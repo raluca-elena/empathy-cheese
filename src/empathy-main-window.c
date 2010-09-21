@@ -76,7 +76,6 @@
 #include "empathy-chatrooms-window.h"
 #include "empathy-event-manager.h"
 #include "empathy-ft-manager.h"
-#include "empathy-migrate-butterfly-logs.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
@@ -168,9 +167,6 @@ struct _EmpathyMainWindowPriv {
 
 	/* Actions that are enabled when there are connected accounts */
 	GList                  *actions_connected;
-
-	/* The idle event source to migrate butterfly's logs */
-	guint butterfly_log_migration_members_changed_id;
 
 	gboolean               shell_running;
 };
@@ -2051,27 +2047,6 @@ account_manager_prepared_cb (GObject      *source_object,
 	g_list_free (accounts);
 }
 
-static void
-main_window_members_changed_cb (EmpathyContactList *list,
-				EmpathyContact     *contact,
-				EmpathyContact     *actor,
-				guint               reason,
-				gchar              *message,
-				gboolean            is_member,
-				EmpathyMainWindow  *window)
-{
-	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-
-	if (!is_member)
-		return;
-
-	if (!empathy_migrate_butterfly_logs (contact)) {
-		g_signal_handler_disconnect (list,
-			priv->butterfly_log_migration_members_changed_id);
-		priv->butterfly_log_migration_members_changed_id = 0;
-	}
-}
-
 void
 empathy_main_window_set_shell_running (EmpathyMainWindow *window,
                                        gboolean          shell_running)
@@ -2357,10 +2332,6 @@ empathy_main_window_init (EmpathyMainWindow *window)
 			priv->individual_store,
 			EMPATHY_INDIVIDUAL_VIEW_FEATURE_ALL ^ EMPATHY_INDIVIDUAL_VIEW_FEATURE_PERSONA_DROP,
 			EMPATHY_INDIVIDUAL_FEATURE_ALL);
-
-	priv->butterfly_log_migration_members_changed_id = g_signal_connect (
-			priv->contact_manager, "members-changed",
-			G_CALLBACK (main_window_members_changed_cb), window);
 
 	gtk_widget_show (GTK_WIDGET (priv->individual_view));
 	gtk_container_add (GTK_CONTAINER (sw),

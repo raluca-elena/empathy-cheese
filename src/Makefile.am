@@ -176,7 +176,6 @@ empathy_handwritten_source = \
 	empathy-ft-manager.c empathy-ft-manager.h			\
 	empathy-invite-participant-dialog.c empathy-invite-participant-dialog.h \
 	empathy-main-window.c empathy-main-window.h			\
-	empathy-migrate-butterfly-logs.c empathy-migrate-butterfly-logs.h \
 	empathy-new-chatroom-dialog.c empathy-new-chatroom-dialog.h	\
 	empathy-notifications-approver.c empathy-notifications-approver.h \
 	empathy-call-observer.c empathy-call-observer.h			\

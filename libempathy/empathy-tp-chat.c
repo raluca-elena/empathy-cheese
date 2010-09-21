@@ -890,66 +890,6 @@ check_almost_ready (EmpathyTpChat *self)
 }
 
 static void
-tp_chat_update_remote_contact (EmpathyTpChat *self)
-{
-	TpChannel *channel = (TpChannel *) self;
-	EmpathyContact *contact = NULL;
-	TpHandle self_handle;
-	TpHandleType handle_type;
-	GList *l;
-
-	/* If this is a named chatroom, never pretend it is a private chat */
-	tp_channel_get_handle (channel, &handle_type);
-	if (handle_type == TP_HANDLE_TYPE_ROOM) {
-		return;
-	}
-
-	/* This is an MSN chat, but it's the new style where 1-1 chats don't
-	 * have the group interface. If it has the conference interface, then
-	 * it is indeed a MUC. */
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_CONFERENCE)) {
-		return;
-	}
-
-	/* This is an MSN-like chat where anyone can join the chat at anytime.
-	 * If there is only one non-self contact member, we are in a private
-	 * chat and we set the "remote-contact" property to that contact. If
-	 * there are more, set the "remote-contact" property to NULL and the
-	 * UI will display a contact list. */
-	self_handle = tp_channel_group_get_self_handle (channel);
-	for (l = self->priv->members; l; l = l->next) {
-		/* Skip self contact if member */
-		if (empathy_contact_get_handle (l->data) == self_handle) {
-			continue;
-		}
-
-		/* We have more than one remote contact, break */
-		if (contact != NULL) {
-			contact = NULL;
-			break;
-		}
-
-		/* If we didn't find yet a remote contact, keep this one */
-		contact = l->data;
-	}
-
-	if (self->priv->remote_contact == contact) {
-		return;
-	}
-
-	DEBUG ("Changing remote contact from %p to %p",
-		self->priv->remote_contact, contact);
-
-	if (self->priv->remote_contact) {
-		g_object_unref (self->priv->remote_contact);
-	}
-
-	self->priv->remote_contact = contact ? g_object_ref (contact) : NULL;
-	g_object_notify (G_OBJECT (self), "remote-contact");
-}
-
-static void
 tp_chat_got_added_contacts_cb (TpConnection            *connection,
 			       guint                    n_contacts,
 			       EmpathyContact * const * contacts,
@@ -984,7 +924,6 @@ tp_chat_got_added_contacts_cb (TpConnection            *connection,
 		}
 	}
 
-	tp_chat_update_remote_contact (EMPATHY_TP_CHAT (chat));
 	check_almost_ready (EMPATHY_TP_CHAT (chat));
 }
 
@@ -1092,7 +1031,6 @@ tp_chat_got_renamed_contacts_cb (TpConnection            *connection,
 		self->priv->user = g_object_ref (new);
 	}
 
-	tp_chat_update_remote_contact (self);
 	check_almost_ready (self);
 }
 
@@ -1167,8 +1105,6 @@ tp_chat_group_members_changed_cb (TpChannel     *channel,
 			tp_chat_got_added_contacts_cb, NULL, NULL,
 			G_OBJECT (self));
 	}
-
-	tp_chat_update_remote_contact (self);
 
 	if (actor_contact != NULL) {
 		g_object_unref (actor_contact);

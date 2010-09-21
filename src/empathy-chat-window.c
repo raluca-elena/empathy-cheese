@@ -1482,8 +1482,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 	 *   a) the chatroom's always_urgent property is TRUE
 	 *   b) the message contains our alias
 	 */
-	if (empathy_chat_is_room (chat) ||
-	    empathy_chat_get_remote_contact (chat) == NULL) {
+	if (empathy_chat_is_room (chat)) {
 		TpAccount             *account;
 		const gchar           *room;
 		EmpathyChatroom       *chatroom;
