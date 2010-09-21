@@ -92,6 +92,10 @@ typedef struct {
   /* Used only for IRC accounts */
   EmpathyIrcNetworkChooser *irc_network_chooser;
 
+  /* Used for 'special' XMPP account having a service associated ensuring that
+   * JIDs have a specific suffix; such as Facebook for example */
+  gchar *jid_suffix;
+
   gboolean dispose_run;
 } EmpathyAccountWidgetPriv;
 
@@ -1256,24 +1260,24 @@ account_widget_is_facebook (EmpathyAccountWidget *self)
       "im-facebook");
 }
 
-#define FACEBOOK_SUFFIX "@chat.facebook.com"
-
 static void
-facebook_id_widget_changed_cb (GtkWidget *entry,
+suffix_id_widget_changed_cb (GtkWidget *entry,
     EmpathyAccountWidget *self)
 {
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
   const gchar *account;
 
+  g_assert (priv->jid_suffix != NULL);
+
   account_widget_entry_changed_common (self, GTK_ENTRY (entry), FALSE);
 
   account = empathy_account_settings_get_string (priv->settings, "account");
   if (!EMP_STR_EMPTY (account) &&
-      !g_str_has_suffix (account, FACEBOOK_SUFFIX))
+      !g_str_has_suffix (account, priv->jid_suffix))
     {
       gchar *tmp;
 
-      tmp = g_strdup_printf ("%s%s", account, FACEBOOK_SUFFIX);
+      tmp = g_strdup_printf ("%s%s", account, priv->jid_suffix);
 
       DEBUG ("Change account from '%s' to '%s'", account, tmp);
 
@@ -1285,17 +1289,23 @@ facebook_id_widget_changed_cb (GtkWidget *entry,
 }
 
 static gchar *
-remove_facebook_suffix (const gchar *str)
+remove_jid_suffix (EmpathyAccountWidget *self,
+    const gchar *str)
 {
-  if (!g_str_has_suffix (str, FACEBOOK_SUFFIX))
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  g_assert (priv->jid_suffix != NULL);
+
+  if (!g_str_has_suffix (str, priv->jid_suffix))
     return g_strdup (str);
 
-  return g_strndup (str, strlen (str) - strlen (FACEBOOK_SUFFIX));
+  return g_strndup (str, strlen (str) - strlen (priv->jid_suffix));
 }
 
 static void
-setup_facebook_id_widget (EmpathyAccountWidget *self,
-    GtkWidget *widget)
+setup_id_widget_with_suffix (EmpathyAccountWidget *self,
+    GtkWidget *widget,
+    const gchar *suffix)
 {
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
   const gchar *str = NULL;
@@ -1303,12 +1313,15 @@ setup_facebook_id_widget (EmpathyAccountWidget *self,
   g_object_set_data_full (G_OBJECT (widget), "param_name",
       g_strdup ("account"), g_free);
 
+  g_assert (priv->jid_suffix == NULL);
+  priv->jid_suffix = g_strdup (suffix);
+
   str = empathy_account_settings_get_string (priv->settings, "account");
   if (str != NULL)
     {
       gchar *tmp;
 
-      tmp = remove_facebook_suffix (str);
+      tmp = remove_jid_suffix (self, str);
       gtk_entry_set_text (GTK_ENTRY (widget), tmp);
       g_free (tmp);
     }
@@ -1316,7 +1329,7 @@ setup_facebook_id_widget (EmpathyAccountWidget *self,
   priv->param_account_widget = widget;
 
   g_signal_connect (widget, "changed",
-      G_CALLBACK (facebook_id_widget_changed_cb), self);
+      G_CALLBACK (suffix_id_widget_changed_cb), self);
 }
 
 static void
@@ -1391,7 +1404,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           "entry_password_fb_simple", "password",
           NULL);
 
-      setup_facebook_id_widget (self, entry_id);
+      setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
     }
@@ -1428,7 +1441,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
           /* Facebook special case the entry ID widget to hide the
            * "@chat.facebook.com" part */
-          setup_facebook_id_widget (self, entry_id);
+          setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
         }
       else
         {
@@ -2177,9 +2190,12 @@ static void
 do_finalize (GObject *obj)
 {
   EmpathyAccountWidget *self = EMPATHY_ACCOUNT_WIDGET (obj);
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
 
   g_free (self->ui_details->default_focus);
   g_slice_free (EmpathyAccountWidgetUIDetails, self->ui_details);
+
+  g_free (priv->jid_suffix);
 
   if (G_OBJECT_CLASS (empathy_account_widget_parent_class)->finalize != NULL)
     G_OBJECT_CLASS (empathy_account_widget_parent_class)->finalize (obj);
@@ -2358,7 +2374,7 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
         {
           gchar *tmp;
 
-          tmp = remove_facebook_suffix (login_id);
+          tmp = remove_jid_suffix (self, login_id);
           default_display_name = g_strdup_printf ("Facebook (%s)", tmp);
           g_free (tmp);
         }
