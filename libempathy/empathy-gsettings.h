@@ -29,7 +29,6 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_USE_CONN                     "use-conn"
 #define EMPATHY_PREFS_AUTOCONNECT                  "autoconnect"
 #define EMPATHY_PREFS_AUTOAWAY                     "autoaway"
-#define EMPATHY_PREFS_BUTTERFLY_LOGS_MIGRATED      "butterfly-logs-migrated"
 #define EMPATHY_PREFS_FILE_TRANSFER_DEFAULT_FOLDER "file-transfer-default-folder"
 
 #define EMPATHY_PREFS_NOTIFICATIONS_SCHEMA EMPATHY_PREFS_SCHEMA ".notifications"
