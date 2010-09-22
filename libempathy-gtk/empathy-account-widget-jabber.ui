@@ -133,6 +133,20 @@ Use &lt;a href="http://www.facebook.com/username/"&gt;this page&lt;/a&gt; to cho
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkLabel" id="label_username_ovi_example">
+                <property name="xalign">0</property>
+                <property name="xpad">3</property>
+                <property name="label" translatable="yes">&lt;b&gt;Example:&lt;/b&gt; alice</property>
+                <property name="use_markup">True</property>
+                <attributes>
+                  <attribute name="scale" value="0.800000"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -692,4 +706,95 @@ Use &lt;a href="http://www.facebook.com/username/"&gt;this page&lt;/a&gt; to cho
       </packing>
     </child>
   </object>
+  <object class="GtkVBox" id="vbox_ovi_simple">
+    <property name="visible">True</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkLabel" id="label_id_ovi_simple">
+        <property name="visible">True</property>
+        <property name="xalign">0</property>
+        <property name="label" translatable="yes">What is your Ovi username?</property>
+      </object>
+      <packing>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkAlignment" id="alignment_simple_ovi_id">
+        <property name="visible">True</property>
+        <property name="xalign">0</property>
+        <property name="yalign">0</property>
+        <property name="xscale">0.34999999403953552</property>
+        <property name="yscale">0.34999999403953552</property>
+        <property name="top_padding">6</property>
+        <property name="bottom_padding">3</property>
+        <property name="left_padding">12</property>
+        <child>
+          <object class="GtkVBox" id="vbox3">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">4</property>
+            <child>
+              <object class="GtkEntry" id="entry_id_ovi_simple">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_ovi_example">
+                <property name="visible">True</property>
+                <property name="xalign">0.10000000149011612</property>
+                <property name="label" translatable="yes">&lt;b&gt;Example:&lt;/b&gt; alice</property>
+                <property name="use_markup">True</property>
+                <attributes>
+                  <attribute name="scale" value="0.800000"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label_password_ovi_simple">
+        <property name="visible">True</property>
+        <property name="xalign">0</property>
+        <property name="ypad">6</property>
+        <property name="label" translatable="yes">What is your Ovi password?</property>
+      </object>
+      <packing>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkAlignment" id="alignment4">
+        <property name="visible">True</property>
+        <property name="xalign">0</property>
+        <property name="yalign">0</property>
+        <property name="xscale">0.34999999403953552</property>
+        <property name="yscale">0.5</property>
+        <property name="left_padding">12</property>
+        <child>
+          <object class="GtkEntry" id="entry_password_ovi_simple">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="visibility">False</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="position">3</property>
+      </packing>
+    </child>
+  </object>
+
 </interface>

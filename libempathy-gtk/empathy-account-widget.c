@@ -1260,6 +1260,15 @@ account_widget_is_facebook (EmpathyAccountWidget *self)
       "im-facebook");
 }
 
+static gboolean
+account_widget_is_ovi (EmpathyAccountWidget *self)
+{
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  return !tp_strdiff (empathy_account_settings_get_service (priv->settings),
+      "ovi-chat");
+}
+
 static void
 suffix_id_widget_changed_cb (GtkWidget *entry,
     EmpathyAccountWidget *self)
@@ -1342,17 +1351,19 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
   GtkWidget *label_id, *label_password;
   GtkWidget *label_id_create, *label_password_create;
   GtkWidget *label_example_gtalk, *label_example_jabber, *label_example_fb;
-  gboolean is_gtalk, is_facebook;
+  GtkWidget *label_example_ovi;
+  gboolean is_gtalk, is_facebook, is_ovi;
   GtkWidget *expander_advanced;
   GtkWidget *entry_id;
 
   is_gtalk = account_widget_is_gtalk (self);
   is_facebook = account_widget_is_facebook (self);
+  is_ovi = account_widget_is_ovi (self);
 
   empathy_account_settings_set_regex (priv->settings, "account",
       ACCOUNT_REGEX_JABBER);
 
-  if (priv->simple && !is_gtalk && !is_facebook)
+  if (priv->simple && !is_gtalk && !is_facebook && !is_ovi)
     {
       /* Simple widget for XMPP */
       self->ui_details->gui = empathy_builder_get_file (filename,
@@ -1408,6 +1419,22 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
     }
+  else if (priv->simple && is_ovi)
+    {
+      /* Simple widget for Ovi */
+      self->ui_details->gui = empathy_builder_get_file (filename,
+          "vbox_ovi_simple", &self->ui_details->widget,
+          "entry_id_ovi_simple", &entry_id,
+          NULL);
+
+      empathy_account_widget_handle_params (self,
+          "entry_password_ovi_simple", "password",
+          NULL);
+
+      setup_id_widget_with_suffix (self, entry_id, "@ovi.com");
+
+      self->ui_details->default_focus = g_strdup ("entry_id_ovi_simple");
+    }
   else
     {
       /* Full widget for XMPP, Google Talk and Facebook*/
@@ -1419,6 +1446,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           "label_username_example", &label_example_jabber,
           "label_username_g_example", &label_example_gtalk,
           "label_username_f_example", &label_example_fb,
+          "label_username_ovi_example", &label_example_ovi,
           "expander_advanced", &expander_advanced,
           "entry_id", &entry_id,
           "label_id", &label_id,
@@ -1442,6 +1470,12 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           /* Facebook special case the entry ID widget to hide the
            * "@chat.facebook.com" part */
           setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
+        }
+      else if (is_ovi)
+        {
+          gtk_label_set_label (GTK_LABEL (label_id), _("Username:"));
+
+          setup_id_widget_with_suffix (self, entry_id, "@ovi.com");
         }
       else
         {
@@ -1475,6 +1509,12 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           g_list_free (children);
 
           gtk_widget_show (label_example_fb);
+          gtk_widget_hide (expander_advanced);
+        }
+      else if (is_ovi)
+        {
+          gtk_widget_hide (label_example_jabber);
+          gtk_widget_show (label_example_ovi);
           gtk_widget_hide (expander_advanced);
         }
     }
@@ -1948,7 +1988,8 @@ add_register_buttons (EmpathyAccountWidget *self,
   if (!tp_connection_manager_protocol_can_register (protocol))
     return;
 
-  if (account_widget_is_gtalk (self) || account_widget_is_facebook (self))
+  if (account_widget_is_gtalk (self) || account_widget_is_facebook (self) ||
+      account_widget_is_ovi (self))
     return;
 
   if (priv->simple)
