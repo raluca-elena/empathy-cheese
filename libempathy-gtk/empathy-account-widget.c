@@ -63,6 +63,19 @@ typedef enum
   N_SERVICES
 } Service;
 
+typedef struct
+{
+  const gchar *label_username_example;
+  gboolean show_advanced;
+} ServiceInfo;
+
+static ServiceInfo services_infos[N_SERVICES] = {
+    { "label_username_example", TRUE },
+    { "label_username_g_example", TRUE },
+    { "label_username_f_example", FALSE },
+    { "label_username_ovi_example", FALSE },
+};
+
 typedef struct {
   EmpathyAccountSettings *settings;
 
@@ -1357,8 +1370,8 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
   GtkWidget *checkbutton_ssl;
   GtkWidget *label_id, *label_password;
   GtkWidget *label_id_create, *label_password_create;
-  GtkWidget *label_example_gtalk, *label_example_jabber, *label_example_fb;
-  GtkWidget *label_example_ovi;
+  GtkWidget *label_example_fb;
+  GtkWidget *label_example;
   GtkWidget *expander_advanced;
   GtkWidget *entry_id;
   Service service;
@@ -1442,16 +1455,16 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
     }
   else
     {
+      ServiceInfo info = services_infos[service];
+
       /* Full widget for XMPP, Google Talk and Facebook*/
       self->ui_details->gui = empathy_builder_get_file (filename,
           "table_common_settings", &priv->table_common_settings,
           "vbox_jabber_settings", &self->ui_details->widget,
           "spinbutton_port", &spinbutton_port,
           "checkbutton_ssl", &checkbutton_ssl,
-          "label_username_example", &label_example_jabber,
-          "label_username_g_example", &label_example_gtalk,
           "label_username_f_example", &label_example_fb,
-          "label_username_ovi_example", &label_example_ovi,
+          info.label_username_example, &label_example,
           "expander_advanced", &expander_advanced,
           "entry_id", &entry_id,
           "label_id", &label_id,
@@ -1494,11 +1507,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           G_CALLBACK (account_widget_jabber_ssl_toggled_cb),
           self);
 
-      if (service == GTALK_SERVICE)
-        {
-          gtk_widget_show (label_example_gtalk);
-        }
-      else if (service == FACEBOOK_SERVICE)
+      if (service == FACEBOOK_SERVICE)
         {
           GtkContainer *parent;
           GList *children;
@@ -1509,18 +1518,12 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           children = g_list_remove (children, label_example_fb);
           gtk_container_set_focus_chain (parent, children);
           g_list_free (children);
+        }
 
-          gtk_widget_hide (expander_advanced);
-        }
-      else if (service == OVI_SERVICE)
-        {
-          gtk_widget_show (label_example_ovi);
-          gtk_widget_hide (expander_advanced);
-        }
-      else
-        {
-          gtk_widget_show (label_example_jabber);
-        }
+      gtk_widget_show (label_example);
+
+      if (!info.show_advanced)
+        gtk_widget_hide (expander_advanced);
     }
 }
 
