@@ -1327,17 +1327,22 @@ static Service
 account_widget_get_service (EmpathyAccountWidget *self)
 {
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+  const gchar *icon_name, *service;
 
-  if (!tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
-      "im-google-talk"))
+  icon_name = empathy_account_settings_get_icon_name (priv->settings);
+  service = empathy_account_settings_get_service (priv->settings);
+
+  /* Previous versions of Empathy didn't set the Service property on Facebook
+   * and gtalk accounts, so we check using the icon name as well. */
+  if (!tp_strdiff (icon_name, "im-google-talk") ||
+      !tp_strdiff (service, "google-talk"))
     return GTALK_SERVICE;
 
-  if (!tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
-      "im-facebook"))
+  if (!tp_strdiff (icon_name, "im-facebook") ||
+      !tp_strdiff (service, "facebook"))
     return FACEBOOK_SERVICE;
 
-  if (!tp_strdiff (empathy_account_settings_get_service (priv->settings),
-      "ovi-chat"))
+  if (!tp_strdiff (service, "ovi-chat"))
     return OVI_SERVICE;
 
   return NO_SERVICE;
