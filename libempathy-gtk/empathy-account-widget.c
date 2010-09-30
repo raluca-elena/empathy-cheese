@@ -2420,6 +2420,14 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
           default_display_name = g_strdup_printf ("Facebook (%s)", tmp);
           g_free (tmp);
         }
+      else if (service == OVI_SERVICE)
+        {
+          gchar *tmp;
+
+          tmp = remove_jid_suffix (self, login_id);
+          default_display_name = g_strdup_printf ("Ovi (%s)", tmp);
+          g_free (tmp);
+        }
       else
         {
           default_display_name = g_strdup (login_id);
