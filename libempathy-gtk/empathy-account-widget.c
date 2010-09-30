@@ -1496,15 +1496,12 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       if (service == GTALK_SERVICE)
         {
-          gtk_widget_hide (label_example_jabber);
           gtk_widget_show (label_example_gtalk);
         }
       else if (service == FACEBOOK_SERVICE)
         {
           GtkContainer *parent;
           GList *children;
-
-          gtk_widget_hide (label_example_jabber);
 
           /* Removing the label from list of focusable widgets */
           parent = GTK_CONTAINER (gtk_widget_get_parent (label_example_fb));
@@ -1513,14 +1510,16 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           gtk_container_set_focus_chain (parent, children);
           g_list_free (children);
 
-          gtk_widget_show (label_example_fb);
           gtk_widget_hide (expander_advanced);
         }
       else if (service == OVI_SERVICE)
         {
-          gtk_widget_hide (label_example_jabber);
           gtk_widget_show (label_example_ovi);
           gtk_widget_hide (expander_advanced);
+        }
+      else
+        {
+          gtk_widget_show (label_example_jabber);
         }
     }
 }
