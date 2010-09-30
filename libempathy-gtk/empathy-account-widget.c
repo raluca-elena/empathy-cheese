@@ -1251,33 +1251,6 @@ account_widget_build_msn (EmpathyAccountWidget *self,
     }
 }
 
-static gboolean
-account_widget_is_gtalk (EmpathyAccountWidget *self)
-{
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
-
-  return !tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
-      "im-google-talk");
-}
-
-static gboolean
-account_widget_is_facebook (EmpathyAccountWidget *self)
-{
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
-
-  return !tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
-      "im-facebook");
-}
-
-static gboolean
-account_widget_is_ovi (EmpathyAccountWidget *self)
-{
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
-
-  return !tp_strdiff (empathy_account_settings_get_service (priv->settings),
-      "ovi-chat");
-}
-
 static void
 suffix_id_widget_changed_cb (GtkWidget *entry,
     EmpathyAccountWidget *self)
@@ -2015,8 +1988,7 @@ add_register_buttons (EmpathyAccountWidget *self,
   if (!tp_connection_manager_protocol_can_register (protocol))
     return;
 
-  if (account_widget_is_gtalk (self) || account_widget_is_facebook (self) ||
-      account_widget_is_ovi (self))
+  if (account_widget_get_service (self) != NO_SERVICE)
     return;
 
   if (priv->simple)
@@ -2415,9 +2387,11 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
   const gchar *login_id;
   const gchar *protocol, *p;
   gchar *default_display_name;
+  Service service;
 
   login_id = empathy_account_settings_get_string (priv->settings, "account");
   protocol = empathy_account_settings_get_protocol (priv->settings);
+  service = account_widget_get_service (self);
 
   if (login_id != NULL)
     {
@@ -2438,7 +2412,7 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
           default_display_name = g_strdup_printf (_("%1$s on %2$s"),
               login_id, empathy_irc_network_get_name (network));
         }
-      else if (account_widget_is_facebook (self))
+      else if (service == FACEBOOK_SERVICE)
         {
           gchar *tmp;
 
