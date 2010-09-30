@@ -54,6 +54,15 @@
 
 G_DEFINE_TYPE (EmpathyAccountWidget, empathy_account_widget, G_TYPE_OBJECT)
 
+typedef enum
+{
+  NO_SERVICE = 0,
+  GTALK_SERVICE,
+  FACEBOOK_SERVICE,
+  OVI_SERVICE,
+  N_SERVICES
+} Service;
+
 typedef struct {
   EmpathyAccountSettings *settings;
 
@@ -1341,6 +1350,26 @@ setup_id_widget_with_suffix (EmpathyAccountWidget *self,
       G_CALLBACK (suffix_id_widget_changed_cb), self);
 }
 
+static Service
+account_widget_get_service (EmpathyAccountWidget *self)
+{
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  if (!tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
+      "im-google-talk"))
+    return GTALK_SERVICE;
+
+  if (!tp_strdiff (empathy_account_settings_get_icon_name (priv->settings),
+      "im-facebook"))
+    return FACEBOOK_SERVICE;
+
+  if (!tp_strdiff (empathy_account_settings_get_service (priv->settings),
+      "ovi-chat"))
+    return OVI_SERVICE;
+
+  return NO_SERVICE;
+}
+
 static void
 account_widget_build_jabber (EmpathyAccountWidget *self,
     const char *filename)
@@ -1352,18 +1381,16 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
   GtkWidget *label_id_create, *label_password_create;
   GtkWidget *label_example_gtalk, *label_example_jabber, *label_example_fb;
   GtkWidget *label_example_ovi;
-  gboolean is_gtalk, is_facebook, is_ovi;
   GtkWidget *expander_advanced;
   GtkWidget *entry_id;
+  Service service;
 
-  is_gtalk = account_widget_is_gtalk (self);
-  is_facebook = account_widget_is_facebook (self);
-  is_ovi = account_widget_is_ovi (self);
+  service = account_widget_get_service (self);
 
   empathy_account_settings_set_regex (priv->settings, "account",
       ACCOUNT_REGEX_JABBER);
 
-  if (priv->simple && !is_gtalk && !is_facebook && !is_ovi)
+  if (priv->simple && service == NO_SERVICE)
     {
       /* Simple widget for XMPP */
       self->ui_details->gui = empathy_builder_get_file (filename,
@@ -1389,7 +1416,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
     }
-  else if (priv->simple && is_gtalk)
+  else if (priv->simple && service == GTALK_SERVICE)
     {
       /* Simple widget for Google Talk */
       self->ui_details->gui = empathy_builder_get_file (filename,
@@ -1403,7 +1430,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id_g_simple");
     }
-  else if (priv->simple && is_facebook)
+  else if (priv->simple && service == FACEBOOK_SERVICE)
     {
       /* Simple widget for Facebook */
       self->ui_details->gui = empathy_builder_get_file (filename,
@@ -1419,7 +1446,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
     }
-  else if (priv->simple && is_ovi)
+  else if (priv->simple && service == OVI_SERVICE)
     {
       /* Simple widget for Ovi */
       self->ui_details->gui = empathy_builder_get_file (filename,
@@ -1463,7 +1490,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           "checkbutton_encryption", "require-encryption",
           NULL);
 
-      if (is_facebook)
+      if (service == FACEBOOK_SERVICE)
         {
           gtk_label_set_label (GTK_LABEL (label_id), _("Username:"));
 
@@ -1471,7 +1498,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
            * "@chat.facebook.com" part */
           setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
         }
-      else if (is_ovi)
+      else if (service == OVI_SERVICE)
         {
           gtk_label_set_label (GTK_LABEL (label_id), _("Username:"));
 
@@ -1489,12 +1516,12 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           G_CALLBACK (account_widget_jabber_ssl_toggled_cb),
           self);
 
-      if (is_gtalk)
+      if (service == GTALK_SERVICE)
         {
           gtk_widget_hide (label_example_jabber);
           gtk_widget_show (label_example_gtalk);
         }
-      else if (is_facebook)
+      else if (service == FACEBOOK_SERVICE)
         {
           GtkContainer *parent;
           GList *children;
@@ -1511,7 +1538,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           gtk_widget_show (label_example_fb);
           gtk_widget_hide (expander_advanced);
         }
-      else if (is_ovi)
+      else if (service == OVI_SERVICE)
         {
           gtk_widget_hide (label_example_jabber);
           gtk_widget_show (label_example_ovi);
