@@ -214,7 +214,8 @@ individual_view_query_tooltip_cb (EmpathyIndividualView *view,
     {
       priv->tooltip_widget = empathy_individual_widget_new (individual,
           EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP |
-          EMPATHY_INDIVIDUAL_WIDGET_SHOW_LOCATION);
+          EMPATHY_INDIVIDUAL_WIDGET_SHOW_LOCATION |
+          EMPATHY_INDIVIDUAL_WIDGET_SHOW_CLIENT_TYPES);
       gtk_container_set_border_width (GTK_CONTAINER (priv->tooltip_widget), 8);
       g_object_ref (priv->tooltip_widget);
       g_signal_connect (priv->tooltip_widget, "destroy",

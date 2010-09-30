@@ -78,7 +78,7 @@ typedef struct {
   EmpathyIndividualWidgetFlags flags;
 
   /* weak pointer to the contact whose contact details we're displaying */
-  TpContact *contact_info_contact;
+  TpContact *contact;
 
   /* unowned Persona (borrowed from priv->individual) -> GtkTable child */
   GHashTable *persona_tables;
@@ -106,6 +106,9 @@ typedef struct {
   /* Groups */
   GtkWidget *groups_widget;
 
+  /* Client types */
+  GtkWidget *hbox_client_types;
+
   /* Details */
   GtkWidget *vbox_details;
   GtkWidget *table_details;
@@ -121,6 +124,9 @@ enum {
   PROP_INDIVIDUAL = 1,
   PROP_FLAGS
 };
+
+static void client_types_update (EmpathyIndividualWidget *self);
+static void remove_weak_contact (EmpathyIndividualWidget *self);
 
 static void
 details_set_up (EmpathyIndividualWidget *self)
@@ -191,6 +197,47 @@ contact_info_field_cmp (TpContactInfoField *field1,
     TpContactInfoField *field2)
 {
   return contact_info_field_name_cmp (field1->field_name, field2->field_name);
+}
+
+static void
+update_weak_contact (EmpathyIndividualWidget *self)
+{
+  EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+  TpContact *tp_contact = NULL;
+
+  remove_weak_contact (self);
+
+  if (priv->individual != NULL)
+    {
+      /* FIXME: We take the most available TpContact we find and only
+       * use its details. It would be a lot better if we would get the
+       * details for every TpContact in the Individual and merge them
+       * all, but that requires vCard support in libfolks for it to
+       * not be hideously complex.  (bgo#627399) */
+      GList *personas, *l;
+      FolksPresenceType presence_type = FOLKS_PRESENCE_TYPE_UNSET;
+
+      personas = folks_individual_get_personas (priv->individual);
+      for (l = personas; l != NULL; l = l->next)
+        {
+          FolksPresence *presence = FOLKS_PRESENCE (l->data);
+
+          if (folks_presence_typecmp (folks_presence_get_presence_type (presence),
+                  presence_type) > 0
+              && TPF_IS_PERSONA (presence))
+            {
+              presence_type = folks_presence_get_presence_type (presence);
+              tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+            }
+        }
+    }
+
+  if (tp_contact != NULL)
+    {
+      priv->contact = tp_contact;
+      g_object_add_weak_pointer (G_OBJECT (tp_contact),
+          (gpointer *) &priv->contact);
+    }
 }
 
 typedef struct {
@@ -324,18 +371,6 @@ details_request_cb (TpContact *contact,
 
       tp_clear_object (&priv->details_cancellable);
 
-      /* We need a (weak) pointer to the contact so that we can disconnect the
-       * signal handler on deconstruction. */
-      if (priv->contact_info_contact != NULL)
-        {
-          g_object_remove_weak_pointer (G_OBJECT (priv->contact_info_contact),
-            (gpointer *) &priv->contact_info_contact);
-        }
-
-      priv->contact_info_contact = contact;
-      g_object_add_weak_pointer (G_OBJECT (contact),
-          (gpointer *) &priv->contact_info_contact);
-
       g_signal_connect (contact, "notify::contact-info",
           (GCallback) details_notify_cb, self);
     }
@@ -387,28 +422,10 @@ details_update (EmpathyIndividualWidget *self)
 
   gtk_widget_hide (priv->vbox_details);
 
-  if (priv->individual != NULL)
-    {
-      /* FIXME: We take the first TpContact we find and only use its details.
-       * It would be a lot better if we would get the details for every
-       * TpContact in the Individual and merge them all, but that requires
-       * vCard support in libfolks for it to not be hideously complex.
-       * (bgo#627399) */
-      GList *personas, *l;
+  if (priv->contact == NULL)
+    update_weak_contact (self);
 
-      personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
-        {
-          if (TPF_IS_PERSONA (l->data))
-            {
-              tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
-              if (tp_contact != NULL)
-                break;
-            }
-        }
-    }
-
-  if (tp_contact != NULL)
+  if (priv->contact != NULL)
     {
       GQuark features[] = { TP_CONNECTION_FEATURE_CONTACT_INFO, 0 };
       TpConnection *connection;
@@ -417,7 +434,7 @@ details_update (EmpathyIndividualWidget *self)
       data = g_slice_new (DetailsData);
       data->widget = self;
       g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &data->widget);
-      data->contact = g_object_ref (tp_contact);
+      data->contact = g_object_ref (priv->contact);
 
       /* First, make sure the CONTACT_INFO feature is ready on the connection */
       connection = tp_contact_get_connection (tp_contact);
@@ -783,6 +800,64 @@ location_update (EmpathyIndividualWidget *self)
 #endif
 
     gtk_widget_show (priv->vbox_location);
+}
+
+static void
+client_types_notify_cb (TpContact *contact,
+    GParamSpec *pspec,
+    EmpathyIndividualWidget *self)
+{
+  client_types_update (self);
+}
+
+static void
+client_types_update (EmpathyIndividualWidget *self)
+{
+  EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+  const gchar * const *types;
+
+  if (!(priv->flags & EMPATHY_INDIVIDUAL_WIDGET_SHOW_CLIENT_TYPES) ||
+      priv->individual == NULL)
+    {
+      gtk_widget_hide (priv->hbox_client_types);
+      return;
+    }
+
+  if (priv->contact == NULL)
+    update_weak_contact (self);
+
+  /* let's try that again... */
+  if (priv->contact == NULL)
+    return;
+
+  types = tp_contact_get_client_types (priv->contact);
+
+  if (types != NULL
+      && g_strv_length ((gchar **) types) > 0
+      && !tp_strdiff (types[0], "phone"))
+    {
+      gtk_widget_show (priv->hbox_client_types);
+    }
+  else
+    {
+      gtk_widget_hide (priv->hbox_client_types);
+    }
+
+  g_signal_connect (priv->contact, "notify::client-types",
+      (GCallback) client_types_notify_cb, self);
+}
+
+static void
+remove_weak_contact (EmpathyIndividualWidget *self)
+{
+  EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+
+  if (priv->contact == NULL)
+    return;
+
+  g_object_remove_weak_pointer (G_OBJECT (priv->contact),
+      (gpointer *) &priv->contact);
+  priv->contact = NULL;
 }
 
 static EmpathyAvatar *
@@ -1741,14 +1816,8 @@ remove_individual (EmpathyIndividualWidget *self)
         remove_persona (self, FOLKS_PERSONA (l->data));
       individual_table_destroy (self);
 
-      if (priv->contact_info_contact != NULL)
-        {
-          g_signal_handlers_disconnect_by_func (priv->contact_info_contact,
-              details_notify_cb, self);
-          g_object_remove_weak_pointer (G_OBJECT (priv->contact_info_contact),
-              (gpointer *) &priv->contact_info_contact);
-          priv->contact_info_contact = NULL;
-        }
+      if (priv->contact != NULL)
+        remove_weak_contact (self);
 
       tp_clear_object (&priv->individual);
     }
@@ -1847,6 +1916,7 @@ empathy_individual_widget_init (EmpathyIndividualWidget *self)
       "vbox_details", &priv->vbox_details,
       "table_details", &priv->table_details,
       "hbox_details_requested", &priv->hbox_details_requested,
+      "hbox_client_types", &priv->hbox_client_types,
       NULL);
   g_free (filename);
 
@@ -2080,4 +2150,5 @@ empathy_individual_widget_set_individual (EmpathyIndividualWidget *self,
   groups_update (self);
   details_update (self);
   location_update (self);
+  client_types_update (self);
 }
