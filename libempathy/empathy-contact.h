@@ -125,6 +125,7 @@ gboolean empathy_avatar_save_to_file (EmpathyAvatar *avatar,
     const gchar *filename, GError **error);
 
 GHashTable * empathy_contact_get_location (EmpathyContact *contact);
+const gchar * const * empathy_contact_get_client_types (EmpathyContact *contact);
 gboolean empathy_contact_equal (gconstpointer contact1,
     gconstpointer contact2);
 

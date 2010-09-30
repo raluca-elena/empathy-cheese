@@ -70,6 +70,7 @@ typedef struct {
    */
   GHashTable *location;
   GHashTable *groups;
+  gchar **client_types;
 } EmpathyContactPriv;
 
 static void contact_finalize (GObject *object);
@@ -84,6 +85,9 @@ static void update_geocode (EmpathyContact *contact);
 
 static void empathy_contact_set_location (EmpathyContact *contact,
     GHashTable *location);
+
+static void contact_set_client_types (EmpathyContact *contact,
+    const gchar * const *types);
 
 static void set_capabilities_from_tp_caps (EmpathyContact *self,
     TpCapabilities *caps);
@@ -110,7 +114,8 @@ enum
   PROP_HANDLE,
   PROP_CAPABILITIES,
   PROP_IS_USER,
-  PROP_LOCATION
+  PROP_LOCATION,
+  PROP_CLIENT_TYPES
 };
 
 enum {
@@ -162,6 +167,11 @@ tp_contact_notify_cb (TpContact *tp_contact,
   else if (!tp_strdiff (param->name, "avatar-file"))
     {
       contact_set_avatar_from_tp_contact (EMPATHY_CONTACT (contact));
+    }
+  else if (!tp_strdiff (param->name, "client-types"))
+    {
+      contact_set_client_types (EMPATHY_CONTACT (contact),
+          tp_contact_get_client_types (tp_contact));
     }
 }
 
@@ -223,6 +233,7 @@ contact_constructed (GObject *object)
   GHashTable *location;
   TpHandle self_handle;
   TpHandle handle;
+  const gchar * const *client_types;
 
   if (priv->tp_contact == NULL)
     return;
@@ -232,6 +243,10 @@ contact_constructed (GObject *object)
   location = tp_contact_get_location (priv->tp_contact);
   if (location != NULL)
     empathy_contact_set_location (contact, location);
+
+  client_types = tp_contact_get_client_types (priv->tp_contact);
+  if (client_types != NULL)
+    contact_set_client_types (contact, client_types);
 
   set_capabilities_from_tp_caps (contact,
       tp_contact_get_capabilities (priv->tp_contact));
@@ -365,6 +380,14 @@ empathy_contact_class_init (EmpathyContactClass *class)
         G_TYPE_HASH_TABLE,
         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (object_class,
+      PROP_CLIENT_TYPES,
+      g_param_spec_boxed ("client-types",
+        "Contact client types",
+        "Client types of the contact",
+        G_TYPE_STRV,
+        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
   signals[PRESENCE_CHANGED] =
     g_signal_new ("presence-changed",
                   G_TYPE_FROM_CLASS (class),
@@ -388,6 +411,7 @@ empathy_contact_init (EmpathyContact *contact)
   contact->priv = priv;
 
   priv->location = NULL;
+  priv->client_types = NULL;
   priv->groups = NULL;
 }
 
@@ -404,6 +428,7 @@ contact_finalize (GObject *object)
     g_hash_table_destroy (priv->groups);
   g_free (priv->alias);
   g_free (priv->id);
+  g_strfreev (priv->client_types);
 
   G_OBJECT_CLASS (empathy_contact_parent_class)->finalize (object);
 }
@@ -1394,6 +1419,31 @@ empathy_contact_set_location (EmpathyContact *contact,
   update_geocode (contact);
 #endif
   g_object_notify (G_OBJECT (contact), "location");
+}
+
+const gchar * const *
+empathy_contact_get_client_types (EmpathyContact *contact)
+{
+  EmpathyContactPriv *priv;
+
+  g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
+
+  priv = GET_PRIV (contact);
+
+  return (const gchar * const *) priv->client_types;
+}
+
+static void
+contact_set_client_types (EmpathyContact *contact,
+    const gchar * const *client_types)
+{
+  EmpathyContactPriv *priv = GET_PRIV (contact);
+
+  if (priv->client_types != NULL)
+    g_strfreev (priv->client_types);
+
+  priv->client_types = g_strdupv ((gchar **) client_types);
+  g_object_notify (G_OBJECT (contact), "client-types");
 }
 
 /**

@@ -1192,6 +1192,36 @@ individual_view_avatar_cell_data_func (GtkTreeViewColumn *tree_column,
 }
 
 static void
+individual_view_phone_cell_data_func (GtkTreeViewColumn *tree_column,
+    GtkCellRenderer *cell,
+    GtkTreeModel *model,
+    GtkTreeIter *iter,
+    EmpathyIndividualView *view)
+{
+  gboolean is_group;
+  gboolean is_active;
+  gchar **types;
+
+  gtk_tree_model_get (model, iter,
+      EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP, &is_group,
+      EMPATHY_INDIVIDUAL_STORE_COL_IS_ACTIVE, &is_active,
+      EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES, &types,
+      -1);
+
+  g_object_set (cell,
+      "visible",
+        !is_group
+        && types != NULL
+        && g_strv_length (types) > 0
+        && !tp_strdiff (types[0], "phone"),
+      NULL);
+
+  g_strfreev (types);
+
+  individual_view_cell_set_background (view, cell, is_group, is_active);
+}
+
+static void
 individual_view_text_cell_data_func (GtkTreeViewColumn *tree_column,
     GtkCellRenderer *cell,
     GtkTreeModel *model,
@@ -1832,6 +1862,15 @@ individual_view_constructed (GObject *object)
       "is_group", EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP);
   gtk_tree_view_column_add_attribute (col, cell,
       "compact", EMPATHY_INDIVIDUAL_STORE_COL_COMPACT);
+
+  /* Phone Icon */
+  cell = gtk_cell_renderer_pixbuf_new ();
+  gtk_tree_view_column_pack_start (col, cell, FALSE);
+  gtk_tree_view_column_set_cell_data_func (col, cell,
+      (GtkTreeCellDataFunc) individual_view_phone_cell_data_func,
+      view, NULL);
+
+  g_object_set (cell, "visible", FALSE, "icon-name", "phone", NULL);
 
   /* Audio Call Icon */
   cell = empathy_cell_renderer_activatable_new ();
