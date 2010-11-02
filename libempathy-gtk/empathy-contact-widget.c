@@ -238,6 +238,30 @@ contact_widget_details_changed_cb (GtkEntry *entry,
   field->field_value = g_strdupv ((GStrv) strv);
 }
 
+static void
+contact_widget_bday_changed_cb (GtkCalendar *calendar,
+    TpContactInfoField *field)
+{
+  guint year, month, day;
+  GDate *date;
+  gchar tmp[255];
+  const gchar *strv[] = { NULL, NULL };
+
+  gtk_calendar_get_date (calendar, &year, &month, &day);
+  date = g_date_new_dmy (day, month+1, year);
+
+  gtk_calendar_clear_marks (calendar);
+  gtk_calendar_mark_day (calendar, g_date_get_day (date));
+
+  g_date_strftime (tmp, sizeof (tmp), EMPATHY_DATE_FORMAT_DISPLAY_SHORT, date);
+  strv[0] = tmp;
+  if (field->field_value != NULL)
+    g_strfreev (field->field_value);
+  field->field_value = g_strdupv ((GStrv) strv);
+
+  g_date_free (date);
+}
+
 static void contact_widget_details_notify_cb (EmpathyContactWidget *information);
 
 typedef struct
@@ -415,15 +439,45 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
       gtk_widget_show (w);
 
       /* Add Value */
-      w = gtk_entry_new ();
-      gtk_entry_set_text (GTK_ENTRY (w),
-          field->field_value[0] ? field->field_value[0] : "");
-      gtk_table_attach_defaults (GTK_TABLE (information->table_details),
-          w, 1, 2, n_rows, n_rows + 1);
-      gtk_widget_show (w);
+      if (!tp_strdiff (field->field_name, "bday"))
+        {
+          w = gtk_calendar_new ();
+          if (field->field_value[0])
+            {
+              GDate date;
 
-      g_signal_connect (w, "changed",
-        G_CALLBACK (contact_widget_details_changed_cb), field);
+              g_date_set_parse (&date, field->field_value[0]);
+              if (g_date_valid (&date))
+                {
+                  gtk_calendar_select_day (GTK_CALENDAR (w),
+                      g_date_get_day (&date));
+                  gtk_calendar_select_month (GTK_CALENDAR (w),
+                      g_date_get_month (&date) - 1, g_date_get_year (&date));
+                  gtk_calendar_mark_day (GTK_CALENDAR (w),
+                      g_date_get_day (&date));
+                }
+            }
+          gtk_table_attach_defaults (GTK_TABLE (information->table_details),
+              w, 1, 2, n_rows, n_rows + 1);
+          gtk_widget_show (w);
+
+          g_signal_connect (w, "day-selected-double-click",
+            G_CALLBACK (contact_widget_bday_changed_cb), field);
+          g_signal_connect (w, "month-changed",
+            G_CALLBACK (contact_widget_bday_changed_cb), field);
+        }
+      else
+        {
+          w = gtk_entry_new ();
+          gtk_entry_set_text (GTK_ENTRY (w),
+              field->field_value[0] ? field->field_value[0] : "");
+          gtk_table_attach_defaults (GTK_TABLE (information->table_details),
+              w, 1, 2, n_rows, n_rows + 1);
+          gtk_widget_show (w);
+
+          g_signal_connect (w, "changed",
+            G_CALLBACK (contact_widget_details_changed_cb), field);
+        }
 
       n_rows++;
     }
