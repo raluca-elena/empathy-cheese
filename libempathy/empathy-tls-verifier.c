@@ -44,7 +44,7 @@ enum {
 };
 
 static const gchar* system_ca_paths[] = {
-  "/etc/ssl/certs/ca-certificates.crt",
+  GTLS_SYSTEM_CA_FILE,
   NULL,
 };
 
