@@ -354,24 +354,28 @@ empathy_contact_personal_dialog_show (GtkWindow *parent)
  *  New contact dialog
  */
 
-static gboolean
-can_add_contact_to_account (TpAccount *account,
-			    gpointer   user_data)
+static void
+can_add_contact_to_account (TpAccount                                 *account,
+			    EmpathyAccountChooserFilterResultCallback  callback,
+			    gpointer                                   callback_data,
+			    gpointer                                   user_data)
 {
 	EmpathyContactManager *contact_manager;
 	TpConnection          *connection;
 	gboolean               result;
 
 	connection = tp_account_get_connection (account);
-	if (connection == NULL)
-		return FALSE;
+	if (connection == NULL) {
+		callback (FALSE, callback_data);
+		return;
+	}
 
 	contact_manager = empathy_contact_manager_dup_singleton ();
 	result = empathy_contact_manager_get_flags_for_connection (
 		contact_manager, connection) & EMPATHY_CONTACT_LIST_CAN_ADD;
 	g_object_unref (contact_manager);
 
-	return result;
+	callback (result, callback_data);
 }
 
 static void

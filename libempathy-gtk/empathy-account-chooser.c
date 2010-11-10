@@ -74,6 +74,12 @@ typedef struct {
 	gboolean               set;
 } SetAccountData;
 
+typedef struct {
+	EmpathyAccountChooser *chooser;
+	TpAccount             *account;
+	GtkTreeIter           *iter;
+} FilterResultCallbackData;
+
 /* Distinguishes between store entries which are actually accounts, and special
  * items like the "All" entry and the separator below it, so they can be sorted
  * correctly. Higher-numbered entries will sort earlier.
@@ -724,33 +730,26 @@ account_chooser_account_remove_foreach (TpAccount             *account,
 }
 
 static void
-account_chooser_update_iter (EmpathyAccountChooser *chooser,
-			     GtkTreeIter           *iter)
+account_chooser_filter_ready_cb (gboolean is_enabled,
+				 gpointer data)
 {
+	FilterResultCallbackData  *fr_data = data;
+	EmpathyAccountChooser     *chooser;
 	EmpathyAccountChooserPriv *priv;
+	TpAccount                 *account;
+	GtkTreeIter               *iter;
 	GtkListStore              *store;
 	GtkComboBox               *combobox;
-	TpAccount                 *account;
 	const gchar               *icon_name;
-	gboolean                   is_enabled = TRUE;
 
+	chooser = fr_data->chooser;
 	priv = GET_PRIV (chooser);
-
+	account = fr_data->account;
+	iter = fr_data->iter;
 	combobox = GTK_COMBO_BOX (chooser);
 	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	gtk_tree_model_get (GTK_TREE_MODEL (store), iter,
-			    COL_ACCOUNT_POINTER, &account,
-			    -1);
-
-	/* Skip rows without account associated */
-	if (account == NULL)
-		return;
-
 	icon_name = tp_account_get_icon_name (account);
-	if (priv->filter) {
-		is_enabled = priv->filter (account, priv->filter_data);
-	}
 
 	gtk_list_store_set (store, iter,
 			    COL_ACCOUNT_IMAGE, icon_name,
@@ -766,6 +765,43 @@ account_chooser_update_iter (EmpathyAccountChooser *chooser,
 	}
 
 	g_object_unref (account);
+	g_free (iter);
+	g_slice_free (FilterResultCallbackData, fr_data);
+}
+
+static void
+account_chooser_update_iter (EmpathyAccountChooser *chooser,
+			     GtkTreeIter           *iter)
+{
+	EmpathyAccountChooserPriv *priv;
+	GtkListStore              *store;
+	GtkComboBox               *combobox;
+	TpAccount                 *account;
+	FilterResultCallbackData  *data;
+
+	priv = GET_PRIV (chooser);
+
+	combobox = GTK_COMBO_BOX (chooser);
+	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+
+	gtk_tree_model_get (GTK_TREE_MODEL (store), iter,
+			    COL_ACCOUNT_POINTER, &account,
+			    -1);
+
+	/* Skip rows without account associated */
+	if (account == NULL)
+		return;
+
+	data = g_slice_new0 (FilterResultCallbackData);
+	data->chooser = chooser;
+	data->account = account;
+	data->iter = g_memdup (iter, sizeof (GtkTreeIter));
+
+	if (priv->filter)
+		priv->filter (account, account_chooser_filter_ready_cb,
+			      (gpointer) data, priv->filter_data);
+	else
+		account_chooser_filter_ready_cb (TRUE, (gpointer) data);
 }
 
 static void
@@ -879,19 +915,26 @@ empathy_account_chooser_set_filter (EmpathyAccountChooser           *chooser,
 /**
  * empathy_account_chooser_filter_is_connected:
  * @account: a #TpAccount
+ * @callback: an #EmpathyAccountChooserFilterResultCallback accepting the result
+ * @callback_data: data passed to the @callback
  * @user_data: user data or %NULL
  *
  * A useful #EmpathyAccountChooserFilterFunc that one could pass into
  * empathy_account_chooser_set_filter() and only show connected accounts.
  *
- * Return value: Whether @account is connected
+ * Returns (via the callback) TRUE is @account is connected
  */
-gboolean
-empathy_account_chooser_filter_is_connected (TpAccount *account,
-					     gpointer   user_data)
+void
+empathy_account_chooser_filter_is_connected (
+	TpAccount                                 *account,
+	EmpathyAccountChooserFilterResultCallback  callback,
+	gpointer                                   callback_data,
+	gpointer                                   user_data)
 {
-	return (tp_account_get_connection_status (account, NULL)
-	    == TP_CONNECTION_STATUS_CONNECTED);
+	gboolean is_connected =
+		tp_account_get_connection_status (account, NULL)
+		== TP_CONNECTION_STATUS_CONNECTED;
+	callback (is_connected, callback_data);
 }
 
 gboolean

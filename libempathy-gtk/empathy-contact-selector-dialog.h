@@ -29,6 +29,8 @@
 #include <telepathy-glib/connection.h>
 #include <telepathy-glib/account.h>
 
+#include "empathy-account-chooser.h"
+
 G_BEGIN_DECLS
 
 typedef struct _EmpathyContactSelectorDialog EmpathyContactSelectorDialog;
@@ -38,7 +40,9 @@ typedef struct _EmpathyContactSelectorDialogClass \
 struct _EmpathyContactSelectorDialogClass {
   GtkDialogClass parent_class;
 
-  gboolean (*account_filter) (EmpathyContactSelectorDialog *self,
+  void (*account_filter) (EmpathyContactSelectorDialog *self,
+      EmpathyAccountChooserFilterResultCallback callback,
+      gpointer callback_data,
       TpAccount *account);
   gboolean (*contact_filter) (EmpathyContactSelectorDialog *self,
       const char *id);

@@ -25,7 +25,6 @@
 #include <config.h>
 
 #include <string.h>
-#include <stdio.h>
 
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -73,6 +72,11 @@ typedef struct {
 	GtkWidget         *label_error_message;
 	GtkWidget         *viewport_error;
 } EmpathyNewChatroomDialog;
+
+typedef struct {
+  EmpathyAccountChooserFilterResultCallback callback;
+  gpointer                                  user_data;
+} FilterCallbackData;
 
 enum {
 	COL_NEED_PASSWORD,
@@ -133,46 +137,95 @@ static void	new_chatroom_dialog_button_close_error_clicked_cb   (GtkButton      
 
 static EmpathyNewChatroomDialog *dialog_p = NULL;
 
+
+static void
+conn_prepared_cb (GObject *conn,
+		  GAsyncResult *result,
+		  gpointer user_data)
+{
+	FilterCallbackData *data = user_data;
+	GError             *myerr = NULL;
+	TpCapabilities     *caps;
+	GPtrArray          *classes;
+	guint               i;
+
+	if (!tp_proxy_prepare_finish (conn, result, &myerr))
+		goto out;
+
+	caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
+	classes = tp_capabilities_get_channel_classes (caps);
+
+	for (i = 0; i < classes->len; i++) {
+		GHashTable *fixed;
+		GStrv allowed;
+		const gchar *chan_type;
+
+		tp_value_array_unpack (g_ptr_array_index (classes, i), 2,
+							  &fixed, &allowed);
+
+		chan_type = tp_asv_get_string (fixed,
+					       TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+		if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
+			continue;
+
+		if (tp_asv_get_uint32 (fixed,
+				       TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
+				       NULL) !=
+		    TP_HANDLE_TYPE_ROOM)
+			continue;
+
+		data->callback (TRUE, data->user_data);
+		g_slice_free (FilterCallbackData, data);
+		return;
+	}
+
+out:
+	data->callback (FALSE, data->user_data);
+	g_slice_free (FilterCallbackData, data);
+}
+
 /**
  * empathy_account_chooser_filter_supports_multichat:
  * @account: a #TpAccount
+ * @callback: an #EmpathyAccountChooserFilterResultCallback accepting the result
+ * @callback_data: data passed to the @callback
  * @user_data: user data or %NULL
  *
  * An #EmpathyAccountChooserFilterFunc that returns accounts that both
  * support multiuser text chat and are connected.
  *
- * Return value: TRUE if @account both supports muc and is connected
+ * Returns (via the callback) TRUE if @account both supports muc and is connected
  */
-static gboolean
-empathy_account_chooser_filter_supports_multichat (TpAccount *account,
-						   gpointer   user_data)
+static void
+empathy_account_chooser_filter_supports_multichat (
+	TpAccount                                 *account,
+	EmpathyAccountChooserFilterResultCallback  callback,
+	gpointer                                   callback_data,
+	gpointer                                   user_data)
 {
-	TpConnection *connection;
-	EmpathyDispatcher *dispatcher;
-	GList *classes;
+	TpConnection       *connection;
+	FilterCallbackData *cb_data;
+	GQuark              features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
 
 	if (tp_account_get_connection_status (account, NULL) !=
-	    TP_CONNECTION_STATUS_CONNECTED)
-	return FALSE;
+	    TP_CONNECTION_STATUS_CONNECTED) {
+		callback (FALSE, callback_data);
+		return;
+	}
 
 	/* check if CM supports multiuser text chat */
 	connection = tp_account_get_connection (account);
-	if (connection == NULL)
-		return FALSE;
+	if (connection == NULL) {
+		callback (FALSE, callback_data);
+		return;
+	}
 
-	dispatcher = empathy_dispatcher_dup_singleton ();
-
-	classes = empathy_dispatcher_find_requestable_channel_classes
-		(dispatcher, connection, TP_IFACE_CHANNEL_TYPE_TEXT,
-		TP_HANDLE_TYPE_ROOM, NULL);
-
-	g_object_unref (dispatcher);
-
-	if (classes == NULL)
-		return FALSE;
-
-	g_list_free (classes);
-	return TRUE;
+	cb_data = g_slice_new0 (FilterCallbackData);
+	cb_data->callback = callback;
+	cb_data->user_data = callback_data;
+        tp_proxy_prepare_async (connection, features, conn_prepared_cb,
+		cb_data);
 }
 
 void

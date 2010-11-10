@@ -38,8 +38,26 @@ G_BEGIN_DECLS
 #define EMPATHY_IS_ACCOUNT_CHOOSER_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_ACCOUNT_CHOOSER))
 #define EMPATHY_ACCOUNT_CHOOSER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_ACCOUNT_CHOOSER, EmpathyAccountChooserClass))
 
-typedef gboolean (* EmpathyAccountChooserFilterFunc) (TpAccount *account,
-						      gpointer   user_data);
+/**
+ * EmpathyAccountChooserFilterResultCallback:
+ * @is_enabled: indicated whether the account should be enabled
+ * @user_data: user data passed to the callback
+ */
+typedef void (* EmpathyAccountChooserFilterResultCallback) (gboolean is_enabled,
+							    gpointer user_data);
+
+/**
+ * EmpathyAccountChooserFilterFunc:
+ * @account: a #TpAccount
+ * @callback: an #EmpathyAccountChooserFilterResultCallback accepting the result
+ * @callback_data: data passed to the @callback
+ * @user_data: user data passed to the callback
+ */
+typedef void (* EmpathyAccountChooserFilterFunc) (
+	TpAccount                                 *account,
+	EmpathyAccountChooserFilterResultCallback  callback,
+	gpointer                                   callback_data,
+	gpointer                                   user_data);
 
 
 typedef struct _EmpathyAccountChooser      EmpathyAccountChooser;
@@ -69,7 +87,9 @@ void           empathy_account_chooser_set_has_all_option (EmpathyAccountChooser
 void           empathy_account_chooser_set_filter         (EmpathyAccountChooser *chooser,
 							   EmpathyAccountChooserFilterFunc filter,
 							   gpointer               user_data);
-gboolean       empathy_account_chooser_filter_is_connected (TpAccount            *account,
+void           empathy_account_chooser_filter_is_connected (TpAccount             *account,
+							   EmpathyAccountChooserFilterResultCallback callback,
+							   gpointer               callback_data,
 							   gpointer               user_data);
 gboolean       empathy_account_chooser_is_ready (EmpathyAccountChooser *chooser);
 

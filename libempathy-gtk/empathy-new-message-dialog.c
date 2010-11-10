@@ -42,6 +42,11 @@
 #include "empathy-new-message-dialog.h"
 #include "empathy-account-chooser.h"
 
+typedef struct {
+  EmpathyAccountChooserFilterResultCallback callback;
+  gpointer                                  user_data;
+} FilterCallbackData;
+
 static EmpathyNewMessageDialog *dialog_singleton = NULL;
 
 G_DEFINE_TYPE(EmpathyNewMessageDialog, empathy_new_message_dialog,
@@ -77,36 +82,80 @@ out:
   gtk_widget_destroy (GTK_WIDGET (dialog));
 }
 
-static gboolean
+static void
+conn_prepared_cb (GObject *conn,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  FilterCallbackData *data = user_data;
+  GError *myerr = NULL;
+  TpCapabilities *caps;
+  GPtrArray *classes;
+  guint i;
+
+  if (!tp_proxy_prepare_finish (conn, result, &myerr))
+      goto out;
+
+  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
+  classes = tp_capabilities_get_channel_classes (caps);
+
+  for (i = 0; i < classes->len; i++)
+    {
+      GHashTable *fixed;
+      GStrv allowed;
+      const gchar *chan_type;
+
+      tp_value_array_unpack (g_ptr_array_index (classes, i), 2,
+          &fixed, &allowed);
+
+      chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
+        continue;
+
+      if (tp_asv_get_uint32 (fixed, TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) !=
+          TP_HANDLE_TYPE_CONTACT)
+        continue;
+
+      data->callback (TRUE, data->user_data);
+      g_slice_free (FilterCallbackData, data);
+      return;
+    }
+
+out:
+  data->callback (FALSE, data->user_data);
+  g_slice_free (FilterCallbackData, data);
+}
+
+static void
 empathy_new_message_account_filter (EmpathyContactSelectorDialog *dialog,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
     TpAccount *account)
 {
   TpConnection *connection;
-  EmpathyDispatcher *dispatcher;
-  GList *classes;
+  FilterCallbackData *cb_data;
+  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
 
   if (tp_account_get_connection_status (account, NULL) !=
       TP_CONNECTION_STATUS_CONNECTED)
-    return FALSE;
+    {
+      callback (FALSE, callback_data);
+      return;
+    }
 
   /* check if CM supports 1-1 text chat */
   connection = tp_account_get_connection (account);
   if (connection == NULL)
-    return FALSE;
+    {
+      callback (FALSE, callback_data);
+      return;
+    }
 
-  dispatcher = empathy_dispatcher_dup_singleton ();
-
-  classes = empathy_dispatcher_find_requestable_channel_classes
-    (dispatcher, connection, TP_IFACE_CHANNEL_TYPE_TEXT,
-     TP_HANDLE_TYPE_CONTACT, NULL);
-
-  g_object_unref (dispatcher);
-
-  if (classes == NULL)
-    return FALSE;
-
-  g_list_free (classes);
-  return TRUE;
+  cb_data = g_slice_new0 (FilterCallbackData);
+  cb_data->callback = callback;
+  cb_data->user_data = callback_data;
+  tp_proxy_prepare_async (connection, features, conn_prepared_cb, cb_data);
 }
 
 static GObject *
