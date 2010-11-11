@@ -48,6 +48,7 @@
 #include "empathy-contact-list-store.h"
 #include "empathy-contact-list-view.h"
 #include "empathy-contact-menu.h"
+#include "empathy-input-text-view.h"
 #include "empathy-search-bar.h"
 #include "empathy-theme-manager.h"
 #include "empathy-smiley-manager.h"
@@ -2588,14 +2589,8 @@ chat_create_ui (EmpathyChat *chat)
 	gtk_widget_show (GTK_WIDGET (chat->view));
 
 	/* Add input GtkTextView */
-	chat->input_text_view = g_object_new (GTK_TYPE_TEXT_VIEW,
-					      "pixels-above-lines", 2,
-					      "pixels-below-lines", 2,
-					      "pixels-inside-wrap", 1,
-					      "right-margin", 2,
-					      "left-margin", 2,
-					      "wrap-mode", GTK_WRAP_WORD_CHAR,
-					      NULL);
+	chat->input_text_view = empathy_input_text_view_new ();
+
 	g_signal_connect (chat->input_text_view, "key-press-event",
 			  G_CALLBACK (chat_input_key_press_event_cb),
 			  chat);
