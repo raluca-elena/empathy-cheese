@@ -29,7 +29,6 @@
 #include <glib/gi18n-lib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
-#include <gconf/gconf-client.h>
 
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-connection-managers.h>
@@ -214,19 +213,11 @@ cc_empathy_accounts_panel_class_finalize (CcEmpathyAccountsPanelClass *klass)
 static void
 cc_empathy_accounts_panel_init (CcEmpathyAccountsPanel *panel)
 {
-  GConfClient *client;
   TpAccountManager *account_manager;
 
   panel->priv = CC_EMPATHY_ACCOUNTS_PANEL_GET_PRIVATE (panel);
 
   empathy_gtk_init ();
-
-  client = gconf_client_get_default ();
-  gconf_client_add_dir (client, "/desktop/gnome/peripherals/empathy_accounts",
-      GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  gconf_client_add_dir (client, "/desktop/gnome/interface",
-      GCONF_CLIENT_PRELOAD_ONELEVEL, NULL);
-  g_object_unref (client);
 
   /* unref'd in final endpoint callbacks */
   account_manager = tp_account_manager_dup ();
