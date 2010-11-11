@@ -1681,6 +1681,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
   const gchar *str;
   GList *personas, *l;
+  gboolean is_favorite;
 
   /* We're only giving the visibility wrt filtering here, not things like
    * presence. */
@@ -1690,8 +1691,10 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
       return FALSE;
     }
 
+  is_favorite = folks_favourite_get_is_favourite (
+      FOLKS_FAVOURITE (individual));
   if (is_searching == FALSE)
-    return (priv->show_offline || is_online);
+    return (priv->show_offline || is_online || is_favorite);
 
   /* check alias name */
   str = folks_aliasable_get_alias (FOLKS_ALIASABLE (individual));
