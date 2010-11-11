@@ -272,6 +272,12 @@ theme_adium_parse_body (const gchar *text)
 
 	g_object_unref (gsettings);
 
+	/* Wrap body in order to make tabs and multiple spaces displayed
+	 * properly. See bug #625745. */
+	g_string_prepend (string, "<div style=\"display: inline; "
+					       "white-space: pre-wrap\"'>");
+	g_string_append (string, "</div>");
+
 	return g_string_free (string, FALSE);
 }
 
