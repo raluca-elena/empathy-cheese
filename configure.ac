@@ -154,6 +154,7 @@ PKG_CHECK_MODULES(EMPATHY,
    gnutls >= $GNUTLS_REQUIRED
    gmodule-export-2.0
    gobject-2.0
+   gsettings-desktop-schemas
    gstreamer-0.10
    gstreamer-interfaces-0.10
    libxml-2.0
