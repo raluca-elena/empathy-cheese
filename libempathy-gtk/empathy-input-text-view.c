@@ -30,14 +30,61 @@
 G_DEFINE_TYPE (EmpathyInputTextView, empathy_input_text_view,
     GTK_TYPE_TEXT_VIEW);
 
+#define MAX_INPUT_HEIGHT 150
+
 struct _EmpathyInputTextViewPrivate
 {
-    gpointer unused;
+  gboolean has_input_vscroll;
 };
+
+static gboolean
+chat_input_set_size_request_idle (gpointer sw)
+{
+  gtk_widget_set_size_request (sw, -1, MAX_INPUT_HEIGHT);
+
+  return FALSE;
+}
+
+static void
+empathy_input_text_view_size_request (GtkWidget *widget,
+    GtkRequisition *requisition)
+{
+  EmpathyInputTextView *self = (EmpathyInputTextView *) widget;
+  GtkWidget *sw;
+
+  sw = gtk_widget_get_parent (widget);
+  if (requisition->height >= MAX_INPUT_HEIGHT && !self->priv->has_input_vscroll)
+    {
+      /* Display scroll bar */
+      g_idle_add (chat_input_set_size_request_idle, sw);
+
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+          GTK_POLICY_NEVER,
+          GTK_POLICY_ALWAYS);
+
+      self->priv->has_input_vscroll = TRUE;
+    }
+
+  if (requisition->height < MAX_INPUT_HEIGHT && self->priv->has_input_vscroll)
+    {
+      /* Hide scroll bar */
+      gtk_widget_set_size_request (sw, -1, -1);
+
+      gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+          GTK_POLICY_NEVER,
+          GTK_POLICY_NEVER);
+
+      self->priv->has_input_vscroll = FALSE;
+    }
+}
 
 static void
 empathy_input_text_view_class_init (EmpathyInputTextViewClass *cls)
 {
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (cls);
+
+  widget_class->size_request = empathy_input_text_view_size_request;
+
   g_type_class_add_private (cls, sizeof (EmpathyInputTextViewPrivate));
 }
 

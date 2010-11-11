@@ -61,7 +61,6 @@
 #define CHAT_DIR_CREATE_MODE  (S_IRUSR | S_IWUSR | S_IXUSR)
 #define CHAT_FILE_CREATE_MODE (S_IRUSR | S_IWUSR)
 #define IS_ENTER(v) (v == GDK_KEY_Return || v == GDK_KEY_ISO_Enter || v == GDK_KEY_KP_Enter)
-#define MAX_INPUT_HEIGHT 150
 #define COMPOSING_STOP_TIMEOUT 5
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyChat)
@@ -1610,40 +1609,6 @@ chat_text_view_focus_in_event_cb (GtkWidget  *widget,
 	return TRUE;
 }
 
-static gboolean
-chat_input_set_size_request_idle (gpointer sw)
-{
-	gtk_widget_set_size_request (sw, -1, MAX_INPUT_HEIGHT);
-
-	return FALSE;
-}
-
-static void
-chat_input_size_request_cb (GtkWidget      *widget,
-			    GtkRequisition *requisition,
-			    EmpathyChat    *chat)
-{
-	EmpathyChatPriv *priv = GET_PRIV (chat);
-	GtkWidget       *sw;
-
-	sw = gtk_widget_get_parent (widget);
-	if (requisition->height >= MAX_INPUT_HEIGHT && !priv->has_input_vscroll) {
-		g_idle_add (chat_input_set_size_request_idle, sw);
-		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-						GTK_POLICY_NEVER,
-						GTK_POLICY_ALWAYS);
-		priv->has_input_vscroll = TRUE;
-	}
-
-	if (requisition->height < MAX_INPUT_HEIGHT && priv->has_input_vscroll) {
-		gtk_widget_set_size_request (sw, -1, -1);
-		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-						GTK_POLICY_NEVER,
-						GTK_POLICY_NEVER);
-		priv->has_input_vscroll = FALSE;
-	}
-}
-
 static void
 chat_input_realize_cb (GtkWidget   *widget,
 		       EmpathyChat *chat)
@@ -2593,9 +2558,6 @@ chat_create_ui (EmpathyChat *chat)
 
 	g_signal_connect (chat->input_text_view, "key-press-event",
 			  G_CALLBACK (chat_input_key_press_event_cb),
-			  chat);
-	g_signal_connect (chat->input_text_view, "size-request",
-			  G_CALLBACK (chat_input_size_request_cb),
 			  chat);
 	g_signal_connect (chat->input_text_view, "realize",
 			  G_CALLBACK (chat_input_realize_cb),
