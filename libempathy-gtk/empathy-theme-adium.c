@@ -28,7 +28,6 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/util.h>
 
-#include <gconf/gconf-client.h>
 #include <pango/pango.h>
 #include <gdk/gdk.h>
 
@@ -48,8 +47,6 @@
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyThemeAdium)
 
-/* GConf key containing current value of font */
-#define EMPATHY_GCONF_FONT_KEY_NAME "/desktop/gnome/interface/document_font_name"
 #define BORING_DPI_DEFAULT 96
 
 /* "Join" consecutive messages with timestamps within five minutes */
@@ -981,24 +978,21 @@ theme_adium_inspect_web_view_cb (WebKitWebInspector *inspector,
 static PangoFontDescription *
 theme_adium_get_default_font (void)
 {
-	GConfClient *gconf_client;
+	GSettings *gsettings;
 	PangoFontDescription *pango_fd;
-	gchar *gconf_font_family;
+	gchar *font_family;
 
-	gconf_client = gconf_client_get_default ();
-	if (gconf_client == NULL) {
-		return NULL;
-	}
-	gconf_font_family = gconf_client_get_string (gconf_client,
-		     EMPATHY_GCONF_FONT_KEY_NAME,
-		     NULL);
-	if (gconf_font_family == NULL) {
-		g_object_unref (gconf_client);
-		return NULL;
-	}
-	pango_fd = pango_font_description_from_string (gconf_font_family);
-	g_free (gconf_font_family);
-	g_object_unref (gconf_client);
+	gsettings = g_settings_new (EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
+
+	font_family = g_settings_get_string (gsettings,
+		     EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME);
+
+	if (font_family == NULL)
+	return NULL;
+
+	pango_fd = pango_font_description_from_string (font_family);
+	g_free (font_family);
+	g_object_unref (gsettings);
 	return pango_fd;
 }
 

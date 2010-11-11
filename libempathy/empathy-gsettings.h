@@ -91,6 +91,9 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_LOGGER_SCHEMA "org.freedesktop.Telepathy.Logger"
 #define EMPATHY_PREFS_LOGGER_ENABLED "enabled"
 
+#define EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA "org.gnome.desktop.interface"
+#define EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME "document-font-name"
+
 G_END_DECLS
 
 #endif /* __EMPATHY_GSETTINGS_H__ */
