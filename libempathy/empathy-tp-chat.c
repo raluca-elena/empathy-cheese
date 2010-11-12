@@ -1637,7 +1637,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      3, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_STRING);
 
 	signals[CHAT_STATE_CHANGED] =
-		g_signal_new ("chat-state-changed",
+		g_signal_new ("chat-state-changed-empathy",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
 			      0,
