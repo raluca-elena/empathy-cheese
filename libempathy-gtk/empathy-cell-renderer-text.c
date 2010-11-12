@@ -50,13 +50,6 @@ static void cell_renderer_text_set_property      (GObject                     *o
 						  guint                        param_id,
 						  const GValue                *value,
 						  GParamSpec                  *pspec);
-static void cell_renderer_text_get_size          (GtkCellRenderer             *cell,
-						  GtkWidget                   *widget,
-						  const GdkRectangle          *cell_area,
-						  gint                        *x_offset,
-						  gint                        *y_offset,
-						  gint                        *width,
-						  gint                        *height);
 static void cell_renderer_text_render            (GtkCellRenderer             *cell,
 						  cairo_t *cr,
 						  GtkWidget                   *widget,
@@ -80,6 +73,25 @@ enum {
 G_DEFINE_TYPE (EmpathyCellRendererText, empathy_cell_renderer_text, GTK_TYPE_CELL_RENDERER_TEXT);
 
 static void
+cell_renderer_text_get_preferred_height_for_width (GtkCellRenderer *renderer,
+								GtkWidget *widget,
+								gint width,
+								gint *minimum_size,
+								gint *natural_size)
+{
+	EmpathyCellRendererText *self = EMPATHY_CELL_RENDERER_TEXT (renderer);
+	EmpathyCellRendererTextPriv *priv = GET_PRIV (self);
+
+	/* Only update if not already valid so we get the right size. */
+	cell_renderer_text_update_text (self, widget, priv->is_selected);
+
+	GTK_CELL_RENDERER_CLASS (empathy_cell_renderer_text_parent_class)->
+			get_preferred_height_for_width (renderer, widget, width,
+					minimum_size, natural_size);
+}
+
+
+static void
 empathy_cell_renderer_text_class_init (EmpathyCellRendererTextClass *klass)
 {
 	GObjectClass         *object_class;
@@ -94,7 +106,7 @@ empathy_cell_renderer_text_class_init (EmpathyCellRendererTextClass *klass)
 	object_class->get_property = cell_renderer_text_get_property;
 	object_class->set_property = cell_renderer_text_set_property;
 
-	cell_class->get_size = cell_renderer_text_get_size;
+	cell_class->get_preferred_height_for_width = cell_renderer_text_get_preferred_height_for_width;
 	cell_class->render = cell_renderer_text_render;
 
 	spec = g_param_spec_string ("name", "Name", "Contact name", NULL,
@@ -237,30 +249,6 @@ cell_renderer_text_set_property (GObject      *object,
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
 	}
-}
-
-static void
-cell_renderer_text_get_size (GtkCellRenderer    *cell,
-			     GtkWidget          *widget,
-			     const GdkRectangle *cell_area,
-			     gint               *x_offset,
-			     gint               *y_offset,
-			     gint               *width,
-			     gint               *height)
-{
-	EmpathyCellRendererText     *celltext;
-	EmpathyCellRendererTextPriv *priv;
-
-	celltext = EMPATHY_CELL_RENDERER_TEXT (cell);
-	priv = GET_PRIV (cell);
-
-	/* Only update if not already valid so we get the right size. */
-	cell_renderer_text_update_text (celltext, widget, priv->is_selected);
-
-	(GTK_CELL_RENDERER_CLASS (empathy_cell_renderer_text_parent_class)->get_size) (cell, widget,
-										      cell_area,
-										      x_offset, y_offset,
-										      width, height);
 }
 
 static void
