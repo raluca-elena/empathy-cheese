@@ -80,6 +80,30 @@ typedef struct {
 	GtkTreeIter           *iter;
 } FilterResultCallbackData;
 
+static FilterResultCallbackData *
+filter_result_callback_data_new (EmpathyAccountChooser *chooser,
+				 TpAccount             *account,
+				 GtkTreeIter           *iter)
+{
+	FilterResultCallbackData *data;
+
+	data = g_slice_new0 (FilterResultCallbackData);
+	data->chooser = g_object_ref (chooser);
+	data->account = g_object_ref (account);
+	data->iter = gtk_tree_iter_copy (iter);
+
+	return data;
+}
+
+static void
+filter_result_callback_data_free (FilterResultCallbackData *data)
+{
+	g_object_unref (data->chooser);
+	g_object_unref (data->account);
+	gtk_tree_iter_free (data->iter);
+	g_slice_free (FilterResultCallbackData, data);
+}
+
 /* Distinguishes between store entries which are actually accounts, and special
  * items like the "All" entry and the separator below it, so they can be sorted
  * correctly. Higher-numbered entries will sort earlier.
@@ -765,8 +789,7 @@ account_chooser_filter_ready_cb (gboolean is_enabled,
 	}
 
 	g_object_unref (account);
-	g_free (iter);
-	g_slice_free (FilterResultCallbackData, fr_data);
+	filter_result_callback_data_free (fr_data);
 }
 
 static void
@@ -792,10 +815,7 @@ account_chooser_update_iter (EmpathyAccountChooser *chooser,
 	if (account == NULL)
 		return;
 
-	data = g_slice_new0 (FilterResultCallbackData);
-	data->chooser = chooser;
-	data->account = account;
-	data->iter = g_memdup (iter, sizeof (GtkTreeIter));
+	data = filter_result_callback_data_new (chooser, account, iter);
 
 	if (priv->filter)
 		priv->filter (account, account_chooser_filter_ready_cb,

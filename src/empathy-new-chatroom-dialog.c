@@ -146,42 +146,16 @@ conn_prepared_cb (GObject *conn,
 	FilterCallbackData *data = user_data;
 	GError             *myerr = NULL;
 	TpCapabilities     *caps;
-	GPtrArray          *classes;
-	guint               i;
 
-	if (!tp_proxy_prepare_finish (conn, result, &myerr))
-		goto out;
-
-	caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
-	classes = tp_capabilities_get_channel_classes (caps);
-
-	for (i = 0; i < classes->len; i++) {
-		GHashTable *fixed;
-		GStrv allowed;
-		const gchar *chan_type;
-
-		tp_value_array_unpack (g_ptr_array_index (classes, i), 2,
-							  &fixed, &allowed);
-
-		chan_type = tp_asv_get_string (fixed,
-					       TP_PROP_CHANNEL_CHANNEL_TYPE);
-
-		if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
-			continue;
-
-		if (tp_asv_get_uint32 (fixed,
-				       TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
-				       NULL) !=
-		    TP_HANDLE_TYPE_ROOM)
-			continue;
-
-		data->callback (TRUE, data->user_data);
+	if (!tp_proxy_prepare_finish (conn, result, &myerr)) {
+		data->callback (FALSE, data->user_data);
 		g_slice_free (FilterCallbackData, data);
-		return;
 	}
 
-out:
-	data->callback (FALSE, data->user_data);
+	caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
+	data->callback (tp_capabilities_supports_text_chatrooms (caps),
+			data->user_data);
+
 	g_slice_free (FilterCallbackData, data);
 }
 
