@@ -403,7 +403,7 @@ chat_window_conversation_menu_update (EmpathyChatWindowPriv *priv,
 	tp_chat = empathy_chat_get_tp_chat (priv->current_chat);
 
 	if (tp_chat != NULL) {
-		connection = empathy_tp_chat_get_connection (tp_chat);
+		connection = tp_channel_borrow_connection (TP_CHANNEL (tp_chat));
 
 		sensitive = empathy_tp_chat_can_add_contact (tp_chat) &&
 			(tp_connection_get_status (connection, NULL) ==

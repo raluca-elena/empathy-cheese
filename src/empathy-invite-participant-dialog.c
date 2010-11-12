@@ -130,7 +130,7 @@ get_tp_contact_for_chat (EmpathyInviteParticipantDialog *self,
   GList *personas, *l;
   TpConnection *chat_conn;
 
-  chat_conn = empathy_tp_chat_get_connection (self->priv->tp_chat);
+  chat_conn = tp_channel_borrow_connection ((TpChannel *) self->priv->tp_chat);
 
   personas = folks_individual_get_personas (individual);
 

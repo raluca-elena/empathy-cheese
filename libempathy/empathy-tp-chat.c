@@ -41,7 +41,6 @@
 struct _EmpathyTpChatPrivate {
 	gboolean               dispose_has_run;
 	TpAccount             *account;
-	TpConnection          *connection;
 	EmpathyContact        *user;
 	EmpathyContact        *remote_contact;
 	GList                 *members;
@@ -331,7 +330,10 @@ tp_chat_build_message (EmpathyTpChat *self,
 		empathy_message_set_sender (message, self->priv->user);
 		tp_chat_emit_queued_messages (self);
 	} else {
-		empathy_tp_contact_factory_get_from_handle (self->priv->connection,
+		TpConnection *connection = tp_channel_borrow_connection (
+			(TpChannel *) self);
+
+		empathy_tp_contact_factory_get_from_handle (connection,
 			tp_contact_get_handle (sender),
 			tp_chat_got_sender_cb,
 			message, NULL, G_OBJECT (self));
@@ -572,7 +574,10 @@ tp_chat_state_changed_cb (TpChannel *channel,
 			  TpChannelChatState state,
 			  EmpathyTpChat *self)
 {
-	empathy_tp_contact_factory_get_from_handle (self->priv->connection, handle,
+	TpConnection *connection = tp_channel_borrow_connection (
+		(TpChannel *) self);
+
+	empathy_tp_contact_factory_get_from_handle (connection, handle,
 		tp_chat_state_changed_got_contact_cb, GUINT_TO_POINTER (state),
 		NULL, G_OBJECT (self));
 }
@@ -822,10 +827,6 @@ tp_chat_dispose (GObject *object)
 	self->priv->dispose_has_run = TRUE;
 
 	tp_clear_object (&self->priv->account);
-
-	if (self->priv->connection != NULL)
-		g_object_unref (self->priv->connection);
-	self->priv->connection = NULL;
 
 	if (self->priv->remote_contact != NULL)
 		g_object_unref (self->priv->remote_contact);
@@ -1141,6 +1142,8 @@ tp_chat_group_members_changed_cb (TpChannel     *channel,
 	guint i;
 	ContactRenameData *rename_data;
 	TpHandle old_handle;
+	TpConnection *connection = tp_channel_borrow_connection (
+		(TpChannel *) self);
 
 	/* Contact renamed */
 	if (reason == TP_CHANNEL_GROUP_CHANGE_REASON_RENAMED) {
@@ -1154,7 +1157,7 @@ tp_chat_group_members_changed_cb (TpChannel     *channel,
 		old_handle = g_array_index (removed, guint, 0);
 
 		rename_data = contact_rename_data_new (old_handle, reason, message);
-		empathy_tp_contact_factory_get_from_handles (self->priv->connection,
+		empathy_tp_contact_factory_get_from_handles (connection,
 			added->len, (TpHandle *) added->data,
 			tp_chat_got_renamed_contacts_cb,
 			rename_data, (GDestroyNotify) contact_rename_data_free,
@@ -1188,7 +1191,7 @@ tp_chat_group_members_changed_cb (TpChannel     *channel,
 
 	/* Request added contacts */
 	if (added->len > 0) {
-		empathy_tp_contact_factory_get_from_handles (self->priv->connection,
+		empathy_tp_contact_factory_get_from_handles (connection,
 			added->len, (TpHandle *) added->data,
 			tp_chat_got_added_contacts_cb, NULL, NULL,
 			G_OBJECT (self));
@@ -1322,17 +1325,20 @@ tp_chat_constructor (GType                  type,
 	EmpathyTpChat *self;
 	TpHandle           handle;
 	TpChannel         *channel;
+	TpConnection *connection;
+
 
 	object = G_OBJECT_CLASS (empathy_tp_chat_parent_class)->constructor (type, n_props, props);
 	self = (EmpathyTpChat *) object;
 	channel = (TpChannel *) object;
 
-	self->priv->connection = g_object_ref (tp_account_get_connection (self->priv->account));
+	connection = tp_channel_borrow_connection (channel);
+
 	tp_g_signal_connect_object (self, "invalidated",
 			  G_CALLBACK (tp_chat_invalidated_cb),
 			  self, 0);
 
-	g_assert (tp_proxy_is_prepared (self->priv->connection,
+	g_assert (tp_proxy_is_prepared (connection,
 		TP_CONNECTION_FEATURE_CAPABILITIES));
 
 	if (tp_proxy_has_interface_by_id (self,
@@ -1342,14 +1348,14 @@ tp_chat_constructor (GType                  type,
 
 		/* Get self contact from the group's self handle */
 		handle = tp_channel_group_get_self_handle (channel);
-		empathy_tp_contact_factory_get_from_handle (self->priv->connection,
+		empathy_tp_contact_factory_get_from_handle (connection,
 			handle, tp_chat_got_self_contact_cb,
 			NULL, NULL, object);
 
 		/* Get initial member contacts */
 		members = tp_channel_group_get_members (channel);
 		handles = tp_intset_to_array (members);
-		empathy_tp_contact_factory_get_from_handles (self->priv->connection,
+		empathy_tp_contact_factory_get_from_handles (connection,
 			handles->len, (TpHandle *) handles->data,
 			tp_chat_got_added_contacts_cb, NULL, NULL, object);
 
@@ -1363,18 +1369,18 @@ tp_chat_constructor (GType                  type,
 		guint i;
 
 		/* Get the self contact from the connection's self handle */
-		handle = tp_connection_get_self_handle (self->priv->connection);
-		empathy_tp_contact_factory_get_from_handle (self->priv->connection,
+		handle = tp_connection_get_self_handle (connection);
+		empathy_tp_contact_factory_get_from_handle (connection,
 			handle, tp_chat_got_self_contact_cb,
 			NULL, NULL, object);
 
 		/* Get the remote contact */
 		handle = tp_channel_get_handle (channel, NULL);
-		empathy_tp_contact_factory_get_from_handle (self->priv->connection,
+		empathy_tp_contact_factory_get_from_handle (connection,
 			handle, tp_chat_got_remote_contact_cb,
 			NULL, NULL, object);
 
-		caps = tp_connection_get_capabilities (self->priv->connection);
+		caps = tp_connection_get_capabilities (connection);
 		g_assert (caps != NULL);
 
 		classes = tp_capabilities_get_channel_classes (caps);
@@ -1690,13 +1696,6 @@ empathy_tp_chat_get_account (EmpathyTpChat *self)
 	return self->priv->account;
 }
 
-TpConnection *
-empathy_tp_chat_get_connection (EmpathyTpChat *self)
-{
-	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), NULL);
-
-	return tp_channel_borrow_connection ((TpChannel *) self);
-}
 gboolean
 empathy_tp_chat_is_ready (EmpathyTpChat *self)
 {

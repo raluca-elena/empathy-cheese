@@ -700,7 +700,7 @@ nick_command_supported (EmpathyChat *chat)
 	EmpathyChatPriv * priv = GET_PRIV (chat);
 	TpConnection    *connection;
 
-	connection = empathy_tp_chat_get_connection (priv->tp_chat);
+	connection = tp_channel_borrow_connection (TP_CHANNEL (priv->tp_chat));
 	return tp_proxy_has_interface_by_id (connection,
 		EMP_IFACE_QUARK_CONNECTION_INTERFACE_RENAMING);
 }
@@ -975,7 +975,7 @@ chat_command_whois (EmpathyChat *chat,
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 	TpConnection *conn;
 
-	conn = empathy_tp_chat_get_connection (priv->tp_chat);
+	conn = tp_channel_borrow_connection ((TpChannel *) priv->tp_chat);
 	tp_connection_get_contacts_by_id (conn,
 		/* Element 0 of 'strv' is "whois"; element 1 is the contact ID
 		 * entered by the user (including spaces, if any). */
@@ -3636,7 +3636,6 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 
 	g_return_if_fail (EMPATHY_IS_CHAT (chat));
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (tp_chat));
-	g_return_if_fail (empathy_tp_chat_is_ready (tp_chat));
 
 	if (priv->tp_chat) {
 		return;
