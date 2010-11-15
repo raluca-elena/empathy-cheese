@@ -96,6 +96,8 @@ static void     log_window_button_next_clicked_cb          (GtkWidget        *wi
 							    EmpathyLogWindow *window);
 static void     log_window_button_previous_clicked_cb      (GtkWidget        *widget,
 							    EmpathyLogWindow *window);
+static void     log_window_button_close_clicked_cb         (GtkWidget        *widget,
+							    EmpathyLogWindow *window);
 static void     log_window_chats_changed_cb                (GtkTreeSelection *selection,
 							    EmpathyLogWindow *window);
 static void     log_window_chats_populate                  (EmpathyLogWindow *window);
@@ -263,6 +265,8 @@ empathy_log_window_show (TpAccount  *account,
 			      "entry_find", "activate", log_window_entry_find_activate_cb,
 			      "button_previous", "clicked", log_window_button_previous_clicked_cb,
 			      "button_next", "clicked", log_window_button_next_clicked_cb,
+			      "button_close", "clicked", log_window_button_close_clicked_cb,
+			      "button_close2", "clicked", log_window_button_close_clicked_cb,
 			      "button_find", "clicked", log_window_button_find_clicked_cb,
 			      "entry_chats", "changed", log_window_entry_chats_changed_cb,
 			      "entry_chats", "activate", log_window_entry_chats_activate_cb,
@@ -757,6 +761,13 @@ log_window_button_previous_clicked_cb (GtkWidget       *widget,
 		gtk_widget_set_sensitive (window->button_previous, can_do_previous);
 		gtk_widget_set_sensitive (window->button_next, can_do_next);
 	}
+}
+
+static void
+log_window_button_close_clicked_cb (GtkWidget *widget,
+				    EmpathyLogWindow *window)
+{
+	gtk_widget_destroy (window->window);
 }
 
 /*
