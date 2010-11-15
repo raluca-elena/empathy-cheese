@@ -7,8 +7,7 @@ INCLUDES =					\
 	$(NST_CFLAGS)				\
 	$(WARN_CFLAGS)				\
 	$(DISABLE_DEPRECATED)			\
-	$(EMPATHY_CFLAGS) \
-	$(GTK_CFLAGS)
+	$(EMPATHY_CFLAGS)
 
 plugin_LTLIBRARIES = libnstempathy.la
 
