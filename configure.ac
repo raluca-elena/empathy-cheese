@@ -161,6 +161,10 @@ PKG_CHECK_MODULES(EMPATHY,
    telepathy-glib >= $TELEPATHY_GLIB_REQUIRED
    telepathy-logger-0.1 >= $TELEPATHY_LOGGER
    x11
+   gtk+-3.0 >= $GTK_REQUIRED
+   libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED
+   libnotify >= $LIBNOTIFY_REQUIRED
+   gcr-3 >= $KEYRING_REQUIRED
 ])
 
 # -----------------------------------------------------------
@@ -173,15 +177,6 @@ if test x"$with_eds" = x"yes" ; then
    PKG_CHECK_MODULES(EDS, [libebook-1.2])
    AC_DEFINE(HAVE_EDS, 1, [Define if we have libebook])
 fi
-
-# -----------------------------------------------------------
-# GTK+
-# -----------------------------------------------------------
-PKG_CHECK_MODULES(GTK, gtk+-3.0 >= $GTK_REQUIRED)
-
-PKG_CHECK_MODULES(CANBERRA, libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED)
-PKG_CHECK_MODULES(LIBNOTIFY, libnotify >= $LIBNOTIFY_REQUIRED)
-PKG_CHECK_MODULES(GCR, gcr-3 >= $KEYRING_REQUIRED)
 
 # -----------------------------------------------------------
 # Enable debug

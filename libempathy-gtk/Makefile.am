@@ -8,14 +8,10 @@ AM_CPPFLAGS =                                           \
 	-DPKGDATADIR=\""$(pkgdatadir)"\"		\
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
-	$(GTK_CFLAGS)				\
-	$(LIBNOTIFY_CFLAGS)				\
-	$(CANBERRA_CFLAGS) \
 	$(ENCHANT_CFLAGS)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
 	$(GEOCLUE_CFLAGS)				\
-	$(GCR_CFLAGS)					\
-	$(MEEGO_CFLAGS)				\
+	$(MEEGO_CFLAGS)					\
 	$(WEBKIT_CFLAGS)				\
 	$(WARN_CFLAGS)					\
 	$(DISABLE_DEPRECATED)
