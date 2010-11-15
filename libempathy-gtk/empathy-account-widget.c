@@ -180,6 +180,12 @@ account_widget_set_control_buttons_sensitivity (EmpathyAccountWidget *self,
       gtk_widget_set_sensitive (priv->apply_button, sensitive);
       gtk_widget_set_sensitive (priv->cancel_button,
           (sensitive || priv->creating_account) && priv->other_accounts_exist);
+
+      if (sensitive)
+        {
+          gtk_widget_set_can_default (priv->apply_button, TRUE);
+          gtk_widget_grab_default (priv->apply_button);
+        }
     }
 }
 
@@ -470,6 +476,16 @@ password_entry_activated_cb (GtkEntry *entry,
         account_widget_apply_and_log_in (self);
 }
 
+static void
+account_entry_activated_cb (GtkEntry *entry,
+    EmpathyAccountWidget *self)
+{
+    EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+    if (gtk_widget_get_sensitive (priv->apply_button))
+        account_widget_apply_and_log_in (self);
+}
+
 void
 empathy_account_widget_setup_widget (EmpathyAccountWidget *self,
     GtkWidget *widget,
@@ -549,6 +565,10 @@ empathy_account_widget_setup_widget (EmpathyAccountWidget *self,
           g_signal_connect (widget, "activate",
               G_CALLBACK (password_entry_activated_cb), self);
         }
+      else if (strstr (param_name, "account"))
+        g_signal_connect (widget, "activate",
+            G_CALLBACK (account_entry_activated_cb), self);
+
 
       g_signal_connect (widget, "changed",
           G_CALLBACK (account_widget_entry_changed_cb), self);
