@@ -1350,6 +1350,9 @@ individual_store_contact_sort (FolksIndividual *individual_a,
   account_a = empathy_contact_get_account (contact_a);
   account_b = empathy_contact_get_account (contact_b);
 
+  g_assert (account_a != NULL);
+  g_assert (account_b != NULL);
+
   /* protocol */
   ret_val = g_strcmp0 (tp_account_get_protocol (account_a),
       tp_account_get_protocol (account_b));
