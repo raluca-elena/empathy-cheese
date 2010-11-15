@@ -220,7 +220,13 @@ update_weak_contact (EmpathyIndividualWidget *self)
       personas = folks_individual_get_personas (priv->individual);
       for (l = personas; l != NULL; l = l->next)
         {
-          FolksPresence *presence = FOLKS_PRESENCE (l->data);
+          FolksPresence *presence;
+
+          /* We only want personas which implement FolksPresence */
+          if (!FOLKS_IS_PRESENCE (l->data))
+            continue;
+
+          presence = FOLKS_PRESENCE (l->data);
 
           if (folks_presence_typecmp (folks_presence_get_presence_type (presence),
                   presence_type) > 0
