@@ -180,7 +180,7 @@ linking_response_cb (EmpathyLinkingDialog *self,
       /* Show a confirmation dialogue first */
       dialog = gtk_message_dialog_new (GTK_WINDOW (self), GTK_DIALOG_MODAL,
           GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE, _("Unlink meta-contact '%s'?"),
-          folks_individual_get_alias (individual));
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
           _("Are you sure you want to unlink this meta-contact? This will "
             "completely split the meta-contact into the contacts it "

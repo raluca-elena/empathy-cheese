@@ -680,7 +680,7 @@ individual_view_drag_motion (GtkWidget *widget,
         }
 
       if (individual != NULL &&
-          folks_individual_is_online (individual) &&
+          folks_presence_is_online (FOLKS_PRESENCE (individual)) &&
           (caps & EMPATHY_CAPABILITIES_FT))
         {
           gdk_drag_status (context, GDK_ACTION_COPY, time_);
@@ -1665,7 +1665,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     return (priv->show_offline || is_online);
 
   /* check alias name */
-  str = folks_individual_get_alias (individual);
+  str = folks_aliasable_get_alias (FOLKS_ALIASABLE (individual));
 
   if (empathy_live_search_match (live, str))
     return TRUE;
@@ -2348,7 +2348,7 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
       text =
           g_strdup_printf (_
           ("Do you really want to remove the contact '%s'?"),
-          folks_individual_get_alias (individual));
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
       if (individual_view_remove_dialog_show (parent, _("Removing contact"),
               text))
         {

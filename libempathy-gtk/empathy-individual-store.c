@@ -167,7 +167,7 @@ add_individual_to_store (GtkTreeStore *self,
 
   gtk_tree_store_insert_with_values (self, iter, parent, 0,
       EMPATHY_INDIVIDUAL_STORE_COL_NAME,
-      folks_individual_get_alias (individual),
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, individual,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP, FALSE,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, FALSE,
@@ -378,12 +378,12 @@ individual_store_add_individual (EmpathyIndividualStore *self,
 
   priv = GET_PRIV (self);
 
-  if (EMP_STR_EMPTY (folks_individual_get_alias (individual)))
+  if (EMP_STR_EMPTY (folks_aliasable_get_alias (FOLKS_ALIASABLE (individual))))
     return;
 
   if (priv->show_groups)
     {
-      group_set = folks_individual_get_groups (individual);
+      group_set = folks_groupable_get_groups (FOLKS_GROUPABLE (individual));
       groups = g_hash_table_get_keys (group_set);
     }
 
@@ -432,8 +432,6 @@ individual_store_add_individual (EmpathyIndividualStore *self,
           individual);
     }
   g_list_free (groups);
-  if (group_set != NULL)
-    g_hash_table_unref (group_set);
 
   if (priv->show_groups &&
       folks_favourite_get_is_favourite (FOLKS_FAVOURITE (individual)))
@@ -518,7 +516,8 @@ individual_store_contact_active_new (EmpathyIndividualStore *self,
   ShowActiveData *data;
 
   DEBUG ("Individual'%s' now active, and %s be removed",
-      folks_individual_get_alias (individual), remove_ ? "WILL" : "WILL NOT");
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
+      remove_ ? "WILL" : "WILL NOT");
 
   data = g_slice_new0 (ShowActiveData);
 
@@ -562,12 +561,12 @@ individual_store_contact_active_cb (ShowActiveData *data)
   if (data->remove)
     {
       DEBUG ("Individual'%s' active timeout, removing item",
-          folks_individual_get_alias (data->individual));
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (data->individual)));
       individual_store_remove_individual (data->self, data->individual);
     }
 
   DEBUG ("Individual'%s' no longer active",
-      folks_individual_get_alias (data->individual));
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (data->individual)));
 
   individual_store_contact_set_active (data->self,
       data->individual, FALSE, TRUE);
@@ -596,7 +595,7 @@ individual_avatar_pixbuf_received_cb (FolksIndividual *individual,
   if (error != NULL)
     {
       DEBUG ("failed to retrieve pixbuf for individual %s: %s",
-          folks_individual_get_alias (individual),
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
           error->message);
       g_clear_error (&error);
     }
@@ -662,12 +661,12 @@ individual_store_contact_update (EmpathyIndividualStore *self,
     }
 
   /* Get online state now. */
-  now_online = folks_individual_is_online (individual);
+  now_online = folks_presence_is_online (FOLKS_PRESENCE (individual));
 
   if (!in_list)
     {
       DEBUG ("Individual'%s' in list:NO, should be:YES",
-          folks_individual_get_alias (individual));
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
 
       individual_store_add_individual (self, individual);
 
@@ -681,7 +680,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
   else
     {
       DEBUG ("Individual'%s' in list:YES, should be:YES",
-          folks_individual_get_alias (individual));
+          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
 
       /* Get online state before. */
       if (iters && g_list_length (iters) > 0)
@@ -747,11 +746,11 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_ICON_STATUS, pixbuf_status,
           EMPATHY_INDIVIDUAL_STORE_COL_PIXBUF_AVATAR_VISIBLE, show_avatar,
           EMPATHY_INDIVIDUAL_STORE_COL_NAME,
-            folks_individual_get_alias (individual),
+            folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
           EMPATHY_INDIVIDUAL_STORE_COL_PRESENCE_TYPE,
-            folks_individual_get_presence_type (individual),
+            folks_presence_get_presence_type (FOLKS_PRESENCE (individual)),
           EMPATHY_INDIVIDUAL_STORE_COL_STATUS,
-            folks_individual_get_presence_message (individual),
+            folks_presence_get_presence_message (FOLKS_PRESENCE (individual)),
           EMPATHY_INDIVIDUAL_STORE_COL_COMPACT, priv->is_compact,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP, FALSE,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, now_online,
@@ -791,7 +790,7 @@ individual_store_individual_updated_cb (FolksIndividual *individual,
     EmpathyIndividualStore *self)
 {
   DEBUG ("Individual'%s' updated, checking roster is in sync...",
-      folks_individual_get_alias (individual));
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
 
   individual_store_contact_update (self, individual);
 }
@@ -1339,8 +1338,9 @@ individual_store_contact_sort (FolksIndividual *individual_a,
   g_return_val_if_fail (individual_a != NULL || individual_b != NULL, 0);
 
   /* alias */
-  ret_val = g_utf8_collate (folks_individual_get_alias (individual_a),
-      folks_individual_get_alias (individual_b));
+  ret_val = g_utf8_collate (
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual_a)),
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual_b)));
 
   if (ret_val != 0)
     goto out;
@@ -1411,8 +1411,10 @@ individual_store_state_sort_func (GtkTreeModel *model,
   /* If we managed to get this far, we can start looking at
    * the presences.
    */
-  folks_presence_type_a = folks_individual_get_presence_type (individual_a);
-  folks_presence_type_b = folks_individual_get_presence_type (individual_b);
+  folks_presence_type_a =
+      folks_presence_get_presence_type (FOLKS_PRESENCE (individual_a));
+  folks_presence_type_b =
+      folks_presence_get_presence_type (FOLKS_PRESENCE (individual_b));
   tp_presence_a = empathy_folks_presence_type_to_tp (folks_presence_type_a);
   tp_presence_b = empathy_folks_presence_type_to_tp (folks_presence_type_b);
 
