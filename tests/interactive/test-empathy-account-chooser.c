@@ -5,12 +5,14 @@
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-account-chooser.h>
 
-static gboolean
+static void
 filter_func (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
     gpointer user_data)
 {
   g_assert (TP_IS_ACCOUNT (account));
-  return TRUE;
+  callback (TRUE, callback_data);
 }
 
 int

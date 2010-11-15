@@ -43,8 +43,10 @@ static GtkWidget *new_individual_dialog = NULL;
  *  New contact dialog
  */
 
-static gboolean
+static void
 can_add_contact_to_account (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
     gpointer user_data)
 {
   EmpathyIndividualManager *individual_manager;
@@ -53,13 +55,16 @@ can_add_contact_to_account (TpAccount *account,
 
   connection = tp_account_get_connection (account);
   if (connection == NULL)
-    return FALSE;
+    {
+      callback (FALSE, callback_data);
+      return;
+    }
 
   individual_manager = empathy_individual_manager_dup_singleton ();
   result = empathy_connection_can_add_personas (connection);
   g_object_unref (individual_manager);
 
-  return result;
+  callback (result, callback_data);
 }
 
 static void

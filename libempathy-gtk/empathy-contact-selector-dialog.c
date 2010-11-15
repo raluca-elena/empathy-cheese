@@ -243,8 +243,10 @@ entry_activate_cb (GtkEntry *entry,
   gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_ACCEPT);
 }
 
-static gboolean
+static void
 account_chooser_filter (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
     gpointer user_data)
 {
   EmpathyContactSelectorDialog *self = user_data;
@@ -252,9 +254,13 @@ account_chooser_filter (TpAccount *account,
       EMPATHY_CONTACT_SELECTOR_DIALOG_GET_CLASS (self);
 
   if (class->account_filter == NULL)
-    return empathy_account_chooser_filter_is_connected (account, user_data);
+    {
+      empathy_account_chooser_filter_is_connected (
+          account,callback, callback_data, user_data);
+      return;
+    }
 
-  return class->account_filter (self, account);
+  class->account_filter (self, callback, callback_data, account);
 }
 
 static gboolean
