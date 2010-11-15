@@ -2006,7 +2006,7 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
-  gtk_container_add (GTK_CONTAINER (content_area), top_hbox);
+  gtk_box_pack_start (GTK_BOX (content_area), top_hbox, TRUE, TRUE, 0);
 
   g_object_unref (gui);
 
