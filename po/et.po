@@ -11,14 +11,14 @@ msgstr ""
 "Project-Id-Version: empathy MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&component=general\n"
-"POT-Creation-Date: 2010-10-16 10:46+0000\n"
-"PO-Revision-Date: 2010-10-17 15:05+0300\n"
-"Last-Translator: Mattias Põldaru <mahfiaz gmail com>\n"
+"POT-Creation-Date: 2010-11-15 13:44+0000\n"
+"PO-Revision-Date: 2010-11-16 10:46+0200\n"
+"Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
-"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: et\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: Estonian\n"
 "X-Poedit-Country: ESTONIA\n"
@@ -349,8 +349,8 @@ msgstr "Sõnumi- ja VoIP kontode haldamine"
 msgid "Messaging and VoIP Accounts"
 msgstr "Sõnumi- ja VoIP kontod"
 
-msgid "The hash of the received file and the sent one do not match"
-msgstr "Vastuvõetud faili ja saadetud faili räsi ei kattu"
+msgid "File transfer completed, but the file was corrupted"
+msgstr "Fail on täielikult üle kantud, kuid faili sisu on rikutud"
 
 msgid "File transfer not supported by remote contact"
 msgstr "Vestluskaaslane ei saa faile vastu võtta"
@@ -558,6 +558,17 @@ msgstr "Port"
 #, c-format
 msgid "%s:"
 msgstr "%s:"
+
+#, c-format
+msgid "The account %s is edited via My Web Accounts."
+msgstr "Kontot %s muudetakse Minu Veebikontode kaudu."
+
+#, c-format
+msgid "The account %s cannot be edited in Empathy."
+msgstr "Kontot %s pole võimalik Empathy abil muuta."
+
+msgid "Launch My Web Accounts"
+msgstr "Käivita Minu Veebikontod"
 
 msgid "Username:"
 msgstr "Kasutajanimi:"
@@ -979,6 +990,17 @@ msgstr "Teemat pole seatud"
 msgid "(No Suggestions)"
 msgstr "(Soovitusi pole)"
 
+#. translators: %s is the selected word
+#, c-format
+msgid "Add '%s' to Dictionary"
+msgstr "Lisa '%s' sõnastikku"
+
+#. translators: first %s is the selected word,
+#. * second %s is the language name of the target dictionary
+#, c-format
+msgid "Add '%s' to %s Dictionary"
+msgstr "Lisa '%s' sõnastikku '%s'"
+
 msgid "Insert Smiley"
 msgstr "Tujunäo lisamine"
 
@@ -986,6 +1008,7 @@ msgstr "Tujunäo lisamine"
 msgid "_Send"
 msgstr "_Saada"
 
+#. Spelling suggestions
 msgid "_Spelling Suggestions"
 msgstr "_Õigekirja soovitused"
 
@@ -1527,11 +1550,11 @@ msgstr "Sisesta oma teade"
 msgid "Edit Custom Messages"
 msgstr "Teadete muutmine"
 
-msgid "Add _New Preset"
-msgstr "_Uue oleku lisamine"
+msgid "Save _New Status Message"
+msgstr "Salvesta _uus olekusõnum"
 
-msgid "Saved Presets"
-msgstr "Salvestatud olekud"
+msgid "Saved Status Messages"
+msgstr "Salvestatud olekuteated"
 
 msgid "Classic"
 msgstr "Klassikaline"
@@ -1714,6 +1737,15 @@ msgstr "Veateade puudub"
 msgid "Instant Message (Empathy)"
 msgstr "Välksõnum (Empathy)"
 
+msgid "Don't connect on startup"
+msgstr "Käivitumisel ei ühenduta"
+
+msgid "Don't display the contact list or any other dialogs on startup"
+msgstr "Käivitumisel ei näidata kontaktide nimekirja ega teisi dialoogiaknaid"
+
+msgid "- Empathy IM Client"
+msgstr "- Empathy interneti sõnumivahetus"
+
 msgid "Error contacting the Account Manager"
 msgstr "Viga kontohalduriga ühendumisel"
 
@@ -1727,15 +1759,6 @@ msgstr ""
 "Telepathy kontohalduriga ühendumisel esines järgnev viga:\n"
 "\n"
 "%s"
-
-msgid "Don't connect on startup"
-msgstr "Käivitumisel ei ühenduta"
-
-msgid "Don't display the contact list or any other dialogs on startup"
-msgstr "Käivitumisel ei näidata kontaktide nimekirja ega teisi dialoogiaknaid"
-
-msgid "- Empathy IM Client"
-msgstr "- Empathy interneti sõnumivahetus"
 
 msgid ""
 "Empathy is free software; you can redistribute it and/or modify it under the "
@@ -2342,8 +2365,8 @@ msgid "Incoming file transfer from %s"
 msgstr "Failiülekanne kasutajalt %s"
 
 #, c-format
-msgid "Subscription requested by %s"
-msgstr "Tellimus, mida küsis %s"
+msgid "%s would like permission to see when you are available"
+msgstr "%s palub luba sinu saadavaloleku nägemiseks"
 
 #, c-format
 msgid ""
@@ -2496,6 +2519,9 @@ msgstr "Kontaktid _kaardil"
 
 msgid "Context"
 msgstr "Kontekst"
+
+msgid "Find in Contact _List"
+msgstr "_Otsi kontaktide nimekirjast"
 
 msgid "Join _Favorites"
 msgstr "Ühine _lemmiktubadega"
@@ -2823,8 +2849,11 @@ msgstr ""
 "Ei kuvata mingeid dialooge; sooritatakse ülesanne (nt. importimine) ja "
 "väljutakse"
 
-msgid "Don't display any dialogs if there are any non-Salut accounts"
-msgstr "Kui on mõni mitte-salut konto, ei kuvata mingeid dialoogiaknaid"
+msgid ""
+"Don't display any dialogs unless there are only \"People Nearby\" accounts"
+msgstr ""
+"Kui pole ühtegi \"lähedalasuvate inimesete\" kontot, siis dialoogiaknaid ei "
+"kuvata."
 
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr "Alguses vali antud konto (nt. gabble/jabber/mingi_40näidis_2eorg0)"
@@ -2840,3 +2869,18 @@ msgstr "Empathy kontod"
 
 msgid "Empathy Debugger"
 msgstr "Empathy siluja"
+
+msgid "- Empathy Chat Client"
+msgstr "- Empathy sõnumivahetusklient"
+
+#~ msgid "The hash of the received file and the sent one do not match"
+#~ msgstr "Vastuvõetud faili ja saadetud faili räsi ei kattu"
+
+#~ msgid "Add _New Preset"
+#~ msgstr "_Uue oleku lisamine"
+
+#~ msgid "Saved Presets"
+#~ msgstr "Salvestatud olekud"
+
+#~ msgid "Subscription requested by %s"
+#~ msgstr "Tellimus, mida küsis %s"
