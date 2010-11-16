@@ -988,7 +988,7 @@ theme_adium_get_default_font (void)
 		     EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME);
 
 	if (font_family == NULL)
-	return NULL;
+		return NULL;
 
 	pango_fd = pango_font_description_from_string (font_family);
 	g_free (font_family);
