@@ -32,7 +32,6 @@ AC_COPYRIGHT([
 
 # Hardp deps
 FOLKS_REQUIRED=0.3.2
-GCONF_REQUIRED=1.2.0
 GLIB_REQUIRED=2.27.2
 GNUTLS_REQUIRED=2.8.5
 GTK_REQUIRED=2.91.3
@@ -147,13 +146,13 @@ PKG_CHECK_MODULES(EMPATHY,
    farsight2-0.10
    folks >= $FOLKS_REQUIRED
    folks-telepathy >= $FOLKS_REQUIRED
-   gconf-2.0 >= $GCONF_REQUIRED
    gio-2.0 >= $GLIB_REQUIRED
    gio-unix-2.0 >= $GLIB_REQUIRED
    gnome-keyring-1 >= $KEYRING_REQUIRED
    gnutls >= $GNUTLS_REQUIRED
    gmodule-export-2.0
    gobject-2.0
+   gsettings-desktop-schemas
    gstreamer-0.10
    gstreamer-interfaces-0.10
    libxml-2.0
