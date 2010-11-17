@@ -111,6 +111,8 @@ typedef struct {
 
 	/* Last user action time we acted upon to show a tab */
 	guint32    x_user_action_time;
+
+	GSettings *gsettings_chat;
 } EmpathyChatWindowPriv;
 
 static GList *chat_windows = NULL;
@@ -533,9 +535,7 @@ chat_window_icon_update (EmpathyChatWindowPriv *priv)
 		gtk_window_set_icon_name (GTK_WINDOW (priv->dialog),
 					  EMPATHY_IMAGE_MESSAGE);
 	} else {
-		GSettings *gsettings = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
-
-		avatar_in_icon = g_settings_get_boolean (gsettings,
+		avatar_in_icon = g_settings_get_boolean (priv->gsettings_chat,
 				EMPATHY_PREFS_CHAT_AVATAR_IN_ICON);
 
 		if (n_chats == 1 && avatar_in_icon) {
@@ -549,8 +549,6 @@ chat_window_icon_update (EmpathyChatWindowPriv *priv)
 		} else {
 			gtk_window_set_icon_name (GTK_WINDOW (priv->dialog), NULL);
 		}
-
-		g_object_unref (gsettings);
 	}
 }
 
@@ -1875,6 +1873,7 @@ chat_window_finalize (GObject *object)
 	g_object_unref (priv->ui_manager);
 	g_object_unref (priv->chatroom_manager);
 	g_object_unref (priv->notify_mgr);
+	g_object_unref (priv->gsettings_chat);
 
 	if (priv->notification != NULL) {
 		notify_notification_close (priv->notification, NULL);
@@ -1985,6 +1984,7 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 	g_object_ref (priv->ui_manager);
 	g_object_unref (gui);
 
+	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 	priv->chatroom_manager = empathy_chatroom_manager_dup_singleton (NULL);
 
 	priv->notebook = gtk_notebook_new ();
