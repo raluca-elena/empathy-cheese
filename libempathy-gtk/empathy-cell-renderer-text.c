@@ -358,7 +358,6 @@ cell_renderer_text_update_text (EmpathyCellRendererText *cell,
 		}
 
 		if (!priv->is_group && priv->types != NULL && g_strv_length (priv->types) > 0
-		    // FIXME: why don't we check the whole array?
 		    && !tp_strdiff (priv->types[0], "phone")) {
 			on_a_phone = TRUE;
 			/* We want the phone black. */
