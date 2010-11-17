@@ -154,6 +154,39 @@ individual_can_audio_video_call (FolksIndividual *individual,
   *can_video_call = can_video;
 }
 
+static const gchar * const *
+individual_get_client_types (FolksIndividual *individual)
+{
+  GList *personas, *l;
+  const gchar * const *types = NULL;
+  FolksPresenceType presence_type = FOLKS_PRESENCE_TYPE_UNSET;
+
+  personas = folks_individual_get_personas (individual);
+  for (l = personas; l != NULL; l = l->next)
+    {
+      FolksPresence *presence;
+
+      /* We only want personas which implement FolksPresence */
+      if (!FOLKS_IS_PRESENCE (l->data))
+        continue;
+
+      presence = FOLKS_PRESENCE (l->data);
+
+      if (folks_presence_typecmp (folks_presence_get_presence_type (presence),
+              presence_type) > 0)
+        {
+          TpContact *tp_contact;
+
+          presence_type = folks_presence_get_presence_type (presence);
+
+          tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+          types = tp_contact_get_client_types (tp_contact);
+        }
+    }
+
+  return types;
+}
+
 static void
 add_individual_to_store (GtkTreeStore *self,
     GtkTreeIter *iter,
@@ -161,9 +194,12 @@ add_individual_to_store (GtkTreeStore *self,
     FolksIndividual *individual)
 {
   gboolean can_audio_call, can_video_call;
+  const gchar * const *types;
 
   individual_can_audio_video_call (individual, &can_audio_call,
       &can_video_call);
+
+  types = individual_get_client_types (individual);
 
   gtk_tree_store_insert_with_values (self, iter, parent, 0,
       EMPATHY_INDIVIDUAL_STORE_COL_NAME,
@@ -173,6 +209,7 @@ add_individual_to_store (GtkTreeStore *self,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, FALSE,
       EMPATHY_INDIVIDUAL_STORE_COL_CAN_AUDIO_CALL, can_audio_call,
       EMPATHY_INDIVIDUAL_STORE_COL_CAN_VIDEO_CALL, can_video_call,
+      EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES, types,
       -1);
 }
 
@@ -738,9 +775,12 @@ individual_store_contact_update (EmpathyIndividualStore *self,
   for (l = iters; l && set_model; l = l->next)
     {
       gboolean can_audio_call, can_video_call;
+      const gchar * const *types;
 
       individual_can_audio_video_call (individual, &can_audio_call,
           &can_video_call);
+
+      types = individual_get_client_types (individual);
 
       gtk_tree_store_set (GTK_TREE_STORE (self), l->data,
           EMPATHY_INDIVIDUAL_STORE_COL_ICON_STATUS, pixbuf_status,
@@ -757,6 +797,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, FALSE,
           EMPATHY_INDIVIDUAL_STORE_COL_CAN_AUDIO_CALL, can_audio_call,
           EMPATHY_INDIVIDUAL_STORE_COL_CAN_VIDEO_CALL, can_video_call,
+          EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES, types,
           -1);
     }
 
@@ -858,6 +899,8 @@ individual_personas_changed_cb (FolksIndividual *individual,
 
       g_object_set_data (G_OBJECT (contact), "individual", individual);
       g_signal_connect (contact, "notify::capabilities",
+          (GCallback) individual_store_contact_updated_cb, self);
+      g_signal_connect (contact, "notify::client-types",
           (GCallback) individual_store_contact_updated_cb, self);
 
       g_object_unref (contact);
@@ -1494,6 +1537,7 @@ individual_store_setup (EmpathyIndividualStore *self)
     G_TYPE_BOOLEAN,             /* Can make audio calls */
     G_TYPE_BOOLEAN,             /* Can make video calls */
     G_TYPE_BOOLEAN,             /* Is a fake group */
+    G_TYPE_STRV,                /* Client types */
   };
 
   priv = GET_PRIV (self);

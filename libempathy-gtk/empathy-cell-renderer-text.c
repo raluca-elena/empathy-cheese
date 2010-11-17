@@ -38,6 +38,8 @@ typedef struct {
 	gboolean  is_valid;
 	gboolean  is_selected;
 
+	gchar   **types;
+
 	gboolean  compact;
 } EmpathyCellRendererTextPriv;
 
@@ -67,7 +69,8 @@ enum {
 	PROP_PRESENCE_TYPE,
 	PROP_STATUS,
 	PROP_IS_GROUP,
-	PROP_COMPACT
+	PROP_COMPACT,
+	PROP_CLIENT_TYPES
 };
 
 G_DEFINE_TYPE (EmpathyCellRendererText, empathy_cell_renderer_text, GTK_TYPE_CELL_RENDERER_TEXT);
@@ -137,6 +140,11 @@ empathy_cell_renderer_text_class_init (EmpathyCellRendererTextClass *klass)
 		FALSE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property (object_class, PROP_COMPACT, spec);
 
+	spec = g_param_spec_boxed ("client-types", "Contact client types",
+		"Client types of the contact",
+		G_TYPE_STRV, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property (object_class, PROP_CLIENT_TYPES, spec);
+
 	g_type_class_add_private (object_class, sizeof (EmpathyCellRendererTextPriv));
 }
 
@@ -167,6 +175,7 @@ cell_renderer_text_finalize (GObject *object)
 
 	g_free (priv->name);
 	g_free (priv->status);
+	g_strfreev (priv->types);
 
 	(G_OBJECT_CLASS (empathy_cell_renderer_text_parent_class)->finalize) (object);
 }
@@ -198,6 +207,9 @@ cell_renderer_text_get_property (GObject    *object,
 		break;
 	case PROP_COMPACT:
 		g_value_set_boolean (value, priv->compact);
+		break;
+	case PROP_CLIENT_TYPES:
+		g_value_set_boxed (value, priv->types);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -245,6 +257,10 @@ cell_renderer_text_set_property (GObject      *object,
 		priv->compact = g_value_get_boolean (value);
 		priv->is_valid = FALSE;
 		break;
+	case PROP_CLIENT_TYPES:
+		priv->types = g_value_dup_boxed (value);
+		priv->is_valid = FALSE;
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
@@ -282,7 +298,7 @@ cell_renderer_text_update_text (EmpathyCellRendererText *cell,
 {
 	EmpathyCellRendererTextPriv *priv;
 	PangoAttrList              *attr_list;
-	PangoAttribute             *attr_color, *attr_size;
+	PangoAttribute             *attr_color = NULL, *attr_size;
 	GtkStyle                   *style;
 	gchar                      *str;
 
@@ -335,15 +351,26 @@ cell_renderer_text_update_text (EmpathyCellRendererText *cell,
 		}
 	} else {
 		const gchar *status = priv->status;
+		gboolean on_a_phone = FALSE;
 
 		if (EMP_STR_EMPTY (priv->status)) {
 			status = empathy_presence_get_default_message (priv->presence_type);
 		}
 
+		if (!priv->is_group && priv->types != NULL && g_strv_length (priv->types) > 0
+		    && !tp_strdiff (priv->types[0], "phone")) {
+			on_a_phone = TRUE;
+			/* We want the phone black. */
+			if (attr_color)
+				attr_color->start_index += 3;
+		}
+
 		if (status == NULL)
 			str = g_strdup (priv->name);
 		else
-			str = g_strdup_printf ("%s\n%s", priv->name, status);
+			str = g_strdup_printf ("%s\n%s%s", priv->name,
+					       on_a_phone ? "☎  " : "",
+					       status);
 	}
 
 	g_object_set (cell,

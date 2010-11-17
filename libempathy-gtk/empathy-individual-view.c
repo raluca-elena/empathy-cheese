@@ -214,7 +214,8 @@ individual_view_query_tooltip_cb (EmpathyIndividualView *view,
     {
       priv->tooltip_widget = empathy_individual_widget_new (individual,
           EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP |
-          EMPATHY_INDIVIDUAL_WIDGET_SHOW_LOCATION);
+          EMPATHY_INDIVIDUAL_WIDGET_SHOW_LOCATION |
+          EMPATHY_INDIVIDUAL_WIDGET_SHOW_CLIENT_TYPES);
       gtk_container_set_border_width (GTK_CONTAINER (priv->tooltip_widget), 8);
       g_object_ref (priv->tooltip_widget);
       g_signal_connect (priv->tooltip_widget, "destroy",
@@ -1832,6 +1833,8 @@ individual_view_constructed (GObject *object)
       "is_group", EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP);
   gtk_tree_view_column_add_attribute (col, cell,
       "compact", EMPATHY_INDIVIDUAL_STORE_COL_COMPACT);
+  gtk_tree_view_column_add_attribute (col, cell,
+      "client-types", EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES);
 
   /* Audio Call Icon */
   cell = empathy_cell_renderer_activatable_new ();
