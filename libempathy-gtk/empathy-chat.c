@@ -100,6 +100,8 @@ struct _EmpathyChatPriv {
 
 	/* Source func ID for update_misspelled_words () */
 	guint              update_misspelled_words_id;
+	/* Source func ID for save_paned_pos_timeout () */
+	guint              save_paned_pos_id;
 
 	GtkWidget         *widget;
 	GtkWidget         *hpaned;
@@ -2491,17 +2493,32 @@ conf_spell_checking_cb (GSettings *gsettings_chat,
 }
 
 static gboolean
+save_paned_pos_timeout (gpointer data)
+{
+	EmpathyChat *self = data;
+	gint hpaned_pos;
+
+	hpaned_pos = gtk_paned_get_position (GTK_PANED (self->priv->hpaned));
+
+	g_settings_set_int (self->priv->gsettings_ui,
+			    EMPATHY_PREFS_UI_CHAT_WINDOW_PANED_POS,
+			    hpaned_pos);
+
+	return FALSE;
+}
+
+static gboolean
 chat_hpaned_pos_changed_cb (GtkWidget* hpaned,
 		GParamSpec *spec,
 		gpointer user_data)
 {
 	EmpathyChat *chat = EMPATHY_CHAT (user_data);
-	gint hpaned_pos;
 
-	hpaned_pos = gtk_paned_get_position (GTK_PANED(hpaned));
-	g_settings_set_int (chat->priv->gsettings_ui,
-			    EMPATHY_PREFS_UI_CHAT_WINDOW_PANED_POS,
-			    hpaned_pos);
+	if (chat->priv->save_paned_pos_id != 0)
+		g_source_remove (chat->priv->save_paned_pos_id);
+
+	chat->priv->save_paned_pos_id = g_timeout_add_seconds (1,
+		save_paned_pos_timeout, chat);
 
 	return TRUE;
 }
@@ -2655,6 +2672,9 @@ chat_finalize (GObject *object)
 
 	if (priv->update_misspelled_words_id != 0)
 		g_source_remove (priv->update_misspelled_words_id);
+
+	if (priv->save_paned_pos_id != 0)
+		g_source_remove (priv->save_paned_pos_id);
 
 	g_object_unref (priv->gsettings_chat);
 	g_object_unref (priv->gsettings_ui);
