@@ -1513,6 +1513,8 @@ individual_store_name_sort_func (GtkTreeModel *model,
 
   tp_clear_object (&individual_a);
   tp_clear_object (&individual_b);
+  g_free (name_a);
+  g_free (name_b);
 
   return ret_val;
 }
