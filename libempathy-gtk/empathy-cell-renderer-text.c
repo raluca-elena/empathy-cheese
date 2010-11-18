@@ -258,6 +258,7 @@ cell_renderer_text_set_property (GObject      *object,
 		priv->is_valid = FALSE;
 		break;
 	case PROP_CLIENT_TYPES:
+		g_strfreev (priv->types);
 		priv->types = g_value_dup_boxed (value);
 		priv->is_valid = FALSE;
 		break;
