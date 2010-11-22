@@ -132,6 +132,7 @@ empathy_handwritten_source = \
 	empathy-main-window.c empathy-main-window.h			\
 	empathy-migrate-butterfly-logs.c empathy-migrate-butterfly-logs.h \
 	empathy-new-chatroom-dialog.c empathy-new-chatroom-dialog.h	\
+	empathy-notifications-approver.c empathy-notifications-approver.h \
 	empathy-preferences.c empathy-preferences.h			\
 	empathy-status-icon.c empathy-status-icon.h			\
 	empathy-chat-manager.c empathy-chat-manager.h			\
