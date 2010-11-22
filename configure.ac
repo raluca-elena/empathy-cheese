@@ -405,7 +405,7 @@ AC_SUBST(GEOCLUE_LIBS)
 # meego widgets support
 # -----------------------------------------------------------
 AC_ARG_ENABLE(meego,
-              AS_HELP_STRING([--enable-meego=@<:no/yes@:>@],
+              AS_HELP_STRING([--enable-meego=@<:@no/yes@:>@],
                              [Enable meego widgets]), ,
                              enable_meego=no)
 
