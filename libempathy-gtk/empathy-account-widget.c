@@ -1440,7 +1440,18 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
         }
       else if (is_facebook)
         {
+          GtkContainer *parent;
+          GList *children;
+
           gtk_widget_hide (label_example_jabber);
+
+          /* Removing the label from list of focusable widgets */
+          parent = GTK_CONTAINER (gtk_widget_get_parent (label_example_fb));
+          children = gtk_container_get_children (parent);
+          children = g_list_remove (children, label_example_fb);
+          gtk_container_set_focus_chain (parent, children);
+          g_list_free (children);
+
           gtk_widget_show (label_example_fb);
           gtk_widget_hide (expander_advanced);
         }
