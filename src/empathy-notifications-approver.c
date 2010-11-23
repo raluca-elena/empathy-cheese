@@ -352,12 +352,12 @@ empathy_notifications_approver_init (EmpathyNotificationsApprover *self)
   self->priv->event_mgr = empathy_event_manager_dup_singleton ();
   self->priv->notify_mgr = empathy_notify_manager_dup_singleton ();
 
-  g_signal_connect (self->priv->event_mgr, "event-added",
-      G_CALLBACK (event_added_cb), self);
-  g_signal_connect (priv->event_mgr, "event-removed",
-      G_CALLBACK (event_removed_cb), self);
-  g_signal_connect (priv->event_mgr, "event-updated",
-      G_CALLBACK (event_updated_cb), self);
+  tp_g_signal_connect_object (self->priv->event_mgr, "event-added",
+      G_CALLBACK (event_added_cb), self, 0);
+  tp_g_signal_connect_object (priv->event_mgr, "event-removed",
+      G_CALLBACK (event_removed_cb), self, 0);
+  tp_g_signal_connect_object (priv->event_mgr, "event-updated",
+      G_CALLBACK (event_updated_cb), self, 0);
 }
 
 EmpathyNotificationsApprover *
