@@ -72,29 +72,29 @@ new_call_handler_cb (EmpathyCallFactory *factory,
 static void
 activate_cb (GApplication *application)
 {
-  if (!activated)
+  GError *error = NULL;
+
+  if (activated)
+    return;
+
+  activated = TRUE;
+
+  if (!use_timer)
     {
-      GError *error = NULL;
+      /* keep a 'ref' to the application */
+      g_application_hold (G_APPLICATION (app));
+    }
 
-      if (!use_timer)
-        {
-          /* keep a 'ref' to the application */
-          g_application_hold (G_APPLICATION (app));
-        }
+  g_assert (call_factory == NULL);
+  call_factory = empathy_call_factory_initialise ();
 
-      g_assert (call_factory == NULL);
-      call_factory = empathy_call_factory_initialise ();
+  g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
+      G_CALLBACK (new_call_handler_cb), NULL);
 
-      g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
-          G_CALLBACK (new_call_handler_cb), NULL);
-
-      if (!empathy_call_factory_register (call_factory, &error))
-        {
-          g_critical ("Failed to register Handler: %s", error->message);
-          g_error_free (error);
-        }
-
-      activated = TRUE;
+  if (!empathy_call_factory_register (call_factory, &error))
+    {
+      g_critical ("Failed to register Handler: %s", error->message);
+      g_error_free (error);
     }
 }
 
