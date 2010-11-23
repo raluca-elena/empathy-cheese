@@ -104,10 +104,8 @@ static void
 notification_closed_cb (NotifyNotification *notification,
     EmpathyNotificationsApprover *self)
 {
-  g_object_unref (notification);
-
   if (self->priv->notification == notification)
-    self->priv->notification = NULL;
+    tp_clear_object (&self->priv->notification);
 }
 
 static void
@@ -116,7 +114,7 @@ notification_close_helper (EmpathyNotificationsApprover *self)
   if (self->priv->notification != NULL)
     {
       notify_notification_close (self->priv->notification, NULL);
-      self->priv->notification = NULL;
+      tp_clear_object (&self->priv->notification);
     }
 }
 
@@ -230,7 +228,7 @@ update_notification (EmpathyNotificationsApprover *self)
   GdkPixbuf *pixbuf = NULL;
   gchar *message_esc = NULL;
   gboolean has_x_canonical_append;
-  NotifyNotification *notification = self->priv->notification;
+  NotifyNotification *notification;
 
   if (!empathy_notify_manager_notification_is_enabled (self->priv->notify_mgr))
     {
@@ -251,11 +249,13 @@ update_notification (EmpathyNotificationsApprover *self)
   has_x_canonical_append = empathy_notify_manager_has_capability (
       self->priv->notify_mgr, EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND);
 
-  if (notification != NULL && ! has_x_canonical_append)
+  if (self->priv->notification != NULL && ! has_x_canonical_append)
     {
       /* if the notification server does NOT supports x-canonical-append, it is
        * better to not use notify_notification_update to avoid
        * overwriting the current notification message */
+      notification = g_object_ref (self->priv->notification);
+
       notify_notification_update (notification,
           self->priv->event->header, message_esc, NULL);
     }
@@ -271,7 +271,12 @@ update_notification (EmpathyNotificationsApprover *self)
            message_esc, NULL);
 
       if (self->priv->notification == NULL)
-        self->priv->notification = notification;
+        {
+          self->priv->notification = g_object_ref (notification);
+
+          g_signal_connect (notification, "closed",
+              G_CALLBACK (notification_closed_cb), self);
+        }
 
       notify_notification_set_timeout (notification,
           NOTIFY_EXPIRES_DEFAULT);
@@ -283,9 +288,6 @@ update_notification (EmpathyNotificationsApprover *self)
       if (empathy_notify_manager_has_capability (self->priv->notify_mgr,
             EMPATHY_NOTIFY_MANAGER_CAP_ACTIONS))
         add_notification_actions (self, notification);
-
-      g_signal_connect (notification, "closed",
-          G_CALLBACK (notification_closed_cb), self);
     }
 
   pixbuf = empathy_notify_manager_get_pixbuf_for_notification (
@@ -301,6 +303,7 @@ update_notification (EmpathyNotificationsApprover *self)
   notify_notification_show (notification, NULL);
 
   g_free (message_esc);
+  g_object_unref (notification);
 }
 
 static void
