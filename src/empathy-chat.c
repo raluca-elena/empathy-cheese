@@ -45,6 +45,8 @@ static GtkApplication *app = NULL;
 static gboolean activated = FALSE;
 static gboolean use_timer = TRUE;
 
+static EmpathyChatManager *chat_mgr = NULL;
+
 static void
 handled_chats_changed_cb (EmpathyChatManager *mgr,
     guint nb_chats,
@@ -61,12 +63,22 @@ handled_chats_changed_cb (EmpathyChatManager *mgr,
 static void
 activate_cb (GApplication *application)
 {
-  if (!use_timer && !activated)
+  if (activated)
+    return;
+
+  activated = TRUE;
+
+  if (!use_timer)
     {
       /* keep a 'ref' to the application */
       g_application_hold (G_APPLICATION (application));
-      activated = TRUE;
     }
+
+  g_assert (chat_mgr == NULL);
+  chat_mgr = empathy_chat_manager_dup_singleton ();
+
+  g_signal_connect (chat_mgr, "handled-chats-changed",
+      G_CALLBACK (handled_chats_changed_cb), GUINT_TO_POINTER (1));
 }
 
 int
@@ -81,7 +93,6 @@ main (int argc,
   TpDebugSender *debug_sender;
 #endif
   GError *error = NULL;
-  EmpathyChatManager *chat_mgr;
   EmpathyIdle *idle;
   gint retval;
 
@@ -120,11 +131,6 @@ main (int argc,
   /* Setting up Idle */
   idle = empathy_idle_dup_singleton ();
 
-  chat_mgr = empathy_chat_manager_dup_singleton ();
-
-  g_signal_connect (chat_mgr, "handled-chats-changed",
-      G_CALLBACK (handled_chats_changed_cb), GUINT_TO_POINTER (1));
-
   if (g_getenv ("EMPATHY_PERSIST") != NULL)
     {
       DEBUG ("Disable timer");
@@ -143,7 +149,7 @@ main (int argc,
 
   g_object_unref (app);
   g_object_unref (idle);
-  g_object_unref (chat_mgr);
+  tp_clear_object (&chat_mgr);
 
 #ifdef ENABLE_DEBUG
   g_object_unref (debug_sender);
