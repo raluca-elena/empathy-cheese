@@ -108,7 +108,7 @@ main (int argc,
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
 
-  app = gtk_application_new (EMPATHY_CHAT_DBUS_NAME, G_APPLICATION_IS_SERVICE);
+  app = gtk_application_new (EMPATHY_CHAT_DBUS_NAME, G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
 
 #ifdef ENABLE_DEBUG
