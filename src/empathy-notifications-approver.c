@@ -253,7 +253,7 @@ update_notification (EmpathyNotificationsApprover *self)
 
   if (notification != NULL && ! has_x_canonical_append)
     {
-      /* if the notification server supports x-canonical-append, it is
+      /* if the notification server does NOT supports x-canonical-append, it is
        * better to not use notify_notification_update to avoid
        * overwriting the current notification message */
       notify_notification_update (notification,
