@@ -2300,6 +2300,7 @@ empathy_individual_view_get_group_menu (EmpathyIndividualView *view)
   if (!group || is_fake_group)
     {
       /* We can't alter fake groups */
+      g_free (group);
       return NULL;
     }
 
