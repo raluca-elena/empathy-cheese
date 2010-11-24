@@ -666,6 +666,7 @@ individual_avatar_pixbuf_received_cb (FolksIndividual *individual,
           data->cancellable);
     }
 
+  tp_clear_object (&pixbuf);
   g_object_unref (data->cancellable);
   g_slice_free (LoadAvatarData, data);
 }

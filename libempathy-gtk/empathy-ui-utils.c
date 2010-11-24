@@ -604,7 +604,7 @@ avatar_file_load_contents_cb (GObject      *object,
 	}
 
 	g_simple_async_result_set_op_res_gpointer (closure->result,
-			avatar_pixbuf_from_loader (loader), NULL);
+			avatar_pixbuf_from_loader (loader), g_object_unref);
 
 out:
 	g_simple_async_result_complete (closure->result);
@@ -654,6 +654,7 @@ out:
 	g_object_unref (result);
 }
 
+/* Return a ref on the GdkPixbuf */
 GdkPixbuf *
 empathy_pixbuf_avatar_from_individual_scaled_finish (
 		FolksIndividual *individual,
@@ -662,6 +663,7 @@ empathy_pixbuf_avatar_from_individual_scaled_finish (
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (result);
 	gboolean result_valid;
+	GdkPixbuf *pixbuf;
 
 	g_return_val_if_fail (FOLKS_IS_INDIVIDUAL (individual), NULL);
 	g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (simple), NULL);
@@ -674,7 +676,8 @@ empathy_pixbuf_avatar_from_individual_scaled_finish (
 			empathy_pixbuf_avatar_from_individual_scaled_async);
 	g_return_val_if_fail (result_valid, NULL);
 
-	return g_simple_async_result_get_op_res_gpointer (simple);
+	pixbuf = g_simple_async_result_get_op_res_gpointer (simple);
+	return pixbuf != NULL ? g_object_ref (pixbuf) : NULL;
 }
 
 GdkPixbuf *
