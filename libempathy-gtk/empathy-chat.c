@@ -2005,6 +2005,7 @@ chat_log_filter (TplEntry *log,
 
 	for (; pending; pending = g_list_next (pending)) {
 		if (empathy_message_equal (message, pending->data)) {
+			g_object_unref (message);
 			return FALSE;
 		}
 	}
