@@ -98,9 +98,6 @@ EmpathyIndividualView *empathy_individual_view_new (
 FolksIndividual *empathy_individual_view_dup_selected (
     EmpathyIndividualView *view);
 
-gchar *empathy_individual_view_get_selected_group (EmpathyIndividualView *view,
-    gboolean * is_fake_group);
-
 GtkWidget *empathy_individual_view_get_individual_menu (
     EmpathyIndividualView *view);
 

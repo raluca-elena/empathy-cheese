@@ -2188,8 +2188,8 @@ empathy_individual_view_dup_selected (EmpathyIndividualView *view)
   return individual;
 }
 
-gchar *
-empathy_individual_view_get_selected_group (EmpathyIndividualView *view,
+static gchar *
+empathy_individual_view_dup_selected_group (EmpathyIndividualView *view,
     gboolean *is_fake_group)
 {
   EmpathyIndividualViewPriv *priv;
@@ -2255,7 +2255,7 @@ individual_view_group_remove_activate_cb (GtkMenuItem *menuitem,
 {
   gchar *group;
 
-  group = empathy_individual_view_get_selected_group (view, NULL);
+  group = empathy_individual_view_dup_selected_group (view, NULL);
   if (group != NULL)
     {
       gchar *text;
@@ -2296,7 +2296,7 @@ empathy_individual_view_get_group_menu (EmpathyIndividualView *view)
               EMPATHY_INDIVIDUAL_VIEW_FEATURE_GROUPS_REMOVE)))
     return NULL;
 
-  group = empathy_individual_view_get_selected_group (view, &is_fake_group);
+  group = empathy_individual_view_dup_selected_group (view, &is_fake_group);
   if (!group || is_fake_group)
     {
       /* We can't alter fake groups */
