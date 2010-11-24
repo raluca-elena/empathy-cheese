@@ -39,7 +39,7 @@ typedef struct {
 struct _SmileyManagerTree {
 	gunichar     c;
 	GdkPixbuf   *pixbuf;
-	const gchar *path;
+	gchar       *path;
 	GSList      *childrens;
 };
 
@@ -78,6 +78,7 @@ smiley_manager_tree_free (SmileyManagerTree *tree)
 		g_object_unref (tree->pixbuf);
 	}
 	g_slist_free (tree->childrens);
+	g_free (tree->path);
 	g_slice_free (SmileyManagerTree, tree);
 }
 
@@ -209,13 +210,13 @@ smiley_manager_tree_insert (SmileyManagerTree *tree,
 	}
 
 	child->pixbuf = g_object_ref (pixbuf);
-	child->path = path;
+	child->path = g_strdup (path);
 }
 
 static void
 smiley_manager_add_valist (EmpathySmileyManager *manager,
 			   GdkPixbuf            *pixbuf,
-			   gchar                *path,
+			   const gchar          *path,
 			   const gchar          *first_str,
 			   va_list               var_args)
 {
@@ -227,7 +228,6 @@ smiley_manager_add_valist (EmpathySmileyManager *manager,
 		smiley_manager_tree_insert (priv->tree, pixbuf, str, path);
 	}
 
-	/* We give the ownership of path to the smiley */
 	g_object_set_data_full (G_OBJECT (pixbuf), "smiley_str",
 				g_strdup (first_str), g_free);
 	smiley = smiley_new (pixbuf, first_str);
@@ -256,6 +256,7 @@ empathy_smiley_manager_add (EmpathySmileyManager *manager,
 		smiley_manager_add_valist (manager, pixbuf, path, first_str, var_args);
 		va_end (var_args);
 		g_object_unref (pixbuf);
+		g_free (path);
 	}
 }
 
