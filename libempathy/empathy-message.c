@@ -267,6 +267,7 @@ empathy_message_from_tpl_log_entry (TplEntry *logentry)
 	TplEntity *receiver = NULL;
 	TplEntity *sender = NULL;
 	gchar *body= NULL;
+	EmpathyContact *contact;
 
 	g_return_val_if_fail (TPL_IS_ENTRY (logentry), NULL);
 
@@ -303,12 +304,17 @@ empathy_message_from_tpl_log_entry (TplEntry *logentry)
 	sender = tpl_entry_get_sender (logentry);
 
 	retval = empathy_message_new (body);
-	if (receiver != NULL)
-		empathy_message_set_receiver (retval,
-				empathy_contact_from_tpl_contact (account, receiver));
-	if (sender != NULL)
-		empathy_message_set_sender (retval,
-				empathy_contact_from_tpl_contact (account, sender));
+	if (receiver != NULL) {
+		contact = empathy_contact_from_tpl_contact (account, receiver);
+		empathy_message_set_receiver (retval, contact);
+		g_object_unref (contact);
+	}
+
+	if (sender != NULL) {
+		contact = empathy_contact_from_tpl_contact (account, sender);
+		empathy_message_set_sender (retval, contact);
+		g_object_unref (contact);
+	}
 
 	empathy_message_set_timestamp (retval,
 			tpl_entry_get_timestamp (logentry));
