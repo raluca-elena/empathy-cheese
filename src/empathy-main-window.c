@@ -602,7 +602,7 @@ main_window_update_status (EmpathyMainWindow *window)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	gboolean connected, connecting;
-	GList *l;
+	GList *l, *children;
 
 	connected = empathy_account_manager_get_accounts_connected (&connecting);
 
@@ -619,6 +619,15 @@ main_window_update_status (EmpathyMainWindow *window)
 	for (l = priv->actions_connected; l; l = l->next) {
 		gtk_action_set_sensitive (l->data, connected);
 	}
+
+	/* Update favourite rooms sensitivity */
+	children = gtk_container_get_children (GTK_CONTAINER (priv->room_menu));
+	for (l = children; l != NULL; l = l->next) {
+		if (g_object_get_data (G_OBJECT (l->data), "is_favorite") != NULL) {
+			gtk_widget_set_sensitive (GTK_WIDGET (l->data), connected);
+		}
+	}
+	g_list_free (children);
 }
 
 static void
@@ -1112,6 +1121,8 @@ main_window_favorite_chatroom_menu_add (EmpathyMainWindow *window,
 
 	name = empathy_chatroom_get_name (chatroom);
 	menu_item = gtk_menu_item_new_with_label (name);
+	g_object_set_data (G_OBJECT (menu_item), "is_favorite",
+			GUINT_TO_POINTER (TRUE));
 
 	g_object_set_data (G_OBJECT (chatroom), "menu_item", menu_item);
 	g_signal_connect (menu_item, "activate",
@@ -1436,7 +1447,8 @@ main_window_connection_items_setup (EmpathyMainWindow *window,
 	GObject       *action;
 	guint          i;
 	const gchar *actions_connected[] = {
-		"room",
+		"room_join_new",
+		"room_join_favorites",
 		"chat_new_message",
 		"chat_new_call",
 		"chat_add_contact",
