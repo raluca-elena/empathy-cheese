@@ -29,13 +29,9 @@
 #include <gdk/gdkkeysyms.h>
 #include <glib/gi18n.h>
 
-#include <libnotify/notification.h>
-#include <libnotify/notify.h>
-
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/util.h>
 
-#include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-utils.h>
 
@@ -44,7 +40,6 @@
 #include <libempathy-gtk/empathy-images.h>
 #include <libempathy-gtk/empathy-new-message-dialog.h>
 #include <libempathy-gtk/empathy-new-call-dialog.h>
-#include <libempathy-gtk/empathy-notify-manager.h>
 
 #include "empathy-accounts-dialog.h"
 #include "empathy-status-icon.h"
@@ -61,12 +56,10 @@
 typedef struct {
 	GtkStatusIcon       *icon;
 	TpAccountManager    *account_manager;
-	EmpathyNotifyManager *notify_mgr;
 	gboolean             showing_event_icon;
 	guint                blink_timeout;
 	EmpathyEventManager *event_manager;
 	EmpathyEvent        *event;
-	NotifyNotification  *notification;
 	GSettings           *gsettings_ui;
 
 	GtkWindow           *window;
@@ -78,227 +71,6 @@ typedef struct {
 } EmpathyStatusIconPriv;
 
 G_DEFINE_TYPE (EmpathyStatusIcon, empathy_status_icon, G_TYPE_OBJECT);
-
-static void
-status_icon_notification_closed_cb (NotifyNotification *notification,
-				    EmpathyStatusIcon  *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-
-	g_object_unref (notification);
-
-	if (priv->notification == notification) {
-		priv->notification = NULL;
-	}
-
-	if (!priv->event) {
-		return;
-	}
-
-	/* inhibit other updates for this event */
-	empathy_event_inhibit_updates (priv->event);
-}
-
-static void
-notification_close_helper (EmpathyStatusIconPriv *priv)
-{
-	if (priv->notification != NULL) {
-		notify_notification_close (priv->notification, NULL);
-		priv->notification = NULL;
-	}
-}
-
-static void
-notification_approve_cb (NotifyNotification *notification,
-			gchar              *action,
-			EmpathyStatusIcon  *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-
-	if (priv->event)
-		empathy_event_approve (priv->event);
-}
-
-static void
-notification_decline_cb (NotifyNotification *notification,
-			gchar              *action,
-			EmpathyStatusIcon  *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-
-	if (priv->event)
-		empathy_event_decline (priv->event);
-}
-
-static void
-notification_decline_subscription_cb (NotifyNotification *notification,
-			gchar              *action,
-			EmpathyStatusIcon  *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-	EmpathyContactManager *manager;
-
-	if (priv->event == NULL)
-		return;
-
-
-	manager = empathy_contact_manager_dup_singleton ();
-	empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
-				     priv->event->contact, "");
-
-	empathy_event_remove (priv->event);
-
-	g_object_unref (manager);
-}
-
-static void
-notification_accept_subscription_cb (NotifyNotification *notification,
-			gchar              *action,
-			EmpathyStatusIcon  *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-	EmpathyContactManager *manager;
-
-	if (priv->event == NULL)
-		return;
-
-
-	manager = empathy_contact_manager_dup_singleton ();
-	empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager),
-				  priv->event->contact, "");
-
-	empathy_event_remove (priv->event);
-
-	g_object_unref (manager);
-}
-
-static void
-add_notification_actions (EmpathyStatusIcon *self,
-			  NotifyNotification *notification)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (self);
-
-	switch (priv->event->type) {
-		case EMPATHY_EVENT_TYPE_CHAT:
-			notify_notification_add_action (notification,
-				"respond", _("Respond"), (NotifyActionCallback) notification_approve_cb,
-					self, NULL);
-			break;
-
-		case EMPATHY_EVENT_TYPE_VOIP:
-			notify_notification_add_action (notification,
-				"reject", _("Reject"), (NotifyActionCallback) notification_decline_cb,
-					self, NULL);
-
-			notify_notification_add_action (notification,
-				"answer", _("Answer"), (NotifyActionCallback) notification_approve_cb,
-					self, NULL);
-			break;
-
-		case EMPATHY_EVENT_TYPE_TRANSFER:
-		case EMPATHY_EVENT_TYPE_INVITATION:
-			notify_notification_add_action (notification,
-				"decline", _("Decline"), (NotifyActionCallback) notification_decline_cb,
-					self, NULL);
-
-			notify_notification_add_action (notification,
-				"accept", _("Accept"), (NotifyActionCallback) notification_approve_cb,
-					self, NULL);
-			break;
-
-		case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
-			notify_notification_add_action (notification,
-				"decline", _("Decline"),
-					(NotifyActionCallback) notification_decline_subscription_cb,
-					self, NULL);
-
-			notify_notification_add_action (notification,
-				"accept", _("Accept"),
-					(NotifyActionCallback) notification_accept_subscription_cb,
-					self, NULL);
-
-		default:
-			break;
-	}
-}
-
-static void
-status_icon_update_notification (EmpathyStatusIcon *icon)
-{
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-	GdkPixbuf *pixbuf = NULL;
-
-	if (!empathy_notify_manager_notification_is_enabled (priv->notify_mgr)) {
-		/* always close the notification if this happens */
-		notification_close_helper (priv);
-		return;
-	}
-
-	if (priv->event) {
-		gchar *message_esc = NULL;
-		gboolean has_x_canonical_append;
-		NotifyNotification *notification = priv->notification;
-
-		if (priv->event->message != NULL)
-			message_esc = g_markup_escape_text (priv->event->message, -1);
-
-		has_x_canonical_append =
-				empathy_notify_manager_has_capability (priv->notify_mgr,
-					EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND);
-
-		if (notification != NULL && ! has_x_canonical_append) {
-			/* if the notification server supports x-canonical-append, it is
-			   better to not use notify_notification_update to avoid
-			   overwriting the current notification message */
-			notify_notification_update (notification,
-						    priv->event->header, message_esc,
-						    NULL);
-		} else {
-			/* if the notification server supports x-canonical-append,
-			   the hint will be added, so that the message from the
-			   just created notification will be automatically appended
-			   to an existing notification with the same title.
-			   In this way the previous message will not be lost: the new
-			   message will appear below it, in the same notification */
-			notification = notify_notification_new
-				(priv->event->header, message_esc, NULL);
-
-			if (priv->notification == NULL) {
-				priv->notification = notification;
-			}
-
-			notify_notification_set_timeout (notification,
-							 NOTIFY_EXPIRES_DEFAULT);
-
-			if (has_x_canonical_append) {
-				notify_notification_set_hint_string (notification,
-					EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND, "");
-			}
-
-			if (empathy_notify_manager_has_capability (priv->notify_mgr,
-			           EMPATHY_NOTIFY_MANAGER_CAP_ACTIONS))
-				add_notification_actions (icon, notification);
-
-			g_signal_connect (notification, "closed",
-					  G_CALLBACK (status_icon_notification_closed_cb), icon);
-		}
-
-		pixbuf = empathy_notify_manager_get_pixbuf_for_notification (
-								   priv->notify_mgr, priv->event->contact,
-								   priv->event->icon_name);
-
-		if (pixbuf != NULL) {
-			notify_notification_set_icon_from_pixbuf (notification, pixbuf);
-			g_object_unref (pixbuf);
-		}
-
-		notify_notification_show (notification, NULL);
-
-		g_free (message_esc);
-	} else {
-		notification_close_helper (priv);
-	}
-}
 
 static void
 status_icon_update_tooltip (EmpathyStatusIcon *icon)
@@ -392,7 +164,6 @@ status_icon_event_added_cb (EmpathyEventManager *manager,
 		status_icon_update_icon (icon);
 		status_icon_update_tooltip (icon);
 	}
-	status_icon_update_notification (icon);
 
 	if (!priv->blink_timeout && priv->showing_event_icon) {
 		priv->blink_timeout = g_timeout_add (BLINK_TIMEOUT,
@@ -417,11 +188,6 @@ status_icon_event_removed_cb (EmpathyEventManager *manager,
 	status_icon_update_tooltip (icon);
 	status_icon_update_icon (icon);
 
-	/* update notification anyway, as it's safe and we might have been
-	 * changed presence in the meanwhile
-	 */
-	status_icon_update_notification (icon);
-
 	if (!priv->event && priv->blink_timeout) {
 		g_source_remove (priv->blink_timeout);
 		priv->blink_timeout = 0;
@@ -437,10 +203,6 @@ status_icon_event_updated_cb (EmpathyEventManager *manager,
 
 	if (event != priv->event) {
 		return;
-	}
-
-	if (empathy_notify_manager_notification_is_enabled (priv->notify_mgr)) {
-		status_icon_update_notification (icon);
 	}
 
 	status_icon_update_tooltip (icon);
@@ -491,19 +253,8 @@ status_icon_toggle_visibility (EmpathyStatusIcon *icon)
 static void
 status_icon_presence_changed_cb (EmpathyStatusIcon *icon)
 {
-	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
-
 	status_icon_update_icon (icon);
 	status_icon_update_tooltip (icon);
-
-	if (!empathy_notify_manager_notification_is_enabled (priv->notify_mgr)) {
-		/* dismiss the outstanding notification if present */
-
-		if (priv->notification) {
-			notify_notification_close (priv->notification, NULL);
-			priv->notification = NULL;
-		}
-	}
 }
 
 static gboolean
@@ -658,17 +409,10 @@ status_icon_finalize (GObject *object)
 		g_source_remove (priv->blink_timeout);
 	}
 
-	if (priv->notification) {
-		notify_notification_close (priv->notification, NULL);
-		g_object_unref (priv->notification);
-		priv->notification = NULL;
-	}
-
 	g_object_unref (priv->icon);
 	g_object_unref (priv->account_manager);
 	g_object_unref (priv->event_manager);
 	g_object_unref (priv->ui_manager);
-	g_object_unref (priv->notify_mgr);
 	g_object_unref (priv->gsettings_ui);
 	g_object_unref (priv->window);
 }
@@ -752,9 +496,6 @@ empathy_status_icon_init (EmpathyStatusIcon *icon)
 	g_signal_connect (priv->icon, "popup-menu",
 			  G_CALLBACK (status_icon_popup_menu_cb),
 			  icon);
-
-	priv->notification = NULL;
-	priv->notify_mgr = empathy_notify_manager_dup_singleton ();
 }
 
 EmpathyStatusIcon *

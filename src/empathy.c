@@ -65,6 +65,7 @@
 #include "empathy-accounts-dialog.h"
 #include "empathy-status-icon.h"
 #include "empathy-ft-manager.h"
+#include "empathy-notifications-approver.h"
 
 #include "extensions/extensions.h"
 
@@ -116,6 +117,7 @@ struct _EmpathyApp
   EmpathyIdle *idle;
   EmpathyConnectivity *connectivity;
   GSettings *gsettings;
+  EmpathyNotificationsApprover *notifications_approver;
 #ifdef HAVE_GEOCLUE
   EmpathyLocationManager *location_manager;
 #endif
@@ -155,6 +157,7 @@ empathy_app_dispose (GObject *object)
 #endif
   tp_clear_object (&self->ft_factory);
   tp_clear_object (&self->gsettings);
+  tp_clear_object (&self->notifications_approver);
 
   if (dispose != NULL)
     dispose (object);
@@ -258,6 +261,9 @@ empathy_app_command_line (GApplication *app,
       gtk_widget_show (self->window);
       self->icon = empathy_status_icon_new (GTK_WINDOW (self->window),
           self->start_hidden);
+
+      self->notifications_approver =
+        empathy_notifications_approver_dup_singleton ();
     }
   else
     {
