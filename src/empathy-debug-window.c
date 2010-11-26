@@ -901,7 +901,7 @@ debug_window_fill_service_chooser (EmpathyDebugWindow *debug_window)
   /* add Mission Control */
   gtk_list_store_append (priv->service_store, &iter);
   gtk_list_store_set (priv->service_store, &iter,
-      COL_NAME, "misson-control",
+      COL_NAME, "mission-control",
       COL_UNIQUE_NAME, "org.freedesktop.Telepathy.MissionControl5",
       -1);
 
