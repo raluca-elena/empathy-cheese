@@ -26,6 +26,8 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include <libnotify/notify.h>
+
 #include <telepathy-glib/debug-sender.h>
 
 #include <libempathy/empathy-idle.h>
@@ -119,6 +121,8 @@ main (int argc,
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
 
+  notify_init (_(PACKAGE_NAME));
+
   app = gtk_application_new (EMPATHY_CHAT_DBUS_NAME, G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
 
@@ -154,6 +158,8 @@ main (int argc,
 #ifdef ENABLE_DEBUG
   g_object_unref (debug_sender);
 #endif
+
+  notify_uninit ();
 
   return retval;
 }
