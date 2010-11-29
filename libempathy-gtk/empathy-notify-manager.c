@@ -42,6 +42,7 @@ typedef struct
   /* owned (gchar *) => TRUE */
   GHashTable *capabilities;
   TpAccountManager *account_manager;
+  GSettings *gsettings_notif;
 } EmpathyNotifyManagerPriv;
 
 G_DEFINE_TYPE (EmpathyNotifyManager, empathy_notify_manager, G_TYPE_OBJECT);
@@ -77,6 +78,8 @@ notify_manager_dispose (GObject *object)
       g_object_unref (priv->account_manager);
       priv->account_manager = NULL;
     }
+
+  tp_clear_object (&priv->gsettings_notif);
 
   G_OBJECT_CLASS (empathy_notify_manager_parent_class)->dispose (object);
 }
@@ -127,6 +130,8 @@ empathy_notify_manager_init (EmpathyNotifyManager *self)
   GList *list, *l;
 
   self->priv = priv;
+
+  priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
 
   priv->capabilities = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
       NULL);
@@ -184,20 +189,17 @@ gboolean
 empathy_notify_manager_notification_is_enabled  (EmpathyNotifyManager *self)
 {
   EmpathyNotifyManagerPriv *priv = GET_PRIV (self);
-  GSettings *gsettings = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
   TpConnectionPresenceType presence;
-  gboolean ret = FALSE;
 
-  if (!g_settings_get_boolean (gsettings, EMPATHY_PREFS_NOTIFICATIONS_ENABLED))
-    goto finally;
+  if (!g_settings_get_boolean (priv->gsettings_notif,
+        EMPATHY_PREFS_NOTIFICATIONS_ENABLED))
+    return FALSE;
 
   if (!tp_account_manager_is_prepared (priv->account_manager,
         TP_ACCOUNT_MANAGER_FEATURE_CORE))
     {
       DEBUG ("account manager is not ready yet; display the notification");
-      ret = TRUE;
-
-      goto finally;
+      return TRUE;
     }
 
   presence = tp_account_manager_get_most_available_presence (
@@ -207,15 +209,10 @@ empathy_notify_manager_notification_is_enabled  (EmpathyNotifyManager *self)
   if (presence != TP_CONNECTION_PRESENCE_TYPE_AVAILABLE &&
       presence != TP_CONNECTION_PRESENCE_TYPE_UNSET)
     {
-      if (g_settings_get_boolean (gsettings,
+      if (g_settings_get_boolean (priv->gsettings_notif,
             EMPATHY_PREFS_NOTIFICATIONS_DISABLED_AWAY))
-        goto finally;
+        return FALSE;
     }
 
-  ret = TRUE;
-
-finally:
-  g_object_unref (gsettings);
-
-  return ret;
+  return TRUE;
 }
