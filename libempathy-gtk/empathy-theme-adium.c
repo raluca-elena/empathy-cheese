@@ -249,14 +249,16 @@ static EmpathyStringParser string_parsers_with_smiley[] = {
 };
 
 static gchar *
-theme_adium_parse_body (const gchar *text)
+theme_adium_parse_body (EmpathyThemeAdium *self,
+	const gchar *text)
 {
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (self);
 	EmpathyStringParser *parsers;
 	GString *string;
-	GSettings *gsettings = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 
 	/* Check if we have to parse smileys */
-	if (g_settings_get_boolean (gsettings, EMPATHY_PREFS_CHAT_SHOW_SMILEYS))
+	if (g_settings_get_boolean (priv->gsettings_chat,
+	  EMPATHY_PREFS_CHAT_SHOW_SMILEYS))
 		parsers = string_parsers_with_smiley;
 	else
 		parsers = string_parsers;
@@ -266,8 +268,6 @@ theme_adium_parse_body (const gchar *text)
 	 * displayed verbatim. */
 	string = g_string_sized_new (strlen (text));
 	empathy_string_parser_substr (text, -1, parsers, string);
-
-	g_object_unref (gsettings);
 
 	/* Wrap body in order to make tabs and multiple spaces displayed
 	 * properly. See bug #625745. */
@@ -469,7 +469,7 @@ theme_adium_append_message (EmpathyChatView *view,
 		service_name = tp_account_get_protocol (account);
 	timestamp = empathy_message_get_timestamp (msg);
 	body = empathy_message_get_body (msg);
-	body_escaped = theme_adium_parse_body (body);
+	body_escaped = theme_adium_parse_body (theme, body);
 	name = empathy_contact_get_alias (sender);
 	contact_id = empathy_contact_get_id (sender);
 
