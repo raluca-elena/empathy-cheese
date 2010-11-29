@@ -68,6 +68,7 @@ typedef struct {
 	gulong ready_handler_id;
 
 	EmpathyAvatar *avatar;
+	GSettings *gsettings_ui;
 } EmpathyAvatarChooserPriv;
 
 static void       avatar_chooser_finalize              (GObject              *object);
@@ -226,6 +227,8 @@ empathy_avatar_chooser_init (EmpathyAvatarChooser *chooser)
 			   G_N_ELEMENTS (drop_types),
 			   GDK_ACTION_COPY);
 
+	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
+
 	g_signal_connect (chooser, "drag-motion",
 			  G_CALLBACK (avatar_chooser_drag_motion_cb),
 			  chooser);
@@ -258,6 +261,8 @@ avatar_chooser_finalize (GObject *object)
 	if (priv->avatar != NULL) {
 		empathy_avatar_unref (priv->avatar);
 	}
+
+	g_object_unref (priv->gsettings_ui);
 
 	G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->finalize (object);
 }
@@ -895,14 +900,11 @@ avatar_chooser_response_cb (GtkWidget            *widget,
 
 		path = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (widget));
 		if (path) {
-			GSettings *gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
-
-			g_settings_set_string (gsettings_ui,
+			g_settings_set_string (priv->gsettings_ui,
 					       EMPATHY_PREFS_UI_AVATAR_DIRECTORY,
 					       path);
 
 			g_free (path);
-			g_object_unref (gsettings_ui);
 		}
 	}
 	else if (response == GTK_RESPONSE_NO) {
@@ -923,7 +925,6 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 	const gchar    *default_dir = DEFAULT_DIR;
 	const gchar    *pics_dir;
 	GtkFileFilter  *filter;
-	GSettings      *gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 	EmpathyAvatarChooserPriv *priv = GET_PRIV (chooser);
 
 	if (priv->chooser_dialog) {
@@ -946,7 +947,7 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 	gtk_window_set_destroy_with_parent (GTK_WINDOW (chooser_dialog), TRUE);
 
 	/* Get special dirs */
-	saved_dir = g_settings_get_string (gsettings_ui,
+	saved_dir = g_settings_get_string (priv->gsettings_ui,
 					   EMPATHY_PREFS_UI_AVATAR_DIRECTORY);
 
 	if (saved_dir && !g_file_test (saved_dir, G_FILE_TEST_IS_DIR)) {
@@ -1014,7 +1015,6 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 	gtk_widget_show (GTK_WIDGET (chooser_dialog));
 
 	g_free (saved_dir);
-	g_object_unref (gsettings_ui);
 }
 
 /**
