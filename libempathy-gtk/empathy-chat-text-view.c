@@ -69,6 +69,7 @@ typedef struct {
 	gboolean              allow_scrolling;
 	guint                 notify_system_fonts_id;
 	GSettings            *gsettings_desktop;
+	GSettings            *gsettings_chat;
 	EmpathySmileyManager *smiley_manager;
 	gboolean              only_if_date;
 } EmpathyChatTextViewPriv;
@@ -560,6 +561,7 @@ chat_text_view_finalize (GObject *object)
 
 	DEBUG ("%p", object);
 
+	g_object_unref (priv->gsettings_chat);
 	g_object_unref (priv->gsettings_desktop);
 
 	if (priv->last_contact) {
@@ -634,6 +636,8 @@ empathy_chat_text_view_init (EmpathyChatTextView *view)
 		      "editable", FALSE,
 		      "cursor-visible", FALSE,
 		      NULL);
+
+	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 
 	priv->gsettings_desktop = g_settings_new (
 			  EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
@@ -1407,11 +1411,9 @@ empathy_chat_text_view_append_body (EmpathyChatTextView *view,
 	GtkTextIter              start_iter;
 	GtkTextIter              iter;
 	GtkTextMark             *mark;
-	GSettings		*gsettings_chat;
 
 	/* Check if we have to parse smileys */
-	gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
-	use_smileys = g_settings_get_boolean (gsettings_chat,
+	use_smileys = g_settings_get_boolean (priv->gsettings_chat,
 			EMPATHY_PREFS_CHAT_SHOW_SMILEYS);
 
 	if (use_smileys)
@@ -1438,8 +1440,6 @@ empathy_chat_text_view_append_body (EmpathyChatTextView *view,
 					   &iter);
 
 	gtk_text_buffer_delete_mark (priv->buffer, mark);
-
-	g_object_unref (gsettings_chat);
 }
 
 void
