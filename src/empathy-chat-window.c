@@ -114,6 +114,7 @@ typedef struct {
 
 	GSettings *gsettings_chat;
 	GSettings *gsettings_notif;
+	GSettings *gsettings_ui;
 } EmpathyChatWindowPriv;
 
 static GList *chat_windows = NULL;
@@ -1871,6 +1872,7 @@ chat_window_finalize (GObject *object)
 	g_object_unref (priv->notify_mgr);
 	g_object_unref (priv->gsettings_chat);
 	g_object_unref (priv->gsettings_notif);
+	g_object_unref (priv->gsettings_ui);
 
 	if (priv->notification != NULL) {
 		notify_notification_close (priv->notification, NULL);
@@ -1983,6 +1985,7 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 	priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
+	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 	priv->chatroom_manager = empathy_chatroom_manager_dup_singleton (NULL);
 
 	priv->notebook = gtk_notebook_new ();
@@ -2180,14 +2183,11 @@ empathy_chat_window_add_chat (EmpathyChatWindow *window,
 
 	/* If this window has just been created, position it */
 	if (priv->chats == NULL) {
-		GSettings *gsettings = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 		const gchar *name = "chat-window";
 		gboolean     separate_windows;
 
-		separate_windows = g_settings_get_boolean (gsettings,
+		separate_windows = g_settings_get_boolean (priv->gsettings_ui,
 				EMPATHY_PREFS_UI_SEPARATE_CHAT_WINDOWS);
-
-		g_object_unref (gsettings);
 
 		if (empathy_chat_is_room (chat))
 			name = "room-window";
