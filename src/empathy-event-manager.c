@@ -82,6 +82,8 @@ typedef struct {
   GSList *approvals;
 
   gint ringing;
+
+  GSettings *gsettings_notif;
 } EmpathyEventManagerPriv;
 
 typedef struct _EventPriv EventPriv;
@@ -1032,10 +1034,10 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
     TpConnectionPresenceType previous,
     EmpathyEventManager *manager)
 {
+  EmpathyEventManagerPriv *priv = GET_PRIV (manager);
   TpAccount *account;
   gchar *header = NULL;
   EmpathyIdle *idle;
-  GSettings *gsettings = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
   GtkWidget *window = empathy_main_window_dup ();
 
   account = empathy_contact_get_account (contact);
@@ -1054,7 +1056,7 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           /* someone is logging off */
           empathy_sound_play (window, EMPATHY_SOUND_CONTACT_DISCONNECTED);
 
-          if (g_settings_get_boolean (gsettings,
+          if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNOUT))
             {
               header = g_strdup_printf (_("%s is now offline."),
@@ -1074,7 +1076,7 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           /* someone is logging in */
           empathy_sound_play (window, EMPATHY_SOUND_CONTACT_CONNECTED);
 
-          if (g_settings_get_boolean (gsettings,
+          if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNIN))
             {
               header = g_strdup_printf (_("%s is now online."),
@@ -1089,7 +1091,6 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
 
 out:
   g_object_unref (idle);
-  g_object_unref (gsettings);
   g_object_unref (window);
 }
 
@@ -1144,6 +1145,7 @@ event_manager_finalize (GObject *object)
   g_slist_free (priv->approvals);
   g_object_unref (priv->contact_manager);
   g_object_unref (priv->approver);
+  g_object_unref (priv->gsettings_notif);
 }
 
 static void
@@ -1195,6 +1197,8 @@ empathy_event_manager_init (EmpathyEventManager *manager)
   GError *error = NULL;
 
   manager->priv = priv;
+
+  priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
 
   priv->contact_manager = empathy_contact_manager_dup_singleton ();
   g_signal_connect (priv->contact_manager, "pendings-changed",
