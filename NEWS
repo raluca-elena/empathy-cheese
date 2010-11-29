@@ -1,3 +1,63 @@
+NEW in 2.91.3 (29/11/2010)
+=============
+
+The Empathy contact list is now able to display a phone icon when a contact is
+connected using a mobile device.
+
+This release adds a '--with-ca-file' option to configure.
+The default is to use the normal location for either Red Hat
+or Debian, or fail if neither exists. Use --with-ca-file to force a
+particular location (e.g. if your build system doesn't guarantee to have
+the CA certificate bundle installed), or use --without-ca-file if your
+system doesn't have a standard CA certificate store.
+
+Dependencies:
+ • folks ≥ 0.3.2
+ • gsettings-desktop-schemas
+ • Empathy does not longer depend on GConf.
+
+Bugs fixed:
+ - Fixed #595305, "Previous Conversations" window does not have an exit keybinding or button (Emilio Pozuelo Monfort)
+ - Fixed #597043, unusual menubar behaviour (Chandni Verma)
+ - Fixed #607146, hitting enter on creating an account should "log in" (Emilio Pozuelo Monfort)
+ - Fixed #625745, Tabs not displayed in chat text in theme (Vitaly Minko)
+ - Fixed #626560, Unusual tabbing behaviour in Facebook account creation dialog (Chandni Verma)
+ - Fixed #626810, Use GSettings to get the document_font_name key (Guillaume Desmottes)
+ - Fixed #628043, Port EmpathyCellRendererText to GTK+ 3 (Guillaume Desmottes)
+ - Fixed #630706, Add Accept/Decline button in subscription notifications (Guillaume Desmottes)
+ - Fixed #630707, show the subscription request message in the accept dialog (Guillaume Desmottes)
+ - Fixed #633481, AccountChooser filters should be asynchronous (Vitaly Minko)
+ - Fixed #633835, Stop using GtkWidget:size-request (Guillaume Desmottes)
+ - Fixed #634197, [Patch] Make CA cert paths configurable (Brian Pepple)
+ - Fixed #634688, Search bar is not visible (Vitaly Minko)
+ - Fixed #634754, Don't use removed folks Individual convenience methods (Philip Withnall)
+ - Fixed #634912, accounts dialog doesn't resize properly with GTK3 (Guillaume Desmottes)
+ - Fixed #635022, Chat window size is written to GSettings on every change (Guillaume Desmottes)
+ - Fixed #635082, Crash when trying to join a MUC (Guillaume Desmottes)
+ - Fixed #635105, Empathy is eating all the memory (Guillaume Desmottes)
+ - Fixed #635262, configure.ac missing Quadrigraphs for meego (Nishio Futoshi)
+ - Fixed #635500, Split notifications from empathy-status-icon (Guillaume Desmottes)
+ - Fixed #635592, EMPATHY_PERSIST doesn't work with empathy-chat (Guillaume Desmottes)
+ - Fixed #635681, Fix leaks in empathy-chat (Guillaume Desmottes)
+ - Fixed #635691, Fix leaks in the log viewer (Guillaume Desmottes)
+ - Fixed #547658, Add client type support (Jonny Lamb, Emilio Pozuelo Monfort)
+ - Fixed #636063, Reduce DConf D-Bus traffic (Guillaume Desmottes)
+
+Translations:
+ - Updated es Translation (Daniel Mustieles)
+ - Updated et Translation (Ivar Smolin)
+ - Updated fi Translation (Ville-Pekka Vainio)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pa Translation (A S Alam)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated ta Translation (Dr.T.Vasudevan)
+ - Updated ug Translation (Gheyret T.Kenji)
+
+Documentation translations:
+ - Updated gl Documentation translation (Fran Diéguez)
+
 NEW in 2.91.2 (08/11/2010)
 =============
 
