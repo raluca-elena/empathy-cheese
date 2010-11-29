@@ -84,6 +84,7 @@ typedef struct {
   gint ringing;
 
   GSettings *gsettings_notif;
+  GSettings *gsettings_ui;
 } EmpathyEventManagerPriv;
 
 typedef struct _EventPriv EventPriv;
@@ -199,19 +200,12 @@ autoremove_event_timeout_cb (EventPriv *event)
 }
 
 static gboolean
-display_notify_area (void)
-
+display_notify_area (EmpathyEventManager *self)
 {
-  GSettings *gsettings;
-  gboolean result;
+  EmpathyEventManagerPriv *priv = GET_PRIV (self);
 
-  gsettings = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
-
-  result = g_settings_get_boolean (gsettings,
+  return g_settings_get_boolean (priv->gsettings_ui,
       EMPATHY_PREFS_UI_EVENTS_NOTIFY_AREA);
-  g_object_unref (gsettings);
-
-  return result;
 }
 
 static void
@@ -244,7 +238,7 @@ event_manager_add (EmpathyEventManager *manager,
   DEBUG ("Adding event %p", event);
   priv->events = g_slist_prepend (priv->events, event);
 
-  if (!display_notify_area ())
+  if (!display_notify_area (manager))
     {
       /* Don't fire the 'event-added' signal as we activate the event now */
       if (approval != NULL)
@@ -1146,6 +1140,7 @@ event_manager_finalize (GObject *object)
   g_object_unref (priv->contact_manager);
   g_object_unref (priv->approver);
   g_object_unref (priv->gsettings_notif);
+  g_object_unref (priv->gsettings_ui);
 }
 
 static void
@@ -1199,6 +1194,7 @@ empathy_event_manager_init (EmpathyEventManager *manager)
   manager->priv = priv;
 
   priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
+  priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 
   priv->contact_manager = empathy_contact_manager_dup_singleton ();
   g_signal_connect (priv->contact_manager, "pendings-changed",
