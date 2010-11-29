@@ -113,6 +113,7 @@ typedef struct {
 	guint32    x_user_action_time;
 
 	GSettings *gsettings_chat;
+	GSettings *gsettings_notif;
 } EmpathyChatWindowPriv;
 
 static GList *chat_windows = NULL;
@@ -1285,13 +1286,8 @@ chat_window_show_or_update_notification (EmpathyChatWindow *window,
 	if (!empathy_notify_manager_notification_is_enabled (priv->notify_mgr)) {
 		return;
 	} else {
-		GSettings *gsettings = g_settings_new (
-				EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
-
-		res = g_settings_get_boolean (gsettings,
+		res = g_settings_get_boolean (priv->gsettings_notif,
 				EMPATHY_PREFS_NOTIFICATIONS_FOCUS);
-
-		g_object_unref (gsettings);
 
 		if (!res) {
 			return;
@@ -1874,6 +1870,7 @@ chat_window_finalize (GObject *object)
 	g_object_unref (priv->chatroom_manager);
 	g_object_unref (priv->notify_mgr);
 	g_object_unref (priv->gsettings_chat);
+	g_object_unref (priv->gsettings_notif);
 
 	if (priv->notification != NULL) {
 		notify_notification_close (priv->notification, NULL);
@@ -1985,6 +1982,7 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 	g_object_unref (gui);
 
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+	priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
 	priv->chatroom_manager = empathy_chatroom_manager_dup_singleton (NULL);
 
 	priv->notebook = gtk_notebook_new ();
