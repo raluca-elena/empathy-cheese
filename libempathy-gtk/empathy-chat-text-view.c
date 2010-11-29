@@ -68,7 +68,7 @@ typedef struct {
 	time_t                last_timestamp;
 	gboolean              allow_scrolling;
 	guint                 notify_system_fonts_id;
-	GSettings            *gsettings;
+	GSettings            *gsettings_desktop;
 	EmpathySmileyManager *smiley_manager;
 	gboolean              only_if_date;
 } EmpathyChatTextViewPriv;
@@ -208,7 +208,7 @@ chat_text_view_system_font_update (EmpathyChatTextView *view)
 	PangoFontDescription *font_description = NULL;
 	gchar                *font_name;
 
-	font_name = g_settings_get_string (priv->gsettings,
+	font_name = g_settings_get_string (priv->gsettings_desktop,
 			EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME);
 
 	if (font_name != NULL) {
@@ -560,7 +560,7 @@ chat_text_view_finalize (GObject *object)
 
 	DEBUG ("%p", object);
 
-	g_object_unref (priv->gsettings);
+	g_object_unref (priv->gsettings_desktop);
 
 	if (priv->last_contact) {
 		g_object_unref (priv->last_contact);
@@ -635,8 +635,9 @@ empathy_chat_text_view_init (EmpathyChatTextView *view)
 		      "cursor-visible", FALSE,
 		      NULL);
 
-	priv->gsettings = g_settings_new (EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
-	g_signal_connect (priv->gsettings,
+	priv->gsettings_desktop = g_settings_new (
+			  EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
+	g_signal_connect (priv->gsettings_desktop,
 			  "changed::" EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME,
 			  G_CALLBACK (chat_text_view_notify_system_font_cb),
 			  view);
