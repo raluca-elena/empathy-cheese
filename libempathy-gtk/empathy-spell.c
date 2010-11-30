@@ -439,7 +439,8 @@ empathy_spell_supported (void)
 }
 
 GList *
-empathy_spell_get_suggestions (const gchar *word)
+empathy_spell_get_suggestions (const gchar *code,
+                               const gchar *word)
 {
 	DEBUG ("Support disabled, could not get suggestions");
 
