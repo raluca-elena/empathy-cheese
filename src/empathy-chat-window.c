@@ -1458,7 +1458,11 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 
 		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (priv->dialog),
 		    EMPATHY_SOUND_MESSAGE_INCOMING);
-		chat_window_show_or_update_notification (window, message, chat);
+
+		/* Pending messages have already been displayed in the approver, so we don't
+		* display a notification for those. */
+		if (!pending)
+			chat_window_show_or_update_notification (window, message, chat);
 	}
 
 	/* update the number of unread messages and the window icon */
