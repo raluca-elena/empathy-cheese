@@ -1383,6 +1383,7 @@ empathy_chat_window_has_focus (EmpathyChatWindow *window)
 static void
 chat_window_new_message_cb (EmpathyChat       *chat,
 			    EmpathyMessage    *message,
+			    gboolean pending,
 			    EmpathyChatWindow *window)
 {
 	EmpathyChatWindowPriv *priv;
