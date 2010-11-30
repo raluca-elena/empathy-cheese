@@ -151,7 +151,7 @@ empathy_sound_manager_dup_singleton (void)
 {
   static EmpathySoundManager *manager = NULL;
 
-  if (manager != NULL)
+  if (G_LIKELY (manager != NULL))
       return g_object_ref (manager);
 
   manager = g_object_new (EMPATHY_TYPE_SOUND_MANAGER, NULL);
