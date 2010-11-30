@@ -483,6 +483,13 @@ empathy_spell_add_to_dictionary (const gchar *code,
 	DEBUG ("Support disabled, could not expand the dictionary");
 }
 
+GList *
+empathy_spell_get_enabled_language_codes (void)
+{
+	DEBUG ("Support disabled, could not get enabled language codes");
+
+	return NULL;
+}
 
 #endif /* HAVE_ENCHANT */
 
