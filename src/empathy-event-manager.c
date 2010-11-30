@@ -85,6 +85,8 @@ typedef struct {
 
   GSettings *gsettings_notif;
   GSettings *gsettings_ui;
+
+  EmpathySoundManager *sound_mgr;
 } EmpathyEventManagerPriv;
 
 typedef struct _EventPriv EventPriv;
@@ -531,6 +533,7 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
   const gchar     *msg;
   TpChannel       *channel;
   EventPriv       *event;
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
 
   /* try to update the event if it's referring to a chat which is already in the
    * queue. */
@@ -550,7 +553,8 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
         EMPATHY_IMAGE_NEW_MESSAGE, header, msg, approval,
         event_text_channel_process_func, NULL);
 
-  empathy_sound_play (window, EMPATHY_SOUND_CONVERSATION_NEW);
+  empathy_sound_manager_play (priv->sound_mgr, window,
+      EMPATHY_SOUND_CONVERSATION_NEW);
 
   g_object_unref (window);
 }
@@ -571,7 +575,8 @@ event_manager_approval_done (EventManagerApproval *approval)
         {
           priv->ringing--;
           if (priv->ringing == 0)
-            empathy_sound_stop (EMPATHY_SOUND_PHONE_INCOMING);
+            empathy_sound_manager_stop (priv->sound_mgr,
+                EMPATHY_SOUND_PHONE_INCOMING);
         }
     }
 
@@ -630,7 +635,7 @@ event_manager_media_channel_got_contact (EventManagerApproval *approval)
 
   priv->ringing++;
   if (priv->ringing == 1)
-    empathy_sound_start_playing (window,
+    empathy_sound_manager_start_playing (priv->sound_mgr, window,
         EMPATHY_SOUND_PHONE_INCOMING, MS_BETWEEN_RING);
 
   g_object_unref (window);
@@ -735,6 +740,7 @@ display_invite_room_dialog (EventManagerApproval *approval)
   const gchar *invite_msg;
   gchar *msg;
   TpHandle self_handle;
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
 
   self_handle = tp_channel_group_get_self_handle (approval->main_channel);
   tp_channel_group_get_local_pending_info (approval->main_channel, self_handle,
@@ -756,7 +762,8 @@ display_invite_room_dialog (EventManagerApproval *approval)
       EMPATHY_EVENT_TYPE_INVITATION, EMPATHY_IMAGE_GROUP_MESSAGE, msg,
       invite_msg, approval, event_room_channel_process_func, NULL);
 
-  empathy_sound_play (window, EMPATHY_SOUND_CONVERSATION_NEW);
+  empathy_sound_manager_play (priv->sound_mgr, window,
+      EMPATHY_SOUND_CONVERSATION_NEW);
 
   g_free (msg);
   g_object_unref (window);
@@ -793,6 +800,7 @@ event_manager_ft_got_contact_cb (TpConnection *connection,
   EventManagerApproval *approval = (EventManagerApproval *) user_data;
   GtkWidget *window = empathy_main_window_dup ();
   char *header;
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
 
   approval->contact = g_object_ref (contact);
 
@@ -804,7 +812,8 @@ event_manager_ft_got_contact_cb (TpConnection *connection,
       approval, event_channel_process_func, NULL);
 
   /* FIXME better sound for incoming file transfers ?*/
-  empathy_sound_play (window, EMPATHY_SOUND_CONVERSATION_NEW);
+  empathy_sound_manager_play (priv->sound_mgr, window,
+      EMPATHY_SOUND_CONVERSATION_NEW);
 
   g_free (header);
   g_object_unref (window);
@@ -1048,7 +1057,8 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           TP_CONNECTION_PRESENCE_TYPE_OFFLINE) <= 0)
         {
           /* someone is logging off */
-          empathy_sound_play (window, EMPATHY_SOUND_CONTACT_DISCONNECTED);
+          empathy_sound_manager_play (priv->sound_mgr, window,
+              EMPATHY_SOUND_CONTACT_DISCONNECTED);
 
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNOUT))
@@ -1068,7 +1078,8 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
             TP_CONNECTION_PRESENCE_TYPE_OFFLINE) > 0)
         {
           /* someone is logging in */
-          empathy_sound_play (window, EMPATHY_SOUND_CONTACT_CONNECTED);
+          empathy_sound_manager_play (priv->sound_mgr, window,
+              EMPATHY_SOUND_CONTACT_CONNECTED);
 
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNIN))
@@ -1131,7 +1142,7 @@ event_manager_finalize (GObject *object)
   EmpathyEventManagerPriv *priv = GET_PRIV (object);
 
   if (priv->ringing > 0)
-    empathy_sound_stop (EMPATHY_SOUND_PHONE_INCOMING);
+    empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_INCOMING);
 
   g_slist_foreach (priv->events, (GFunc) event_free, NULL);
   g_slist_free (priv->events);
@@ -1141,6 +1152,7 @@ event_manager_finalize (GObject *object)
   g_object_unref (priv->approver);
   g_object_unref (priv->gsettings_notif);
   g_object_unref (priv->gsettings_ui);
+  g_object_unref (priv->sound_mgr);
 }
 
 static void
@@ -1195,6 +1207,8 @@ empathy_event_manager_init (EmpathyEventManager *manager)
 
   priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
   priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
+
+  priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
   priv->contact_manager = empathy_contact_manager_dup_singleton ();
   g_signal_connect (priv->contact_manager, "pendings-changed",

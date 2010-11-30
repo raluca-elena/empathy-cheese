@@ -221,6 +221,8 @@ struct _EmpathyCallWindowPriv
   gboolean start_call_when_playing;
   /* TRUE if we requested to set the pipeline in the playing state */
   gboolean pipeline_playing;
+
+  EmpathySoundManager *sound_mgr;
 };
 
 #define GET_PRIV(o) \
@@ -810,7 +812,7 @@ empathy_call_window_set_state_connecting (EmpathyCallWindow *window)
   priv->call_state = CONNECTING;
 
   if (priv->outgoing)
-    empathy_sound_start_playing (GTK_WIDGET (window),
+    empathy_sound_manager_start_playing (priv->sound_mgr, GTK_WIDGET (window),
         EMPATHY_SOUND_PHONE_OUTGOING, MS_BETWEEN_RING);
 }
 
@@ -1224,6 +1226,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   g_object_ref (priv->ui_manager);
   g_object_unref (gui);
+
+  priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
   empathy_geometry_bind (GTK_WINDOW (self), "call-window");
 }
@@ -1761,6 +1765,8 @@ empathy_call_window_dispose (GObject *object)
       priv->contact = NULL;
     }
 
+  tp_clear_object (&priv->sound_mgr);
+
   /* release any references held by the object here */
   if (G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose)
     G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose (object);
@@ -1913,7 +1919,8 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
   could_reset_pipeline = empathy_call_window_reset_pipeline (self);
 
   if (priv->call_state == CONNECTING)
-      empathy_sound_stop (EMPATHY_SOUND_PHONE_OUTGOING);
+      empathy_sound_manager_stop (priv->sound_mgr,
+          EMPATHY_SOUND_PHONE_OUTGOING);
 
   if (priv->call_state != REDIALING)
     priv->call_state = DISCONNECTED;
@@ -2456,7 +2463,7 @@ empathy_call_window_connected (gpointer user_data)
   EmpathyTpCall *call;
   gboolean can_send_video;
 
-  empathy_sound_stop (EMPATHY_SOUND_PHONE_OUTGOING);
+  empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
   can_send_video = priv->video_input != NULL && priv->contact != NULL &&
     empathy_contact_can_voip_video (priv->contact);
@@ -2884,7 +2891,7 @@ empathy_call_window_delete_cb (GtkWidget *widget, GdkEvent*event,
     }
 
   if (priv->call_state == CONNECTING)
-    empathy_sound_stop (EMPATHY_SOUND_PHONE_OUTGOING);
+    empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
   return FALSE;
 }

@@ -115,6 +115,8 @@ typedef struct {
 	GSettings *gsettings_chat;
 	GSettings *gsettings_notif;
 	GSettings *gsettings_ui;
+
+	EmpathySoundManager *sound_mgr;
 } EmpathyChatWindowPriv;
 
 static GList *chat_windows = NULL;
@@ -1402,7 +1404,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 	sender = empathy_message_get_sender (message);
 
 	if (empathy_contact_is_user (sender)) {
-		empathy_sound_play (GTK_WIDGET (priv->dialog),
+		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (priv->dialog),
 				    EMPATHY_SOUND_MESSAGE_OUTGOING);
 	}
 
@@ -1453,7 +1455,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 			chat_window_set_highlight_room_tab_label (chat);
 		}
 
-		empathy_sound_play (GTK_WIDGET (priv->dialog),
+		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (priv->dialog),
 		    EMPATHY_SOUND_MESSAGE_INCOMING);
 		chat_window_show_or_update_notification (window, message, chat);
 	}
@@ -1873,6 +1875,7 @@ chat_window_finalize (GObject *object)
 	g_object_unref (priv->gsettings_chat);
 	g_object_unref (priv->gsettings_notif);
 	g_object_unref (priv->gsettings_ui);
+	g_object_unref (priv->sound_mgr);
 
 	if (priv->notification != NULL) {
 		notify_notification_close (priv->notification, NULL);
@@ -1987,6 +1990,8 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 	priv->gsettings_notif = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
 	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 	priv->chatroom_manager = empathy_chatroom_manager_dup_singleton (NULL);
+
+	priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
 	priv->notebook = gtk_notebook_new ();
 

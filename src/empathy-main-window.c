@@ -107,6 +107,7 @@ struct _EmpathyMainWindowPriv {
 	TpAccountManager        *account_manager;
 	EmpathyChatroomManager  *chatroom_manager;
 	EmpathyEventManager     *event_manager;
+	EmpathySoundManager     *sound_mgr;;
 	guint                    flash_timeout_id;
 	gboolean                 flash_on;
 	gboolean                 empty;
@@ -639,6 +640,8 @@ main_window_connection_changed_cb (TpAccount  *account,
 				   GHashTable *details,
 				   EmpathyMainWindow *window)
 {
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+
 	main_window_update_status (window);
 
 	if (current == TP_CONNECTION_STATUS_DISCONNECTED &&
@@ -647,12 +650,12 @@ main_window_connection_changed_cb (TpAccount  *account,
 	}
 
 	if (current == TP_CONNECTION_STATUS_DISCONNECTED) {
-		empathy_sound_play (GTK_WIDGET (window),
+		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (window),
 				    EMPATHY_SOUND_ACCOUNT_DISCONNECTED);
 	}
 
 	if (current == TP_CONNECTION_STATUS_CONNECTED) {
-		empathy_sound_play (GTK_WIDGET (window),
+		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (window),
 				    EMPATHY_SOUND_ACCOUNT_CONNECTED);
 
 		/* Account connected without error, remove error message if any */
@@ -706,6 +709,7 @@ empathy_main_window_finalize (GObject *window)
 	g_object_unref (priv->account_manager);
 	g_object_unref (priv->individual_store);
 	g_object_unref (priv->contact_manager);
+	g_object_unref (priv->sound_mgr);
 	g_hash_table_destroy (priv->errors);
 
 	/* disconnect all handlers of status-changed signal */
@@ -1575,6 +1579,8 @@ empathy_main_window_init (EmpathyMainWindow *window)
 
 	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 	priv->gsettings_contacts = g_settings_new (EMPATHY_PREFS_CONTACTS_SCHEMA);
+
+	priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
 	gtk_window_set_title (GTK_WINDOW (window), _("Contact List"));
 	gtk_window_set_role (GTK_WINDOW (window), "contact_list");

@@ -68,14 +68,23 @@ GType empathy_sound_manager_get_type (void) G_GNUC_CONST;
 
 EmpathySoundManager * empathy_sound_manager_dup_singleton (void);
 
-gboolean empathy_sound_play (GtkWidget *widget, EmpathySound sound_id);
-void empathy_sound_stop (EmpathySound sound_id);
+gboolean empathy_sound_manager_play (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id);
 
-gboolean empathy_sound_start_playing (GtkWidget *widget, EmpathySound sound_id,
+void empathy_sound_manager_stop (EmpathySoundManager *self,
+    EmpathySound sound_id);
+
+gboolean empathy_sound_manager_start_playing (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id,
     guint timeout_before_replay);
 
-gboolean empathy_sound_play_full (GtkWidget *widget, EmpathySound sound_id,
-    ca_finish_callback_t callback, gpointer user_data);
+gboolean empathy_sound_manager_play_full (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id,
+    ca_finish_callback_t callback,
+    gpointer user_data);
 
 G_END_DECLS
 

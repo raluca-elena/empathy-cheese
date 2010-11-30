@@ -148,14 +148,16 @@ finally:
 }
 
 /**
- * empathy_sound_stop:
+ * empathy_sound_manager_stop:
+ * @self: a #EmpathySoundManager
  * @sound_id: The #EmpathySound to stop playing.
  *
  * Stop playing a sound. If it has been stated in loop with
  * empathy_sound_start_playing(), it will also stop replaying.
  */
 void
-empathy_sound_stop (EmpathySound sound_id)
+empathy_sound_manager_stop (EmpathySoundManager *self,
+    EmpathySound sound_id)
 {
   EmpathySoundEntry *entry;
 
@@ -232,7 +234,8 @@ failed:
 }
 
 /**
- * empathy_sound_play_full:
+ * empathy_sound_manager_play_full:
+ * @self: a #EmpathySoundManager
  * @widget: The #GtkWidget from which the sound is originating.
  * @sound_id: The #EmpathySound to play.
  * @callback: The #ca_finish_callback_t function that will be called when the
@@ -253,8 +256,11 @@ failed:
  *               otherwise.
  */
 gboolean
-empathy_sound_play_full (GtkWidget *widget, EmpathySound sound_id,
-  ca_finish_callback_t callback, gpointer user_data)
+empathy_sound_manager_play_full (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id,
+    ca_finish_callback_t callback,
+    gpointer user_data)
 {
   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
   g_return_val_if_fail (sound_id < LAST_EMPATHY_SOUND, FALSE);
@@ -272,22 +278,25 @@ empathy_sound_play_full (GtkWidget *widget, EmpathySound sound_id,
 }
 
 /**
- * empathy_sound_play:
+ * empathy_sound_manager_play:
+ * @self: a #EmpathySoundManager
  * @widget: The #GtkWidget from which the sound is originating.
  * @sound_id: The #EmpathySound to play.
  *
- * Plays a sound. See %empathy_sound_play_full for details.'
+ * Plays a sound. See %empathy_sound_manager_play_full for details.'
  *
  * Return value: %TRUE if the sound has successfully started playing, %FALSE
  *               otherwise.
  */
 gboolean
-empathy_sound_play (GtkWidget *widget, EmpathySound sound_id)
+empathy_sound_manager_play (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id)
 {
   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
   g_return_val_if_fail (sound_id < LAST_EMPATHY_SOUND, FALSE);
 
-  return empathy_sound_play_full (widget, sound_id, NULL, NULL);
+  return empathy_sound_manager_play_full (self, widget, sound_id, NULL, NULL);
 }
 
 static void playing_finished_cb (ca_context *c, guint id, int error_code,
@@ -362,7 +371,8 @@ repeating_sounds_item_delete (gpointer data)
 }
 
 /**
- * empathy_sound_start_playing:
+ * empathy_sound_manager_start_playing:
+ * @self: a #EmpathySoundManager
  * @widget: The #GtkWidget from which the sound is originating.
  * @sound_id: The #EmpathySound to play.
  * @timeout_before_replay: The amount of time, in milliseconds, between two
@@ -376,7 +386,9 @@ repeating_sounds_item_delete (gpointer data)
  * Return value: %TRUE if the sound has successfully started playing.
  */
 gboolean
-empathy_sound_start_playing (GtkWidget *widget, EmpathySound sound_id,
+empathy_sound_manager_start_playing (EmpathySoundManager *self,
+    GtkWidget *widget,
+    EmpathySound sound_id,
     guint timeout_before_replay)
 {
   EmpathyRepeatableSound *repeatable_sound;
