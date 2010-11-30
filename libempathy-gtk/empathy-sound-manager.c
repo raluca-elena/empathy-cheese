@@ -73,7 +73,7 @@ G_DEFINE_TYPE (EmpathySoundManager, empathy_sound_manager, G_TYPE_OBJECT)
 
 struct _EmpathySoundManagerPrivate
 {
-  /* An hash table containing currently repeating sounds. The format is the
+  /* A hash table containing currently repeating sounds. The format is the
    * following:
    * Key: An EmpathySound
    * Value : The EmpathyRepeatableSound associated with that EmpathySound. */
