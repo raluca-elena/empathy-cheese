@@ -42,6 +42,7 @@ typedef struct {
   gint sound_id;
   guint play_interval;
   guint replay_timeout_id;
+  EmpathySoundManager *self;
 } EmpathyRepeatableSound;
 
 /* NOTE: these entries MUST be in the same order than EmpathySound enum */
@@ -72,13 +73,63 @@ G_DEFINE_TYPE (EmpathySoundManager, empathy_sound_manager, G_TYPE_OBJECT)
 
 struct _EmpathySoundManagerPrivate
 {
-  gpointer unused;
+  /* An hash table containing currently repeating sounds. The format is the
+   * following:
+   * Key: An EmpathySound
+   * Value : The EmpathyRepeatableSound associated with that EmpathySound. */
+  GHashTable *repeating_sounds;
 };
+
+static void
+empathy_sound_manager_dispose (GObject *object)
+{
+  EmpathySoundManager *self = (EmpathySoundManager *) object;
+
+  tp_clear_pointer (&self->priv->repeating_sounds, g_hash_table_unref);
+
+  G_OBJECT_CLASS (empathy_sound_manager_parent_class)->dispose (object);
+}
 
 static void
 empathy_sound_manager_class_init (EmpathySoundManagerClass *cls)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (cls);
+
+  object_class->dispose = empathy_sound_manager_dispose;
+
   g_type_class_add_private (cls, sizeof (EmpathySoundManagerPrivate));
+}
+
+static void
+empathy_sound_widget_destroyed_cb (GtkWidget *widget,
+    gpointer user_data)
+{
+  EmpathyRepeatableSound *repeatable_sound = user_data;
+
+  /* The sound must be stopped... If it is waiting for replay, remove
+   * it from hash table to cancel. Otherwise playing_finished_cb will be
+   * called with an error. */
+  if (repeatable_sound->replay_timeout_id != 0)
+    {
+      g_hash_table_remove (repeatable_sound->self->priv->repeating_sounds,
+          GINT_TO_POINTER (repeatable_sound->sound_id));
+    }
+}
+
+static void
+repeating_sounds_item_delete (gpointer data)
+{
+  EmpathyRepeatableSound *repeatable_sound = data;
+
+  if (repeatable_sound->replay_timeout_id != 0)
+    g_source_remove (repeatable_sound->replay_timeout_id);
+
+  g_signal_handlers_disconnect_by_func (repeatable_sound->widget,
+      empathy_sound_widget_destroyed_cb, repeatable_sound);
+
+  g_object_unref (repeatable_sound->self);
+
+  g_slice_free (EmpathyRepeatableSound, repeatable_sound);
 }
 
 static void
@@ -86,6 +137,9 @@ empathy_sound_manager_init (EmpathySoundManager *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_SOUND_MANAGER, EmpathySoundManagerPrivate);
+
+  self->priv->repeating_sounds = g_hash_table_new_full (NULL, NULL,
+      NULL, repeating_sounds_item_delete);
 }
 
 EmpathySoundManager *
@@ -101,12 +155,6 @@ empathy_sound_manager_dup_singleton (void)
   g_object_add_weak_pointer (G_OBJECT (manager), (gpointer *) &manager);
   return manager;
 }
-
-/* An hash table containing currently repeating sounds. The format is the
- * following:
- * Key: An EmpathySound
- * Value : The EmpathyRepeatableSound associated with that EmpathySound. */
-static GHashTable *repeating_sounds;
 
 static gboolean
 empathy_sound_pref_is_enabled (EmpathySound sound_id)
@@ -160,28 +208,25 @@ empathy_sound_manager_stop (EmpathySoundManager *self,
     EmpathySound sound_id)
 {
   EmpathySoundEntry *entry;
+  EmpathyRepeatableSound *repeatable_sound;
 
   g_return_if_fail (sound_id < LAST_EMPATHY_SOUND);
 
   entry = &(sound_entries[sound_id]);
   g_return_if_fail (entry->sound_id == sound_id);
 
-  if (repeating_sounds != NULL)
+  repeatable_sound = g_hash_table_lookup (self->priv->repeating_sounds,
+      GINT_TO_POINTER (sound_id));
+  if (repeatable_sound != NULL)
     {
-      EmpathyRepeatableSound *repeatable_sound;
-
-      repeatable_sound = g_hash_table_lookup (repeating_sounds,
-          GINT_TO_POINTER (sound_id));
-      if (repeatable_sound != NULL)
+      /* The sound must be stopped... If it is waiting for replay, remove
+       * it from hash table to cancel. Otherwise we'll cancel the sound
+       * being played. */
+      if (repeatable_sound->replay_timeout_id != 0)
         {
-          /* The sound must be stopped... If it is waiting for replay, remove
-           * it from hash table to cancel. Otherwise we'll cancel the sound
-           * being played. */
-          if (repeatable_sound->replay_timeout_id != 0)
-            {
-              g_hash_table_remove (repeating_sounds, GINT_TO_POINTER (sound_id));
-              return;
-            }
+          g_hash_table_remove (self->priv->repeating_sounds,
+              GINT_TO_POINTER (sound_id));
+          return;
         }
     }
 
@@ -270,8 +315,8 @@ empathy_sound_manager_play_full (EmpathySoundManager *self,
 
   /* The sound might already be playing repeatedly. If it's the case, we
    * immediadely return since there's no need to make it play again */
-  if (repeating_sounds != NULL &&
-      g_hash_table_lookup (repeating_sounds, GINT_TO_POINTER (sound_id)) != NULL)
+  if (g_hash_table_lookup (self->priv->repeating_sounds,
+        GINT_TO_POINTER (sound_id)) != NULL)
     return FALSE;
 
   return empathy_sound_play_internal (widget, sound_id, callback, user_data);
@@ -316,7 +361,7 @@ playing_timeout_cb (gpointer data)
   if (!playing)
     {
       DEBUG ("Failed to replay sound, stop repeating");
-      g_hash_table_remove (repeating_sounds,
+      g_hash_table_remove (repeatable_sound->self->priv->repeating_sounds,
           GINT_TO_POINTER (repeatable_sound->sound_id));
     }
 
@@ -332,42 +377,13 @@ playing_finished_cb (ca_context *c, guint id, int error_code,
   if (error_code != CA_SUCCESS)
     {
       DEBUG ("Error: %s", ca_strerror (error_code));
-      g_hash_table_remove (repeating_sounds,
+      g_hash_table_remove (repeatable_sound->self->priv->repeating_sounds,
           GINT_TO_POINTER (repeatable_sound->sound_id));
       return;
     }
 
   repeatable_sound->replay_timeout_id = g_timeout_add (
       repeatable_sound->play_interval, playing_timeout_cb, user_data);
-}
-
-static void
-empathy_sound_widget_destroyed_cb (GtkWidget *widget, gpointer user_data)
-{
-  EmpathyRepeatableSound *repeatable_sound = user_data;
-
-  /* The sound must be stopped... If it is waiting for replay, remove
-   * it from hash table to cancel. Otherwise playing_finished_cb will be
-   * called with an error. */
-  if (repeatable_sound->replay_timeout_id != 0)
-    {
-      g_hash_table_remove (repeating_sounds,
-          GINT_TO_POINTER (repeatable_sound->sound_id));
-    }
-}
-
-static void
-repeating_sounds_item_delete (gpointer data)
-{
-  EmpathyRepeatableSound *repeatable_sound = data;
-
-  if (repeatable_sound->replay_timeout_id != 0)
-    g_source_remove (repeatable_sound->replay_timeout_id);
-
-  g_signal_handlers_disconnect_by_func (repeatable_sound->widget,
-      empathy_sound_widget_destroyed_cb, repeatable_sound);
-
-  g_slice_free (EmpathyRepeatableSound, repeatable_sound);
 }
 
 /**
@@ -400,12 +416,7 @@ empathy_sound_manager_start_playing (EmpathySoundManager *self,
   if (!empathy_sound_pref_is_enabled (sound_id))
     return FALSE;
 
-  if (repeating_sounds == NULL)
-    {
-      repeating_sounds = g_hash_table_new_full (g_direct_hash, g_direct_equal,
-          NULL, repeating_sounds_item_delete);
-    }
-  else if (g_hash_table_lookup (repeating_sounds,
+  if (g_hash_table_lookup (self->priv->repeating_sounds,
                GINT_TO_POINTER (sound_id)) != NULL)
     {
       /* The sound is already playing in loop. No need to continue. */
@@ -417,8 +428,9 @@ empathy_sound_manager_start_playing (EmpathySoundManager *self,
   repeatable_sound->sound_id = sound_id;
   repeatable_sound->play_interval = timeout_before_replay;
   repeatable_sound->replay_timeout_id = 0;
+  repeatable_sound->self = g_object_ref (self);
 
-  g_hash_table_insert (repeating_sounds, GINT_TO_POINTER (sound_id),
+  g_hash_table_insert (self->priv->repeating_sounds, GINT_TO_POINTER (sound_id),
       repeatable_sound);
 
   g_signal_connect (G_OBJECT (widget), "destroy",
@@ -429,7 +441,8 @@ empathy_sound_manager_start_playing (EmpathySoundManager *self,
         repeatable_sound);
 
   if (!playing)
-      g_hash_table_remove (repeating_sounds, GINT_TO_POINTER (sound_id));
+      g_hash_table_remove (self->priv->repeating_sounds,
+          GINT_TO_POINTER (sound_id));
 
   return playing;
 }
