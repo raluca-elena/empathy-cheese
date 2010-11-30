@@ -68,6 +68,40 @@ static EmpathySoundEntry sound_entries[LAST_EMPATHY_SOUND] = {
     N_("Voice call ended"), NULL },
 };
 
+G_DEFINE_TYPE (EmpathySoundManager, empathy_sound_manager, G_TYPE_OBJECT)
+
+struct _EmpathySoundManagerPrivate
+{
+  gpointer unused;
+};
+
+static void
+empathy_sound_manager_class_init (EmpathySoundManagerClass *cls)
+{
+  g_type_class_add_private (cls, sizeof (EmpathySoundManagerPrivate));
+}
+
+static void
+empathy_sound_manager_init (EmpathySoundManager *self)
+{
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EMPATHY_TYPE_SOUND_MANAGER, EmpathySoundManagerPrivate);
+}
+
+EmpathySoundManager *
+empathy_sound_manager_dup_singleton (void)
+{
+  static EmpathySoundManager *manager = NULL;
+
+  if (manager != NULL)
+      return g_object_ref (manager);
+
+  manager = g_object_new (EMPATHY_TYPE_SOUND_MANAGER, NULL);
+
+  g_object_add_weak_pointer (G_OBJECT (manager), (gpointer *) &manager);
+  return manager;
+}
+
 /* An hash table containing currently repeating sounds. The format is the
  * following:
  * Key: An EmpathySound

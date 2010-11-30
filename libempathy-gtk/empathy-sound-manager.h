@@ -42,6 +42,32 @@ typedef enum {
   LAST_EMPATHY_SOUND,
 } EmpathySound;
 
+#define EMPATHY_TYPE_SOUND_MANAGER         (empathy_sound_manager_get_type ())
+#define EMPATHY_SOUND_MANAGER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), EMPATHY_TYPE_SOUND_MANAGER, EmpathySoundManager))
+#define EMPATHY_SOUND_MANAGER_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), EMPATHY_TYPE_SOUND_MANAGER, EmpathySoundManagerClass))
+#define EMPATHY_IS_SOUND_MANAGER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), EMPATHY_TYPE_SOUND_MANAGER))
+#define EMPATHY_IS_SOUND_MANAGER_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_SOUND_MANAGER))
+#define EMPATHY_SOUND_MANAGER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_SOUND_MANAGER, EmpathySoundManagerClass))
+
+typedef struct _EmpathySoundManager EmpathySoundManager;
+typedef struct _EmpathySoundManagerClass EmpathySoundManagerClass;
+typedef struct _EmpathySoundManagerPrivate EmpathySoundManagerPrivate;
+
+struct _EmpathySoundManager
+{
+  GObject parent;
+  EmpathySoundManagerPrivate *priv;
+};
+
+struct _EmpathySoundManagerClass
+{
+  GObjectClass parent_class;
+};
+
+GType empathy_sound_manager_get_type (void) G_GNUC_CONST;
+
+EmpathySoundManager * empathy_sound_manager_dup_singleton (void);
+
 gboolean empathy_sound_play (GtkWidget *widget, EmpathySound sound_id);
 void empathy_sound_stop (EmpathySound sound_id);
 
