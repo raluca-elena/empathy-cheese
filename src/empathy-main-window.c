@@ -60,7 +60,7 @@
 #include <libempathy-gtk/empathy-new-call-dialog.h>
 #include <libempathy-gtk/empathy-log-window.h>
 #include <libempathy-gtk/empathy-presence-chooser.h>
-#include <libempathy-gtk/empathy-sound.h>
+#include <libempathy-gtk/empathy-sound-manager.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-accounts-dialog.h"

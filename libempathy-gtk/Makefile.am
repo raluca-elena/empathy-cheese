@@ -75,7 +75,7 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-search-bar.c			\
 	empathy-share-my-desktop.c		\
 	empathy-smiley-manager.c		\
-	empathy-sound.c				\
+	empathy-sound-manager.c			\
 	empathy-spell.c				\
 	empathy-status-preset-dialog.c		\
 	empathy-string-parser.c			\
@@ -137,7 +137,7 @@ libempathy_gtk_headers =			\
 	empathy-search-bar.h			\
 	empathy-share-my-desktop.h		\
 	empathy-smiley-manager.h		\
-	empathy-sound.h				\
+	empathy-sound-manager.h			\
 	empathy-spell.h				\
 	empathy-status-preset-dialog.h		\
 	empathy-string-parser.h			\

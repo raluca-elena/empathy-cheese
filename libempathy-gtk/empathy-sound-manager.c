@@ -1,5 +1,5 @@
 /*
- * empathy-sound.c - Various sound related utility functions.
+ * empathy-sound-manager.c - Various sound related utility functions.
  * Copyright (C) 2009 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@
 
 #include <config.h>
 
-#include "empathy-sound.h"
+#include "empathy-sound-manager.h"
 
 #include <canberra-gtk.h>
 #include <glib/gi18n-lib.h>

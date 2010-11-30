@@ -1,5 +1,5 @@
 /*
- * empathy-sound.h - Various sound related utility functions.
+ * empathy-sound-manager.h - Various sound related utility functions.
  * Copyright (C) 2009 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  */
 
 
-#ifndef __EMPATHY_SOUND_H__
-#define __EMPATHY_SOUND_H__
+#ifndef __EMPATHY_SOUND_MANAGER_H__
+#define __EMPATHY_SOUND_MANAGER_H__
 
 #include <gtk/gtk.h>
 
@@ -27,19 +27,19 @@
 
 G_BEGIN_DECLS
 
-/* NOTE: Keep this sync with sound_entries in empathy-sound.c */
+/* NOTE: Keep this sync with sound_entries in empathy-sound-manager.c */
 typedef enum {
-	EMPATHY_SOUND_MESSAGE_INCOMING = 0,
-	EMPATHY_SOUND_MESSAGE_OUTGOING,
-	EMPATHY_SOUND_CONVERSATION_NEW,
-	EMPATHY_SOUND_CONTACT_CONNECTED,
-	EMPATHY_SOUND_CONTACT_DISCONNECTED,
-	EMPATHY_SOUND_ACCOUNT_CONNECTED,
-	EMPATHY_SOUND_ACCOUNT_DISCONNECTED,
-	EMPATHY_SOUND_PHONE_INCOMING,
-	EMPATHY_SOUND_PHONE_OUTGOING,
-	EMPATHY_SOUND_PHONE_HANGUP,
-	LAST_EMPATHY_SOUND,
+  EMPATHY_SOUND_MESSAGE_INCOMING = 0,
+  EMPATHY_SOUND_MESSAGE_OUTGOING,
+  EMPATHY_SOUND_CONVERSATION_NEW,
+  EMPATHY_SOUND_CONTACT_CONNECTED,
+  EMPATHY_SOUND_CONTACT_DISCONNECTED,
+  EMPATHY_SOUND_ACCOUNT_CONNECTED,
+  EMPATHY_SOUND_ACCOUNT_DISCONNECTED,
+  EMPATHY_SOUND_PHONE_INCOMING,
+  EMPATHY_SOUND_PHONE_OUTGOING,
+  EMPATHY_SOUND_PHONE_HANGUP,
+  LAST_EMPATHY_SOUND,
 } EmpathySound;
 
 gboolean empathy_sound_play (GtkWidget *widget, EmpathySound sound_id);
@@ -53,4 +53,4 @@ gboolean empathy_sound_play_full (GtkWidget *widget, EmpathySound sound_id,
 
 G_END_DECLS
 
-#endif /* #ifndef __EMPATHY_SOUND_H__*/
+#endif /* #ifndef __EMPATHY_SOUND_MANAGER_H__ */

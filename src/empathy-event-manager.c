@@ -43,7 +43,7 @@
 
 #include <libempathy-gtk/empathy-images.h>
 #include <libempathy-gtk/empathy-contact-dialogs.h>
-#include <libempathy-gtk/empathy-sound.h>
+#include <libempathy-gtk/empathy-sound-manager.h>
 
 #include "empathy-event-manager.h"
 #include "empathy-main-window.h"

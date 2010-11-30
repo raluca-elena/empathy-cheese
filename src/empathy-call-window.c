@@ -44,7 +44,7 @@
 #include <libempathy-gtk/empathy-audio-sink.h>
 #include <libempathy-gtk/empathy-video-src.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
-#include <libempathy-gtk/empathy-sound.h>
+#include <libempathy-gtk/empathy-sound-manager.h>
 #include <libempathy-gtk/empathy-geometry.h>
 #include <libempathy-gtk/empathy-images.h>
 
