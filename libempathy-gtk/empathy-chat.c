@@ -59,9 +59,6 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_CHAT
 #include <libempathy/empathy-debug.h>
 
-
-#define CHAT_DIR_CREATE_MODE  (S_IRUSR | S_IWUSR | S_IXUSR)
-#define CHAT_FILE_CREATE_MODE (S_IRUSR | S_IWUSR)
 #define IS_ENTER(v) (v == GDK_KEY_Return || v == GDK_KEY_ISO_Enter || v == GDK_KEY_KP_Enter)
 #define COMPOSING_STOP_TIMEOUT 5
 
