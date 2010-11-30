@@ -816,8 +816,6 @@ contact_list_view_popup_menu_idle_cb (gpointer user_data)
 	}
 
 	if (menu) {
-		g_signal_connect (menu, "deactivate",
-				  G_CALLBACK (gtk_menu_detach), NULL);
 		gtk_menu_attach_to_widget (GTK_MENU (menu),
 					   GTK_WIDGET (data->view), NULL);
 		gtk_widget_show (menu);
@@ -936,8 +934,6 @@ contact_list_view_call_activated_cb (
 	gtk_menu_shell_append (shell, item);
 	gtk_widget_show (item);
 
-	g_signal_connect (menu, "deactivate",
-			  G_CALLBACK (gtk_menu_detach), NULL);
 	gtk_menu_attach_to_widget (GTK_MENU (menu),
 				   GTK_WIDGET (view), NULL);
 	gtk_widget_show (menu);
