@@ -78,6 +78,7 @@ struct _EmpathySoundManagerPrivate
    * Key: An EmpathySound
    * Value : The EmpathyRepeatableSound associated with that EmpathySound. */
   GHashTable *repeating_sounds;
+  GSettings *gsettings_sound;
 };
 
 static void
@@ -86,6 +87,7 @@ empathy_sound_manager_dispose (GObject *object)
   EmpathySoundManager *self = (EmpathySoundManager *) object;
 
   tp_clear_pointer (&self->priv->repeating_sounds, g_hash_table_unref);
+  tp_clear_object (&self->priv->gsettings_sound);
 
   G_OBJECT_CLASS (empathy_sound_manager_parent_class)->dispose (object);
 }
@@ -140,6 +142,8 @@ empathy_sound_manager_init (EmpathySoundManager *self)
 
   self->priv->repeating_sounds = g_hash_table_new_full (NULL, NULL,
       NULL, repeating_sounds_item_delete);
+
+  self->priv->gsettings_sound = g_settings_new (EMPATHY_PREFS_SOUNDS_SCHEMA);
 }
 
 EmpathySoundManager *
@@ -157,42 +161,29 @@ empathy_sound_manager_dup_singleton (void)
 }
 
 static gboolean
-empathy_sound_pref_is_enabled (EmpathySound sound_id)
+empathy_sound_pref_is_enabled (EmpathySoundManager *self,
+    EmpathySound sound_id)
 {
   EmpathySoundEntry *entry;
-  GSettings *gsettings = g_settings_new (EMPATHY_PREFS_SOUNDS_SCHEMA);
-  gboolean res;
 
   entry = &(sound_entries[sound_id]);
   g_return_val_if_fail (entry->sound_id == sound_id, FALSE);
 
   if (entry->key == NULL)
-    {
-      res = TRUE;
-      goto finally;
-    }
+    return TRUE;
 
-  res = g_settings_get_boolean (gsettings, EMPATHY_PREFS_SOUNDS_ENABLED);
-
-  if (!res)
-    goto finally;
+  if (! g_settings_get_boolean (self->priv->gsettings_sound,
+      EMPATHY_PREFS_SOUNDS_ENABLED))
+    return FALSE;
 
   if (!empathy_check_available_state ())
     {
-      if (g_settings_get_boolean (gsettings,
+      if (g_settings_get_boolean (self->priv->gsettings_sound,
             EMPATHY_PREFS_SOUNDS_DISABLED_AWAY))
-        {
-          res = FALSE;
-          goto finally;
-        }
+        return FALSE;
     }
 
-  res = g_settings_get_boolean (gsettings, entry->key);
-
-finally:
-  g_object_unref (gsettings);
-
-  return res;
+  return g_settings_get_boolean (self->priv->gsettings_sound, entry->key);
 }
 
 /**
@@ -310,7 +301,7 @@ empathy_sound_manager_play_full (EmpathySoundManager *self,
   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
   g_return_val_if_fail (sound_id < LAST_EMPATHY_SOUND, FALSE);
 
-  if (!empathy_sound_pref_is_enabled (sound_id))
+  if (!empathy_sound_pref_is_enabled (self, sound_id))
     return FALSE;
 
   /* The sound might already be playing repeatedly. If it's the case, we
@@ -413,7 +404,7 @@ empathy_sound_manager_start_playing (EmpathySoundManager *self,
   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
   g_return_val_if_fail (sound_id < LAST_EMPATHY_SOUND, FALSE);
 
-  if (!empathy_sound_pref_is_enabled (sound_id))
+  if (!empathy_sound_pref_is_enabled (self, sound_id))
     return FALSE;
 
   if (g_hash_table_lookup (self->priv->repeating_sounds,
