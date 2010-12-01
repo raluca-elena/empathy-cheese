@@ -29,6 +29,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-auth-factory.h>
+#include <libempathy/empathy-server-sasl-handler.h>
 #include <libempathy/empathy-server-tls-handler.h>
 #include <libempathy/empathy-tls-verifier.h>
 
@@ -180,7 +181,7 @@ verifier_verify_cb (GObject *source,
 }
 
 static void
-auth_factory_new_handler_cb (EmpathyAuthFactory *factory,
+auth_factory_new_tls_handler_cb (EmpathyAuthFactory *factory,
     EmpathyServerTLSHandler *handler,
     gpointer user_data)
 {
@@ -202,6 +203,69 @@ auth_factory_new_handler_cb (EmpathyAuthFactory *factory,
   g_object_unref (verifier);
   g_object_unref (certificate);
   g_free (hostname);
+}
+
+typedef struct
+{
+  EmpathyServerSASLHandler *handler;
+  GtkWidget *entry;
+} PasswordDialogData;
+
+static void
+password_dialog_response_cb (GtkDialog *dialog,
+    gint response,
+    gpointer user_data)
+{
+  PasswordDialogData *data = user_data;
+
+  if (response == GTK_RESPONSE_ACCEPT)
+    {
+      empathy_server_sasl_handler_provide_password (data->handler,
+          gtk_entry_get_text (GTK_ENTRY (data->entry)));
+    }
+  else
+    {
+      empathy_server_sasl_handler_cancel (data->handler);
+    }
+
+  gtk_widget_destroy (GTK_WIDGET (dialog));
+
+  g_object_unref (data->handler);
+  g_slice_free (PasswordDialogData, data);
+}
+
+static void
+auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
+    EmpathyServerSASLHandler *handler,
+    gpointer user_data)
+{
+  GtkWidget *dialog, *entry;
+  PasswordDialogData *data;
+
+  DEBUG ("New SASL server handler received from the factory");
+
+  dialog = gtk_dialog_new_with_buttons (_("Enter password"), NULL,
+      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+      GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
+      NULL);
+
+  entry = gtk_entry_new ();
+  gtk_entry_set_visibility (GTK_ENTRY (entry), FALSE);
+
+  gtk_box_pack_start (GTK_BOX (
+          gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
+      entry, FALSE, FALSE, 10);
+  gtk_widget_show (entry);
+
+  data = g_slice_new0 (PasswordDialogData);
+  data->handler = g_object_ref (handler);
+  data->entry = entry;
+
+  g_signal_connect (dialog, "response",
+      G_CALLBACK (password_dialog_response_cb), data);
+
+  gtk_widget_show (dialog);
 }
 
 int
@@ -238,7 +302,10 @@ main (int argc,
   factory = empathy_auth_factory_dup_singleton ();
 
   g_signal_connect (factory, "new-server-tls-handler",
-      G_CALLBACK (auth_factory_new_handler_cb), NULL);
+      G_CALLBACK (auth_factory_new_tls_handler_cb), NULL);
+
+  g_signal_connect (factory, "new-server-sasl-handler",
+      G_CALLBACK (auth_factory_new_sasl_handler_cb), NULL);
 
   if (!empathy_auth_factory_register (factory, &error))
     {
