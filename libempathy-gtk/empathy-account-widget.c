@@ -183,8 +183,17 @@ account_widget_set_control_buttons_sensitivity (EmpathyAccountWidget *self,
 
       if (sensitive)
         {
-          gtk_widget_set_can_default (priv->apply_button, TRUE);
-          gtk_widget_grab_default (priv->apply_button);
+          /* We can't grab default if the widget hasn't be packed in a
+           * window */
+          GtkWidget *window;
+
+          window = gtk_widget_get_toplevel (priv->apply_button);
+          if (window != NULL &&
+              gtk_widget_is_toplevel (window))
+            {
+              gtk_widget_set_can_default (priv->apply_button, TRUE);
+              gtk_widget_grab_default (priv->apply_button);
+            }
         }
     }
 }
