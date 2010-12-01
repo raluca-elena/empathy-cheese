@@ -41,6 +41,7 @@ typedef struct {
 
 enum {
   NEW_SERVER_TLS_HANDLER,
+  NEW_SERVER_SASL_HANDLER,
   LAST_SIGNAL,
 };
 
@@ -270,6 +271,15 @@ empathy_auth_factory_class_init (EmpathyAuthFactoryClass *klass)
       g_cclosure_marshal_VOID__OBJECT,
       G_TYPE_NONE,
       1, EMPATHY_TYPE_SERVER_TLS_HANDLER);
+
+  signals[NEW_SERVER_SASL_HANDLER] =
+    g_signal_new ("new-server-sasl-handler",
+      G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0,
+      NULL, NULL,
+      g_cclosure_marshal_VOID__OBJECT,
+      G_TYPE_NONE,
+      1, EMPATHY_TYPE_SERVER_SASL_HANDLER);
 }
 
 EmpathyAuthFactory *
