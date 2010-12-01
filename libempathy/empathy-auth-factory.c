@@ -218,12 +218,23 @@ empathy_auth_factory_init (EmpathyAuthFactory *self)
       FALSE, handle_channels_cb, self, NULL);
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
+          /* ChannelType */
           TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION,
+          /* AuthenticationMethod */
           TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
           TP_HANDLE_TYPE_NONE, NULL));
 
-  g_object_unref (bus);
+  tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
+          /* ChannelType */
+          TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TP_IFACE_CHANNEL_TYPE_SERVER_AUTHENTICATION,
+          /* AuthenticationMethod */
+          TP_PROP_CHANNEL_TYPE_SERVER_AUTHENTICATION_AUTHENTICATION_METHOD,
+          G_TYPE_STRING, TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
+          NULL));
+
+ g_object_unref (bus);
 }
 
 static void
