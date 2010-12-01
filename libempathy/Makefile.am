@@ -49,6 +49,7 @@ libempathy_headers =				\
 	empathy-irc-server.h			\
 	empathy-location.h			\
 	empathy-message.h			\
+	empathy-server-sasl-handler.h		\
 	empathy-server-tls-handler.h		\
 	empathy-status-presets.h		\
 	empathy-time.h				\
@@ -87,6 +88,7 @@ libempathy_la_SOURCES =					\
 	empathy-irc-network.c				\
 	empathy-irc-server.c				\
 	empathy-message.c				\
+	empathy-server-sasl-handler.c			\
 	empathy-server-tls-handler.c			\
 	empathy-status-presets.c			\
 	empathy-time.c					\
