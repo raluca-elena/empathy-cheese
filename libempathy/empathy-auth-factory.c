@@ -26,6 +26,7 @@
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include "empathy-debug.h"
+#include "empathy-server-sasl-handler.h"
 #include "empathy-server-tls-handler.h"
 #include "empathy-utils.h"
 
@@ -35,6 +36,11 @@ G_DEFINE_TYPE (EmpathyAuthFactory, empathy_auth_factory, G_TYPE_OBJECT);
 
 typedef struct {
   TpBaseClient *handler;
+
+  /* Keep a ref here so the auth client doesn't have to mess with
+   * refs. It will be cleared when the channel (and so the handler)
+   * gets invalidated. */
+  EmpathyServerSASLHandler *sasl_handler;
 
   gboolean dispose_run;
 } EmpathyAuthFactoryPriv;
@@ -112,6 +118,18 @@ server_tls_handler_ready_cb (GObject *source,
 }
 
 static void
+sasl_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
+    gpointer user_data)
+{
+  EmpathyAuthFactory *self = user_data;
+  EmpathyAuthFactoryPriv *priv = GET_PRIV (self);
+
+  DEBUG ("SASL handler is invalidated, unref it");
+
+  tp_clear_object (&priv->sasl_handler);
+}
+
+static void
 handle_channels_cb (TpSimpleHandler *handler,
     TpAccount *account,
     TpConnection *connection,
@@ -125,18 +143,22 @@ handle_channels_cb (TpSimpleHandler *handler,
   const GError *dbus_error;
   GError *error = NULL;
   EmpathyAuthFactory *self = user_data;
+  EmpathyAuthFactoryPriv *priv = GET_PRIV (self);
   HandlerContextData *data;
+  GHashTable *props;
+  const gchar * const *available_mechanisms;
 
-  DEBUG ("Handle TLS carrier channels.");
+  DEBUG ("Handle TLS or SASL carrier channels.");
 
-  /* there can't be more than one ServerTLSConnection channels
-   * at the same time, for the same connection/account.
+  /* there can't be more than one ServerTLSConnection or
+   * ServerAuthentication channels at the same time, for the same
+   * connection/account.
    */
   if (g_list_length (channels) != 1)
     {
       g_set_error_literal (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Can't handle more than one ServerTLSConnection channel "
-          "for the same connection.");
+          "Can't handle more than one ServerTLSConnection or ServerAuthentication "
+          "channel for the same connection.");
 
       goto error;
     }
@@ -144,11 +166,38 @@ handle_channels_cb (TpSimpleHandler *handler,
   channel = channels->data;
 
   if (tp_channel_get_channel_type_id (channel) !=
-      EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION)
+      EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION
+      && tp_channel_get_channel_type_id (channel) !=
+      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
       g_set_error (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Can only handle ServerTLSConnection channels, this was a %s "
-          "channel", tp_channel_get_channel_type (channel));
+          "Can only handle ServerTLSConnection or ServerAuthentication channels, "
+          "this was a %s channel", tp_channel_get_channel_type (channel));
+
+      goto error;
+    }
+
+  if (tp_channel_get_channel_type_id (channel) ==
+      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
+      && priv->sasl_handler != NULL)
+    {
+      g_set_error_literal (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Can't handle more than one ServerAuthentication channel at one time");
+
+      goto error;
+    }
+
+  props = tp_channel_borrow_immutable_properties (channel);
+  available_mechanisms = tp_asv_get_boxed (props,
+      TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_AVAILABLE_MECHANISMS,
+      G_TYPE_STRV);
+
+  if (tp_channel_get_channel_type_id (channel) ==
+      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
+      && !tp_strv_contains (available_mechanisms, "X-TELEPATHY-PASSWORD"))
+    {
+      g_set_error_literal (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Only the X-TELEPATHY-PASSWORD SASL mechanism is supported");
 
       goto error;
     }
@@ -162,11 +211,27 @@ handle_channels_cb (TpSimpleHandler *handler,
     }
 
   /* create a handler */
-  data = handler_context_data_new (self, context);
-  tp_handle_channels_context_delay (context);
-  empathy_server_tls_handler_new_async (channel, server_tls_handler_ready_cb,
-      data);
+  if (tp_channel_get_channel_type_id (channel) ==
+      EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION)
+    {
+      data = handler_context_data_new (self, context);
+      tp_handle_channels_context_delay (context);
 
+      empathy_server_tls_handler_new_async (channel, server_tls_handler_ready_cb,
+          data);
+    }
+  else if (tp_channel_get_channel_type_id (channel) ==
+      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
+    {
+      priv->sasl_handler = empathy_server_sasl_handler_new (channel);
+
+      g_signal_connect (priv->sasl_handler, "invalidated",
+          G_CALLBACK (sasl_handler_invalidated_cb), self);
+
+      tp_handle_channels_context_accept (context);
+      g_signal_emit (self, signals[NEW_SERVER_SASL_HANDLER], 0,
+          priv->sasl_handler);
+    }
   return;
 
  error:
@@ -249,6 +314,7 @@ empathy_auth_factory_dispose (GObject *object)
   priv->dispose_run = TRUE;
 
   tp_clear_object (&priv->handler);
+  tp_clear_object (&priv->sasl_handler);
 
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->dispose (object);
 }
