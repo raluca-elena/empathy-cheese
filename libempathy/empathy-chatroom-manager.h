@@ -1,7 +1,6 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2004-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2010 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -44,36 +43,48 @@ G_BEGIN_DECLS
 typedef struct _EmpathyChatroomManager      EmpathyChatroomManager;
 typedef struct _EmpathyChatroomManagerClass EmpathyChatroomManagerClass;
 
-struct _EmpathyChatroomManager {
-	GObject parent;
-	gpointer priv;
+struct _EmpathyChatroomManager
+{
+  GObject parent;
+  gpointer priv;
 };
 
-struct _EmpathyChatroomManagerClass {
-	GObjectClass parent_class;
+struct _EmpathyChatroomManagerClass
+{
+  GObjectClass parent_class;
 };
 
-GType                  empathy_chatroom_manager_get_type      (void) G_GNUC_CONST;
-EmpathyChatroomManager *empathy_chatroom_manager_dup_singleton (const gchar *file);
-gboolean               empathy_chatroom_manager_add           (EmpathyChatroomManager *manager,
-							      EmpathyChatroom        *chatroom);
-void                   empathy_chatroom_manager_remove        (EmpathyChatroomManager *manager,
-							      EmpathyChatroom        *chatroom);
-EmpathyChatroom *       empathy_chatroom_manager_find          (EmpathyChatroomManager *manager,
-							      TpAccount               *account,
-							      const gchar             *room);
-EmpathyChatroom *      empathy_chatroom_manager_ensure_chatroom (EmpathyChatroomManager *manager,
-							      TpAccount               *account,
-							      const gchar             *room,
-							      const gchar             *name);
-GList *                empathy_chatroom_manager_get_chatrooms (EmpathyChatroomManager *manager,
-							      TpAccount               *account);
-guint                  empathy_chatroom_manager_get_count     (EmpathyChatroomManager *manager,
-							      TpAccount               *account);
+GType empathy_chatroom_manager_get_type (void) G_GNUC_CONST;
 
-void		       empathy_chatroom_manager_chat_handled  (EmpathyChatroomManager *self,
-							       EmpathyTpChat *chat,
-							       TpAccount *account);
+EmpathyChatroomManager * empathy_chatroom_manager_dup_singleton (
+    const gchar *file);
+
+gboolean empathy_chatroom_manager_add (EmpathyChatroomManager *manager,
+    EmpathyChatroom *chatroom);
+
+void empathy_chatroom_manager_remove (EmpathyChatroomManager *manager,
+    EmpathyChatroom *chatroom);
+
+EmpathyChatroom * empathy_chatroom_manager_find (
+    EmpathyChatroomManager *manager,
+    TpAccount *account,
+    const gchar *room);
+
+EmpathyChatroom * empathy_chatroom_manager_ensure_chatroom (
+    EmpathyChatroomManager *manager,
+    TpAccount *account,
+    const gchar *room,
+    const gchar *name);
+
+GList * empathy_chatroom_manager_get_chatrooms (EmpathyChatroomManager *manager,
+    TpAccount *account);
+
+guint empathy_chatroom_manager_get_count (EmpathyChatroomManager *manager,
+    TpAccount *account);
+
+void empathy_chatroom_manager_chat_handled (EmpathyChatroomManager *self,
+    EmpathyTpChat *chat,
+    TpAccount *account);
 
 G_END_DECLS
 
