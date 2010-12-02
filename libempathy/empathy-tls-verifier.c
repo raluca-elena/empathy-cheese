@@ -489,3 +489,24 @@ empathy_tls_verifier_verify_finish (EmpathyTLSVerifier *self,
 
   return TRUE;
 }
+
+void
+empathy_tls_verifier_store_exception (EmpathyTLSVerifier *self)
+{
+  GArray *last_cert;
+  GcrCertificate *cert;
+  GPtrArray *certs;
+  GError *error = NULL;
+  EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
+
+  g_object_get (priv->certificate, "cert-data", &certs, NULL);
+  last_cert = g_ptr_array_index (certs, certs->len - 1);
+  cert = gcr_simple_certificate_new_static ((gpointer)last_cert->data,
+          last_cert->len);
+
+  if (!gcr_trust_add_certificate_exception (cert, GCR_PURPOSE_CLIENT_AUTH,
+          priv->hostname, NULL, &error))
+      DEBUG ("Can't store the certificate exeption: %s", error->message);
+
+  g_object_unref (cert);
+}

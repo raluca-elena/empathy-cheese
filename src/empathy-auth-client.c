@@ -93,6 +93,7 @@ tls_dialog_response_cb (GtkDialog *dialog,
   GHashTable *details = NULL;
   EmpathyTLSDialog *tls_dialog = EMPATHY_TLS_DIALOG (dialog);
   gboolean remember = FALSE;
+  EmpathyTLSVerifier *verifier = EMPATHY_TLS_VERIFIER (user_data);
 
   DEBUG ("Response %d", response_id);
 
@@ -117,7 +118,7 @@ tls_dialog_response_cb (GtkDialog *dialog,
     }
 
   if (remember)
-    empathy_tls_certificate_store_ca (certificate);
+    empathy_tls_verifier_store_exception (verifier);
 
   g_object_unref (certificate);
   g_hash_table_unref (details);
@@ -133,6 +134,7 @@ tls_dialog_response_cb (GtkDialog *dialog,
 
 static void
 display_interactive_dialog (EmpathyTLSCertificate *certificate,
+    EmpathyTLSVerifier *verifier,
     EmpTLSCertificateRejectReason reason,
     GHashTable *details)
 {
@@ -143,8 +145,9 @@ display_interactive_dialog (EmpathyTLSCertificate *certificate,
   stop_timer ();
 
   tls_dialog = empathy_tls_dialog_new (certificate, reason, details);
-  g_signal_connect (tls_dialog, "response",
-      G_CALLBACK (tls_dialog_response_cb), NULL);
+  g_signal_connect_data (tls_dialog, "response",
+      G_CALLBACK (tls_dialog_response_cb), g_object_ref (verifier),
+      (GClosureNotify)g_object_unref, 0);
 
   gtk_widget_show (tls_dialog);
 }
@@ -159,6 +162,7 @@ verifier_verify_cb (GObject *source,
   GError *error = NULL;
   EmpathyTLSCertificate *certificate = NULL;
   GHashTable *details = NULL;
+  gchar *hostname = NULL;
 
   g_object_get (source,
       "certificate", &certificate,
@@ -170,7 +174,8 @@ verifier_verify_cb (GObject *source,
   if (error != NULL)
     {
       DEBUG ("Error: %s", error->message);
-      display_interactive_dialog (certificate, reason, details);
+      display_interactive_dialog (certificate, EMPATHY_TLS_VERIFIER (source),
+              reason, details);
 
       g_error_free (error);
     }
@@ -179,6 +184,7 @@ verifier_verify_cb (GObject *source,
       empathy_tls_certificate_accept_async (certificate, NULL, NULL);
     }
 
+  g_free (hostname);
   g_object_unref (certificate);
 }
 

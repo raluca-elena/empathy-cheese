@@ -88,8 +88,6 @@ gboolean empathy_tls_certificate_reject_finish (EmpathyTLSCertificate *self,
     GAsyncResult *result,
     GError **error);
 
-void empathy_tls_certificate_store_ca (EmpathyTLSCertificate *self);
-
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_TLS_CERTIFICATE_H__*/
