@@ -32,6 +32,7 @@
 
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/interfaces.h>
+#include <telepathy-glib/simple-observer.h>
 #include <telepathy-glib/util.h>
 
 #include "empathy-tp-chat.h"
@@ -47,6 +48,15 @@
 
 static EmpathyChatroomManager *chatroom_manager_singleton = NULL;
 
+static void observe_channels_cb (TpSimpleObserver *observer,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    GList *requests,
+    TpObserveChannelsContext *context,
+    gpointer user_data);
+
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyChatroomManager)
 typedef struct
 {
@@ -57,6 +67,8 @@ typedef struct
   /* source id of the autosave timer */
   gint save_timer_id;
   gboolean ready;
+
+  TpBaseClient *observer;
 } EmpathyChatroomManagerPriv;
 
 enum {
@@ -377,6 +389,18 @@ empathy_chatroom_manager_set_property (GObject *object,
 }
 
 static void
+chatroom_manager_dispose (GObject *object)
+{
+  EmpathyChatroomManagerPriv *priv;
+
+  priv = GET_PRIV (object);
+
+  tp_clear_object (&priv->observer);
+
+  (G_OBJECT_CLASS (empathy_chatroom_manager_parent_class)->dispose) (object);
+}
+
+static void
 chatroom_manager_finalize (GObject *object)
 {
   EmpathyChatroomManager *self = EMPATHY_CHATROOM_MANAGER (object);
@@ -441,6 +465,8 @@ empathy_chatroom_manager_constructor (GType type,
   GObject *obj;
   EmpathyChatroomManager *self;
   EmpathyChatroomManagerPriv *priv;
+  GError *error = NULL;
+  TpDBusDaemon *dbus;
 
   if (chatroom_manager_singleton != NULL)
     return g_object_ref (chatroom_manager_singleton);
@@ -475,6 +501,38 @@ empathy_chatroom_manager_constructor (GType type,
       g_free (dir);
     }
 
+  dbus = tp_dbus_daemon_dup (&error);
+  if (dbus == NULL)
+    {
+      g_warning ("Failed to get TpDBusDaemon: %s", error->message);
+
+      g_error_free (error);
+      return obj;
+    }
+
+  /* Setup a room observer */
+  priv->observer = tp_simple_observer_new (dbus, TRUE,
+      "Empathy.ChatroomManager", TRUE, observe_channels_cb, self, NULL);
+
+  g_object_unref (dbus);
+
+  tp_base_client_take_observer_filter (priv->observer, tp_asv_new (
+      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+        TP_IFACE_CHANNEL_TYPE_TEXT,
+      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
+        TP_HANDLE_TYPE_ROOM,
+      NULL));
+
+  tp_base_client_add_connection_features_varargs (priv->observer,
+      TP_CONNECTION_FEATURE_CAPABILITIES, NULL);
+
+  if (!tp_base_client_register (priv->observer, &error))
+    {
+      g_critical ("Failed to register Observer: %s", error->message);
+
+      g_error_free (error);
+    }
+
   return obj;
 }
 
@@ -487,6 +545,7 @@ empathy_chatroom_manager_class_init (EmpathyChatroomManagerClass *klass)
   object_class->constructor = empathy_chatroom_manager_constructor;
   object_class->get_property = empathy_chatroom_manager_get_property;
   object_class->set_property = empathy_chatroom_manager_set_property;
+  object_class->dispose = chatroom_manager_dispose;
   object_class->finalize = chatroom_manager_finalize;
 
   param_spec = g_param_spec_string (
@@ -764,4 +823,52 @@ empathy_chatroom_manager_chat_handled (EmpathyChatroomManager *self,
   g_signal_connect (chat, "destroy",
     G_CALLBACK (chatroom_manager_chat_destroyed_cb),
     self);
+}
+
+static void
+observe_channels_cb (TpSimpleObserver *observer,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    GList *requests,
+    TpObserveChannelsContext *context,
+    gpointer user_data)
+{
+  EmpathyChatroomManager *self = user_data;
+  GList *l;
+
+  for (l = channels; l != NULL; l = g_list_next (l))
+    {
+      TpChannel *channel = l->data;
+      EmpathyTpChat *tp_chat;
+      const gchar *roomname;
+      EmpathyChatroom *chatroom;
+
+      if (tp_proxy_get_invalidated (channel) != NULL)
+        continue;
+
+      tp_chat = empathy_tp_chat_new (account, channel);
+      roomname = empathy_tp_chat_get_id (tp_chat);
+      chatroom = empathy_chatroom_manager_find (self, account, roomname);
+
+      if (chatroom == NULL)
+        {
+          chatroom = empathy_chatroom_new_full (account, roomname, roomname,
+            FALSE);
+          empathy_chatroom_manager_add (self, chatroom);
+          g_object_unref (chatroom);
+        }
+
+      empathy_chatroom_set_tp_chat (chatroom, tp_chat);
+      g_object_unref (tp_chat);
+
+      /* A TpChat is always destroyed as it only gets unreffed after the channel
+       * has been invalidated in the dispatcher..  */
+      g_signal_connect (tp_chat, "destroy",
+        G_CALLBACK (chatroom_manager_chat_destroyed_cb),
+        self);
+    }
+
+  tp_observe_channels_context_accept (context);
 }
