@@ -113,18 +113,14 @@ verification_output_to_reason (gint res,
 }
 
 static gboolean
-check_is_certificate_exception (EmpathyTLSVerifier *self,
-        gconstpointer data, gsize n_data)
+check_is_certificate_exception (EmpathyTLSVerifier *self, GcrCertificate *cert)
 {
-  GcrCertificate *cert;
   GError *error = NULL;
   gboolean ret;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
-  cert = gcr_simple_certificate_new_static (data, n_data);
   ret = gcr_trust_is_certificate_exception (cert, GCR_PURPOSE_CLIENT_AUTH,
           priv->hostname, NULL, &error);
-  g_object_unref (cert);
 
   if (!ret && error) {
       DEBUG ("Can't lookup certificate exception for %s: %s", priv->hostname,
@@ -136,14 +132,11 @@ check_is_certificate_exception (EmpathyTLSVerifier *self,
 }
 
 static gboolean
-check_is_certificate_anchor (EmpathyTLSVerifier *self,
-        gconstpointer data, gsize n_data)
+check_is_certificate_anchor (EmpathyTLSVerifier *self, GcrCertificate *cert)
 {
-  GcrCertificate *cert;
   GError *error = NULL;
   gboolean ret;
 
-  cert = gcr_simple_certificate_new_static (data, n_data);
   ret = gcr_trust_is_certificate_anchor (cert, GCR_PURPOSE_CLIENT_AUTH,
           NULL, &error);
   g_object_unref (cert);
@@ -156,16 +149,120 @@ check_is_certificate_anchor (EmpathyTLSVerifier *self,
   return ret;
 }
 
-static gnutls_x509_crt_t
-convert_cert_to_gnutls (GArray *cert_data)
+static gnutls_x509_crt_t*
+convert_chain_to_gnutls (GPtrArray *chain, guint *chain_length)
 {
+  gnutls_x509_crt_t *retval;
   gnutls_x509_crt_t cert;
-  gnutls_datum_t datum = { (unsigned char*)cert_data->data, cert_data->len };
+  gnutls_datum_t datum;
+  gsize n_data;
+  gint idx;
 
-  gnutls_x509_crt_init (&cert);
-  gnutls_x509_crt_import (cert, &datum, GNUTLS_X509_FMT_DER);
+  retval = g_malloc0 (sizeof (gnutls_x509_crt_t) * chain->len);
 
-  return cert;
+  for (idx = 0; idx < (gint) chain->len; idx++)
+    {
+      datum.data = (gpointer)gcr_certificate_get_der_data
+              (g_ptr_array_index (chain, idx), &n_data);
+      datum.size = n_data;
+
+      gnutls_x509_crt_init (&cert);
+      if (gnutls_x509_crt_import (cert, &datum, GNUTLS_X509_FMT_DER) < 0)
+        g_return_val_if_reached (NULL);
+
+      retval[idx] = cert;
+      cert = NULL;
+  }
+
+  *chain_length = chain->len;
+  return retval;
+}
+
+static gnutls_x509_crt_t*
+build_certificate_chain_for_gnutls (EmpathyTLSVerifier *self,
+        GPtrArray *certs, guint *chain_length, gboolean *chain_anchor)
+{
+  GPtrArray *chain;
+  gnutls_x509_crt_t *result;
+  GArray *cert_data;
+  GcrCertificate *cert;
+  GcrCertificate *anchor;
+  guint idx;
+
+  g_assert (chain_length);
+  g_assert (chain_anchor);
+
+  chain = g_ptr_array_new_with_free_func (g_object_unref);
+
+  /*
+   * The first certificate always goes in the chain unconditionally.
+   */
+  cert_data = g_ptr_array_index (certs, 0);
+  cert = gcr_simple_certificate_new_static (cert_data->data, cert_data->len);
+  g_ptr_array_add (chain, cert);
+
+  /*
+   * Find out which of our certificates is the anchor. Note that we
+   * don't allow the leaf certificate on the tree to be an anchor.
+   * Also build up the certificate chain. But only up to our anchor.
+   */
+  anchor = NULL;
+  for (idx = 1; idx < certs->len && anchor == NULL; idx++)
+    {
+      /* Stop the chain if previous was self-signed */
+      if (gcr_certificate_is_issuer (cert, cert))
+        break;
+
+      cert_data = g_ptr_array_index (certs, idx);
+      cert = gcr_simple_certificate_new_static (cert_data->data,
+              cert_data->len);
+
+      /* Add this to the chain */
+      g_ptr_array_add (chain, cert);
+
+      /* Stop the chain at the first anchor */
+      if (check_is_certificate_anchor (self, cert))
+          anchor = cert;
+    }
+
+  /*
+   * If at this point we haven't found a anchor, then we need
+   * to keep looking up certificates until we do.
+   */
+  while (!anchor) {
+      /* Stop the chain if previous was self-signed */
+      if (gcr_certificate_is_issuer (cert, cert))
+        break;
+
+      cert = gcr_pkcs11_certificate_lookup_for_issuer (cert);
+      if (cert == NULL)
+        break;
+
+      /* Add this to the chain */
+      g_ptr_array_add (chain, cert);
+
+      /* Stop the chain if this is an anchor */
+      if (check_is_certificate_anchor (self, cert))
+          anchor = cert;
+  }
+
+  /* Now convert to a form that gnutls understands... */
+  result = convert_chain_to_gnutls (chain, chain_length);
+  g_assert (!anchor || g_ptr_array_index (chain, chain->len - 1) == anchor);
+  *chain_anchor = (anchor != NULL);
+  g_ptr_array_free (chain, TRUE);
+
+  return result;
+}
+
+static void
+free_certificate_chain_for_gnutls (gnutls_x509_crt_t *chain, guint n_chain)
+{
+  guint idx;
+
+  for (idx = 0; idx < n_chain; idx++)
+    gnutls_x509_crt_deinit (chain[idx]);
+  g_free (chain);
 }
 
 static void
@@ -199,64 +296,49 @@ abort_verification (EmpathyTLSVerifier *self,
 static void
 perform_verification (EmpathyTLSVerifier *self)
 {
-  gnutls_x509_crt_t cert, anchor;
   gboolean ret = FALSE;
   EmpTLSCertificateRejectReason reason =
     EMP_TLS_CERTIFICATE_REJECT_REASON_UNKNOWN;
-  gsize idx;
+  GcrCertificate *cert;
+  gboolean have_anchor = FALSE;
   GPtrArray *certs = NULL;
   GArray *cert_data;
-  GPtrArray *cert_chain;
   gint res;
+  gnutls_x509_crt_t *chain;
+  guint n_chain;
   guint verify_output;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
   DEBUG ("Starting verification");
 
   g_object_get (priv->certificate, "cert-data", &certs, NULL);
-  cert_chain = g_ptr_array_new_with_free_func
-          ((GDestroyNotify)gnutls_x509_crt_deinit);
 
   /*
    * If the first certificate is an exception then we completely
    * ignore the rest of the verification process.
    */
   cert_data = g_ptr_array_index (certs, 0);
-  if (check_is_certificate_exception (self, cert_data->data, cert_data->len)) {
+  cert = gcr_simple_certificate_new_static (cert_data->data, cert_data->len);
+  if (check_is_certificate_exception (self, cert)) {
       DEBUG ("Found certificate exception for %s", priv->hostname);
       complete_verification (self);
       goto out;
   }
 
-  cert = convert_cert_to_gnutls (cert_data);
-  g_ptr_array_add (cert_chain, cert);
-
-  /*
-   * Find out which of our certificates is the anchor. Note that we
-   * don't allow the leaf certificate on the tree to be an anchor.
-   * Also build up the certificate chain. But only up to our anchor.
-   */
-  anchor = NULL;
-  for (idx = 1; idx < certs->len; idx++)
-    {
-      cert_data = g_ptr_array_index (certs, idx);
-
-      /* Add this to the chain */
-      cert = convert_cert_to_gnutls (cert_data);
-      g_ptr_array_add (cert_chain, cert);
-
-      /* Stop the chain at the first anchor */
-      if (check_is_certificate_anchor (self, cert_data->data,
-              cert_data->len)) {
-          anchor = cert;
-          break;
-      }
-    }
+  n_chain = 0;
+  have_anchor = FALSE;
+  chain = build_certificate_chain_for_gnutls (self, certs, &n_chain,
+          &have_anchor);
+  if (chain == NULL || n_chain == 0) {
+      g_warn_if_reached ();
+      abort_verification (self, EMP_TLS_CERTIFICATE_REJECT_REASON_UNKNOWN);
+      goto out;
+  }
 
   verify_output = 0;
-  res = gnutls_x509_crt_list_verify
-          ((const gnutls_x509_crt_t*)cert_chain->pdata,
-           cert_chain->len, anchor ? &anchor : NULL, anchor ? 1 : 1,
+  res = gnutls_x509_crt_list_verify (chain, n_chain,
+           have_anchor ? chain + (n_chain - 1) : NULL,
+           have_anchor ? 1 : 0,
            NULL, 0, 0, &verify_output);
   ret = verification_output_to_reason (res, verify_output, &reason);
 
@@ -264,18 +346,16 @@ perform_verification (EmpathyTLSVerifier *self)
           reason);
 
   if (!ret) {
-      g_ptr_array_free (cert_chain, TRUE);
       abort_verification (self, reason);
       goto out;
   }
 
   /* now check if the certificate matches the hostname first. */
-  cert = g_ptr_array_index (cert_chain, 0);
-  if (gnutls_x509_crt_check_hostname (cert, priv->hostname) == 0)
+  if (gnutls_x509_crt_check_hostname (chain[0], priv->hostname) == 0)
     {
       gchar *certified_hostname;
 
-      certified_hostname = empathy_get_x509_certificate_hostname (cert);
+      certified_hostname = empathy_get_x509_certificate_hostname (chain[0]);
       tp_asv_set_string (priv->details,
           "expected-hostname", priv->hostname);
       tp_asv_set_string (priv->details,
@@ -295,7 +375,7 @@ perform_verification (EmpathyTLSVerifier *self)
   /* TODO: And here is where we check negative trust (ie: revocation) */
 
  out:
-  g_ptr_array_free (cert_chain, TRUE);
+  free_certificate_chain_for_gnutls (chain, n_chain);
 }
 
 static gboolean
