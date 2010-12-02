@@ -792,39 +792,6 @@ chatroom_manager_chat_destroyed_cb (EmpathyTpChat *chat,
     }
 }
 
-/* Called by EmpathyChatManager when we are handling a new group chat */
-void
-empathy_chatroom_manager_chat_handled (EmpathyChatroomManager *self,
-    EmpathyTpChat *chat,
-    TpAccount *account)
-{
-  EmpathyChatroom *chatroom;
-  const gchar *roomname;
-
-  roomname = empathy_tp_chat_get_id (chat);
-
-  chatroom = empathy_chatroom_manager_find (self, account, roomname);
-
-  if (chatroom == NULL)
-    {
-      chatroom = empathy_chatroom_new_full (account, roomname, roomname,
-        FALSE);
-      empathy_chatroom_set_tp_chat (chatroom, chat);
-      empathy_chatroom_manager_add (self, chatroom);
-      g_object_unref (chatroom);
-    }
-  else
-    {
-        empathy_chatroom_set_tp_chat (chatroom, chat);
-    }
-
-  /* A TpChat is always destroyed as it only gets unreffed after the channel
-   * has been invalidated in the dispatcher..  */
-  g_signal_connect (chat, "destroy",
-    G_CALLBACK (chatroom_manager_chat_destroyed_cb),
-    self);
-}
-
 static void
 observe_channels_cb (TpSimpleObserver *observer,
     TpAccount *account,
