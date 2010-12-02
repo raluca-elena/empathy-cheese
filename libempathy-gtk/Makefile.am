@@ -154,7 +154,6 @@ libempathy_gtk_headers =			\
 libempathy_gtk_la_SOURCES =			\
 	$(libempathy_gtk_handwritten_source)	\
 	$(libempathy_gtk_headers)		\
-	gcr-simple-certificate.c gcr-simple-certificate.h \
 	totem-subtitle-encoding.c totem-subtitle-encoding.h
 
 # do not distribute generated files
