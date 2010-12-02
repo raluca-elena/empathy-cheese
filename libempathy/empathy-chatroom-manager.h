@@ -79,9 +79,6 @@ EmpathyChatroom * empathy_chatroom_manager_ensure_chatroom (
 GList * empathy_chatroom_manager_get_chatrooms (EmpathyChatroomManager *manager,
     TpAccount *account);
 
-guint empathy_chatroom_manager_get_count (EmpathyChatroomManager *manager,
-    TpAccount *account);
-
 void empathy_chatroom_manager_chat_handled (EmpathyChatroomManager *self,
     EmpathyTpChat *chat,
     TpAccount *account);

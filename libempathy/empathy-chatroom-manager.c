@@ -705,34 +705,6 @@ empathy_chatroom_manager_get_chatrooms (EmpathyChatroomManager *manager,
   return chatrooms;
 }
 
-guint
-empathy_chatroom_manager_get_count (EmpathyChatroomManager *manager,
-    TpAccount *account)
-{
-  EmpathyChatroomManagerPriv *priv;
-  GList *l;
-  guint count = 0;
-
-  g_return_val_if_fail (EMPATHY_IS_CHATROOM_MANAGER (manager), 0);
-
-  priv = GET_PRIV (manager);
-
-  if (!account)
-    return g_list_length (priv->chatrooms);
-
-  for (l = priv->chatrooms; l; l = l->next)
-    {
-      EmpathyChatroom *chatroom;
-
-      chatroom = l->data;
-
-      if (account == empathy_chatroom_get_account (chatroom))
-        count++;
-    }
-
-  return count;
-}
-
 static void
 chatroom_manager_chat_destroyed_cb (EmpathyTpChat *chat,
   gpointer manager)
