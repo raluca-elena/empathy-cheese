@@ -100,22 +100,6 @@ chat_data_free (ChatData *data)
 }
 
 static void
-tell_chatroom_manager_if_needed (EmpathyChatManager *self,
-    TpAccount *account,
-    EmpathyTpChat *chat)
-{
-  EmpathyChatManagerPriv *priv = GET_PRIV (self);
-  TpHandleType type;
-
-  tp_channel_get_handle (empathy_tp_chat_get_channel (chat), &type);
-
-  if (type == TP_HANDLE_TYPE_ROOM)
-    {
-      empathy_chatroom_manager_chat_handled (priv->chatroom_mgr, chat, account);
-    }
-}
-
-static void
 process_tp_chat (EmpathyChatManager *self,
     EmpathyTpChat *tp_chat,
     TpAccount *account,
@@ -123,8 +107,6 @@ process_tp_chat (EmpathyChatManager *self,
 {
   EmpathyChat *chat = NULL;
   const gchar *id;
-
-  tell_chatroom_manager_if_needed (self, account, tp_chat);
 
   id = empathy_tp_chat_get_id (tp_chat);
   if (!tp_str_empty (id))
