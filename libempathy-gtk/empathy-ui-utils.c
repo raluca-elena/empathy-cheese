@@ -1564,7 +1564,7 @@ empathy_window_iconify (GtkWindow *window, GtkStatusIcon *status_icon)
 
 	gtk_status_icon_get_geometry (status_icon, NULL, &icon_location, NULL);
 	gdk_window = gtk_widget_get_window (GTK_WIDGET (window));
-	dpy = gdk_x11_drawable_get_xdisplay (gdk_window);
+	dpy = GDK_WINDOW_XDISPLAY (gdk_window);
 
 	data[0] = icon_location.x;
 	data[1] = icon_location.y;
