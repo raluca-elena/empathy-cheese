@@ -258,6 +258,69 @@ password_entry_changed_cb (GtkEditable *entry,
       GTK_ENTRY_ICON_SECONDARY, !EMP_STR_EMPTY (str));
 }
 
+#define KEYBOARD_GRABBED \
+  g_quark_from_static_string ("password-entry-keyboard-grabbed")
+
+static gboolean
+password_dialog_grab_keyboard (GtkWidget *widget,
+    GdkEvent *event,
+    gpointer user_data)
+{
+  if (g_object_get_qdata (G_OBJECT (widget), KEYBOARD_GRABBED) == NULL)
+    {
+      GdkGrabStatus status = gdk_keyboard_grab (gtk_widget_get_window (widget),
+          FALSE, gdk_event_get_time (event));
+
+      if (status != GDK_GRAB_SUCCESS)
+        {
+          DEBUG ("Could not grab keyboard; grab status was %u", status);
+        }
+      else
+        {
+          g_object_set_qdata (G_OBJECT (widget), KEYBOARD_GRABBED,
+              GINT_TO_POINTER (TRUE));
+        }
+    }
+
+  return FALSE;
+}
+
+static gboolean
+password_dialog_ungrab_keyboard (GtkWidget *widget,
+    GdkEvent *event,
+    gpointer user_data)
+{
+  if (g_object_get_qdata (G_OBJECT (widget), KEYBOARD_GRABBED) != NULL)
+    {
+      gdk_keyboard_ungrab (gdk_event_get_time (event));
+      g_object_set_qdata (G_OBJECT (widget), KEYBOARD_GRABBED, NULL);
+    }
+
+  return FALSE;
+}
+
+static gboolean
+password_dialog_window_state_changed (GtkWidget *widget,
+    GdkEventWindowState *event,
+    gpointer data)
+{
+  GdkWindowState state = gdk_window_get_state (gtk_widget_get_window (widget));
+
+  if (state & GDK_WINDOW_STATE_WITHDRAWN
+      || state & GDK_WINDOW_STATE_ICONIFIED
+      || state & GDK_WINDOW_STATE_FULLSCREEN
+      || state & GDK_WINDOW_STATE_MAXIMIZED)
+    {
+      password_dialog_ungrab_keyboard (widget, (GdkEvent*) event, data);
+    }
+  else
+    {
+      password_dialog_grab_keyboard (widget, (GdkEvent*) event, data);
+    }
+
+  return FALSE;
+}
+
 static void
 auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
     EmpathyServerSASLHandler *handler,
@@ -272,10 +335,13 @@ auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
 
   account = empathy_server_sasl_handler_get_account (handler);
 
+  /* dialog */
   dialog = gtk_message_dialog_new_with_markup (NULL, 0,
       GTK_MESSAGE_OTHER, GTK_BUTTONS_OK_CANCEL,
       _("Enter your password for account\n<b>%s</b>"),
       tp_account_get_display_name (account));
+  gtk_window_set_icon_name (GTK_WINDOW (dialog),
+      GTK_STOCK_DIALOG_AUTHENTICATION);
 
   box = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog)));
 
@@ -316,8 +382,15 @@ auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
 
   g_signal_connect (dialog, "response",
       G_CALLBACK (password_dialog_response_cb), data);
+  g_signal_connect (dialog, "window-state-event",
+      G_CALLBACK (password_dialog_window_state_changed), NULL);
+  g_signal_connect (dialog, "map-event",
+      G_CALLBACK (password_dialog_grab_keyboard), NULL);
+  g_signal_connect (dialog, "unmap-event",
+      G_CALLBACK (password_dialog_ungrab_keyboard), NULL);
 
   gtk_widget_show (dialog);
+  gtk_widget_grab_focus (entry);
 }
 
 int
