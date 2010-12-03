@@ -67,6 +67,8 @@ typedef struct
   /* source id of the autosave timer */
   gint save_timer_id;
   gboolean ready;
+  GFileMonitor *monitor;
+  gboolean writing;
 
   TpBaseClient *observer;
 } EmpathyChatroomManagerPriv;
@@ -102,6 +104,8 @@ chatroom_manager_file_save (EmpathyChatroomManager *manager)
   GList *l;
 
   priv = GET_PRIV (manager);
+
+  priv->writing = TRUE;
 
   doc = xmlNewDoc ((const xmlChar *) "1.0");
   root = xmlNewNode (NULL, (const xmlChar *) "chatrooms");
@@ -145,6 +149,7 @@ chatroom_manager_file_save (EmpathyChatroomManager *manager)
 
   xmlMemoryDump ();
 
+  priv->writing = FALSE;
   return TRUE;
 }
 
@@ -338,8 +343,11 @@ chatroom_manager_get_all (EmpathyChatroomManager *manager)
       !chatroom_manager_file_parse (manager, priv->file))
     return FALSE;
 
-  priv->ready = TRUE;
-  g_object_notify (G_OBJECT (manager), "ready");
+  if (!priv->ready)
+    {
+      priv->ready = TRUE;
+      g_object_notify (G_OBJECT (manager), "ready");
+    }
 
   return TRUE;
 }
@@ -396,8 +404,30 @@ chatroom_manager_dispose (GObject *object)
   priv = GET_PRIV (object);
 
   tp_clear_object (&priv->observer);
+  tp_clear_object (&priv->monitor);
 
   (G_OBJECT_CLASS (empathy_chatroom_manager_parent_class)->dispose) (object);
+}
+
+static void
+clear_chatrooms (EmpathyChatroomManager *self)
+{
+  EmpathyChatroomManagerPriv *priv = GET_PRIV (self);
+  GList *l;
+
+  for (l = priv->chatrooms; l != NULL; l = g_list_next (l))
+    {
+      EmpathyChatroom *chatroom = l->data;
+
+      g_signal_handlers_disconnect_by_func (chatroom, chatroom_changed_cb,
+          self);
+      g_signal_emit (self, signals[CHATROOM_REMOVED], 0, chatroom);
+
+      g_object_unref (chatroom);
+    }
+
+  g_list_free (priv->chatrooms);
+  priv->chatrooms = NULL;
 }
 
 static void
@@ -405,7 +435,6 @@ chatroom_manager_finalize (GObject *object)
 {
   EmpathyChatroomManager *self = EMPATHY_CHATROOM_MANAGER (object);
   EmpathyChatroomManagerPriv *priv;
-  GList *l;
 
   priv = GET_PRIV (object);
 
@@ -419,20 +448,33 @@ chatroom_manager_finalize (GObject *object)
       chatroom_manager_file_save (self);
     }
 
-  for (l = priv->chatrooms; l != NULL; l = g_list_next (l))
-    {
-      EmpathyChatroom *chatroom = l->data;
+  clear_chatrooms (self);
 
-      g_signal_handlers_disconnect_by_func (chatroom, chatroom_changed_cb,
-          self);
-
-      g_object_unref (chatroom);
-    }
-
-  g_list_free (priv->chatrooms);
   g_free (priv->file);
 
   (G_OBJECT_CLASS (empathy_chatroom_manager_parent_class)->finalize) (object);
+}
+
+static void
+file_changed_cb (GFileMonitor *monitor,
+    GFile *file,
+    GFile *other_file,
+    GFileMonitorEvent event_type,
+    gpointer user_data)
+{
+  EmpathyChatroomManager *self = user_data;
+  EmpathyChatroomManagerPriv *priv = GET_PRIV (self);
+
+  if (event_type != G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT)
+    return;
+
+  if (priv->writing)
+    return;
+
+  DEBUG ("chatrooms file changed; reloading list");
+
+  clear_chatrooms (self);
+  chatroom_manager_get_all (self);
 }
 
 static void
@@ -441,8 +483,10 @@ account_manager_ready_cb (GObject *source_object,
     gpointer user_data)
 {
   EmpathyChatroomManager *self = EMPATHY_CHATROOM_MANAGER (user_data);
+  EmpathyChatroomManagerPriv *priv = GET_PRIV (self);
   TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
+  GFile *file;
 
   if (!tp_account_manager_prepare_finish (manager, result, &error))
     {
@@ -453,7 +497,24 @@ account_manager_ready_cb (GObject *source_object,
 
   chatroom_manager_get_all (self);
 
+  /* Set up file monitor */
+  file = g_file_new_for_path (priv->file);
+
+  priv->monitor = g_file_monitor (file, 0, NULL, &error);
+  if (priv->monitor == NULL)
+    {
+      DEBUG ("Failed to create file monitor on %s: %s", priv->file,
+          error->message);
+
+      g_error_free (error);
+      goto out;
+    }
+
+  g_signal_connect (priv->monitor, "changed", G_CALLBACK (file_changed_cb),
+      self);
+
 out:
+  tp_clear_object (&file);
   g_object_unref (self);
 }
 
