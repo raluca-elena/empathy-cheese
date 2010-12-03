@@ -223,7 +223,8 @@ handle_channels_cb (TpSimpleHandler *handler,
   else if (tp_channel_get_channel_type_id (channel) ==
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      priv->sasl_handler = empathy_server_sasl_handler_new (channel);
+      priv->sasl_handler = empathy_server_sasl_handler_new (
+          account, channel);
 
       g_signal_connect (priv->sasl_handler, "invalidated",
           G_CALLBACK (sasl_handler_invalidated_cb), self);

@@ -23,6 +23,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
+#include <telepathy-glib/account.h>
 #include <telepathy-glib/channel.h>
 
 G_BEGIN_DECLS
@@ -58,13 +59,15 @@ GType empathy_server_sasl_handler_get_type (void);
   EmpathyServerSASLHandlerClass))
 
 EmpathyServerSASLHandler * empathy_server_sasl_handler_new (
-    TpChannel *channel);
+    TpAccount *account, TpChannel *channel);
 
 void empathy_server_sasl_handler_provide_password (
     EmpathyServerSASLHandler *handler, const gchar *password);
 
 void empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler);
 
+TpAccount * empathy_server_sasl_handler_get_account (
+    EmpathyServerSASLHandler *handler);
 
 G_END_DECLS
 

@@ -27,6 +27,7 @@
 
 enum {
   PROP_CHANNEL = 1,
+  PROP_ACCOUNT,
   LAST_PROPERTY,
 };
 
@@ -40,6 +41,7 @@ static guint signals[LAST_SIGNAL] = {0};
 
 typedef struct {
   TpChannel *channel;
+  TpAccount *account;
 
   GSimpleAsyncResult *result;
 } EmpathyServerSASLHandlerPriv;
@@ -125,6 +127,9 @@ empathy_server_sasl_handler_get_property (GObject *object,
     case PROP_CHANNEL:
       g_value_set_object (value, priv->channel);
       break;
+    case PROP_ACCOUNT:
+      g_value_set_object (value, priv->account);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -144,6 +149,9 @@ empathy_server_sasl_handler_set_property (GObject *object,
     case PROP_CHANNEL:
       priv->channel = g_value_dup_object (value);
       break;
+    case PROP_ACCOUNT:
+      priv->account = g_value_dup_object (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -158,6 +166,7 @@ empathy_server_sasl_handler_dispose (GObject *object)
   DEBUG ("%p", object);
 
   tp_clear_object (&priv->channel);
+  tp_clear_object (&priv->account);
 
   G_OBJECT_CLASS (empathy_server_sasl_handler_parent_class)->dispose (object);
 }
@@ -181,6 +190,12 @@ empathy_server_sasl_handler_class_init (EmpathyServerSASLHandlerClass *klass)
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (oclass, PROP_CHANNEL, pspec);
 
+  pspec = g_param_spec_object ("account", "The TpAccount",
+      "The TpAccount this channel belongs to.",
+      TP_TYPE_ACCOUNT,
+      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (oclass, PROP_ACCOUNT, pspec);
+
   signals[INVALIDATED] = g_signal_new ("invalidated",
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
@@ -197,12 +212,15 @@ empathy_server_sasl_handler_init (EmpathyServerSASLHandler *self)
 }
 
 EmpathyServerSASLHandler *
-empathy_server_sasl_handler_new (TpChannel *channel)
+empathy_server_sasl_handler_new (TpAccount *account,
+    TpChannel *channel)
 {
   g_return_val_if_fail (TP_IS_CHANNEL (channel), NULL);
 
   return g_object_new (EMPATHY_TYPE_SERVER_SASL_HANDLER,
-      "channel", channel, NULL);
+      "account", account,
+      "channel", channel,
+      NULL);
 }
 
 static void
@@ -261,4 +279,16 @@ empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler)
       priv->channel, -1, TP_SASL_ABORT_REASON_USER_ABORT,
       "User cancelled the authentication",
       NULL, NULL, NULL, NULL);
+}
+
+TpAccount *
+empathy_server_sasl_handler_get_account (EmpathyServerSASLHandler *handler)
+{
+  EmpathyServerSASLHandlerPriv *priv;
+
+  g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler), NULL);
+
+  priv = GET_PRIV (handler);
+
+  return priv->account;
 }
