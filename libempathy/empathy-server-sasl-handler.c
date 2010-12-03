@@ -241,7 +241,8 @@ start_mechanism_with_data_cb (TpChannel *proxy,
 void
 empathy_server_sasl_handler_provide_password (
     EmpathyServerSASLHandler *handler,
-    const gchar *password)
+    const gchar *password,
+    gboolean remember)
 {
   EmpathyServerSASLHandlerPriv *priv;
   GArray *array;
@@ -262,6 +263,13 @@ empathy_server_sasl_handler_provide_password (
       NULL, NULL, G_OBJECT (handler));
 
   g_array_unref (array);
+
+  DEBUG ("%sremembering the password", remember ? "" : "not ");
+
+  if (remember)
+    {
+      /* TODO */
+    }
 }
 
 void

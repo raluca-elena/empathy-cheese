@@ -62,7 +62,8 @@ EmpathyServerSASLHandler * empathy_server_sasl_handler_new (
     TpAccount *account, TpChannel *channel);
 
 void empathy_server_sasl_handler_provide_password (
-    EmpathyServerSASLHandler *handler, const gchar *password);
+    EmpathyServerSASLHandler *handler, const gchar *password,
+    gboolean remember);
 
 void empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler);
 

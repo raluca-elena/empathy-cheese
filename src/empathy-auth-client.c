@@ -32,6 +32,7 @@
 #include <libempathy/empathy-server-sasl-handler.h>
 #include <libempathy/empathy-server-tls-handler.h>
 #include <libempathy/empathy-tls-verifier.h>
+#include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-tls-dialog.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -209,6 +210,7 @@ typedef struct
 {
   EmpathyServerSASLHandler *handler;
   GtkWidget *entry;
+  GtkWidget *ticky;
 } PasswordDialogData;
 
 static void
@@ -218,10 +220,11 @@ password_dialog_response_cb (GtkDialog *dialog,
 {
   PasswordDialogData *data = user_data;
 
-  if (response == GTK_RESPONSE_ACCEPT)
+  if (response == GTK_RESPONSE_OK)
     {
       empathy_server_sasl_handler_provide_password (data->handler,
-          gtk_entry_get_text (GTK_ENTRY (data->entry)));
+          gtk_entry_get_text (GTK_ENTRY (data->entry)),
+          gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (data->ticky)));
     }
   else
     {
@@ -235,32 +238,81 @@ password_dialog_response_cb (GtkDialog *dialog,
 }
 
 static void
+clear_icon_released_cb (GtkEntry *entry,
+    GtkEntryIconPosition icon_pos,
+    GdkEvent *event,
+    gpointer user_data)
+{
+  gtk_entry_set_text (entry, "");
+}
+
+static void
+password_entry_changed_cb (GtkEditable *entry,
+    gpointer user_data)
+{
+  const gchar *str;
+
+  str = gtk_entry_get_text (GTK_ENTRY (entry));
+
+  gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
+      GTK_ENTRY_ICON_SECONDARY, !EMP_STR_EMPTY (str));
+}
+
+static void
 auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
     EmpathyServerSASLHandler *handler,
     gpointer user_data)
 {
-  GtkWidget *dialog, *entry;
+  GtkWidget *dialog, *entry, *icon, *ticky;
+  GtkBox *box;
+  TpAccount *account;
   PasswordDialogData *data;
 
   DEBUG ("New SASL server handler received from the factory");
 
-  dialog = gtk_dialog_new_with_buttons (_("Enter password"), NULL,
-      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-      GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
-      GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
-      NULL);
+  account = empathy_server_sasl_handler_get_account (handler);
 
+  dialog = gtk_message_dialog_new_with_markup (NULL, 0,
+      GTK_MESSAGE_OTHER, GTK_BUTTONS_OK_CANCEL,
+      _("Enter your password for account\n<b>%s</b>"),
+      tp_account_get_display_name (account));
+
+  box = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog)));
+
+  /* dialog icon */
+  icon = gtk_image_new_from_icon_name (tp_account_get_icon_name (account),
+      GTK_ICON_SIZE_DIALOG);
+  gtk_message_dialog_set_image (GTK_MESSAGE_DIALOG (dialog), icon);
+  gtk_widget_show (icon);
+
+  /* entry */
   entry = gtk_entry_new ();
   gtk_entry_set_visibility (GTK_ENTRY (entry), FALSE);
 
-  gtk_box_pack_start (GTK_BOX (
-          gtk_dialog_get_content_area (GTK_DIALOG (dialog))),
-      entry, FALSE, FALSE, 10);
+  /* entry clear icon */
+  gtk_entry_set_icon_from_stock (GTK_ENTRY (entry),
+      GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+  gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
+      GTK_ENTRY_ICON_SECONDARY, FALSE);
+
+  g_signal_connect (entry, "icon-release",
+      G_CALLBACK (clear_icon_released_cb), NULL);
+  g_signal_connect (entry, "changed",
+      G_CALLBACK (password_entry_changed_cb), NULL);
+
+  gtk_box_pack_start (box, entry, FALSE, FALSE, 0);
   gtk_widget_show (entry);
+
+  /* remember password ticky */
+  ticky = gtk_check_button_new_with_label (_("Remember password"));
+
+  gtk_box_pack_start (box, ticky, FALSE, FALSE, 0);
+  gtk_widget_show (ticky);
 
   data = g_slice_new0 (PasswordDialogData);
   data->handler = g_object_ref (handler);
   data->entry = entry;
+  data->ticky = ticky;
 
   g_signal_connect (dialog, "response",
       G_CALLBACK (password_dialog_response_cb), data);
