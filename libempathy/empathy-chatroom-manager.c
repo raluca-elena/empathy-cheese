@@ -486,7 +486,7 @@ account_manager_ready_cb (GObject *source_object,
   EmpathyChatroomManagerPriv *priv = GET_PRIV (self);
   TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
-  GFile *file;
+  GFile *file = NULL;
 
   if (!tp_account_manager_prepare_finish (manager, result, &error))
     {
