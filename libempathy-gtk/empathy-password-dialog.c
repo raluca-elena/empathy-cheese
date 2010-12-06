@@ -286,6 +286,8 @@ empathy_password_dialog_constructed (GObject *object)
       G_CALLBACK (password_dialog_ungrab_keyboard), dialog);
 
   gtk_widget_grab_focus (priv->entry);
+
+  gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER_ALWAYS);
 }
 
 static void
