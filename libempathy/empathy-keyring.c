@@ -27,13 +27,11 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include "empathy-debug.h"
 
-/*
-GnomeKeyringPasswordSchema keyring_schema =
+static GnomeKeyringPasswordSchema keyring_schema =
   { GNOME_KEYRING_ITEM_GENERIC_SECRET,
     { { "account", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
       { "param", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
       { NULL } } };
-*/
 
 static void
 find_items_cb (GnomeKeyringResult result,
@@ -44,9 +42,11 @@ find_items_cb (GnomeKeyringResult result,
 
   if (result != GNOME_KEYRING_RESULT_OK)
     {
-      GError error = { TP_ERROR, TP_ERROR_DOES_NOT_EXIST,
-                       (gchar *) gnome_keyring_result_to_message (result) };
-      g_simple_async_result_set_from_error (simple, &error);
+      GError *error = g_error_new_literal (TP_ERROR,
+          TP_ERROR_DOES_NOT_EXIST,
+          gnome_keyring_result_to_message (result));
+      g_simple_async_result_set_from_error (simple, error);
+      g_clear_error (&error);
     }
 
   if (g_list_length (list) == 1)
@@ -113,3 +113,77 @@ empathy_keyring_get_password_finish (TpAccount *account,
 
   return g_simple_async_result_get_op_res_gpointer (simple);
 }
+
+static void
+store_password_cb (GnomeKeyringResult result,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
+
+  if (result != GNOME_KEYRING_RESULT_OK)
+    {
+      GError *error = g_error_new_literal (TP_ERROR,
+          TP_ERROR_DOES_NOT_EXIST,
+          gnome_keyring_result_to_message (result));
+      g_simple_async_result_set_from_error (simple, error);
+      g_clear_error (&error);
+    }
+
+  g_simple_async_result_complete (simple);
+  g_object_unref (simple);
+}
+
+void
+empathy_keyring_set_password_async (TpAccount *account,
+    const gchar *password,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  const gchar *account_id;
+  gchar *name;
+
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+  g_return_if_fail (password != NULL);
+  g_return_if_fail (callback != NULL);
+
+  simple = g_simple_async_result_new (G_OBJECT (account), callback,
+      user_data, empathy_keyring_set_password_async);
+
+  account_id = tp_proxy_get_object_path (account) +
+    strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
+
+  DEBUG ("Remembering password for %s", account_id);
+
+  name = g_strdup_printf ("account: %s; param: param-password", account_id);
+
+  gnome_keyring_store_password (&keyring_schema, NULL, name, password,
+      store_password_cb, simple, NULL,
+      "account", account_id,
+      "param", "password",
+      NULL);
+
+  g_free (name);
+}
+
+gboolean
+empathy_keyring_set_password_finish (TpAccount *account,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (account), empathy_keyring_set_password_async), FALSE);
+
+  return TRUE;
+}
+
