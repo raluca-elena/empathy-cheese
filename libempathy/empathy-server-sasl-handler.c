@@ -24,6 +24,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_SASL
 #include "empathy-debug.h"
 #include "empathy-utils.h"
+#include "empathy-keyring.h"
 
 enum {
   PROP_CHANNEL = 1,
@@ -44,10 +45,17 @@ typedef struct {
   TpAccount *account;
 
   GSimpleAsyncResult *result;
+
+  gchar *password;
+
+  GSimpleAsyncResult *async_init_res;
 } EmpathyServerSASLHandlerPriv;
 
-G_DEFINE_TYPE (EmpathyServerSASLHandler, empathy_server_sasl_handler,
-    G_TYPE_OBJECT);
+static void async_initable_iface_init (GAsyncInitableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (EmpathyServerSASLHandler, empathy_server_sasl_handler,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (G_TYPE_ASYNC_INITABLE, async_initable_iface_init));
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyServerSASLHandler);
 
@@ -81,6 +89,83 @@ sasl_status_changed_cb (TpChannel *channel,
       tp_cli_channel_call_close (priv->channel, -1,
           NULL, NULL, NULL, NULL);
     }
+}
+
+static gboolean
+empathy_server_sasl_handler_give_password (gpointer data)
+{
+  EmpathyServerSASLHandler *self = data;
+  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (self);
+
+  empathy_server_sasl_handler_provide_password (self,
+      priv->password, FALSE);
+
+  return FALSE;
+}
+
+static void
+empathy_server_sasl_handler_get_password_async_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyServerSASLHandlerPriv *priv;
+  const gchar *password;
+  GError *error = NULL;
+
+  priv = GET_PRIV (user_data);
+
+  password = empathy_keyring_get_password_finish (TP_ACCOUNT (source),
+      result, &error);
+
+  if (password != NULL)
+    {
+      priv->password = g_strdup (password);
+
+      /* Do this in an idle so the async result will get there
+       * first. */
+      g_idle_add (empathy_server_sasl_handler_give_password, user_data);
+    }
+
+  g_simple_async_result_complete (priv->async_init_res);
+  tp_clear_object (&priv->async_init_res);
+}
+
+static void
+empathy_server_sasl_handler_init_async (GAsyncInitable *initable,
+    gint io_priority,
+    GCancellable *cancellable,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  EmpathyServerSASLHandler *self = EMPATHY_SERVER_SASL_HANDLER (initable);
+  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (self);
+
+  g_assert (priv->account != NULL);
+
+  priv->async_init_res = g_simple_async_result_new (G_OBJECT (self),
+      callback, user_data, empathy_server_sasl_handler_new_async);
+
+  empathy_keyring_get_password_async (priv->account,
+      empathy_server_sasl_handler_get_password_async_cb, self);
+}
+
+static gboolean
+empathy_server_sasl_handler_init_finish (GAsyncInitable *initable,
+    GAsyncResult *res,
+    GError **error)
+{
+  if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (res),
+          error))
+    return FALSE;
+
+  return TRUE;
+}
+
+static void
+async_initable_iface_init (GAsyncInitableIface *iface)
+{
+  iface->init_async = empathy_server_sasl_handler_init_async;
+  iface->init_finish = empathy_server_sasl_handler_init_finish;
 }
 
 static void
@@ -172,6 +257,18 @@ empathy_server_sasl_handler_dispose (GObject *object)
 }
 
 static void
+empathy_server_sasl_handler_finalize (GObject *object)
+{
+  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (object);
+
+  DEBUG ("%p", object);
+
+  tp_clear_pointer (&priv->password, g_free);
+
+  G_OBJECT_CLASS (empathy_server_sasl_handler_parent_class)->finalize (object);
+}
+
+static void
 empathy_server_sasl_handler_class_init (EmpathyServerSASLHandlerClass *klass)
 {
   GObjectClass *oclass = G_OBJECT_CLASS (klass);
@@ -181,6 +278,7 @@ empathy_server_sasl_handler_class_init (EmpathyServerSASLHandlerClass *klass)
   oclass->get_property = empathy_server_sasl_handler_get_property;
   oclass->set_property = empathy_server_sasl_handler_set_property;
   oclass->dispose = empathy_server_sasl_handler_dispose;
+  oclass->dispose = empathy_server_sasl_handler_finalize;
 
   g_type_class_add_private (klass, sizeof (EmpathyServerSASLHandlerPriv));
 
@@ -212,12 +310,35 @@ empathy_server_sasl_handler_init (EmpathyServerSASLHandler *self)
 }
 
 EmpathyServerSASLHandler *
-empathy_server_sasl_handler_new (TpAccount *account,
-    TpChannel *channel)
+empathy_server_sasl_handler_new_finish (GAsyncResult *result,
+    GError **error)
 {
-  g_return_val_if_fail (TP_IS_CHANNEL (channel), NULL);
+  GObject *object, *source_object;
 
-  return g_object_new (EMPATHY_TYPE_SERVER_SASL_HANDLER,
+  source_object = g_async_result_get_source_object (result);
+
+  object = g_async_initable_new_finish (G_ASYNC_INITABLE (source_object),
+      result, error);
+  g_object_unref (source_object);
+
+  if (object != NULL)
+    return EMPATHY_SERVER_SASL_HANDLER (object);
+  else
+    return NULL;
+}
+
+void
+empathy_server_sasl_handler_new_async (TpAccount *account,
+    TpChannel *channel,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+  g_return_if_fail (TP_IS_CHANNEL (channel));
+  g_return_if_fail (callback != NULL);
+
+  g_async_initable_new_async (EMPATHY_TYPE_SERVER_SASL_HANDLER,
+      G_PRIORITY_DEFAULT, NULL, callback, user_data,
       "account", account,
       "channel", channel,
       NULL);
@@ -299,4 +420,16 @@ empathy_server_sasl_handler_get_account (EmpathyServerSASLHandler *handler)
   priv = GET_PRIV (handler);
 
   return priv->account;
+}
+
+gboolean
+empathy_server_sasl_handler_has_password (EmpathyServerSASLHandler *handler)
+{
+  EmpathyServerSASLHandlerPriv *priv;
+
+  g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler), FALSE);
+
+  priv = GET_PRIV (handler);
+
+  return (priv->password != NULL);
 }

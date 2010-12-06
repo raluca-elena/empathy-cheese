@@ -216,9 +216,12 @@ auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
 
   DEBUG ("New SASL server handler received from the factory");
 
-  /* TODO: check whether to show the dialog */
-  dialog = empathy_password_dialog_new (handler);
-  gtk_widget_show (dialog);
+  /* If the handler has the password it will deal with it itself. */
+  if (!empathy_server_sasl_handler_has_password (handler))
+    {
+      dialog = empathy_password_dialog_new (handler);
+      gtk_widget_show (dialog);
+    }
 }
 
 int

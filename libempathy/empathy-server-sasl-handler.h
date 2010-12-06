@@ -58,8 +58,12 @@ GType empathy_server_sasl_handler_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), EMPATHY_TYPE_SERVER_SASL_HANDLER, \
   EmpathyServerSASLHandlerClass))
 
-EmpathyServerSASLHandler * empathy_server_sasl_handler_new (
-    TpAccount *account, TpChannel *channel);
+void empathy_server_sasl_handler_new_async (
+    TpAccount *account, TpChannel *channel,
+    GAsyncReadyCallback callback, gpointer user_data);
+
+EmpathyServerSASLHandler * empathy_server_sasl_handler_new_finish (
+    GAsyncResult *result, GError **error);
 
 void empathy_server_sasl_handler_provide_password (
     EmpathyServerSASLHandler *handler, const gchar *password,
@@ -68,6 +72,9 @@ void empathy_server_sasl_handler_provide_password (
 void empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler);
 
 TpAccount * empathy_server_sasl_handler_get_account (
+    EmpathyServerSASLHandler *handler);
+
+gboolean empathy_server_sasl_handler_has_password (
     EmpathyServerSASLHandler *handler);
 
 G_END_DECLS

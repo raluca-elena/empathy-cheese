@@ -130,6 +130,40 @@ sasl_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
 }
 
 static void
+server_sasl_handler_ready_cb (GObject *source,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  EmpathyAuthFactoryPriv *priv;
+  GError *error = NULL;
+  HandlerContextData *data = user_data;
+
+  priv = GET_PRIV (data->self);
+  priv->sasl_handler = empathy_server_sasl_handler_new_finish (res, &error);
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to create a server SASL handler; error %s",
+          error->message);
+      tp_handle_channels_context_fail (data->context, error);
+
+      g_error_free (error);
+    }
+  else
+    {
+      tp_handle_channels_context_accept (data->context);
+
+      g_signal_connect (priv->sasl_handler, "invalidated",
+          G_CALLBACK (sasl_handler_invalidated_cb), data->self);
+
+      g_signal_emit (data->self, signals[NEW_SERVER_SASL_HANDLER], 0,
+          priv->sasl_handler);
+    }
+
+  handler_context_data_free (data);
+}
+
+static void
 handle_channels_cb (TpSimpleHandler *handler,
     TpAccount *account,
     TpConnection *connection,
@@ -210,28 +244,21 @@ handle_channels_cb (TpSimpleHandler *handler,
       goto error;
     }
 
+  data = handler_context_data_new (self, context);
+  tp_handle_channels_context_delay (context);
+
   /* create a handler */
   if (tp_channel_get_channel_type_id (channel) ==
       EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION)
     {
-      data = handler_context_data_new (self, context);
-      tp_handle_channels_context_delay (context);
-
       empathy_server_tls_handler_new_async (channel, server_tls_handler_ready_cb,
           data);
     }
   else if (tp_channel_get_channel_type_id (channel) ==
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      priv->sasl_handler = empathy_server_sasl_handler_new (
-          account, channel);
-
-      g_signal_connect (priv->sasl_handler, "invalidated",
-          G_CALLBACK (sasl_handler_invalidated_cb), self);
-
-      tp_handle_channels_context_accept (context);
-      g_signal_emit (self, signals[NEW_SERVER_SASL_HANDLER], 0,
-          priv->sasl_handler);
+      empathy_server_sasl_handler_new_async (account, channel,
+          server_sasl_handler_ready_cb, data);
     }
   return;
 
