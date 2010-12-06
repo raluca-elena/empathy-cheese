@@ -28,8 +28,7 @@
 
 #include "empathy-tls-verifier.h"
 
-#include <gcr/gcr-simple-certificate.h>
-#include <gcr/gcr-trust.h>
+#include <gcr/gcr.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include "empathy-debug.h"
@@ -185,6 +184,7 @@ build_certificate_chain_for_gnutls (EmpathyTLSVerifier *self,
   GPtrArray *chain;
   gnutls_x509_crt_t *result;
   GArray *cert_data;
+  GError *error = NULL;
   GcrCertificate *cert;
   GcrCertificate *anchor;
   guint idx;
@@ -234,9 +234,17 @@ build_certificate_chain_for_gnutls (EmpathyTLSVerifier *self,
       if (gcr_certificate_is_issuer (cert, cert))
         break;
 
-      cert = gcr_pkcs11_certificate_lookup_for_issuer (cert);
+      cert = gcr_pkcs11_certificate_lookup_issuer (cert, NULL, &error);
       if (cert == NULL)
-        break;
+        {
+          if (error != NULL)
+            {
+              DEBUG ("Lookup of certificate in PKCS#11 store failed: %s",
+                      error->message);
+              g_clear_error (&error);
+            }
+          break;
+        }
 
       /* Add this to the chain */
       g_ptr_array_add (chain, cert);
