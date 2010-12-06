@@ -145,7 +145,6 @@ empathy_keyring_set_password_async (TpAccount *account,
 
   g_return_if_fail (TP_IS_ACCOUNT (account));
   g_return_if_fail (password != NULL);
-  g_return_if_fail (callback != NULL);
 
   simple = g_simple_async_result_new (G_OBJECT (account), callback,
       user_data, empathy_keyring_set_password_async);
@@ -243,7 +242,6 @@ empathy_keyring_delete_password_async (TpAccount *account,
   const gchar *account_id;
 
   g_return_if_fail (TP_IS_ACCOUNT (account));
-  g_return_if_fail (callback != NULL);
 
   simple = g_simple_async_result_new (G_OBJECT (account), callback,
       user_data, empathy_keyring_delete_password_async);
