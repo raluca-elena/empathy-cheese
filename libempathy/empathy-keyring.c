@@ -29,8 +29,8 @@
 
 static GnomeKeyringPasswordSchema keyring_schema =
   { GNOME_KEYRING_ITEM_GENERIC_SECRET,
-    { { "account", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
-      { "param", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
+    { { "account-id", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
+      { "param-name", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
       { NULL } } };
 
 static void
@@ -83,9 +83,9 @@ empathy_keyring_get_password_async (TpAccount *account,
   DEBUG ("Trying to get password for: %s", account_id);
 
   match = gnome_keyring_attribute_list_new ();
-  gnome_keyring_attribute_list_append_string (match, "account",
+  gnome_keyring_attribute_list_append_string (match, "account-id",
       account_id);
-  gnome_keyring_attribute_list_append_string (match, "param", "password");
+  gnome_keyring_attribute_list_append_string (match, "param-name", "password");
 
   gnome_keyring_find_items (GNOME_KEYRING_ITEM_GENERIC_SECRET,
       match, find_items_cb, simple, NULL);
@@ -154,12 +154,12 @@ empathy_keyring_set_password_async (TpAccount *account,
 
   DEBUG ("Remembering password for %s", account_id);
 
-  name = g_strdup_printf ("account: %s; param: param-password", account_id);
+  name = g_strdup_printf ("account: %s; param: password", account_id);
 
   gnome_keyring_store_password (&keyring_schema, NULL, name, password,
       store_password_cb, simple, NULL,
-      "account", account_id,
-      "param", "password",
+      "account-id", account_id,
+      "param-name", "password",
       NULL);
 
   g_free (name);
@@ -250,9 +250,9 @@ empathy_keyring_delete_password_async (TpAccount *account,
     strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
 
   match = gnome_keyring_attribute_list_new ();
-  gnome_keyring_attribute_list_append_string (match, "account",
+  gnome_keyring_attribute_list_append_string (match, "account-id",
       account_id);
-  gnome_keyring_attribute_list_append_string (match, "param", "password");
+  gnome_keyring_attribute_list_append_string (match, "param-name", "password");
 
   gnome_keyring_find_items (GNOME_KEYRING_ITEM_GENERIC_SECRET,
       match, find_item_to_delete_cb, simple, NULL);
