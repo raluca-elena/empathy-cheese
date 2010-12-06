@@ -187,3 +187,99 @@ empathy_keyring_set_password_finish (TpAccount *account,
   return TRUE;
 }
 
+static void
+item_delete_cb (GnomeKeyringResult result,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
+
+  if (result != GNOME_KEYRING_RESULT_OK)
+    {
+      GError *error = g_error_new_literal (TP_ERROR,
+          TP_ERROR_DOES_NOT_EXIST,
+          gnome_keyring_result_to_message (result));
+      g_simple_async_result_set_from_error (simple, error);
+      g_clear_error (&error);
+    }
+
+  g_simple_async_result_complete (simple);
+  g_object_unref (simple);
+}
+
+static void
+find_item_to_delete_cb (GnomeKeyringResult result,
+    GList *list,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
+  GnomeKeyringFound *found;
+
+  if (result != GNOME_KEYRING_RESULT_OK || g_list_length (list) != 1)
+    {
+      GError *error = g_error_new_literal (TP_ERROR,
+          TP_ERROR_DOES_NOT_EXIST,
+          gnome_keyring_result_to_message (result));
+      g_simple_async_result_set_from_error (simple, error);
+      g_clear_error (&error);
+
+      g_simple_async_result_complete (simple);
+      g_object_unref (simple);
+      return;
+    }
+
+  found = list->data;
+
+  gnome_keyring_item_delete (NULL, found->item_id, item_delete_cb,
+      simple, NULL);
+}
+
+void
+empathy_keyring_delete_password_async (TpAccount *account,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  GnomeKeyringAttributeList *match;
+  const gchar *account_id;
+
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+  g_return_if_fail (callback != NULL);
+
+  simple = g_simple_async_result_new (G_OBJECT (account), callback,
+      user_data, empathy_keyring_delete_password_async);
+
+  account_id = tp_proxy_get_object_path (account) +
+    strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
+
+  match = gnome_keyring_attribute_list_new ();
+  gnome_keyring_attribute_list_append_string (match, "account",
+      account_id);
+  gnome_keyring_attribute_list_append_string (match, "param", "password");
+
+  gnome_keyring_find_items (GNOME_KEYRING_ITEM_GENERIC_SECRET,
+      match, find_item_to_delete_cb, simple, NULL);
+
+  gnome_keyring_attribute_list_free (match);
+}
+
+gboolean
+empathy_keyring_delete_password_finish (TpAccount *account,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (account), empathy_keyring_delete_password_async), FALSE);
+
+  return TRUE;
+}
+
