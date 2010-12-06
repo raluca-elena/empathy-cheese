@@ -79,6 +79,13 @@ sasl_status_changed_cb (TpChannel *channel,
 {
   EmpathyServerSASLHandlerPriv *priv = GET_PRIV (weak_object);
 
+  /* buh boh */
+  if (status >= G_N_ELEMENTS (sasl_statuses))
+    {
+      DEBUG ("SASL status changed to unknown status");
+      return;
+    }
+
   DEBUG ("SASL status changed to '%s'", sasl_statuses[status]);
 
   if (status == TP_SASL_STATUS_SERVER_SUCCEEDED)
