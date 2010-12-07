@@ -194,11 +194,11 @@ password_dialog_window_state_changed (GtkWidget *widget,
       || state & GDK_WINDOW_STATE_FULLSCREEN
       || state & GDK_WINDOW_STATE_MAXIMIZED)
     {
-      password_dialog_ungrab_keyboard (widget, (GdkEvent*) event, data);
+      password_dialog_ungrab_keyboard (widget, (GdkEvent *) event, data);
     }
   else
     {
-      password_dialog_grab_keyboard (widget, (GdkEvent*) event, data);
+      password_dialog_grab_keyboard (widget, (GdkEvent *) event, data);
     }
 
   return FALSE;
