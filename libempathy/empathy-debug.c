@@ -53,6 +53,7 @@ static GDebugKey keys[] = {
   { "Tests", EMPATHY_DEBUG_TESTS },
   { "Voip", EMPATHY_DEBUG_VOIP },
   { "Tls", EMPATHY_DEBUG_TLS },
+  { "Sasl", EMPATHY_DEBUG_SASL },
   { 0, }
 };
 

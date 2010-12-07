@@ -29,9 +29,12 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-auth-factory.h>
+#include <libempathy/empathy-server-sasl-handler.h>
 #include <libempathy/empathy-server-tls-handler.h>
 #include <libempathy/empathy-tls-verifier.h>
+#include <libempathy/empathy-utils.h>
 
+#include <libempathy-gtk/empathy-password-dialog.h>
 #include <libempathy-gtk/empathy-tls-dialog.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
@@ -180,7 +183,7 @@ verifier_verify_cb (GObject *source,
 }
 
 static void
-auth_factory_new_handler_cb (EmpathyAuthFactory *factory,
+auth_factory_new_tls_handler_cb (EmpathyAuthFactory *factory,
     EmpathyServerTLSHandler *handler,
     gpointer user_data)
 {
@@ -202,6 +205,23 @@ auth_factory_new_handler_cb (EmpathyAuthFactory *factory,
   g_object_unref (verifier);
   g_object_unref (certificate);
   g_free (hostname);
+}
+
+static void
+auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
+    EmpathyServerSASLHandler *handler,
+    gpointer user_data)
+{
+  GtkWidget *dialog;
+
+  DEBUG ("New SASL server handler received from the factory");
+
+  /* If the handler has the password it will deal with it itself. */
+  if (!empathy_server_sasl_handler_has_password (handler))
+    {
+      dialog = empathy_password_dialog_new (handler);
+      gtk_widget_show (dialog);
+    }
 }
 
 int
@@ -238,7 +258,10 @@ main (int argc,
   factory = empathy_auth_factory_dup_singleton ();
 
   g_signal_connect (factory, "new-server-tls-handler",
-      G_CALLBACK (auth_factory_new_handler_cb), NULL);
+      G_CALLBACK (auth_factory_new_tls_handler_cb), NULL);
+
+  g_signal_connect (factory, "new-server-sasl-handler",
+      G_CALLBACK (auth_factory_new_sasl_handler_cb), NULL);
 
   if (!empathy_auth_factory_register (factory, &error))
     {

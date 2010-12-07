@@ -47,6 +47,7 @@ typedef enum
   EMPATHY_DEBUG_TESTS = 1 << 12,
   EMPATHY_DEBUG_VOIP = 1 << 13,
   EMPATHY_DEBUG_TLS = 1 << 14,
+  EMPATHY_DEBUG_SASL = 1 << 15,
 } EmpathyDebugFlags;
 
 gboolean empathy_debug_flag_is_set (EmpathyDebugFlags flag);
