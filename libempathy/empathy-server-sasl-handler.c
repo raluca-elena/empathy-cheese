@@ -21,9 +21,10 @@
 
 #include <telepathy-glib/util.h>
 
+#include <string.h>
+
 #define DEBUG_FLAG EMPATHY_DEBUG_SASL
 #include "empathy-debug.h"
-#include "empathy-utils.h"
 #include "empathy-keyring.h"
 
 enum {
@@ -57,8 +58,6 @@ G_DEFINE_TYPE_WITH_CODE (EmpathyServerSASLHandler, empathy_server_sasl_handler,
     G_TYPE_OBJECT,
     G_IMPLEMENT_INTERFACE (G_TYPE_ASYNC_INITABLE, async_initable_iface_init));
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyServerSASLHandler);
-
 static const gchar *sasl_statuses[] = {
   "not started",
   "in progress",
@@ -77,7 +76,7 @@ sasl_status_changed_cb (TpChannel *channel,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (weak_object);
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (weak_object)->priv;
 
   /* buh boh */
   if (status >= G_N_ELEMENTS (sasl_statuses))
@@ -102,7 +101,7 @@ static gboolean
 empathy_server_sasl_handler_give_password (gpointer data)
 {
   EmpathyServerSASLHandler *self = data;
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (self);
+  EmpathyServerSASLHandlerPriv *priv = self->priv;
 
   empathy_server_sasl_handler_provide_password (self,
       priv->password, FALSE);
@@ -119,7 +118,7 @@ empathy_server_sasl_handler_get_password_async_cb (GObject *source,
   const gchar *password;
   GError *error = NULL;
 
-  priv = GET_PRIV (user_data);
+  priv = EMPATHY_SERVER_SASL_HANDLER (user_data)->priv;
 
   password = empathy_keyring_get_password_finish (TP_ACCOUNT (source),
       result, &error);
@@ -145,7 +144,7 @@ empathy_server_sasl_handler_init_async (GAsyncInitable *initable,
     gpointer user_data)
 {
   EmpathyServerSASLHandler *self = EMPATHY_SERVER_SASL_HANDLER (initable);
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (self);
+  EmpathyServerSASLHandlerPriv *priv = self->priv;
 
   g_assert (priv->account != NULL);
 
@@ -188,10 +187,8 @@ channel_invalidated_cb (TpProxy *proxy,
 static void
 empathy_server_sasl_handler_constructed (GObject *object)
 {
-  EmpathyServerSASLHandlerPriv *priv;
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
   GError *error = NULL;
-
-  priv = GET_PRIV (object);
 
   tp_cli_channel_interface_sasl_authentication_connect_to_sasl_status_changed (priv->channel,
       sasl_status_changed_cb, NULL, NULL, object, &error);
@@ -212,7 +209,7 @@ empathy_server_sasl_handler_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (object);
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
 
   switch (property_id)
     {
@@ -234,7 +231,7 @@ empathy_server_sasl_handler_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (object);
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
 
   switch (property_id)
     {
@@ -253,7 +250,7 @@ empathy_server_sasl_handler_set_property (GObject *object,
 static void
 empathy_server_sasl_handler_dispose (GObject *object)
 {
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (object);
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
 
   DEBUG ("%p", object);
 
@@ -266,7 +263,7 @@ empathy_server_sasl_handler_dispose (GObject *object)
 static void
 empathy_server_sasl_handler_finalize (GObject *object)
 {
-  EmpathyServerSASLHandlerPriv *priv = GET_PRIV (object);
+  EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
 
   DEBUG ("%p", object);
 
@@ -396,7 +393,7 @@ empathy_server_sasl_handler_provide_password (
 
   g_return_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler));
 
-  priv = GET_PRIV (handler);
+  priv = handler->priv;
 
   array = g_array_sized_new (TRUE, FALSE,
       sizeof (gchar), strlen (password));
@@ -427,7 +424,7 @@ empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler)
 
   g_return_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler));
 
-  priv = GET_PRIV (handler);
+  priv = handler->priv;
 
   DEBUG ("Cancelling SASL mechanism...");
 
@@ -444,7 +441,7 @@ empathy_server_sasl_handler_get_account (EmpathyServerSASLHandler *handler)
 
   g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler), NULL);
 
-  priv = GET_PRIV (handler);
+  priv = handler->priv;
 
   return priv->account;
 }
@@ -456,7 +453,7 @@ empathy_server_sasl_handler_has_password (EmpathyServerSASLHandler *handler)
 
   g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler), FALSE);
 
-  priv = GET_PRIV (handler);
+  priv = handler->priv;
 
   return (priv->password != NULL);
 }
