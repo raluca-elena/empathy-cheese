@@ -190,8 +190,8 @@ empathy_server_sasl_handler_constructed (GObject *object)
   EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (object)->priv;
   GError *error = NULL;
 
-  tp_cli_channel_interface_sasl_authentication_connect_to_sasl_status_changed (priv->channel,
-      sasl_status_changed_cb, NULL, NULL, object, &error);
+  tp_cli_channel_interface_sasl_authentication_connect_to_sasl_status_changed (
+      priv->channel, sasl_status_changed_cb, NULL, NULL, object, &error);
 
   if (error != NULL)
     {
@@ -403,8 +403,8 @@ empathy_server_sasl_handler_provide_password (
   DEBUG ("Calling StartMechanismWithData with our password");
 
   tp_cli_channel_interface_sasl_authentication_call_start_mechanism_with_data (
-      priv->channel, -1, "X-TELEPATHY-PASSWORD", array, start_mechanism_with_data_cb,
-      NULL, NULL, G_OBJECT (handler));
+      priv->channel, -1, "X-TELEPATHY-PASSWORD", array,
+      start_mechanism_with_data_cb, NULL, NULL, G_OBJECT (handler));
 
   g_array_unref (array);
 
