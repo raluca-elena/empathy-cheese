@@ -130,7 +130,8 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	contact_widget = empathy_contact_widget_new (contact,
 						     EMPATHY_CONTACT_WIDGET_NO_SET_ALIAS |
 						     EMPATHY_CONTACT_WIDGET_EDIT_ALIAS |
-						     EMPATHY_CONTACT_WIDGET_EDIT_GROUPS);
+						     EMPATHY_CONTACT_WIDGET_EDIT_GROUPS |
+						     EMPATHY_CONTACT_WIDGET_SHOW_DETAILS);
 	gtk_box_pack_start (GTK_BOX (vbox),
 			  contact_widget,
 			  TRUE, TRUE,
