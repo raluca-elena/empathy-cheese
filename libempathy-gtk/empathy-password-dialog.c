@@ -30,8 +30,6 @@
 G_DEFINE_TYPE (EmpathyPasswordDialog, empathy_password_dialog,
     GTK_TYPE_MESSAGE_DIALOG)
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyPasswordDialog);
-
 enum {
   PROP_HANDLER = 1,
 
@@ -55,7 +53,7 @@ empathy_password_dialog_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (object);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
 
   switch (property_id)
     {
@@ -74,7 +72,7 @@ empathy_password_dialog_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (object);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
 
   switch (property_id)
     {
@@ -91,7 +89,7 @@ empathy_password_dialog_set_property (GObject *object,
 static void
 empathy_password_dialog_dispose (GObject *object)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (object);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
 
   if (priv->dispose_run)
     return;
@@ -108,7 +106,7 @@ password_dialog_response_cb (GtkDialog *dialog,
     gint response,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (user_data);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
 
   if (response == GTK_RESPONSE_OK)
     {
@@ -150,7 +148,7 @@ password_dialog_grab_keyboard (GtkWidget *widget,
     GdkEvent *event,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (user_data);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
 
   if (!priv->grabbing)
     {
@@ -171,7 +169,7 @@ password_dialog_ungrab_keyboard (GtkWidget *widget,
     GdkEvent *event,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = GET_PRIV (user_data);
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
 
   if (priv->grabbing)
     {
@@ -215,7 +213,7 @@ empathy_password_dialog_constructed (GObject *object)
   gchar *text;
 
   dialog = EMPATHY_PASSWORD_DIALOG (object);
-  priv = GET_PRIV (dialog);
+  priv = dialog->priv;
 
   g_assert (priv->handler != NULL);
 
