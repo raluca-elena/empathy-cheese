@@ -59,7 +59,6 @@ typedef enum
   NO_SERVICE = 0,
   GTALK_SERVICE,
   FACEBOOK_SERVICE,
-  OVI_SERVICE,
   N_SERVICES
 } Service;
 
@@ -73,7 +72,6 @@ static ServiceInfo services_infos[N_SERVICES] = {
     { "label_username_example", TRUE },
     { "label_username_g_example", TRUE },
     { "label_username_f_example", FALSE },
-    { "label_username_ovi_example", FALSE },
 };
 
 typedef struct {
@@ -1355,9 +1353,6 @@ account_widget_get_service (EmpathyAccountWidget *self)
       !tp_strdiff (service, "facebook"))
     return FACEBOOK_SERVICE;
 
-  if (!tp_strdiff (service, "ovi-chat"))
-    return OVI_SERVICE;
-
   return NO_SERVICE;
 }
 
@@ -1437,22 +1432,6 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
     }
-  else if (priv->simple && service == OVI_SERVICE)
-    {
-      /* Simple widget for Ovi */
-      self->ui_details->gui = empathy_builder_get_file (filename,
-          "vbox_ovi_simple", &self->ui_details->widget,
-          "entry_id_ovi_simple", &entry_id,
-          NULL);
-
-      empathy_account_widget_handle_params (self,
-          "entry_password_ovi_simple", "password",
-          NULL);
-
-      setup_id_widget_with_suffix (self, entry_id, "@ovi.com");
-
-      self->ui_details->default_focus = g_strdup ("entry_id_ovi_simple");
-    }
   else
     {
       ServiceInfo info = services_infos[service];
@@ -1488,12 +1467,6 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           /* Facebook special case the entry ID widget to hide the
            * "@chat.facebook.com" part */
           setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
-        }
-      else if (service == OVI_SERVICE)
-        {
-          gtk_label_set_label (GTK_LABEL (label_id), _("Username:"));
-
-          setup_id_widget_with_suffix (self, entry_id, "@ovi.com");
         }
       else
         {
@@ -2425,14 +2398,6 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
 
           tmp = remove_jid_suffix (self, login_id);
           default_display_name = g_strdup_printf ("Facebook (%s)", tmp);
-          g_free (tmp);
-        }
-      else if (service == OVI_SERVICE)
-        {
-          gchar *tmp;
-
-          tmp = remove_jid_suffix (self, login_id);
-          default_display_name = g_strdup_printf ("Ovi (%s)", tmp);
           g_free (tmp);
         }
       else

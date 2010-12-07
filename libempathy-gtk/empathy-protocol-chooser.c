@@ -258,16 +258,6 @@ protocol_choosers_add_cm (EmpathyProtocolChooser *chooser,
              COL_PROTOCOL_NAME, proto->name,
              COL_SERVICE, "facebook",
              -1);
-
-          display_name = empathy_service_name_to_display_name ("ovi-chat");
-          gtk_list_store_insert_with_values (priv->store,
-             NULL, 0,
-             COL_ICON, "im-ovi",
-             COL_LABEL, display_name,
-             COL_CM, cm,
-             COL_PROTOCOL_NAME, proto->name,
-             COL_SERVICE, "ovi-chat",
-             -1);
         }
 
       g_free (icon_name);
@@ -617,11 +607,6 @@ empathy_protocol_chooser_create_account_settings (EmpathyProtocolChooser *self)
 
       empathy_account_settings_set_string (settings, "server",
           "chat.facebook.com");
-    }
-  else if (!tp_strdiff (service, "ovi-chat"))
-    {
-      empathy_account_settings_set_icon_name_async (settings, "im-ovi",
-          NULL, NULL);
     }
 
   g_object_unref (cm);

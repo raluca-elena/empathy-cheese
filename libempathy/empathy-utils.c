@@ -576,7 +576,6 @@ empathy_service_name_to_display_name (const gchar *service_name)
   } names[] = {
     { "google-talk", N_("Google Talk"), FALSE },
     { "facebook", N_("Facebook Chat"), TRUE },
-    { "ovi-chat", "Ovi", FALSE },
     { NULL, NULL }
   };
 
