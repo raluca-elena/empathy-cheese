@@ -44,7 +44,9 @@ enum {
 };
 
 static const gchar* system_ca_paths[] = {
+#ifdef GTLS_SYSTEM_CA_FILE
   GTLS_SYSTEM_CA_FILE,
+#endif
   NULL,
 };
 
