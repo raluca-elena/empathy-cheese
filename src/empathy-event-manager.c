@@ -170,6 +170,11 @@ event_free (EventPriv *event)
       g_object_unref (event->public.contact);
     }
 
+  if (event->public.account)
+    {
+      g_object_unref (event->public.account);
+    }
+
   g_slice_free (EventPriv, event);
 }
 
@@ -212,6 +217,7 @@ display_notify_area (EmpathyEventManager *self)
 
 static void
 event_manager_add (EmpathyEventManager *manager,
+    TpAccount *account,
     EmpathyContact *contact,
     EmpathyEventType type,
     const gchar *icon_name,
@@ -225,6 +231,7 @@ event_manager_add (EmpathyEventManager *manager,
   EventPriv               *event;
 
   event = g_slice_new0 (EventPriv);
+  event->public.account = account != NULL ? g_object_ref (account) : NULL;
   event->public.contact = contact ? g_object_ref (contact) : NULL;
   event->public.type = type;
   event->public.icon_name = g_strdup (icon_name);
@@ -549,9 +556,9 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
     event_update (approval->manager, event, EMPATHY_IMAGE_NEW_MESSAGE, header,
         msg);
   else
-    event_manager_add (approval->manager, sender, EMPATHY_EVENT_TYPE_CHAT,
-        EMPATHY_IMAGE_NEW_MESSAGE, header, msg, approval,
-        event_text_channel_process_func, NULL);
+    event_manager_add (approval->manager, NULL, sender,
+        EMPATHY_EVENT_TYPE_CHAT, EMPATHY_IMAGE_NEW_MESSAGE, header, msg,
+        approval, event_text_channel_process_func, NULL);
 
   empathy_sound_manager_play (priv->sound_mgr, window,
       EMPATHY_SOUND_CONVERSATION_NEW);
@@ -625,8 +632,8 @@ event_manager_media_channel_got_contact (EventManagerApproval *approval)
     video ? _("Incoming video call from %s") :_("Incoming call from %s"),
     empathy_contact_get_alias (approval->contact));
 
-  event_manager_add (approval->manager, approval->contact,
-      EMPATHY_EVENT_TYPE_VOIP,
+  event_manager_add (approval->manager, NULL,
+      approval->contact, EMPATHY_EVENT_TYPE_VOIP,
       video ? EMPATHY_IMAGE_VIDEO_CALL : EMPATHY_IMAGE_VOIP,
       header, NULL, approval,
       event_channel_process_voip_func, NULL);
@@ -758,9 +765,10 @@ display_invite_room_dialog (EventManagerApproval *approval)
           tp_channel_get_identifier (approval->main_channel));
     }
 
-  event_manager_add (approval->manager, approval->contact,
-      EMPATHY_EVENT_TYPE_INVITATION, EMPATHY_IMAGE_GROUP_MESSAGE, msg,
-      invite_msg, approval, event_room_channel_process_func, NULL);
+  event_manager_add (approval->manager, NULL,
+      approval->contact, EMPATHY_EVENT_TYPE_INVITATION,
+      EMPATHY_IMAGE_GROUP_MESSAGE, msg, invite_msg, approval,
+      event_room_channel_process_func, NULL);
 
   empathy_sound_manager_play (priv->sound_mgr, window,
       EMPATHY_SOUND_CONVERSATION_NEW);
@@ -807,8 +815,9 @@ event_manager_ft_got_contact_cb (TpConnection *connection,
   header = g_strdup_printf (_("Incoming file transfer from %s"),
                             empathy_contact_get_alias (approval->contact));
 
-  event_manager_add (approval->manager, approval->contact,
-      EMPATHY_EVENT_TYPE_TRANSFER, EMPATHY_IMAGE_DOCUMENT_SEND, header, NULL,
+  event_manager_add (approval->manager, NULL,
+      approval->contact, EMPATHY_EVENT_TYPE_TRANSFER,
+      EMPATHY_IMAGE_DOCUMENT_SEND, header, NULL,
       approval, event_channel_process_func, NULL);
 
   /* FIXME better sound for incoming file transfers ?*/
@@ -1023,7 +1032,7 @@ event_manager_pendings_changed_cb (EmpathyContactList  *list,
   else
     event_msg = NULL;
 
-  event_manager_add (manager, contact, EMPATHY_EVENT_TYPE_SUBSCRIPTION,
+  event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_SUBSCRIPTION,
       GTK_STOCK_DIALOG_QUESTION, header, event_msg, NULL,
       event_pending_subscribe_func, NULL);
 
@@ -1066,7 +1075,7 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
               header = g_strdup_printf (_("%s is now offline."),
                   empathy_contact_get_alias (contact));
 
-              event_manager_add (manager, contact, EMPATHY_EVENT_TYPE_PRESENCE,
+              event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_PRESENCE,
                   EMPATHY_IMAGE_AVATAR_DEFAULT, header, NULL, NULL, NULL, NULL);
             }
         }
@@ -1087,7 +1096,7 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
               header = g_strdup_printf (_("%s is now online."),
                   empathy_contact_get_alias (contact));
 
-              event_manager_add (manager, contact, EMPATHY_EVENT_TYPE_PRESENCE,
+              event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_PRESENCE,
                   EMPATHY_IMAGE_AVATAR_DEFAULT, header, NULL, NULL, NULL, NULL);
             }
         }

@@ -58,6 +58,7 @@ typedef enum {
 } EmpathyEventType;
 
 typedef struct {
+    TpAccount *account;
     EmpathyContact *contact;
     EmpathyEventType type;
     gchar *icon_name;
