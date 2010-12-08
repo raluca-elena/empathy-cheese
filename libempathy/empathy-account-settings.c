@@ -59,6 +59,7 @@ struct _EmpathyAccountSettingsPriv
   TpAccountManager *account_manager;
 
   TpConnectionManager *manager;
+  TpProtocol *protocol_obj;
 
   TpAccount *account;
   gchar *cm_name;
@@ -80,6 +81,7 @@ struct _EmpathyAccountSettingsPriv
   GList *required_params;
 
   gulong managers_ready_id;
+  gboolean preparing_protocol;
 
   GSimpleAsyncResult *apply_result;
 };
@@ -336,6 +338,10 @@ empathy_account_settings_dispose (GObject *object)
     g_object_unref (priv->account);
   priv->account = NULL;
 
+  if (priv->protocol_obj != NULL)
+    g_object_unref (priv->protocol_obj);
+  priv->protocol_obj = NULL;
+
   /* release any references held by the object here */
   if (G_OBJECT_CLASS (empathy_account_settings_parent_class)->dispose)
     G_OBJECT_CLASS (empathy_account_settings_parent_class)->dispose (object);
@@ -385,10 +391,29 @@ empathy_account_settings_finalize (GObject *object)
 }
 
 static void
+empathy_account_settings_protocol_obj_prepared_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyAccountSettings *self = user_data;
+  GError *error = NULL;
+
+  if (!tp_proxy_prepare_finish (source, result, &error))
+    {
+      DEBUG ("Failed to prepare protocol object: %s", error->message);
+      g_clear_error (&error);
+      return;
+    }
+
+  empathy_account_settings_check_readyness (self);
+}
+
+static void
 empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 {
   EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
   const TpConnectionManagerProtocol *tp_protocol;
+  GQuark features[] = { TP_PROTOCOL_FEATURE_CORE, 0 };
 
   if (priv->ready)
     return;
@@ -400,11 +425,16 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
   if (!empathy_connection_managers_is_ready (priv->managers))
     return;
 
-  priv->manager = empathy_connection_managers_get_cm (
-    priv->managers, priv->cm_name);
+  if (priv->manager == NULL)
+    {
+      priv->manager = empathy_connection_managers_get_cm (
+          priv->managers, priv->cm_name);
+    }
 
   if (priv->manager == NULL)
     return;
+
+  g_object_ref (priv->manager);
 
   if (priv->account != NULL)
     {
@@ -440,7 +470,21 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
         }
     }
 
-  g_object_ref (priv->manager);
+  if (priv->protocol_obj == NULL)
+    {
+      priv->protocol_obj = g_object_ref (
+          tp_connection_manager_get_protocol_object (priv->manager,
+              priv->protocol));
+    }
+
+  if (!tp_proxy_is_prepared (priv->protocol_obj, TP_PROTOCOL_FEATURE_CORE)
+      && !priv->preparing_protocol)
+    {
+      priv->preparing_protocol = TRUE;
+      tp_proxy_prepare_async (priv->protocol_obj, features,
+          empathy_account_settings_protocol_obj_prepared_cb, self);
+      return;
+    }
 
   priv->ready = TRUE;
   g_object_notify (G_OBJECT (self), "ready");
