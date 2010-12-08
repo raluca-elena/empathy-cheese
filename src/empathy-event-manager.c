@@ -76,6 +76,7 @@ typedef struct {
 
 typedef struct {
   TpBaseClient *approver;
+  TpBaseClient *auth_approver;
   EmpathyContactManager *contact_manager;
   GSList *events;
   /* Ongoing approvals */
@@ -428,11 +429,46 @@ out:
 }
 
 static void
+reject_auth_channel_claim_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpChannelDispatchOperation *cdo = TP_CHANNEL_DISPATCH_OPERATION (source);
+  GError *error = NULL;
+
+  if (!tp_channel_dispatch_operation_claim_finish (cdo, result, &error))
+    {
+      DEBUG ("Failed to claim channel: %s", error->message);
+
+      g_error_free (error);
+      return;
+    }
+
+  tp_cli_channel_call_close (TP_CHANNEL (user_data), -1,
+      NULL, NULL, NULL, NULL);
+}
+
+static void
 reject_approval (EventManagerApproval *approval)
 {
   /* We have to claim the channel before closing it */
-  tp_channel_dispatch_operation_claim_async (approval->operation,
-      reject_channel_claim_cb, g_object_ref (approval->handler_instance));
+
+  /* Unfortunately, we need to special case the auth channels for the
+   * time being as they don't have a wrapper object handler in
+   * approval->handler_instance as they're not actually handled by
+   * this process, so we can just use a noddy callback to call Close()
+   * directly. */
+  if (approval->handler_instance != NULL)
+    {
+      tp_channel_dispatch_operation_claim_async (approval->operation,
+          reject_channel_claim_cb, g_object_ref (approval->handler_instance));
+    }
+  else if (tp_channel_get_channel_type_id (approval->main_channel)
+      == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
+    {
+      tp_channel_dispatch_operation_claim_async (approval->operation,
+          reject_auth_channel_claim_cb, approval->main_channel);
+    }
 }
 
 static void
@@ -828,8 +864,13 @@ event_manager_ft_got_contact_cb (TpConnection *connection,
   g_object_unref (window);
 }
 
-/* If there is a file-transfer or media channel consider it as the
- * main one. */
+static void
+dummy_process_func (EventPriv *event)
+{
+}
+
+/* If there is a file-transfer, media, or auth channel consider it as
+ * the main one. */
 static TpChannel *
 find_main_channel (GList *channels)
 {
@@ -847,7 +888,8 @@ find_main_channel (GList *channels)
       channel_type = tp_channel_get_channel_type_id (channel);
 
       if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA ||
-          channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
+          channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER ||
+          channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
         return channel;
 
       else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_TEXT)
@@ -970,6 +1012,13 @@ approve_channels (TpSimpleApprover *approver,
       connection = tp_channel_borrow_connection (channel);
       empathy_tp_contact_factory_get_from_handle (connection, handle,
         event_manager_ft_got_contact_cb, approval, NULL, G_OBJECT (self));
+    }
+  else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
+    {
+      /* We need a process function or this will time out after
+       * NOTIFICATION_TIMEOUT seconds, which is undesirable. */
+      event_manager_add (approval->manager, account, NULL, EMPATHY_EVENT_TYPE_AUTH,
+          NULL, NULL, NULL, approval, dummy_process_func, NULL);
     }
   else
     {
@@ -1159,6 +1208,7 @@ event_manager_finalize (GObject *object)
   g_slist_free (priv->approvals);
   g_object_unref (priv->contact_manager);
   g_object_unref (priv->approver);
+  g_object_unref (priv->auth_approver);
   g_object_unref (priv->gsettings_notif);
   g_object_unref (priv->gsettings_ui);
   g_object_unref (priv->sound_mgr);
@@ -1199,7 +1249,6 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
       NULL, NULL,
       g_cclosure_marshal_VOID__POINTER,
       G_TYPE_NONE, 1, G_TYPE_POINTER);
-
 
   g_type_class_add_private (object_class, sizeof (EmpathyEventManagerPriv));
 }
@@ -1271,9 +1320,38 @@ empathy_event_manager_init (EmpathyEventManager *manager)
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         NULL));
 
+  /* I don't feel good about doing this, and I'm sorry, but the
+   * capabilities connection feature is added earlier because it's
+   * needed for EmpathyTpChat. If the capabilities feature is required
+   * then preparing an auth channel (which of course appears in the
+   * CONNECTING state) will never be prepared. So the options are
+   * either to create another approver like I've done, or to port
+   * EmpathyTpChat and its users to not depend on the connection being
+   * prepared with capabilities. I chose the former, obviously. :-) */
+
+  priv->auth_approver = tp_simple_approver_new (dbus,
+      "Empathy.AuthEventManager", FALSE, approve_channels, manager,
+      NULL);
+
+  /* SASL auth channels */
+  tp_base_client_take_approver_filter (priv->auth_approver,
+      tp_asv_new (
+        TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TP_IFACE_CHANNEL_TYPE_SERVER_AUTHENTICATION,
+        TP_PROP_CHANNEL_TYPE_SERVER_AUTHENTICATION_AUTHENTICATION_METHOD,
+          G_TYPE_STRING,
+          TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
+        NULL));
+
   if (!tp_base_client_register (priv->approver, &error))
     {
       DEBUG ("Failed to register Approver: %s", error->message);
+      g_error_free (error);
+    }
+
+  if (!tp_base_client_register (priv->auth_approver, &error))
+    {
+      DEBUG ("Failed to register auth Approver: %s", error->message);
       g_error_free (error);
     }
 
