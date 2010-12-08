@@ -29,6 +29,7 @@
 
 #include "empathy-account-settings.h"
 #include "empathy-connection-managers.h"
+#include "empathy-keyring.h"
 #include "empathy-utils.h"
 #include "empathy-idle.h"
 
@@ -69,6 +70,15 @@ struct _EmpathyAccountSettingsPriv
   gchar *icon_name;
   gboolean display_name_overridden;
   gboolean ready;
+
+  gboolean supports_sasl;
+  gboolean password_changed;
+
+  gchar *password;
+  gchar *password_original;
+
+  gboolean password_retrieved;
+  gboolean password_requested;
 
   /* Parameter name (gchar *) -> parameter value (GValue) */
   GHashTable *parameters;
@@ -373,6 +383,8 @@ empathy_account_settings_finalize (GObject *object)
   g_free (priv->service);
   g_free (priv->display_name);
   g_free (priv->icon_name);
+  g_free (priv->password);
+  g_free (priv->password_original);
 
   if (priv->required_params != NULL)
     {
@@ -404,6 +416,39 @@ empathy_account_settings_protocol_obj_prepared_cb (GObject *source,
       g_clear_error (&error);
       return;
     }
+
+  empathy_account_settings_check_readyness (self);
+}
+
+static void
+empathy_account_settings_get_password_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyAccountSettings *self = user_data;
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+  const gchar *password;
+  GError *error = NULL;
+
+  password = empathy_keyring_get_password_finish (TP_ACCOUNT (source),
+      result, &error);
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to get password: %s", error->message);
+      g_clear_error (&error);
+    }
+
+  /* It doesn't really matter if getting the password failed; that
+   * just means that it's not there, or let's act like that at
+   * least. */
+
+  g_assert (priv->password == NULL);
+
+  priv->password = g_strdup (password);
+  priv->password_original = g_strdup (password);
+
+  priv->password_retrieved = TRUE;
 
   empathy_account_settings_check_readyness (self);
 }
@@ -483,6 +528,25 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
       priv->preparing_protocol = TRUE;
       tp_proxy_prepare_async (priv->protocol_obj, features,
           empathy_account_settings_protocol_obj_prepared_cb, self);
+      return;
+    }
+  else
+    {
+      if (tp_strv_contains (tp_protocol_get_authentication_types (
+                  priv->protocol_obj),
+              TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION))
+        {
+          priv->supports_sasl = TRUE;
+        }
+    }
+
+  if (priv->supports_sasl && !priv->password_retrieved
+      && !priv->password_requested)
+    {
+      priv->password_requested = TRUE;
+
+      empathy_keyring_get_password_async (priv->account,
+          empathy_account_settings_get_password_cb, self);
       return;
     }
 
@@ -745,6 +809,14 @@ empathy_account_settings_unset (EmpathyAccountSettings *settings,
   if (empathy_account_settings_is_unset (settings, param))
     return;
 
+  if (priv->supports_sasl && !tp_strdiff (param, "password"))
+    {
+      g_free (priv->password);
+      priv->password = NULL;
+      priv->password_changed = TRUE;
+      return;
+    }
+
   v = g_strdup (param);
 
   g_array_append_val (priv->unset_parameters, v);
@@ -758,13 +830,23 @@ empathy_account_settings_discard_changes (EmpathyAccountSettings *settings)
 
   g_hash_table_remove_all (priv->parameters);
   empathy_account_settings_free_unset_parameters (settings);
+
+  priv->password_changed = FALSE;
+  g_free (priv->password);
+  priv->password = g_strdup (priv->password_original);
 }
 
 const gchar *
 empathy_account_settings_get_string (EmpathyAccountSettings *settings,
     const gchar *param)
 {
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (settings);
   const GValue *v;
+
+  if (!tp_strdiff (param, "password") && priv->supports_sasl)
+    {
+      return priv->password;
+    }
 
   v = empathy_account_settings_get (settings, param);
 
@@ -960,7 +1042,16 @@ empathy_account_settings_set_string (EmpathyAccountSettings *settings,
   g_return_if_fail (param != NULL);
   g_return_if_fail (value != NULL);
 
-  tp_asv_set_string (priv->parameters, g_strdup (param), value);
+  if (!tp_strdiff (param, "password") && priv->supports_sasl)
+    {
+      g_free (priv->password);
+      priv->password = g_strdup (value);
+      priv->password_changed = TRUE;
+    }
+  else
+    {
+      tp_asv_set_string (priv->parameters, g_strdup (param), value);
+    }
 
   account_settings_remove_from_unset (settings, param);
 }
@@ -1196,6 +1287,55 @@ empathy_account_settings_set_icon_name_finish (
 }
 
 static void
+empathy_account_settings_processed_password (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data,
+    gpointer finish_func)
+{
+  EmpathyAccountSettings *settings = EMPATHY_ACCOUNT_SETTINGS (user_data);
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (settings);
+  GSimpleAsyncResult *r;
+  GError *error = NULL;
+  gboolean (*func) (TpAccount *source, GAsyncResult *result, GError **error) =
+    finish_func;
+
+  g_free (priv->password_original);
+  priv->password_original = g_strdup (priv->password);
+
+  if (!func (TP_ACCOUNT (source), result, &error))
+    {
+      g_simple_async_result_set_from_error (priv->apply_result, error);
+      g_error_free (error);
+    }
+
+  empathy_account_settings_discard_changes (settings);
+
+  r = priv->apply_result;
+  priv->apply_result = NULL;
+
+  g_simple_async_result_complete (r);
+  g_object_unref (r);
+}
+
+static void
+empathy_account_settings_set_password_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  empathy_account_settings_processed_password (source, result, user_data,
+      empathy_keyring_set_password_finish);
+}
+
+static void
+empathy_account_settings_delete_password_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  empathy_account_settings_processed_password (source, result, user_data,
+      empathy_keyring_delete_password_finish);
+}
+
+static void
 empathy_account_settings_account_updated (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
@@ -1210,11 +1350,29 @@ empathy_account_settings_account_updated (GObject *source,
     {
       g_simple_async_result_set_from_error (priv->apply_result, error);
       g_error_free (error);
+      goto out;
     }
-  else
+
+  /* Only set the password in the keyring if the CM supports SASL and
+   * it's changed. */
+  if (priv->supports_sasl && priv->password_changed)
     {
-      empathy_account_settings_discard_changes (settings);
+      if (priv->password != NULL)
+        {
+          empathy_keyring_set_password_async (priv->account, priv->password,
+              empathy_account_settings_set_password_cb, settings);
+        }
+      else
+        {
+          empathy_keyring_delete_password_async (priv->account,
+              empathy_account_settings_delete_password_cb, settings);
+        }
+
+      return;
     }
+
+out:
+  empathy_account_settings_discard_changes (settings);
 
   r = priv->apply_result;
   priv->apply_result = NULL;
