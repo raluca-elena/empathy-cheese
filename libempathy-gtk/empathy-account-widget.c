@@ -1990,6 +1990,24 @@ add_register_buttons (EmpathyAccountWidget *self,
 #endif /* HAVE_MEEGO */
 
 static void
+remember_password_toggled_cb (GtkToggleButton *button,
+    EmpathyAccountWidget *self)
+{
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  if (gtk_toggle_button_get_active (button))
+    {
+      gtk_widget_set_sensitive (priv->param_password_widget, TRUE);
+    }
+  else
+    {
+      gtk_widget_set_sensitive (priv->param_password_widget, FALSE);
+      gtk_entry_set_text (GTK_ENTRY (priv->param_password_widget), "");
+      empathy_account_settings_unset (priv->settings, "password");
+    }
+}
+
+static void
 do_constructed (GObject *obj)
 {
   EmpathyAccountWidget *self = EMPATHY_ACCOUNT_WIDGET (obj);
@@ -2072,6 +2090,26 @@ do_constructed (GObject *obj)
       g_signal_connect (default_focus_entry, "realize",
           G_CALLBACK (gtk_widget_grab_focus),
           NULL);
+    }
+
+  /* remember password */
+  if (priv->param_password_widget != NULL)
+    {
+      GObject *button;
+
+      button = gtk_builder_get_object (
+          self->ui_details->gui, "remember_password");
+
+      if (button != NULL)
+        {
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
+              !EMP_STR_EMPTY (empathy_account_settings_get_string (
+                      priv->settings, "password")));
+
+          g_signal_connect (button, "toggled",
+              G_CALLBACK (remember_password_toggled_cb), self);
+          remember_password_toggled_cb (GTK_TOGGLE_BUTTON (button), self);
+        }
     }
 
   /* dup and init the account-manager */
