@@ -109,6 +109,8 @@ typedef struct {
   GtkWidget *param_account_widget;
   GtkWidget *param_password_widget;
 
+  GtkWidget *remember_password_widget;
+
   /* Used only for IRC accounts */
   EmpathyIrcNetworkChooser *irc_network_chooser;
 
@@ -1603,6 +1605,9 @@ account_widget_build_yahoo (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1622,6 +1627,9 @@ account_widget_build_yahoo (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -2093,23 +2101,27 @@ do_constructed (GObject *obj)
     }
 
   /* remember password */
-  if (priv->param_password_widget != NULL)
+  if (priv->param_password_widget != NULL
+      && priv->remember_password_widget != NULL)
     {
-      GObject *button;
-
-      button = gtk_builder_get_object (
-          self->ui_details->gui, "remember_password");
-
-      if (button != NULL)
+      if (priv->simple)
         {
-          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button),
+          gtk_toggle_button_set_active (
+              GTK_TOGGLE_BUTTON (priv->remember_password_widget), TRUE);
+        }
+      else
+        {
+          gtk_toggle_button_set_active (
+              GTK_TOGGLE_BUTTON (priv->remember_password_widget),
               !EMP_STR_EMPTY (empathy_account_settings_get_string (
                       priv->settings, "password")));
-
-          g_signal_connect (button, "toggled",
-              G_CALLBACK (remember_password_toggled_cb), self);
-          remember_password_toggled_cb (GTK_TOGGLE_BUTTON (button), self);
         }
+
+      g_signal_connect (priv->remember_password_widget, "toggled",
+          G_CALLBACK (remember_password_toggled_cb), self);
+
+      remember_password_toggled_cb (
+          GTK_TOGGLE_BUTTON (priv->remember_password_widget), self);
     }
 
   /* dup and init the account-manager */
