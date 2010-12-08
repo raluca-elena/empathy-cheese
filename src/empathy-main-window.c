@@ -122,6 +122,7 @@ struct _EmpathyMainWindowPriv {
 	GtkWidget              *presence_toolbar;
 	GtkWidget              *presence_chooser;
 	GtkWidget              *errors_vbox;
+	GtkWidget              *auth_vbox;
 	GtkWidget              *search_bar;
 	GtkWidget              *notebook;
 	GtkWidget              *no_entry_label;
@@ -143,6 +144,7 @@ struct _EmpathyMainWindowPriv {
 
 	guint                   size_timeout_id;
 	GHashTable             *errors;
+	GHashTable             *auths;
 
 	/* stores a mapping from TpAccount to Handler ID to prevent
 	 * to listen more than once to the status-changed signal */
@@ -286,12 +288,146 @@ main_window_flash_start (EmpathyMainWindow *window)
 }
 
 static void
+main_window_remove_auth (EmpathyMainWindow *window,
+			 EmpathyEvent      *event)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GtkWidget *error_widget;
+
+	error_widget = g_hash_table_lookup (priv->auths, event);
+	if (error_widget != NULL) {
+		gtk_widget_destroy (error_widget);
+		g_hash_table_remove (priv->auths, event);
+	}
+}
+
+static void
+main_window_auth_add_clicked_cb (GtkButton         *button,
+				 EmpathyMainWindow *window)
+{
+	EmpathyEvent *event;
+
+	event = g_object_get_data (G_OBJECT (button), "event");
+
+	empathy_event_approve (event);
+
+	main_window_remove_auth (window, event);
+}
+
+static void
+main_window_auth_close_clicked_cb (GtkButton         *button,
+				   EmpathyMainWindow *window)
+{
+	EmpathyEvent *event;
+
+	event = g_object_get_data (G_OBJECT (button), "event");
+
+	empathy_event_decline (event);
+	main_window_remove_auth (window, event);
+}
+
+static void
+main_window_auth_display (EmpathyMainWindow *window,
+			  EmpathyEvent      *event)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	TpAccount *account = event->account;
+	GtkWidget *info_bar;
+	GtkWidget *content_area;
+	GtkWidget *image;
+	GtkWidget *label;
+	GtkWidget *add_button;
+	GtkWidget *close_button;
+	GtkWidget *action_area;
+	GtkWidget *action_table;
+	const gchar *icon_name;
+	gchar *str;
+
+	if (g_hash_table_lookup (priv->auths, event) != NULL) {
+		return;
+	}
+
+	info_bar = gtk_info_bar_new ();
+	gtk_info_bar_set_message_type (GTK_INFO_BAR (info_bar), GTK_MESSAGE_QUESTION);
+
+	gtk_widget_set_no_show_all (info_bar, TRUE);
+	gtk_box_pack_start (GTK_BOX (priv->auth_vbox), info_bar, FALSE, TRUE, 0);
+	gtk_widget_show (info_bar);
+
+	icon_name = tp_account_get_icon_name (account);
+	image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_widget_show (image);
+
+	str = g_markup_printf_escaped ("<b>%s</b>\n%s",
+				       tp_account_get_display_name (account),
+				       _("Password required"));
+
+	label = gtk_label_new (str);
+	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+	gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+	gtk_widget_show (label);
+
+	g_free (str);
+
+	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
+	gtk_box_pack_start (GTK_BOX (content_area), image, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (content_area), label, TRUE, TRUE, 0);
+
+	image = gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_BUTTON);
+	add_button = gtk_button_new ();
+	gtk_button_set_image (GTK_BUTTON (add_button), image);
+	gtk_widget_set_tooltip_text (add_button, _("Provide Password"));
+	gtk_widget_show (add_button);
+
+	image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_BUTTON);
+	close_button = gtk_button_new ();
+	gtk_button_set_image (GTK_BUTTON (close_button), image);
+	gtk_widget_set_tooltip_text (close_button, _("Cancel"));
+	gtk_widget_show (close_button);
+
+	action_table = gtk_table_new (1, 2, FALSE);
+	gtk_table_set_col_spacings (GTK_TABLE (action_table), 6);
+	gtk_widget_show (action_table);
+
+	action_area = gtk_info_bar_get_action_area (GTK_INFO_BAR (info_bar));
+	gtk_box_pack_start (GTK_BOX (action_area), action_table, FALSE, FALSE, 0);
+
+	gtk_table_attach (GTK_TABLE (action_table), add_button, 0, 1, 0, 1,
+			  (GtkAttachOptions) (GTK_SHRINK),
+			  (GtkAttachOptions) (GTK_SHRINK), 0, 0);
+	gtk_table_attach (GTK_TABLE (action_table), close_button, 1, 2, 0, 1,
+			  (GtkAttachOptions) (GTK_SHRINK),
+			  (GtkAttachOptions) (GTK_SHRINK), 0, 0);
+
+	g_object_set_data_full (G_OBJECT (info_bar),
+				"event", event, NULL);
+	g_object_set_data_full (G_OBJECT (add_button),
+				"event", event, NULL);
+	g_object_set_data_full (G_OBJECT (close_button),
+				"event", event, NULL);
+
+	g_signal_connect (add_button, "clicked",
+			  G_CALLBACK (main_window_auth_add_clicked_cb),
+			  window);
+	g_signal_connect (close_button, "clicked",
+			  G_CALLBACK (main_window_auth_close_clicked_cb),
+			  window);
+
+	gtk_widget_show (priv->auth_vbox);
+
+	g_hash_table_insert (priv->auths, event, info_bar);
+}
+
+static void
 main_window_event_added_cb (EmpathyEventManager *manager,
 			    EmpathyEvent        *event,
 			    EmpathyMainWindow   *window)
 {
 	if (event->contact) {
 		main_window_flash_start (window);
+	} else if (event->type == EMPATHY_EVENT_TYPE_AUTH) {
+		main_window_auth_display (window, event);
 	}
 }
 
@@ -302,6 +438,11 @@ main_window_event_removed_cb (EmpathyEventManager *manager,
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	FlashForeachData data;
+
+	if (event->type == EMPATHY_EVENT_TYPE_AUTH) {
+		main_window_remove_auth (window, event);
+		return;
+	}
 
 	if (!event->contact) {
 		return;
@@ -711,6 +852,7 @@ empathy_main_window_finalize (GObject *window)
 	g_object_unref (priv->contact_manager);
 	g_object_unref (priv->sound_mgr);
 	g_hash_table_destroy (priv->errors);
+	g_hash_table_destroy (priv->auths);
 
 	/* disconnect all handlers of status-changed signal */
 	g_hash_table_iter_init (&iter, priv->status_changed_handlers);
@@ -1591,6 +1733,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	gui = empathy_builder_get_file (filename,
 				       "main_vbox", &priv->main_vbox,
 				       "errors_vbox", &priv->errors_vbox,
+				       "auth_vbox", &priv->auth_vbox,
 				       "ui_manager", &priv->ui_manager,
 				       "view_show_offline", &show_offline_widget,
 				       "view_show_protocols", &priv->show_protocols,
@@ -1659,6 +1802,11 @@ empathy_main_window_init (EmpathyMainWindow *window)
 					      g_direct_equal,
 					      g_object_unref,
 					      NULL);
+
+	priv->auths = g_hash_table_new_full (g_direct_hash,
+					     g_direct_equal,
+					     NULL,
+					     NULL);
 
 	priv->status_changed_handlers = g_hash_table_new_full (g_direct_hash,
 							       g_direct_equal,
