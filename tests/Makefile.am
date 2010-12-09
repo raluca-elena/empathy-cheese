@@ -31,9 +31,13 @@ TEST_PROGS =                                     \
      empathy-chatroom-test                       \
      empathy-chatroom-manager-test               \
      empathy-parser-test                         \
-     empathy-live-search-test
+     empathy-live-search-test                    \
+     empathy-tls-test
 
 empathy_utils_test_SOURCES = empathy-utils-test.c \
+     test-helper.c test-helper.h
+
+empathy_tls_test_SOURCES = empathy-tls-test.c \
      test-helper.c test-helper.h
 
 empathy_irc_server_test_SOURCES = empathy-irc-server-test.c \
