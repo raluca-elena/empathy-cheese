@@ -865,8 +865,9 @@ event_manager_ft_got_contact_cb (TpConnection *connection,
 }
 
 static void
-dummy_process_func (EventPriv *event)
+event_manager_auth_process_func (EventPriv *event)
 {
+  empathy_event_approve ((EmpathyEvent *) event);
 }
 
 /* If there is a file-transfer, media, or auth channel consider it as
@@ -1015,10 +1016,10 @@ approve_channels (TpSimpleApprover *approver,
     }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      /* We need a process function or this will time out after
-       * NOTIFICATION_TIMEOUT seconds, which is undesirable. */
       event_manager_add (approval->manager, account, NULL, EMPATHY_EVENT_TYPE_AUTH,
-          NULL, NULL, NULL, approval, dummy_process_func, NULL);
+          GTK_STOCK_DIALOG_AUTHENTICATION, tp_account_get_display_name (account),
+          _("Password required"), approval,
+          event_manager_auth_process_func, NULL);
     }
   else
     {
