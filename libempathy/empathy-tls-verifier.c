@@ -138,7 +138,6 @@ check_is_certificate_anchor (EmpathyTLSVerifier *self, GcrCertificate *cert)
 
   ret = gcr_trust_is_certificate_anchor (cert, GCR_PURPOSE_CLIENT_AUTH,
           NULL, &error);
-  g_object_unref (cert);
 
   if (!ret && error) {
       DEBUG ("Can't lookup certificate anchor: %s", error->message);
@@ -327,7 +326,10 @@ perform_verification (EmpathyTLSVerifier *self)
    */
   cert_data = g_ptr_array_index (certs, 0);
   cert = gcr_simple_certificate_new_static (cert_data->data, cert_data->len);
-  if (check_is_certificate_exception (self, cert)) {
+  ret = check_is_certificate_exception (self, cert);
+  g_object_unref (cert);
+
+  if (ret) {
       DEBUG ("Found certificate exception for %s", priv->hostname);
       complete_verification (self);
       goto out;
