@@ -3,7 +3,10 @@
 #include <string.h>
 
 #include <libempathy/empathy-tls-certificate.h>
+#include <libempathy/empathy-tls-verifier.h>
 #include "test-helper.h"
+
+#include <gnutls/gnutls.h>
 
 #include <telepathy-glib/dbus-properties-mixin.h>
 #include <telepathy-glib/enums.h>
@@ -280,28 +283,6 @@ accepted_callback (GObject *object, GAsyncResult *res, gpointer user_data)
   g_main_loop_quit (test->loop);
 }
 
-/* A simple test to make sure the test infrastructure is working */
-static void
-test_certificate_mock_accept (Test *test, gconstpointer data G_GNUC_UNUSED)
-{
-  GError *error = NULL;
-  EmpathyTLSCertificate *cert;
-
-  test->mock = mock_tls_certificate_new_and_register (test->dbus,
-          "dhansak-collabora.cer");
-
-  cert = empathy_tls_certificate_new (test->dbus, test->dbus_name,
-          MOCK_TLS_CERTIFICATE_PATH, &error);
-  g_assert_no_error (error);
-
-  empathy_tls_certificate_accept_async (cert, accepted_callback, test);
-  g_object_unref (cert);
-
-  g_main_loop_run (test->loop);
-
-  g_assert (test->mock->state == TP_TLS_CERTIFICATE_STATE_ACCEPTED);
-}
-
 static void
 prepared_callback (GObject *object, GAsyncResult *res, gpointer user_data)
 {
@@ -313,12 +294,12 @@ prepared_callback (GObject *object, GAsyncResult *res, gpointer user_data)
           res, &error);
   g_assert_no_error (error);
 
-  /* Stop the tests */
   g_main_loop_quit (test->loop);
 }
 
+/* A simple test to make sure the test infrastructure is working */
 static void
-test_certificate_prepare (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_mock_basics (Test *test, gconstpointer data G_GNUC_UNUSED)
 {
   GError *error = NULL;
   EmpathyTLSCertificate *cert;
@@ -331,9 +312,61 @@ test_certificate_prepare (Test *test, gconstpointer data G_GNUC_UNUSED)
   g_assert_no_error (error);
 
   empathy_tls_certificate_prepare_async (cert, prepared_callback, test);
-
   g_main_loop_run (test->loop);
 
+  empathy_tls_certificate_accept_async (cert, accepted_callback, test);
+  g_main_loop_run (test->loop);
+
+  g_object_unref (cert);
+  g_assert (test->mock->state == TP_TLS_CERTIFICATE_STATE_ACCEPTED);
+}
+
+static void
+verifier_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+  EmpTLSCertificateRejectReason reason = 0;
+  GHashTable *details = NULL;
+  GError *error = NULL;
+  Test *test = user_data;
+
+  g_assert (EMPATHY_IS_TLS_VERIFIER (object));
+  empathy_tls_verifier_verify_finish (EMPATHY_TLS_VERIFIER (object),
+          res, &reason, &details, &error);
+  g_assert_no_error (error);
+
+  if (details)
+    g_hash_table_destroy (details);
+  g_main_loop_quit (test->loop);
+}
+
+static void
+test_certificate_verify (Test *test, gconstpointer data G_GNUC_UNUSED)
+{
+  GError *error = NULL;
+  EmpathyTLSCertificate *cert;
+  EmpathyTLSVerifier *verifier;
+
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer");
+
+  cert = empathy_tls_certificate_new (test->dbus, test->dbus_name,
+          MOCK_TLS_CERTIFICATE_PATH, &error);
+  g_assert_no_error (error);
+
+  empathy_tls_certificate_prepare_async (cert, prepared_callback, test);
+  g_main_loop_run (test->loop);
+
+  verifier = empathy_tls_verifier_new (cert, "another-host");
+
+  empathy_tls_verifier_verify_async (verifier, verifier_callback, test);
+  g_main_loop_run (test->loop);
+
+#if 0
+  empathy_tls_certificate_accept_async (cert, accepted_callback, test);
+  g_main_loop_run (test->loop);
+#endif
+
+  g_object_unref (verifier);
   g_object_unref (cert);
 }
 
@@ -344,11 +377,12 @@ main (int argc,
   int result;
 
   test_init (argc, argv);
+  gnutls_global_init ();
 
-  g_test_add ("/tls/certificate_accept", Test, NULL,
-          setup, test_certificate_mock_accept, teardown);
-  g_test_add ("/tls/certificate_prepare", Test, NULL,
-          setup, test_certificate_prepare, teardown);
+  g_test_add ("/tls/certificate_basics", Test, NULL,
+          setup, test_certificate_mock_basics, teardown);
+  g_test_add ("/tls/certificate_verify", Test, NULL,
+          setup, test_certificate_verify, teardown);
 
   result = g_test_run ();
   test_deinit ();
