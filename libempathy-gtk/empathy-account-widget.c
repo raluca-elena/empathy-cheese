@@ -1228,6 +1228,17 @@ account_widget_build_sip (EmpathyAccountWidget *self,
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
   empathy_account_widget_sip_build (self, filename,
     &priv->table_common_settings);
+
+  if (priv->simple)
+    {
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
+    }
+  else
+    {
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
+    }
 }
 
 static void
@@ -1251,6 +1262,9 @@ account_widget_build_msn (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1267,6 +1281,9 @@ account_widget_build_msn (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1409,6 +1426,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else if (priv->simple && service == GTALK_SERVICE)
     {
@@ -1423,6 +1443,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_g_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_g_simple"));
     }
   else if (priv->simple && service == FACEBOOK_SERVICE)
     {
@@ -1439,6 +1462,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
       setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_fb_simple"));
     }
   else
     {
@@ -1483,6 +1509,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id");
       priv->spinbutton_port = spinbutton_port;
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
 
       g_signal_connect (checkbutton_ssl, "toggled",
           G_CALLBACK (account_widget_jabber_ssl_toggled_cb),
@@ -1530,6 +1559,9 @@ account_widget_build_icq (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_uin_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1548,6 +1580,9 @@ account_widget_build_icq (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_uin");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1570,6 +1605,9 @@ account_widget_build_aim (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_screenname_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1587,6 +1625,9 @@ account_widget_build_aim (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_screenname");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1657,6 +1698,9 @@ account_widget_build_groupwise (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1673,6 +1717,9 @@ account_widget_build_groupwise (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
