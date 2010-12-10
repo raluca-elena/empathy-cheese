@@ -109,6 +109,7 @@ typedef struct {
   GtkWidget *param_account_widget;
   GtkWidget *param_password_widget;
 
+  gboolean automatic_change;
   GtkWidget *remember_password_widget;
 
   /* Used only for IRC accounts */
@@ -313,6 +314,11 @@ static void
 account_widget_entry_changed_cb (GtkEditable *entry,
     EmpathyAccountWidget *self)
 {
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  if (priv->automatic_change)
+    return;
+
   account_widget_entry_changed_common (self, GTK_ENTRY (entry), FALSE);
   empathy_account_widget_changed (self);
 }
@@ -2016,6 +2022,30 @@ remember_password_toggled_cb (GtkToggleButton *button,
 }
 
 static void
+account_settings_password_retrieved_cb (GObject *object,
+    gpointer user_data)
+{
+  EmpathyAccountWidget *self = user_data;
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+  const gchar *password = empathy_account_settings_get_string (
+      priv->settings, "password");
+
+  if (password != NULL)
+    {
+      /* We have to do this so that when we call gtk_entry_set_text,
+       * the ::changed callback doesn't think the user made the
+       * change. */
+      priv->automatic_change = TRUE;
+      gtk_entry_set_text (GTK_ENTRY (priv->param_password_widget), password);
+      priv->automatic_change = FALSE;
+    }
+
+  gtk_toggle_button_set_active (
+      GTK_TOGGLE_BUTTON (priv->remember_password_widget),
+      !EMP_STR_EMPTY (password));
+}
+
+static void
 do_constructed (GObject *obj)
 {
   EmpathyAccountWidget *self = EMPATHY_ACCOUNT_WIDGET (obj);
@@ -2115,6 +2145,12 @@ do_constructed (GObject *obj)
               GTK_TOGGLE_BUTTON (priv->remember_password_widget),
               !EMP_STR_EMPTY (empathy_account_settings_get_string (
                       priv->settings, "password")));
+
+          /* The password might not have been retrieved from the
+           * keyring yet. We should update the remember password
+           * toggle button and the password entry when/if it is. */
+          g_signal_connect (priv->settings, "password-retrieved",
+              G_CALLBACK (account_settings_password_retrieved_cb), self);
         }
 
       g_signal_connect (priv->remember_password_widget, "toggled",

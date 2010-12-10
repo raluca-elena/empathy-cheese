@@ -50,6 +50,13 @@ enum {
   PROP_READY
 };
 
+enum {
+  PASSWORD_RETRIEVED = 1,
+  LAST_SIGNAL
+};
+
+static gulong signals[LAST_SIGNAL] = { 0, };
+
 /* private structure */
 typedef struct _EmpathyAccountSettingsPriv EmpathyAccountSettingsPriv;
 
@@ -319,6 +326,13 @@ empathy_account_settings_class_init (
       "Whether this account is ready to be used",
       FALSE,
       G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
+
+  signals[PASSWORD_RETRIEVED] =
+      g_signal_new ("password-retrieved",
+          G_TYPE_FROM_CLASS (empathy_account_settings_class),
+          G_SIGNAL_RUN_LAST, 0, NULL, NULL,
+          g_cclosure_marshal_VOID__VOID,
+          G_TYPE_NONE, 0);
 }
 
 static void
@@ -452,9 +466,7 @@ empathy_account_settings_get_password_cb (GObject *source,
   priv->password = g_strdup (password);
   priv->password_original = g_strdup (password);
 
-  priv->password_retrieved = TRUE;
-
-  empathy_account_settings_check_readyness (self);
+  g_signal_emit (self, signals[PASSWORD_RETRIEVED], 0);
 }
 
 static void
@@ -546,14 +558,15 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 
   /* priv->account won't be a proper account if it's the account
    * assistant showing this widget. */
-  if (priv->supports_sasl && !priv->password_retrieved
-      && !priv->password_requested && priv->account != NULL)
+  if (priv->supports_sasl && !priv->password_requested
+      && priv->account != NULL)
     {
       priv->password_requested = TRUE;
 
+      /* Make this call but don't block on its readiness. We'll signal
+       * if it's updated later with ::password-retrieved. */
       empathy_keyring_get_password_async (priv->account,
           empathy_account_settings_get_password_cb, self);
-      return;
     }
 
   priv->ready = TRUE;
