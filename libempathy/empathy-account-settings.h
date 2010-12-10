@@ -189,6 +189,8 @@ gboolean empathy_account_settings_is_valid (EmpathyAccountSettings *settings);
 const TpConnectionManagerProtocol * empathy_account_settings_get_tp_protocol (
     EmpathyAccountSettings *settings);
 
+gboolean empathy_account_settings_supports_sasl (EmpathyAccountSettings *self);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_ACCOUNT_SETTINGS_H__*/

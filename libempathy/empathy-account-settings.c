@@ -1672,3 +1672,11 @@ empathy_account_settings_get_tp_protocol (EmpathyAccountSettings *self)
 
   return tp_connection_manager_get_protocol (priv->manager, priv->protocol);
 }
+
+gboolean
+empathy_account_settings_supports_sasl (EmpathyAccountSettings *self)
+{
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+
+  return priv->supports_sasl;
+}
