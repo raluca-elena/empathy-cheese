@@ -381,6 +381,7 @@ perform_verification (EmpathyTLSVerifier *self)
     }
 
   DEBUG ("Hostname matched");
+  complete_verification (self);
 
   /* TODO: And here is where we check negative trust (ie: revocation) */
 
