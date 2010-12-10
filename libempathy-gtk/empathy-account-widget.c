@@ -2132,7 +2132,8 @@ do_constructed (GObject *obj)
 
   /* remember password */
   if (priv->param_password_widget != NULL
-      && priv->remember_password_widget != NULL)
+      && priv->remember_password_widget != NULL
+      && empathy_account_settings_supports_sasl (priv->settings))
     {
       if (priv->simple)
         {
@@ -2158,6 +2159,11 @@ do_constructed (GObject *obj)
 
       remember_password_toggled_cb (
           GTK_TOGGLE_BUTTON (priv->remember_password_widget), self);
+    }
+  else if (priv->remember_password_widget != NULL
+      && !empathy_account_settings_supports_sasl (priv->settings))
+    {
+      gtk_widget_set_visible (priv->remember_password_widget, FALSE);
     }
 
   /* dup and init the account-manager */
