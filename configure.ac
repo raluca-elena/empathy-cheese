@@ -168,6 +168,12 @@ PKG_CHECK_MODULES(EMPATHY,
    gcr-3 >= $GCR_REQUIRED
 ])
 
+# Pkg Config lookup for modules used in tests
+AC_MSG_CHECKING([for pkcs11 standalone modules])
+pkcs11standalonedir=$(pkg-config --variable=pkcs11standalonedir gcr-3)
+AC_MSG_RESULT([$pkcs11standalonedir])
+AC_SUBST(pkcs11standalonedir)
+
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
 # -----------------------------------------------------------

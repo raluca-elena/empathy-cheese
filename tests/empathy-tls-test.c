@@ -6,6 +6,8 @@
 #include <libempathy/empathy-tls-verifier.h>
 #include "test-helper.h"
 
+#include <gcr/gcr.h>
+
 #include <gnutls/gnutls.h>
 
 #include <telepathy-glib/dbus-properties-mixin.h>
@@ -196,6 +198,40 @@ mock_tls_certificate_iface_init (gpointer g_iface, gpointer iface_data)
       mock_tls_certificate_reject);
 }
 
+#if 0
+static void
+mock_tls_certificate_assert_rejected (MockTLSCertificate *self,
+        EmpTLSCertificateRejectReason reason)
+{
+  GValueArray *rejection;
+  EmpTLSCertificateRejectReason rejection_reason;
+  gchar *rejection_error;
+  GHashTable *rejection_details;
+  guint i;
+
+  g_assert (self->state == TP_TLS_CERTIFICATE_STATE_REJECTED);
+  g_assert (self->rejections);
+  g_assert (self->rejections->len > 0);
+
+  for (i = 0; i < self->rejections->len; ++i)
+    {
+      rejection = g_ptr_array_index (self->rejections, i);
+      tp_value_array_unpack (rejection, 3,
+              G_TYPE_UINT, &rejection_reason,
+              G_TYPE_STRING, &rejection_error,
+              TP_HASH_TYPE_STRING_VARIANT_MAP, &rejection_details,
+              NULL);
+      g_free (rejection_error);
+      g_hash_table_destroy (rejection_details);
+
+      if (rejection_reason == reason)
+        return;
+    }
+
+  g_assert ("Certificate was not rejected for right reason" && 0);
+}
+#endif
+
 static MockTLSCertificate*
 mock_tls_certificate_new_and_register (TpDBusDaemon *dbus, const gchar *path, ...)
 {
@@ -239,6 +275,8 @@ typedef struct {
   TpDBusDaemon *dbus;
   const gchar *dbus_name;
   MockTLSCertificate *mock;
+  EmpathyTLSCertificate *cert;
+  GAsyncResult *result;
 } Test;
 
 static void
@@ -251,6 +289,12 @@ setup (Test *test, gconstpointer data)
   g_assert_no_error (error);
 
   test->dbus_name = tp_dbus_daemon_get_unique_name (test->dbus);
+
+  test->result = NULL;
+  test->cert = NULL;
+
+  /* No PKCS#11 modules by default, tests add them */
+  gcr_pkcs11_set_modules (NULL);
 }
 
 static void
@@ -265,36 +309,67 @@ teardown (Test *test, gconstpointer data)
       test->mock = NULL;
     }
 
+  if (test->result)
+    g_object_unref (test->result);
+  test->result = NULL;
+
+  if (test->cert)
+    g_object_unref (test->cert);
+  test->cert = NULL;
+
   g_main_loop_unref (test->loop);
   test->loop = NULL;
 }
 
 static void
-accepted_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+add_pkcs11_module_for_testing (Test *test, const gchar *filename,
+        const gchar *subdir)
 {
   GError *error = NULL;
-  Test *test = user_data;
+  gchar *args, *path, *directory;
 
-  g_assert (EMPATHY_IS_TLS_CERTIFICATE (object));
-  empathy_tls_certificate_accept_finish (EMPATHY_TLS_CERTIFICATE (object),
-          res, &error);
+  directory = g_build_filename (g_getenv ("EMPATHY_SRCDIR"),
+          "tests", "certificates", subdir, NULL);
+
+  args = g_strdup_printf ("directory=\"%s\"", directory);
+  path = g_build_filename (P11STANDALONEDIR, filename, NULL);
+  gcr_pkcs11_add_module_from_file (path, args, &error);
   g_assert_no_error (error);
 
+  g_free (directory);
+  g_free (args);
+  g_free (path);
+}
+
+static void
+fetch_callback_result (GObject *object, GAsyncResult *res, gpointer user_data)
+{
+  Test *test = user_data;
+  g_assert (!test->result);
+  test->result = g_object_ref (res);
   g_main_loop_quit (test->loop);
 }
 
 static void
-prepared_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+ensure_certificate_proxy (Test *test)
 {
   GError *error = NULL;
-  Test *test = user_data;
 
-  g_assert (EMPATHY_IS_TLS_CERTIFICATE (object));
-  empathy_tls_certificate_prepare_finish (EMPATHY_TLS_CERTIFICATE (object),
-          res, &error);
+  if (test->cert)
+    return;
+
+  /* Create and prepare a certificate */
+  test->cert = empathy_tls_certificate_new (test->dbus, test->dbus_name,
+          MOCK_TLS_CERTIFICATE_PATH, &error);
+  g_assert_no_error (error);
+  empathy_tls_certificate_prepare_async (test->cert, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+  empathy_tls_certificate_prepare_finish (test->cert, test->result, &error);
   g_assert_no_error (error);
 
-  g_main_loop_quit (test->loop);
+  /* Clear for any future async stuff */
+  g_object_unref (test->result);
+  test->result = NULL;
 }
 
 /* A simple test to make sure the test infrastructure is working */
@@ -302,72 +377,178 @@ static void
 test_certificate_mock_basics (Test *test, gconstpointer data G_GNUC_UNUSED)
 {
   GError *error = NULL;
-  EmpathyTLSCertificate *cert;
 
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
-          "dhansak-collabora.cer");
+          "dhansak-collabora.cer", NULL);
 
-  cert = empathy_tls_certificate_new (test->dbus, test->dbus_name,
-          MOCK_TLS_CERTIFICATE_PATH, &error);
+  ensure_certificate_proxy (test);
+
+  empathy_tls_certificate_accept_async (test->cert, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+  empathy_tls_certificate_accept_finish (test->cert, test->result, &error);
   g_assert_no_error (error);
 
-  empathy_tls_certificate_prepare_async (cert, prepared_callback, test);
-  g_main_loop_run (test->loop);
-
-  empathy_tls_certificate_accept_async (cert, accepted_callback, test);
-  g_main_loop_run (test->loop);
-
-  g_object_unref (cert);
   g_assert (test->mock->state == TP_TLS_CERTIFICATE_STATE_ACCEPTED);
 }
 
 static void
-verifier_callback (GObject *object, GAsyncResult *res, gpointer user_data)
+test_certificate_verify_success_with_pkcs11_lookup (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
   EmpTLSCertificateRejectReason reason = 0;
-  GHashTable *details = NULL;
   GError *error = NULL;
-  Test *test = user_data;
+  EmpathyTLSVerifier *verifier;
 
-  g_assert (EMPATHY_IS_TLS_VERIFIER (object));
-  empathy_tls_verifier_verify_finish (EMPATHY_TLS_VERIFIER (object),
-          res, &reason, &details, &error);
-  g_assert_no_error (error);
+  /*
+   * In this test the mock TLS connection only has one certificate
+   * not a full certificat echain. The root anchor certificate is
+   * retrieved from PKCS#11 storage.
+   */
 
-  if (details)
-    g_hash_table_destroy (details);
-  g_main_loop_quit (test->loop);
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer", NULL);
+
+  /* We add teh collabora directory with the collabora root */
+  add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
+          "collabora-ca");
+
+  ensure_certificate_proxy (test);
+
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+  if (!empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
+
+  /* Yay the verification was a success! */
+
+  g_clear_error (&error);
+  g_object_unref (verifier);
 }
 
 static void
-test_certificate_verify (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_verify_success_with_full_chain (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
+  EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
-  EmpathyTLSCertificate *cert;
+  EmpathyTLSVerifier *verifier;
+
+  /*
+   * In this test the mock TLS connection has a full certificate
+   * chain. We look for an anchor certificate in the chain.
+   */
+
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
+
+  /* We add teh collabora directory with the collabora root */
+  add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
+          "collabora-ca");
+
+  ensure_certificate_proxy (test);
+
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+  if (!empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
+
+  /* Yay the verification was a success! */
+
+  g_clear_error (&error);
+  g_object_unref (verifier);
+}
+
+static void
+test_certificate_verify_root_not_found (Test *test, gconstpointer data G_GNUC_UNUSED)
+{
+  EmpTLSCertificateRejectReason reason = 0;
+  GError *error = NULL;
   EmpathyTLSVerifier *verifier;
 
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
-          "dhansak-collabora.cer");
+          "dhansak-collabora.cer", NULL);
 
-  cert = empathy_tls_certificate_new (test->dbus, test->dbus_name,
-          MOCK_TLS_CERTIFICATE_PATH, &error);
-  g_assert_no_error (error);
+  /* Note that we're not adding any place to find root certs */
 
-  empathy_tls_certificate_prepare_async (cert, prepared_callback, test);
+  ensure_certificate_proxy (test);
+
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
 
-  verifier = empathy_tls_verifier_new (cert, "another-host");
+  if (empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
 
-  empathy_tls_verifier_verify_async (verifier, verifier_callback, test);
-  g_main_loop_run (test->loop);
+  /* And it should say we're self-signed (oddly enough) */
+  g_assert_cmpuint (reason, ==, EMP_TLS_CERTIFICATE_REJECT_REASON_SELF_SIGNED);
 
-#if 0
-  empathy_tls_certificate_accept_async (cert, accepted_callback, test);
-  g_main_loop_run (test->loop);
-#endif
-
+  g_clear_error (&error);
   g_object_unref (verifier);
-  g_object_unref (cert);
+}
+
+static void
+test_certificate_verify_root_not_anchored (Test *test, gconstpointer data G_GNUC_UNUSED)
+{
+  EmpTLSCertificateRejectReason reason = 0;
+  GError *error = NULL;
+  EmpathyTLSVerifier *verifier;
+
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
+
+  /* Note that we're not adding any place to find root certs */
+
+  ensure_certificate_proxy (test);
+
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+
+  if (empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
+
+  /* And it should say we're self-signed (oddly enough) */
+  g_assert_cmpuint (reason, ==, EMP_TLS_CERTIFICATE_REJECT_REASON_SELF_SIGNED);
+
+  g_clear_error (&error);
+  g_object_unref (verifier);
+}
+
+static void
+test_certificate_verify_hostname_invalid (Test *test, gconstpointer data G_GNUC_UNUSED)
+{
+  EmpTLSCertificateRejectReason reason = 0;
+  GError *error = NULL;
+  EmpathyTLSVerifier *verifier;
+
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
+
+  /* We add teh collabora directory with the collabora root */
+  add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
+          "collabora-ca");
+
+  ensure_certificate_proxy (test);
+
+  verifier = empathy_tls_verifier_new (test->cert, "invalid.host.name");
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+
+  if (empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
+
+  /* And it should say we're self-signed (oddly enough) */
+  g_assert_cmpuint (reason, ==, EMP_TLS_CERTIFICATE_REJECT_REASON_HOSTNAME_MISMATCH);
+
+  g_clear_error (&error);
+  g_object_unref (verifier);
 }
 
 int
@@ -381,8 +562,16 @@ main (int argc,
 
   g_test_add ("/tls/certificate_basics", Test, NULL,
           setup, test_certificate_mock_basics, teardown);
-  g_test_add ("/tls/certificate_verify", Test, NULL,
-          setup, test_certificate_verify, teardown);
+  g_test_add ("/tls/certificate_verify_success_with_pkcs11_lookup", Test, NULL,
+          setup, test_certificate_verify_success_with_pkcs11_lookup, teardown);
+  g_test_add ("/tls/certificate_verify_success_with_full_chain", Test, NULL,
+          setup, test_certificate_verify_success_with_full_chain, teardown);
+  g_test_add ("/tls/certificate_verify_root_not_found", Test, NULL,
+          setup, test_certificate_verify_root_not_found, teardown);
+  g_test_add ("/tls/certificate_verify_root_not_anchored", Test, NULL,
+          setup, test_certificate_verify_root_not_anchored, teardown);
+  g_test_add ("/tls/certificate_verify_hostname_invalid", Test, NULL,
+          setup, test_certificate_verify_hostname_invalid, teardown);
 
   result = g_test_run ();
   test_deinit ();
