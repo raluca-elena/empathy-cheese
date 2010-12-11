@@ -152,7 +152,7 @@ build_certificate_list_for_gnutls (GcrCertificateChain *chain,
   *n_list = length;
 
   /* See if we have an anchor */
-  if (gcr_certificate_chain_get_chain_type (chain) ==
+  if (gcr_certificate_chain_get_status (chain) ==
           GCR_CERTIFICATE_CHAIN_ANCHORED)
     {
       cert = gcr_certificate_chain_get_anchor (chain);
@@ -211,6 +211,32 @@ abort_verification (EmpathyTLSVerifier *self,
 }
 
 static void
+debug_certificate_chain (GcrCertificateChain *chain)
+{
+    GEnumClass *enum_class;
+    GEnumValue *enum_value;
+    gint idx, length;
+    GcrCertificate *cert;
+    gchar *subject;
+
+    enum_class = G_ENUM_CLASS
+            (g_type_class_peek (GCR_TYPE_CERTIFICATE_CHAIN_STATUS));
+    enum_value = g_enum_get_value (enum_class,
+            gcr_certificate_chain_get_status (chain));
+    length = gcr_certificate_chain_get_length (chain);
+    DEBUG ("Certificate chain: length %u status %s",
+            length, enum_value ? enum_value->value_nick : "XXX");
+
+    for (idx = 0; idx < length; ++idx)
+      {
+        cert = gcr_certificate_chain_get_certificate (chain, idx);
+        subject = gcr_certificate_get_subject_dn (cert);
+        DEBUG ("  Certificate: %s", subject);
+        g_free (subject);
+      }
+}
+
+static void
 perform_verification (EmpathyTLSVerifier *self, GcrCertificateChain *chain)
 {
   gboolean ret = FALSE;
@@ -223,12 +249,13 @@ perform_verification (EmpathyTLSVerifier *self, GcrCertificateChain *chain)
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
   DEBUG ("Performing verification");
+  debug_certificate_chain (chain);
 
   /*
    * If the first certificate is an pinned certificate then we completely
    * ignore the rest of the verification process.
    */
-  if (gcr_certificate_chain_get_chain_type (chain) == GCR_CERTIFICATE_CHAIN_PINNED)
+  if (gcr_certificate_chain_get_status (chain) == GCR_CERTIFICATE_CHAIN_PINNED)
     {
       DEBUG ("Found pinned certificate for %s", priv->hostname);
       complete_verification (self);
