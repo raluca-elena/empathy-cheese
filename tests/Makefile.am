@@ -12,7 +12,6 @@ AM_CPPFLAGS =						\
 	$(ERROR_CFLAGS)					\
 	-I$(top_srcdir)                          	\
 	-DPKGDATADIR=\""$(pkgdatadir)"\"		\
-	-DP11STANDALONEDIR=\""$(pkcs11standalonedir)"\" \
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
 	$(WARN_CFLAGS)					\

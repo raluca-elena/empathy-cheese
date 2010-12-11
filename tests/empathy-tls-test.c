@@ -327,16 +327,35 @@ add_pkcs11_module_for_testing (Test *test, const gchar *filename,
 {
   GError *error = NULL;
   gchar *args, *path, *directory;
+  gchar *standalone, *error_output;
+  gint exit_status;
 
   directory = g_build_filename (g_getenv ("EMPATHY_SRCDIR"),
           "tests", "certificates", subdir, NULL);
 
+  /*
+   * Lookup the directory for standalone pkcs11 modules installed by
+   * gnome-keyring. We use these for testing our implementation.
+   */
+  g_spawn_command_line_sync ("pkg-config --variable=pkcs11standalonedir gcr-3",
+          &standalone, &error_output, &exit_status, &error);
+  g_assert_no_error (error);
+  if (exit_status != 0)
+    {
+      g_warning ("couldn't determine standalone pkcs11 module directory: %d: %s",
+              exit_status, error_output);
+      g_assert_not_reached ();
+    }
+
+  g_strstrip (standalone);
   args = g_strdup_printf ("directory=\"%s\"", directory);
-  path = g_build_filename (P11STANDALONEDIR, filename, NULL);
+  path = g_build_filename (standalone, filename, NULL);
   gcr_pkcs11_add_module_from_file (path, args, &error);
   g_assert_no_error (error);
 
   g_free (directory);
+  g_free (standalone);
+  g_free (error_output);
   g_free (args);
   g_free (path);
 }
