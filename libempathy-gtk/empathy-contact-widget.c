@@ -1345,10 +1345,10 @@ contact_widget_contact_update (EmpathyContactWidget *information)
           FolksPersona *persona = empathy_contact_get_persona (
               information->contact);
 
-          if (persona != NULL && FOLKS_IS_FAVOURITE (persona))
+          if (persona != NULL && FOLKS_IS_FAVOURITABLE (persona))
             {
-              gboolean is_favourite = folks_favourite_get_is_favourite (
-                  FOLKS_FAVOURITE (persona));
+              gboolean is_favourite = folks_favouritable_get_is_favourite (
+                  FOLKS_FAVOURITABLE (persona));
               contact_widget_favourites_changed_cb (information->manager,
                   information->contact, is_favourite, information);
             }
@@ -1479,10 +1479,10 @@ favourite_toggled_cb (GtkToggleButton *button,
 {
   FolksPersona *persona = empathy_contact_get_persona (information->contact);
 
-  if (persona != NULL && FOLKS_IS_FAVOURITE (persona))
+  if (persona != NULL && FOLKS_IS_FAVOURITABLE (persona))
     {
       gboolean active = gtk_toggle_button_get_active (button);
-      folks_favourite_set_is_favourite (FOLKS_FAVOURITE (persona), active);
+      folks_favouritable_set_is_favourite (FOLKS_FAVOURITABLE (persona), active);
     }
 }
 

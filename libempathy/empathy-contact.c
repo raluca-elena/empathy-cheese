@@ -510,8 +510,8 @@ empathy_contact_set_presence_message (EmpathyContact *contact,
 
   if (priv->persona != NULL)
     {
-      folks_presence_set_presence_message (FOLKS_PRESENCE (priv->persona),
-          message);
+      folks_has_presence_set_presence_message (
+          FOLKS_HAS_PRESENCE (priv->persona), message);
     }
 }
 
@@ -991,7 +991,10 @@ empathy_contact_get_presence_message (EmpathyContact *contact)
   priv = GET_PRIV (contact);
 
   if (priv->persona != NULL)
-    return folks_presence_get_presence_message (FOLKS_PRESENCE (priv->persona));
+    {
+      return folks_has_presence_get_presence_message (
+          FOLKS_HAS_PRESENCE (priv->persona));
+    }
 
   return NULL;
 }
@@ -1791,15 +1794,16 @@ static int
 presence_cmp_func (EmpathyContact *a,
     EmpathyContact *b)
 {
-  FolksPresence *presence_a, *presence_b;
+  FolksHasPresence *presence_a, *presence_b;
 
-  presence_a = FOLKS_PRESENCE (empathy_contact_get_persona (a));
-  presence_b = FOLKS_PRESENCE (empathy_contact_get_persona (b));
+  presence_a = FOLKS_HAS_PRESENCE (empathy_contact_get_persona (a));
+  presence_b = FOLKS_HAS_PRESENCE (empathy_contact_get_persona (b));
 
   /* We negate the result because we're sorting in reverse order (i.e. such that
    * the Personas with the highest presence are at the beginning of the list. */
-  return -folks_presence_typecmp (folks_presence_get_presence_type (presence_a),
-      folks_presence_get_presence_type (presence_b));
+  return -folks_has_presence_typecmp (
+      folks_has_presence_get_presence_type (presence_a),
+      folks_has_presence_get_presence_type (presence_b));
 }
 
 static gint

@@ -232,7 +232,8 @@ empathy_icon_name_for_individual (FolksIndividual *individual)
 	TpConnectionPresenceType presence;
 
 	folks_presence =
-	    folks_presence_get_presence_type (FOLKS_PRESENCE (individual));
+	    folks_has_presence_get_presence_type (
+	        FOLKS_HAS_PRESENCE (individual));
 	presence = empathy_folks_presence_type_to_tp (folks_presence);
 
 	return empathy_icon_name_for_presence (presence);
@@ -632,7 +633,8 @@ empathy_pixbuf_avatar_from_individual_scaled_async (
 			callback, user_data,
 			empathy_pixbuf_avatar_from_individual_scaled_async);
 
-	avatar_file = folks_avatar_get_avatar (FOLKS_AVATAR (individual));
+	avatar_file =
+		folks_has_avatar_get_avatar (FOLKS_HAS_AVATAR (individual));
 	if (avatar_file == NULL)
 		goto out;
 

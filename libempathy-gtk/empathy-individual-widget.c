@@ -220,19 +220,20 @@ update_weak_contact (EmpathyIndividualWidget *self)
       personas = folks_individual_get_personas (priv->individual);
       for (l = personas; l != NULL; l = l->next)
         {
-          FolksPresence *presence;
+          FolksHasPresence *presence;
 
           /* We only want personas which implement FolksPresence */
-          if (!FOLKS_IS_PRESENCE (l->data))
+          if (!FOLKS_IS_HAS_PRESENCE (l->data))
             continue;
 
-          presence = FOLKS_PRESENCE (l->data);
+          presence = FOLKS_HAS_PRESENCE (l->data);
 
-          if (folks_presence_typecmp (folks_presence_get_presence_type (presence),
+          if (folks_has_presence_typecmp (
+                  folks_has_presence_get_presence_type (presence),
                   presence_type) > 0
               && TPF_IS_PERSONA (presence))
             {
-              presence_type = folks_presence_get_presence_type (presence);
+              presence_type = folks_has_presence_get_presence_type (presence);
               tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
             }
         }
@@ -896,7 +897,7 @@ individual_dup_avatar (FolksIndividual *individual)
 
   /* FIXME: We just choose the first Persona which has an avatar, and save that.
    * The avatar handling in EmpathyContact needs to be moved into libfolks as
-   * much as possible, and this code rewritten to use FolksAvatar.
+   * much as possible, and this code rewritten to use FolksHasAvatar.
    * (bgo#627401) */
   personas = folks_individual_get_personas (individual);
   for (l = personas; l != NULL; l = l->next)
@@ -1150,8 +1151,8 @@ favourite_toggled_cb (GtkToggleButton *button,
     EmpathyIndividualWidget *self)
 {
   gboolean active = gtk_toggle_button_get_active (button);
-  folks_favourite_set_is_favourite (
-      FOLKS_FAVOURITE (GET_PRIV (self)->individual), active);
+  folks_favouritable_set_is_favourite (
+      FOLKS_FAVOURITABLE (GET_PRIV (self)->individual), active);
 }
 
 static void
@@ -1247,11 +1248,13 @@ notify_presence_cb (gpointer folks_object,
   state_image = g_object_get_data (table, "state-image");
 
   /* FIXME: Default messages should be moved into libfolks (bgo#627403) */
-  message = folks_presence_get_presence_message (FOLKS_PRESENCE (folks_object));
+  message = folks_has_presence_get_presence_message (
+      FOLKS_HAS_PRESENCE (folks_object));
   if (EMP_STR_EMPTY (message))
     {
       message = empathy_presence_get_default_message (
-          folks_presence_get_presence_type (FOLKS_PRESENCE (folks_object)));
+          folks_has_presence_get_presence_type (
+              FOLKS_HAS_PRESENCE (folks_object)));
     }
 
   if (message != NULL)
@@ -1261,7 +1264,8 @@ notify_presence_cb (gpointer folks_object,
 
   gtk_image_set_from_icon_name (GTK_IMAGE (state_image),
       empathy_icon_name_for_presence (
-          folks_presence_get_presence_type (FOLKS_PRESENCE (folks_object))),
+          folks_has_presence_get_presence_type (
+              FOLKS_HAS_PRESENCE (folks_object))),
       GTK_ICON_SIZE_BUTTON);
   gtk_widget_show (state_image);
 }
@@ -1290,7 +1294,8 @@ notify_is_favourite_cb (gpointer folks_object,
   if (GTK_IS_TOGGLE_BUTTON (favourite_widget))
     {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (favourite_widget),
-          folks_favourite_get_is_favourite (FOLKS_FAVOURITE (folks_object)));
+          folks_favouritable_get_is_favourite (
+              FOLKS_FAVOURITABLE (folks_object)));
     }
 }
 
