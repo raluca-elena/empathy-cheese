@@ -2345,12 +2345,45 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
     {
       gchar *text;
       GtkWindow *parent;
+      GList *l, *personas;
+      guint persona_count = 0;
+
+      personas = folks_individual_get_personas (individual);
+
+      /* If we have more than one TpfPersona, display a different message
+       * ensuring the user knows that *all* of the meta-contacts' personas will
+       * be removed. */
+      for (l = personas; l != NULL; l = l->next)
+        {
+          if (!TPF_IS_PERSONA (l->data))
+            continue;
+
+          persona_count++;
+          if (persona_count >= 2)
+            break;
+        }
+
+      if (persona_count < 2)
+        {
+          /* Not a meta-contact */
+          text =
+              g_strdup_printf (
+                  _("Do you really want to remove the contact '%s'?"),
+                  folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+        }
+      else
+        {
+          /* Meta-contact */
+          text =
+              g_strdup_printf (
+                  _("Do you really want to remove the linked contact '%s'? "
+                    "Note that this will remove all the contacts which make up "
+                    "this linked contact."),
+                  folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+        }
 
       parent = empathy_get_toplevel_window (GTK_WIDGET (view));
-      text =
-          g_strdup_printf (_
-          ("Do you really want to remove the contact '%s'?"),
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+
       if (individual_view_remove_dialog_show (parent, _("Removing contact"),
               text))
         {
