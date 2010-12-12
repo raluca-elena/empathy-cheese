@@ -119,7 +119,7 @@ empathy_linking_dialog_init (EmpathyLinkingDialog *self)
   button = gtk_button_new_with_mnemonic (
       C_("Unlink individual (button)", "_Unlink…"));
   gtk_widget_set_tooltip_text (button, _("Completely split the displayed "
-      "meta-contact into the contacts it contains."));
+      "linked contacts into the separate contacts."));
   gtk_dialog_add_action_widget (dialog, button, RESPONSE_UNLINK);
   gtk_widget_show (button);
 
@@ -179,12 +179,12 @@ linking_response_cb (EmpathyLinkingDialog *self,
 
       /* Show a confirmation dialogue first */
       dialog = gtk_message_dialog_new (GTK_WINDOW (self), GTK_DIALOG_MODAL,
-          GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE, _("Unlink meta-contact '%s'?"),
+          GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE,
+          _("Unlink linked contacts '%s'?"),
           folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
-          _("Are you sure you want to unlink this meta-contact? This will "
-            "completely split the meta-contact into the contacts it "
-            "contains."));
+          _("Are you sure you want to unlink these linked contacts? This will "
+            "completely split the linked contacts into separate contacts."));
       gtk_dialog_add_buttons (GTK_DIALOG (dialog),
           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
           C_("Unlink individual (button)", "_Unlink"), GTK_RESPONSE_OK,

@@ -1646,8 +1646,12 @@ individual_table_set_up (EmpathyIndividualWidget *self)
             num_personas++;
         }
 
-      message = g_strdup_printf (ngettext ("Meta-contact containing %u contact",
-          "Meta-contact containing %u contacts", num_personas), num_personas);
+      /* Translators: the plurality applies to both instances of the word
+       * "contact" */
+      message = g_strdup_printf (
+          ngettext ("Linked contact containing %u contact",
+              "Linked contacts containing %u contacts", num_personas),
+          num_personas);
       label = gtk_label_new (message);
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
       g_free (message);
