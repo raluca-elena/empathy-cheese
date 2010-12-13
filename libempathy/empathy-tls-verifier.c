@@ -466,8 +466,8 @@ empathy_tls_verifier_verify_async (EmpathyTLSVerifier *self,
 {
   GcrCertificateChain *chain;
   GcrCertificate *cert;
-  GPtrArray *certs = NULL;
-  GArray *cert_data;
+  GPtrArray *cert_data = NULL;
+  GArray *data;
   guint idx;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
@@ -475,17 +475,17 @@ empathy_tls_verifier_verify_async (EmpathyTLSVerifier *self,
 
   g_return_if_fail (priv->verify_result == NULL);
 
-  g_object_get (priv->certificate, "cert-data", &certs, NULL);
-  g_return_if_fail (certs);
+  g_object_get (priv->certificate, "cert-data", &cert_data, NULL);
+  g_return_if_fail (cert_data);
 
   priv->verify_result = g_simple_async_result_new (G_OBJECT (self),
       callback, user_data, NULL);
 
   /* Create a certificate chain */
   chain = gcr_certificate_chain_new ();
-  for (idx = 0; idx < certs->len; ++idx) {
-    cert_data = g_ptr_array_index (certs, idx);
-    cert = gcr_simple_certificate_new_static (cert_data->data, cert_data->len);
+  for (idx = 0; idx < cert_data->len; ++idx) {
+    data = g_ptr_array_index (cert_data, idx);
+    cert = gcr_simple_certificate_new (data->data, data->len);
     gcr_certificate_chain_add (chain, cert);
     g_object_unref (cert);
   }
@@ -494,7 +494,7 @@ empathy_tls_verifier_verify_async (EmpathyTLSVerifier *self,
           NULL, perform_verification_cb, g_object_ref (self));
 
   g_object_unref (chain);
-  g_ptr_array_unref (certs);
+  g_boxed_free (TP_ARRAY_TYPE_UCHAR_ARRAY_LIST, cert_data);
 }
 
 gboolean
@@ -532,21 +532,22 @@ empathy_tls_verifier_verify_finish (EmpathyTLSVerifier *self,
 void
 empathy_tls_verifier_store_exception (EmpathyTLSVerifier *self)
 {
-  GArray *last_cert;
+  GArray *data;
   GcrCertificate *cert;
-  GPtrArray *certs;
+  GPtrArray *cert_data = NULL;
   GError *error = NULL;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
-  g_object_get (priv->certificate, "cert-data", &certs, NULL);
-  last_cert = g_ptr_array_index (certs, certs->len - 1);
-  cert = gcr_simple_certificate_new_static ((gpointer)last_cert->data,
-          last_cert->len);
+  g_object_get (priv->certificate, "cert-data", &cert_data, NULL);
+  g_return_if_fail (cert_data);
+
+  data = g_ptr_array_index (cert_data, cert_data->len - 1);
+  cert = gcr_simple_certificate_new ((gpointer)data->data, data->len);
 
   if (!gcr_trust_add_pinned_certificate (cert, GCR_PURPOSE_CLIENT_AUTH,
           priv->hostname, NULL, &error))
       DEBUG ("Can't store the certificate exeption: %s", error->message);
 
   g_object_unref (cert);
-  g_ptr_array_unref (certs);
+  g_boxed_free (TP_ARRAY_TYPE_UCHAR_ARRAY_LIST, cert_data);
 }
