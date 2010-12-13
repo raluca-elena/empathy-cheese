@@ -548,4 +548,5 @@ empathy_tls_verifier_store_exception (EmpathyTLSVerifier *self)
       DEBUG ("Can't store the certificate exeption: %s", error->message);
 
   g_object_unref (cert);
+  g_ptr_array_unref (certs);
 }
