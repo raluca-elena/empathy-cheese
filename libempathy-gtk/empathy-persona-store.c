@@ -532,6 +532,11 @@ individual_personas_changed_cb (GObject *object,
 {
   GList *l;
 
+  /* One of the personas' row references might hold the last reference to the
+   * PersonaStore, so we need to keep a reference ourselves so we don't get
+   * finalised. */
+  g_object_ref (self);
+
   /* Remove the old personas. */
   for (l = removed; l != NULL; l = l->next)
     remove_persona_and_disconnect (self, FOLKS_PERSONA (l->data));
@@ -539,6 +544,8 @@ individual_personas_changed_cb (GObject *object,
   /* Add each of the new personas to the tree model */
   for (l = added; l != NULL; l = l->next)
     add_persona_and_connect (self, FOLKS_PERSONA (l->data));
+
+  g_object_unref (self);
 }
 
 static gint
