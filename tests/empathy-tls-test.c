@@ -66,8 +66,10 @@ mock_tls_certificate_init (MockTLSCertificate *self)
 }
 
 static void
-mock_tls_certificate_get_property (GObject *object, guint property_id,
-    GValue *value, GParamSpec *pspec)
+mock_tls_certificate_get_property (GObject *object,
+        guint property_id,
+        GValue *value,
+        GParamSpec *pspec)
 {
   MockTLSCertificate *self = MOCK_TLS_CERTIFICATE (object);
 
@@ -178,7 +180,8 @@ mock_tls_certificate_accept (TpSvcAuthenticationTLSCertificate *base,
 
 static void
 mock_tls_certificate_reject (TpSvcAuthenticationTLSCertificate *base,
-        const GPtrArray *in_Rejections, DBusGMethodInvocation *context)
+        const GPtrArray *in_Rejections,
+        DBusGMethodInvocation *context)
 {
   MockTLSCertificate *self = MOCK_TLS_CERTIFICATE (base);
   self->state = TP_TLS_CERTIFICATE_STATE_REJECTED;
@@ -187,7 +190,8 @@ mock_tls_certificate_reject (TpSvcAuthenticationTLSCertificate *base,
 }
 
 static void
-mock_tls_certificate_iface_init (gpointer g_iface, gpointer iface_data)
+mock_tls_certificate_iface_init (gpointer g_iface,
+        gpointer iface_data)
 {
   TpSvcAuthenticationTLSCertificateClass *klass =
     (TpSvcAuthenticationTLSCertificateClass*)g_iface;
@@ -233,7 +237,9 @@ mock_tls_certificate_assert_rejected (MockTLSCertificate *self,
 #endif
 
 static MockTLSCertificate*
-mock_tls_certificate_new_and_register (TpDBusDaemon *dbus, const gchar *path, ...)
+mock_tls_certificate_new_and_register (TpDBusDaemon *dbus,
+        const gchar *path,
+        ...)
 {
   MockTLSCertificate *cert;
   GError *error = NULL;
@@ -322,7 +328,8 @@ teardown (Test *test, gconstpointer data)
 }
 
 static void
-add_pkcs11_module_for_testing (Test *test, const gchar *filename,
+add_pkcs11_module_for_testing (Test *test,
+        const gchar *filename,
         const gchar *subdir)
 {
   GError *error = NULL;
@@ -361,7 +368,9 @@ add_pkcs11_module_for_testing (Test *test, const gchar *filename,
 }
 
 static void
-fetch_callback_result (GObject *object, GAsyncResult *res, gpointer user_data)
+fetch_callback_result (GObject *object,
+        GAsyncResult *res,
+        gpointer user_data)
 {
   Test *test = user_data;
   g_assert (!test->result);
@@ -393,7 +402,8 @@ ensure_certificate_proxy (Test *test)
 
 /* A simple test to make sure the test infrastructure is working */
 static void
-test_certificate_mock_basics (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_mock_basics (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
   GError *error = NULL;
 
@@ -482,7 +492,8 @@ test_certificate_verify_success_with_full_chain (Test *test,
 }
 
 static void
-test_certificate_verify_root_not_found (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_verify_root_not_found (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
@@ -511,7 +522,8 @@ test_certificate_verify_root_not_found (Test *test, gconstpointer data G_GNUC_UN
 }
 
 static void
-test_certificate_verify_root_not_anchored (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_verify_root_not_anchored (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
@@ -540,7 +552,8 @@ test_certificate_verify_root_not_anchored (Test *test, gconstpointer data G_GNUC
 }
 
 static void
-test_certificate_verify_hostname_invalid (Test *test, gconstpointer data G_GNUC_UNUSED)
+test_certificate_verify_hostname_invalid (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
 {
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;

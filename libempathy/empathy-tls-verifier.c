@@ -113,8 +113,10 @@ verification_output_to_reason (gint res,
 
 static void
 build_certificate_list_for_gnutls (GcrCertificateChain *chain,
-        gnutls_x509_crt_t **list, guint *n_list,
-        gnutls_x509_crt_t **anchors, guint *n_anchors)
+        gnutls_x509_crt_t **list,
+        guint *n_list,
+        gnutls_x509_crt_t **anchors,
+        guint *n_anchors)
 {
   GcrCertificate *cert;
   guint idx, length;
@@ -173,7 +175,8 @@ build_certificate_list_for_gnutls (GcrCertificateChain *chain,
 }
 
 static void
-free_certificate_list_for_gnutls (gnutls_x509_crt_t *list, guint n_list)
+free_certificate_list_for_gnutls (gnutls_x509_crt_t *list,
+        guint n_list)
 {
   guint idx;
 
@@ -237,7 +240,8 @@ debug_certificate_chain (GcrCertificateChain *chain)
 }
 
 static void
-perform_verification (EmpathyTLSVerifier *self, GcrCertificateChain *chain)
+perform_verification (EmpathyTLSVerifier *self,
+        GcrCertificateChain *chain)
 {
   gboolean ret = FALSE;
   EmpTLSCertificateRejectReason reason =
@@ -312,7 +316,9 @@ perform_verification (EmpathyTLSVerifier *self, GcrCertificateChain *chain)
 }
 
 static void
-perform_verification_cb (GObject *object, GAsyncResult *res, gpointer user_data)
+perform_verification_cb (GObject *object,
+        GAsyncResult *res,
+        gpointer user_data)
 {
   GError *error = NULL;
 
