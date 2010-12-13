@@ -214,13 +214,20 @@ abort_verification (EmpathyTLSVerifier *self,
 }
 
 static void
+debug_certificate (GcrCertificate *cert)
+{
+    gchar *subject = gcr_certificate_get_subject_dn (cert);
+    DEBUG ("Certificate: %s", subject);
+    g_free (subject);
+}
+
+static void
 debug_certificate_chain (GcrCertificateChain *chain)
 {
     GEnumClass *enum_class;
     GEnumValue *enum_value;
     gint idx, length;
     GcrCertificate *cert;
-    gchar *subject;
 
     enum_class = G_ENUM_CLASS
             (g_type_class_peek (GCR_TYPE_CERTIFICATE_CHAIN_STATUS));
@@ -233,9 +240,7 @@ debug_certificate_chain (GcrCertificateChain *chain)
     for (idx = 0; idx < length; ++idx)
       {
         cert = gcr_certificate_chain_get_certificate (chain, idx);
-        subject = gcr_certificate_get_subject_dn (cert);
-        DEBUG ("  Certificate: %s", subject);
-        g_free (subject);
+        debug_certificate (cert);
       }
 }
 
@@ -541,12 +546,22 @@ empathy_tls_verifier_store_exception (EmpathyTLSVerifier *self)
   g_object_get (priv->certificate, "cert-data", &cert_data, NULL);
   g_return_if_fail (cert_data);
 
-  data = g_ptr_array_index (cert_data, cert_data->len - 1);
+  if (!cert_data->len)
+    {
+      DEBUG ("No certificate to pin.");
+      return;
+    }
+
+  /* The first certificate in the chain is for the host */
+  data = g_ptr_array_index (cert_data, 0);
   cert = gcr_simple_certificate_new ((gpointer)data->data, data->len);
+
+  DEBUG ("Storing pinned certificate:");
+  debug_certificate (cert);
 
   if (!gcr_trust_add_pinned_certificate (cert, GCR_PURPOSE_CLIENT_AUTH,
           priv->hostname, NULL, &error))
-      DEBUG ("Can't store the certificate exeption: %s", error->message);
+      DEBUG ("Can't store the pinned certificate: %s", error->message);
 
   g_object_unref (cert);
   g_boxed_free (TP_ARRAY_TYPE_UCHAR_ARRAY_LIST, cert_data);
