@@ -593,6 +593,7 @@ main_window_error_display (EmpathyMainWindow *window,
 			  G_CALLBACK (main_window_error_retry_clicked_cb),
 			  window);
 
+	gtk_widget_set_tooltip_text (priv->errors_vbox, error_message);
 	gtk_widget_show (priv->errors_vbox);
 
 	g_hash_table_insert (priv->errors, g_object_ref (account), info_bar);
