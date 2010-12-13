@@ -325,6 +325,9 @@ teardown (Test *test, gconstpointer data)
 
   g_main_loop_unref (test->loop);
   test->loop = NULL;
+
+  g_object_unref (test->dbus);
+  test->dbus = NULL;
 }
 
 static void
