@@ -1807,10 +1807,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 					      g_object_unref,
 					      NULL);
 
-	priv->auths = g_hash_table_new_full (g_direct_hash,
-					     g_direct_equal,
-					     NULL,
-					     NULL);
+	priv->auths = g_hash_table_new (NULL, NULL);
 
 	priv->status_changed_handlers = g_hash_table_new_full (g_direct_hash,
 							       g_direct_equal,
