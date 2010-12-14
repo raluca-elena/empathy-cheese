@@ -350,25 +350,11 @@ empathy_account_settings_dispose (GObject *object)
     g_signal_handler_disconnect (priv->managers, priv->managers_ready_id);
   priv->managers_ready_id = 0;
 
-  if (priv->managers != NULL)
-    g_object_unref (priv->managers);
-  priv->managers = NULL;
-
-  if (priv->manager != NULL)
-    g_object_unref (priv->manager);
-  priv->manager = NULL;
-
-  if (priv->account_manager != NULL)
-    g_object_unref (priv->account_manager);
-  priv->account_manager = NULL;
-
-  if (priv->account != NULL)
-    g_object_unref (priv->account);
-  priv->account = NULL;
-
-  if (priv->protocol_obj != NULL)
-    g_object_unref (priv->protocol_obj);
-  priv->protocol_obj = NULL;
+  tp_clear_object (&priv->managers);
+  tp_clear_object (&priv->manager);
+  tp_clear_object (&priv->account_manager);
+  tp_clear_object (&priv->account);
+  tp_clear_object (&priv->protocol_obj);
 
   /* release any references held by the object here */
   if (G_OBJECT_CLASS (empathy_account_settings_parent_class)->dispose)
