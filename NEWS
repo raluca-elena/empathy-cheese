@@ -1,3 +1,43 @@
+NEW in 2.91.3.1 (14/12/2010)
+===============
+
+This release fixes a lot of nasty bugs, including crashes and infinite
+loops.
+
+Dependencies:
+ • telepathy-glib ≥ 0.13.7
+ • folks ≥ 0.3.3
+
+Bugs fixed:
+ - Fixed #608806, empathy doesn't let me see or get to contact details during subscription request (Guillaume Desmottes)
+ - Fixed #626507, Connection error message is not shown completely (Robert Sajdok)
+ - Fixed #630146, Add Ovi account profile (Guillaume Desmottes)
+ - Fixed #631096, Should not mention "meta contacts" in UI (Philip Withnall)
+ - Fixed #635513, Message displayed TWICE (in chat msg overlay) when opening a chat window for unread msg (Guillaume Desmottes)
+ - Fixed #636067, Add an EmpathySoundManager (Guillaume Desmottes)
+ - Fixed #636123, gtk_menu_detach(): menu is not attached when right closing contact context menu (Guillaume Desmottes)
+ - Fixed #636202, "Invite to chatroom" menu broken (Guillaume Desmottes)
+ - Fixed #636203, Crash when trying to create an IRC account (Guillaume Desmottes)
+ - Fixed #636207, Avatar not always displayed in a MUC (Guillaume Desmottes)
+ - Fixed #636360, Favorite chatrooms list is not updated (Guillaume Desmottes)
+ - Fixed #636613, Become a server SASL handler (Jonny Lamb)
+ - Fixed #636700, Add an extra warning when deleting a metacontact (Philip Withnall)
+ - Fixed #636802, Doesn't compile with --without-ca-file (Will Thompson)
+ - Fixed #637097, Port to latest folks API changes (Philip Withnall)
+
+Translations:
+ - Updated en_GB Translation (Philip Withnall)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+
+Documentation translations:
+ - Updated hu Documentation translation (Gabor Kelemen)
+
 NEW in 2.91.3 (29/11/2010)
 =============
 
