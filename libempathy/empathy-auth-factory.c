@@ -475,6 +475,12 @@ empathy_auth_factory_constructed (GObject *obj)
           G_TYPE_STRING, TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
           NULL));
 
+  /* We are also an observer so that we can see new auth channels
+   * popping up and if we have the password already saved to one
+   * account where an auth channel has just appeared we can call
+   * Claim() on the CDO so the approver won't get it, which makes
+   * sense. */
+
   tp_base_client_take_observer_filter (client, tp_asv_new (
           /* ChannelType */
           TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
