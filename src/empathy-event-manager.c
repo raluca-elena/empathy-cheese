@@ -166,15 +166,8 @@ event_free (EventPriv *event)
   if (event->autoremove_timeout_id != 0)
     g_source_remove (event->autoremove_timeout_id);
 
-  if (event->public.contact)
-    {
-      g_object_unref (event->public.contact);
-    }
-
-  if (event->public.account)
-    {
-      g_object_unref (event->public.account);
-    }
+  tp_clear_object (&(event->public.contact));
+  tp_clear_object (&(event->public.account));
 
   g_slice_free (EventPriv, event);
 }
