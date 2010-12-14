@@ -143,7 +143,11 @@ struct _EmpathyMainWindowPriv {
 	GtkWidget              *edit_context_separator;
 
 	guint                   size_timeout_id;
+
+	/* reffed TpAccount* => visible GtkInfoBar* */
 	GHashTable             *errors;
+
+	/* EmpathyEvent* => visible GtkInfoBar* */
 	GHashTable             *auths;
 
 	/* stores a mapping from TpAccount to Handler ID to prevent
