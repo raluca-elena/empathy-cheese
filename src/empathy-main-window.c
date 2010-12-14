@@ -387,7 +387,7 @@ main_window_auth_display (EmpathyMainWindow *window,
 	image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_BUTTON);
 	close_button = gtk_button_new ();
 	gtk_button_set_image (GTK_BUTTON (close_button), image);
-	gtk_widget_set_tooltip_text (close_button, _("Cancel"));
+	gtk_widget_set_tooltip_text (close_button, _("Disconnect"));
 	gtk_widget_show (close_button);
 
 	action_table = gtk_table_new (1, 2, FALSE);
