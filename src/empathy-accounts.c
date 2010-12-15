@@ -93,7 +93,6 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
     gpointer user_data)
 {
   TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
-  const gchar *account_id = (const gchar*) user_data;
   GError *error = NULL;
 
   if (!tp_account_manager_prepare_finish (manager, result, &error))
@@ -103,7 +102,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       return;
     }
 
-  if (account_id != NULL)
+  if (selected_account_name != NULL)
     {
       gchar *account_path;
       TpAccount *account = NULL;
@@ -112,7 +111,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       /* create and prep the corresponding TpAccount so it's fully ready by the
        * time we try to select it in the accounts dialog */
       account_path = g_strdup_printf ("%s%s", TP_ACCOUNT_OBJECT_PATH_BASE,
-          account_id);
+          selected_account_name);
       bus = tp_dbus_daemon_dup (NULL);
       if ((account = tp_account_new (bus, account_path, &error)))
         {
@@ -240,7 +239,7 @@ main (int argc, char *argv[])
   account_manager = tp_account_manager_dup ();
 
   tp_account_manager_prepare_async (account_manager, NULL,
-    account_manager_ready_for_accounts_cb, selected_account_name);
+    account_manager_ready_for_accounts_cb, NULL);
 
   g_signal_connect (app, "command-line", G_CALLBACK (app_command_line_cb),
       NULL);
