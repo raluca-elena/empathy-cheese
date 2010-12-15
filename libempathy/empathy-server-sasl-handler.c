@@ -89,9 +89,13 @@ sasl_status_changed_cb (TpChannel *channel,
 
   if (status == TP_SASL_STATUS_SERVER_SUCCEEDED)
     {
+      DEBUG ("Calling AcceptSASL");
       tp_cli_channel_interface_sasl_authentication_call_accept_sasl (
           priv->channel, -1, NULL, NULL, NULL, NULL);
-
+    }
+  else if (status == TP_SASL_STATUS_SUCCEEDED)
+    {
+      DEBUG ("SASL succeeded, calling Close");
       tp_cli_channel_call_close (priv->channel, -1,
           NULL, NULL, NULL, NULL);
     }
