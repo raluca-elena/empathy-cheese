@@ -235,7 +235,6 @@ account_widget_set_entry_highlighting (GtkEntry *entry,
     {
       GtkStyleContext *style;
       GdkRGBA color;
-      const GdkRGBA white = { 1.0, 1.0, 1.0, 1.0 };
 
       style = gtk_widget_get_style_context (GTK_WIDGET (entry));
       gtk_style_context_get_background_color (style, GTK_STATE_FLAG_SELECTED,
@@ -246,9 +245,7 @@ account_widget_set_entry_highlighting (GtkEntry *entry,
        * gives a colour which is inline with the theme but
        * slightly whiter.
        */
-      color.red = (color.red + (white).red) / 2;
-      color.green = (color.green + (white).green) / 2;
-      color.blue = (color.blue + (white).blue) / 2;
+      empathy_make_color_whiter (&color);
 
       gtk_widget_override_background_color (GTK_WIDGET (entry), 0, &color);
     }
