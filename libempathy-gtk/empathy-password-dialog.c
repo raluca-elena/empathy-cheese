@@ -203,6 +203,13 @@ password_dialog_window_state_changed (GtkWidget *widget,
 }
 
 static void
+password_dialog_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
+    EmpathyPasswordDialog *dialog)
+{
+  gtk_widget_destroy (GTK_WIDGET (dialog));
+}
+
+static void
 empathy_password_dialog_constructed (GObject *object)
 {
   EmpathyPasswordDialog *dialog;
@@ -220,6 +227,10 @@ empathy_password_dialog_constructed (GObject *object)
   priv->grabbing = FALSE;
 
   account = empathy_server_sasl_handler_get_account (priv->handler);
+
+  tp_g_signal_connect_object (priv->handler, "invalidated",
+      G_CALLBACK (password_dialog_handler_invalidated_cb),
+      object, 0);
 
   /* dialog */
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
