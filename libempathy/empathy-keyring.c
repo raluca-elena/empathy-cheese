@@ -154,7 +154,8 @@ empathy_keyring_set_password_async (TpAccount *account,
 
   DEBUG ("Remembering password for %s", account_id);
 
-  name = g_strdup_printf ("account: %s; param: password", account_id);
+  name = g_strdup_printf ("IM account password for %s (%s)",
+      tp_account_get_display_name (account), account_id);
 
   gnome_keyring_store_password (&keyring_schema, NULL, name, password,
       store_password_cb, simple, NULL,
