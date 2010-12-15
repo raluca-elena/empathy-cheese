@@ -102,6 +102,8 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       return;
     }
 
+  account_manager_prepared = TRUE;
+
   if (selected_account_name != NULL)
     {
       gchar *account_path;
@@ -131,7 +133,6 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
   else
     {
       maybe_show_accounts_ui (manager);
-      account_manager_prepared = TRUE;
     }
 }
 
