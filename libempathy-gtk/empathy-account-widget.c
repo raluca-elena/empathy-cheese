@@ -109,6 +109,9 @@ typedef struct {
   GtkWidget *param_account_widget;
   GtkWidget *param_password_widget;
 
+  gboolean automatic_change;
+  GtkWidget *remember_password_widget;
+
   /* Used only for IRC accounts */
   EmpathyIrcNetworkChooser *irc_network_chooser;
 
@@ -311,6 +314,11 @@ static void
 account_widget_entry_changed_cb (GtkEditable *entry,
     EmpathyAccountWidget *self)
 {
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  if (priv->automatic_change)
+    return;
+
   account_widget_entry_changed_common (self, GTK_ENTRY (entry), FALSE);
   empathy_account_widget_changed (self);
 }
@@ -1220,6 +1228,17 @@ account_widget_build_sip (EmpathyAccountWidget *self,
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
   empathy_account_widget_sip_build (self, filename,
     &priv->table_common_settings);
+
+  if (priv->simple)
+    {
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
+    }
+  else
+    {
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
+    }
 }
 
 static void
@@ -1243,6 +1262,9 @@ account_widget_build_msn (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1259,6 +1281,9 @@ account_widget_build_msn (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1401,6 +1426,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else if (priv->simple && service == GTALK_SERVICE)
     {
@@ -1415,6 +1443,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_g_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_g_simple"));
     }
   else if (priv->simple && service == FACEBOOK_SERVICE)
     {
@@ -1431,6 +1462,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
       setup_id_widget_with_suffix (self, entry_id, "@chat.facebook.com");
 
       self->ui_details->default_focus = g_strdup ("entry_id_fb_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_fb_simple"));
     }
   else
     {
@@ -1475,6 +1509,9 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       self->ui_details->default_focus = g_strdup ("entry_id");
       priv->spinbutton_port = spinbutton_port;
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
 
       g_signal_connect (checkbutton_ssl, "toggled",
           G_CALLBACK (account_widget_jabber_ssl_toggled_cb),
@@ -1522,6 +1559,9 @@ account_widget_build_icq (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_uin_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1540,6 +1580,9 @@ account_widget_build_icq (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_uin");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1562,6 +1605,9 @@ account_widget_build_aim (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_screenname_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1579,6 +1625,9 @@ account_widget_build_aim (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_screenname");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1603,6 +1652,9 @@ account_widget_build_yahoo (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1622,6 +1674,9 @@ account_widget_build_yahoo (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1643,6 +1698,9 @@ account_widget_build_groupwise (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id_simple");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password_simple"));
     }
   else
     {
@@ -1659,6 +1717,9 @@ account_widget_build_groupwise (EmpathyAccountWidget *self,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_id");
+
+      priv->remember_password_widget = GTK_WIDGET (gtk_builder_get_object (
+              self->ui_details->gui, "remember_password"));
     }
 }
 
@@ -1990,6 +2051,48 @@ add_register_buttons (EmpathyAccountWidget *self,
 #endif /* HAVE_MEEGO */
 
 static void
+remember_password_toggled_cb (GtkToggleButton *button,
+    EmpathyAccountWidget *self)
+{
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  if (gtk_toggle_button_get_active (button))
+    {
+      gtk_widget_set_sensitive (priv->param_password_widget, TRUE);
+    }
+  else
+    {
+      gtk_widget_set_sensitive (priv->param_password_widget, FALSE);
+      gtk_entry_set_text (GTK_ENTRY (priv->param_password_widget), "");
+      empathy_account_settings_unset (priv->settings, "password");
+    }
+}
+
+static void
+account_settings_password_retrieved_cb (GObject *object,
+    gpointer user_data)
+{
+  EmpathyAccountWidget *self = user_data;
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+  const gchar *password = empathy_account_settings_get_string (
+      priv->settings, "password");
+
+  if (password != NULL)
+    {
+      /* We have to do this so that when we call gtk_entry_set_text,
+       * the ::changed callback doesn't think the user made the
+       * change. */
+      priv->automatic_change = TRUE;
+      gtk_entry_set_text (GTK_ENTRY (priv->param_password_widget), password);
+      priv->automatic_change = FALSE;
+    }
+
+  gtk_toggle_button_set_active (
+      GTK_TOGGLE_BUTTON (priv->remember_password_widget),
+      !EMP_STR_EMPTY (password));
+}
+
+static void
 do_constructed (GObject *obj)
 {
   EmpathyAccountWidget *self = EMPATHY_ACCOUNT_WIDGET (obj);
@@ -2072,6 +2175,42 @@ do_constructed (GObject *obj)
       g_signal_connect (default_focus_entry, "realize",
           G_CALLBACK (gtk_widget_grab_focus),
           NULL);
+    }
+
+  /* remember password */
+  if (priv->param_password_widget != NULL
+      && priv->remember_password_widget != NULL
+      && empathy_account_settings_supports_sasl (priv->settings))
+    {
+      if (priv->simple)
+        {
+          gtk_toggle_button_set_active (
+              GTK_TOGGLE_BUTTON (priv->remember_password_widget), TRUE);
+        }
+      else
+        {
+          gtk_toggle_button_set_active (
+              GTK_TOGGLE_BUTTON (priv->remember_password_widget),
+              !EMP_STR_EMPTY (empathy_account_settings_get_string (
+                      priv->settings, "password")));
+
+          /* The password might not have been retrieved from the
+           * keyring yet. We should update the remember password
+           * toggle button and the password entry when/if it is. */
+          g_signal_connect (priv->settings, "password-retrieved",
+              G_CALLBACK (account_settings_password_retrieved_cb), self);
+        }
+
+      g_signal_connect (priv->remember_password_widget, "toggled",
+          G_CALLBACK (remember_password_toggled_cb), self);
+
+      remember_password_toggled_cb (
+          GTK_TOGGLE_BUTTON (priv->remember_password_widget), self);
+    }
+  else if (priv->remember_password_widget != NULL
+      && !empathy_account_settings_supports_sasl (priv->settings))
+    {
+      gtk_widget_set_visible (priv->remember_password_widget, FALSE);
     }
 
   /* dup and init the account-manager */

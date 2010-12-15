@@ -264,15 +264,8 @@ empathy_password_dialog_constructed (GObject *object)
   /* remember password ticky box */
   priv->ticky = gtk_check_button_new_with_label (_("Remember password"));
 
-  /* Don't add this to the dialog yet because we haven't set up
-   * everything in the UI properly yet and the MC transition isn't
-   * ready etc. so we'll just force it to never remember a
-   * password. */
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->ticky), FALSE);
-  /*
   gtk_box_pack_start (box, priv->ticky, FALSE, FALSE, 0);
   gtk_widget_show (priv->ticky);
-  */
 
   g_signal_connect (dialog, "response",
       G_CALLBACK (password_dialog_response_cb), dialog);

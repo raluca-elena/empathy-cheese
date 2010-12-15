@@ -23,17 +23,19 @@
 
 #include <glib-object.h>
 
+#include <telepathy-glib/base-client.h>
+
 G_BEGIN_DECLS
 
 typedef struct _EmpathyAuthFactory EmpathyAuthFactory;
 typedef struct _EmpathyAuthFactoryClass EmpathyAuthFactoryClass;
 
 struct _EmpathyAuthFactoryClass {
-    GObjectClass parent_class;
+    TpBaseClientClass parent_class;
 };
 
 struct _EmpathyAuthFactory {
-    GObject parent;
+    TpBaseClient parent;
     gpointer priv;
 };
 

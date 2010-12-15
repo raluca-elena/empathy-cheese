@@ -159,7 +159,7 @@ status_icon_event_added_cb (EmpathyEventManager *manager,
 	DEBUG ("New event %p", event);
 
 	priv->event = event;
-	if (event->must_ack) {
+	if (event->must_ack || event->type == EMPATHY_EVENT_TYPE_AUTH) {
 		priv->showing_event_icon = TRUE;
 		status_icon_update_icon (icon);
 		status_icon_update_tooltip (icon);

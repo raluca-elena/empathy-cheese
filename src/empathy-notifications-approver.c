@@ -314,7 +314,11 @@ event_added_cb (EmpathyEventManager *manager,
   if (self->priv->event != NULL)
     return;
 
+  if (event->type == EMPATHY_EVENT_TYPE_AUTH)
+    return;
+
   self->priv->event = event;
+
   update_notification (self);
 }
 
@@ -324,6 +328,9 @@ event_removed_cb (EmpathyEventManager *manager,
     EmpathyNotificationsApprover *self)
 {
   if (event != self->priv->event)
+    return;
+
+  if (event->type == EMPATHY_EVENT_TYPE_AUTH)
     return;
 
   self->priv->event = empathy_event_manager_get_top_event (
@@ -338,6 +345,9 @@ event_updated_cb (EmpathyEventManager *manager,
     EmpathyNotificationsApprover *self)
 {
   if (event != self->priv->event)
+    return;
+
+  if (event->type == EMPATHY_EVENT_TYPE_AUTH)
     return;
 
   if (empathy_notify_manager_notification_is_enabled (self->priv->notify_mgr))
