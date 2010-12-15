@@ -140,12 +140,7 @@ static int
 app_command_line_cb (GApplication *app,
     GApplicationCommandLine *cmdline)
 {
-  gchar **argv;
-  gint argc;
-
   g_application_hold (app);
-
-  argv = g_application_command_line_get_arguments (cmdline, &argc);
 
   /* if the window is ready, present it; otherwise, it will be presented when
    * the accounts manager is prepared */
@@ -159,8 +154,6 @@ app_command_line_cb (GApplication *app,
 
       g_object_unref (account_manager);
     }
-
-  g_strfreev (argv);
 
   return 0;
 }
