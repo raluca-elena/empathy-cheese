@@ -125,6 +125,8 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
           DEBUG ("Failed to find account with path %s: %s", account_path,
               error->message);
           g_clear_error (&error);
+
+          maybe_show_accounts_ui (manager);
         }
 
       g_object_unref (bus);
