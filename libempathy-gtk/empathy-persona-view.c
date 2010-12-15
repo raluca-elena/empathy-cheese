@@ -236,29 +236,28 @@ cell_set_background (EmpathyPersonaView *self,
     GtkCellRenderer *cell,
     gboolean is_active)
 {
-  GdkColor  color;
-  GtkStyle *style;
-
-  style = gtk_widget_get_style (GTK_WIDGET (self));
-
   if (is_active)
     {
-      color = style->bg[GTK_STATE_SELECTED];
+      GdkRGBA color;
+      GtkStyleContext *style;
+
+      style = gtk_widget_get_style_context (GTK_WIDGET (self));
+
+      gtk_style_context_get_background_color (style, GTK_STATE_FLAG_SELECTED,
+          &color);
 
       /* Here we take the current theme colour and add it to
        * the colour for white and average the two. This
        * gives a colour which is inline with the theme but
        * slightly whiter.
        */
-      color.red = (color.red + (style->white).red) / 2;
-      color.green = (color.green + (style->white).green) / 2;
-      color.blue = (color.blue + (style->white).blue) / 2;
+      empathy_make_color_whiter (&color);
 
-      g_object_set (cell, "cell-background-gdk", &color, NULL);
+      g_object_set (cell, "cell-background-rgba", &color, NULL);
     }
   else
     {
-      g_object_set (cell, "cell-background-gdk", NULL, NULL);
+      g_object_set (cell, "cell-background-rgba", NULL, NULL);
     }
 }
 
