@@ -2314,11 +2314,8 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
 
   if (selected_account != NULL)
     {
-      const gchar *account_path;
-
-      account_path = tp_proxy_get_object_path (TP_PROXY (selected_account));
       account_option = g_strdup_printf ("--select-account=%s",
-          &account_path[strlen (TP_ACCOUNT_OBJECT_PATH_BASE)]);
+          tp_account_get_path_suffix (selected_account));
 
       argv[i++] = account_option;
     }
