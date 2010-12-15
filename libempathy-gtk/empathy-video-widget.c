@@ -83,7 +83,7 @@ static void
 empathy_video_widget_init (EmpathyVideoWidget *obj)
 {
   EmpathyVideoWidgetPriv *priv = GET_PRIV (obj);
-  GdkColor black;
+  GdkRGBA black;
 
   priv->lock = g_mutex_new ();
 
@@ -92,9 +92,8 @@ empathy_video_widget_init (EmpathyVideoWidget *obj)
     G_CALLBACK (empathy_video_widget_element_added_cb),
     obj);
 
-  if (gdk_color_parse ("Black", &black))
-    gtk_widget_modify_bg (GTK_WIDGET (obj), GTK_STATE_NORMAL,
-      &black);
+  if (gdk_rgba_parse (&black, "Black"))
+    gtk_widget_override_background_color (GTK_WIDGET (obj), 0, &black);
 
   gtk_widget_set_double_buffered (GTK_WIDGET (obj), FALSE);
 }
@@ -434,8 +433,7 @@ empathy_video_widget_draw (GtkWidget *widget,
     {
       gtk_widget_get_allocation (widget, &allocation);
 
-      gtk_paint_flat_box (gtk_widget_get_style (widget), cr,
-          GTK_STATE_NORMAL, GTK_SHADOW_NONE, widget, NULL,
+      gtk_render_frame (gtk_widget_get_style_context (widget), cr,
           0, 0,
           gtk_widget_get_allocated_width (widget),
           gtk_widget_get_allocated_height (widget));

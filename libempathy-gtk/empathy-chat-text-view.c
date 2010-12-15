@@ -219,7 +219,7 @@ chat_text_view_system_font_update (EmpathyChatTextView *view)
 		font_description = NULL;
 	}
 
-	gtk_widget_modify_font (GTK_WIDGET (view), font_description);
+	gtk_widget_override_font (GTK_WIDGET (view), font_description);
 
 	if (font_description) {
 		pango_font_description_free (font_description);

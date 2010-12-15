@@ -351,12 +351,12 @@ status_preset_dialog_set_add_combo_changed (EmpathyStatusPresetDialog *self,
 	gtk_widget_set_sensitive (priv->add_button, state);
 
 	if (state) {
-		gtk_widget_modify_text (entry, GTK_STATE_NORMAL, NULL);
+		gtk_widget_override_color (entry, 0, NULL);
 	} else {
-		GdkColor colour;
+		GdkRGBA color;
 
-		gdk_color_parse ("Gray", &colour); /* FIXME - theme */
-		gtk_widget_modify_text (entry, GTK_STATE_NORMAL, &colour);
+		if (gdk_rgba_parse (&color, "Gray")) /* FIXME - theme */
+			gtk_widget_override_color (entry, 0, &color);
 
 		if (reset_text) {
 			priv->block_add_combo_changed++;

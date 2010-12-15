@@ -1898,3 +1898,13 @@ empathy_receive_file_with_file_chooser (EmpathyFTHandler *handler)
 	gtk_widget_show (widget);
 	g_free (title);
 }
+
+void
+empathy_make_color_whiter (GdkRGBA *color)
+{
+	const GdkRGBA white = { 1.0, 1.0, 1.0, 1.0 };
+
+	color->red = (color->red + white.red) / 2;
+	color->green = (color->green + white.green) / 2;
+	color->blue = (color->blue + white.blue) / 2;
+}
