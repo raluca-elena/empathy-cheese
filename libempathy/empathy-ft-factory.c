@@ -70,19 +70,22 @@ do_constructor (GType type,
     guint n_props,
     GObjectConstructParam *props)
 {
-	GObject *retval;
+  GObject *retval;
 
-	if (factory_singleton != NULL) {
-		retval = g_object_ref (factory_singleton);
-	} else {
-		retval = G_OBJECT_CLASS (empathy_ft_factory_parent_class)->constructor
-			(type, n_props, props);
+  if (factory_singleton != NULL)
+    {
+      retval = g_object_ref (factory_singleton);
+    }
+  else
+    {
+      retval = G_OBJECT_CLASS (empathy_ft_factory_parent_class)->constructor
+        (type, n_props, props);
 
-		factory_singleton = EMPATHY_FT_FACTORY (retval);
-		g_object_add_weak_pointer (retval, (gpointer *) &factory_singleton);
-	}
+      factory_singleton = EMPATHY_FT_FACTORY (retval);
+      g_object_add_weak_pointer (retval, (gpointer *) &factory_singleton);
+    }
 
-	return retval;
+  return retval;
 }
 
 static void
