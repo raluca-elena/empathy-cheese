@@ -89,6 +89,17 @@ do_constructor (GType type,
 }
 
 static void
+empathy_ft_factory_dispose (GObject *object)
+{
+  EmpathyFTFactory *self = (EmpathyFTFactory *) object;
+  EmpathyFTFactoryPriv *priv = GET_PRIV (self);
+
+  tp_clear_object (&priv->handler);
+
+  (G_OBJECT_CLASS (empathy_ft_factory_parent_class)->dispose) (object);
+}
+
+static void
 empathy_ft_factory_class_init (EmpathyFTFactoryClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -96,6 +107,7 @@ empathy_ft_factory_class_init (EmpathyFTFactoryClass *klass)
   g_type_class_add_private (klass, sizeof (EmpathyFTFactoryPriv));
 
   object_class->constructor = do_constructor;
+  object_class->dispose = empathy_ft_factory_dispose;
 
   /**
    * EmpathyFTFactory::new-ft-handler
