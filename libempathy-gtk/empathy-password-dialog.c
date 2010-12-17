@@ -41,6 +41,7 @@ typedef struct {
 
   GtkWidget *entry;
   GtkWidget *ticky;
+  GtkWidget *ok_button;
 
   gboolean grabbing;
 
@@ -135,12 +136,16 @@ static void
 password_entry_changed_cb (GtkEditable *entry,
     gpointer user_data)
 {
+  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
   const gchar *str;
 
   str = gtk_entry_get_text (GTK_ENTRY (entry));
 
   gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
       GTK_ENTRY_ICON_SECONDARY, !EMP_STR_EMPTY (str));
+
+  gtk_widget_set_sensitive (priv->ok_button,
+      !EMP_STR_EMPTY (str));
 }
 
 static gboolean
@@ -233,10 +238,12 @@ empathy_password_dialog_constructed (GObject *object)
       object, 0);
 
   /* dialog */
-  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-      GTK_STOCK_OK, GTK_RESPONSE_OK,
-      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-      NULL);
+  gtk_dialog_add_button (GTK_DIALOG (dialog),
+      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+
+  priv->ok_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+      GTK_STOCK_OK, GTK_RESPONSE_OK);
+  gtk_widget_set_sensitive (priv->ok_button, FALSE);
 
   text = g_strdup_printf (_("Enter your password for account\n<b>%s</b>"),
       tp_account_get_display_name (account));
@@ -267,7 +274,7 @@ empathy_password_dialog_constructed (GObject *object)
   g_signal_connect (priv->entry, "icon-release",
       G_CALLBACK (clear_icon_released_cb), NULL);
   g_signal_connect (priv->entry, "changed",
-      G_CALLBACK (password_entry_changed_cb), NULL);
+      G_CALLBACK (password_entry_changed_cb), dialog);
 
   gtk_box_pack_start (box, priv->entry, FALSE, FALSE, 0);
   gtk_widget_show (priv->entry);
