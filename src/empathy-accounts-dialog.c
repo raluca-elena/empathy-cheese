@@ -1485,6 +1485,99 @@ accounts_dialog_model_set_selected (EmpathyAccountsDialog *dialog,
   if (accounts_dialog_get_settings_iter (dialog, settings, &iter))
     gtk_tree_selection_select_iter (selection, &iter);
 }
+
+static void
+accounts_dialog_treeview_enabled_cb (GtkMenuItem *item,
+    TpAccount *account)
+{
+  gboolean enabled;
+
+  enabled = tp_account_is_enabled (account);
+  tp_account_set_enabled_async (account, !enabled, NULL, NULL);
+}
+
+static gboolean
+accounts_dialog_treeview_button_press_event_cb (GtkTreeView *view,
+    GdkEventButton *event,
+    EmpathyAccountsDialog *dialog)
+{
+  EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
+  TpAccount *account;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  GtkWidget *menu;
+  GtkWidget *item_enable, *item_disable;
+  GtkWidget *image_enable, *image_disable;
+
+  /* ignore multiple clicks */
+  if (event->type != GDK_BUTTON_PRESS)
+    return TRUE;
+
+  if (event->button != 3)
+    goto finally;
+
+  /* Selection is not yet set, so we have to get account from event position */
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->treeview));
+  if (!gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (priv->treeview),
+      event->x, event->y, &path, NULL, NULL, NULL))
+    goto finally;
+
+  if (!gtk_tree_model_get_iter (model, &iter, path))
+    goto finally;
+
+  gtk_tree_model_get (model, &iter, COL_ACCOUNT, &account, -1);
+
+  /* Create the menu */
+  menu = gtk_menu_new ();
+
+  /* Get images for menu items */
+  image_enable = gtk_image_new_from_icon_name (empathy_icon_name_for_presence (
+        tp_account_manager_get_most_available_presence (
+          priv->account_manager, NULL, NULL)),
+      GTK_ICON_SIZE_MENU);
+  image_disable = gtk_image_new_from_icon_name (
+      empathy_icon_name_for_presence (TP_CONNECTION_PRESENCE_TYPE_OFFLINE),
+      GTK_ICON_SIZE_MENU);
+
+  /* Menu items: to enabled/disable the account */
+  item_enable = gtk_image_menu_item_new_with_mnemonic (_("_Enable"));
+  item_disable = gtk_image_menu_item_new_with_mnemonic (_("_Disable"));
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_enable), image_enable);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_disable), image_disable);
+
+  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item_enable);
+  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item_disable);
+
+  if (tp_account_is_enabled (account))
+    {
+      tp_g_signal_connect_object (item_disable, "activate",
+          G_CALLBACK (accounts_dialog_treeview_enabled_cb), account, 0);
+      gtk_widget_set_sensitive (item_enable, FALSE);
+    }
+  else
+    {
+      tp_g_signal_connect_object (item_enable, "activate",
+          G_CALLBACK (accounts_dialog_treeview_enabled_cb), account, 0);
+      gtk_widget_set_sensitive (item_disable, FALSE);
+    }
+
+  gtk_widget_show (item_enable);
+  gtk_widget_show (item_disable);
+
+  /* FIXME: Add here presence items, to be able to set per-account presence */
+
+  /* Popup menu */
+  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
+      event->button, event->time);
+
+finally:
+  tp_clear_object (&account);
+  tp_clear_pointer (&path, gtk_tree_path_free);
+
+  return FALSE;
+}
+
 static void
 accounts_dialog_add (EmpathyAccountsDialog *dialog,
     EmpathyAccountSettings *settings)
@@ -2002,6 +2095,8 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
       "button_add", "clicked", accounts_dialog_button_add_clicked_cb,
       "button_remove", "clicked", accounts_dialog_button_remove_clicked_cb,
       "button_import", "clicked", accounts_dialog_button_import_clicked_cb,
+      "treeview", "button-press-event",
+         accounts_dialog_treeview_button_press_event_cb,
       NULL);
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
