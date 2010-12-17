@@ -47,6 +47,7 @@
 #include "empathy-cell-renderer-activatable.h"
 #include "empathy-gtk-enum-types.h"
 #include "empathy-gtk-marshal.h"
+#include "empathy-ui-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
