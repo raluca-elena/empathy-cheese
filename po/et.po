@@ -11,14 +11,14 @@ msgstr ""
 "Project-Id-Version: empathy MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&component=general\n"
-"POT-Creation-Date: 2010-11-17 14:29+0000\n"
-"PO-Revision-Date: 2010-11-16 10:46+0200\n"
-"Last-Translator: Ivar Smolin <okul@linux.ee>\n"
+"POT-Creation-Date: 2010-12-18 23:01+0000\n"
+"PO-Revision-Date: 2010-12-18 23:17+0300\n"
+"Last-Translator: Mattias Põldaru <mahfiaz gmail com>\n"
 "Language-Team: Estonian <et@li.org>\n"
+"Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: et\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: Estonian\n"
 "X-Poedit-Country: ESTONIA\n"
@@ -622,6 +622,9 @@ msgstr "Laiendatud"
 msgid "Pass_word:"
 msgstr "_Parool:"
 
+msgid "Remember Password"
+msgstr "Parooli peetakse meeles"
+
 msgid "Screen _Name:"
 msgstr "Ekraani_nimi:"
 
@@ -750,7 +753,7 @@ msgstr ""
 "See on sinu kasutajanimi, mitte tavaline Facebooki sisselogimise nimi.\n"
 "Kui sinu leht on facebook.com/<b>hüüdnimi</b>, sisesta <b>hüüdnimi</b>.\n"
 "Kui sul veel ei ole Facebooki kasutajanime, saad selle luua <a href=\"http://"
-"www.facebook.com/username/\">siin</a>."
+"www.facebook.com/username/\">siin lehel</a>."
 
 msgid "Use old SS_L"
 msgstr "Kasutatakse _vana SSL-i"
@@ -862,6 +865,10 @@ msgstr "_Kasutajanimi:"
 
 msgid "I_gnore conference and chat room invitations"
 msgstr "Konverentside ja jututubade kutseid _eiratakse"
+
+#. remember password ticky box
+msgid "Remember password"
+msgstr "Parooli peetakse meeles"
 
 msgid "What is your Yahoo! ID?"
 msgstr "Mis on sinu Yahoo! ID?"
@@ -1362,10 +1369,18 @@ msgid "_Link Contacts…"
 msgstr "_Ühenda kontaktid…"
 
 #, c-format
-msgid "Meta-contact containing %u contact"
-msgid_plural "Meta-contact containing %u contacts"
-msgstr[0] "Metakontakt, mis sisaldab %u kontakti"
-msgstr[1] "Metakontakt, mis sisaldab %u kontakti"
+msgid ""
+"Do you really want to remove the linked contact '%s'? Note that this will "
+"remove all the contacts which make up this linked contact."
+msgstr ""
+"Kas tõesti tahad eemaldada lingitud kontakti '%s'? See eemaldab kõik "
+"kontaktid, millest lingitud kontakt koosneb."
+
+#, c-format
+msgid "Linked contact containing %u contact"
+msgid_plural "Linked contacts containing %u contacts"
+msgstr[0] "Lingitud kontakt, mis sisaldab %u kontakti"
+msgstr[1] "Lingitud kontakt, mis sisaldab %u kontakti"
 
 msgid "<b>Location</b> at (date)"
 msgstr "<b>Asukoht</b> kuupäeval"
@@ -1400,8 +1415,8 @@ msgid "_Unlink…"
 msgstr "_Eralda kontaktid…"
 
 msgid ""
-"Completely split the displayed meta-contact into the contacts it contains."
-msgstr "Metakontakti lahutamine seda moodustavateks kontaktideks."
+"Completely split the displayed linked contacts into the separate contacts."
+msgstr "Lingitud kontakti lahutamine seda moodustavateks kontaktideks."
 
 #. Add button
 #. Translators: this is an action button in the linking dialogue. "Link" is
@@ -1411,15 +1426,15 @@ msgid "_Link"
 msgstr "_Ühenda"
 
 #, c-format
-msgid "Unlink meta-contact '%s'?"
-msgstr "Kas lahutada metakontakt '%s' osadeks?"
+msgid "Unlink linked contacts '%s'?"
+msgstr "Kas lahutada lingitud kontakt '%s' osadeks?"
 
 msgid ""
-"Are you sure you want to unlink this meta-contact? This will completely "
-"split the meta-contact into the contacts it contains."
+"Are you sure you want to unlink these linked contacts? This will completely "
+"split the linked contacts into separate contacts."
 msgstr ""
-"Kas sa oled kindel, et tahad selle metakontakti osadeks lahutada? Sellega "
-"muutuvad metakontakti moodustavad kontaktid jälle iseseisvateks."
+"Kas sa oled kindel, et tahad need lingitud kontakti eraldada? Sellega muutub "
+"lingitud kontakt jälle eraldi kontaktideks."
 
 msgctxt "Unlink individual (button)"
 msgid "_Unlink"
@@ -1471,6 +1486,14 @@ msgstr "_Helista"
 #. Tweak the dialog
 msgid "New Call"
 msgstr "Uus kõne"
+
+#, c-format
+msgid ""
+"Enter your password for account\n"
+"<b>%s</b>"
+msgstr ""
+"Sisesta järgneva konto parool\n"
+"<b>%s</b>"
 
 #. COL_STATUS_TEXT
 #. COL_STATE_ICON_NAME
@@ -2367,6 +2390,9 @@ msgstr "Oled kutsutud ühinema jututoaga %s"
 msgid "Incoming file transfer from %s"
 msgstr "Failiülekanne kasutajalt %s"
 
+msgid "Password required"
+msgstr "Parool on vajalik"
+
 #, c-format
 msgid "%s would like permission to see when you are available"
 msgstr "%s palub luba sinu saadavaloleku nägemiseks"
@@ -2495,6 +2521,12 @@ msgstr "Protokoll"
 
 msgid "Source"
 msgstr "Allikas"
+
+msgid "Provide Password"
+msgstr "Parooli sisestamine"
+
+msgid "Disconnect"
+msgstr "Katkesta ühendus"
 
 msgid "No match found"
 msgstr "Vastavust ei leitud"
@@ -2767,21 +2799,6 @@ msgstr "_Minu asukoht avaldatakse kontaktidele"
 msgid "_Reduce location accuracy"
 msgstr "_Asukoha täpsust vähendatakse"
 
-msgid "Respond"
-msgstr "Vastamine"
-
-msgid "Reject"
-msgstr "Lükka tagasi"
-
-msgid "Answer"
-msgstr "Vasta"
-
-msgid "Decline"
-msgstr "Lükka tagasi"
-
-msgid "Accept"
-msgstr "Nõustu"
-
 msgid "Status"
 msgstr "Olek"
 
@@ -2875,6 +2892,21 @@ msgstr "Empathy siluja"
 
 msgid "- Empathy Chat Client"
 msgstr "- Empathy sõnumivahetusklient"
+
+msgid "Respond"
+msgstr "Vastamine"
+
+msgid "Reject"
+msgstr "Lükka tagasi"
+
+msgid "Answer"
+msgstr "Vasta"
+
+msgid "Decline"
+msgstr "Lükka tagasi"
+
+msgid "Accept"
+msgstr "Nõustu"
 
 #~ msgid "The hash of the received file and the sent one do not match"
 #~ msgstr "Vastuvõetud faili ja saadetud faili räsi ei kattu"
