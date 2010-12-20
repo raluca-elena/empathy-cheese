@@ -1,3 +1,28 @@
+NEW in 2.91.4 (20/12/2010)
+=============
+
+Empathy is now able to prompt you for your password when it's needed, rather
+than requiring you to save it when you create the account. This needs the very
+latest versions of connection managers (in some cases, unreleased versions).
+Older connection managers will continue to work but you'll still have to save
+passwords when creating accounts.
+
+Dependencies:
+ • telepathy-glib ≥ 0.13.9
+ • GTK+ ≥ 2.91.6
+
+Bugs fixed:
+ - Fixed #602450, Cannot clear password from created accounts (Jonny Lamb)
+ - Fixed #637135, Add nice UI for password-less accounts (Jonny Lamb)
+ - Fixed #637307, Accounts dialog doesn't select the right accounts when opened from the info bar (Guillaume Desmottes)
+
+Translations:
+ - Updated eo Translation (Kristjan SCHMIDT)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated et Translation (Mattias Põldaru)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+
 NEW in 2.91.3.1 (14/12/2010)
 ===============
 
