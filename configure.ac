@@ -57,8 +57,9 @@ GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 # Use --enable-maintainer-mode to disable deprecated symbols,
 # disable single include and enable GSEAL. If this is not a released empathy,
 # maintainer mode is forced
-ifelse(empathy_released, 1, [], [enable_maintainer_mode="yes"])
-GNOME_MAINTAINER_MODE_DEFINES
+# FIXME: don't disable deprecated symbols until bgo #636654 has been fixed
+#ifelse(empathy_released, 1, [], [enable_maintainer_mode="yes"])
+#GNOME_MAINTAINER_MODE_DEFINES
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
