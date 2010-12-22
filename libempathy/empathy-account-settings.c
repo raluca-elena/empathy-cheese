@@ -456,13 +456,40 @@ empathy_account_settings_get_password_cb (GObject *source,
 }
 
 static void
+empathy_account_settings_migrate_password_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpAccount *account = TP_ACCOUNT (source);
+  GError *error = NULL;
+  EmpathyAccountSettings *self = user_data;
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+  GHashTable *empty;
+  const gchar *unset[] = { "password", NULL };
+
+  if (!empathy_keyring_set_password_finish (account, result, &error))
+    {
+      DEBUG ("Failed to set password: %s", error->message);
+      g_clear_error (&error);
+      return;
+    }
+
+  /* Now clear the password MC has stored. */
+  empty = tp_asv_new (NULL, NULL);
+  tp_account_update_parameters_async (priv->account,
+      empty, unset, NULL, NULL);
+
+  g_hash_table_remove (priv->parameters, "password");
+
+  g_hash_table_unref (empty);
+}
+
+static void
 empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
 {
   EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
   const GValue *v;
   const gchar *password;
-  const gchar *unset[] = { "password", NULL };
-  GHashTable *empty;
 
   if (!priv->supports_sasl || empathy_account_settings_get (
           self, "password") == NULL)
@@ -487,7 +514,7 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
     return;
 
   empathy_keyring_set_password_async (priv->account, password,
-      NULL, NULL);
+      empathy_account_settings_migrate_password_cb, self);
 
   /* We don't want to request the password again, we
    * already know it. */
@@ -495,15 +522,6 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
 
   priv->password = g_strdup (password);
   priv->password_original = g_strdup (password);
-
-  /* Now clear the password MC has stored. */
-  empty = tp_asv_new (NULL, NULL);
-  tp_account_update_parameters_async (priv->account,
-      empty, unset, NULL, NULL);
-
-  g_hash_table_remove (priv->parameters, "password");
-
-  g_hash_table_unref (empty);
 }
 
 static void
