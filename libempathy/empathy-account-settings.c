@@ -595,7 +595,8 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
         }
     }
 
-
+  /* NOTE: When removing MC migration code, remove this call, and the
+   * function it's calling. That's it. */
   empathy_account_settings_try_migrating_password (self);
 
   /* priv->account won't be a proper account if it's the account
