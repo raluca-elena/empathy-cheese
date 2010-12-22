@@ -460,7 +460,7 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
 {
   EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
   const GValue *v;
-  const gchar *account_id, *password;
+  const gchar *password;
   const gchar *unset[] = { "password", NULL };
   GHashTable *empty;
 
@@ -471,11 +471,9 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
   /* mission-control still has our password, although the CM
    * supports SASL. Let's try migrating it. */
 
-  account_id = tp_proxy_get_object_path (priv->account)
-    + strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
-
   DEBUG ("Trying to migrate password parameter from MC to the "
-      "keyring ourselves for account %s", account_id);
+      "keyring ourselves for account %s",
+      tp_account_get_path_suffix (priv->account));
 
   v = empathy_account_settings_get (self, "password");
 
