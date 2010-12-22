@@ -633,37 +633,45 @@ typedef struct {
 	gchar *message;
 } ChatCommandMsgData;
 
-#if 0
 static void
-chat_command_msg_cb (EmpathyDispatchOperation *dispatch,
-			      const GError             *error,
+chat_command_msg_cb (GObject *source,
+			      GAsyncResult *result,
 			      gpointer                  user_data)
 {
 	ChatCommandMsgData *data = user_data;
+	GError *error = NULL;
+	TpChannel *channel;
 
-	if (error != NULL) {
+	channel = tp_account_channel_request_ensure_and_observe_channel_finish (
+					TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error);
+
+	if (channel == NULL) {
+		DEBUG ("Failed to get channel: %s", error->message);
+		g_error_free (error);
+
 		empathy_chat_view_append_event (data->chat->view,
 			_("Failed to open private chat"));
 		goto OUT;
 	}
 
-	if (!EMP_STR_EMPTY (data->message)) {
-		EmpathyTpChat *tpchat;
-		EmpathyMessage *message;
+	if (!EMP_STR_EMPTY (data->message) && TP_IS_TEXT_CHANNEL (channel)) {
+		TpTextChannel *text = (TpTextChannel *) channel;
+		TpMessage *msg;
 
-		tpchat = EMPATHY_TP_CHAT (
-			empathy_dispatch_operation_get_channel_wrapper (dispatch));
+		msg = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+			data->message);
 
-		message = empathy_message_new (data->message);
-		empathy_tp_chat_send (tpchat, message);
-		g_object_unref (message);
+		tp_text_channel_send_message_async (text, msg, 0, NULL, NULL);
+
+		g_object_unref (msg);
 	}
+
+	g_object_unref (channel);
 
 OUT:
 	g_free (data->message);
 	g_slice_free (ChatCommandMsgData, data);
 }
-#endif
 
 static gboolean
 nick_command_supported (EmpathyChat *chat)
@@ -736,26 +744,36 @@ chat_command_join (EmpathyChat *chat,
 	g_strfreev (rooms);
 }
 
-#if 0
 static void
 chat_command_msg_internal (EmpathyChat *chat,
 			   const gchar *contact_id,
 			   const gchar *message)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	TpConnection *connection;
 	ChatCommandMsgData *data;
+	TpAccountChannelRequest *req;
+	GHashTable *request;
+
+	request = tp_asv_new (
+		TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_TEXT,
+		TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+		TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, contact_id,
+		NULL);
+
+	req = tp_account_channel_request_new (priv->account, request,
+		tp_user_action_time_from_x11 (gtk_get_current_event_time ()));
 
 	/* FIXME: We should probably search in members alias. But this
 	 * is enough for IRC */
 	data = g_slice_new (ChatCommandMsgData);
 	data->chat = chat;
 	data->message = g_strdup (message);
-	connection = empathy_tp_chat_get_connection (priv->tp_chat);
-	empathy_dispatcher_chat_with_contact_id (connection, contact_id,
-						 gtk_get_current_event_time (),
-						 chat_command_msg_cb,
-						 data);
+
+	tp_account_channel_request_ensure_and_observe_channel_async (req, NULL, NULL,
+		chat_command_msg_cb, data);
+
+	g_object_unref (req);
+	g_hash_table_unref (request);
 }
 
 static void
@@ -773,7 +791,6 @@ chat_command_msg (EmpathyChat *chat,
 {
 	chat_command_msg_internal (chat, strv[1], strv[2]);
 }
-#endif
 
 static void
 callback_for_request_rename (TpProxy *proxy,
@@ -850,14 +867,11 @@ static ChatCommandItem commands[] = {
 	{"j", 2, 2, chat_command_join, NULL,
 	 N_("/j <chat room ID>: join a new chat room")},
 
-#if 0
-/* FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=623682 */
 	{"query", 2, 3, chat_command_query, NULL,
 	 N_("/query <contact ID> [<message>]: open a private chat")},
 
 	{"msg", 3, 3, chat_command_msg, NULL,
 	 N_("/msg <contact ID> <message>: open a private chat")},
-#endif
 
 	{"nick", 2, 2, chat_command_nick, nick_command_supported,
 	 N_("/nick <nickname>: change your nickname on the current server")},
