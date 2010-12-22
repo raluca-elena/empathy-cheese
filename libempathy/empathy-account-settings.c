@@ -542,6 +542,53 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
         }
     }
 
+  if (priv->supports_sasl && empathy_account_settings_get (
+          self, "password") != NULL)
+    {
+      /* mission-control still has our password, although the CM
+       * supports SASL. Let's try migrating it. */
+      const GValue *v;
+      const gchar *account_id;
+
+      account_id = tp_proxy_get_object_path (priv->account)
+        + strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
+
+      g_print ("Trying to migrate password parameter from MC to the "
+          "keyring ourselves for account %s", account_id);
+
+      v = empathy_account_settings_get (self, "password");
+
+      /* I can't imagine why this would fail. */
+      if (G_VALUE_HOLDS_STRING (v))
+        {
+          const gchar *password = g_value_get_string (v);
+          const gchar *unset[] = { "password", NULL };
+
+          if (!EMP_STR_EMPTY (password))
+            {
+              GHashTable *empty = tp_asv_new (NULL, NULL);
+
+              empathy_keyring_set_password_async (priv->account, password,
+                  NULL, NULL);
+
+              /* We don't want to request the password again, we
+               * already know it. */
+              priv->password_requested = TRUE;
+
+              priv->password = g_strdup (password);
+              priv->password_original = g_strdup (password);
+
+              /* Now clear the password MC has stored. */
+              tp_account_update_parameters_async (priv->account,
+                  empty, unset, NULL, NULL);
+
+              g_hash_table_remove (priv->parameters, "password");
+
+              g_hash_table_unref (empty);
+            }
+        }
+    }
+
   /* priv->account won't be a proper account if it's the account
    * assistant showing this widget. */
   if (priv->supports_sasl && !priv->password_requested
