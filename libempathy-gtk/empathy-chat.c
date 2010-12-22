@@ -3250,12 +3250,6 @@ empathy_chat_get_contact_menu (EmpathyChat *chat)
 						 EMPATHY_CONTACT_FEATURE_LOG |
 						 EMPATHY_CONTACT_FEATURE_INFO);
 	}
-	else if (priv->contact_list_view) {
-		EmpathyContactListView *view;
-
-		view = EMPATHY_CONTACT_LIST_VIEW (priv->contact_list_view);
-		menu = empathy_contact_list_view_get_contact_menu (view);
-	}
 
 	return menu;
 }
