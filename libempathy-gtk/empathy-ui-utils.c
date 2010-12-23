@@ -633,7 +633,7 @@ empathy_pixbuf_avatar_from_individual_scaled_async (
 			empathy_pixbuf_avatar_from_individual_scaled_async);
 
 	avatar_file =
-		folks_has_avatar_get_avatar (FOLKS_HAS_AVATAR (individual));
+		folks_avatar_owner_get_avatar (FOLKS_AVATAR_OWNER (individual));
 	if (avatar_file == NULL)
 		goto out;
 
