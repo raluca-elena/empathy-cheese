@@ -2292,10 +2292,10 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
     gboolean hidden)
 {
   GError *error = NULL;
-  const gchar *argv[4] = { NULL, };
-  gint i = 0;
-  gchar *account_option = NULL;
+  GString *cmd;
   gchar *path;
+  GAppInfo *app_info;
+  GdkAppLaunchContext *context;
 
   g_return_if_fail (GDK_IS_SCREEN (screen));
   g_return_if_fail (!selected_account || TP_IS_ACCOUNT (selected_account));
@@ -2310,37 +2310,48 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
       path = g_build_filename (BIN_DIR, "empathy-accounts", NULL);
     }
 
-  argv[i++] = path;
+  cmd = g_string_new (path);
+  g_free (path);
 
   if (selected_account != NULL)
     {
-      account_option = g_strdup_printf ("--select-account=%s",
+      g_string_append_printf (cmd, " --select-account=%s",
           tp_account_get_path_suffix (selected_account));
-
-      argv[i++] = account_option;
     }
 
   if (if_needed)
-    argv[i++] = "--if-needed";
+    g_string_append_printf (cmd, " --if-needed");
 
   if (hidden)
-    argv[i++] = "--hidden";
+    g_string_append_printf (cmd, " --hidden");
 
   DEBUG ("Launching empathy-accounts (if_needed: %d, hidden: %d, account: %s)",
     if_needed, hidden,
     selected_account == NULL ? "<none selected>" :
       tp_proxy_get_object_path (TP_PROXY (selected_account)));
 
-  gdk_spawn_on_screen (screen, NULL, (gchar**) argv, NULL, G_SPAWN_SEARCH_PATH,
-      NULL, NULL, NULL, &error);
-  if (error != NULL)
+  app_info = g_app_info_create_from_commandline (cmd->str, NULL, 0, &error);
+  if (app_info == NULL)
+    {
+      DEBUG ("Failed to create app info: %s", error->message);
+      g_error_free (error);
+      goto out;
+    }
+
+  context = gdk_app_launch_context_new ();
+  gdk_app_launch_context_set_display (context, gdk_screen_get_display (screen));
+
+  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+        &error))
     {
       g_warning ("Failed to open accounts dialog: %s", error->message);
       g_error_free (error);
     }
 
-  g_free (account_option);
-  g_free (path);
+out:
+  tp_clear_object (&app_info);
+  tp_clear_object (&context);
+  g_string_free (cmd, TRUE);
 }
 
 gboolean
