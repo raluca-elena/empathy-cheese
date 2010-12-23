@@ -2295,7 +2295,7 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
   GString *cmd;
   gchar *path;
   GAppInfo *app_info;
-  GdkAppLaunchContext *context;
+  GdkAppLaunchContext *context = NULL;
 
   g_return_if_fail (GDK_IS_SCREEN (screen));
   g_return_if_fail (!selected_account || TP_IS_ACCOUNT (selected_account));

@@ -1089,7 +1089,7 @@ account_widget_launch_external_clicked (GtkWidget *button,
       /* we know how to handle this external provider */
       GDesktopAppInfo *desktop_info;
       GError *error = NULL;
-      GdkAppLaunchContext *context;
+      GdkAppLaunchContext *context = NULL;
       gchar *cmd;
       GAppInfo *app_info;
 

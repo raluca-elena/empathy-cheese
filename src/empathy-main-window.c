@@ -1483,7 +1483,7 @@ main_window_help_debug_cb (GtkAction         *action,
 	GError *error = NULL;
 	gchar *path;
 	GAppInfo *app_info;
-	GdkAppLaunchContext *context;
+	GdkAppLaunchContext *context = NULL;
 
 	g_return_if_fail (GDK_IS_SCREEN (screen));
 
