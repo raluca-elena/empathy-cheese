@@ -268,6 +268,7 @@ class Project:
 
 	def send_email(self):
 		notes = self.get_release_notes()
+                print notes
 		cmd = 'xdg-email ' \
 		      ' --cc telepathy@lists.freedesktop.org' \
 		      ' --subject "ANNOUNCE: Empathy %s"' \
