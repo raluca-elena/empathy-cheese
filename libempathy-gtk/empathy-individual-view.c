@@ -682,7 +682,7 @@ individual_view_drag_motion (GtkWidget *widget,
         }
 
       if (individual != NULL &&
-          folks_has_presence_is_online (FOLKS_HAS_PRESENCE (individual)) &&
+          folks_presence_owner_is_online (FOLKS_PRESENCE_OWNER (individual)) &&
           (caps & EMPATHY_CAPABILITIES_FT))
         {
           gdk_drag_status (context, GDK_ACTION_COPY, time_);
