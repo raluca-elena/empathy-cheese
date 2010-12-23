@@ -155,7 +155,8 @@ avatar_image_add_filter (EmpathyAvatarImage *avatar_image)
 	mask = PropertyChangeMask;
 
 	window = GDK_ROOT_WINDOW ();
-	gdkwindow = gdk_xid_table_lookup (window);
+	gdkwindow = gdk_x11_window_lookup_for_display (gdk_display_get_default (),
+		window);
 
 	gdk_error_trap_push ();
 	if (gdkwindow) {
