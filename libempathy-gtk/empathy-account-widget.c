@@ -1087,32 +1087,48 @@ account_widget_launch_external_clicked (GtkWidget *button,
         "com.meego.libsocialweb"))
     {
       /* we know how to handle this external provider */
-      GDesktopAppInfo *app_info;
-      const gchar *args[3] = { NULL, };
+      GDesktopAppInfo *desktop_info;
       GError *error = NULL;
+      GdkAppLaunchContext *context;
+      gchar *cmd;
+      GAppInfo *app_info;
 
-      app_info = g_desktop_app_info_new ("gnome-control-center.desktop");
-
-      if (app_info == NULL)
+      desktop_info = g_desktop_app_info_new ("gnome-control-center.desktop");
+      if (desktop_info == NULL)
         {
           g_critical ("Could not locate 'gnome-control-center.desktop'");
           return;
         }
 
-      args[0] = g_app_info_get_commandline (G_APP_INFO (app_info));
-      args[1] = "bisho.desktop";
-      args[2] = NULL;
+      /* glib doesn't have API to start a desktop file with args... (#637875) */
+      cmd = g_strdup_printf ("%s bisho.desktop", g_app_info_get_commandline (
+            (GAppInfo *) desktop_info));
 
-      gdk_spawn_on_screen (gtk_widget_get_screen (button),
-          NULL, (gchar **) args, NULL,
-          G_SPAWN_SEARCH_PATH, NULL, NULL, NULL, &error);
-      if (error != NULL)
+      app_info = g_app_info_create_from_commandline (cmd, NULL, 0, &error);
+      g_free (cmd);
+
+      if (app_info == NULL)
         {
-          g_critical ("Failed to launch editor: %s", error->message);
+          DEBUG ("Failed to create app info: %s", error->message);
+          g_error_free (error);
+          goto out;
+        }
+
+      context = gdk_app_launch_context_new ();
+      gdk_app_launch_context_set_screen  (context,
+          gtk_widget_get_screen (button));
+
+      if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+            &error))
+        {
+          g_critical ("Failed to bisho: %s", error->message);
           g_clear_error (&error);
         }
 
-      g_object_unref (app_info);
+out:
+      g_object_unref (desktop_info);
+      tp_clear_object (&app_info);
+      tp_clear_object (&context);
     }
 }
 
