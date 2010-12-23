@@ -1481,9 +1481,9 @@ main_window_help_debug_cb (GtkAction         *action,
 {
 	GdkScreen *screen = gdk_screen_get_default ();
 	GError *error = NULL;
-	gchar *argv[2] = { NULL, };
-	gint i = 0;
 	gchar *path;
+	GAppInfo *app_info;
+	GdkAppLaunchContext *context;
 
 	g_return_if_fail (GDK_IS_SCREEN (screen));
 
@@ -1496,17 +1496,26 @@ main_window_help_debug_cb (GtkAction         *action,
 		path = g_build_filename (BIN_DIR, "empathy-debugger", NULL);
 	}
 
-	argv[i++] = path;
-
-	gdk_spawn_on_screen (screen, NULL, argv, NULL,
-			G_SPAWN_SEARCH_PATH,
-			NULL, NULL, NULL, &error);
-
-	if (error) {
-		g_warning ("Failed to open debug window: %s", error->message);
+	app_info = g_app_info_create_from_commandline (path, NULL, 0, &error);
+	if (app_info == NULL) {
+		DEBUG ("Failed to create app info: %s", error->message);
 		g_error_free (error);
+		goto out;
 	}
 
+	context = gdk_app_launch_context_new ();
+	gdk_app_launch_context_set_display (context, gdk_screen_get_display (screen));
+
+	if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+		&error)) {
+		g_warning ("Failed to open debug window: %s", error->message);
+		g_error_free (error);
+		goto out;
+	}
+
+out:
+	tp_clear_object (&app_info);
+	tp_clear_object (&context);
 	g_free (path);
 }
 
