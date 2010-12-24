@@ -26,7 +26,7 @@
 #include <gcr/gcr.h>
 #include <telepathy-glib/util.h>
 
-#include <gcr/gcr-simple-certificate.h>
+#include <gcr/gcr.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include <libempathy/empathy-debug.h>
