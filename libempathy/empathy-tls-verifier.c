@@ -260,6 +260,9 @@ perform_verification (EmpathyTLSVerifier *self,
   DEBUG ("Performing verification");
   debug_certificate_chain (chain);
 
+  list = anchors = NULL;
+  n_list = n_anchors = 0;
+
   /*
    * If the first certificate is an pinned certificate then we completely
    * ignore the rest of the verification process.
