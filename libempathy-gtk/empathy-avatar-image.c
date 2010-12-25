@@ -148,24 +148,22 @@ avatar_image_filter_func (GdkXEvent  *gdkxevent,
 static void
 avatar_image_add_filter (EmpathyAvatarImage *avatar_image)
 {
+	Display    *display;
 	Window     window;
-	GdkWindow *gdkwindow;
 	gint       mask;
+	XWindowAttributes attrs;
 
 	mask = PropertyChangeMask;
 
-	window = GDK_ROOT_WINDOW ();
-	gdkwindow = gdk_x11_window_lookup_for_display (gdk_display_get_default (),
-		window);
+	window = gdk_x11_get_default_root_xwindow ();
+	display = gdk_x11_get_default_xdisplay ();
 
 	gdk_error_trap_push ();
-	if (gdkwindow) {
-		XWindowAttributes attrs;
-		XGetWindowAttributes (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), window, &attrs);
-		mask |= attrs.your_event_mask;
-	}
 
-	XSelectInput (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), window, mask);
+	XGetWindowAttributes (display, window, &attrs);
+	mask |= attrs.your_event_mask;
+
+	XSelectInput (display, window, mask);
 
 	gdk_error_trap_pop_ignored ();
 
