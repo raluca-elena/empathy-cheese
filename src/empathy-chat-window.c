@@ -1354,7 +1354,7 @@ chat_window_show_or_update_notification (EmpathyChatWindow *window,
 }
 
 static void
-chat_window_set_highlight_room_tab_label (EmpathyChat *chat)
+chat_window_set_highlight_room_labels (EmpathyChat *chat)
 {
 	gchar *markup;
 	GtkWidget *widget;
@@ -1368,6 +1368,10 @@ chat_window_set_highlight_room_tab_label (EmpathyChat *chat)
 
 	widget = g_object_get_data (G_OBJECT (chat), "chat-window-tab-label");
 	gtk_label_set_markup (GTK_LABEL (widget), markup);
+
+	widget = g_object_get_data (G_OBJECT (chat), "chat-window-menu-label");
+	gtk_label_set_markup (GTK_LABEL (widget), markup);
+
 	g_free (markup);
 }
 
@@ -1459,7 +1463,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 	if (needs_urgency) {
 		if (!has_focus) {
 			chat_window_set_urgency_hint (window, TRUE);
-			chat_window_set_highlight_room_tab_label (chat);
+			chat_window_set_highlight_room_labels (chat);
 		}
 
 		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (priv->dialog),
