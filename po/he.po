@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-12-19 00:59+0200\n"
-"PO-Revision-Date: 2010-12-19 01:00+0200\n"
+"POT-Creation-Date: 2010-12-26 19:54+0200\n"
+"PO-Revision-Date: 2010-12-26 19:54+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -442,7 +442,7 @@ msgstr "ניהול חשבונות התכתבות ו־VoIP"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2105
+#: ../src/empathy-accounts-dialog.c:2200
 msgid "Messaging and VoIP Accounts"
 msgstr "חשבונות התכתבות ו־VoIP"
 
@@ -724,34 +724,34 @@ msgstr "פתחה"
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1136
+#: ../libempathy-gtk/empathy-account-widget.c:1152
 #, c-format
 msgid "The account %s is edited via My Web Accounts."
 msgstr "החשבון %s נערך דרך החשבונות המקוונים שלי."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1142
+#: ../libempathy-gtk/empathy-account-widget.c:1158
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "לא ניתן לערוך את החשבון %s ב־Empathy."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1162
+#: ../libempathy-gtk/empathy-account-widget.c:1178
 msgid "Launch My Web Accounts"
 msgstr "טעינת החשבונות המקוונים שלי"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1500
+#: ../libempathy-gtk/empathy-account-widget.c:1516
 msgid "Username:"
 msgstr "ש_ם משתמש:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1868
+#: ../libempathy-gtk/empathy-account-widget.c:1884
 msgid "A_pply"
 msgstr "ה_חלה"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1898
+#: ../libempathy-gtk/empathy-account-widget.c:1914
 msgid "L_og in"
 msgstr "_כניסה"
 
 #. Account and Identifier
-#: ../libempathy-gtk/empathy-account-widget.c:1964
+#: ../libempathy-gtk/empathy-account-widget.c:1980
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
 #: ../libempathy-gtk/empathy-individual-widget.c:1486
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
@@ -760,19 +760,19 @@ msgstr "_כניסה"
 msgid "Account:"
 msgstr "חשבון:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1975
+#: ../libempathy-gtk/empathy-account-widget.c:1991
 msgid "_Enabled"
 msgstr "מו_פעל"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2040
+#: ../libempathy-gtk/empathy-account-widget.c:2056
 msgid "This account already exists on the server"
 msgstr "חשבון זה כבר קיים על השרת"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2043
+#: ../libempathy-gtk/empathy-account-widget.c:2059
 msgid "Create a new account on the server"
 msgstr "יצירת חשבון חדש על השרת"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2235
+#: ../libempathy-gtk/empathy-account-widget.c:2251
 msgid "Ca_ncel"
 msgstr "_ביטול"
 
@@ -781,19 +781,19 @@ msgstr "_ביטול"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2532
+#: ../libempathy-gtk/empathy-account-widget.c:2548
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "‏%1$s על גבי %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2558
+#: ../libempathy-gtk/empathy-account-widget.c:2574
 #, c-format
 msgid "%s Account"
 msgstr "חשבון %s"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2562
+#: ../libempathy-gtk/empathy-account-widget.c:2578
 msgid "New account"
 msgstr "חשבון חדש"
 
@@ -1213,7 +1213,7 @@ msgstr "תמונות"
 msgid "All Files"
 msgstr "כל הקבצים"
 
-#: ../libempathy-gtk/empathy-avatar-image.c:323
+#: ../libempathy-gtk/empathy-avatar-image.c:324
 msgid "Click to enlarge"
 msgstr "יש ללחוץ כדי להגדיל"
 
@@ -1320,7 +1320,7 @@ msgstr "לא ידוע"
 msgid "Error sending message '%s': %s"
 msgstr "שגיאה בשליחת ההודעה '%s': ‏%s"
 
-#: ../libempathy-gtk/empathy-chat.c:1237 ../src/empathy-chat-window.c:707
+#: ../libempathy-gtk/empathy-chat.c:1237 ../src/empathy-chat-window.c:713
 msgid "Topic:"
 msgstr "נושא:"
 
@@ -1591,7 +1591,7 @@ msgstr "ע_ריכה"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:547
 #: ../libempathy-gtk/empathy-individual-menu.c:969
-#: ../src/empathy-chat-window.c:919
+#: ../src/empathy-chat-window.c:925
 msgid "Inviting you to this room"
 msgstr "מזמין/ה אותך לחדר זה"
 
@@ -2734,7 +2734,16 @@ msgstr ""
 "אתה עומד לבחור חשבון חדש, מה שיבטל\n"
 "את השינויים שלך. האת אתה בטוח שברצונך להמשיך?"
 
-#: ../src/empathy-accounts-dialog.c:1951
+#. Menu items: to enabled/disable the account
+#: ../src/empathy-accounts-dialog.c:1544
+msgid "_Enable"
+msgstr "ה_פעלה"
+
+#: ../src/empathy-accounts-dialog.c:1545
+msgid "_Disable"
+msgstr "נ_טרול"
+
+#: ../src/empathy-accounts-dialog.c:2044
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2769,11 +2778,11 @@ msgstr "הו_ספה…"
 msgid "_Import…"
 msgstr "י_בוא…"
 
-#: ../src/empathy-auth-client.c:237
+#: ../src/empathy-auth-client.c:243
 msgid " - Empathy authentication client"
 msgstr "- לקוח האימות של Empathy"
 
-#: ../src/empathy-auth-client.c:253
+#: ../src/empathy-auth-client.c:259
 msgid "Empathy authentication client"
 msgstr "לקוח האימות של Empathy"
 
@@ -3027,35 +3036,35 @@ msgstr "_שיחה"
 msgid "_View"
 msgstr "_תצוגה"
 
-#: ../src/empathy-chat-window.c:472 ../src/empathy-chat-window.c:492
+#: ../src/empathy-chat-window.c:478 ../src/empathy-chat-window.c:498
 #, c-format
 msgid "%s (%d unread)"
 msgid_plural "%s (%d unread)"
 msgstr[0] "‏%s (אחת שלא נקראה)"
 msgstr[1] "‏%s ‏(%d שלא נקראו)"
 
-#: ../src/empathy-chat-window.c:484
+#: ../src/empathy-chat-window.c:490
 #, c-format
 msgid "%s (and %u other)"
 msgid_plural "%s (and %u others)"
 msgstr[0] "‏%s (ואחד נוסף)"
 msgstr[1] "‏%s (ו־%u נוספים)"
 
-#: ../src/empathy-chat-window.c:500
+#: ../src/empathy-chat-window.c:506
 #, c-format
 msgid "%s (%d unread from others)"
 msgid_plural "%s (%d unread from others)"
 msgstr[0] "‏%s (אחת שלא נקראה מאחרים)"
 msgstr[1] "‏%s (%d שלא נקראו מאחרים)"
 
-#: ../src/empathy-chat-window.c:509
+#: ../src/empathy-chat-window.c:515
 #, c-format
 msgid "%s (%d unread from all)"
 msgid_plural "%s (%d unread from all)"
 msgstr[0] "‏%s (אחת שלא נקראה מכולם)"
 msgstr[1] "‏%s (%d שלא נקראו מכולם)"
 
-#: ../src/empathy-chat-window.c:711
+#: ../src/empathy-chat-window.c:717
 msgid "Typing a message."
 msgstr "הודעה מוקלדת."
 
@@ -3416,11 +3425,11 @@ msgstr "סגירה"
 msgid "Contact"
 msgstr "איש קשר"
 
-#: ../src/empathy-main-window.c:1732
+#: ../src/empathy-main-window.c:1741
 msgid "Contact List"
 msgstr "רשימת אנשי קשר"
 
-#: ../src/empathy-main-window.c:1845
+#: ../src/empathy-main-window.c:1854
 msgid "Show and edit accounts"
 msgstr "הצגה ועריכה של חשבונות"
 
