@@ -74,7 +74,6 @@
 typedef struct {
 	EmpathyChat *current_chat;
 	GList       *chats;
-	GList       *chats_new_msg;
 	gboolean     page_added;
 	gboolean     dnd_same_window;
 	EmpathyChatroomManager *chatroom_manager;
@@ -444,11 +443,8 @@ get_all_unread_messages (EmpathyChatWindowPriv *priv)
 	GList *l;
 	guint nb = 0;
 
-	for (l = priv->chats_new_msg; l != NULL; l = g_list_next (l)) {
-		EmpathyChat *chat = l->data;
-
-		nb += empathy_chat_get_nb_unread_messages (chat);
-	}
+	for (l = priv->chats; l != NULL; l = g_list_next (l))
+		nb += empathy_chat_get_nb_unread_messages (EMPATHY_CHAT (l->data));
 
 	return nb;
 }
@@ -530,7 +526,7 @@ chat_window_title_update (EmpathyChatWindowPriv *priv)
 }
 
 static void
-chat_window_icon_update (EmpathyChatWindowPriv *priv)
+chat_window_icon_update (EmpathyChatWindowPriv *priv, gboolean new_messages)
 {
 	GdkPixbuf      *icon;
 	EmpathyContact *remote_contact;
@@ -540,7 +536,7 @@ chat_window_icon_update (EmpathyChatWindowPriv *priv)
 	n_chats = g_list_length (priv->chats);
 
 	/* Update window icon */
-	if (priv->chats_new_msg) {
+	if (new_messages) {
 		gtk_window_set_icon_name (GTK_WINDOW (priv->dialog),
 					  EMPATHY_IMAGE_MESSAGE);
 	} else {
@@ -603,7 +599,7 @@ chat_window_update (EmpathyChatWindow *window)
 
 	chat_window_title_update (priv);
 
-	chat_window_icon_update (priv);
+	chat_window_icon_update (priv, get_all_unread_messages (priv) > 0);
 
 	chat_window_close_button_update (priv,
 					 num_pages);
@@ -664,7 +660,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 		/* No TpChat, we are disconnected */
 		icon_name = NULL;
 	}
-	else if (g_list_find (priv->chats_new_msg, chat)) {
+	else if (empathy_chat_get_nb_unread_messages (chat) > 0) {
 		icon_name = EMPATHY_IMAGE_MESSAGE;
 	}
 	else if (empathy_chat_is_composing (chat)) {
@@ -1416,8 +1412,8 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 		return;
 	}
 
-	if (!g_list_find (priv->chats_new_msg, chat)) {
-		priv->chats_new_msg = g_list_prepend (priv->chats_new_msg, chat);
+	/* Update the chat tab if this is the first unread message */
+	if (empathy_chat_get_nb_unread_messages (chat) == 1) {
 		chat_window_update_chat_tab (chat);
 	}
 
@@ -1466,7 +1462,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 
 	/* update the number of unread messages and the window icon */
 	chat_window_title_update (priv);
-	chat_window_icon_update (priv);
+	chat_window_icon_update (priv, TRUE);
 }
 
 static GtkNotebook *
@@ -1525,7 +1521,6 @@ chat_window_page_switched_cb (GtkNotebook      *notebook,
 	}
 
 	priv->current_chat = chat;
-	priv->chats_new_msg = g_list_remove (priv->chats_new_msg, chat);
 	empathy_chat_messages_read (chat);
 
 	chat_window_update_chat_tab (chat);
@@ -1617,7 +1612,6 @@ chat_window_page_removed_cb (GtkNotebook      *notebook,
 
 	/* Keep list of chats up to date */
 	priv->chats = g_list_remove (priv->chats, chat);
-	priv->chats_new_msg = g_list_remove (priv->chats_new_msg, chat);
 	empathy_chat_messages_read (chat);
 
 	if (priv->chats == NULL) {
@@ -1636,7 +1630,6 @@ chat_window_focus_in_event_cb (GtkWidget        *widget,
 
 	priv = GET_PRIV (window);
 
-	priv->chats_new_msg = g_list_remove (priv->chats_new_msg, priv->current_chat);
 	empathy_chat_messages_read (priv->current_chat);
 
 	chat_window_set_urgency_hint (window, FALSE);
@@ -2091,7 +2084,6 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 
 	/* Set up private details */
 	priv->chats = NULL;
-	priv->chats_new_msg = NULL;
 	priv->current_chat = NULL;
 	priv->notification = NULL;
 
