@@ -89,6 +89,8 @@ void               empathy_chat_set_show_contacts    (EmpathyChat *chat,
 guint              empathy_chat_get_nb_unread_messages (EmpathyChat   *chat);
 
 void               empathy_chat_messages_read        (EmpathyChat *self);
+
+gboolean           empathy_chat_is_composing (EmpathyChat *chat);
 G_END_DECLS
 
 #endif /* __EMPATHY_CHAT_H__ */

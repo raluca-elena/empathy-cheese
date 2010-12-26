@@ -75,7 +75,6 @@ typedef struct {
 	EmpathyChat *current_chat;
 	GList       *chats;
 	GList       *chats_new_msg;
-	GList       *chats_composing;
 	gboolean     page_added;
 	gboolean     dnd_same_window;
 	EmpathyChatroomManager *chatroom_manager;
@@ -668,7 +667,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 	else if (g_list_find (priv->chats_new_msg, chat)) {
 		icon_name = EMPATHY_IMAGE_MESSAGE;
 	}
-	else if (g_list_find (priv->chats_composing, chat)) {
+	else if (empathy_chat_is_composing (chat)) {
 		icon_name = EMPATHY_IMAGE_TYPING;
 	}
 	else if (remote_contact) {
@@ -713,7 +712,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 				      _("Topic:"), subject);
 	}
 
-	if (g_list_find (priv->chats_composing, chat)) {
+	if (empathy_chat_is_composing (chat)) {
 		append_markup_printf (tooltip, "\n%s", _("Typing a message."));
 	}
 
@@ -1242,16 +1241,6 @@ chat_window_composing_cb (EmpathyChat       *chat,
 			  gboolean          is_composing,
 			  EmpathyChatWindow *window)
 {
-	EmpathyChatWindowPriv *priv;
-
-	priv = GET_PRIV (window);
-
-	if (is_composing && !g_list_find (priv->chats_composing, chat)) {
-		priv->chats_composing = g_list_prepend (priv->chats_composing, chat);
-	} else {
-		priv->chats_composing = g_list_remove (priv->chats_composing, chat);
-	}
-
 	chat_window_update_chat_tab (chat);
 }
 
@@ -1630,7 +1619,6 @@ chat_window_page_removed_cb (GtkNotebook      *notebook,
 	priv->chats = g_list_remove (priv->chats, chat);
 	priv->chats_new_msg = g_list_remove (priv->chats_new_msg, chat);
 	empathy_chat_messages_read (chat);
-	priv->chats_composing = g_list_remove (priv->chats_composing, chat);
 
 	if (priv->chats == NULL) {
 		g_object_unref (window);
@@ -2104,7 +2092,6 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 	/* Set up private details */
 	priv->chats = NULL;
 	priv->chats_new_msg = NULL;
-	priv->chats_composing = NULL;
 	priv->current_chat = NULL;
 	priv->notification = NULL;
 

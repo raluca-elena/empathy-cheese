@@ -3429,3 +3429,10 @@ empathy_chat_messages_read (EmpathyChat *self)
 	}
 	priv->unread_messages = 0;
 }
+
+/* Return TRUE if on of the contacts in this chat is composing */
+gboolean
+empathy_chat_is_composing (EmpathyChat *chat)
+{
+  return chat->priv->compositors != NULL;
+}
