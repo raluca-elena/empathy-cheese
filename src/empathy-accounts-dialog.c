@@ -1502,9 +1502,9 @@ accounts_dialog_treeview_button_press_event_cb (GtkTreeView *view,
     EmpathyAccountsDialog *dialog)
 {
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
-  TpAccount *account;
-  GtkTreeModel *model;
-  GtkTreePath *path;
+  TpAccount *account = NULL;
+  GtkTreeModel *model = NULL;
+  GtkTreePath *path = NULL;
   GtkTreeIter iter;
   GtkWidget *menu;
   GtkWidget *item_enable, *item_disable;
@@ -1573,7 +1573,7 @@ accounts_dialog_treeview_button_press_event_cb (GtkTreeView *view,
 
 finally:
   tp_clear_object (&account);
-  tp_clear_pointer (&path, gtk_tree_path_free);
+  gtk_tree_path_free (path);
 
   return FALSE;
 }
