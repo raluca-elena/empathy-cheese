@@ -1543,8 +1543,10 @@ accounts_dialog_treeview_button_press_event_cb (GtkTreeView *view,
   /* Menu items: to enabled/disable the account */
   item_enable = gtk_image_menu_item_new_with_mnemonic (_("_Enable"));
   item_disable = gtk_image_menu_item_new_with_mnemonic (_("_Disable"));
-  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_enable), image_enable);
-  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_disable), image_disable);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_enable),
+      image_enable);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item_disable),
+      image_disable);
 
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), item_enable);
   gtk_menu_shell_append (GTK_MENU_SHELL (menu), item_disable);
