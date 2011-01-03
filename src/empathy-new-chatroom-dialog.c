@@ -73,11 +73,6 @@ typedef struct {
 	GtkWidget         *viewport_error;
 } EmpathyNewChatroomDialog;
 
-typedef struct {
-  EmpathyAccountChooserFilterResultCallback callback;
-  gpointer                                  user_data;
-} FilterCallbackData;
-
 enum {
 	COL_NEED_PASSWORD,
 	COL_INVITE_ONLY,
@@ -137,70 +132,6 @@ static void	new_chatroom_dialog_button_close_error_clicked_cb   (GtkButton      
 
 static EmpathyNewChatroomDialog *dialog_p = NULL;
 
-
-static void
-conn_prepared_cb (GObject *conn,
-		  GAsyncResult *result,
-		  gpointer user_data)
-{
-	FilterCallbackData *data = user_data;
-	GError             *myerr = NULL;
-	TpCapabilities     *caps;
-
-	if (!tp_proxy_prepare_finish (conn, result, &myerr)) {
-		data->callback (FALSE, data->user_data);
-		g_slice_free (FilterCallbackData, data);
-	}
-
-	caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
-	data->callback (tp_capabilities_supports_text_chatrooms (caps),
-			data->user_data);
-
-	g_slice_free (FilterCallbackData, data);
-}
-
-/**
- * empathy_account_chooser_filter_supports_multichat:
- * @account: a #TpAccount
- * @callback: an #EmpathyAccountChooserFilterResultCallback accepting the result
- * @callback_data: data passed to the @callback
- * @user_data: user data or %NULL
- *
- * An #EmpathyAccountChooserFilterFunc that returns accounts that both
- * support multiuser text chat and are connected.
- *
- * Returns (via the callback) TRUE if @account both supports muc and is connected
- */
-static void
-empathy_account_chooser_filter_supports_multichat (
-	TpAccount                                 *account,
-	EmpathyAccountChooserFilterResultCallback  callback,
-	gpointer                                   callback_data,
-	gpointer                                   user_data)
-{
-	TpConnection       *connection;
-	FilterCallbackData *cb_data;
-	GQuark              features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
-
-	if (tp_account_get_connection_status (account, NULL) !=
-	    TP_CONNECTION_STATUS_CONNECTED) {
-		callback (FALSE, callback_data);
-		return;
-	}
-
-	/* check if CM supports multiuser text chat */
-	connection = tp_account_get_connection (account);
-	if (connection == NULL) {
-		callback (FALSE, callback_data);
-		return;
-	}
-
-	cb_data = g_slice_new0 (FilterCallbackData);
-	cb_data->callback = callback;
-	cb_data->user_data = callback_data;
-        tp_proxy_prepare_async (connection, features, conn_prepared_cb,
-		cb_data);
-}
 
 void
 empathy_new_chatroom_dialog_show (GtkWindow *parent)
@@ -270,7 +201,7 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 	/* Account chooser for custom */
 	dialog->account_chooser = empathy_account_chooser_new ();
 	empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser),
-					    empathy_account_chooser_filter_supports_multichat,
+					    empathy_account_chooser_filter_supports_chatrooms,
 					    NULL);
 	gtk_table_attach_defaults (GTK_TABLE (dialog->table_info),
 				   dialog->account_chooser,
