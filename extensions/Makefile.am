@@ -14,6 +14,7 @@ EXTRA_DIST = \
     misc.xml \
     Debug.xml \
     Logger.xml \
+    Connection_Interface_Renaming.xml \
     Authentication_TLS_Certificate.xml \
     Channel_Type_Server_TLS_Connection.xml \
     $(NULL)
