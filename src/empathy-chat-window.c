@@ -219,9 +219,8 @@ chat_window_close_clicked_cb (GtkAction   *action,
 }
 
 static void
-chat_tab_style_set_cb (GtkWidget *hbox,
-				       GtkStyle  *previous_style,
-				       gpointer   user_data)
+chat_tab_style_updated_cb (GtkWidget *hbox,
+			   gpointer   user_data)
 {
 	GtkWidget *button;
 	int char_width, h, w;
@@ -339,8 +338,8 @@ chat_window_create_label (EmpathyChatWindow *window,
 
 		/* React to theme changes and also setup the size correctly.  */
 		g_signal_connect (hbox,
-				  "style-set",
-				  G_CALLBACK (chat_tab_style_set_cb),
+				  "style-updated",
+				  G_CALLBACK (chat_tab_style_updated_cb),
 				  chat);
 	}
 
