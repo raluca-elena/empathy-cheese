@@ -336,14 +336,12 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 		      "ypad", &ypad,
 		      NULL);
 
-	gtk_paint_expander (gtk_widget_get_style (widget),
-			    cr,
-			    GTK_STATE_NORMAL,
-			    widget,
-			    "treeview",
-			    cell_area->x + x_offset + xpad + priv->expander_size / 2,
-			    cell_area->y + y_offset + ypad + priv->expander_size / 2,
-			    expander_style);
+	gtk_render_expander (gtk_widget_get_style_context (widget),
+			     cr,
+			     cell_area->x + x_offset + xpad,
+			     cell_area->y + y_offset + ypad,
+			     priv->expander_size,
+			     priv->expander_size);
 }
 
 static void
