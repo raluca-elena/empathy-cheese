@@ -298,10 +298,12 @@ cell_renderer_text_update_text (EmpathyCellRendererText *cell,
 				gboolean                selected)
 {
 	EmpathyCellRendererTextPriv *priv;
+	const PangoFontDescription *font_desc;
 	PangoAttrList              *attr_list;
 	PangoAttribute             *attr_color = NULL, *attr_size;
-	GtkStyle                   *style;
+	GtkStyleContext            *style;
 	gchar                      *str;
+	gint                        font_size;
 
 	priv = GET_PRIV (cell);
 
@@ -324,21 +326,25 @@ cell_renderer_text_update_text (EmpathyCellRendererText *cell,
 		return;
 	}
 
-	style = gtk_widget_get_style (widget);
+	style = gtk_widget_get_style_context (widget);
 
 	attr_list = pango_attr_list_new ();
 
-	attr_size = pango_attr_size_new (pango_font_description_get_size (style->font_desc) / 1.2);
+	font_desc = gtk_style_context_get_font (style, GTK_STATE_FLAG_NORMAL);
+	font_size = pango_font_description_get_size (font_desc);
+	attr_size = pango_attr_size_new (font_size / 1.2);
 	attr_size->start_index = strlen (priv->name) + 1;
 	attr_size->end_index = -1;
 	pango_attr_list_insert (attr_list, attr_size);
 
 	if (!selected) {
-		GdkColor color;
+		GdkRGBA color;
 
-		color = style->text_aa[GTK_STATE_NORMAL];
+		gtk_style_context_get_color (style, 0, &color);
 
-		attr_color = pango_attr_foreground_new (color.red, color.green, color.blue);
+		attr_color = pango_attr_foreground_new (color.red * 0xffff,
+							color.green * 0xffff,
+							color.blue * 0xffff);
 		attr_color->start_index = attr_size->start_index;
 		attr_color->end_index = -1;
 		pango_attr_list_insert (attr_list, attr_color);
