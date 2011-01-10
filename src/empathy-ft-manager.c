@@ -816,8 +816,6 @@ ft_manager_open (EmpathyFTManager *manager)
   GtkTreeIter iter;
   GtkTreeModel *model;
   EmpathyFTHandler *handler;
-  char *uri;
-  GFile *file;
   EmpathyFTManagerPriv *priv = GET_PRIV (manager);
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
@@ -827,14 +825,19 @@ ft_manager_open (EmpathyFTManager *manager)
 
   gtk_tree_model_get (model, &iter, COL_FT_OBJECT, &handler, -1);
 
-  file = empathy_ft_handler_get_gfile (handler);
-  uri = g_file_get_uri (file);
+  if (empathy_ft_handler_is_completed (handler)){
+    char *uri;
+    GFile *file;
 
-  DEBUG ("Opening URI: %s", uri);
-  empathy_url_show (GTK_WIDGET (priv->window), uri);
+    file = empathy_ft_handler_get_gfile (handler);
+    uri = g_file_get_uri (file);
+
+    DEBUG ("Opening URI: %s", uri);
+    empathy_url_show (GTK_WIDGET (priv->window), uri);
+    g_free (uri);
+  }
 
   g_object_unref (handler);
-  g_free (uri);
 }
 
 static void
@@ -923,6 +926,20 @@ ft_manager_destroy_cb (GtkWidget *widget,
 }
 
 static gboolean
+ft_view_button_press_event_cb (GtkWidget *widget,
+                               GdkEventKey *event,
+                               EmpathyFTManager *manager)
+{
+
+  if (event->type != GDK_2BUTTON_PRESS)
+      return FALSE;
+
+  ft_manager_open (manager);
+
+  return FALSE;
+}
+
+static gboolean
 ft_manager_key_press_event_cb (GtkWidget *widget,
                                GdkEventKey *event,
                                gpointer user_data)
@@ -977,6 +994,9 @@ ft_manager_build_ui (EmpathyFTManager *manager)
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_BROWSE);
   g_signal_connect (selection, "changed",
       G_CALLBACK (ft_manager_selection_changed), manager);
+  g_signal_connect (view, "button-press-event",
+                    G_CALLBACK (ft_view_button_press_event_cb),
+                    manager);
   gtk_tree_view_set_headers_visible (view, TRUE);
   gtk_tree_view_set_enable_search (view, FALSE);
 
