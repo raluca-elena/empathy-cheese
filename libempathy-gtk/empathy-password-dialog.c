@@ -157,13 +157,25 @@ password_dialog_grab_keyboard (GtkWidget *widget,
 
   if (!priv->grabbing)
     {
-      GdkGrabStatus status = gdk_keyboard_grab (gtk_widget_get_window (widget),
-          FALSE, gdk_event_get_time (event));
+      GdkDevice *device = gdk_event_get_device (event);
 
-      if (status != GDK_GRAB_SUCCESS)
-        DEBUG ("Could not grab keyboard; grab status was %u", status);
+      if (device != NULL)
+        {
+          GdkGrabStatus status = gdk_device_grab (device,
+              gtk_widget_get_window (widget),
+              GDK_OWNERSHIP_WINDOW,
+              FALSE,
+              GDK_ALL_EVENTS_MASK,
+              NULL,
+              gdk_event_get_time (event));
+
+          if (status != GDK_GRAB_SUCCESS)
+            DEBUG ("Could not grab keyboard; grab status was %u", status);
+          else
+            priv->grabbing = TRUE;
+        }
       else
-        priv->grabbing = TRUE;
+        DEBUG ("Could not get the event device!");
     }
 
   return FALSE;
@@ -178,8 +190,15 @@ password_dialog_ungrab_keyboard (GtkWidget *widget,
 
   if (priv->grabbing)
     {
-      gdk_keyboard_ungrab (gdk_event_get_time (event));
-      priv->grabbing = FALSE;
+      GdkDevice *device = gdk_event_get_device (event);
+
+      if (device != NULL)
+        {
+          gdk_device_ungrab (device, gdk_event_get_time (event));
+          priv->grabbing = FALSE;
+        }
+      else
+        DEBUG ("Could not get the event device!");
     }
 
   return FALSE;
