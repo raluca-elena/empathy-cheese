@@ -1479,13 +1479,11 @@ static void
 main_window_help_debug_cb (GtkAction         *action,
 			   EmpathyMainWindow *window)
 {
-	GdkScreen *screen = gdk_screen_get_default ();
+	GdkDisplay *display;
 	GError *error = NULL;
 	gchar *path;
 	GAppInfo *app_info;
 	GdkAppLaunchContext *context = NULL;
-
-	g_return_if_fail (GDK_IS_SCREEN (screen));
 
 	/* Try to run from source directory if possible */
 	path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
@@ -1503,8 +1501,8 @@ main_window_help_debug_cb (GtkAction         *action,
 		goto out;
 	}
 
-	context = gdk_app_launch_context_new ();
-	gdk_app_launch_context_set_display (context, gdk_screen_get_display (screen));
+	display = gdk_display_get_default ();
+	context = gdk_display_get_app_launch_context (display);
 
 	if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
 		&error)) {

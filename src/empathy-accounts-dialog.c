@@ -2389,6 +2389,7 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
     gboolean hidden)
 {
   GError *error = NULL;
+  GdkDisplay *display;
   GString *cmd;
   gchar *path;
   GAppInfo *app_info;
@@ -2435,8 +2436,8 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
       goto out;
     }
 
-  context = gdk_app_launch_context_new ();
-  gdk_app_launch_context_set_display (context, gdk_screen_get_display (screen));
+  display = gdk_screen_get_display (screen);
+  context = gdk_display_get_app_launch_context (display);
 
   if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
         &error))

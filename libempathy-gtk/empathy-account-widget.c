@@ -1090,6 +1090,7 @@ account_widget_launch_external_clicked (GtkWidget *button,
       GDesktopAppInfo *desktop_info;
       GError *error = NULL;
       GdkAppLaunchContext *context = NULL;
+      GdkDisplay *display;
       gchar *cmd;
       GAppInfo *app_info;
 
@@ -1114,9 +1115,8 @@ account_widget_launch_external_clicked (GtkWidget *button,
           goto out;
         }
 
-      context = gdk_app_launch_context_new ();
-      gdk_app_launch_context_set_screen  (context,
-          gtk_widget_get_screen (button));
+      display = gdk_display_get_default ();
+      context = gdk_display_get_app_launch_context (display);
 
       if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
             &error))
