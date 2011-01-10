@@ -226,13 +226,17 @@ chat_tab_style_set_cb (GtkWidget *hbox,
 	GtkWidget *button;
 	int char_width, h, w;
 	PangoContext *context;
+	const PangoFontDescription *font_desc;
 	PangoFontMetrics *metrics;
 
 	button = g_object_get_data (G_OBJECT (user_data),
 		"chat-window-tab-close-button");
 	context = gtk_widget_get_pango_context (hbox);
 
-	metrics = pango_context_get_metrics (context, gtk_widget_get_style (hbox)->font_desc,
+	font_desc = gtk_style_context_get_font (gtk_widget_get_style_context (hbox),
+						GTK_STATE_FLAG_NORMAL);
+
+	metrics = pango_context_get_metrics (context, font_desc,
 		pango_context_get_language (context));
 	char_width = pango_font_metrics_get_approximate_char_width (metrics);
 	pango_font_metrics_unref (metrics);
