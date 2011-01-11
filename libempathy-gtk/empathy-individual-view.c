@@ -47,6 +47,7 @@
 #include "empathy-individual-view.h"
 #include "empathy-individual-menu.h"
 #include "empathy-individual-store.h"
+#include "empathy-contact-dialogs.h"
 #include "empathy-images.h"
 #include "empathy-linking-dialog.h"
 #include "empathy-cell-renderer-expander.h"
@@ -947,6 +948,25 @@ individual_view_key_press_event_cb (EmpathyIndividualView *view,
       data->button = 0;
       data->time = event->time;
       g_idle_add (individual_view_popup_menu_idle_cb, data);
+    } else if (event->keyval == GDK_KEY_F2) {
+        FolksIndividual *individual;
+        EmpathyContact *contact;
+
+        g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), FALSE);
+
+        individual = empathy_individual_view_dup_selected (view);
+        if (individual == NULL)
+            return FALSE;
+
+        contact = empathy_contact_dup_from_folks_individual (individual);
+        if (contact == NULL) {
+            g_object_unref (individual);
+            return FALSE;
+        }
+        empathy_contact_edit_dialog_show (contact, NULL);
+
+        g_object_unref (individual);
+        g_object_unref (contact);
     }
 
   return FALSE;
@@ -1365,7 +1385,8 @@ individual_view_search_key_navigation_cb (GtkWidget *search,
   GdkEventKey *eventkey = ((GdkEventKey *) event);
   gboolean ret = FALSE;
 
-  if (eventkey->keyval == GDK_KEY_Up || eventkey->keyval == GDK_KEY_Down)
+  if (eventkey->keyval == GDK_KEY_Up || eventkey->keyval == GDK_KEY_Down
+      || eventkey->keyval == GDK_KEY_F2)
     {
       GdkEvent *new_event;
 
