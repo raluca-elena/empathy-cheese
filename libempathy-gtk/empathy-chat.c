@@ -55,6 +55,7 @@
 #include "empathy-smiley-manager.h"
 #include "empathy-ui-utils.h"
 #include "empathy-string-parser.h"
+#include "extensions/extensions.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CHAT
 #include <libempathy/empathy-debug.h>
@@ -663,6 +664,17 @@ OUT:
 }
 #endif
 
+static gboolean
+nick_command_supported (EmpathyChat *chat)
+{
+	EmpathyChatPriv * priv = GET_PRIV (chat);
+	TpConnection    *connection;
+
+	connection = empathy_tp_chat_get_connection (priv->tp_chat);
+	return tp_proxy_has_interface_by_id (connection,
+		EMP_IFACE_QUARK_CONNECTION_INTERFACE_RENAMING);
+}
+
 static void
 chat_command_clear (EmpathyChat *chat,
 		    GStrv        strv)
@@ -816,43 +828,44 @@ typedef struct {
 	guint min_parts;
 	guint max_parts;
 	ChatCommandFunc func;
+	gboolean (*is_supported)(EmpathyChat *chat);
 	const gchar *help;
 } ChatCommandItem;
 
 static ChatCommandItem commands[] = {
-	{"clear", 1, 1, chat_command_clear,
+	{"clear", 1, 1, chat_command_clear, NULL,
 	 N_("/clear: clear all messages from the current conversation")},
 
-	{"topic", 2, 2, chat_command_topic,
+	{"topic", 2, 2, chat_command_topic, NULL,
 	 N_("/topic <topic>: set the topic of the current conversation")},
 
-	{"join", 2, 2, chat_command_join,
+	{"join", 2, 2, chat_command_join, NULL,
 	 N_("/join <chat room ID>: join a new chat room")},
 
-	{"j", 2, 2, chat_command_join,
+	{"j", 2, 2, chat_command_join, NULL,
 	 N_("/j <chat room ID>: join a new chat room")},
 
 #if 0
 /* FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=623682 */
-	{"query", 2, 3, chat_command_query,
+	{"query", 2, 3, chat_command_query, NULL,
 	 N_("/query <contact ID> [<message>]: open a private chat")},
 
-	{"msg", 3, 3, chat_command_msg,
+	{"msg", 3, 3, chat_command_msg, NULL,
 	 N_("/msg <contact ID> <message>: open a private chat")},
 #endif
 
-	{"nick", 2, 2, chat_command_nick,
+	{"nick", 2, 2, chat_command_nick, nick_command_supported,
 	 N_("/nick <nickname>: change your nickname on the current server")},
 
-	{"me", 2, 2, chat_command_me,
+	{"me", 2, 2, chat_command_me, NULL,
 	 N_("/me <message>: send an ACTION message to the current conversation")},
 
-	{"say", 2, 2, chat_command_say,
+	{"say", 2, 2, chat_command_say, NULL,
 	 N_("/say <message>: send <message> to the current conversation. "
 	    "This is used to send a message starting with a '/'. For example: "
 	    "\"/say /join is used to join a new chat room\"")},
 
-	{"help", 1, 2, chat_command_help,
+	{"help", 1, 2, chat_command_help, NULL,
 	 N_("/help [<command>]: show all supported commands. "
 	    "If <command> is defined, show its usage.")},
 };
@@ -872,20 +885,33 @@ static void
 chat_command_help (EmpathyChat *chat,
 		   GStrv        strv)
 {
+	EmpathyChatPriv *priv;
 	guint i;
+
+	priv = GET_PRIV (chat);
 
 	/* If <command> part is not defined,
 	 * strv[1] will be the terminal NULL */
 	if (strv[1] == NULL) {
 		for (i = 0; i < G_N_ELEMENTS (commands); i++) {
-			empathy_chat_view_append_event (chat->view,
-				_(commands[i].help));
+			if (commands[i].is_supported != NULL) {
+				if (!commands[i].is_supported (chat)) {
+					continue;
+				}
+			}
+		    empathy_chat_view_append_event (chat->view,
+			    _(commands[i].help));
 		}
 		return;
 	}
 
 	for (i = 0; i < G_N_ELEMENTS (commands); i++) {
 		if (g_ascii_strcasecmp (strv[1], commands[i].prefix) == 0) {
+			if (commands[i].is_supported != NULL) {
+				if (!commands[i].is_supported (chat)) {
+					break;
+				}
+			}
 			chat_command_show_help (chat, &commands[i]);
 			return;
 		}
@@ -980,6 +1006,11 @@ chat_send (EmpathyChat  *chat,
 			c = *(msg + 1 + strlen (commands[i].prefix));
 			if (c != '\0' && !g_ascii_isspace (c)) {
 				continue;
+			}
+			if (commands[i].is_supported != NULL) {
+				if (!commands[i].is_supported (chat)) {
+					continue;
+				}
 			}
 
 			/* We can't use g_strsplit here because it does
@@ -3089,7 +3120,6 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 			  EmpathyTpChat *tp_chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	TpConnection    *connection;
 	GPtrArray       *properties;
 
 	g_return_if_fail (EMPATHY_IS_CHAT (chat));
@@ -3105,7 +3135,6 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	}
 
 	priv->tp_chat = g_object_ref (tp_chat);
-	connection = empathy_tp_chat_get_connection (priv->tp_chat);
 	priv->account = g_object_ref (empathy_tp_chat_get_account (priv->tp_chat));
 
 	g_signal_connect (tp_chat, "destroy",
