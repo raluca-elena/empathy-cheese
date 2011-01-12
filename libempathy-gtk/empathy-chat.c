@@ -775,23 +775,27 @@ chat_command_msg (EmpathyChat *chat,
 #endif
 
 static void
+callback_for_request_rename(TpProxy *proxy,
+		  const GError *error,
+		  gpointer user_data,
+		  GObject *weak_object)
+{
+	if (error != NULL) {
+		DEBUG ("Call to RequestRename method failed: %s",error->message);
+	}
+}
+
+static void
 chat_command_nick (EmpathyChat *chat,
 		   GStrv        strv)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	TpConnection *connection;
-	GHashTable *new_alias;
-	TpHandle handle;
+	TpProxy *proxy;
 
-	connection = tp_account_get_connection (priv->account);
-	handle = tp_connection_get_self_handle (connection);
-	new_alias = g_hash_table_new (g_direct_hash, g_direct_equal);
-	g_hash_table_insert (new_alias, GUINT_TO_POINTER (handle), strv[1]);
+	proxy = TP_PROXY (tp_account_get_connection (priv->account));
 
-	tp_cli_connection_interface_aliasing_call_set_aliases (connection, -1,
-		new_alias, NULL, NULL, NULL, NULL);
-
-	g_hash_table_destroy (new_alias);
+	emp_cli_connection_interface_renaming_call_request_rename (proxy, -1,
+		strv[1], callback_for_request_rename, NULL, NULL, NULL);
 }
 
 static void
