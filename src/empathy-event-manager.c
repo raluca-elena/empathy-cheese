@@ -1115,11 +1115,12 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNOUT))
             {
-              header = g_strdup_printf (_("%s is now offline."),
+              header = g_strdup_printf ("<b>%s</b>",
                   empathy_contact_get_alias (contact));
 
-              event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_PRESENCE,
-                  EMPATHY_IMAGE_AVATAR_DEFAULT, header, NULL, NULL, NULL, NULL);
+              event_manager_add (manager, NULL, contact,
+                  EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
+                  header, _("Disconnected"), NULL, NULL, NULL);
             }
         }
     }
@@ -1136,11 +1137,12 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNIN))
             {
-              header = g_strdup_printf (_("%s is now online."),
+              header = g_strdup_printf ("<b>%s</b>",
                   empathy_contact_get_alias (contact));
 
-              event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_PRESENCE,
-                  EMPATHY_IMAGE_AVATAR_DEFAULT, header, NULL, NULL, NULL, NULL);
+              event_manager_add (manager, NULL, contact,
+                  EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
+                  header, _("Connected"), NULL, NULL, NULL);
             }
         }
     }
