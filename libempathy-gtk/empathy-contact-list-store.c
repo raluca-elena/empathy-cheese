@@ -34,12 +34,14 @@
 #include <telepathy-glib/util.h>
 
 #include <libempathy/empathy-utils.h>
+#include <libempathy/empathy-tp-chat.h>
 #include <libempathy/empathy-enum-types.h>
 #include <libempathy/empathy-contact-manager.h>
 
 #include "empathy-contact-list-store.h"
 #include "empathy-ui-utils.h"
 #include "empathy-gtk-enum-types.h"
+#include "empathy-images.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
@@ -181,6 +183,32 @@ enum {
 
 G_DEFINE_TYPE (EmpathyContactListStore, empathy_contact_list_store, GTK_TYPE_TREE_STORE);
 
+static void
+contact_list_store_chat_state_changed_cb (TpChannel *self,
+				     guint contact_handle,
+				     guint state,
+				     gpointer store)
+{
+	EmpathyContactListStorePriv *priv = GET_PRIV (store);
+	GList *contacts, *l;
+
+	contacts = empathy_contact_list_get_members (priv->list);
+
+	/* Find the contact in the list. After that l is the list elem or NULL */
+	for (l = contacts; l != NULL; l = l->next) {
+		if (empathy_contact_get_handle (EMPATHY_CONTACT (l->data)) ==
+		    contact_handle) {
+			break;
+		}
+	}
+
+	if (l != NULL)
+		contact_list_store_contact_update (store, l->data);
+
+	g_list_foreach (contacts, (GFunc) g_object_unref, NULL);
+	g_list_free (contacts);
+}
+
 static gboolean
 contact_list_store_iface_setup (gpointer user_data)
 {
@@ -205,6 +233,20 @@ contact_list_store_iface_setup (gpointer user_data)
 			  "groups-changed",
 			  G_CALLBACK (contact_list_store_groups_changed_cb),
 			  store);
+
+	if (EMPATHY_IS_TP_CHAT (priv->list)) {
+		TpChannel *channel;
+
+		channel = empathy_tp_chat_get_channel (EMPATHY_TP_CHAT (priv->list));
+		if (!tp_proxy_is_prepared (channel, TP_CHANNEL_FEATURE_CHAT_STATES)) {
+			DEBUG ("Chat state feature not prepared");
+		} else {
+			g_signal_connect (channel,
+					  "chat-state-changed",
+					  G_CALLBACK (contact_list_store_chat_state_changed_cb),
+					  store);
+		}
+	}
 
 	/* Add contacts already created. */
 	contacts = empathy_contact_list_get_members (priv->list);
@@ -1835,9 +1877,25 @@ contact_list_store_get_contact_status_icon (EmpathyContactListStore *store,
 					    EmpathyContact *contact)
 {
 	GdkPixbuf                   *pixbuf_status = NULL;
+	EmpathyContactListStorePriv *priv;
 	const gchar                 *status_icon_name = NULL;
+	gboolean                     composing = FALSE;
 
-	status_icon_name = empathy_icon_name_for_contact (contact);
+	priv = GET_PRIV (store);
+
+	if (EMPATHY_IS_TP_CHAT (priv->list)) {
+		if (empathy_tp_chat_get_chat_state (EMPATHY_TP_CHAT (priv->list),
+		      contact) ==
+			TP_CHANNEL_CHAT_STATE_COMPOSING)
+		composing = TRUE;
+	}
+
+	if (composing) {
+		status_icon_name = EMPATHY_IMAGE_TYPING;
+	} else {
+		status_icon_name = empathy_icon_name_for_contact (contact);
+	}
+
 	if (status_icon_name == NULL)
 		return NULL;
 

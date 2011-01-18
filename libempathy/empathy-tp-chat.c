@@ -1959,3 +1959,12 @@ empathy_tp_chat_is_invited (EmpathyTpChat *self,
 	return tp_channel_group_get_local_pending_info (priv->channel, self_handle,
 		inviter, NULL, NULL);
 }
+
+TpChannelChatState
+empathy_tp_chat_get_chat_state (EmpathyTpChat *chat,
+			    EmpathyContact *contact)
+{
+	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	return tp_channel_get_chat_state (priv->channel,
+		empathy_contact_get_handle (contact));
+}
