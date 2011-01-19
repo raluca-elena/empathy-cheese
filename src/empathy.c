@@ -61,6 +61,7 @@
 
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-location-manager.h>
+#include <libempathy-gtk/empathy-notify-manager.h>
 
 #include "empathy-main-window.h"
 #include "empathy-accounts-common.h"
@@ -239,6 +240,43 @@ empathy_app_local_command_line (GApplication *app,
     gchar ***arguments,
     gint *exit_status);
 
+#define GNOME_SHELL_BUS_NAME "org.gnome.Shell"
+
+static void
+list_names_cb (TpDBusDaemon *bus_daemon,
+        const gchar * const *names,
+        const GError *error,
+        gpointer user_data,
+        GObject *weak_object)
+{
+  EmpathyApp *self = (EmpathyApp *) weak_object;
+  gboolean shell_running = FALSE;
+  guint i;
+
+  if (error != NULL)
+      goto out;
+
+  for (i = 0; names[i] != NULL; i++)
+    {
+      if (!tp_strdiff (names[i], GNOME_SHELL_BUS_NAME))
+        {
+          shell_running = TRUE;
+          break;
+        }
+    }
+
+out:
+  if (shell_running)
+    {
+      DEBUG ("GNOMES Shell is running, don't create status icon");
+    }
+  else
+    {
+      self->icon = empathy_status_icon_new (GTK_WINDOW (self->window),
+          self->start_hidden);
+    }
+}
+
 static int
 empathy_app_command_line (GApplication *app,
     GApplicationCommandLine *cmdline)
@@ -263,6 +301,7 @@ empathy_app_command_line (GApplication *app,
   if (!self->activated)
     {
       GError *error = NULL;
+      TpDBusDaemon *dbus;
 
       /* Create the FT factory */
       self->ft_factory = empathy_ft_factory_dup_singleton ();
@@ -283,8 +322,15 @@ empathy_app_command_line (GApplication *app,
 
       /* Setting up UI */
       self->window = empathy_main_window_dup ();
-      self->icon = empathy_status_icon_new (GTK_WINDOW (self->window),
-          self->start_hidden);
+
+      /* check if Shell is running */
+      dbus = tp_dbus_daemon_dup (&error);
+      g_assert_no_error (error);
+
+      tp_dbus_daemon_list_names (dbus, -1, list_names_cb,
+              self, NULL, G_OBJECT (self));
+
+      g_object_unref (dbus);
 
       self->notifications_approver =
         empathy_notifications_approver_dup_singleton ();
