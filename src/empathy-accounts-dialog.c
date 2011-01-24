@@ -105,12 +105,18 @@ typedef struct {
   GtkWidget *spinner;
   gboolean loading;
 
-  /* We have to keep a reference on the actual EmpathyAccountWidget, not just
-   * his GtkWidget. It is the only reliable source we can query to know if
+  /* We have to keep a weak reference on the actual EmpathyAccountWidget, not
+   * just its GtkWidget. It is the only reliable source we can query to know if
    * there are any unsaved changes to the currently selected account. We can't
    * look at the account settings because it does not contain everything that
    * can be changed using the EmpathyAccountWidget. For instance, it does not
-   * contain the state of the "Enabled" checkbox. */
+   * contain the state of the "Enabled" checkbox.
+   *
+   * Even if we create it ourself, we just get a weak ref and not a strong one
+   * as EmpathyAccountWidget unrefs itself when the GtkWidget is destroyed.
+   * That's kinda ugly; cf bgo #640417.
+   *
+   * */
   EmpathyAccountWidget *setting_widget_object;
 
   gboolean  connecting_show;
@@ -484,8 +490,15 @@ account_dialog_create_settings_widget (EmpathyAccountsDialog *dialog,
   const gchar               *icon_name;
   TpAccount                 *account;
 
+  if (priv->setting_widget_object != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (priv->setting_widget_object),
+        (gpointer *) &priv->setting_widget_object);
+
   priv->setting_widget_object =
       empathy_account_widget_new_for_protocol (settings, FALSE);
+
+  g_object_add_weak_pointer (G_OBJECT (priv->setting_widget_object),
+      (gpointer *) &priv->setting_widget_object);
 
   if (accounts_dialog_has_valid_accounts (dialog))
     empathy_account_widget_set_other_accounts_exist (
