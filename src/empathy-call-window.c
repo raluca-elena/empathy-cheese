@@ -136,6 +136,7 @@ struct _EmpathyCallWindowPriv
   GtkAction *redial;
   GtkAction *menu_fullscreen;
   GtkAction *action_camera;
+  GtkAction *action_camera_on;
   GtkWidget *tool_button_camera_off;
   GtkWidget *tool_button_camera_preview;
   GtkWidget *tool_button_camera_on;
@@ -1056,6 +1057,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "camera_preview", &priv->tool_button_camera_preview,
     "camera_on", &priv->tool_button_camera_on,
     "action_camera_off",  &priv->action_camera,
+    "action_camera_on",  &priv->action_camera_on,
     "details_vbox",  &priv->details_vbox,
     "vcodec_encoding_label", &priv->vcodec_encoding_label,
     "acodec_encoding_label", &priv->acodec_encoding_label,
@@ -1947,6 +1949,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
       /* Unsensitive the camera and mic button */
       gtk_widget_set_sensitive (priv->tool_button_camera_on, FALSE);
+      gtk_action_set_sensitive (priv->action_camera_on, FALSE);
       gtk_widget_set_sensitive (priv->mic_button, FALSE);
 
       /* Be sure that the mic button is enabled */
@@ -2485,6 +2488,7 @@ empathy_call_window_connected (gpointer user_data)
       GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on),
       priv->sending_video && priv->video_input != NULL);
   gtk_widget_set_sensitive (priv->tool_button_camera_on, can_send_video);
+  gtk_action_set_sensitive (priv->action_camera_on, can_send_video);
 
   gtk_action_set_sensitive (priv->redial, FALSE);
   gtk_widget_set_sensitive (priv->redial_button, FALSE);
@@ -2686,6 +2690,7 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
   priv->video_preview = NULL;
 
   gtk_widget_set_sensitive (priv->tool_button_camera_on, FALSE);
+  gtk_action_set_sensitive (priv->action_camera_on, FALSE);
   gtk_widget_set_sensitive (priv->tool_button_camera_preview, FALSE);
 }
 
