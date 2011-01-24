@@ -136,7 +136,6 @@ struct _EmpathyCallWindowPriv
   GtkAction *redial;
   GtkAction *menu_fullscreen;
   GtkAction *action_camera;
-  GtkAction *action_camera_preview;
   GtkWidget *tool_button_camera_off;
   GtkWidget *tool_button_camera_preview;
   GtkWidget *tool_button_camera_on;
@@ -1057,7 +1056,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "camera_preview", &priv->tool_button_camera_preview,
     "camera_on", &priv->tool_button_camera_on,
     "action_camera_off",  &priv->action_camera,
-    "action_camera_preview",  &priv->action_camera_preview,
     "details_vbox",  &priv->details_vbox,
     "vcodec_encoding_label", &priv->vcodec_encoding_label,
     "acodec_encoding_label", &priv->acodec_encoding_label,
