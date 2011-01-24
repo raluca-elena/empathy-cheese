@@ -666,7 +666,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 	else if (empathy_chat_get_nb_unread_messages (chat) > 0) {
 		icon_name = EMPATHY_IMAGE_MESSAGE;
 	}
-	else if (empathy_chat_is_composing (chat)) {
+	else if (remote_contact && empathy_chat_is_composing (chat)) {
 		icon_name = EMPATHY_IMAGE_TYPING;
 	}
 	else if (remote_contact) {
@@ -711,7 +711,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 				      _("Topic:"), subject);
 	}
 
-	if (empathy_chat_is_composing (chat)) {
+	if (remote_contact && empathy_chat_is_composing (chat)) {
 		append_markup_printf (tooltip, "\n%s", _("Typing a message."));
 	}
 
