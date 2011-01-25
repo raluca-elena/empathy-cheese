@@ -1,6 +1,5 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,34 +39,45 @@ typedef struct _EmpathyPresenceManager      EmpathyPresenceManager;
 typedef struct _EmpathyPresenceManagerClass EmpathyPresenceManagerClass;
 
 struct _EmpathyPresenceManager {
-	GObject parent;
-	gpointer priv;
+  GObject parent;
+  gpointer priv;
 };
 
-struct _EmpathyPresenceManagerClass {
-	GObjectClass parent_class;
+struct _EmpathyPresenceManagerClass
+{
+  GObjectClass parent_class;
 };
 
-GType        empathy_presence_manager_get_type            (void) G_GNUC_CONST;
-EmpathyPresenceManager *empathy_presence_manager_dup_singleton       (void);
-TpConnectionPresenceType   empathy_presence_manager_get_state           (EmpathyPresenceManager *idle);
-void         empathy_presence_manager_set_state           (EmpathyPresenceManager *idle,
-					       TpConnectionPresenceType   state);
-void         empathy_presence_manager_set_status          (EmpathyPresenceManager *idle,
-					       const gchar *status);
-void         empathy_presence_manager_set_presence        (EmpathyPresenceManager *idle,
-					       TpConnectionPresenceType   state,
-					       const gchar *status);
-gboolean     empathy_presence_manager_get_auto_away       (EmpathyPresenceManager *idle);
-void         empathy_presence_manager_set_auto_away       (EmpathyPresenceManager *idle,
-					       gboolean     auto_away);
+GType empathy_presence_manager_get_type (void) G_GNUC_CONST;
 
-TpConnectionPresenceType empathy_presence_manager_get_requested_presence (EmpathyPresenceManager *idle,
-							      gchar **status,
-							      gchar **status_message);
+EmpathyPresenceManager * empathy_presence_manager_dup_singleton (void);
 
-gboolean empathy_presence_manager_account_is_just_connected (EmpathyPresenceManager *idle,
-						 TpAccount *account);
+TpConnectionPresenceType empathy_presence_manager_get_state (
+    EmpathyPresenceManager *self);
+
+void empathy_presence_manager_set_state (EmpathyPresenceManager *self,
+    TpConnectionPresenceType state);
+
+void empathy_presence_manager_set_status (EmpathyPresenceManager *self,
+                 const gchar *status);
+
+void empathy_presence_manager_set_presence (EmpathyPresenceManager *self,
+                 TpConnectionPresenceType state,
+                 const gchar *status);
+
+gboolean empathy_presence_manager_get_auto_away (EmpathyPresenceManager *self);
+
+void empathy_presence_manager_set_auto_away (EmpathyPresenceManager *self,
+    gboolean     auto_away);
+
+TpConnectionPresenceType empathy_presence_manager_get_requested_presence (
+    EmpathyPresenceManager *self,
+    gchar **status,
+    gchar **status_message);
+
+gboolean empathy_presence_manager_account_is_just_connected (
+    EmpathyPresenceManager *self,
+    TpAccount *account);
 
 G_END_DECLS
 
