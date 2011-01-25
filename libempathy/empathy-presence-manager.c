@@ -301,6 +301,8 @@ presence_manager_finalize (GObject *object)
   self->priv->connect_times = NULL;
 
   next_away_stop (EMPATHY_PRESENCE_MANAGER (object));
+
+  G_OBJECT_CLASS (empathy_presence_manager_parent_class)->finalize (object);
 }
 
 static GObject *
