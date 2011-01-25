@@ -97,9 +97,11 @@ empathy_contact_menu_new (EmpathyContact             *contact,
 	gtk_widget_show (item);
 
 	/* File transfer */
-	item = empathy_contact_file_transfer_menu_item_new (contact);
-	gtk_menu_shell_append (shell, item);
-	gtk_widget_show (item);
+	if (features & EMPATHY_CONTACT_FEATURE_FT) {
+		item = empathy_contact_file_transfer_menu_item_new (contact);
+		gtk_menu_shell_append (shell, item);
+		gtk_widget_show (item);
+	}
 
 	/* Share my desktop */
 	/* FIXME we should add the "Share my desktop" menu item if Vino is

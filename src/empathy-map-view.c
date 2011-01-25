@@ -210,6 +210,7 @@ marker_clicked_cb (ChamplainMarker *marker,
       EMPATHY_CONTACT_FEATURE_CHAT |
       EMPATHY_CONTACT_FEATURE_CALL |
       EMPATHY_CONTACT_FEATURE_LOG |
+      EMPATHY_CONTACT_FEATURE_FT |
       EMPATHY_CONTACT_FEATURE_INFO);
 
   if (menu == NULL)

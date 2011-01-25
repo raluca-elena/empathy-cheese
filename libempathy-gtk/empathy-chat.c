@@ -3281,6 +3281,7 @@ empathy_chat_get_contact_menu (EmpathyChat *chat)
 		menu = empathy_contact_menu_new (priv->remote_contact,
 						 EMPATHY_CONTACT_FEATURE_CALL |
 						 EMPATHY_CONTACT_FEATURE_LOG |
+						 EMPATHY_CONTACT_FEATURE_FT |
 						 EMPATHY_CONTACT_FEATURE_INFO);
 	}
 
