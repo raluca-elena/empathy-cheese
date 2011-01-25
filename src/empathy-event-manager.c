@@ -29,7 +29,7 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/simple-approver.h>
 
-#include <libempathy/empathy-idle.h>
+#include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-chat.h>
@@ -1092,13 +1092,13 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
   EmpathyEventManagerPriv *priv = GET_PRIV (manager);
   TpAccount *account;
   gchar *header = NULL;
-  EmpathyIdle *idle;
+  EmpathyPresenceManager *presence_mgr;
   GtkWidget *window = empathy_main_window_dup ();
 
   account = empathy_contact_get_account (contact);
-  idle = empathy_idle_dup_singleton ();
+  presence_mgr = empathy_presence_manager_dup_singleton ();
 
-  if (empathy_idle_account_is_just_connected (idle, account))
+  if (empathy_presence_manager_account_is_just_connected (presence_mgr, account))
     goto out;
 
   if (tp_connection_presence_type_cmp_availability (previous,
@@ -1149,7 +1149,7 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
   g_free (header);
 
 out:
-  g_object_unref (idle);
+  g_object_unref (presence_mgr);
   g_object_unref (window);
 }
 

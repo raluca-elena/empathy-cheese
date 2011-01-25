@@ -19,6 +19,8 @@
  * Authors: Xavier Claessens <xclaesse@gmail.com>
  */
 
+#include "empathy-presence-manager.h"
+
 #include <config.h>
 
 #include <string.h>
@@ -30,7 +32,6 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/util.h>
 
-#include "empathy-idle.h"
 #include "empathy-utils.h"
 #include "empathy-connectivity.h"
 
@@ -44,7 +45,7 @@
  * for. */
 #define ACCOUNT_IS_JUST_CONNECTED_SECONDS 10
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIdle)
+#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyPresenceManager)
 typedef struct {
 	DBusGProxy     *gs_proxy;
 	EmpathyConnectivity *connectivity;
@@ -72,7 +73,7 @@ typedef struct {
 	TpConnectionPresenceType requested_presence_type;
 	gchar *requested_status_message;
 
-} EmpathyIdlePriv;
+} EmpathyPresenceManagerPriv;
 
 typedef enum {
 	SESSION_STATUS_AVAILABLE,
@@ -89,9 +90,9 @@ enum {
 	PROP_AUTO_AWAY
 };
 
-G_DEFINE_TYPE (EmpathyIdle, empathy_idle, G_TYPE_OBJECT);
+G_DEFINE_TYPE (EmpathyPresenceManager, empathy_presence_manager, G_TYPE_OBJECT);
 
-static EmpathyIdle * idle_singleton = NULL;
+static EmpathyPresenceManager * idle_singleton = NULL;
 
 static const gchar *presence_type_to_status[NUM_TP_CONNECTION_PRESENCE_TYPES] = {
 	NULL,
@@ -110,9 +111,9 @@ idle_presence_changed_cb (TpAccountManager *manager,
 			  TpConnectionPresenceType state,
 			  gchar          *status,
 			  gchar          *status_message,
-			  EmpathyIdle    *idle)
+			  EmpathyPresenceManager    *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -135,23 +136,23 @@ idle_presence_changed_cb (TpAccountManager *manager,
 }
 
 static gboolean
-idle_ext_away_cb (EmpathyIdle *idle)
+idle_ext_away_cb (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
 	DEBUG ("Going to extended autoaway");
-	empathy_idle_set_state (idle, TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY);
+	empathy_presence_manager_set_state (idle, TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY);
 	priv->ext_away_timeout = 0;
 
 	return FALSE;
 }
 
 static void
-idle_ext_away_stop (EmpathyIdle *idle)
+idle_ext_away_stop (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -162,9 +163,9 @@ idle_ext_away_stop (EmpathyIdle *idle)
 }
 
 static void
-idle_ext_away_start (EmpathyIdle *idle)
+idle_ext_away_start (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -179,9 +180,9 @@ idle_ext_away_start (EmpathyIdle *idle)
 static void
 idle_session_status_changed_cb (DBusGProxy    *gs_proxy,
 				SessionStatus  status,
-				EmpathyIdle   *idle)
+				EmpathyPresenceManager   *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 	gboolean is_idle;
 
 	priv = GET_PRIV (idle);
@@ -224,7 +225,7 @@ idle_session_status_changed_cb (DBusGProxy    *gs_proxy,
 
 		DEBUG ("Going to autoaway. Saved state=%d, new state=%d",
 			priv->away_saved_state, new_state);
-		empathy_idle_set_state (idle, new_state);
+		empathy_presence_manager_set_state (idle, new_state);
 	} else if (!is_idle && priv->is_idle) {
 		/* We are no more idle, restore state */
 
@@ -239,7 +240,7 @@ idle_session_status_changed_cb (DBusGProxy    *gs_proxy,
 			DEBUG ("Restoring state to %d",
 				priv->away_saved_state);
 
-			empathy_idle_set_state (idle,priv->away_saved_state);
+			empathy_presence_manager_set_state (idle,priv->away_saved_state);
 		} else {
 			DEBUG ("Away saved state is unset. This means that we "
 			       "weren't told when the session went idle. "
@@ -255,9 +256,9 @@ idle_session_status_changed_cb (DBusGProxy    *gs_proxy,
 static void
 idle_state_change_cb (EmpathyConnectivity *connectivity,
 		      gboolean new_online,
-		      EmpathyIdle *idle)
+		      EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -268,14 +269,14 @@ idle_state_change_cb (EmpathyConnectivity *connectivity,
 		priv->saved_state = priv->state;
 		g_free (priv->saved_status);
 		priv->saved_status = g_strdup (priv->status);
-		empathy_idle_set_state (idle, TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
+		empathy_presence_manager_set_state (idle, TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
 	}
 	else if (new_online
 			&& priv->saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET) {
 		/* We are now connected */
 		DEBUG ("Reconnected: Restore state %d (%s)",
 				priv->saved_state, priv->saved_status);
-		empathy_idle_set_presence (idle,
+		empathy_presence_manager_set_presence (idle,
 				priv->saved_state,
 				priv->saved_status);
 		priv->saved_state = TP_CONNECTION_PRESENCE_TYPE_UNSET;
@@ -287,7 +288,7 @@ idle_state_change_cb (EmpathyConnectivity *connectivity,
 static void
 idle_finalize (GObject *object)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (object);
 
@@ -313,7 +314,7 @@ idle_finalize (GObject *object)
 	g_hash_table_destroy (priv->connect_times);
 	priv->connect_times = NULL;
 
-	idle_ext_away_stop (EMPATHY_IDLE (object));
+	idle_ext_away_stop (EMPATHY_PRESENCE_MANAGER (object));
 }
 
 static GObject *
@@ -326,10 +327,10 @@ idle_constructor (GType type,
 	if (idle_singleton) {
 		retval = g_object_ref (idle_singleton);
 	} else {
-		retval = G_OBJECT_CLASS (empathy_idle_parent_class)->constructor
+		retval = G_OBJECT_CLASS (empathy_presence_manager_parent_class)->constructor
 			(type, n_props, props);
 
-		idle_singleton = EMPATHY_IDLE (retval);
+		idle_singleton = EMPATHY_PRESENCE_MANAGER (retval);
 		g_object_add_weak_pointer (retval, (gpointer) &idle_singleton);
 	}
 
@@ -337,9 +338,9 @@ idle_constructor (GType type,
 }
 
 static const gchar *
-empathy_idle_get_status (EmpathyIdle *idle)
+empathy_presence_manager_get_status (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -360,21 +361,21 @@ idle_get_property (GObject    *object,
 		   GValue     *value,
 		   GParamSpec *pspec)
 {
-	EmpathyIdlePriv *priv;
-	EmpathyIdle     *idle;
+	EmpathyPresenceManagerPriv *priv;
+	EmpathyPresenceManager     *idle;
 
 	priv = GET_PRIV (object);
-	idle = EMPATHY_IDLE (object);
+	idle = EMPATHY_PRESENCE_MANAGER (object);
 
 	switch (param_id) {
 	case PROP_STATE:
-		g_value_set_enum (value, empathy_idle_get_state (idle));
+		g_value_set_enum (value, empathy_presence_manager_get_state (idle));
 		break;
 	case PROP_STATUS:
-		g_value_set_string (value, empathy_idle_get_status (idle));
+		g_value_set_string (value, empathy_presence_manager_get_status (idle));
 		break;
 	case PROP_AUTO_AWAY:
-		g_value_set_boolean (value, empathy_idle_get_auto_away (idle));
+		g_value_set_boolean (value, empathy_presence_manager_get_auto_away (idle));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -388,21 +389,21 @@ idle_set_property (GObject      *object,
 		   const GValue *value,
 		   GParamSpec   *pspec)
 {
-	EmpathyIdlePriv *priv;
-	EmpathyIdle     *idle;
+	EmpathyPresenceManagerPriv *priv;
+	EmpathyPresenceManager     *idle;
 
 	priv = GET_PRIV (object);
-	idle = EMPATHY_IDLE (object);
+	idle = EMPATHY_PRESENCE_MANAGER (object);
 
 	switch (param_id) {
 	case PROP_STATE:
-		empathy_idle_set_state (idle, g_value_get_enum (value));
+		empathy_presence_manager_set_state (idle, g_value_get_enum (value));
 		break;
 	case PROP_STATUS:
-		empathy_idle_set_status (idle, g_value_get_string (value));
+		empathy_presence_manager_set_status (idle, g_value_get_string (value));
 		break;
 	case PROP_AUTO_AWAY:
-		empathy_idle_set_auto_away (idle, g_value_get_boolean (value));
+		empathy_presence_manager_set_auto_away (idle, g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -411,7 +412,7 @@ idle_set_property (GObject      *object,
 }
 
 static void
-empathy_idle_class_init (EmpathyIdleClass *klass)
+empathy_presence_manager_class_init (EmpathyPresenceManagerClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
@@ -444,7 +445,7 @@ empathy_idle_class_init (EmpathyIdleClass *klass)
 								FALSE,
 								G_PARAM_READWRITE));
 
-	g_type_class_add_private (object_class, sizeof (EmpathyIdlePriv));
+	g_type_class_add_private (object_class, sizeof (EmpathyPresenceManagerPriv));
 }
 
 static void
@@ -456,8 +457,8 @@ account_status_changed_cb (TpAccount  *account,
 			   GHashTable *details,
 			   gpointer    user_data)
 {
-	EmpathyIdle *idle = EMPATHY_IDLE (user_data);
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManager *idle = EMPATHY_PRESENCE_MANAGER (user_data);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 	GTimeVal val;
 
 	if (new_status == TP_CONNECTION_STATUS_CONNECTED) {
@@ -474,9 +475,9 @@ account_manager_ready_cb (GObject *source_object,
 			  GAsyncResult *result,
 			  gpointer user_data)
 {
-	EmpathyIdle *idle = user_data;
+	EmpathyPresenceManager *idle = user_data;
 	TpAccountManager *account_manager = TP_ACCOUNT_MANAGER (source_object);
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 	TpConnectionPresenceType state;
 	gchar *status, *status_message;
 	GList *accounts, *l;
@@ -514,10 +515,10 @@ account_manager_ready_cb (GObject *source_object,
 }
 
 static void
-empathy_idle_init (EmpathyIdle *idle)
+empathy_presence_manager_init (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (idle,
-		EMPATHY_TYPE_IDLE, EmpathyIdlePriv);
+	EmpathyPresenceManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (idle,
+		EMPATHY_TYPE_PRESENCE_MANAGER, EmpathyPresenceManagerPriv);
 	TpDBusDaemon *dbus;
 
 	idle->priv = priv;
@@ -558,16 +559,16 @@ empathy_idle_init (EmpathyIdle *idle)
 	priv->connect_times = g_hash_table_new (g_direct_hash, g_direct_equal);
 }
 
-EmpathyIdle *
-empathy_idle_dup_singleton (void)
+EmpathyPresenceManager *
+empathy_presence_manager_dup_singleton (void)
 {
-	return g_object_new (EMPATHY_TYPE_IDLE, NULL);
+	return g_object_new (EMPATHY_TYPE_PRESENCE_MANAGER, NULL);
 }
 
 TpConnectionPresenceType
-empathy_idle_get_state (EmpathyIdle *idle)
+empathy_presence_manager_get_state (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
@@ -579,33 +580,33 @@ empathy_idle_get_state (EmpathyIdle *idle)
 }
 
 void
-empathy_idle_set_state (EmpathyIdle *idle,
+empathy_presence_manager_set_state (EmpathyPresenceManager *idle,
 			TpConnectionPresenceType   state)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
-	empathy_idle_set_presence (idle, state, priv->status);
+	empathy_presence_manager_set_presence (idle, state, priv->status);
 }
 
 void
-empathy_idle_set_status (EmpathyIdle *idle,
+empathy_presence_manager_set_status (EmpathyPresenceManager *idle,
 			 const gchar *status)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 
 	priv = GET_PRIV (idle);
 
-	empathy_idle_set_presence (idle, priv->state, status);
+	empathy_presence_manager_set_presence (idle, priv->state, status);
 }
 
 static void
-empathy_idle_do_set_presence (EmpathyIdle *idle,
+empathy_presence_manager_do_set_presence (EmpathyPresenceManager *idle,
 			   TpConnectionPresenceType status_type,
 			   const gchar *status_message)
 {
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 	const gchar *status;
 
 	g_assert (status_type > 0 && status_type < NUM_TP_CONNECTION_PRESENCE_TYPES);
@@ -616,7 +617,7 @@ empathy_idle_do_set_presence (EmpathyIdle *idle,
 
 	/* We possibly should be sure that the account manager is prepared, but
 	 * sometimes this isn't possible, like when exiting. In other words,
-	 * we need a callback to empathy_idle_set_presence to be sure the
+	 * we need a callback to empathy_presence_manager_set_presence to be sure the
 	 * presence is set on all accounts successfully.
 	 * However, in practice, this is fine as we've already prepared the
 	 * account manager here in _init. */
@@ -625,11 +626,11 @@ empathy_idle_do_set_presence (EmpathyIdle *idle,
 }
 
 void
-empathy_idle_set_presence (EmpathyIdle *idle,
+empathy_presence_manager_set_presence (EmpathyPresenceManager *idle,
 			   TpConnectionPresenceType   state,
 			   const gchar *status)
 {
-	EmpathyIdlePriv *priv;
+	EmpathyPresenceManagerPriv *priv;
 	const gchar     *default_status;
 
 	priv = GET_PRIV (idle);
@@ -661,22 +662,22 @@ empathy_idle_set_presence (EmpathyIdle *idle,
 		return;
 	}
 
-	empathy_idle_do_set_presence (idle, state, status);
+	empathy_presence_manager_do_set_presence (idle, state, status);
 }
 
 gboolean
-empathy_idle_get_auto_away (EmpathyIdle *idle)
+empathy_presence_manager_get_auto_away (EmpathyPresenceManager *idle)
 {
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 
 	return priv->auto_away;
 }
 
 void
-empathy_idle_set_auto_away (EmpathyIdle *idle,
+empathy_presence_manager_set_auto_away (EmpathyPresenceManager *idle,
 			    gboolean     auto_away)
 {
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 
 	priv->auto_away = auto_away;
 
@@ -684,11 +685,11 @@ empathy_idle_set_auto_away (EmpathyIdle *idle,
 }
 
 TpConnectionPresenceType
-empathy_idle_get_requested_presence (EmpathyIdle *idle,
+empathy_presence_manager_get_requested_presence (EmpathyPresenceManager *idle,
     gchar **status,
     gchar **status_message)
 {
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 
 	if (status != NULL) {
 		*status = g_strdup (presence_type_to_status[priv->requested_presence_type]);
@@ -701,14 +702,14 @@ empathy_idle_get_requested_presence (EmpathyIdle *idle,
 	return priv->requested_presence_type;
 }
 
-/* This function returns %TRUE if EmpathyIdle considers the account
+/* This function returns %TRUE if EmpathyPresenceManager considers the account
  * @account as having just connected recently. Otherwise, it returns
  * %FALSE. In doubt, %FALSE is returned. */
 gboolean
-empathy_idle_account_is_just_connected (EmpathyIdle *idle,
+empathy_presence_manager_account_is_just_connected (EmpathyPresenceManager *idle,
 					TpAccount *account)
 {
-	EmpathyIdlePriv *priv = GET_PRIV (idle);
+	EmpathyPresenceManagerPriv *priv = GET_PRIV (idle);
 	GTimeVal val;
 	gpointer ptr;
 	glong t;

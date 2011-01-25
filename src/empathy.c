@@ -46,7 +46,7 @@
 
 #include <telepathy-logger/log-manager.h>
 
-#include <libempathy/empathy-idle.h>
+#include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-account-settings.h>
@@ -114,7 +114,7 @@ struct _EmpathyApp
   TplLogManager *log_manager;
   EmpathyChatroomManager *chatroom_manager;
   EmpathyFTFactory  *ft_factory;
-  EmpathyIdle *idle;
+  EmpathyPresenceManager *presence_mgr;
   EmpathyConnectivity *connectivity;
   GSettings *gsettings;
   EmpathyNotificationsApprover *notifications_approver;
@@ -136,16 +136,17 @@ empathy_app_dispose (GObject *object)
   void (*dispose) (GObject *) =
     G_OBJECT_CLASS (empathy_app_parent_class)->dispose;
 
-  if (self->idle != NULL)
+  if (self->presence_mgr != NULL)
     {
-      empathy_idle_set_state (self->idle, TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
+      empathy_presence_manager_set_state (self->presence_mgr,
+          TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
     }
 
 #ifdef ENABLE_DEBUG
   tp_clear_object (&self->debug_sender);
 #endif
 
-  tp_clear_object (&self->idle);
+  tp_clear_object (&self->presence_mgr);
   tp_clear_object (&self->connectivity);
   tp_clear_object (&self->icon);
   tp_clear_object (&self->account_manager);
@@ -520,7 +521,7 @@ account_manager_ready_cb (GObject *source_object,
           (presence, TP_CONNECTION_PRESENCE_TYPE_OFFLINE)
             <= 0)
       /* if current state is Offline, then put it online */
-      empathy_idle_set_state (self->idle,
+      empathy_presence_manager_set_state (self->presence_mgr,
           TP_CONNECTION_PRESENCE_TYPE_AVAILABLE);
 
   /* Pop up the accounts dialog if we don't have any account */
@@ -612,13 +613,13 @@ chatroom_manager_ready_cb (EmpathyChatroomManager *chatroom_manager,
 }
 
 static void
-empathy_idle_set_auto_away_cb (GSettings *gsettings,
+empathy_presence_manager_set_auto_away_cb (GSettings *gsettings,
 				const gchar *key,
 				gpointer user_data)
 {
-	EmpathyIdle *idle = user_data;
+	EmpathyPresenceManager *presence_mgr = user_data;
 
-	empathy_idle_set_auto_away (idle,
+	empathy_presence_manager_set_auto_away (presence_mgr,
       g_settings_get_boolean (gsettings, key));
 }
 
@@ -643,16 +644,17 @@ empathy_app_constructed (GObject *object)
   notify_init (_(PACKAGE_NAME));
 
   /* Setting up Idle */
-  self->idle = empathy_idle_dup_singleton ();
+  self->presence_mgr = empathy_presence_manager_dup_singleton ();
 
   self->gsettings = g_settings_new (EMPATHY_PREFS_SCHEMA);
   autoaway = g_settings_get_boolean (self->gsettings, EMPATHY_PREFS_AUTOAWAY);
 
   g_signal_connect (self->gsettings,
       "changed::" EMPATHY_PREFS_AUTOAWAY,
-      G_CALLBACK (empathy_idle_set_auto_away_cb), self->idle);
+      G_CALLBACK (empathy_presence_manager_set_auto_away_cb),
+      self->presence_mgr);
 
-  empathy_idle_set_auto_away (self->idle, autoaway);
+  empathy_presence_manager_set_auto_away (self->presence_mgr, autoaway);
 
   /* Setting up Connectivity */
   self->connectivity = empathy_connectivity_dup_singleton ();

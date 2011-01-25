@@ -31,7 +31,7 @@
 #include "empathy-connection-managers.h"
 #include "empathy-keyring.h"
 #include "empathy-utils.h"
-#include "empathy-idle.h"
+#include "empathy-presence-manager.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_ACCOUNT
 #include <libempathy/empathy-debug.h>
@@ -1499,13 +1499,14 @@ empathy_account_settings_do_create_account (EmpathyAccountSettings *settings)
   TpConnectionPresenceType type;
   gchar *status;
   gchar *message;
-  EmpathyIdle *idle;
+  EmpathyPresenceManager *presence_mgr;
 
   properties = tp_asv_new (NULL, NULL);
 
-  idle = empathy_idle_dup_singleton ();
-  type = empathy_idle_get_requested_presence (idle, &status, &message);
-  g_object_unref (idle);
+  presence_mgr = empathy_presence_manager_dup_singleton ();
+  type = empathy_presence_manager_get_requested_presence (presence_mgr, &status,
+      &message);
+  g_object_unref (presence_mgr);
 
   if (type != TP_CONNECTION_PRESENCE_TYPE_UNSET)
     {

@@ -50,7 +50,6 @@
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-dispatcher.h>
-#include <libempathy/empathy-idle.h>
 #include <libempathy/empathy-ft-factory.h>
 
 void

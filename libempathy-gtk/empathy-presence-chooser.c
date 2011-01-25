@@ -37,7 +37,7 @@
 #include <telepathy-glib/util.h>
 
 #include <libempathy/empathy-connectivity.h>
-#include <libempathy/empathy-idle.h>
+#include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-status-presets.h>
 
@@ -99,7 +99,7 @@ typedef enum  {
 } PresenceChooserEntryType;
 
 typedef struct {
-	EmpathyIdle *idle;
+	EmpathyPresenceManager *presence_mgr;
 	EmpathyConnectivity *connectivity;
 
 	gboolean     editing_status;
@@ -433,7 +433,7 @@ mc_set_custom_state (EmpathyPresenceChooser *self)
 
 	DEBUG ("Sending state to MC-> %d (%s)", priv->state, status);
 
-	empathy_idle_set_presence (priv->idle, priv->state, status);
+	empathy_presence_manager_set_presence (priv->presence_mgr, priv->state, status);
 }
 
 static void
@@ -664,7 +664,7 @@ presence_chooser_changed_cb (GtkComboBox *self, gpointer user_data)
 				    COL_STATUS_TEXT, &status,
 				    -1);
 
-		empathy_idle_set_presence (priv->idle, priv->state, status);
+		empathy_presence_manager_set_presence (priv->presence_mgr, priv->state, status);
 
 		g_free (status);
 	}
@@ -922,7 +922,7 @@ presence_chooser_constructed (GObject *object)
 			G_CALLBACK (presence_chooser_entry_focus_out_cb),
 			chooser);
 
-	priv->idle = empathy_idle_dup_singleton ();
+	priv->presence_mgr = empathy_presence_manager_dup_singleton ();
 
 	priv->account_manager = tp_account_manager_dup ();
 	g_signal_connect_swapped (priv->account_manager,
@@ -970,10 +970,10 @@ presence_chooser_finalize (GObject *object)
 	if (priv->account_manager != NULL)
 		g_object_unref (priv->account_manager);
 
-	g_signal_handlers_disconnect_by_func (priv->idle,
+	g_signal_handlers_disconnect_by_func (priv->presence_mgr,
 					      presence_chooser_presence_changed_cb,
 					      object);
-	g_object_unref (priv->idle);
+	g_object_unref (priv->presence_mgr);
 
 	g_object_unref (priv->connectivity);
 	if (priv->not_favorite_pixbuf != NULL)
@@ -1197,11 +1197,11 @@ static void
 presence_chooser_set_state (TpConnectionPresenceType state,
 			    const gchar *status)
 {
-	EmpathyIdle *idle;
+	EmpathyPresenceManager *presence_mgr;
 
-	idle = empathy_idle_dup_singleton ();
-	empathy_idle_set_presence (idle, state, status);
-	g_object_unref (idle);
+	presence_mgr = empathy_presence_manager_dup_singleton ();
+	empathy_presence_manager_set_presence (presence_mgr, state, status);
+	g_object_unref (presence_mgr);
 }
 
 static void
