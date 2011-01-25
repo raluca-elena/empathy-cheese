@@ -274,33 +274,41 @@ state_change_cb (EmpathyConnectivity *connectivity,
 }
 
 static void
+presence_manager_dispose (GObject *object)
+{
+  EmpathyPresenceManager *self = (EmpathyPresenceManager *) object;
+
+  tp_clear_object (&self->priv->gs_proxy);
+
+  if (self->priv->state_change_signal_id != 0)
+    {
+      g_signal_handler_disconnect (self->priv->connectivity,
+          self->priv->state_change_signal_id);
+      self->priv->state_change_signal_id = 0;
+    }
+
+  if (self->priv->manager != NULL)
+    {
+      g_signal_handler_disconnect (self->priv->manager,
+        self->priv->most_available_presence_changed_id);
+      tp_clear_object (&self->priv->manager);
+    }
+
+  tp_clear_object (&self->priv->connectivity);
+  tp_clear_pointer (&self->priv->connect_times, g_hash_table_unref);
+
+  next_away_stop (EMPATHY_PRESENCE_MANAGER (object));
+
+  G_OBJECT_CLASS (empathy_presence_manager_parent_class)->dispose (object);
+}
+
+static void
 presence_manager_finalize (GObject *object)
 {
   EmpathyPresenceManager *self = (EmpathyPresenceManager *) object;
 
   g_free (self->priv->status);
   g_free (self->priv->requested_status_message);
-
-  if (self->priv->gs_proxy)
-    g_object_unref (self->priv->gs_proxy);
-
-  g_signal_handler_disconnect (self->priv->connectivity,
-      self->priv->state_change_signal_id);
-  self->priv->state_change_signal_id = 0;
-
-  if (self->priv->manager != NULL)
-    {
-      g_signal_handler_disconnect (self->priv->manager,
-        self->priv->most_available_presence_changed_id);
-      g_object_unref (self->priv->manager);
-    }
-
-  g_object_unref (self->priv->connectivity);
-
-  g_hash_table_destroy (self->priv->connect_times);
-  self->priv->connect_times = NULL;
-
-  next_away_stop (EMPATHY_PRESENCE_MANAGER (object));
 
   G_OBJECT_CLASS (empathy_presence_manager_parent_class)->finalize (object);
 }
@@ -398,6 +406,7 @@ empathy_presence_manager_class_init (EmpathyPresenceManagerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->dispose = presence_manager_dispose;
   object_class->finalize = presence_manager_finalize;
   object_class->constructor = presence_manager_constructor;
   object_class->get_property = presence_manager_get_property;
