@@ -48,7 +48,6 @@ struct _EmpathyPresenceManagerPrivate
 {
   DBusGProxy *gs_proxy;
   EmpathyConnectivity *connectivity;
-  gulong state_change_signal_id;
 
   gboolean ready;
 
@@ -64,7 +63,6 @@ struct _EmpathyPresenceManagerPrivate
   guint ext_away_timeout;
 
   TpAccountManager *manager;
-  gulong most_available_presence_changed_id;
 
   /* pointer to a TpAccount --> glong of time of connection */
   GHashTable *connect_times;
@@ -279,20 +277,7 @@ presence_manager_dispose (GObject *object)
   EmpathyPresenceManager *self = (EmpathyPresenceManager *) object;
 
   tp_clear_object (&self->priv->gs_proxy);
-
-  if (self->priv->state_change_signal_id != 0)
-    {
-      g_signal_handler_disconnect (self->priv->connectivity,
-          self->priv->state_change_signal_id);
-      self->priv->state_change_signal_id = 0;
-    }
-
-  if (self->priv->manager != NULL)
-    {
-      g_signal_handler_disconnect (self->priv->manager,
-        self->priv->most_available_presence_changed_id);
-      tp_clear_object (&self->priv->manager);
-    }
+  tp_clear_object (&self->priv->manager);
 
   tp_clear_object (&self->priv->connectivity);
   tp_clear_pointer (&self->priv->connect_times, g_hash_table_unref);
@@ -518,10 +503,9 @@ empathy_presence_manager_init (EmpathyPresenceManager *self)
   tp_account_manager_prepare_async (self->priv->manager, NULL,
       account_manager_ready_cb, self);
 
-  self->priv->most_available_presence_changed_id = g_signal_connect (
-      self->priv->manager,
+  tp_g_signal_connect_object (self->priv->manager,
       "most-available-presence-changed",
-      G_CALLBACK (most_available_presence_changed), self);
+      G_CALLBACK (most_available_presence_changed), self, 0);
 
   dbus = tp_dbus_daemon_dup (NULL);
 
@@ -547,9 +531,9 @@ empathy_presence_manager_init (EmpathyPresenceManager *self)
   g_object_unref (dbus);
 
   self->priv->connectivity = empathy_connectivity_dup_singleton ();
-  self->priv->state_change_signal_id = g_signal_connect (
-      self->priv->connectivity,
-      "state-change", G_CALLBACK (state_change_cb), self);
+
+  tp_g_signal_connect_object (self->priv->connectivity,
+      "state-change", G_CALLBACK (state_change_cb), self, 0);
 
   self->priv->connect_times = g_hash_table_new (g_direct_hash, g_direct_equal);
 }
