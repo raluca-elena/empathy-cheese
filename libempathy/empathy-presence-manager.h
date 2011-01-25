@@ -37,10 +37,11 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyPresenceManager      EmpathyPresenceManager;
 typedef struct _EmpathyPresenceManagerClass EmpathyPresenceManagerClass;
+typedef struct _EmpathyPresenceManagerPrivate EmpathyPresenceManagerPrivate;
 
 struct _EmpathyPresenceManager {
   GObject parent;
-  gpointer priv;
+  EmpathyPresenceManagerPrivate *priv;
 };
 
 struct _EmpathyPresenceManagerClass

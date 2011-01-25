@@ -44,9 +44,7 @@
  * for. */
 #define ACCOUNT_IS_JUST_CONNECTED_SECONDS 10
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyPresenceManager)
-
-typedef struct
+struct _EmpathyPresenceManagerPrivate
 {
   DBusGProxy *gs_proxy;
   EmpathyConnectivity *connectivity;
@@ -73,8 +71,7 @@ typedef struct
 
   TpConnectionPresenceType requested_presence_type;
   gchar *requested_status_message;
-
-} EmpathyPresenceManagerPriv;
+};
 
 typedef enum
 {
@@ -117,10 +114,6 @@ most_available_presence_changed (TpAccountManager *manager,
     gchar *status_message,
     EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
   if (state == TP_CONNECTION_PRESENCE_TYPE_UNSET)
     /* Assume our presence is offline if MC reports UNSET */
     state = TP_CONNECTION_PRESENCE_TYPE_OFFLINE;
@@ -128,12 +121,12 @@ most_available_presence_changed (TpAccountManager *manager,
   DEBUG ("Presence changed to '%s' (%d) \"%s\"", status, state,
     status_message);
 
-  g_free (priv->status);
-  priv->state = state;
+  g_free (self->priv->status);
+  self->priv->state = state;
   if (EMP_STR_EMPTY (status_message))
-    priv->status = NULL;
+    self->priv->status = NULL;
   else
-    priv->status = g_strdup (status_message);
+    self->priv->status = g_strdup (status_message);
 
   g_object_notify (G_OBJECT (self), "state");
   g_object_notify (G_OBJECT (self), "status");
@@ -142,14 +135,10 @@ most_available_presence_changed (TpAccountManager *manager,
 static gboolean
 ext_away_cb (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
   DEBUG ("Going to extended autoaway");
   empathy_presence_manager_set_state (self,
       TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY);
-  priv->ext_away_timeout = 0;
+  self->priv->ext_away_timeout = 0;
 
   return FALSE;
 }
@@ -157,28 +146,20 @@ ext_away_cb (EmpathyPresenceManager *self)
 static void
 next_away_stop (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  if (priv->ext_away_timeout)
+  if (self->priv->ext_away_timeout)
     {
-      g_source_remove (priv->ext_away_timeout);
-      priv->ext_away_timeout = 0;
+      g_source_remove (self->priv->ext_away_timeout);
+      self->priv->ext_away_timeout = 0;
     }
 }
 
 static void
 ext_away_start (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  if (priv->ext_away_timeout != 0)
+  if (self->priv->ext_away_timeout != 0)
     return;
 
-  priv->ext_away_timeout = g_timeout_add_seconds (EXT_AWAY_TIME,
+  self->priv->ext_away_timeout = g_timeout_add_seconds (EXT_AWAY_TIME,
       (GSourceFunc) ext_away_cb, self);
 }
 
@@ -187,52 +168,49 @@ session_status_changed_cb (DBusGProxy *gs_proxy,
     SessionStatus status,
     EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
   gboolean is_idle;
-
-  priv = GET_PRIV (self);
 
   is_idle = (status == SESSION_STATUS_IDLE);
 
   DEBUG ("Session idle state changed, %s -> %s",
-    priv->is_idle ? "yes" : "no",
+    self->priv->is_idle ? "yes" : "no",
     is_idle ? "yes" : "no");
 
-  if (!priv->auto_away ||
-      (priv->saved_state == TP_CONNECTION_PRESENCE_TYPE_UNSET &&
-       (priv->state <= TP_CONNECTION_PRESENCE_TYPE_OFFLINE ||
-        priv->state == TP_CONNECTION_PRESENCE_TYPE_HIDDEN)))
+  if (!self->priv->auto_away ||
+      (self->priv->saved_state == TP_CONNECTION_PRESENCE_TYPE_UNSET &&
+       (self->priv->state <= TP_CONNECTION_PRESENCE_TYPE_OFFLINE ||
+        self->priv->state == TP_CONNECTION_PRESENCE_TYPE_HIDDEN)))
     {
       /* We don't want to go auto away OR we explicitely asked to be
        * offline, nothing to do here */
-      priv->is_idle = is_idle;
+      self->priv->is_idle = is_idle;
       return;
     }
 
-  if (is_idle && !priv->is_idle)
+  if (is_idle && !self->priv->is_idle)
     {
       TpConnectionPresenceType new_state;
       /* We are now idle */
 
       ext_away_start (self);
 
-      if (priv->saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
+      if (self->priv->saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
         /* We are disconnected, when coming back from away
          * we want to restore the presence before the
          * disconnection. */
-        priv->away_saved_state = priv->saved_state;
+        self->priv->away_saved_state = self->priv->saved_state;
       else
-        priv->away_saved_state = priv->state;
+        self->priv->away_saved_state = self->priv->state;
 
     new_state = TP_CONNECTION_PRESENCE_TYPE_AWAY;
-    if (priv->state == TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY)
+    if (self->priv->state == TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY)
       new_state = TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY;
 
     DEBUG ("Going to autoaway. Saved state=%d, new state=%d",
-      priv->away_saved_state, new_state);
+      self->priv->away_saved_state, new_state);
     empathy_presence_manager_set_state (self, new_state);
   }
-  else if (!is_idle && priv->is_idle)
+  else if (!is_idle && self->priv->is_idle)
     {
       /* We are no more idle, restore state */
 
@@ -243,12 +221,13 @@ session_status_changed_cb (DBusGProxy *gs_proxy,
        * didn't notify us of the state change to idle, and as a
        * result, we couldn't save the current state at that time.
        */
-      if (priv->away_saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
+      if (self->priv->away_saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
         {
           DEBUG ("Restoring state to %d",
-            priv->away_saved_state);
+            self->priv->away_saved_state);
 
-          empathy_presence_manager_set_state (self, priv->away_saved_state);
+          empathy_presence_manager_set_state (self,
+              self->priv->away_saved_state);
         }
       else
         {
@@ -257,10 +236,10 @@ session_status_changed_cb (DBusGProxy *gs_proxy,
                  "As a result, I'm not trying to set presence");
         }
 
-      priv->away_saved_state = TP_CONNECTION_PRESENCE_TYPE_UNSET;
+      self->priv->away_saved_state = TP_CONNECTION_PRESENCE_TYPE_UNSET;
     }
 
-  priv->is_idle = is_idle;
+  self->priv->is_idle = is_idle;
 }
 
 static void
@@ -268,64 +247,58 @@ state_change_cb (EmpathyConnectivity *connectivity,
     gboolean new_online,
     EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
   if (!new_online)
     {
       /* We are no longer connected */
       DEBUG ("Disconnected: Save state %d (%s)",
-          priv->state, priv->status);
-      priv->saved_state = priv->state;
-      g_free (priv->saved_status);
-      priv->saved_status = g_strdup (priv->status);
+          self->priv->state, self->priv->status);
+      self->priv->saved_state = self->priv->state;
+      g_free (self->priv->saved_status);
+      self->priv->saved_status = g_strdup (self->priv->status);
       empathy_presence_manager_set_state (self,
           TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
     }
   else if (new_online
-      && priv->saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
+      && self->priv->saved_state != TP_CONNECTION_PRESENCE_TYPE_UNSET)
     {
       /* We are now connected */
       DEBUG ("Reconnected: Restore state %d (%s)",
-          priv->saved_state, priv->saved_status);
+          self->priv->saved_state, self->priv->saved_status);
       empathy_presence_manager_set_presence (self,
-          priv->saved_state,
-          priv->saved_status);
-      priv->saved_state = TP_CONNECTION_PRESENCE_TYPE_UNSET;
-      g_free (priv->saved_status);
-      priv->saved_status = NULL;
+          self->priv->saved_state,
+          self->priv->saved_status);
+      self->priv->saved_state = TP_CONNECTION_PRESENCE_TYPE_UNSET;
+      g_free (self->priv->saved_status);
+      self->priv->saved_status = NULL;
     }
 }
 
 static void
 presence_manager_finalize (GObject *object)
 {
-  EmpathyPresenceManagerPriv *priv;
+  EmpathyPresenceManager *self = (EmpathyPresenceManager *) object;
 
-  priv = GET_PRIV (object);
+  g_free (self->priv->status);
+  g_free (self->priv->requested_status_message);
 
-  g_free (priv->status);
-  g_free (priv->requested_status_message);
+  if (self->priv->gs_proxy)
+    g_object_unref (self->priv->gs_proxy);
 
-  if (priv->gs_proxy)
-    g_object_unref (priv->gs_proxy);
+  g_signal_handler_disconnect (self->priv->connectivity,
+      self->priv->state_change_signal_id);
+  self->priv->state_change_signal_id = 0;
 
-  g_signal_handler_disconnect (priv->connectivity,
-             priv->state_change_signal_id);
-  priv->state_change_signal_id = 0;
-
-  if (priv->manager != NULL)
+  if (self->priv->manager != NULL)
     {
-      g_signal_handler_disconnect (priv->manager,
-        priv->most_available_presence_changed_id);
-      g_object_unref (priv->manager);
+      g_signal_handler_disconnect (self->priv->manager,
+        self->priv->most_available_presence_changed_id);
+      g_object_unref (self->priv->manager);
     }
 
-  g_object_unref (priv->connectivity);
+  g_object_unref (self->priv->connectivity);
 
-  g_hash_table_destroy (priv->connect_times);
-  priv->connect_times = NULL;
+  g_hash_table_destroy (self->priv->connect_times);
+  self->priv->connect_times = NULL;
 
   next_away_stop (EMPATHY_PRESENCE_MANAGER (object));
 }
@@ -356,18 +329,14 @@ presence_manager_constructor (GType type,
 static const gchar *
 empathy_presence_manager_get_status (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  if (G_UNLIKELY (!priv->ready))
+  if (G_UNLIKELY (!self->priv->ready))
     g_critical (G_STRLOC ": %s called before AccountManager ready",
         G_STRFUNC);
 
-  if (!priv->status)
-    return empathy_presence_get_default_message (priv->state);
+  if (!self->priv->status)
+    return empathy_presence_get_default_message (self->priv->state);
 
-  return priv->status;
+  return self->priv->status;
 }
 
 static void
@@ -376,11 +345,7 @@ presence_manager_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPresenceManagerPriv *priv;
-  EmpathyPresenceManager *self;
-
-  priv = GET_PRIV (object);
-  self = EMPATHY_PRESENCE_MANAGER (object);
+  EmpathyPresenceManager *self = EMPATHY_PRESENCE_MANAGER (object);
 
   switch (param_id)
     {
@@ -406,11 +371,7 @@ presence_manager_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPresenceManagerPriv *priv;
-  EmpathyPresenceManager *self;
-
-  priv = GET_PRIV (object);
-  self = EMPATHY_PRESENCE_MANAGER (object);
+  EmpathyPresenceManager *self = EMPATHY_PRESENCE_MANAGER (object);
 
   switch (param_id)
     {
@@ -460,7 +421,8 @@ empathy_presence_manager_class_init (EmpathyPresenceManagerClass *klass)
          FALSE,
          G_PARAM_READWRITE));
 
-  g_type_class_add_private (object_class, sizeof (EmpathyPresenceManagerPriv));
+  g_type_class_add_private (object_class,
+      sizeof (EmpathyPresenceManagerPrivate));
 }
 
 static void
@@ -473,18 +435,17 @@ account_status_changed_cb (TpAccount  *account,
     gpointer user_data)
 {
   EmpathyPresenceManager *self = EMPATHY_PRESENCE_MANAGER (user_data);
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
   GTimeVal val;
 
   if (new_status == TP_CONNECTION_STATUS_CONNECTED)
     {
       g_get_current_time (&val);
-      g_hash_table_insert (priv->connect_times, account,
+      g_hash_table_insert (self->priv->connect_times, account,
                GINT_TO_POINTER (val.tv_sec));
     }
   else if (new_status == TP_CONNECTION_STATUS_DISCONNECTED)
     {
-      g_hash_table_remove (priv->connect_times, account);
+      g_hash_table_remove (self->priv->connect_times, account);
     }
 }
 
@@ -495,7 +456,6 @@ account_manager_ready_cb (GObject *source_object,
 {
   EmpathyPresenceManager *self = user_data;
   TpAccountManager *account_manager = TP_ACCOUNT_MANAGER (source_object);
-  EmpathyPresenceManagerPriv *priv;
   TpConnectionPresenceType state;
   gchar *status, *status_message;
   GList *accounts, *l;
@@ -505,8 +465,7 @@ account_manager_ready_cb (GObject *source_object,
   if (singleton == NULL)
     return;
 
-  priv = GET_PRIV (self);
-  priv->ready = TRUE;
+  self->priv->ready = TRUE;
 
   if (!tp_account_manager_prepare_finish (account_manager, result, &error))
     {
@@ -515,13 +474,13 @@ account_manager_ready_cb (GObject *source_object,
       return;
     }
 
-  state = tp_account_manager_get_most_available_presence (priv->manager,
+  state = tp_account_manager_get_most_available_presence (self->priv->manager,
     &status, &status_message);
 
   most_available_presence_changed (account_manager, state, status,
     status_message, self);
 
-  accounts = tp_account_manager_get_valid_accounts (priv->manager);
+  accounts = tp_account_manager_get_valid_accounts (self->priv->manager);
   for (l = accounts; l != NULL; l = l->next)
     {
       tp_g_signal_connect_object (l->data, "status-changed",
@@ -536,35 +495,36 @@ account_manager_ready_cb (GObject *source_object,
 static void
 empathy_presence_manager_init (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
-    EMPATHY_TYPE_PRESENCE_MANAGER, EmpathyPresenceManagerPriv);
   TpDBusDaemon *dbus;
 
-  self->priv = priv;
-  priv->is_idle = FALSE;
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EMPATHY_TYPE_PRESENCE_MANAGER, EmpathyPresenceManagerPrivate);
 
-  priv->manager = tp_account_manager_dup ();
+  self->priv->is_idle = FALSE;
 
-  tp_account_manager_prepare_async (priv->manager, NULL,
+  self->priv->manager = tp_account_manager_dup ();
+
+  tp_account_manager_prepare_async (self->priv->manager, NULL,
       account_manager_ready_cb, self);
 
-  priv->most_available_presence_changed_id = g_signal_connect (priv->manager,
-    "most-available-presence-changed",
-    G_CALLBACK (most_available_presence_changed), self);
+  self->priv->most_available_presence_changed_id = g_signal_connect (
+      self->priv->manager,
+      "most-available-presence-changed",
+      G_CALLBACK (most_available_presence_changed), self);
 
   dbus = tp_dbus_daemon_dup (NULL);
 
-  priv->gs_proxy = dbus_g_proxy_new_for_name (
+  self->priv->gs_proxy = dbus_g_proxy_new_for_name (
       tp_proxy_get_dbus_connection (dbus),
       "org.gnome.SessionManager",
       "/org/gnome/SessionManager/Presence",
       "org.gnome.SessionManager.Presence");
 
-  if (priv->gs_proxy)
+  if (self->priv->gs_proxy)
     {
-      dbus_g_proxy_add_signal (priv->gs_proxy, "StatusChanged",
+      dbus_g_proxy_add_signal (self->priv->gs_proxy, "StatusChanged",
           G_TYPE_UINT, G_TYPE_INVALID);
-      dbus_g_proxy_connect_signal (priv->gs_proxy, "StatusChanged",
+      dbus_g_proxy_connect_signal (self->priv->gs_proxy, "StatusChanged",
           G_CALLBACK (session_status_changed_cb),
           self, NULL);
     }
@@ -575,11 +535,12 @@ empathy_presence_manager_init (EmpathyPresenceManager *self)
 
   g_object_unref (dbus);
 
-  priv->connectivity = empathy_connectivity_dup_singleton ();
-  priv->state_change_signal_id = g_signal_connect (priv->connectivity,
+  self->priv->connectivity = empathy_connectivity_dup_singleton ();
+  self->priv->state_change_signal_id = g_signal_connect (
+      self->priv->connectivity,
       "state-change", G_CALLBACK (state_change_cb), self);
 
-  priv->connect_times = g_hash_table_new (g_direct_hash, g_direct_equal);
+  self->priv->connect_times = g_hash_table_new (g_direct_hash, g_direct_equal);
 }
 
 EmpathyPresenceManager *
@@ -591,37 +552,25 @@ empathy_presence_manager_dup_singleton (void)
 TpConnectionPresenceType
 empathy_presence_manager_get_state (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  if (G_UNLIKELY (!priv->ready))
+  if (G_UNLIKELY (!self->priv->ready))
     g_critical (G_STRLOC ": %s called before AccountManager ready",
         G_STRFUNC);
 
-  return priv->state;
+  return self->priv->state;
 }
 
 void
 empathy_presence_manager_set_state (EmpathyPresenceManager *self,
     TpConnectionPresenceType state)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  empathy_presence_manager_set_presence (self, state, priv->status);
+  empathy_presence_manager_set_presence (self, state, self->priv->status);
 }
 
 void
 empathy_presence_manager_set_status (EmpathyPresenceManager *self,
        const gchar *status)
 {
-  EmpathyPresenceManagerPriv *priv;
-
-  priv = GET_PRIV (self);
-
-  empathy_presence_manager_set_presence (self, priv->state, status);
+  empathy_presence_manager_set_presence (self, self->priv->state, status);
 }
 
 static void
@@ -629,7 +578,6 @@ empathy_presence_manager_do_set_presence (EmpathyPresenceManager *self,
     TpConnectionPresenceType status_type,
     const gchar *status_message)
 {
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
   const gchar *status;
 
   g_assert (status_type > 0 && status_type < NUM_TP_CONNECTION_PRESENCE_TYPES);
@@ -644,7 +592,7 @@ empathy_presence_manager_do_set_presence (EmpathyPresenceManager *self,
    * presence is set on all accounts successfully.
    * However, in practice, this is fine as we've already prepared the
    * account manager here in _init. */
-  tp_account_manager_set_all_requested_presences (priv->manager,
+  tp_account_manager_set_all_requested_presences (self->priv->manager,
     status_type, status, status_message);
 }
 
@@ -653,16 +601,13 @@ empathy_presence_manager_set_presence (EmpathyPresenceManager *self,
     TpConnectionPresenceType state,
     const gchar *status)
 {
-  EmpathyPresenceManagerPriv *priv;
   const gchar     *default_status;
-
-  priv = GET_PRIV (self);
 
   DEBUG ("Changing presence to %s (%d)", status, state);
 
-  g_free (priv->requested_status_message);
-  priv->requested_presence_type = state;
-  priv->requested_status_message = g_strdup (status);
+  g_free (self->priv->requested_status_message);
+  self->priv->requested_presence_type = state;
+  self->priv->requested_status_message = g_strdup (status);
 
   /* Do not set translated default messages */
   default_status = empathy_presence_get_default_message (state);
@@ -670,17 +615,17 @@ empathy_presence_manager_set_presence (EmpathyPresenceManager *self,
     status = NULL;
 
   if (state != TP_CONNECTION_PRESENCE_TYPE_OFFLINE &&
-      !empathy_connectivity_is_online (priv->connectivity))
+      !empathy_connectivity_is_online (self->priv->connectivity))
     {
       DEBUG ("Empathy is not online");
 
-      priv->saved_state = state;
-      if (tp_strdiff (priv->status, status))
+      self->priv->saved_state = state;
+      if (tp_strdiff (self->priv->status, status))
         {
-          g_free (priv->saved_status);
-          priv->saved_status = NULL;
+          g_free (self->priv->saved_status);
+          self->priv->saved_status = NULL;
           if (!EMP_STR_EMPTY (status))
-            priv->saved_status = g_strdup (status);
+            self->priv->saved_status = g_strdup (status);
         }
       return;
     }
@@ -691,18 +636,14 @@ empathy_presence_manager_set_presence (EmpathyPresenceManager *self,
 gboolean
 empathy_presence_manager_get_auto_away (EmpathyPresenceManager *self)
 {
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
-
-  return priv->auto_away;
+  return self->priv->auto_away;
 }
 
 void
 empathy_presence_manager_set_auto_away (EmpathyPresenceManager *self,
           gboolean     auto_away)
 {
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
-
-  priv->auto_away = auto_away;
+  self->priv->auto_away = auto_away;
 
   g_object_notify (G_OBJECT (self), "auto-away");
 }
@@ -712,15 +653,14 @@ empathy_presence_manager_get_requested_presence (EmpathyPresenceManager *self,
     gchar **status,
     gchar **status_message)
 {
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
-
   if (status != NULL)
-    *status = g_strdup (presence_type_to_status[priv->requested_presence_type]);
+    *status = g_strdup (presence_type_to_status[
+        self->priv->requested_presence_type]);
 
   if (status_message != NULL)
-    *status_message = g_strdup (priv->requested_status_message);
+    *status_message = g_strdup (self->priv->requested_status_message);
 
-  return priv->requested_presence_type;
+  return self->priv->requested_presence_type;
 }
 
 /* This function returns %TRUE if EmpathyPresenceManager considers the account
@@ -731,7 +671,6 @@ empathy_presence_manager_account_is_just_connected (
     EmpathyPresenceManager *self,
     TpAccount *account)
 {
-  EmpathyPresenceManagerPriv *priv = GET_PRIV (self);
   GTimeVal val;
   gpointer ptr;
   glong t;
@@ -740,7 +679,7 @@ empathy_presence_manager_account_is_just_connected (
       != TP_CONNECTION_STATUS_CONNECTED)
     return FALSE;
 
-  ptr = g_hash_table_lookup (priv->connect_times, account);
+  ptr = g_hash_table_lookup (self->priv->connect_times, account);
 
   if (ptr == NULL)
     return FALSE;
