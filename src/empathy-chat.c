@@ -30,7 +30,7 @@
 
 #include <telepathy-glib/debug-sender.h>
 
-#include <libempathy/empathy-idle.h>
+#include <libempathy/empathy-presence-manager.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-chat-manager.h"
@@ -95,7 +95,7 @@ main (int argc,
   TpDebugSender *debug_sender;
 #endif
   GError *error = NULL;
-  EmpathyIdle *idle;
+  EmpathyPresenceManager *presence_mgr;
   gint retval;
 
   /* Init */
@@ -133,7 +133,7 @@ main (int argc,
 #endif
 
   /* Setting up Idle */
-  idle = empathy_idle_dup_singleton ();
+  presence_mgr = empathy_presence_manager_dup_singleton ();
 
   if (g_getenv ("EMPATHY_PERSIST") != NULL)
     {
@@ -152,7 +152,7 @@ main (int argc,
   retval = g_application_run (G_APPLICATION (app), argc, argv);
 
   g_object_unref (app);
-  g_object_unref (idle);
+  g_object_unref (presence_mgr);
   tp_clear_object (&chat_mgr);
 
 #ifdef ENABLE_DEBUG

@@ -49,7 +49,7 @@
 #include "empathy-contact-manager.h"
 #include "empathy-individual-manager.h"
 #include "empathy-dispatcher.h"
-#include "empathy-idle.h"
+#include "empathy-presence-manager.h"
 #include "empathy-tp-call.h"
 #include "empathy-tp-contact-factory.h"
 
@@ -482,11 +482,11 @@ gboolean
 empathy_check_available_state (void)
 {
 	TpConnectionPresenceType presence;
-	EmpathyIdle *idle;
+	EmpathyPresenceManager *presence_mgr;
 
-	idle = empathy_idle_dup_singleton ();
-	presence = empathy_idle_get_state (idle);
-	g_object_unref (idle);
+	presence_mgr = empathy_presence_manager_dup_singleton ();
+	presence = empathy_presence_manager_get_state (presence_mgr);
+	g_object_unref (presence_mgr);
 
 	if (presence != TP_CONNECTION_PRESENCE_TYPE_AVAILABLE &&
 		presence != TP_CONNECTION_PRESENCE_TYPE_UNSET) {

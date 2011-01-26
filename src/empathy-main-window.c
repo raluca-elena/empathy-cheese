@@ -34,7 +34,6 @@
 #include <folks/folks.h>
 
 #include <libempathy/empathy-contact.h>
-#include <libempathy/empathy-idle.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-chatroom-manager.h>
