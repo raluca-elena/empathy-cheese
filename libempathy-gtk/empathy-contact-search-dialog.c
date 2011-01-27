@@ -1,0 +1,572 @@
+/* -*- Mode: C; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/*
+ * empathy-contact-search-dialog.c
+ *
+ * Copyright (C) 2010-2011 Collabora Ltd.
+ *
+ * The code contained in this file is free software; you can redistribute
+ * it and/or modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either version
+ * 2.1 of the License, or (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this code; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Authors:
+ *     Danielle Madeley <danielle.madeley@collabora.co.uk>
+ *     Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
+ */
+
+#include <glib/gi18n.h>
+
+#include <telepathy-glib/telepathy-glib.h>
+
+#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-tp-contact-factory.h>
+
+#include <libempathy-gtk/empathy-account-chooser.h>
+#include <libempathy-gtk/empathy-cell-renderer-text.h>
+
+#define DEBUG_FLAG EMPATHY_DEBUG_OTHER
+#include <libempathy/empathy-debug.h>
+
+#include "empathy-contact-search-dialog.h"
+
+#define GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), EMPATHY_TYPE_CONTACT_SEARCH_DIALOG, EmpathyContactSearchDialogPrivate))
+
+G_DEFINE_TYPE (EmpathyContactSearchDialog, empathy_contact_search_dialog, GTK_TYPE_DIALOG);
+
+enum
+{
+   NAME_COLUMN,
+   LOGIN_COLUMN,
+   N_COLUMNS
+};
+
+enum {
+   PAGE_SEARCH_RESULTS,
+   PAGE_NO_MATCH
+};
+
+typedef struct _EmpathyContactSearchDialogPrivate EmpathyContactSearchDialogPrivate;
+struct _EmpathyContactSearchDialogPrivate
+{
+  TpContactSearch *searcher;
+  GtkListStore *store;
+
+  GtkWidget *chooser;
+  GtkWidget *notebook;
+  GtkWidget *tree_view;
+  GtkWidget *spinner;
+  GtkWidget *add_button;
+  GtkWidget *find_button;
+  GtkWidget *no_contact_found;
+  GtkWidget *search_entry;
+  /* GtkWidget *server_entry; */
+};
+
+static void
+empathy_contact_search_dialog_dispose (GObject *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+
+  tp_clear_object (&priv->searcher);
+
+  G_OBJECT_CLASS (empathy_contact_search_dialog_parent_class)->dispose (self);
+}
+
+static void
+on_searcher_reset (GObject *source_object,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyContactSearchDialog *self = EMPATHY_CONTACT_SEARCH_DIALOG (user_data);
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  TpContactSearch *searcher = TP_CONTACT_SEARCH (source_object);
+  GError *error = NULL;
+  GHashTable *search;
+  const gchar *search_criteria;
+
+  tp_contact_search_reset_finish (searcher, result, &error);
+  if (error != NULL)
+    {
+      DEBUG ("Failed to reset the TpContactSearch: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  search = g_hash_table_new (g_str_hash, g_str_equal);
+
+  search_criteria = gtk_entry_get_text (GTK_ENTRY (priv->search_entry));
+  g_hash_table_insert (search, "fn", (gpointer) search_criteria);
+
+  gtk_list_store_clear (priv->store);
+  tp_contact_search_start (priv->searcher, search);
+
+  g_hash_table_destroy (search);
+}
+
+static void
+empathy_contact_search_dialog_do_search (EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+
+  tp_contact_search_reset_async (priv->searcher,
+      NULL, /* gtk_entry_get_text (GTK_ENTRY (priv->server_entry)), */
+      0,
+      on_searcher_reset,
+      self);
+}
+
+static void
+on_get_contact_factory_get_from_id_cb (TpConnection *connection,
+    EmpathyContact *contact,
+    const GError *error,
+    gpointer user_data,
+    GObject *object)
+{
+    EmpathyContactManager *manager = empathy_contact_manager_dup_singleton ();
+
+    if (error != NULL)
+      {
+        g_warning ("Error while getting the contact: %s", error->message);
+        return;
+      }
+
+    empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager), contact, "");
+}
+
+static void
+add_selected_contact (EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->tree_view));
+  TpConnection *conn;
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+  gboolean sel;
+  gchar *id;
+
+  conn = empathy_account_chooser_get_connection (EMPATHY_ACCOUNT_CHOOSER (priv->chooser));
+
+  sel = gtk_tree_selection_get_selected (selection, &model, &iter);
+  g_return_if_fail (sel == TRUE);
+
+  gtk_tree_model_get (model, &iter, LOGIN_COLUMN, &id, -1);
+
+  DEBUG ("Requested to add contact: %s", id);
+
+  empathy_tp_contact_factory_get_from_id (conn, id,
+      on_get_contact_factory_get_from_id_cb, NULL,
+      NULL, NULL);
+}
+
+static void
+empathy_contact_search_dialog_response (GtkDialog *self,
+    gint response)
+{
+  switch (response)
+    {
+      case GTK_RESPONSE_APPLY:
+        add_selected_contact (EMPATHY_CONTACT_SEARCH_DIALOG (self));
+        break;
+      default:
+        gtk_widget_destroy (GTK_WIDGET (self));
+        break;
+    }
+}
+
+static void
+empathy_contact_search_dialog_class_init (
+    EmpathyContactSearchDialogClass *klass)
+{
+  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+  GtkDialogClass *dialog_class = GTK_DIALOG_CLASS (klass);
+
+  gobject_class->dispose = empathy_contact_search_dialog_dispose;
+
+  dialog_class->response = empathy_contact_search_dialog_response;
+
+  g_type_class_add_private (gobject_class,
+      sizeof (EmpathyContactSearchDialogPrivate));
+}
+
+static void
+_on_search_state_changed_cb (TpContactSearch *searcher,
+    GParamSpec *pspec,
+    gpointer user_data)
+{
+  EmpathyContactSearchDialog *self = EMPATHY_CONTACT_SEARCH_DIALOG (user_data);
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  TpChannelContactSearchState state;
+
+  g_object_get (searcher, "state", &state, NULL);
+
+  DEBUG ("new search status: %d", state);
+
+  if (state == TP_CHANNEL_CONTACT_SEARCH_STATE_IN_PROGRESS)
+    {
+      gtk_widget_show (priv->spinner);
+      gtk_spinner_start (GTK_SPINNER (priv->spinner));
+    }
+  else
+    {
+      gtk_widget_hide (priv->spinner);
+      gtk_spinner_stop (GTK_SPINNER (priv->spinner));
+    }
+
+  if (state == TP_CHANNEL_CONTACT_SEARCH_STATE_NOT_STARTED
+      || state == TP_CHANNEL_CONTACT_SEARCH_STATE_IN_PROGRESS)
+    {
+      gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook),
+          PAGE_SEARCH_RESULTS);
+    }
+  else
+    {
+      GtkTreeIter help_iter;
+
+      if (!gtk_tree_model_get_iter_first (GTK_TREE_MODEL (priv->store),
+          &help_iter))
+        {
+          /* No results found, display a helpful message. */
+          gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook),
+              PAGE_NO_MATCH);
+        }
+    }
+}
+
+static void
+_search_results_received (TpContactSearch *searcher,
+    GList *results,
+    EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  const TpContactInfoField *name;
+  GList *l;
+
+  for (l = results; l != NULL; l = l->next)
+    {
+      TpContactSearchResult *result = l->data;
+      GtkTreeIter iter;
+
+      gtk_list_store_append (priv->store, &iter);
+
+      name = tp_contact_search_result_get_field (result, "fn");
+
+      gtk_list_store_set (priv->store, &iter,
+          NAME_COLUMN, name ? name->field_value[0] : NULL,
+          LOGIN_COLUMN, tp_contact_search_result_get_identifier (result),
+          -1);
+    }
+}
+
+static void
+on_searcher_created (GObject *source_object,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyContactSearchDialog *self;
+  EmpathyContactSearchDialogPrivate *priv;
+  GError *error = NULL;
+
+  if (EMPATHY_IS_CONTACT_SEARCH_DIALOG (user_data) == FALSE)
+    /* This happens if the dialog is closed before the callback is called */
+    return;
+
+  self = EMPATHY_CONTACT_SEARCH_DIALOG (user_data);
+  priv = GET_PRIVATE (self);
+
+  priv->searcher = tp_contact_search_new_finish (result, &error);
+  if (error != NULL)
+    {
+      DEBUG ("Failed to create a TpContactSearch: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  g_signal_connect (priv->searcher, "search-results-received",
+      G_CALLBACK (_search_results_received), self);
+  g_signal_connect (priv->searcher, "notify::state",
+      G_CALLBACK (_on_search_state_changed_cb), self);
+
+  gtk_widget_set_sensitive (priv->find_button, TRUE);
+}
+
+static void
+on_selection_changed (GtkTreeSelection *selection,
+    gpointer user_data)
+{
+  EmpathyContactSearchDialog *self;
+  EmpathyContactSearchDialogPrivate *priv;
+  gboolean sel;
+
+  self = EMPATHY_CONTACT_SEARCH_DIALOG (user_data);
+  priv = GET_PRIVATE (self);
+  sel = gtk_tree_selection_get_selected (selection, NULL, NULL);
+
+  gtk_widget_set_sensitive (priv->add_button, sel);
+}
+
+
+static void
+_account_chooser_changed (EmpathyAccountChooser *chooser,
+    EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  TpAccount *account = empathy_account_chooser_get_account (chooser);
+  TpConnection *conn = empathy_account_chooser_get_connection (chooser);
+  TpCapabilities *caps = tp_connection_get_capabilities (conn);
+  gboolean can_cs, can_set_limit, can_set_server;
+
+  can_cs = tp_capabilities_supports_contact_search (caps,
+      &can_set_limit, &can_set_server);
+  DEBUG ("The server supports cs|limit|server: %s|%s|%s",
+      can_cs ? "yes" : "no",
+      can_set_limit ? "yes" : "no",
+      can_set_server ? "yes" : "no");
+
+  /* gtk_widget_set_sensitive (priv->server_entry, can_set_server); */
+  gtk_widget_set_sensitive (priv->find_button, FALSE);
+
+  DEBUG ("New account is %s", tp_proxy_get_object_path (account));
+
+  tp_clear_object (&priv->searcher);
+  tp_contact_search_new_async (account,
+      NULL, /* gtk_entry_get_text (GTK_ENTRY (priv->server_entry)), */
+      0,
+      on_searcher_created, self);
+}
+
+static void
+_on_button_search_clicked (GtkButton *button,
+    EmpathyContactSearchDialog *self)
+{
+  empathy_contact_search_dialog_do_search (self);
+}
+
+#if 0
+static void
+on_server_changed_cb (GtkEditable *editable,
+    gpointer user_data)
+{
+  EmpathyContactSearchDialog *self = EMPATHY_CONTACT_SEARCH_DIALOG (user_data);
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+
+  g_return_if_fail (priv->searcher != NULL);
+
+  tp_contact_search_reset_async (priv->searcher,
+      gtk_entry_get_text (GTK_ENTRY (editable)),
+      0,
+      on_searcher_reset,
+      self);
+}
+#endif
+
+typedef struct
+{
+    EmpathyAccountChooserFilterResultCallback callback;
+    gpointer                                  user_data;
+} FilterCallbackData;
+
+static void
+supports_contact_search_cb (GObject *conn,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  FilterCallbackData *data = user_data;
+  GError *myerr = NULL;
+  TpCapabilities *caps;
+
+  if (!tp_proxy_prepare_finish (conn, result, &myerr))
+    {
+      data->callback (FALSE, data->user_data);
+      g_slice_free (FilterCallbackData, data);
+      return;
+    }
+
+  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
+  data->callback (tp_capabilities_supports_contact_search (caps, NULL, NULL),
+    data->user_data);
+
+  g_slice_free (FilterCallbackData, data);
+}
+
+static void
+empathy_account_chooser_filter_supports_contact_search (
+    TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    gpointer user_data)
+{
+  TpConnection *connection;
+  FilterCallbackData *cb_data;
+  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
+
+  if (tp_account_get_connection_status (account, NULL)
+      != TP_CONNECTION_STATUS_CONNECTED)
+    {
+      callback (FALSE, callback_data);
+      return;
+    }
+
+  /* check if CM supports contact search */
+  connection = tp_account_get_connection (account);
+  if (connection == NULL)
+    {
+      callback (FALSE, callback_data);
+      return;
+    }
+
+  cb_data = g_slice_new0 (FilterCallbackData);
+  cb_data->callback = callback;
+  cb_data->user_data = callback_data;
+
+  tp_proxy_prepare_async (connection, features, supports_contact_search_cb,
+      cb_data);
+}
+
+static void
+empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  GtkWidget *vbox, *hbox, *scrolled_window, *label;
+  GtkCellRenderer *cell;
+  GtkTreeViewColumn *col;
+  GtkTreeSelection *selection;
+  gchar *tmp;
+
+  /* Title */
+  gtk_window_set_title (GTK_WINDOW (self), _("Search contacts"));
+
+  vbox = gtk_vbox_new (FALSE, 6);
+
+  /* Account chooser */
+  hbox = gtk_hbox_new (FALSE, 6);
+  label = gtk_label_new (_("Account:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 6);
+
+  priv->chooser = empathy_account_chooser_new ();
+  empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (priv->chooser),
+      empathy_account_chooser_filter_supports_contact_search, NULL);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->chooser, FALSE, TRUE, 6);
+  g_signal_connect (priv->chooser, "changed",
+      G_CALLBACK (_account_chooser_changed), self);
+
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 6);
+
+#if 0
+  /* Server entry */
+  priv->server_entry = gtk_entry_new ();
+  gtk_box_pack_start (GTK_BOX (vbox), priv->server_entry, FALSE, TRUE, 6);
+  g_signal_connect (GTK_EDITABLE (priv->server_entry), "changed",
+      G_CALLBACK (on_server_changed_cb), self);
+#endif
+
+  /* Search input */
+  hbox = gtk_hbox_new (FALSE, 6);
+  label = gtk_label_new (_("Search: "));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 6);
+
+  priv->search_entry = gtk_entry_new ();
+  gtk_box_pack_start (GTK_BOX (hbox), priv->search_entry, TRUE, TRUE, 6);
+
+  priv->find_button = gtk_button_new_from_stock (GTK_STOCK_FIND);
+  g_signal_connect (priv->find_button, "clicked", G_CALLBACK (_on_button_search_clicked), self);
+  gtk_box_pack_end (GTK_BOX (hbox), priv->find_button, FALSE, TRUE, 6);
+
+  priv->spinner = gtk_spinner_new ();
+  gtk_box_pack_end (GTK_BOX (hbox), priv->spinner, FALSE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 6);
+
+  /* Search results */
+  priv->store = gtk_list_store_new (N_COLUMNS,
+                                    G_TYPE_STRING,  /* Name */
+                                    G_TYPE_STRING); /* Login */
+
+  priv->tree_view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (priv->store));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->tree_view));
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (on_selection_changed), self);
+
+  gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (priv->tree_view), FALSE);
+
+  col = gtk_tree_view_column_new ();
+  cell = empathy_cell_renderer_text_new ();
+  gtk_tree_view_column_pack_start (col, cell, TRUE);
+  /* EmpathyCellRendererText displays "name" above and "status" below.
+   * We want the login above since it'll always be available, and the
+   * name below since we won't always have it. */
+  gtk_tree_view_column_add_attribute (col, cell,
+      "name", LOGIN_COLUMN);
+  gtk_tree_view_column_add_attribute (col, cell,
+      "status", NAME_COLUMN);
+
+  gtk_tree_view_append_column (GTK_TREE_VIEW (priv->tree_view), col);
+
+  gtk_dialog_add_button (GTK_DIALOG (self),
+      GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
+
+  priv->add_button = gtk_dialog_add_button (GTK_DIALOG (self),
+      GTK_STOCK_ADD, GTK_RESPONSE_APPLY);
+  gtk_widget_set_sensitive (priv->add_button, FALSE);
+
+  /* Pack the dialog */
+  priv->notebook = gtk_notebook_new ();
+  gtk_notebook_set_show_tabs (GTK_NOTEBOOK (priv->notebook), FALSE);
+  g_object_set (priv->notebook, "margin", 6, NULL);
+
+  scrolled_window = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
+      GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+  gtk_container_add (GTK_CONTAINER (scrolled_window), priv->tree_view);
+
+  priv->no_contact_found = gtk_label_new (NULL);
+  tmp = g_strdup_printf ("<b><span size='xx-large'>%s</span></b>",
+      _("No contacts found"));
+  gtk_label_set_markup (GTK_LABEL (priv->no_contact_found), tmp);
+  g_free (tmp);
+
+  gtk_label_set_ellipsize (GTK_LABEL (priv->no_contact_found),
+      PANGO_ELLIPSIZE_END);
+
+
+  gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), scrolled_window,
+      NULL);
+  gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook),
+      priv->no_contact_found, NULL);
+
+  gtk_box_pack_start (GTK_BOX (vbox), priv->notebook, TRUE, TRUE, 6);
+
+  gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (
+          GTK_DIALOG (self))), vbox, TRUE, TRUE, 6);
+
+  gtk_window_set_default_size (GTK_WINDOW (self), 200, 400);
+  gtk_widget_show_all (vbox);
+  gtk_widget_hide (priv->spinner);
+}
+
+GtkWidget *
+empathy_contact_search_dialog_new (GtkWindow *parent)
+{
+  GtkWidget *self;
+
+  g_return_val_if_fail (parent == NULL || GTK_IS_WINDOW (parent), NULL);
+
+  self = g_object_new (EMPATHY_TYPE_CONTACT_SEARCH_DIALOG, NULL);
+
+  if (parent != NULL)
+    {
+      gtk_window_set_transient_for (GTK_WINDOW (self), parent);
+    }
+
+  return self;
+}

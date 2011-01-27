@@ -95,6 +95,7 @@ void           empathy_account_chooser_filter_supports_chatrooms (TpAccount     
 							   EmpathyAccountChooserFilterResultCallback callback,
 							   gpointer               callback_data,
 							   gpointer               user_data);
+
 gboolean       empathy_account_chooser_is_ready (EmpathyAccountChooser *chooser);
 
 G_END_DECLS

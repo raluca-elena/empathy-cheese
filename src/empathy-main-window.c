@@ -50,6 +50,7 @@
 #include <libempathy-gtk/empathy-contact-list-store.h>
 #include <libempathy-gtk/empathy-contact-list-view.h>
 #include <libempathy-gtk/empathy-live-search.h>
+#include <libempathy-gtk/empathy-contact-search-dialog.h>
 #include <libempathy-gtk/empathy-geometry.h>
 #include <libempathy-gtk/empathy-gtk-enum-types.h>
 #include <libempathy-gtk/empathy-individual-dialogs.h>
@@ -935,6 +936,15 @@ main_window_chat_add_contact_cb (GtkAction         *action,
 }
 
 static void
+main_window_chat_search_contacts_cb (GtkAction         *action,
+				     EmpathyMainWindow *window)
+{
+	GtkWidget *dialog = empathy_contact_search_dialog_new (
+			GTK_WINDOW (window));
+	gtk_widget_show (dialog);
+}
+
+static void
 main_window_view_show_ft_manager (GtkAction         *action,
 				  EmpathyMainWindow *window)
 {
@@ -1778,6 +1788,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 			      "room_join_favorites", "activate", main_window_room_join_favorites_cb,
 			      "room_manage_favorites", "activate", main_window_room_manage_favorites_cb,
 			      "chat_add_contact", "activate", main_window_chat_add_contact_cb,
+			      "chat_search_contacts", "activate", main_window_chat_search_contacts_cb,
 			      "view_show_ft_manager", "activate", main_window_view_show_ft_manager,
 			      "view_show_offline", "toggled", main_window_view_show_offline_cb,
 			      "view_show_protocols", "toggled", main_window_view_show_protocols_cb,

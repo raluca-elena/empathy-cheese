@@ -42,6 +42,13 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="chat_search_contacts">
+            <property name="stock_id">gtk-find</property>
+            <property name="name">chat_search_contacts</property>
+            <property name="label" translatable="yes">_Search for Contacts…</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="view_show_ft_manager">
             <property name="icon-name">document-send</property>
             <property name="name">view_show_ft_manager</property>
@@ -232,6 +239,7 @@
           <menuitem action="chat_new_call"/>
           <separator/>
           <menuitem action="chat_add_contact"/>
+          <menuitem action="chat_search_contacts"/>
           <separator/>
           <menuitem action="chat_quit"/>
         </menu>
