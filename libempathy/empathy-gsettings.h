@@ -86,8 +86,6 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_LOCATION_RESOURCE_GPS        "resource-gps"
 #define EMPATHY_PREFS_LOCATION_REDUCE_ACCURACY     "reduce-accuracy"
 
-#define EMPATHY_PREFS_ACCOUNTS_SCHEMA EMPATHY_PREFS_SCHEMA ".accounts"
-
 #define EMPATHY_PREFS_LOGGER_SCHEMA "org.freedesktop.Telepathy.Logger"
 #define EMPATHY_PREFS_LOGGER_ENABLED "enabled"
 
