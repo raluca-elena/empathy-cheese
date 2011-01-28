@@ -101,6 +101,40 @@ empathy_keyring_get_account_password_async (TpAccount *account,
   gnome_keyring_attribute_list_free (match);
 }
 
+void
+empathy_keyring_get_room_password_async (TpAccount *account,
+    const gchar *id,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  GnomeKeyringAttributeList *match;
+  const gchar *account_id;
+
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+  g_return_if_fail (id != NULL);
+  g_return_if_fail (callback != NULL);
+
+  simple = g_simple_async_result_new (G_OBJECT (account), callback,
+      user_data, empathy_keyring_get_room_password_async);
+
+  account_id = tp_proxy_get_object_path (account) +
+    strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
+
+  DEBUG ("Trying to get password for room '%s' on account '%s'",
+      id, account_id);
+
+  match = gnome_keyring_attribute_list_new ();
+  gnome_keyring_attribute_list_append_string (match, "account-id",
+      account_id);
+  gnome_keyring_attribute_list_append_string (match, "room-id", id);
+
+  gnome_keyring_find_items (GNOME_KEYRING_ITEM_GENERIC_SECRET,
+      match, find_items_cb, simple, NULL);
+
+  gnome_keyring_attribute_list_free (match);
+}
+
 const gchar *
 empathy_keyring_get_account_password_finish (TpAccount *account,
     GAsyncResult *result,
@@ -118,6 +152,27 @@ empathy_keyring_get_account_password_finish (TpAccount *account,
 
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
           G_OBJECT (account), empathy_keyring_get_room_password_async), NULL);
+
+  return g_simple_async_result_get_op_res_gpointer (simple);
+}
+
+const gchar *
+empathy_keyring_get_room_password_finish (TpAccount *account,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), NULL);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return NULL;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (account), empathy_keyring_get_account_password_async), NULL);
 
   return g_simple_async_result_get_op_res_gpointer (simple);
 }
