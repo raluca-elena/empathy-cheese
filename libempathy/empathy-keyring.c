@@ -33,6 +33,12 @@ static GnomeKeyringPasswordSchema account_keyring_schema =
       { "param-name", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
       { NULL } } };
 
+static GnomeKeyringPasswordSchema room_keyring_schema =
+  { GNOME_KEYRING_ITEM_GENERIC_SECRET,
+    { { "account-id", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
+      { "room-id", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
+      { NULL } } };
+
 gboolean
 empathy_keyring_is_available (void)
 {
@@ -231,6 +237,41 @@ empathy_keyring_set_account_password_async (TpAccount *account,
   g_free (name);
 }
 
+void
+empathy_keyring_set_room_password_async (TpAccount *account,
+    const gchar *id,
+    const gchar *password,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  GSimpleAsyncResult *simple;
+  const gchar *account_id;
+  gchar *name;
+
+  g_return_if_fail (TP_IS_ACCOUNT (account));
+  g_return_if_fail (id != NULL);
+  g_return_if_fail (password != NULL);
+
+  simple = g_simple_async_result_new (G_OBJECT (account), callback,
+      user_data, empathy_keyring_set_room_password_async);
+
+  account_id = tp_proxy_get_object_path (account) +
+    strlen (TP_ACCOUNT_OBJECT_PATH_BASE);
+
+  DEBUG ("Remembering password for room '%s' on account '%s'", id, account_id);
+
+  name = g_strdup_printf ("Password for chatroom '%s' on account %s (%s)",
+      id, tp_account_get_display_name (account), account_id);
+
+  gnome_keyring_store_password (&room_keyring_schema, NULL, name, password,
+      store_password_cb, simple, NULL,
+      "account-id", account_id,
+      "room-id", id,
+      NULL);
+
+  g_free (name);
+}
+
 gboolean
 empathy_keyring_set_account_password_finish (TpAccount *account,
     GAsyncResult *result,
@@ -248,6 +289,27 @@ empathy_keyring_set_account_password_finish (TpAccount *account,
 
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
           G_OBJECT (account), empathy_keyring_set_account_password_async), FALSE);
+
+  return TRUE;
+}
+
+gboolean
+empathy_keyring_set_room_password_finish (TpAccount *account,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple;
+
+  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
+  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
+
+  simple = G_SIMPLE_ASYNC_RESULT (result);
+
+  if (g_simple_async_result_propagate_error (simple, error))
+    return FALSE;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (account), empathy_keyring_set_room_password_async), FALSE);
 
   return TRUE;
 }

@@ -47,6 +47,13 @@ void empathy_keyring_set_account_password_async (TpAccount *account,
 gboolean empathy_keyring_set_account_password_finish (TpAccount *account,
     GAsyncResult *result, GError **error);
 
+void empathy_keyring_set_room_password_async (TpAccount *account,
+    const gchar *id, const gchar *password, GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean empathy_keyring_set_room_password_finish (TpAccount *account,
+    GAsyncResult *result, GError **error);
+
 void empathy_keyring_delete_account_password_async (TpAccount *account,
     GAsyncReadyCallback callback, gpointer user_data);
 
