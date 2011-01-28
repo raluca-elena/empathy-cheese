@@ -172,7 +172,7 @@ empathy_keyring_get_room_password_finish (TpAccount *account,
     return NULL;
 
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_get_account_password_async), NULL);
+          G_OBJECT (account), empathy_keyring_get_room_password_async), NULL);
 
   return g_simple_async_result_get_op_res_gpointer (simple);
 }
