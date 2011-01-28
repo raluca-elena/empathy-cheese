@@ -3067,6 +3067,27 @@ passwd_join_button_cb (GtkButton *button,
 }
 
 static void
+clear_icon_released_cb (GtkEntry *entry,
+			GtkEntryIconPosition icon_pos,
+			GdkEvent *event,
+			PasswordData *data)
+{
+	gtk_entry_set_text (entry, "");
+}
+
+static void
+password_entry_changed_cb (GtkEditable *entry,
+			   PasswordData *data)
+{
+	const gchar *str;
+
+	str = gtk_entry_get_text (GTK_ENTRY (entry));
+
+	gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
+	    GTK_ENTRY_ICON_SECONDARY, !EMP_STR_EMPTY (str));
+}
+
+static void
 display_password_info_bar (EmpathyChat *self)
 {
 	EmpathyChatPriv *priv = GET_PRIV (self);
@@ -3105,6 +3126,16 @@ display_password_info_bar (EmpathyChat *self)
 	entry = gtk_entry_new ();
 	gtk_entry_set_visibility (GTK_ENTRY (entry), FALSE);
 	gtk_box_pack_start (GTK_BOX (hbox), entry, TRUE, TRUE, 0);
+
+	gtk_entry_set_icon_from_stock (GTK_ENTRY (entry),
+				       GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+	gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
+				      GTK_ENTRY_ICON_SECONDARY, FALSE);
+
+	g_signal_connect (entry, "icon-release",
+			  G_CALLBACK (clear_icon_released_cb), data);
+	g_signal_connect (entry, "changed",
+			  G_CALLBACK (password_entry_changed_cb), data);
 
 	g_signal_connect (entry, "activate",
 			  G_CALLBACK (password_entry_activate_cb), data);
