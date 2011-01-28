@@ -2973,6 +2973,7 @@ typedef struct
 	GtkWidget *label;
 	GtkWidget *entry;
 	GtkWidget *spinner;
+	gchar *password;
 } PasswordData;
 
 static void
@@ -2994,12 +2995,18 @@ remember_password_infobar_response_cb (GtkWidget *info_bar,
 				       gint response_id,
 				       PasswordData *data)
 {
+	EmpathyChatPriv *priv = GET_PRIV (data->self);
+
 	if (response_id == GTK_RESPONSE_OK) {
 		DEBUG ("Saving room password");
-		/* TODO: implement this */
+		empathy_keyring_set_room_password_async (priv->account,
+							 empathy_tp_chat_get_id (priv->tp_chat),
+							 data->password,
+							 NULL, NULL);
 	}
 
 	gtk_widget_destroy (info_bar);
+	g_free (data->password);
 	g_slice_free (PasswordData, data);
 }
 
@@ -3013,6 +3020,9 @@ chat_prompt_to_save_password (EmpathyChat *self,
 	GtkWidget *label;
 	GtkWidget *alig;
 	GtkWidget *button;
+
+	/* save the password in case it needs to be saved */
+	data->password = g_strdup (gtk_entry_get_text (GTK_ENTRY (data->entry)));
 
 	/* Remove all previous widgets */
 	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (data->info_bar));
