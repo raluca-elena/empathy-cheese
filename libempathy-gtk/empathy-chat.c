@@ -3090,7 +3090,7 @@ display_password_info_bar (EmpathyChat *self)
 	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
 
 	hbox = gtk_hbox_new (FALSE, 5);
-	gtk_container_add (GTK_CONTAINER (content_area), hbox);
+	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 
 	/* Add image */
 	image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_AUTHENTICATION,
@@ -3113,7 +3113,7 @@ display_password_info_bar (EmpathyChat *self)
 	g_signal_connect (entry, "realize", G_CALLBACK (gtk_widget_grab_focus), NULL);
 
 	/* Add 'Join' button */
-	alig = gtk_alignment_new (0, 0.5, 0, 0);
+	alig = gtk_alignment_new (0, 0.5, 1, 0);
 
 	button = gtk_button_new_with_label (_("Join"));
 	gtk_container_add (GTK_CONTAINER (alig), button);
@@ -3124,7 +3124,7 @@ display_password_info_bar (EmpathyChat *self)
 
 	/* Add spinner */
 	spinner = gtk_spinner_new ();
-	gtk_box_pack_end (GTK_BOX (hbox), spinner, TRUE, TRUE, 0);
+	gtk_box_pack_end (GTK_BOX (hbox), spinner, FALSE, FALSE, 0);
 
 	/* Save some data for messing around with later */
 	data->self = self;
@@ -3135,7 +3135,7 @@ display_password_info_bar (EmpathyChat *self)
 	data->spinner = spinner;
 
 	gtk_box_pack_start (GTK_BOX (priv->info_bar_vbox), info_bar,
-			    FALSE, FALSE, 3);
+			    TRUE, TRUE, 3);
 	gtk_widget_show_all (hbox);
 
 	g_signal_connect (info_bar, "response",
