@@ -33,6 +33,12 @@ static GnomeKeyringPasswordSchema account_keyring_schema =
       { "param-name", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
       { NULL } } };
 
+gboolean
+empathy_keyring_is_available (void)
+{
+  return gnome_keyring_is_available ();
+}
+
 /* get */
 
 static void
