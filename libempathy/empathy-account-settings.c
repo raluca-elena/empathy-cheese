@@ -434,7 +434,7 @@ empathy_account_settings_get_password_cb (GObject *source,
   const gchar *password;
   GError *error = NULL;
 
-  password = empathy_keyring_get_password_finish (TP_ACCOUNT (source),
+  password = empathy_keyring_get_account_password_finish (TP_ACCOUNT (source),
       result, &error);
 
   if (error != NULL)
@@ -467,7 +467,7 @@ empathy_account_settings_migrate_password_cb (GObject *source,
   GHashTable *empty;
   const gchar *unset[] = { "password", NULL };
 
-  if (!empathy_keyring_set_password_finish (account, result, &error))
+  if (!empathy_keyring_set_account_password_finish (account, result, &error))
     {
       DEBUG ("Failed to set password: %s", error->message);
       g_clear_error (&error);
@@ -513,7 +513,7 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
   if (EMP_STR_EMPTY (password))
     return;
 
-  empathy_keyring_set_password_async (priv->account, password,
+  empathy_keyring_set_account_password_async (priv->account, password,
       empathy_account_settings_migrate_password_cb, self);
 
   /* We don't want to request the password again, we
@@ -624,7 +624,7 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 
       /* Make this call but don't block on its readiness. We'll signal
        * if it's updated later with ::password-retrieved. */
-      empathy_keyring_get_password_async (priv->account,
+      empathy_keyring_get_account_password_async (priv->account,
           empathy_account_settings_get_password_cb, self);
     }
 
@@ -1401,7 +1401,7 @@ empathy_account_settings_set_password_cb (GObject *source,
     gpointer user_data)
 {
   empathy_account_settings_processed_password (source, result, user_data,
-      empathy_keyring_set_password_finish);
+      empathy_keyring_set_account_password_finish);
 }
 
 static void
@@ -1410,7 +1410,7 @@ empathy_account_settings_delete_password_cb (GObject *source,
     gpointer user_data)
 {
   empathy_account_settings_processed_password (source, result, user_data,
-      empathy_keyring_delete_password_finish);
+      empathy_keyring_delete_account_password_finish);
 }
 
 static void
@@ -1437,12 +1437,12 @@ empathy_account_settings_account_updated (GObject *source,
     {
       if (priv->password != NULL)
         {
-          empathy_keyring_set_password_async (priv->account, priv->password,
+          empathy_keyring_set_account_password_async (priv->account, priv->password,
               empathy_account_settings_set_password_cb, settings);
         }
       else
         {
-          empathy_keyring_delete_password_async (priv->account,
+          empathy_keyring_delete_account_password_async (priv->account,
               empathy_account_settings_delete_password_cb, settings);
         }
 

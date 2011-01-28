@@ -345,7 +345,7 @@ get_password_cb (GObject *source,
 {
   ObserveChannelsData *data = user_data;
 
-  if (empathy_keyring_get_password_finish (TP_ACCOUNT (source), result, NULL) == NULL)
+  if (empathy_keyring_get_account_password_finish (TP_ACCOUNT (source), result, NULL) == NULL)
     {
       /* We don't actually mind if this fails, just let the approver
        * go ahead and take the channel. */
@@ -404,7 +404,7 @@ observe_channels (TpBaseClient *client,
   data->account = g_object_ref (account);
   data->channel = g_object_ref (channel);
 
-  empathy_keyring_get_password_async (account, get_password_cb, data);
+  empathy_keyring_get_account_password_async (account, get_password_cb, data);
 
   tp_observe_channels_context_delay (context);
 }
