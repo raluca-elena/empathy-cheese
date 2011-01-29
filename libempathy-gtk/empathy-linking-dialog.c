@@ -248,7 +248,7 @@ empathy_linking_dialog_show (FolksIndividual *individual,
   personas = folks_individual_get_personas (individual);
   for (l = personas; l != NULL; l = l->next)
     {
-      if (TPF_IS_PERSONA (l->data))
+      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         num_personas++;
     }
 

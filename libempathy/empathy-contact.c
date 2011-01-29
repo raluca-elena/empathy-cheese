@@ -885,7 +885,7 @@ empathy_contact_get_persona (EmpathyContact *contact)
             {
               TpfPersona *persona = j->data;
 
-              if (TPF_IS_PERSONA (persona))
+              if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
                 {
                   TpContact *tp_contact = tpf_persona_get_contact (persona);
 
@@ -1958,7 +1958,7 @@ empathy_contact_dup_best_for_action (FolksIndividual *individual,
       TpContact *tp_contact;
       EmpathyContact *contact;
 
-      if (!TPF_IS_PERSONA (l->data))
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         continue;
 
       tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));

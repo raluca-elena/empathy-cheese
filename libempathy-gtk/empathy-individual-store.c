@@ -132,7 +132,7 @@ individual_can_audio_video_call (FolksIndividual *individual,
       TpContact *tp_contact;
       EmpathyContact *contact;
 
-      if (!TPF_IS_PERSONA (l->data))
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         continue;
 
       tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
@@ -1954,7 +1954,7 @@ individual_store_get_individual_status_icon_with_icon_name (
   personas = folks_individual_get_personas (individual);
   for (l = personas, contact_count = 0; l; l = l->next)
     {
-      if (TPF_IS_PERSONA (l->data))
+      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         contact_count++;
 
       if (contact_count > 1)

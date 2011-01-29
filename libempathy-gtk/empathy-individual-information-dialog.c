@@ -139,7 +139,7 @@ set_label_visibility (EmpathyIndividualInformationDialog *dialog)
       personas = folks_individual_get_personas (priv->individual);
       for (l = personas; l != NULL; l = l->next)
         {
-          if (TPF_IS_PERSONA (l->data))
+          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
             num_personas++;
         }
     }

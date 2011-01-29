@@ -87,7 +87,7 @@ individual_menu_add_personas (GtkMenuShell *menu,
    * functionality */
   for (l = personas; l != NULL; l = l->next)
     {
-      if (!TPF_IS_PERSONA (l->data))
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         continue;
 
       persona_count++;
@@ -116,7 +116,7 @@ individual_menu_add_personas (GtkMenuShell *menu,
       const gchar *account;
       GtkWidget *action;
 
-      if (!TPF_IS_PERSONA (persona))
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         continue;
 
       tp_contact = tpf_persona_get_contact (persona);
@@ -937,7 +937,7 @@ room_sub_menu_activate_cb (GtkWidget *item,
           TpContact *tp_contact;
           GList *rooms;
 
-          if (!TPF_IS_PERSONA (persona))
+          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
             continue;
 
           tp_contact = tpf_persona_get_contact (persona);
@@ -1037,7 +1037,7 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
           TpContact *tp_contact;
           EmpathyContact *contact_cur;
 
-          if (!TPF_IS_PERSONA (persona))
+          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
             continue;
 
           tp_contact = tpf_persona_get_contact (persona);

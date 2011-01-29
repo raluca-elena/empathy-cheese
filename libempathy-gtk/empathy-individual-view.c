@@ -1681,7 +1681,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
   const gchar *str;
   GList *personas, *l;
-  gboolean is_favorite;
+  gboolean is_favorite, contains_interesting_persona = FALSE;
 
   /* We're only giving the visibility wrt filtering here, not things like
    * presence. */
@@ -1690,6 +1690,20 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     {
       return FALSE;
     }
+
+  /* Hide all individuals which consist entirely of uninteresting personas */
+  personas = folks_individual_get_personas (individual);
+  for (l = personas; l; l = l->next)
+    {
+      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+        {
+          contains_interesting_persona = TRUE;
+          break;
+        }
+    }
+
+  if (contains_interesting_persona == FALSE)
+    return FALSE;
 
   is_favorite = folks_favouritable_get_is_favourite (
       FOLKS_FAVOURITABLE (individual));
@@ -1703,14 +1717,13 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     return TRUE;
 
   /* check contact id, remove the @server.com part */
-  personas = folks_individual_get_personas (individual);
   for (l = personas; l; l = l->next)
     {
       const gchar *p;
       gchar *dup_str = NULL;
       gboolean visible;
 
-      if (!TPF_IS_PERSONA (l->data))
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
         continue;
 
       str = folks_persona_get_display_id (l->data);
@@ -2388,7 +2401,7 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
        * be removed. */
       for (l = personas; l != NULL; l = l->next)
         {
-          if (!TPF_IS_PERSONA (l->data))
+          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
             continue;
 
           persona_count++;
