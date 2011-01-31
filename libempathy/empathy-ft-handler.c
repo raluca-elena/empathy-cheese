@@ -774,8 +774,10 @@ ft_handler_populate_outgoing_request (EmpathyFTHandler *handler)
 {
   guint contact_handle;
   EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
+  gchar *uri;
 
   contact_handle = empathy_contact_get_handle (priv->contact);
+  uri = g_file_get_uri (priv->gfile);
 
   priv->request = tp_asv_new (
       TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
@@ -792,7 +794,10 @@ ft_handler_populate_outgoing_request (EmpathyFTHandler *handler)
         priv->total_bytes,
       TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_DATE, G_TYPE_UINT64,
         priv->mtime,
+      TP_PROP_CHANNEL_TYPE_FILE_TRANSFER_URI, G_TYPE_STRING, uri,
       NULL);
+
+  g_free (uri);
 }
 
 static gboolean
