@@ -85,7 +85,8 @@ enum {
   PROP_FILENAME,
   PROP_MODIFICATION_TIME,
   PROP_TOTAL_BYTES,
-  PROP_TRANSFERRED_BYTES
+  PROP_TRANSFERRED_BYTES,
+  PROP_USER_ACTION_TIME
 };
 
 enum {
@@ -138,6 +139,8 @@ typedef struct {
   gchar *content_hash;
   TpFileHashType content_hash_type;
 
+  gint64 user_action_time;
+
   /* time and speed */
   gdouble speed;
   guint remaining_time;
@@ -189,6 +192,9 @@ do_get_property (GObject *object,
       case PROP_TP_FILE:
         g_value_set_object (value, priv->tpfile);
         break;
+      case PROP_USER_ACTION_TIME:
+        g_value_set_int64 (value, priv->user_action_time);
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -230,6 +236,9 @@ do_set_property (GObject *object,
         break;
       case PROP_TP_FILE:
         priv->tpfile = g_value_dup_object (value);
+        break;
+      case PROP_USER_ACTION_TIME:
+        priv->user_action_time = g_value_get_int64 (value);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -411,6 +420,13 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
     EMPATHY_TYPE_TP_FILE,
     G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_property (object_class, PROP_TP_FILE, param_spec);
+
+  param_spec = g_param_spec_int64 ("user-action-time", "user action time",
+    "User action time",
+    0, G_MAXINT64, 0,
+    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
+  g_object_class_install_property (object_class, PROP_USER_ACTION_TIME,
+      param_spec);
 
   /* signals */
 
@@ -751,7 +767,7 @@ ft_handler_push_to_dispatcher (EmpathyFTHandler *handler)
   account = empathy_contact_get_account (priv->contact);
 
   req = tp_account_channel_request_new (account, priv->request,
-      TP_USER_ACTION_TIME_NOT_USER_ACTION);
+      priv->user_action_time);
 
   tp_account_channel_request_create_and_handle_channel_async (req, NULL,
       ft_handler_create_channel_cb, handler);
@@ -1295,6 +1311,7 @@ channel_get_all_properties_cb (TpProxy *proxy,
 void
 empathy_ft_handler_new_outgoing (EmpathyContact *contact,
     GFile *source,
+    gint64 action_time,
     EmpathyFTHandlerReadyCallback callback,
     gpointer user_data)
 {
@@ -1308,7 +1325,10 @@ empathy_ft_handler_new_outgoing (EmpathyContact *contact,
   g_return_if_fail (G_IS_FILE (source));
 
   handler = g_object_new (EMPATHY_TYPE_FT_HANDLER,
-      "contact", contact, "gfile", source, NULL);
+      "contact", contact,
+      "gfile", source,
+      "user-action-time", action_time,
+      NULL);
 
   priv = GET_PRIV (handler);
 

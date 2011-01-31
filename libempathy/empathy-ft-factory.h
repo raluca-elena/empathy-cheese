@@ -62,7 +62,8 @@ GType empathy_ft_factory_get_type (void);
 EmpathyFTFactory* empathy_ft_factory_dup_singleton (void);
 void empathy_ft_factory_new_transfer_outgoing (EmpathyFTFactory *factory,
     EmpathyContact *contact,
-    GFile *source);
+    GFile *source,
+    gint64 user_action_time);
 void empathy_ft_factory_set_destination_for_incoming_handler (
     EmpathyFTFactory *factory,
     EmpathyFTHandler *handler,

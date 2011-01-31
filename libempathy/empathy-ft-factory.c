@@ -265,13 +265,14 @@ empathy_ft_factory_dup_singleton (void)
 void
 empathy_ft_factory_new_transfer_outgoing (EmpathyFTFactory *factory,
     EmpathyContact *contact,
-    GFile *source)
+    GFile *source,
+    gint64 action_time)
 {
   g_return_if_fail (EMPATHY_IS_FT_FACTORY (factory));
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
   g_return_if_fail (G_IS_FILE (source));
 
-  empathy_ft_handler_new_outgoing (contact, source,
+  empathy_ft_handler_new_outgoing (contact, source, action_time,
       ft_handler_outgoing_ready_cb, factory);
 }
 

@@ -71,6 +71,7 @@ GType empathy_ft_handler_get_type (void);
 /* public methods */
 void empathy_ft_handler_new_outgoing (EmpathyContact *contact,
     GFile *source,
+    gint64 action_time,
     EmpathyFTHandlerReadyCallback callback,
     gpointer user_data);
 

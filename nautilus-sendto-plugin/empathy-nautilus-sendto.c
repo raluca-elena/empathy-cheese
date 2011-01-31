@@ -210,7 +210,7 @@ send_files (NstPlugin *plugin,
       ++transfers;
 
       empathy_ft_factory_new_transfer_outgoing (factory,
-          contact, file);
+          contact, file, empathy_get_current_action_time ());
 
       g_object_unref (file);
     }

@@ -1759,7 +1759,8 @@ empathy_send_file (EmpathyContact *contact, GFile *file)
 
 	factory = empathy_ft_factory_dup_singleton ();
 
-	empathy_ft_factory_new_transfer_outgoing (factory, contact, file);
+	empathy_ft_factory_new_transfer_outgoing (factory, contact, file,
+		empathy_get_current_action_time ());
 
 	uri = g_file_get_uri (file);
 	manager = gtk_recent_manager_get_default ();
