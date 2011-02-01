@@ -991,10 +991,11 @@ empathy_contact_get_presence_message (EmpathyContact *contact)
   priv = GET_PRIV (contact);
 
   if (priv->persona != NULL)
-    {
-      return folks_presence_owner_get_presence_message (
-          FOLKS_PRESENCE_OWNER (priv->persona));
-    }
+    return folks_presence_owner_get_presence_message (
+        FOLKS_PRESENCE_OWNER (priv->persona));
+
+  if (priv->tp_contact != NULL)
+    return tp_contact_get_presence_message (priv->tp_contact);
 
   return NULL;
 }
