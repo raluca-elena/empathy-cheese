@@ -107,6 +107,51 @@ gboolean empathy_connection_can_group_personas (TpConnection *connection);
 
 gchar * empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert);
 
+/* Copied from wocky/wocky-utils.h */
+
+#define empathy_implement_finish_void(source, tag) \
+    if (g_simple_async_result_propagate_error (\
+      G_SIMPLE_ASYNC_RESULT (result), error)) \
+      return FALSE; \
+    g_return_val_if_fail (g_simple_async_result_is_valid (result, \
+            G_OBJECT(source), tag), \
+        FALSE); \
+    return TRUE;
+
+#define empathy_implement_finish_copy_pointer(source, tag, copy_func, \
+    out_param) \
+    GSimpleAsyncResult *_simple; \
+    _simple = (GSimpleAsyncResult *) result; \
+    if (g_simple_async_result_propagate_error (_simple, error)) \
+      return FALSE; \
+    g_return_val_if_fail (g_simple_async_result_is_valid (result, \
+            G_OBJECT (source), tag), \
+        FALSE); \
+    if (out_param != NULL) \
+      *out_param = copy_func ( \
+          g_simple_async_result_get_op_res_gpointer (_simple)); \
+    return TRUE;
+
+#define empathy_implement_finish_return_copy_pointer(source, tag, copy_func) \
+    GSimpleAsyncResult *_simple; \
+    _simple = (GSimpleAsyncResult *) result; \
+    if (g_simple_async_result_propagate_error (_simple, error)) \
+      return NULL; \
+    g_return_val_if_fail (g_simple_async_result_is_valid (result, \
+            G_OBJECT (source), tag), \
+        NULL); \
+    return copy_func (g_simple_async_result_get_op_res_gpointer (_simple));
+
+#define empathy_implement_finish_return_pointer(source, tag) \
+    GSimpleAsyncResult *_simple; \
+    _simple = (GSimpleAsyncResult *) result; \
+    if (g_simple_async_result_propagate_error (_simple, error)) \
+      return NULL; \
+    g_return_val_if_fail (g_simple_async_result_is_valid (result, \
+            G_OBJECT (source), tag), \
+        NULL); \
+    return g_simple_async_result_get_op_res_gpointer (_simple);
+
 G_END_DECLS
 
 #endif /*  __EMPATHY_UTILS_H__ */

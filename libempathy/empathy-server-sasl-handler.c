@@ -124,7 +124,7 @@ empathy_server_sasl_handler_get_password_async_cb (GObject *source,
 
   priv = EMPATHY_SERVER_SASL_HANDLER (user_data)->priv;
 
-  password = empathy_keyring_get_password_finish (TP_ACCOUNT (source),
+  password = empathy_keyring_get_account_password_finish (TP_ACCOUNT (source),
       result, &error);
 
   if (password != NULL)
@@ -155,7 +155,7 @@ empathy_server_sasl_handler_init_async (GAsyncInitable *initable,
   priv->async_init_res = g_simple_async_result_new (G_OBJECT (self),
       callback, user_data, empathy_server_sasl_handler_new_async);
 
-  empathy_keyring_get_password_async (priv->account,
+  empathy_keyring_get_account_password_async (priv->account,
       empathy_server_sasl_handler_get_password_async_cb, self);
 }
 
@@ -374,7 +374,7 @@ empathy_server_sasl_handler_set_password_cb (GObject *source,
 {
   GError *error = NULL;
 
-  if (!empathy_keyring_set_password_finish (TP_ACCOUNT (source), result,
+  if (!empathy_keyring_set_account_password_finish (TP_ACCOUNT (source), result,
           &error))
     {
       DEBUG ("Failed to set password: %s", error->message);
@@ -416,7 +416,7 @@ empathy_server_sasl_handler_provide_password (
 
   if (remember)
     {
-      empathy_keyring_set_password_async (priv->account, password,
+      empathy_keyring_set_account_password_async (priv->account, password,
           empathy_server_sasl_handler_set_password_cb, NULL);
     }
 }

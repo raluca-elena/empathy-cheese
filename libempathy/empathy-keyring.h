@@ -25,23 +25,39 @@
 
 G_BEGIN_DECLS
 
-void empathy_keyring_get_password_async (TpAccount *account,
+gboolean empathy_keyring_is_available (void);
+
+void empathy_keyring_get_account_password_async (TpAccount *account,
     GAsyncReadyCallback callback, gpointer user_data);
 
-const gchar * empathy_keyring_get_password_finish (TpAccount *account,
+const gchar * empathy_keyring_get_account_password_finish (TpAccount *account,
     GAsyncResult *result, GError **error);
 
-void empathy_keyring_set_password_async (TpAccount *account,
+void empathy_keyring_get_room_password_async (TpAccount *account,
+    const gchar *id,
+    GAsyncReadyCallback callback, gpointer user_data);
+
+const gchar * empathy_keyring_get_room_password_finish (TpAccount *account,
+    GAsyncResult *result, GError **error);
+
+void empathy_keyring_set_account_password_async (TpAccount *account,
     const gchar *password, GAsyncReadyCallback callback,
     gpointer user_data);
 
-gboolean empathy_keyring_set_password_finish (TpAccount *account,
+gboolean empathy_keyring_set_account_password_finish (TpAccount *account,
     GAsyncResult *result, GError **error);
 
-void empathy_keyring_delete_password_async (TpAccount *account,
+void empathy_keyring_set_room_password_async (TpAccount *account,
+    const gchar *id, const gchar *password, GAsyncReadyCallback callback,
+    gpointer user_data);
+
+gboolean empathy_keyring_set_room_password_finish (TpAccount *account,
+    GAsyncResult *result, GError **error);
+
+void empathy_keyring_delete_account_password_async (TpAccount *account,
     GAsyncReadyCallback callback, gpointer user_data);
 
-gboolean empathy_keyring_delete_password_finish (TpAccount *account,
+gboolean empathy_keyring_delete_account_password_finish (TpAccount *account,
     GAsyncResult *result, GError **error);
 
 G_END_DECLS

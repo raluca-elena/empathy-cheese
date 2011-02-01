@@ -40,6 +40,7 @@
 #include <telepathy-logger/log-manager.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-gsettings.h>
+#include <libempathy/empathy-keyring.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-marshal.h>
@@ -2967,11 +2968,113 @@ typedef struct
 {
 	EmpathyChat *self;
 	GtkWidget *info_bar;
+	gulong response_id;
 	GtkWidget *button;
 	GtkWidget *label;
 	GtkWidget *entry;
 	GtkWidget *spinner;
+	gchar *password;
 } PasswordData;
+
+static void
+passwd_remember_button_cb (GtkButton *button,
+			  PasswordData *data)
+{
+	gtk_info_bar_response (GTK_INFO_BAR (data->info_bar), GTK_RESPONSE_OK);
+}
+
+static void
+passwd_not_now_button_cb (GtkButton *button,
+			  PasswordData *data)
+{
+	gtk_info_bar_response (GTK_INFO_BAR (data->info_bar), GTK_RESPONSE_NO);
+}
+
+static void
+remember_password_infobar_response_cb (GtkWidget *info_bar,
+				       gint response_id,
+				       PasswordData *data)
+{
+	EmpathyChatPriv *priv = GET_PRIV (data->self);
+
+	if (response_id == GTK_RESPONSE_OK) {
+		DEBUG ("Saving room password");
+		empathy_keyring_set_room_password_async (priv->account,
+							 empathy_tp_chat_get_id (priv->tp_chat),
+							 data->password,
+							 NULL, NULL);
+	}
+
+	gtk_widget_destroy (info_bar);
+	g_free (data->password);
+	g_slice_free (PasswordData, data);
+}
+
+static void
+chat_prompt_to_save_password (EmpathyChat *self,
+			      PasswordData *data)
+{
+	GtkWidget *content_area;
+	GtkWidget *hbox;
+	GtkWidget *image;
+	GtkWidget *label;
+	GtkWidget *alig;
+	GtkWidget *button;
+
+	/* save the password in case it needs to be saved */
+	data->password = g_strdup (gtk_entry_get_text (GTK_ENTRY (data->entry)));
+
+	/* Remove all previous widgets */
+	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (data->info_bar));
+	gtk_container_forall (GTK_CONTAINER (content_area),
+			      (GtkCallback) gtk_widget_destroy, NULL);
+	data->button = NULL;
+	data->label = NULL;
+	data->entry = NULL;
+	data->spinner = NULL;
+
+	gtk_info_bar_set_message_type (GTK_INFO_BAR (data->info_bar),
+				       GTK_MESSAGE_QUESTION);
+
+	hbox = gtk_hbox_new (FALSE, 5);
+	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
+
+	/* Add image */
+	image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_AUTHENTICATION,
+					  GTK_ICON_SIZE_DIALOG);
+	gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
+
+	/* Add message */
+	label = gtk_label_new (_("Would you like to store this password?"));
+	gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
+
+	/* Add 'Remember' button */
+	alig = gtk_alignment_new (0, 0.5, 1, 0);
+
+	button = gtk_button_new_with_label (_("Remember"));
+	gtk_container_add (GTK_CONTAINER (alig), button);
+	gtk_box_pack_start (GTK_BOX (hbox), alig, FALSE, FALSE, 0);
+
+	g_signal_connect (button, "clicked", G_CALLBACK (passwd_remember_button_cb),
+			  data);
+
+	/* Add 'Not now' button */
+	alig = gtk_alignment_new (0, 0.5, 1, 0);
+
+	button = gtk_button_new_with_label (_("Not now"));
+	gtk_container_add (GTK_CONTAINER (alig), button);
+	gtk_box_pack_start (GTK_BOX (hbox), alig, FALSE, FALSE, 0);
+
+	g_signal_connect (button, "clicked", G_CALLBACK (passwd_not_now_button_cb),
+			  data);
+
+	/* go! */
+	g_signal_handler_disconnect (data->info_bar, data->response_id);
+	g_signal_connect (data->info_bar, "response",
+			  G_CALLBACK (remember_password_infobar_response_cb), data);
+
+	gtk_widget_show_all (data->info_bar);
+}
 
 static void
 provide_password_cb (GObject *tp_chat,
@@ -3016,10 +3119,14 @@ provide_password_cb (GObject *tp_chat,
 		return;
 	}
 
-	/* Get rid of the password info bar finally */
-	gtk_widget_destroy (data->info_bar);
-
-	g_slice_free (PasswordData, data);
+	if (empathy_keyring_is_available ()) {
+		/* ask whether they want to save the password */
+		chat_prompt_to_save_password (self, data);
+	} else {
+		/* Get rid of the password info bar finally */
+		gtk_widget_destroy (data->info_bar);
+		g_slice_free (PasswordData, data);
+	}
 
 	/* Room joined */
 	gtk_widget_set_sensitive (priv->hpaned, TRUE);
@@ -3169,12 +3276,65 @@ display_password_info_bar (EmpathyChat *self)
 			    TRUE, TRUE, 3);
 	gtk_widget_show_all (hbox);
 
-	g_signal_connect (info_bar, "response",
-			  G_CALLBACK (password_infobar_response_cb), data);
+	data->response_id = g_signal_connect (info_bar, "response",
+					      G_CALLBACK (password_infobar_response_cb), data);
 
 	gtk_widget_show_all (info_bar);
 	/* ... but hide the spinner */
 	gtk_widget_hide (spinner);
+}
+
+static void
+provide_saved_password_cb (GObject *tp_chat,
+			   GAsyncResult *res,
+			   gpointer user_data)
+{
+	EmpathyChat *self = user_data;
+	EmpathyChatPriv *priv = GET_PRIV (self);
+	GError *error = NULL;
+
+	if (!empathy_tp_chat_provide_password_finish (EMPATHY_TP_CHAT (tp_chat), res,
+						      &error)) {
+		DEBUG ("error: %s", error->message);
+		/* FIXME: what should we do if that's another error? Close the channel?
+		 * Display the raw D-Bus error to the user isn't very useful */
+		if (g_error_matches (error, TP_ERRORS, TP_ERROR_AUTHENTICATION_FAILED)) {
+			display_password_info_bar (self);
+			gtk_widget_set_sensitive (priv->hpaned, FALSE);
+		}
+		g_error_free (error);
+		return;
+	}
+
+	/* Room joined */
+	gtk_widget_set_sensitive (priv->hpaned, TRUE);
+	gtk_widget_grab_focus (self->input_text_view);
+}
+
+static void
+chat_room_got_password_cb (GObject *source,
+			   GAsyncResult *result,
+			   gpointer user_data)
+{
+	EmpathyChat *self = user_data;
+	EmpathyChatPriv *priv = GET_PRIV (self);
+	const gchar *password;
+	GError *error = NULL;
+
+	password = empathy_keyring_get_room_password_finish (priv->account,
+	    result, &error);
+
+	if (error != NULL) {
+		DEBUG ("Couldn't get room password: %s\n", error->message);
+		g_clear_error (&error);
+
+		display_password_info_bar (self);
+		gtk_widget_set_sensitive (priv->hpaned, FALSE);
+		return;
+	}
+
+	empathy_tp_chat_provide_password_async (priv->tp_chat, password,
+						provide_saved_password_cb, self);
 }
 
 static void
@@ -3183,8 +3343,9 @@ chat_password_needed_changed_cb (EmpathyChat *self)
 	EmpathyChatPriv *priv = GET_PRIV (self);
 
 	if (empathy_tp_chat_password_needed (priv->tp_chat)) {
-		display_password_info_bar (self);
-		gtk_widget_set_sensitive (priv->hpaned, FALSE);
+		empathy_keyring_get_room_password_async (priv->account,
+							 empathy_tp_chat_get_id (priv->tp_chat),
+							 chat_room_got_password_cb, self);
 	}
 }
 
