@@ -24,6 +24,8 @@
 
 #include <gnome-keyring.h>
 
+#include "empathy-utils.h"
+
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include "empathy-debug.h"
 
@@ -146,20 +148,8 @@ empathy_keyring_get_account_password_finish (TpAccount *account,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), NULL);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return NULL;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_get_room_password_async), NULL);
-
-  return g_simple_async_result_get_op_res_gpointer (simple);
+  empathy_implement_finish_return_pointer (account,
+      empathy_keyring_get_account_password_async);
 }
 
 const gchar *
@@ -167,20 +157,8 @@ empathy_keyring_get_room_password_finish (TpAccount *account,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), NULL);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return NULL;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_get_room_password_async), NULL);
-
-  return g_simple_async_result_get_op_res_gpointer (simple);
+  empathy_implement_finish_return_pointer (account,
+      empathy_keyring_get_room_password_async);
 }
 
 /* set */
@@ -277,20 +255,7 @@ empathy_keyring_set_account_password_finish (TpAccount *account,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return FALSE;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_set_account_password_async), FALSE);
-
-  return TRUE;
+  empathy_implement_finish_void (account, empathy_keyring_set_account_password_async);
 }
 
 gboolean
@@ -298,20 +263,7 @@ empathy_keyring_set_room_password_finish (TpAccount *account,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return FALSE;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_set_room_password_async), FALSE);
-
-  return TRUE;
+  empathy_implement_finish_void (account, empathy_keyring_set_room_password_async);
 }
 
 /* delete */
@@ -395,19 +347,6 @@ empathy_keyring_delete_account_password_finish (TpAccount *account,
     GAsyncResult *result,
     GError **error)
 {
-  GSimpleAsyncResult *simple;
-
-  g_return_val_if_fail (TP_IS_ACCOUNT (account), FALSE);
-  g_return_val_if_fail (G_IS_SIMPLE_ASYNC_RESULT (result), FALSE);
-
-  simple = G_SIMPLE_ASYNC_RESULT (result);
-
-  if (g_simple_async_result_propagate_error (simple, error))
-    return FALSE;
-
-  g_return_val_if_fail (g_simple_async_result_is_valid (result,
-          G_OBJECT (account), empathy_keyring_delete_account_password_async), FALSE);
-
-  return TRUE;
+  empathy_implement_finish_void (account, empathy_keyring_delete_account_password_async);
 }
 
