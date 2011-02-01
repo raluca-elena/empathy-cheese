@@ -433,7 +433,6 @@ static void
 details_update (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  TpContact *tp_contact = NULL;
 
   if (!(priv->flags & EMPATHY_INDIVIDUAL_WIDGET_SHOW_DETAILS))
     return;
@@ -455,7 +454,7 @@ details_update (EmpathyIndividualWidget *self)
       data->contact = g_object_ref (priv->contact);
 
       /* First, make sure the CONTACT_INFO feature is ready on the connection */
-      connection = tp_contact_get_connection (tp_contact);
+      connection = tp_contact_get_connection (priv->contact);
       tp_proxy_prepare_async (connection, features,
           (GAsyncReadyCallback) details_feature_prepared_cb, data);
     }
