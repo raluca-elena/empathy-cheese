@@ -14,23 +14,29 @@ EXTRA_DIST = \
     check-whitespace.sh \
     doc-generator.xsl \
     flymake.mk \
+    git-which-branch.sh \
     glib-client-gen.py \
     glib-client-marshaller-gen.py \
-    glib-errors-enum-body-gen.py \
-    glib-errors-enum-header-gen.py \
+    glib-errors-check-gen.py \
+    glib-errors-str-gen.py \
     glib-ginterface-gen.py \
     glib-gtypes-generator.py \
     glib-interfaces-gen.py \
     glib-signals-marshal-gen.py \
     gobject-foo.py \
-    identity.xsl \
     lcov.am \
     libtpcodegen.py \
     libglibcodegen.py \
+    make-release-mail.py \
     make-version-script.py \
+    manager-file.py \
+    shave.mk \
     telepathy.am \
+    telepathy-glib.supp \
     telepathy-glib-env.in \
-    with-session-bus.sh
+    test-wrapper.sh \
+    with-session-bus.sh \
+    xincludator.py
 
 CLEANFILES = libtpcodegen.pyc libtpcodegen.pyo libglibcodegen.pyc libglibcodegen.pyo $(noinst_SCRIPTS)
 

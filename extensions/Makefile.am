@@ -59,10 +59,9 @@ XSLTPROCFLAGS = --nonet --novalid
 
 # Generated files which can be generated for all categories simultaneously
 
-_gen/all.xml: all.xml $(wildcard *.xml)
+_gen/all.xml: all.xml $(wildcard *.xml) $(tools_dir)/xincludator.py
 	@$(mkdir_p) _gen
-	$(AM_V_GEN)$(XSLTPROC) $(XSLTPROCFLAGS) --xinclude $(tools_dir)/identity.xsl \
-		$< > $@
+	$(AM_V_GEN)$(PYTHON) $(tools_dir)/xincludator.py $< > $@
 
 extensions.html: _gen/all.xml $(tools_dir)/doc-generator.xsl
 	$(AM_V_GEN)$(XSLTPROC) $(XSLTPROCFLAGS) \
@@ -95,7 +94,7 @@ _gen/enums.h: _gen/all.xml \
 	$(tools_dir)/c-constants-gen.py
 	$(AM_V_GEN)$(PYTHON) $(tools_dir)/c-constants-gen.py \
 		Emp \
-		$< > $@
+		$< _gen/enums
 
 _gen/interfaces-body.h _gen/interfaces.h: _gen/all.xml \
 	$(tools_dir)/glib-interfaces-gen.py
@@ -106,10 +105,9 @@ _gen/interfaces-body.h _gen/interfaces.h: _gen/all.xml \
 # subclass you want to use with --subclass will need to have its own category,
 # although you can subdivide further if you want.
 
-_gen/misc.xml: misc.xml $(wildcard *.xml)
+_gen/misc.xml: misc.xml $(wildcard *.xml) $(tools_dir)/xincludator.py
 	@$(mkdir_p) _gen
-	$(AM_V_GEN)$(XSLTPROC) $(XSLTPROCFLAGS) --xinclude $(tools_dir)/identity.xsl \
-		$< > $@
+	$(AM_V_GEN)$(PYTHON) $(tools_dir)/xincludator.py $< > $@
 
 _gen/cli-misc-body.h _gen/cli-misc.h: _gen/misc.xml \
 	$(tools_dir)/glib-client-gen.py
