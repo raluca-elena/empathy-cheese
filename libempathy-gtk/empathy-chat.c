@@ -776,7 +776,7 @@ chat_command_msg (EmpathyChat *chat,
 #endif
 
 static void
-callback_for_request_rename(TpProxy *proxy,
+callback_for_request_rename (TpProxy *proxy,
 		  const GError *error,
 		  gpointer user_data,
 		  GObject *weak_object)
