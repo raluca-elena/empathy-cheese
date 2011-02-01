@@ -200,6 +200,14 @@ contact_info_field_cmp (TpContactInfoField *field1,
 }
 
 static void
+client_types_notify_cb (TpContact *contact,
+    GParamSpec *pspec,
+    EmpathyIndividualWidget *self)
+{
+  client_types_update (self);
+}
+
+static void
 update_weak_contact (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
@@ -244,6 +252,9 @@ update_weak_contact (EmpathyIndividualWidget *self)
       priv->contact = tp_contact;
       g_object_add_weak_pointer (G_OBJECT (tp_contact),
           (gpointer *) &priv->contact);
+
+      g_signal_connect (priv->contact, "notify::client-types",
+          (GCallback) client_types_notify_cb, self);
     }
 }
 
@@ -810,14 +821,6 @@ location_update (EmpathyIndividualWidget *self)
 }
 
 static void
-client_types_notify_cb (TpContact *contact,
-    GParamSpec *pspec,
-    EmpathyIndividualWidget *self)
-{
-  client_types_update (self);
-}
-
-static void
 client_types_update (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
@@ -850,8 +853,6 @@ client_types_update (EmpathyIndividualWidget *self)
       gtk_widget_hide (priv->hbox_client_types);
     }
 
-  g_signal_connect (priv->contact, "notify::client-types",
-      (GCallback) client_types_notify_cb, self);
 }
 
 static void
@@ -861,6 +862,9 @@ remove_weak_contact (EmpathyIndividualWidget *self)
 
   if (priv->contact == NULL)
     return;
+
+  g_signal_handlers_disconnect_by_func (priv->contact, client_types_notify_cb,
+      self);
 
   g_object_remove_weak_pointer (G_OBJECT (priv->contact),
       (gpointer *) &priv->contact);
