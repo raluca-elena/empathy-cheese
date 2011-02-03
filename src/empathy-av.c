@@ -31,7 +31,7 @@
 #include <libempathy/empathy-call-factory.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
-#include "empathy-call-window.h"
+#include "empathy-streamed-media-window.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -55,11 +55,11 @@ new_call_handler_cb (EmpathyCallFactory *factory,
     gboolean outgoing,
     gpointer user_data)
 {
-  EmpathyCallWindow *window;
+  EmpathyStreamedMediaWindow *window;
 
   DEBUG ("Create a new call window");
 
-  window = empathy_call_window_new (handler);
+  window = empathy_streamed_media_window_new (handler);
 
   g_application_hold (G_APPLICATION (app));
 

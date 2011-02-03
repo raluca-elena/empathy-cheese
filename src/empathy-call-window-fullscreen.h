@@ -23,7 +23,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
-#include "empathy-call-window.h"
+#include "empathy-streamed-media-window.h"
 
 G_BEGIN_DECLS
 
@@ -61,7 +61,7 @@ GType empathy_call_window_fullscreen_get_type (void);
     EmpathyCallWindowFullscreenClass))
 
 EmpathyCallWindowFullscreen *empathy_call_window_fullscreen_new (
-    EmpathyCallWindow *parent);
+    EmpathyStreamedMediaWindow *parent);
 
 void empathy_call_window_fullscreen_set_fullscreen (
     EmpathyCallWindowFullscreen *fs,

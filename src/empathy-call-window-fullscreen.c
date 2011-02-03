@@ -42,7 +42,7 @@ typedef struct _EmpathyCallWindowFullscreenPriv
 
 struct _EmpathyCallWindowFullscreenPriv
 {
-  EmpathyCallWindow *parent_window;
+  EmpathyStreamedMediaWindow *parent_window;
 
   GtkWidget *leave_fullscreen_popup;
   GtkWidget *video_widget;
@@ -260,7 +260,7 @@ empathy_call_window_fullscreen_parent_window_notify (GtkWidget *parent_window,
 }
 
 EmpathyCallWindowFullscreen *
-empathy_call_window_fullscreen_new (EmpathyCallWindow *parent_window)
+empathy_call_window_fullscreen_new (EmpathyStreamedMediaWindow *parent_window)
 {
   EmpathyCallWindowFullscreen *self = EMPATHY_CALL_WINDOW_FULLSCREEN (
     g_object_new (EMPATHY_TYPE_CALL_WINDOW_FULLSCREEN, NULL));

@@ -1,5 +1,5 @@
 /*
- * empathy-call-window.c - Source for EmpathyCallWindow
+ * empathy-streamed-media-window.c - Source for EmpathyStreamedMediaWindow
  * Copyright (C) 2008-2009 Collabora Ltd.
  * @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *
@@ -51,7 +51,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
 
-#include "empathy-call-window.h"
+#include "empathy-streamed-media-window.h"
 #include "empathy-call-window-fullscreen.h"
 #include "ev-sidebar.h"
 
@@ -76,7 +76,7 @@
 /* The time interval in milliseconds between 2 outgoing rings */
 #define MS_BETWEEN_RING 500
 
-G_DEFINE_TYPE(EmpathyCallWindow, empathy_call_window, GTK_TYPE_WINDOW)
+G_DEFINE_TYPE(EmpathyStreamedMediaWindow, empathy_streamed_media_window, GTK_TYPE_WINDOW)
 
 /* signal enum */
 #if 0
@@ -106,9 +106,9 @@ typedef enum {
 } CameraState;
 
 /* private structure */
-typedef struct _EmpathyCallWindowPriv EmpathyCallWindowPriv;
+typedef struct _EmpathyStreamedMediaWindowPriv EmpathyStreamedMediaWindowPriv;
 
-struct _EmpathyCallWindowPriv
+struct _EmpathyStreamedMediaWindowPriv
 {
   gboolean dispose_has_run;
   EmpathyStreamedMediaHandler *handler;
@@ -225,78 +225,78 @@ struct _EmpathyCallWindowPriv
 };
 
 #define GET_PRIV(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_CALL_WINDOW, \
-    EmpathyCallWindowPriv))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_STREAMED_MEDIA_WINDOW, \
+    EmpathyStreamedMediaWindowPriv))
 
-static void empathy_call_window_realized_cb (GtkWidget *widget,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_realized_cb (GtkWidget *widget,
+  EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_delete_cb (GtkWidget *widget,
-  GdkEvent *event, EmpathyCallWindow *window);
+static gboolean empathy_streamed_media_window_delete_cb (GtkWidget *widget,
+  GdkEvent *event, EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_state_event_cb (GtkWidget *widget,
-  GdkEventWindowState *event, EmpathyCallWindow *window);
+static gboolean empathy_streamed_media_window_state_event_cb (GtkWidget *widget,
+  GdkEventWindowState *event, EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_sidebar_toggled_cb (GtkToggleButton *toggle,
+  EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_set_send_video (EmpathyCallWindow *window,
+static void empathy_streamed_media_window_set_send_video (EmpathyStreamedMediaWindow *window,
   CameraState state);
 
-static void empathy_call_window_mic_toggled_cb (
-  GtkToggleToolButton *toggle, EmpathyCallWindow *window);
+static void empathy_streamed_media_window_mic_toggled_cb (
+  GtkToggleToolButton *toggle, EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_sidebar_hidden_cb (EvSidebar *sidebar,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_sidebar_hidden_cb (EvSidebar *sidebar,
+  EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_sidebar_shown_cb (EvSidebar *sidebar,
+  EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_hangup_cb (gpointer object,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_hangup_cb (gpointer object,
+  EmpathyStreamedMediaWindow *window);
 
 static void empathy_call_window_fullscreen_cb (gpointer object,
-  EmpathyCallWindow *window);
+  EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_fullscreen_toggle (EmpathyCallWindow *window);
+static void empathy_call_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_video_button_press_cb (
-  GtkWidget *video_output, GdkEventButton *event, EmpathyCallWindow *window);
+static gboolean empathy_streamed_media_window_video_button_press_cb (
+  GtkWidget *video_output, GdkEventButton *event, EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_key_press_cb (GtkWidget *video_output,
-  GdkEventKey *event, EmpathyCallWindow *window);
+static gboolean empathy_streamed_media_window_key_press_cb (GtkWidget *video_output,
+  GdkEventKey *event, EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_video_output_motion_notify (
-  GtkWidget *widget, GdkEventMotion *event, EmpathyCallWindow *window);
+static gboolean empathy_streamed_media_window_video_output_motion_notify (
+  GtkWidget *widget, GdkEventMotion *event, EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
+static void empathy_streamed_media_window_video_menu_popup (EmpathyStreamedMediaWindow *window,
   guint button);
 
-static void empathy_call_window_redial_cb (gpointer object,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_redial_cb (gpointer object,
+  EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_restart_call (EmpathyCallWindow *window);
+static void empathy_streamed_media_window_restart_call (EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_status_message (EmpathyCallWindow *window,
+static void empathy_streamed_media_window_status_message (EmpathyStreamedMediaWindow *window,
   gchar *message);
 
-static void empathy_call_window_update_avatars_visibility (EmpathyTpStreamedMedia *call,
-  EmpathyCallWindow *window);
+static void empathy_streamed_media_window_update_avatars_visibility (EmpathyTpStreamedMedia *call,
+  EmpathyStreamedMediaWindow *window);
 
-static gboolean empathy_call_window_bus_message (GstBus *bus,
+static gboolean empathy_streamed_media_window_bus_message (GstBus *bus,
   GstMessage *message, gpointer user_data);
 
 static void
-empathy_call_window_volume_changed_cb (GtkScaleButton *button,
-  gdouble value, EmpathyCallWindow *window);
+empathy_streamed_media_window_volume_changed_cb (GtkScaleButton *button,
+  gdouble value, EmpathyStreamedMediaWindow *window);
 
-static void block_camera_control_signals (EmpathyCallWindow *self);
-static void unblock_camera_control_signals (EmpathyCallWindow *self);
+static void block_camera_control_signals (EmpathyStreamedMediaWindow *self);
+static void unblock_camera_control_signals (EmpathyStreamedMediaWindow *self);
 
 static void
-empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
+empathy_streamed_media_window_setup_toolbar (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkToolItem *tool_item;
   GtkWidget *camera_off_icon;
   GdkPixbuf *pixbuf, *modded_pixbuf;
@@ -330,7 +330,7 @@ empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
    * volume will do */
   gtk_scale_button_set_value (GTK_SCALE_BUTTON (priv->volume_button), 1.0);
   g_signal_connect (G_OBJECT (priv->volume_button), "value-changed",
-    G_CALLBACK (empathy_call_window_volume_changed_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_volume_changed_cb), self);
 
   tool_item = gtk_tool_item_new ();
   gtk_container_add (GTK_CONTAINER (tool_item), priv->volume_button);
@@ -339,9 +339,9 @@ empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
 }
 
 static void
-dtmf_button_pressed_cb (GtkButton *button, EmpathyCallWindow *window)
+dtmf_button_pressed_cb (GtkButton *button, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
   GQuark button_quark;
   TpDTMFEvent event;
@@ -358,9 +358,9 @@ dtmf_button_pressed_cb (GtkButton *button, EmpathyCallWindow *window)
 }
 
 static void
-dtmf_button_released_cb (GtkButton *button, EmpathyCallWindow *window)
+dtmf_button_released_cb (GtkButton *button, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
 
   g_object_get (priv->handler, "tp-call", &call, NULL);
@@ -371,7 +371,7 @@ dtmf_button_released_cb (GtkButton *button, EmpathyCallWindow *window)
 }
 
 static GtkWidget *
-empathy_call_window_create_dtmf (EmpathyCallWindow *self)
+empathy_streamed_media_window_create_dtmf (EmpathyStreamedMediaWindow *self)
 {
   GtkWidget *table;
   int i;
@@ -416,7 +416,7 @@ empathy_call_window_create_dtmf (EmpathyCallWindow *self)
 }
 
 static GtkWidget *
-empathy_call_window_create_video_input_add_slider (EmpathyCallWindow *self,
+empathy_streamed_media_window_create_video_input_add_slider (EmpathyStreamedMediaWindow *self,
   gchar *label_text, GtkWidget *bin)
 {
    GtkWidget *vbox = gtk_vbox_new (FALSE, 2);
@@ -435,33 +435,33 @@ empathy_call_window_create_video_input_add_slider (EmpathyCallWindow *self,
 }
 
 static void
-empathy_call_window_video_contrast_changed_cb (GtkAdjustment *adj,
-  EmpathyCallWindow *self)
+empathy_streamed_media_window_video_contrast_changed_cb (GtkAdjustment *adj,
+  EmpathyStreamedMediaWindow *self)
 
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   empathy_video_src_set_channel (priv->video_input,
     EMPATHY_GST_VIDEO_SRC_CHANNEL_CONTRAST, gtk_adjustment_get_value (adj));
 }
 
 static void
-empathy_call_window_video_brightness_changed_cb (GtkAdjustment *adj,
-  EmpathyCallWindow *self)
+empathy_streamed_media_window_video_brightness_changed_cb (GtkAdjustment *adj,
+  EmpathyStreamedMediaWindow *self)
 
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   empathy_video_src_set_channel (priv->video_input,
     EMPATHY_GST_VIDEO_SRC_CHANNEL_BRIGHTNESS, gtk_adjustment_get_value (adj));
 }
 
 static void
-empathy_call_window_video_gamma_changed_cb (GtkAdjustment *adj,
-  EmpathyCallWindow *self)
+empathy_streamed_media_window_video_gamma_changed_cb (GtkAdjustment *adj,
+  EmpathyStreamedMediaWindow *self)
 
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   empathy_video_src_set_channel (priv->video_input,
     EMPATHY_GST_VIDEO_SRC_CHANNEL_GAMMA, gtk_adjustment_get_value (adj));
@@ -469,29 +469,29 @@ empathy_call_window_video_gamma_changed_cb (GtkAdjustment *adj,
 
 
 static GtkWidget *
-empathy_call_window_create_video_input (EmpathyCallWindow *self)
+empathy_streamed_media_window_create_video_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkWidget *hbox;
 
   hbox = gtk_hbox_new (TRUE, 3);
 
-  priv->video_contrast = empathy_call_window_create_video_input_add_slider (
+  priv->video_contrast = empathy_streamed_media_window_create_video_input_add_slider (
     self,  _("Contrast"), hbox);
 
-  priv->video_brightness = empathy_call_window_create_video_input_add_slider (
+  priv->video_brightness = empathy_streamed_media_window_create_video_input_add_slider (
     self,  _("Brightness"), hbox);
 
-  priv->video_gamma = empathy_call_window_create_video_input_add_slider (
+  priv->video_gamma = empathy_streamed_media_window_create_video_input_add_slider (
     self,  _("Gamma"), hbox);
 
   return hbox;
 }
 
 static void
-empathy_call_window_setup_video_input (EmpathyCallWindow *self)
+empathy_streamed_media_window_setup_video_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   guint supported;
   GtkAdjustment *adj;
 
@@ -506,7 +506,7 @@ empathy_call_window_setup_video_input (EmpathyCallWindow *self)
           EMPATHY_GST_VIDEO_SRC_CHANNEL_CONTRAST));
 
       g_signal_connect (G_OBJECT (adj), "value-changed",
-        G_CALLBACK (empathy_call_window_video_contrast_changed_cb), self);
+        G_CALLBACK (empathy_streamed_media_window_video_contrast_changed_cb), self);
 
       gtk_widget_set_sensitive (priv->video_contrast, TRUE);
     }
@@ -520,7 +520,7 @@ empathy_call_window_setup_video_input (EmpathyCallWindow *self)
           EMPATHY_GST_VIDEO_SRC_CHANNEL_BRIGHTNESS));
 
       g_signal_connect (G_OBJECT (adj), "value-changed",
-        G_CALLBACK (empathy_call_window_video_brightness_changed_cb), self);
+        G_CALLBACK (empathy_streamed_media_window_video_brightness_changed_cb), self);
       gtk_widget_set_sensitive (priv->video_brightness, TRUE);
     }
 
@@ -533,16 +533,16 @@ empathy_call_window_setup_video_input (EmpathyCallWindow *self)
           EMPATHY_GST_VIDEO_SRC_CHANNEL_GAMMA));
 
       g_signal_connect (G_OBJECT (adj), "value-changed",
-        G_CALLBACK (empathy_call_window_video_gamma_changed_cb), self);
+        G_CALLBACK (empathy_streamed_media_window_video_gamma_changed_cb), self);
       gtk_widget_set_sensitive (priv->video_gamma, TRUE);
     }
 }
 
 static void
-empathy_call_window_mic_volume_changed_cb (GtkAdjustment *adj,
-  EmpathyCallWindow *self)
+empathy_streamed_media_window_mic_volume_changed_cb (GtkAdjustment *adj,
+  EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   gdouble volume;
 
   volume = gtk_adjustment_get_value (adj)/100.0;
@@ -564,11 +564,11 @@ empathy_call_window_mic_volume_changed_cb (GtkAdjustment *adj,
 }
 
 static void
-empathy_call_window_audio_input_level_changed_cb (EmpathyGstAudioSrc *src,
-  gdouble level, EmpathyCallWindow *window)
+empathy_streamed_media_window_audio_input_level_changed_cb (EmpathyGstAudioSrc *src,
+  gdouble level, EmpathyStreamedMediaWindow *window)
 {
   gdouble value;
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   value = CLAMP (pow (10, level / 20), 0.0, 1.0);
   gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (priv->volume_progress_bar),
@@ -576,9 +576,9 @@ empathy_call_window_audio_input_level_changed_cb (EmpathyGstAudioSrc *src,
 }
 
 static GtkWidget *
-empathy_call_window_create_audio_input (EmpathyCallWindow *self)
+empathy_streamed_media_window_create_audio_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkWidget *hbox, *vbox, *label;
 
   hbox = gtk_hbox_new (TRUE, 3);
@@ -597,7 +597,7 @@ empathy_call_window_create_audio_input (EmpathyCallWindow *self)
   gtk_adjustment_set_value (priv->audio_input_adj, priv->volume * 100);
 
   g_signal_connect (G_OBJECT (priv->audio_input_adj), "value-changed",
-    G_CALLBACK (empathy_call_window_mic_volume_changed_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_mic_volume_changed_cb), self);
 
   gtk_box_pack_start (GTK_BOX (vbox), priv->volume_scale, TRUE, TRUE, 3);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
@@ -617,9 +617,9 @@ empathy_call_window_create_audio_input (EmpathyCallWindow *self)
 }
 
 static void
-create_video_output_widget (EmpathyCallWindow *self)
+create_video_output_widget (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstBus *bus;
 
   g_assert (priv->video_output == NULL);
@@ -634,15 +634,15 @@ create_video_output_widget (EmpathyCallWindow *self)
   gtk_widget_add_events (priv->video_output,
       GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect (G_OBJECT (priv->video_output), "button-press-event",
-      G_CALLBACK (empathy_call_window_video_button_press_cb), self);
+      G_CALLBACK (empathy_streamed_media_window_video_button_press_cb), self);
 
   g_object_unref (bus);
 }
 
 static void
-create_audio_output (EmpathyCallWindow *self)
+create_audio_output (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_assert (priv->audio_output == NULL);
   priv->audio_output = empathy_audio_sink_new ();
@@ -651,9 +651,9 @@ create_audio_output (EmpathyCallWindow *self)
 }
 
 static void
-create_video_input (EmpathyCallWindow *self)
+create_video_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_assert (priv->video_input == NULL);
   priv->video_input = empathy_video_src_new ();
@@ -662,9 +662,9 @@ create_video_input (EmpathyCallWindow *self)
 }
 
 static void
-create_audio_input (EmpathyCallWindow *self)
+create_audio_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_assert (priv->audio_input == NULL);
   priv->audio_input = empathy_audio_src_new ();
@@ -672,14 +672,14 @@ create_audio_input (EmpathyCallWindow *self)
   gst_object_sink (priv->audio_input);
 
   tp_g_signal_connect_object (priv->audio_input, "peak-level-changed",
-    G_CALLBACK (empathy_call_window_audio_input_level_changed_cb),
+    G_CALLBACK (empathy_streamed_media_window_audio_input_level_changed_cb),
     self, 0);
 }
 
 static void
-add_video_preview_to_pipeline (EmpathyCallWindow *self)
+add_video_preview_to_pipeline (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstElement *preview;
 
   g_assert (priv->video_preview != NULL);
@@ -722,9 +722,9 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
 }
 
 static void
-create_video_preview (EmpathyCallWindow *self)
+create_video_preview (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstBus *bus;
 
   g_assert (priv->video_preview == NULL);
@@ -747,10 +747,10 @@ create_video_preview (EmpathyCallWindow *self)
 }
 
 static void
-play_camera (EmpathyCallWindow *window,
+play_camera (EmpathyStreamedMediaWindow *window,
     gboolean play)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   GstElement *preview;
   GstState state;
 
@@ -774,10 +774,10 @@ play_camera (EmpathyCallWindow *window,
 }
 
 static void
-display_video_preview (EmpathyCallWindow *self,
+display_video_preview (EmpathyStreamedMediaWindow *self,
     gboolean display)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (display)
     {
@@ -803,11 +803,11 @@ display_video_preview (EmpathyCallWindow *self,
 }
 
 static void
-empathy_call_window_set_state_connecting (EmpathyCallWindow *window)
+empathy_streamed_media_window_set_state_connecting (EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
-  empathy_call_window_status_message (window, _("Connecting…"));
+  empathy_streamed_media_window_status_message (window, _("Connecting…"));
   priv->call_state = CONNECTING;
 
   if (priv->outgoing)
@@ -816,9 +816,9 @@ empathy_call_window_set_state_connecting (EmpathyCallWindow *window)
 }
 
 static void
-disable_camera (EmpathyCallWindow *self)
+disable_camera (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->camera_state == CAMERA_STATE_OFF)
     return;
@@ -828,7 +828,7 @@ disable_camera (EmpathyCallWindow *self)
   display_video_preview (self, FALSE);
 
   if (priv->camera_state == CAMERA_STATE_ON)
-    empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
+    empathy_streamed_media_window_set_send_video (self, CAMERA_STATE_OFF);
 
   block_camera_control_signals (self);
   gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON (
@@ -847,9 +847,9 @@ disable_camera (EmpathyCallWindow *self)
 
 static void
 tool_button_camera_off_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *self)
+  EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (!gtk_toggle_tool_button_get_active (toggle))
     {
@@ -868,9 +868,9 @@ tool_button_camera_off_toggled_cb (GtkToggleToolButton *toggle,
 }
 
 static void
-enable_preview (EmpathyCallWindow *self)
+enable_preview (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->camera_state == CAMERA_STATE_PREVIEW)
     return;
@@ -880,7 +880,7 @@ enable_preview (EmpathyCallWindow *self)
   if (priv->camera_state == CAMERA_STATE_ON)
     {
       /* preview is already displayed so we just have to stop sending */
-      empathy_call_window_set_send_video (self, CAMERA_STATE_PREVIEW);
+      empathy_streamed_media_window_set_send_video (self, CAMERA_STATE_PREVIEW);
     }
   else
     {
@@ -904,9 +904,9 @@ enable_preview (EmpathyCallWindow *self)
 
 static void
 tool_button_camera_preview_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *self)
+  EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (!gtk_toggle_tool_button_get_active (toggle))
     {
@@ -925,9 +925,9 @@ tool_button_camera_preview_toggled_cb (GtkToggleToolButton *toggle,
 }
 
 static void
-enable_camera (EmpathyCallWindow *self)
+enable_camera (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->camera_state == CAMERA_STATE_ON)
     return;
@@ -941,7 +941,7 @@ enable_camera (EmpathyCallWindow *self)
 
   DEBUG ("Enable camera");
 
-  empathy_call_window_set_send_video (self, CAMERA_STATE_ON);
+  empathy_streamed_media_window_set_send_video (self, CAMERA_STATE_ON);
 
   block_camera_control_signals (self);
   gtk_toggle_tool_button_set_active (GTK_TOGGLE_TOOL_BUTTON (
@@ -960,9 +960,9 @@ enable_camera (EmpathyCallWindow *self)
 
 static void
 tool_button_camera_on_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *self)
+  EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (!gtk_toggle_tool_button_get_active (toggle))
     {
@@ -983,7 +983,7 @@ tool_button_camera_on_toggled_cb (GtkToggleToolButton *toggle,
 static void
 action_camera_change_cb (GtkRadioAction *action,
     GtkRadioAction *current,
-    EmpathyCallWindow *self)
+    EmpathyStreamedMediaWindow *self)
 {
   CameraState state;
 
@@ -1009,9 +1009,9 @@ action_camera_change_cb (GtkRadioAction *action,
 }
 
 static void
-create_pipeline (EmpathyCallWindow *self)
+create_pipeline (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstBus *bus;
 
   g_assert (priv->pipeline == NULL);
@@ -1021,16 +1021,16 @@ create_pipeline (EmpathyCallWindow *self)
 
   bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
   priv->bus_message_source_id = gst_bus_add_watch (bus,
-      empathy_call_window_bus_message, self);
+      empathy_streamed_media_window_bus_message, self);
 
   g_object_unref (bus);
 }
 
 
 static void
-empathy_call_window_init (EmpathyCallWindow *self)
+empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkBuilder *gui;
   GtkWidget *top_vbox;
   GtkWidget *h;
@@ -1073,11 +1073,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   g_free (filename);
 
   empathy_builder_connect (gui, self,
-    "menuhangup", "activate", empathy_call_window_hangup_cb,
-    "hangup", "clicked", empathy_call_window_hangup_cb,
-    "menuredial", "activate", empathy_call_window_redial_cb,
-    "redial", "clicked", empathy_call_window_redial_cb,
-    "microphone", "toggled", empathy_call_window_mic_toggled_cb,
+    "menuhangup", "activate", empathy_streamed_media_window_hangup_cb,
+    "hangup", "clicked", empathy_streamed_media_window_hangup_cb,
+    "menuredial", "activate", empathy_streamed_media_window_redial_cb,
+    "redial", "clicked", empathy_streamed_media_window_redial_cb,
+    "microphone", "toggled", empathy_streamed_media_window_mic_toggled_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "camera_off", "toggled", tool_button_camera_off_toggled_cb,
     "camera_preview", "toggled", tool_button_camera_preview_toggled_cb,
@@ -1161,12 +1161,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_box_pack_start (GTK_BOX (priv->vbox), priv->self_user_output_frame,
       FALSE, FALSE, 0);
 
-  empathy_call_window_setup_toolbar (self);
+  empathy_streamed_media_window_setup_toolbar (self);
 
   priv->sidebar_button = gtk_toggle_button_new_with_mnemonic (_("_Sidebar"));
   arrow = gtk_arrow_new (GTK_ARROW_RIGHT, GTK_SHADOW_NONE);
   g_signal_connect (G_OBJECT (priv->sidebar_button), "toggled",
-    G_CALLBACK (empathy_call_window_sidebar_toggled_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_sidebar_toggled_cb), self);
 
   gtk_button_set_image (GTK_BUTTON (priv->sidebar_button), arrow);
 
@@ -1176,20 +1176,20 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   priv->sidebar = ev_sidebar_new ();
   g_signal_connect (G_OBJECT (priv->sidebar),
-    "hide", G_CALLBACK (empathy_call_window_sidebar_hidden_cb), self);
+    "hide", G_CALLBACK (empathy_streamed_media_window_sidebar_hidden_cb), self);
   g_signal_connect (G_OBJECT (priv->sidebar),
-    "show", G_CALLBACK (empathy_call_window_sidebar_shown_cb), self);
+    "show", G_CALLBACK (empathy_streamed_media_window_sidebar_shown_cb), self);
   gtk_paned_pack2 (GTK_PANED (priv->pane), priv->sidebar, FALSE, FALSE);
 
-  page = empathy_call_window_create_audio_input (self);
+  page = empathy_streamed_media_window_create_audio_input (self);
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "audio-input",
       _("Audio input"), page);
 
-  page = empathy_call_window_create_video_input (self);
+  page = empathy_streamed_media_window_create_video_input (self);
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "video-input",
       _("Video input"), page);
 
-  priv->dtmf_panel = empathy_call_window_create_dtmf (self);
+  priv->dtmf_panel = empathy_streamed_media_window_create_dtmf (self);
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "dialpad",
       _("Dialpad"), priv->dtmf_panel);
 
@@ -1209,16 +1209,16 @@ empathy_call_window_init (EmpathyCallWindow *self)
       "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
 
   g_signal_connect (G_OBJECT (self), "realize",
-    G_CALLBACK (empathy_call_window_realized_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_realized_cb), self);
 
   g_signal_connect (G_OBJECT (self), "delete-event",
-    G_CALLBACK (empathy_call_window_delete_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_delete_cb), self);
 
   g_signal_connect (G_OBJECT (self), "window-state-event",
-    G_CALLBACK (empathy_call_window_state_event_cb), self);
+    G_CALLBACK (empathy_streamed_media_window_state_event_cb), self);
 
   g_signal_connect (G_OBJECT (self), "key-press-event",
-      G_CALLBACK (empathy_call_window_key_press_cb), self);
+      G_CALLBACK (empathy_streamed_media_window_key_press_cb), self);
 
   priv->timer = g_timer_new ();
 
@@ -1258,9 +1258,9 @@ init_contact_avatar_with_size (EmpathyContact *contact,
 }
 
 static void
-set_window_title (EmpathyCallWindow *self)
+set_window_title (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   gchar *tmp;
 
   /* translators: Call is a noun and %s is the contact name. This string
@@ -1273,7 +1273,7 @@ set_window_title (EmpathyCallWindow *self)
 
 static void
 contact_name_changed_cb (EmpathyContact *contact,
-    GParamSpec *pspec, EmpathyCallWindow *self)
+    GParamSpec *pspec, EmpathyStreamedMediaWindow *self)
 {
   set_window_title (self);
 }
@@ -1299,12 +1299,12 @@ contact_avatar_changed_cb (EmpathyContact *contact,
 }
 
 static void
-empathy_call_window_got_self_contact_cb (TpConnection *connection,
+empathy_streamed_media_window_got_self_contact_cb (TpConnection *connection,
     EmpathyContact *contact, const GError *error, gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   init_contact_avatar_with_size (contact, priv->self_user_avatar_widget,
       MIN (SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH));
@@ -1314,10 +1314,10 @@ empathy_call_window_got_self_contact_cb (TpConnection *connection,
 }
 
 static void
-empathy_call_window_setup_avatars (EmpathyCallWindow *self,
+empathy_streamed_media_window_setup_avatars (EmpathyStreamedMediaWindow *self,
     EmpathyStreamedMediaHandler *handler)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_object_get (handler, "contact", &(priv->contact), NULL);
 
@@ -1337,7 +1337,7 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
       connection = empathy_contact_get_connection (priv->contact);
       empathy_tp_contact_factory_get_from_handle (connection,
           tp_connection_get_self_handle (connection),
-          empathy_call_window_got_self_contact_cb, self, NULL, G_OBJECT (self));
+          empathy_streamed_media_window_got_self_contact_cb, self, NULL, G_OBJECT (self));
     }
   else
     {
@@ -1365,10 +1365,10 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
 }
 
 static void
-update_send_codec (EmpathyCallWindow *self,
+update_send_codec (EmpathyStreamedMediaWindow *self,
     gboolean audio)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   FsCodec *codec;
   GtkWidget *widget;
   gchar *tmp;
@@ -1397,7 +1397,7 @@ send_audio_codec_notify_cb (GObject *object,
     GParamSpec *pspec,
     gpointer user_data)
 {
-  EmpathyCallWindow *self = user_data;
+  EmpathyStreamedMediaWindow *self = user_data;
 
   update_send_codec (self, TRUE);
 }
@@ -1407,16 +1407,16 @@ send_video_codec_notify_cb (GObject *object,
     GParamSpec *pspec,
     gpointer user_data)
 {
-  EmpathyCallWindow *self = user_data;
+  EmpathyStreamedMediaWindow *self = user_data;
 
   update_send_codec (self, FALSE);
 }
 
 static void
-update_recv_codec (EmpathyCallWindow *self,
+update_recv_codec (EmpathyStreamedMediaWindow *self,
     gboolean audio)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GList *codecs, *l;
   GtkWidget *widget;
   GString *str = NULL;
@@ -1457,7 +1457,7 @@ recv_audio_codecs_notify_cb (GObject *object,
     GParamSpec *pspec,
     gpointer user_data)
 {
-  EmpathyCallWindow *self = user_data;
+  EmpathyStreamedMediaWindow *self = user_data;
 
   update_recv_codec (self, TRUE);
 }
@@ -1467,7 +1467,7 @@ recv_video_codecs_notify_cb (GObject *object,
     GParamSpec *pspec,
     gpointer user_data)
 {
-  EmpathyCallWindow *self = user_data;
+  EmpathyStreamedMediaWindow *self = user_data;
 
   update_recv_codec (self, FALSE);
 }
@@ -1513,7 +1513,7 @@ candidate_type_to_desc (FsCandidate *candidate)
 }
 
 static void
-update_candidat_widget (EmpathyCallWindow *self,
+update_candidat_widget (EmpathyStreamedMediaWindow *self,
     GtkWidget *label,
     GtkWidget *img,
     FsCandidate *candidate)
@@ -1533,9 +1533,9 @@ update_candidat_widget (EmpathyCallWindow *self,
 static void
 candidates_changed_cb (GObject *object,
     FsMediaType type,
-    EmpathyCallWindow *self)
+    EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   FsCandidate *candidate = NULL;
 
   if (type == FS_MEDIA_TYPE_VIDEO)
@@ -1573,10 +1573,10 @@ candidates_changed_cb (GObject *object,
 }
 
 static void
-empathy_call_window_constructed (GObject *object)
+empathy_streamed_media_window_constructed (GObject *object)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (object);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (object);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   EmpathyTpStreamedMedia *call;
 
   g_assert (priv->handler != NULL);
@@ -1586,8 +1586,8 @@ empathy_call_window_constructed (GObject *object)
   if (call != NULL)
     g_object_unref (call);
 
-  empathy_call_window_setup_avatars (self, priv->handler);
-  empathy_call_window_set_state_connecting (self);
+  empathy_streamed_media_window_setup_avatars (self, priv->handler);
+  empathy_streamed_media_window_set_state_connecting (self);
 
   if (!empathy_streamed_media_handler_has_initial_video (priv->handler))
     {
@@ -1615,14 +1615,14 @@ empathy_call_window_constructed (GObject *object)
       G_CALLBACK (candidates_changed_cb), self, 0);
 }
 
-static void empathy_call_window_dispose (GObject *object);
-static void empathy_call_window_finalize (GObject *object);
+static void empathy_streamed_media_window_dispose (GObject *object);
+static void empathy_streamed_media_window_finalize (GObject *object);
 
 static void
-empathy_call_window_set_property (GObject *object,
+empathy_streamed_media_window_set_property (GObject *object,
   guint property_id, const GValue *value, GParamSpec *pspec)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (object);
 
   switch (property_id)
     {
@@ -1635,10 +1635,10 @@ empathy_call_window_set_property (GObject *object,
 }
 
 static void
-empathy_call_window_get_property (GObject *object,
+empathy_streamed_media_window_get_property (GObject *object,
   guint property_id, GValue *value, GParamSpec *pspec)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (object);
 
   switch (property_id)
     {
@@ -1651,21 +1651,21 @@ empathy_call_window_get_property (GObject *object,
 }
 
 static void
-empathy_call_window_class_init (
-  EmpathyCallWindowClass *empathy_call_window_class)
+empathy_streamed_media_window_class_init (
+  EmpathyStreamedMediaWindowClass *empathy_streamed_media_window_class)
 {
-  GObjectClass *object_class = G_OBJECT_CLASS (empathy_call_window_class);
+  GObjectClass *object_class = G_OBJECT_CLASS (empathy_streamed_media_window_class);
   GParamSpec *param_spec;
 
-  g_type_class_add_private (empathy_call_window_class,
-    sizeof (EmpathyCallWindowPriv));
+  g_type_class_add_private (empathy_streamed_media_window_class,
+    sizeof (EmpathyStreamedMediaWindowPriv));
 
-  object_class->constructed = empathy_call_window_constructed;
-  object_class->set_property = empathy_call_window_set_property;
-  object_class->get_property = empathy_call_window_get_property;
+  object_class->constructed = empathy_streamed_media_window_constructed;
+  object_class->set_property = empathy_streamed_media_window_set_property;
+  object_class->get_property = empathy_streamed_media_window_get_property;
 
-  object_class->dispose = empathy_call_window_dispose;
-  object_class->finalize = empathy_call_window_finalize;
+  object_class->dispose = empathy_streamed_media_window_dispose;
+  object_class->finalize = empathy_streamed_media_window_finalize;
 
   param_spec = g_param_spec_object ("handler",
     "handler", "The call handler",
@@ -1676,19 +1676,19 @@ empathy_call_window_class_init (
 }
 
 static void
-empathy_call_window_video_stream_changed_cb (EmpathyTpStreamedMedia *call,
-    GParamSpec *property, EmpathyCallWindow *self)
+empathy_streamed_media_window_video_stream_changed_cb (EmpathyTpStreamedMedia *call,
+    GParamSpec *property, EmpathyStreamedMediaWindow *self)
 {
   DEBUG ("video stream changed");
-  empathy_call_window_update_avatars_visibility (call, self);
+  empathy_streamed_media_window_update_avatars_visibility (call, self);
 }
 
 void
-empathy_call_window_dispose (GObject *object)
+empathy_streamed_media_window_dispose (GObject *object)
 {
   EmpathyTpStreamedMedia *call;
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (object);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (object);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->dispose_has_run)
     return;
@@ -1766,14 +1766,14 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->sound_mgr);
 
   /* release any references held by the object here */
-  if (G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose)
-    G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose (object);
+  if (G_OBJECT_CLASS (empathy_streamed_media_window_parent_class)->dispose)
+    G_OBJECT_CLASS (empathy_streamed_media_window_parent_class)->dispose (object);
 }
 
 static void
-disconnect_video_output_motion_handler (EmpathyCallWindow *self)
+disconnect_video_output_motion_handler (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->video_output_motion_handler_id != 0)
     {
@@ -1784,10 +1784,10 @@ disconnect_video_output_motion_handler (EmpathyCallWindow *self)
 }
 
 void
-empathy_call_window_finalize (GObject *object)
+empathy_streamed_media_window_finalize (GObject *object)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (object);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (object);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   disconnect_video_output_motion_handler (self);
 
@@ -1796,23 +1796,23 @@ empathy_call_window_finalize (GObject *object)
 
   g_timer_destroy (priv->timer);
 
-  G_OBJECT_CLASS (empathy_call_window_parent_class)->finalize (object);
+  G_OBJECT_CLASS (empathy_streamed_media_window_parent_class)->finalize (object);
 }
 
 
-EmpathyCallWindow *
-empathy_call_window_new (EmpathyStreamedMediaHandler *handler)
+EmpathyStreamedMediaWindow *
+empathy_streamed_media_window_new (EmpathyStreamedMediaHandler *handler)
 {
-  return EMPATHY_CALL_WINDOW (
-    g_object_new (EMPATHY_TYPE_CALL_WINDOW, "handler", handler, NULL));
+  return EMPATHY_STREAMED_MEDIA_WINDOW (
+    g_object_new (EMPATHY_TYPE_STREAMED_MEDIA_WINDOW, "handler", handler, NULL));
 }
 
 static void
-empathy_call_window_conference_added_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_conference_added_cb (EmpathyStreamedMediaHandler *handler,
   GstElement *conference, gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   gst_bin_add (GST_BIN (priv->pipeline), conference);
 
@@ -1820,11 +1820,11 @@ empathy_call_window_conference_added_cb (EmpathyStreamedMediaHandler *handler,
 }
 
 static gboolean
-empathy_call_window_request_resource_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_request_resource_cb (EmpathyStreamedMediaHandler *handler,
   FsMediaType type, FsStreamDirection direction, gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (type != FS_MEDIA_TYPE_VIDEO)
     return TRUE;
@@ -1837,10 +1837,10 @@ empathy_call_window_request_resource_cb (EmpathyStreamedMediaHandler *handler,
 }
 
 static gboolean
-empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
+empathy_streamed_media_window_reset_pipeline (EmpathyStreamedMediaWindow *self)
 {
   GstStateChangeReturn state_change_return;
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   if (priv->pipeline == NULL)
     return TRUE;
@@ -1861,7 +1861,7 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       priv->pipeline = NULL;
 
       g_signal_handlers_disconnect_by_func (priv->audio_input_adj,
-          empathy_call_window_mic_volume_changed_cb, self);
+          empathy_streamed_media_window_mic_volume_changed_cb, self);
 
       if (priv->video_tee != NULL)
         g_object_unref (priv->video_tee);
@@ -1891,9 +1891,9 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
 }
 
 static void
-reset_details_pane (EmpathyCallWindow *self)
+reset_details_pane (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   gtk_label_set_text (GTK_LABEL (priv->vcodec_encoding_label), _("Unknown"));
   gtk_label_set_text (GTK_LABEL (priv->acodec_encoding_label), _("Unknown"));
@@ -1902,11 +1902,11 @@ reset_details_pane (EmpathyCallWindow *self)
 }
 
 static gboolean
-empathy_call_window_disconnected (EmpathyCallWindow *self,
+empathy_streamed_media_window_disconnected (EmpathyStreamedMediaWindow *self,
     gboolean restart)
 {
   gboolean could_disconnect = FALSE;
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   gboolean could_reset_pipeline;
 
   /* Leave full screen mode if needed */
@@ -1914,7 +1914,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
 
-  could_reset_pipeline = empathy_call_window_reset_pipeline (self);
+  could_reset_pipeline = empathy_streamed_media_window_reset_pipeline (self);
 
   if (priv->call_state == CONNECTING)
       empathy_sound_manager_stop (priv->sound_mgr,
@@ -1940,7 +1940,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
          * a video preview */
         return TRUE;
 
-      empathy_call_window_status_message (self, _("Disconnected"));
+      empathy_streamed_media_window_status_message (self, _("Disconnected"));
 
       gtk_action_set_sensitive (priv->redial, TRUE);
       gtk_widget_set_sensitive (priv->redial_button, TRUE);
@@ -1992,24 +1992,24 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
 
 static void
-empathy_call_window_channel_closed_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_channel_closed_cb (EmpathyStreamedMediaHandler *handler,
     gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
-  if (empathy_call_window_disconnected (self, TRUE) &&
+  if (empathy_streamed_media_window_disconnected (self, TRUE) &&
       priv->call_state == REDIALING)
-      empathy_call_window_restart_call (self);
+      empathy_streamed_media_window_restart_call (self);
 }
 
 
 static void
-empathy_call_window_channel_stream_closed_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_channel_stream_closed_cb (EmpathyStreamedMediaHandler *handler,
     TfStream *stream, gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   guint media_type;
 
   g_object_get (stream, "media-type", &media_type, NULL);
@@ -2051,9 +2051,9 @@ empathy_call_window_channel_stream_closed_cb (EmpathyStreamedMediaHandler *handl
 
 /* Called with global lock held */
 static GstPad *
-empathy_call_window_get_video_sink_pad (EmpathyCallWindow *self)
+empathy_streamed_media_window_get_video_sink_pad (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstPad *pad;
   GstElement *output;
 
@@ -2132,9 +2132,9 @@ empathy_call_window_get_video_sink_pad (EmpathyCallWindow *self)
 
 /* Called with global lock held */
 static GstPad *
-empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self)
+empathy_streamed_media_window_get_audio_sink_pad (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstPad *pad;
   GstElement *filter;
   GError *gerror = NULL;
@@ -2247,10 +2247,10 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self)
 }
 
 static gboolean
-empathy_call_window_update_timer (gpointer user_data)
+empathy_streamed_media_window_update_timer (gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   gchar *str;
   gdouble time_;
 
@@ -2259,21 +2259,21 @@ empathy_call_window_update_timer (gpointer user_data)
   /* Translators: number of minutes:seconds the caller has been connected */
   str = g_strdup_printf (_("Connected — %d:%02dm"), (int) time_ / 60,
     (int) time_ % 60);
-  empathy_call_window_status_message (self, str);
+  empathy_streamed_media_window_status_message (self, str);
   g_free (str);
 
   return TRUE;
 }
 
 static void
-display_error (EmpathyCallWindow *self,
+display_error (EmpathyStreamedMediaWindow *self,
     EmpathyTpStreamedMedia *call,
     const gchar *img,
     const gchar *title,
     const gchar *desc,
     const gchar *details)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkWidget *info_bar;
   GtkWidget *content_area;
   GtkWidget *hbox;
@@ -2341,12 +2341,12 @@ display_error (EmpathyCallWindow *self,
 }
 
 static gchar *
-media_stream_error_to_txt (EmpathyCallWindow *self,
+media_stream_error_to_txt (EmpathyStreamedMediaWindow *self,
     EmpathyTpStreamedMedia *call,
     gboolean audio,
     TpMediaStreamError error)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   const gchar *cm;
   gchar *url;
   gchar *result;
@@ -2410,7 +2410,7 @@ media_stream_error_to_txt (EmpathyCallWindow *self,
 }
 
 static void
-empathy_call_window_stream_error (EmpathyCallWindow *self,
+empathy_streamed_media_window_stream_error (EmpathyStreamedMediaWindow *self,
     EmpathyTpStreamedMedia *call,
     gboolean audio,
     guint code,
@@ -2435,30 +2435,30 @@ empathy_call_window_stream_error (EmpathyCallWindow *self,
 }
 
 static void
-empathy_call_window_audio_stream_error (EmpathyTpStreamedMedia *call,
+empathy_streamed_media_window_audio_stream_error (EmpathyTpStreamedMedia *call,
     guint code,
     const gchar *msg,
-    EmpathyCallWindow *self)
+    EmpathyStreamedMediaWindow *self)
 {
-  empathy_call_window_stream_error (self, call, TRUE, code, msg,
+  empathy_streamed_media_window_stream_error (self, call, TRUE, code, msg,
       "gnome-stock-mic", _("Can't establish audio stream"));
 }
 
 static void
-empathy_call_window_video_stream_error (EmpathyTpStreamedMedia *call,
+empathy_streamed_media_window_video_stream_error (EmpathyTpStreamedMedia *call,
     guint code,
     const gchar *msg,
-    EmpathyCallWindow *self)
+    EmpathyStreamedMediaWindow *self)
 {
-  empathy_call_window_stream_error (self, call, FALSE, code, msg,
+  empathy_streamed_media_window_stream_error (self, call, FALSE, code, msg,
       "camera-web", _("Can't establish video stream"));
 }
 
 static gboolean
-empathy_call_window_connected (gpointer user_data)
+empathy_streamed_media_window_connected (gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   EmpathyTpStreamedMedia *call;
   gboolean can_send_video;
 
@@ -2470,14 +2470,14 @@ empathy_call_window_connected (gpointer user_data)
   g_object_get (priv->handler, "tp-call", &call, NULL);
 
   tp_g_signal_connect_object (call, "notify::video-stream",
-    G_CALLBACK (empathy_call_window_video_stream_changed_cb),
+    G_CALLBACK (empathy_streamed_media_window_video_stream_changed_cb),
     self, 0);
 
   if (empathy_tp_streamed_media_has_dtmf (call))
     gtk_widget_set_sensitive (priv->dtmf_panel, TRUE);
 
   if (priv->video_input == NULL)
-    empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
+    empathy_streamed_media_window_set_send_video (self, CAMERA_STATE_OFF);
 
   priv->sending_video = can_send_video ?
     empathy_tp_streamed_media_is_sending_video (call) : FALSE;
@@ -2493,18 +2493,18 @@ empathy_call_window_connected (gpointer user_data)
 
   gtk_widget_set_sensitive (priv->mic_button, TRUE);
 
-  empathy_call_window_update_avatars_visibility (call, self);
+  empathy_streamed_media_window_update_avatars_visibility (call, self);
 
   g_object_unref (call);
 
   g_mutex_lock (priv->lock);
 
   priv->timer_id = g_timeout_add_seconds (1,
-    empathy_call_window_update_timer, self);
+    empathy_streamed_media_window_update_timer, self);
 
   g_mutex_unlock (priv->lock);
 
-  empathy_call_window_update_timer (self);
+  empathy_streamed_media_window_update_timer (self);
 
   gtk_action_set_sensitive (priv->menu_fullscreen, TRUE);
 
@@ -2514,11 +2514,11 @@ empathy_call_window_connected (gpointer user_data)
 
 /* Called from the streaming thread */
 static gboolean
-empathy_call_window_src_added_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_src_added_cb (EmpathyStreamedMediaHandler *handler,
   GstPad *src, guint media_type, gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   gboolean retval = FALSE;
 
   GstPad *pad;
@@ -2528,19 +2528,19 @@ empathy_call_window_src_added_cb (EmpathyStreamedMediaHandler *handler,
   if (priv->call_state != CONNECTED)
     {
       g_timer_start (priv->timer);
-      priv->timer_id = g_idle_add  (empathy_call_window_connected, self);
+      priv->timer_id = g_idle_add  (empathy_streamed_media_window_connected, self);
       priv->call_state = CONNECTED;
     }
 
   switch (media_type)
     {
       case TP_MEDIA_STREAM_TYPE_AUDIO:
-        pad = empathy_call_window_get_audio_sink_pad (self);
+        pad = empathy_streamed_media_window_get_audio_sink_pad (self);
         break;
       case TP_MEDIA_STREAM_TYPE_VIDEO:
         gtk_widget_hide (priv->remote_user_avatar_widget);
         gtk_widget_show (priv->video_output);
-        pad = empathy_call_window_get_video_sink_pad (self);
+        pad = empathy_streamed_media_window_get_video_sink_pad (self);
         break;
       default:
         g_assert_not_reached ();
@@ -2595,11 +2595,11 @@ empathy_call_window_src_added_cb (EmpathyStreamedMediaHandler *handler,
 }
 
 static gboolean
-empathy_call_window_sink_added_cb (EmpathyStreamedMediaHandler *handler,
+empathy_streamed_media_window_sink_added_cb (EmpathyStreamedMediaHandler *handler,
   GstPad *sink, guint media_type, gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstPad *pad;
   gboolean retval = FALSE;
 
@@ -2662,9 +2662,9 @@ empathy_call_window_sink_added_cb (EmpathyStreamedMediaHandler *handler,
 }
 
 static void
-empathy_call_window_remove_video_input (EmpathyCallWindow *self)
+empathy_streamed_media_window_remove_video_input (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstElement *preview;
 
   disable_camera (self);
@@ -2693,9 +2693,9 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
 }
 
 static void
-start_call (EmpathyCallWindow *self)
+start_call (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   priv->call_started = TRUE;
   empathy_streamed_media_handler_start_call (priv->handler,
@@ -2710,11 +2710,11 @@ start_call (EmpathyCallWindow *self)
 }
 
 static gboolean
-empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
+empathy_streamed_media_window_bus_message (GstBus *bus, GstMessage *message,
   gpointer user_data)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstState newstate;
 
   empathy_streamed_media_handler_bus_message (priv->handler, bus, message);
@@ -2726,7 +2726,7 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
           {
             gst_message_parse_state_changed (message, NULL, &newstate, NULL);
             if (newstate == GST_STATE_PAUSED)
-                empathy_call_window_setup_video_input (self);
+                empathy_streamed_media_window_setup_video_input (self);
           }
         if (GST_MESSAGE_SRC (message) == GST_OBJECT (priv->pipeline) &&
             !priv->call_started)
@@ -2758,12 +2758,12 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
             {
               /* Remove the video input and continue */
               if (priv->video_input != NULL)
-                empathy_call_window_remove_video_input (self);
+                empathy_streamed_media_window_remove_video_input (self);
               gst_element_set_state (priv->pipeline, GST_STATE_PLAYING);
             }
           else
             {
-              empathy_call_window_disconnected (self, TRUE);
+              empathy_streamed_media_window_disconnected (self, TRUE);
             }
           g_error_free (error);
           g_free (debug);
@@ -2795,10 +2795,10 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
 }
 
 static void
-empathy_call_window_update_avatars_visibility (EmpathyTpStreamedMedia *call,
-    EmpathyCallWindow *window)
+empathy_streamed_media_window_update_avatars_visibility (EmpathyTpStreamedMedia *call,
+    EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (empathy_tp_streamed_media_is_receiving_video (call))
     {
@@ -2815,9 +2815,9 @@ empathy_call_window_update_avatars_visibility (EmpathyTpStreamedMedia *call,
 static void
 call_handler_notify_tp_streamed_media_cb (EmpathyStreamedMediaHandler *handler,
     GParamSpec *spec,
-    EmpathyCallWindow *self)
+    EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   EmpathyTpStreamedMedia *call;
 
   g_object_get (priv->handler, "tp-call", &call, NULL);
@@ -2825,40 +2825,40 @@ call_handler_notify_tp_streamed_media_cb (EmpathyStreamedMediaHandler *handler,
     return;
 
   tp_g_signal_connect_object (call, "audio-stream-error",
-      G_CALLBACK (empathy_call_window_audio_stream_error), self, 0);
+      G_CALLBACK (empathy_streamed_media_window_audio_stream_error), self, 0);
   tp_g_signal_connect_object (call, "video-stream-error",
-      G_CALLBACK (empathy_call_window_video_stream_error), self, 0);
+      G_CALLBACK (empathy_streamed_media_window_video_stream_error), self, 0);
 
   g_object_unref (call);
 }
 
 static void
-empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
+empathy_streamed_media_window_realized_cb (GtkWidget *widget, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
 
   g_signal_connect (priv->handler, "conference-added",
-    G_CALLBACK (empathy_call_window_conference_added_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_conference_added_cb), window);
   g_signal_connect (priv->handler, "request-resource",
-    G_CALLBACK (empathy_call_window_request_resource_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_request_resource_cb), window);
   g_signal_connect (priv->handler, "closed",
-    G_CALLBACK (empathy_call_window_channel_closed_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_channel_closed_cb), window);
   g_signal_connect (priv->handler, "src-pad-added",
-    G_CALLBACK (empathy_call_window_src_added_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_src_added_cb), window);
   g_signal_connect (priv->handler, "sink-pad-added",
-    G_CALLBACK (empathy_call_window_sink_added_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_sink_added_cb), window);
   g_signal_connect (priv->handler, "stream-closed",
-    G_CALLBACK (empathy_call_window_channel_stream_closed_cb), window);
+    G_CALLBACK (empathy_streamed_media_window_channel_stream_closed_cb), window);
 
   g_object_get (priv->handler, "tp-call", &call, NULL);
   if (call != NULL)
     {
       tp_g_signal_connect_object (call, "audio-stream-error",
-        G_CALLBACK (empathy_call_window_audio_stream_error), window,
+        G_CALLBACK (empathy_streamed_media_window_audio_stream_error), window,
         0);
       tp_g_signal_connect_object (call, "video-stream-error",
-        G_CALLBACK (empathy_call_window_video_stream_error), window,
+        G_CALLBACK (empathy_streamed_media_window_video_stream_error), window,
         0);
 
       g_object_unref (call);
@@ -2875,10 +2875,10 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
 }
 
 static gboolean
-empathy_call_window_delete_cb (GtkWidget *widget, GdkEvent*event,
-  EmpathyCallWindow *window)
+empathy_streamed_media_window_delete_cb (GtkWidget *widget, GdkEvent*event,
+  EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->pipeline != NULL)
     {
@@ -2898,10 +2898,10 @@ empathy_call_window_delete_cb (GtkWidget *widget, GdkEvent*event,
 }
 
 static void
-show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
+show_controls (EmpathyStreamedMediaWindow *window, gboolean set_fullscreen)
 {
   GtkWidget *menu;
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   menu = gtk_ui_manager_get_widget (priv->ui_manager,
             "/menubar1");
@@ -2930,9 +2930,9 @@ show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
 }
 
 static void
-show_borders (EmpathyCallWindow *window, gboolean set_fullscreen)
+show_borders (EmpathyStreamedMediaWindow *window, gboolean set_fullscreen)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   gtk_container_set_border_width (GTK_CONTAINER (priv->content_hbox),
       set_fullscreen ? 0 : CONTENT_HBOX_BORDER_WIDTH);
@@ -2954,12 +2954,12 @@ show_borders (EmpathyCallWindow *window, gboolean set_fullscreen)
 }
 
 static gboolean
-empathy_call_window_state_event_cb (GtkWidget *widget,
-  GdkEventWindowState *event, EmpathyCallWindow *window)
+empathy_streamed_media_window_state_event_cb (GtkWidget *widget,
+  GdkEventWindowState *event, EmpathyStreamedMediaWindow *window)
 {
   if (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)
     {
-      EmpathyCallWindowPriv *priv = GET_PRIV (window);
+      EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
       gboolean set_fullscreen = event->new_window_state &
         GDK_WINDOW_STATE_FULLSCREEN;
 
@@ -2984,7 +2984,7 @@ empathy_call_window_state_event_cb (GtkWidget *widget,
             {
               priv->video_output_motion_handler_id = g_signal_connect (
                   G_OBJECT (priv->video_output), "motion-notify-event",
-                  G_CALLBACK (empathy_call_window_video_output_motion_notify),
+                  G_CALLBACK (empathy_streamed_media_window_video_output_motion_notify),
                   window);
             }
         }
@@ -3006,10 +3006,10 @@ empathy_call_window_state_event_cb (GtkWidget *widget,
 }
 
 static void
-empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
-  EmpathyCallWindow *window)
+empathy_streamed_media_window_sidebar_toggled_cb (GtkToggleButton *toggle,
+  EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   GtkWidget *arrow;
   int w, h, handle_size;
   GtkAllocation allocation, sidebar_allocation;
@@ -3041,10 +3041,10 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
 }
 
 static void
-empathy_call_window_set_send_video (EmpathyCallWindow *window,
+empathy_streamed_media_window_set_send_video (EmpathyStreamedMediaWindow *window,
   CameraState state)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
 
   priv->sending_video = (state == CAMERA_STATE_ON);
@@ -3071,10 +3071,10 @@ empathy_call_window_set_send_video (EmpathyCallWindow *window,
 }
 
 static void
-empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *window)
+empathy_streamed_media_window_mic_toggled_cb (GtkToggleToolButton *toggle,
+  EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   gboolean active;
 
   active = (gtk_toggle_tool_button_get_active (toggle));
@@ -3099,41 +3099,41 @@ empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
 }
 
 static void
-empathy_call_window_sidebar_hidden_cb (EvSidebar *sidebar,
-  EmpathyCallWindow *window)
+empathy_streamed_media_window_sidebar_hidden_cb (EvSidebar *sidebar,
+  EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
     FALSE);
 }
 
 static void
-empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
-  EmpathyCallWindow *window)
+empathy_streamed_media_window_sidebar_shown_cb (EvSidebar *sidebar,
+  EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
     TRUE);
 }
 
 static void
-empathy_call_window_hangup_cb (gpointer object,
-                               EmpathyCallWindow *window)
+empathy_streamed_media_window_hangup_cb (gpointer object,
+                               EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   empathy_streamed_media_handler_stop_call (priv->handler);
 
-  if (empathy_call_window_disconnected (window, FALSE))
+  if (empathy_streamed_media_window_disconnected (window, FALSE))
     gtk_widget_destroy (GTK_WIDGET (window));
 }
 
 static void
-empathy_call_window_restart_call (EmpathyCallWindow *window)
+empathy_streamed_media_window_restart_call (EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   /* Remove error info bars */
   gtk_container_forall (GTK_CONTAINER (priv->errors_vbox),
@@ -3142,15 +3142,15 @@ empathy_call_window_restart_call (EmpathyCallWindow *window)
   create_video_output_widget (window);
 
   g_signal_connect (G_OBJECT (priv->audio_input_adj), "value-changed",
-      G_CALLBACK (empathy_call_window_mic_volume_changed_cb), window);
+      G_CALLBACK (empathy_streamed_media_window_mic_volume_changed_cb), window);
 
   /* While the call was disconnected, the input volume might have changed.
    * However, since the audio_input source was destroyed, its volume has not
    * been updated during that time. That's why we manually update it here */
-  empathy_call_window_mic_volume_changed_cb (priv->audio_input_adj, window);
+  empathy_streamed_media_window_mic_volume_changed_cb (priv->audio_input_adj, window);
 
   priv->outgoing = TRUE;
-  empathy_call_window_set_state_connecting (window);
+  empathy_streamed_media_window_set_state_connecting (window);
 
   if (priv->pipeline_playing)
     start_call (window);
@@ -3159,17 +3159,17 @@ empathy_call_window_restart_call (EmpathyCallWindow *window)
     priv->start_call_when_playing = TRUE;
 
 
-  empathy_call_window_setup_avatars (window, priv->handler);
+  empathy_streamed_media_window_setup_avatars (window, priv->handler);
 
   gtk_action_set_sensitive (priv->redial, FALSE);
   gtk_widget_set_sensitive (priv->redial_button, FALSE);
 }
 
 static void
-empathy_call_window_redial_cb (gpointer object,
-    EmpathyCallWindow *window)
+empathy_streamed_media_window_redial_cb (gpointer object,
+    EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->call_state == CONNECTED)
     priv->call_state = REDIALING;
@@ -3177,20 +3177,20 @@ empathy_call_window_redial_cb (gpointer object,
   empathy_streamed_media_handler_stop_call (priv->handler);
 
   if (priv->call_state != CONNECTED)
-    empathy_call_window_restart_call (window);
+    empathy_streamed_media_window_restart_call (window);
 }
 
 static void
 empathy_call_window_fullscreen_cb (gpointer object,
-                                   EmpathyCallWindow *window)
+                                   EmpathyStreamedMediaWindow *window)
 {
   empathy_call_window_fullscreen_toggle (window);
 }
 
 static void
-empathy_call_window_fullscreen_toggle (EmpathyCallWindow *window)
+empathy_call_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->is_fullscreen)
     gtk_window_unfullscreen (GTK_WINDOW (window));
@@ -3199,12 +3199,12 @@ empathy_call_window_fullscreen_toggle (EmpathyCallWindow *window)
 }
 
 static gboolean
-empathy_call_window_video_button_press_cb (GtkWidget *video_output,
-  GdkEventButton *event, EmpathyCallWindow *window)
+empathy_streamed_media_window_video_button_press_cb (GtkWidget *video_output,
+  GdkEventButton *event, EmpathyStreamedMediaWindow *window)
 {
   if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
     {
-      empathy_call_window_video_menu_popup (window, event->button);
+      empathy_streamed_media_window_video_menu_popup (window, event->button);
       return TRUE;
     }
 
@@ -3212,10 +3212,10 @@ empathy_call_window_video_button_press_cb (GtkWidget *video_output,
 }
 
 static gboolean
-empathy_call_window_key_press_cb (GtkWidget *video_output,
-  GdkEventKey *event, EmpathyCallWindow *window)
+empathy_streamed_media_window_key_press_cb (GtkWidget *video_output,
+  GdkEventKey *event, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->is_fullscreen && event->keyval == GDK_KEY_Escape)
     {
@@ -3229,10 +3229,10 @@ empathy_call_window_key_press_cb (GtkWidget *video_output,
 }
 
 static gboolean
-empathy_call_window_video_output_motion_notify (GtkWidget *widget,
-    GdkEventMotion *event, EmpathyCallWindow *window)
+empathy_streamed_media_window_video_output_motion_notify (GtkWidget *widget,
+    GdkEventMotion *event, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->is_fullscreen)
     {
@@ -3243,11 +3243,11 @@ empathy_call_window_video_output_motion_notify (GtkWidget *widget,
 }
 
 static void
-empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
+empathy_streamed_media_window_video_menu_popup (EmpathyStreamedMediaWindow *window,
   guint button)
 {
   GtkWidget *menu;
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   menu = gtk_ui_manager_get_widget (priv->ui_manager,
             "/video-popup");
@@ -3257,10 +3257,10 @@ empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
 }
 
 static void
-empathy_call_window_status_message (EmpathyCallWindow *window,
+empathy_streamed_media_window_status_message (EmpathyStreamedMediaWindow *window,
   gchar *message)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->context_id == 0)
     {
@@ -3277,10 +3277,10 @@ empathy_call_window_status_message (EmpathyCallWindow *window,
 }
 
 static void
-empathy_call_window_volume_changed_cb (GtkScaleButton *button,
-  gdouble value, EmpathyCallWindow *window)
+empathy_streamed_media_window_volume_changed_cb (GtkScaleButton *button,
+  gdouble value, EmpathyStreamedMediaWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
   if (priv->audio_output == NULL)
     return;
@@ -3293,9 +3293,9 @@ empathy_call_window_volume_changed_cb (GtkScaleButton *button,
  * when we are manually updating the UI and so don't want to fire the
  * callbacks */
 static void
-block_camera_control_signals (EmpathyCallWindow *self)
+block_camera_control_signals (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_signal_handlers_block_by_func (priv->tool_button_camera_off,
       tool_button_camera_off_toggled_cb, self);
@@ -3308,9 +3308,9 @@ block_camera_control_signals (EmpathyCallWindow *self)
 }
 
 static void
-unblock_camera_control_signals (EmpathyCallWindow *self)
+unblock_camera_control_signals (EmpathyStreamedMediaWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   g_signal_handlers_unblock_by_func (priv->tool_button_camera_off,
       tool_button_camera_off_toggled_cb, self);
