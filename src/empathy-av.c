@@ -88,7 +88,7 @@ activate_cb (GApplication *application)
   g_assert (call_factory == NULL);
   call_factory = empathy_call_factory_initialise ();
 
-  g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
+  g_signal_connect (G_OBJECT (call_factory), "new-streamed-media-handler",
       G_CALLBACK (new_call_handler_cb), NULL);
 
   if (!empathy_call_factory_register (call_factory, &error))

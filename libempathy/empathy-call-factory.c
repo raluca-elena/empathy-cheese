@@ -167,7 +167,7 @@ empathy_call_factory_class_init (
   object_class->finalize = empathy_call_factory_finalize;
 
   signals[NEW_STREAMED_MEDIA_HANDLER] =
-    g_signal_new ("new-call-handler",
+    g_signal_new ("new-streamed-media-handler",
       G_TYPE_FROM_CLASS (empathy_call_factory_class),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
