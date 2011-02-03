@@ -889,6 +889,17 @@ typedef struct
   guint32 time;
 } MenuPopupData;
 
+static void
+menu_deactivate_cb (GtkMenuShell *menushell,
+    gpointer user_data)
+{
+  gtk_menu_detach (GTK_MENU (menushell));
+
+  /* FIXME: we shouldn't have to disconnec the signal (bgo #641327) */
+  g_signal_handlers_disconnect_by_func (menushell,
+      menu_deactivate_cb, user_data);
+}
+
 static gboolean
 individual_view_popup_menu_idle_cb (gpointer user_data)
 {
@@ -906,6 +917,15 @@ individual_view_popup_menu_idle_cb (gpointer user_data)
       gtk_widget_show (menu);
       gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, data->button,
           data->time);
+
+      /* menu is initially unowned but gtk_menu_attach_to_widget() taked its
+       * floating ref. We can either wait that the treeview releases its ref
+       * when it will be destroyed (when leaving Empathy) or explicitely
+       * detach the menu when it's not displayed any more.
+       * We go for the latter as we don't want to keep useless menus in memory
+       * during the whole lifetime of Empathy. */
+      g_signal_connect (menu, "deactivate", G_CALLBACK (menu_deactivate_cb),
+          NULL);
     }
 
   g_slice_free (MenuPopupData, data);
