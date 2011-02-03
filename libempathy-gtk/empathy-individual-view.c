@@ -906,8 +906,6 @@ individual_view_popup_menu_idle_cb (gpointer user_data)
       gtk_widget_show (menu);
       gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL, data->button,
           data->time);
-      g_object_ref_sink (menu);
-      g_object_unref (menu);
     }
 
   g_slice_free (MenuPopupData, data);
