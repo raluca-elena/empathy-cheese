@@ -163,11 +163,7 @@ individual_view_tooltip_destroy_cb (GtkWidget *widget,
 {
   EmpathyIndividualViewPriv *priv = GET_PRIV (view);
 
-  if (priv->tooltip_widget != NULL)
-    {
-      DEBUG ("Tooltip destroyed");
-      tp_clear_object (&priv->tooltip_widget);
-    }
+  tp_clear_object (&priv->tooltip_widget);
 }
 
 static gboolean
@@ -1984,7 +1980,7 @@ individual_view_dispose (GObject *object)
 
   tp_clear_object (&priv->store);
   tp_clear_object (&priv->filter);
-  tp_clear_pointer (&priv->tooltip_widget, gtk_widget_destroy);
+  tp_clear_object (&priv->tooltip_widget);
 
   empathy_individual_view_set_live_search (view, NULL);
 
