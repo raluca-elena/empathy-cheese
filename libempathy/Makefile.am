@@ -29,7 +29,6 @@ libempathy_headers =				\
 	empathy-account-settings.h		\
 	empathy-auth-factory.h			\
 	empathy-call-factory.h			\
-	empathy-call-handler.h			\
 	empathy-chatroom-manager.h		\
 	empathy-chatroom.h			\
 	empathy-connection-managers.h		\
@@ -54,6 +53,7 @@ libempathy_headers =				\
 	empathy-server-sasl-handler.h		\
 	empathy-server-tls-handler.h		\
 	empathy-status-presets.h		\
+	empathy-streamed-media-handler.h	\
 	empathy-time.h				\
 	empathy-tls-certificate.h		\
 	empathy-tls-verifier.h			\
@@ -71,7 +71,6 @@ libempathy_la_SOURCES =					\
 	empathy-account-settings.c			\
 	empathy-auth-factory.c				\
 	empathy-call-factory.c				\
-	empathy-call-handler.c				\
 	empathy-chatroom-manager.c			\
 	empathy-chatroom.c				\
 	empathy-connection-managers.c			\
@@ -94,6 +93,7 @@ libempathy_la_SOURCES =					\
 	empathy-server-sasl-handler.c			\
 	empathy-server-tls-handler.c			\
 	empathy-status-presets.c			\
+	empathy-streamed-media-handler.c		\
 	empathy-time.c					\
 	empathy-tls-certificate.c			\
 	empathy-tls-verifier.c				\

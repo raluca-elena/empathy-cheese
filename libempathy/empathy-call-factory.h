@@ -23,7 +23,7 @@
 
 #include <glib-object.h>
 
-#include <libempathy/empathy-call-handler.h>
+#include <libempathy/empathy-streamed-media-handler.h>
 #include <libempathy/empathy-dispatcher.h>
 
 G_BEGIN_DECLS

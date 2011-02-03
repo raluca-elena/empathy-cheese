@@ -23,7 +23,7 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <libempathy/empathy-call-handler.h>
+#include <libempathy/empathy-streamed-media-handler.h>
 
 G_BEGIN_DECLS
 
@@ -57,7 +57,7 @@ GType empathy_call_window_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), EMPATHY_TYPE_CALL_WINDOW, \
     EmpathyCallWindowClass))
 
-EmpathyCallWindow *empathy_call_window_new (EmpathyCallHandler *handler);
+EmpathyCallWindow *empathy_call_window_new (EmpathyStreamedMediaHandler *handler);
 
 G_END_DECLS
 

@@ -49,7 +49,7 @@ static void handle_channels_cb (TpSimpleHandler *handler,
 /* signal enum */
 enum
 {
-    NEW_CALL_HANDLER,
+    NEW_STREAMED_MEDIA_HANDLER,
     LAST_SIGNAL
 };
 
@@ -166,14 +166,14 @@ empathy_call_factory_class_init (
   object_class->dispose = empathy_call_factory_dispose;
   object_class->finalize = empathy_call_factory_finalize;
 
-  signals[NEW_CALL_HANDLER] =
+  signals[NEW_STREAMED_MEDIA_HANDLER] =
     g_signal_new ("new-call-handler",
       G_TYPE_FROM_CLASS (empathy_call_factory_class),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
       _empathy_marshal_VOID__OBJECT_BOOLEAN,
       G_TYPE_NONE,
-      2, EMPATHY_TYPE_CALL_HANDLER, G_TYPE_BOOLEAN);
+      2, EMPATHY_TYPE_STREAMED_MEDIA_HANDLER, G_TYPE_BOOLEAN);
 }
 
 EmpathyCallFactory *
@@ -263,13 +263,13 @@ static void
 create_call_handler (EmpathyCallFactory *factory,
   EmpathyTpStreamedMedia *call)
 {
-  EmpathyCallHandler *handler;
+  EmpathyStreamedMediaHandler *handler;
 
   g_return_if_fail (factory != NULL);
 
-  handler = empathy_call_handler_new_for_channel (call);
+  handler = empathy_streamed_media_handler_new_for_channel (call);
 
-  g_signal_emit (factory, signals[NEW_CALL_HANDLER], 0,
+  g_signal_emit (factory, signals[NEW_STREAMED_MEDIA_HANDLER], 0,
     handler, FALSE);
 
   g_object_unref (handler);

@@ -1,5 +1,5 @@
 /*
- * empathy-call-handler.c - Source for EmpathyCallHandler
+ * empathy-call-handler.c - Source for EmpathyStreamedMediaHandler
  * Copyright (C) 2008-2009 Collabora Ltd.
  * @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *
@@ -29,7 +29,7 @@
 #include <telepathy-farsight/channel.h>
 #include <telepathy-farsight/stream.h>
 
-#include "empathy-call-handler.h"
+#include "empathy-streamed-media-handler.h"
 #include "empathy-call-factory.h"
 #include "empathy-marshal.h"
 #include "empathy-utils.h"
@@ -37,7 +37,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
 
-G_DEFINE_TYPE(EmpathyCallHandler, empathy_call_handler, G_TYPE_OBJECT)
+G_DEFINE_TYPE(EmpathyStreamedMediaHandler, empathy_streamed_media_handler, G_TYPE_OBJECT)
 
 /* signal enum */
 enum {
@@ -87,14 +87,14 @@ typedef struct {
   FsCandidate *video_remote_candidate;
   FsCandidate *audio_local_candidate;
   FsCandidate *video_local_candidate;
-} EmpathyCallHandlerPriv;
+} EmpathyStreamedMediaHandlerPriv;
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyCallHandler)
+#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyStreamedMediaHandler)
 
 static void
-empathy_call_handler_dispose (GObject *object)
+empathy_streamed_media_handler_dispose (GObject *object)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (object);
 
   if (priv->dispose_has_run)
     return;
@@ -120,14 +120,14 @@ empathy_call_handler_dispose (GObject *object)
   priv->call = NULL;
 
   /* release any references held by the object here */
-  if (G_OBJECT_CLASS (empathy_call_handler_parent_class)->dispose)
-    G_OBJECT_CLASS (empathy_call_handler_parent_class)->dispose (object);
+  if (G_OBJECT_CLASS (empathy_streamed_media_handler_parent_class)->dispose)
+    G_OBJECT_CLASS (empathy_streamed_media_handler_parent_class)->dispose (object);
 }
 
 static void
-empathy_call_handler_finalize (GObject *object)
+empathy_streamed_media_handler_finalize (GObject *object)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (object);
 
   fs_codec_destroy (priv->send_audio_codec);
   fs_codec_destroy (priv->send_video_codec);
@@ -138,23 +138,23 @@ empathy_call_handler_finalize (GObject *object)
   fs_candidate_destroy (priv->audio_local_candidate);
   fs_candidate_destroy (priv->video_local_candidate);
 
-  if (G_OBJECT_CLASS (empathy_call_handler_parent_class)->finalize)
-    G_OBJECT_CLASS (empathy_call_handler_parent_class)->finalize (object);
+  if (G_OBJECT_CLASS (empathy_streamed_media_handler_parent_class)->finalize)
+    G_OBJECT_CLASS (empathy_streamed_media_handler_parent_class)->finalize (object);
 }
 
 static void
-empathy_call_handler_init (EmpathyCallHandler *obj)
+empathy_streamed_media_handler_init (EmpathyStreamedMediaHandler *obj)
 {
-  EmpathyCallHandlerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
-    EMPATHY_TYPE_CALL_HANDLER, EmpathyCallHandlerPriv);
+  EmpathyStreamedMediaHandlerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
+    EMPATHY_TYPE_STREAMED_MEDIA_HANDLER, EmpathyStreamedMediaHandlerPriv);
 
   obj->priv = priv;
 }
 
 static void
-empathy_call_handler_constructed (GObject *object)
+empathy_streamed_media_handler_constructed (GObject *object)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (object);
 
   if (priv->contact == NULL)
     {
@@ -163,10 +163,10 @@ empathy_call_handler_constructed (GObject *object)
 }
 
 static void
-empathy_call_handler_set_property (GObject *object,
+empathy_streamed_media_handler_set_property (GObject *object,
   guint property_id, const GValue *value, GParamSpec *pspec)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (object);
 
   switch (property_id)
     {
@@ -188,10 +188,10 @@ empathy_call_handler_set_property (GObject *object,
 }
 
 static void
-empathy_call_handler_get_property (GObject *object,
+empathy_streamed_media_handler_get_property (GObject *object,
   guint property_id, GValue *value, GParamSpec *pspec)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (object);
 
   switch (property_id)
     {
@@ -238,18 +238,18 @@ empathy_call_handler_get_property (GObject *object,
 
 
 static void
-empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
+empathy_streamed_media_handler_class_init (EmpathyStreamedMediaHandlerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *param_spec;
 
-  g_type_class_add_private (klass, sizeof (EmpathyCallHandlerPriv));
+  g_type_class_add_private (klass, sizeof (EmpathyStreamedMediaHandlerPriv));
 
-  object_class->constructed = empathy_call_handler_constructed;
-  object_class->set_property = empathy_call_handler_set_property;
-  object_class->get_property = empathy_call_handler_get_property;
-  object_class->dispose = empathy_call_handler_dispose;
-  object_class->finalize = empathy_call_handler_finalize;
+  object_class->constructed = empathy_streamed_media_handler_constructed;
+  object_class->set_property = empathy_streamed_media_handler_set_property;
+  object_class->get_property = empathy_streamed_media_handler_get_property;
+  object_class->dispose = empathy_streamed_media_handler_dispose;
+  object_class->finalize = empathy_streamed_media_handler_finalize;
 
   param_spec = g_param_spec_object ("contact",
     "contact", "The remote contact",
@@ -386,35 +386,35 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
 }
 
 /**
- * empathy_call_handler_new_for_contact:
+ * empathy_streamed_media_handler_new_for_contact:
  * @contact: an #EmpathyContact
  *
- * Creates a new #EmpathyCallHandler with contact @contact.
+ * Creates a new #EmpathyStreamedMediaHandler with contact @contact.
  *
- * Return value: a new #EmpathyCallHandler
+ * Return value: a new #EmpathyStreamedMediaHandler
  */
-EmpathyCallHandler *
-empathy_call_handler_new_for_contact (EmpathyContact *contact)
+EmpathyStreamedMediaHandler *
+empathy_streamed_media_handler_new_for_contact (EmpathyContact *contact)
 {
-  return EMPATHY_CALL_HANDLER (g_object_new (EMPATHY_TYPE_CALL_HANDLER,
+  return EMPATHY_STREAMED_MEDIA_HANDLER (g_object_new (EMPATHY_TYPE_STREAMED_MEDIA_HANDLER,
     "contact", contact, NULL));
 }
 
-EmpathyCallHandler *
-empathy_call_handler_new_for_channel (EmpathyTpStreamedMedia *call)
+EmpathyStreamedMediaHandler *
+empathy_streamed_media_handler_new_for_channel (EmpathyTpStreamedMedia *call)
 {
-  return EMPATHY_CALL_HANDLER (g_object_new (EMPATHY_TYPE_CALL_HANDLER,
+  return EMPATHY_STREAMED_MEDIA_HANDLER (g_object_new (EMPATHY_TYPE_STREAMED_MEDIA_HANDLER,
     "tp-call", call,
     "initial-video", empathy_tp_streamed_media_is_receiving_video (call),
     NULL));
 }
 
 static void
-update_sending_codec (EmpathyCallHandler *self,
+update_sending_codec (EmpathyStreamedMediaHandler *self,
     FsCodec *codec,
     FsSession *session)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
   FsMediaType type;
 
   if (codec == NULL || session == NULL)
@@ -435,11 +435,11 @@ update_sending_codec (EmpathyCallHandler *self,
 }
 
 static void
-update_receiving_codec (EmpathyCallHandler *self,
+update_receiving_codec (EmpathyStreamedMediaHandler *self,
     GList *codecs,
     FsStream *stream)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
   FsSession *session;
   FsMediaType type;
 
@@ -467,12 +467,12 @@ update_receiving_codec (EmpathyCallHandler *self,
 }
 
 static void
-update_candidates (EmpathyCallHandler *self,
+update_candidates (EmpathyStreamedMediaHandler *self,
     FsCandidate *remote_candidate,
     FsCandidate *local_candidate,
     FsStream *stream)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
   FsSession *session;
   FsMediaType type;
 
@@ -528,10 +528,10 @@ update_candidates (EmpathyCallHandler *self,
 }
 
 void
-empathy_call_handler_bus_message (EmpathyCallHandler *handler,
+empathy_streamed_media_handler_bus_message (EmpathyStreamedMediaHandler *handler,
   GstBus *bus, GstMessage *message)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (handler);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (handler);
   const GstStructure *s = gst_message_get_structure (message);
 
   if (priv->tfchannel == NULL)
@@ -590,9 +590,9 @@ empathy_call_handler_bus_message (EmpathyCallHandler *handler,
 }
 
 static void
-empathy_call_handler_tf_channel_session_created_cb (TfChannel *tfchannel,
+empathy_streamed_media_handler_tf_channel_session_created_cb (TfChannel *tfchannel,
   FsConference *conference, FsParticipant *participant,
-  EmpathyCallHandler *self)
+  EmpathyStreamedMediaHandler *self)
 {
   g_signal_emit (G_OBJECT (self), signals[CONFERENCE_ADDED], 0,
     GST_ELEMENT (conference));
@@ -611,8 +611,8 @@ src_pad_added_error_idle (gpointer data)
 }
 
 static void
-empathy_call_handler_tf_stream_src_pad_added_cb (TfStream *stream,
-  GstPad *pad, FsCodec *codec, EmpathyCallHandler  *handler)
+empathy_streamed_media_handler_tf_stream_src_pad_added_cb (TfStream *stream,
+  GstPad *pad, FsCodec *codec, EmpathyStreamedMediaHandler  *handler)
 {
   guint media_type;
   gboolean retval;
@@ -628,7 +628,7 @@ empathy_call_handler_tf_stream_src_pad_added_cb (TfStream *stream,
 
 
 static gboolean
-empathy_call_handler_tf_stream_request_resource_cb (TfStream *stream,
+empathy_streamed_media_handler_tf_stream_request_resource_cb (TfStream *stream,
   guint direction, EmpathyTpStreamedMedia *call)
 {
   gboolean ret;
@@ -643,15 +643,15 @@ empathy_call_handler_tf_stream_request_resource_cb (TfStream *stream,
 }
 
 static void
-empathy_call_handler_tf_stream_closed_cb (TfStream *stream,
-  EmpathyCallHandler *handler)
+empathy_streamed_media_handler_tf_stream_closed_cb (TfStream *stream,
+  EmpathyStreamedMediaHandler *handler)
 {
   g_signal_emit (handler, signals[STREAM_CLOSED], 0, stream);
 }
 
 static void
-empathy_call_handler_tf_channel_stream_created_cb (TfChannel *tfchannel,
-  TfStream *stream, EmpathyCallHandler *handler)
+empathy_streamed_media_handler_tf_channel_stream_created_cb (TfChannel *tfchannel,
+  TfStream *stream, EmpathyStreamedMediaHandler *handler)
 {
   guint media_type;
   GstPad *spad;
@@ -662,12 +662,12 @@ empathy_call_handler_tf_channel_stream_created_cb (TfChannel *tfchannel,
   FsCodec *codec;
 
   g_signal_connect (stream, "src-pad-added",
-      G_CALLBACK (empathy_call_handler_tf_stream_src_pad_added_cb), handler);
+      G_CALLBACK (empathy_streamed_media_handler_tf_stream_src_pad_added_cb), handler);
   g_signal_connect (stream, "request-resource",
-      G_CALLBACK (empathy_call_handler_tf_stream_request_resource_cb),
+      G_CALLBACK (empathy_streamed_media_handler_tf_stream_request_resource_cb),
         handler);
   g_signal_connect (stream, "closed",
-      G_CALLBACK (empathy_call_handler_tf_stream_closed_cb), handler);
+      G_CALLBACK (empathy_streamed_media_handler_tf_stream_closed_cb), handler);
 
   g_object_get (stream, "media-type", &media_type,
     "sink-pad", &spad, NULL);
@@ -701,14 +701,14 @@ empathy_call_handler_tf_channel_stream_created_cb (TfChannel *tfchannel,
 }
 
 static void
-empathy_call_handler_tf_channel_closed_cb (TfChannel *tfchannel,
-  EmpathyCallHandler *handler)
+empathy_streamed_media_handler_tf_channel_closed_cb (TfChannel *tfchannel,
+  EmpathyStreamedMediaHandler *handler)
 {
   g_signal_emit (G_OBJECT (handler), signals[CLOSED], 0);
 }
 
 static GList *
-empathy_call_handler_tf_channel_codec_config_cb (TfChannel *channel,
+empathy_streamed_media_handler_tf_channel_codec_config_cb (TfChannel *channel,
   guint stream_id, FsMediaType media_type, guint direction, gpointer user_data)
 {
   gchar *filename = empathy_file_lookup ("codec-preferences", "data");
@@ -729,9 +729,9 @@ empathy_call_handler_tf_channel_codec_config_cb (TfChannel *channel,
 }
 
 static void
-empathy_call_handler_start_tpfs (EmpathyCallHandler *self)
+empathy_streamed_media_handler_start_tpfs (EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
   TpChannel *channel;
 
   g_object_get (priv->call, "channel", &channel, NULL);
@@ -742,24 +742,24 @@ empathy_call_handler_start_tpfs (EmpathyCallHandler *self)
 
   /* Set up the telepathy farsight channel */
   g_signal_connect (priv->tfchannel, "session-created",
-      G_CALLBACK (empathy_call_handler_tf_channel_session_created_cb), self);
+      G_CALLBACK (empathy_streamed_media_handler_tf_channel_session_created_cb), self);
   g_signal_connect (priv->tfchannel, "stream-created",
-      G_CALLBACK (empathy_call_handler_tf_channel_stream_created_cb), self);
+      G_CALLBACK (empathy_streamed_media_handler_tf_channel_stream_created_cb), self);
   g_signal_connect (priv->tfchannel, "closed",
-      G_CALLBACK (empathy_call_handler_tf_channel_closed_cb), self);
+      G_CALLBACK (empathy_streamed_media_handler_tf_channel_closed_cb), self);
   g_signal_connect (priv->tfchannel, "stream-get-codec-config",
-      G_CALLBACK (empathy_call_handler_tf_channel_codec_config_cb), self);
+      G_CALLBACK (empathy_streamed_media_handler_tf_channel_codec_config_cb), self);
 
   g_object_unref (channel);
 }
 
 static void
-empathy_call_handler_request_cb (GObject *source,
+empathy_streamed_media_handler_request_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
-  EmpathyCallHandler *self = EMPATHY_CALL_HANDLER (user_data);
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandler *self = EMPATHY_STREAMED_MEDIA_HANDLER (user_data);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
   TpChannel *channel;
   GError *error = NULL;
   TpAccountChannelRequest *req = TP_ACCOUNT_CHANNEL_REQUEST (source);
@@ -780,23 +780,23 @@ empathy_call_handler_request_cb (GObject *source,
 
   g_object_notify (G_OBJECT (self), "tp-call");
 
-  empathy_call_handler_start_tpfs (self);
+  empathy_streamed_media_handler_start_tpfs (self);
 
   g_object_unref (channel);
 }
 
 void
-empathy_call_handler_start_call (EmpathyCallHandler *handler,
+empathy_streamed_media_handler_start_call (EmpathyStreamedMediaHandler *handler,
     gint64 timestamp)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (handler);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (handler);
   TpAccountChannelRequest *req;
   TpAccount *account;
   GHashTable *request;
 
   if (priv->call != NULL)
     {
-      empathy_call_handler_start_tpfs (handler);
+      empathy_streamed_media_handler_start_tpfs (handler);
       empathy_tp_streamed_media_accept_incoming_call (priv->call);
       return;
     }
@@ -812,22 +812,22 @@ empathy_call_handler_start_call (EmpathyCallHandler *handler,
   req = tp_account_channel_request_new (account, request, timestamp);
 
   tp_account_channel_request_create_and_handle_channel_async (req, NULL,
-      empathy_call_handler_request_cb, handler);
+      empathy_streamed_media_handler_request_cb, handler);
 
   g_object_unref (req);
   g_hash_table_unref (request);
 }
 
 /**
- * empathy_call_handler_stop_call:
- * @handler: an #EmpathyCallHandler
+ * empathy_streamed_media_handler_stop_call:
+ * @handler: an #EmpathyStreamedMediaHandler
  *
- * Closes the #EmpathyCallHandler's call and frees its resources.
+ * Closes the #EmpathyStreamedMediaHandler's call and frees its resources.
  */
 void
-empathy_call_handler_stop_call (EmpathyCallHandler *handler)
+empathy_streamed_media_handler_stop_call (EmpathyStreamedMediaHandler *handler)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (handler);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (handler);
 
   if (priv->call != NULL)
     {
@@ -839,86 +839,86 @@ empathy_call_handler_stop_call (EmpathyCallHandler *handler)
 }
 
 /**
- * empathy_call_handler_has_initial_video:
- * @handler: an #EmpathyCallHandler
+ * empathy_streamed_media_handler_has_initial_video:
+ * @handler: an #EmpathyStreamedMediaHandler
  *
- * Return %TRUE if the call managed by this #EmpathyCallHandler was
+ * Return %TRUE if the call managed by this #EmpathyStreamedMediaHandler was
  * created with video enabled
  *
  * Return value: %TRUE if the call was created as a video conversation.
  */
 gboolean
-empathy_call_handler_has_initial_video (EmpathyCallHandler *handler)
+empathy_streamed_media_handler_has_initial_video (EmpathyStreamedMediaHandler *handler)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (handler);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (handler);
 
   return priv->initial_video;
 }
 
 FsCodec *
-empathy_call_handler_get_send_audio_codec (EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_send_audio_codec (EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->send_audio_codec;
 }
 
 FsCodec *
-empathy_call_handler_get_send_video_codec (EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_send_video_codec (EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->send_video_codec;
 }
 
 GList *
-empathy_call_handler_get_recv_audio_codecs (EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_recv_audio_codecs (EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->recv_audio_codecs;
 }
 
 GList *
-empathy_call_handler_get_recv_video_codecs (EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_recv_video_codecs (EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->recv_video_codecs;
 }
 
 FsCandidate *
-empathy_call_handler_get_audio_remote_candidate (
-    EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_audio_remote_candidate (
+    EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->audio_remote_candidate;
 }
 
 FsCandidate *
-empathy_call_handler_get_audio_local_candidate (
-    EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_audio_local_candidate (
+    EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->audio_local_candidate;
 }
 
 FsCandidate *
-empathy_call_handler_get_video_remote_candidate (
-    EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_video_remote_candidate (
+    EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->video_remote_candidate;
 }
 
 FsCandidate *
-empathy_call_handler_get_video_local_candidate (
-    EmpathyCallHandler *self)
+empathy_streamed_media_handler_get_video_local_candidate (
+    EmpathyStreamedMediaHandler *self)
 {
-  EmpathyCallHandlerPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaHandlerPriv *priv = GET_PRIV (self);
 
   return priv->video_local_candidate;
 }
