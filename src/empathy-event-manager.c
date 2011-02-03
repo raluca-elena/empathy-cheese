@@ -33,7 +33,7 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-chat.h>
-#include <libempathy/empathy-tp-call.h>
+#include <libempathy/empathy-tp-streamed-media.h>
 #include <libempathy/empathy-tp-file.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-call-factory.h>
@@ -404,9 +404,9 @@ reject_channel_claim_cb (GObject *source,
       goto out;
     }
 
-  if (EMPATHY_IS_TP_CALL (user_data))
+  if (EMPATHY_IS_TP_STREAMED_MEDIA (user_data))
     {
-      empathy_tp_call_close (user_data);
+      empathy_tp_streamed_media_close (user_data);
     }
   else if (EMPATHY_IS_TP_CHAT (user_data))
     {
@@ -489,7 +489,7 @@ event_channel_process_voip_func (EventPriv *event)
   GtkWidget *dialog;
   GtkWidget *button;
   GtkWidget *image;
-  EmpathyTpCall *call;
+  EmpathyTpStreamedMedia *call;
   gboolean video;
   gchar *title;
 
@@ -499,9 +499,9 @@ event_channel_process_voip_func (EventPriv *event)
       return;
     }
 
-  call = EMPATHY_TP_CALL (event->approval->handler_instance);
+  call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
 
-  video = empathy_tp_call_has_initial_video (call);
+  video = empathy_tp_streamed_media_has_initial_video (call);
 
   dialog = gtk_message_dialog_new (NULL, 0,
       GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
@@ -650,12 +650,12 @@ event_manager_media_channel_got_contact (EventManagerApproval *approval)
   EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
   GtkWidget *window = empathy_main_window_dup ();
   gchar *header;
-  EmpathyTpCall *call;
+  EmpathyTpStreamedMedia *call;
   gboolean video;
 
-  call = EMPATHY_TP_CALL (approval->handler_instance);
+  call = EMPATHY_TP_STREAMED_MEDIA (approval->handler_instance);
 
-  video = empathy_tp_call_has_initial_video (call);
+  video = empathy_tp_streamed_media_has_initial_video (call);
 
   header = g_strdup_printf (
     video ? _("Incoming video call from %s") :_("Incoming call from %s"),
@@ -678,7 +678,7 @@ event_manager_media_channel_got_contact (EventManagerApproval *approval)
 }
 
 static void
-event_manager_media_channel_contact_changed_cb (EmpathyTpCall *call,
+event_manager_media_channel_contact_changed_cb (EmpathyTpStreamedMedia *call,
   GParamSpec *param, EventManagerApproval *approval)
 {
   EmpathyContact *contact;
@@ -975,7 +975,7 @@ approve_channels (TpSimpleApprover *approver,
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
     {
       EmpathyContact *contact;
-      EmpathyTpCall *call = empathy_tp_call_new (account, channel);
+      EmpathyTpStreamedMedia *call = empathy_tp_streamed_media_new (account, channel);
 
       approval->handler_instance = G_OBJECT (call);
 

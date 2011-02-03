@@ -26,7 +26,7 @@
 #include <gst/gst.h>
 #include <gst/farsight/fs-conference-iface.h>
 
-#include <libempathy/empathy-tp-call.h>
+#include <libempathy/empathy-tp-streamed-media.h>
 #include <libempathy/empathy-contact.h>
 
 G_BEGIN_DECLS
@@ -66,7 +66,7 @@ EmpathyCallHandler * empathy_call_handler_new_for_contact (
   EmpathyContact *contact);
 
 EmpathyCallHandler * empathy_call_handler_new_for_channel (
-  EmpathyTpCall *call);
+  EmpathyTpStreamedMedia *call);
 
 void empathy_call_handler_start_call (EmpathyCallHandler *handler,
     gint64 timestamp);

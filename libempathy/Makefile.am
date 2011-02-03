@@ -57,12 +57,12 @@ libempathy_headers =				\
 	empathy-time.h				\
 	empathy-tls-certificate.h		\
 	empathy-tls-verifier.h			\
-	empathy-tp-call.h			\
 	empathy-tp-chat.h			\
 	empathy-tp-contact-factory.h		\
 	empathy-tp-contact-list.h		\
 	empathy-tp-file.h			\
 	empathy-tp-roomlist.h			\
+	empathy-tp-streamed-media.h		\
 	empathy-types.h				\
 	empathy-utils.h
 
@@ -97,12 +97,12 @@ libempathy_la_SOURCES =					\
 	empathy-time.c					\
 	empathy-tls-certificate.c			\
 	empathy-tls-verifier.c				\
-	empathy-tp-call.c				\
 	empathy-tp-chat.c				\
 	empathy-tp-contact-factory.c			\
 	empathy-tp-contact-list.c			\
 	empathy-tp-file.c				\
 	empathy-tp-roomlist.c				\
+	empathy-tp-streamed-media.c			\
 	empathy-utils.c
 
 # do not distribute generated files

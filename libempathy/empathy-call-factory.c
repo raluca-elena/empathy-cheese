@@ -261,7 +261,7 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
 
 static void
 create_call_handler (EmpathyCallFactory *factory,
-  EmpathyTpCall *call)
+  EmpathyTpStreamedMedia *call)
 {
   EmpathyCallHandler *handler;
 
@@ -276,11 +276,11 @@ create_call_handler (EmpathyCallFactory *factory,
 }
 
 static void
-call_status_changed_cb (EmpathyTpCall *call,
+call_status_changed_cb (EmpathyTpStreamedMedia *call,
     GParamSpec *spec,
     EmpathyCallFactory *self)
 {
-  if (empathy_tp_call_get_status (call) <= EMPATHY_TP_CALL_STATUS_READYING)
+  if (empathy_tp_streamed_media_get_status (call) <= EMPATHY_TP_STREAMED_MEDIA_STATUS_READYING)
     return;
 
   create_call_handler (self, call);
@@ -305,7 +305,7 @@ handle_channels_cb (TpSimpleHandler *handler,
   for (l = channels; l != NULL; l = g_list_next (l))
     {
       TpChannel *channel = l->data;
-      EmpathyTpCall *call;
+      EmpathyTpStreamedMedia *call;
 
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
@@ -314,11 +314,11 @@ handle_channels_cb (TpSimpleHandler *handler,
           TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
         continue;
 
-      call = empathy_tp_call_new (account, channel);
+      call = empathy_tp_streamed_media_new (account, channel);
 
-      if (empathy_tp_call_get_status (call) <= EMPATHY_TP_CALL_STATUS_READYING)
+      if (empathy_tp_streamed_media_get_status (call) <= EMPATHY_TP_STREAMED_MEDIA_STATUS_READYING)
         {
-          /* We have to wait that the TpCall is ready as the
+          /* We have to wait that the TpStreamedMedia is ready as the
            * call-handler rely on it. */
           tp_g_signal_connect_object (call, "notify::status",
               G_CALLBACK (call_status_changed_cb), self, 0);

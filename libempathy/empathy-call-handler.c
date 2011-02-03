@@ -54,7 +54,7 @@ enum {
 static guint signals[LAST_SIGNAL] = {0};
 
 enum {
-  PROP_TP_CALL = 1,
+  PROP_TP_STREAMED_MEDIA = 1,
   PROP_GST_BUS,
   PROP_CONTACT,
   PROP_INITIAL_AUDIO,
@@ -73,7 +73,7 @@ enum {
 
 typedef struct {
   gboolean dispose_has_run;
-  EmpathyTpCall *call;
+  EmpathyTpStreamedMedia *call;
   EmpathyContact *contact;
   TfChannel *tfchannel;
   gboolean initial_audio;
@@ -113,7 +113,7 @@ empathy_call_handler_dispose (GObject *object)
 
   if (priv->call != NULL)
     {
-      empathy_tp_call_close (priv->call);
+      empathy_tp_streamed_media_close (priv->call);
       g_object_unref (priv->call);
     }
 
@@ -173,7 +173,7 @@ empathy_call_handler_set_property (GObject *object,
       case PROP_CONTACT:
         priv->contact = g_value_dup_object (value);
         break;
-      case PROP_TP_CALL:
+      case PROP_TP_STREAMED_MEDIA:
         priv->call = g_value_dup_object (value);
         break;
       case PROP_INITIAL_AUDIO:
@@ -198,7 +198,7 @@ empathy_call_handler_get_property (GObject *object,
       case PROP_CONTACT:
         g_value_set_object (value, priv->contact);
         break;
-      case PROP_TP_CALL:
+      case PROP_TP_STREAMED_MEDIA:
         g_value_set_object (value, priv->call);
         break;
       case PROP_INITIAL_AUDIO:
@@ -259,9 +259,9 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
 
   param_spec = g_param_spec_object ("tp-call",
     "tp-call", "The calls channel wrapper",
-    EMPATHY_TYPE_TP_CALL,
+    EMPATHY_TYPE_TP_STREAMED_MEDIA,
     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, PROP_TP_CALL, param_spec);
+  g_object_class_install_property (object_class, PROP_TP_STREAMED_MEDIA, param_spec);
 
   param_spec = g_param_spec_boolean ("initial-audio",
     "initial-audio", "Whether the call should start with audio",
@@ -401,11 +401,11 @@ empathy_call_handler_new_for_contact (EmpathyContact *contact)
 }
 
 EmpathyCallHandler *
-empathy_call_handler_new_for_channel (EmpathyTpCall *call)
+empathy_call_handler_new_for_channel (EmpathyTpStreamedMedia *call)
 {
   return EMPATHY_CALL_HANDLER (g_object_new (EMPATHY_TYPE_CALL_HANDLER,
     "tp-call", call,
-    "initial-video", empathy_tp_call_is_receiving_video (call),
+    "initial-video", empathy_tp_streamed_media_is_receiving_video (call),
     NULL));
 }
 
@@ -629,7 +629,7 @@ empathy_call_handler_tf_stream_src_pad_added_cb (TfStream *stream,
 
 static gboolean
 empathy_call_handler_tf_stream_request_resource_cb (TfStream *stream,
-  guint direction, EmpathyTpCall *call)
+  guint direction, EmpathyTpStreamedMedia *call)
 {
   gboolean ret;
   guint media_type;
@@ -776,7 +776,7 @@ empathy_call_handler_request_cb (GObject *source,
 
   account = tp_account_channel_request_get_account (req);
 
-  priv->call = empathy_tp_call_new (account, channel);
+  priv->call = empathy_tp_streamed_media_new (account, channel);
 
   g_object_notify (G_OBJECT (self), "tp-call");
 
@@ -797,12 +797,12 @@ empathy_call_handler_start_call (EmpathyCallHandler *handler,
   if (priv->call != NULL)
     {
       empathy_call_handler_start_tpfs (handler);
-      empathy_tp_call_accept_incoming_call (priv->call);
+      empathy_tp_streamed_media_accept_incoming_call (priv->call);
       return;
     }
 
-  /* No TpCall object (we are redialing). Request a new media channel that
-   * will be used to create a new EmpathyTpCall. */
+  /* No TpStreamedMedia object (we are redialing). Request a new media channel that
+   * will be used to create a new EmpathyTpStreamedMedia. */
   g_assert (priv->contact != NULL);
 
   account = empathy_contact_get_account (priv->contact);
@@ -831,7 +831,7 @@ empathy_call_handler_stop_call (EmpathyCallHandler *handler)
 
   if (priv->call != NULL)
     {
-      empathy_tp_call_leave (priv->call);
+      empathy_tp_streamed_media_leave (priv->call);
       g_object_unref (priv->call);
     }
 
