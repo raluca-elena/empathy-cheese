@@ -460,8 +460,10 @@ menu_item_set_contact (GtkWidget *item,
 
   if (can_do_action == TRUE)
     {
-      g_signal_connect (item, "activate", G_CALLBACK (activate_callback),
-          contact);
+      /* We want to make sure that the EmpathyContact stays alive while the
+       * signal is connected. */
+      g_signal_connect_data (item, "activate", G_CALLBACK (activate_callback),
+          g_object_ref (contact), (GClosureNotify) g_object_unref, 0);
     }
 
   return can_do_action;
