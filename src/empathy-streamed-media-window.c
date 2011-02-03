@@ -52,7 +52,7 @@
 #include <libempathy/empathy-debug.h>
 
 #include "empathy-streamed-media-window.h"
-#include "empathy-call-window-fullscreen.h"
+#include "empathy-streamed-media-window-fullscreen.h"
 #include "ev-sidebar.h"
 
 #define BUTTON_ID "empathy-call-dtmf-button-id"
@@ -207,7 +207,7 @@ struct _EmpathyStreamedMediaWindowPriv
   gboolean sending_video;
   CameraState camera_state;
 
-  EmpathyCallWindowFullscreen *fullscreen;
+  EmpathyStreamedMediaWindowFullscreen *fullscreen;
   gboolean is_fullscreen;
 
   /* Those fields represent the state of the window before it actually was in
@@ -255,10 +255,10 @@ static void empathy_streamed_media_window_sidebar_shown_cb (EvSidebar *sidebar,
 static void empathy_streamed_media_window_hangup_cb (gpointer object,
   EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_fullscreen_cb (gpointer object,
+static void empathy_streamed_media_window_fullscreen_cb (gpointer object,
   EmpathyStreamedMediaWindow *window);
 
-static void empathy_call_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window);
+static void empathy_streamed_media_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window);
 
 static gboolean empathy_streamed_media_window_video_button_press_cb (
   GtkWidget *video_output, GdkEventButton *event, EmpathyStreamedMediaWindow *window);
@@ -1078,7 +1078,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
     "menuredial", "activate", empathy_streamed_media_window_redial_cb,
     "redial", "clicked", empathy_streamed_media_window_redial_cb,
     "microphone", "toggled", empathy_streamed_media_window_mic_toggled_cb,
-    "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
+    "menufullscreen", "activate", empathy_streamed_media_window_fullscreen_cb,
     "camera_off", "toggled", tool_button_camera_off_toggled_cb,
     "camera_preview", "toggled", tool_button_camera_preview_toggled_cb,
     "camera_on", "toggled", tool_button_camera_on_toggled_cb,
@@ -1202,11 +1202,11 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 
   gtk_widget_hide (priv->sidebar);
 
-  priv->fullscreen = empathy_call_window_fullscreen_new (self);
-  empathy_call_window_fullscreen_set_video_widget (priv->fullscreen,
+  priv->fullscreen = empathy_streamed_media_window_fullscreen_new (self);
+  empathy_streamed_media_window_fullscreen_set_video_widget (priv->fullscreen,
       priv->video_output);
   g_signal_connect (G_OBJECT (priv->fullscreen->leave_fullscreen_button),
-      "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
+      "clicked", G_CALLBACK (empathy_streamed_media_window_fullscreen_cb), self);
 
   g_signal_connect (G_OBJECT (self), "realize",
     G_CALLBACK (empathy_streamed_media_window_realized_cb), self);
@@ -2993,7 +2993,7 @@ empathy_streamed_media_window_state_event_cb (GtkWidget *widget,
           disconnect_video_output_motion_handler (window);
         }
 
-      empathy_call_window_fullscreen_set_fullscreen (priv->fullscreen,
+      empathy_streamed_media_window_fullscreen_set_fullscreen (priv->fullscreen,
           set_fullscreen);
       show_controls (window, set_fullscreen);
       show_borders (window, set_fullscreen);
@@ -3181,14 +3181,14 @@ empathy_streamed_media_window_redial_cb (gpointer object,
 }
 
 static void
-empathy_call_window_fullscreen_cb (gpointer object,
+empathy_streamed_media_window_fullscreen_cb (gpointer object,
                                    EmpathyStreamedMediaWindow *window)
 {
-  empathy_call_window_fullscreen_toggle (window);
+  empathy_streamed_media_window_fullscreen_toggle (window);
 }
 
 static void
-empathy_call_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window)
+empathy_streamed_media_window_fullscreen_toggle (EmpathyStreamedMediaWindow *window)
 {
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
 
@@ -3221,7 +3221,7 @@ empathy_streamed_media_window_key_press_cb (GtkWidget *video_output,
     {
       /* Since we are in fullscreen mode, toggling will bring us back to
          normal mode. */
-      empathy_call_window_fullscreen_toggle (window);
+      empathy_streamed_media_window_fullscreen_toggle (window);
       return TRUE;
     }
 
@@ -3236,7 +3236,7 @@ empathy_streamed_media_window_video_output_motion_notify (GtkWidget *widget,
 
   if (priv->is_fullscreen)
     {
-      empathy_call_window_fullscreen_show_popup (priv->fullscreen);
+      empathy_streamed_media_window_fullscreen_show_popup (priv->fullscreen);
       return TRUE;
     }
   return FALSE;

@@ -1,5 +1,5 @@
 /*
- * empathy-call-window-fullscreen.c - Source for EmpathyCallWindowFullscreen
+ * empathy-streamed-media-window-fullscreen.c - Source for EmpathyStreamedMediaWindowFullscreen
  * Copyright (C) 2009 Collabora Ltd.
  *
  * Some code is based on the Totem Movie Player, especially
@@ -22,7 +22,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "empathy-call-window-fullscreen.h"
+#include "empathy-streamed-media-window-fullscreen.h"
 
 #include <gtk/gtk.h>
 
@@ -33,14 +33,14 @@
    be shown */
 #define FULLSCREEN_POPUP_TIMEOUT 5
 
-G_DEFINE_TYPE (EmpathyCallWindowFullscreen, empathy_call_window_fullscreen,
+G_DEFINE_TYPE (EmpathyStreamedMediaWindowFullscreen, empathy_streamed_media_window_fullscreen,
     G_TYPE_OBJECT)
 
 /* private structure */
-typedef struct _EmpathyCallWindowFullscreenPriv
-    EmpathyCallWindowFullscreenPriv;
+typedef struct _EmpathyStreamedMediaWindowFullscreenPriv
+    EmpathyStreamedMediaWindowFullscreenPriv;
 
-struct _EmpathyCallWindowFullscreenPriv
+struct _EmpathyStreamedMediaWindowFullscreenPriv
 {
   EmpathyStreamedMediaWindow *parent_window;
 
@@ -53,21 +53,21 @@ struct _EmpathyCallWindowFullscreenPriv
 };
 
 #define GET_PRIV(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_CALL_WINDOW_FULLSCREEN, \
-    EmpathyCallWindowFullscreenPriv))
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_STREAMED_MEDIA_WINDOW_FULLSCREEN, \
+    EmpathyStreamedMediaWindowFullscreenPriv))
 
-static void empathy_call_window_fullscreen_dispose (GObject *object);
-static void empathy_call_window_fullscreen_finalize (GObject *object);
+static void empathy_streamed_media_window_fullscreen_dispose (GObject *object);
+static void empathy_streamed_media_window_fullscreen_finalize (GObject *object);
 
-static gboolean empathy_call_window_fullscreen_hide_popup (
-    EmpathyCallWindowFullscreen *fs);
+static gboolean empathy_streamed_media_window_fullscreen_hide_popup (
+    EmpathyStreamedMediaWindowFullscreen *fs);
 
 static void
-empathy_call_window_fullscreen_set_cursor_visible (
-    EmpathyCallWindowFullscreen *fs,
+empathy_streamed_media_window_fullscreen_set_cursor_visible (
+    EmpathyStreamedMediaWindowFullscreen *fs,
     gboolean show_cursor)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (fs);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (fs);
   GdkWindow *window;
 
   if (priv->video_widget == NULL)
@@ -82,23 +82,23 @@ empathy_call_window_fullscreen_set_cursor_visible (
 }
 
 static void
-empathy_call_window_fullscreen_add_popup_timeout (
-    EmpathyCallWindowFullscreen *self)
+empathy_streamed_media_window_fullscreen_add_popup_timeout (
+    EmpathyStreamedMediaWindowFullscreen *self)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   if (priv->popup_timeout == 0)
     {
       priv->popup_timeout = g_timeout_add_seconds (FULLSCREEN_POPUP_TIMEOUT,
-          (GSourceFunc) empathy_call_window_fullscreen_hide_popup, self);
+          (GSourceFunc) empathy_streamed_media_window_fullscreen_hide_popup, self);
     }
 }
 
 static void
-empathy_call_window_fullscreen_remove_popup_timeout (
-    EmpathyCallWindowFullscreen *self)
+empathy_streamed_media_window_fullscreen_remove_popup_timeout (
+    EmpathyStreamedMediaWindowFullscreen *self)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   if (priv->popup_timeout != 0)
     {
@@ -108,12 +108,12 @@ empathy_call_window_fullscreen_remove_popup_timeout (
 }
 
 void
-empathy_call_window_fullscreen_show_popup (EmpathyCallWindowFullscreen *self)
+empathy_streamed_media_window_fullscreen_show_popup (EmpathyStreamedMediaWindowFullscreen *self)
 {
   gint leave_fullscreen_width, leave_fullscreen_height;
   GdkScreen *screen;
   GdkRectangle fullscreen_rect;
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   g_assert (self->is_fullscreen);
 
@@ -127,7 +127,7 @@ empathy_call_window_fullscreen_show_popup (EmpathyCallWindowFullscreen *self)
 
   priv->popup_creation_in_progress = TRUE;
 
-  empathy_call_window_fullscreen_set_cursor_visible (self, TRUE);
+  empathy_streamed_media_window_fullscreen_set_cursor_visible (self, TRUE);
 
   /* Obtaining the screen rectangle */
   screen = gtk_window_get_screen (GTK_WINDOW (priv->parent_window));
@@ -157,31 +157,31 @@ empathy_call_window_fullscreen_show_popup (EmpathyCallWindowFullscreen *self)
     }
 
   gtk_widget_show_all (priv->leave_fullscreen_popup);
-  empathy_call_window_fullscreen_add_popup_timeout (self);
+  empathy_streamed_media_window_fullscreen_add_popup_timeout (self);
 
   priv->popup_creation_in_progress = FALSE;
 }
 
 static gboolean
-empathy_call_window_fullscreen_hide_popup (EmpathyCallWindowFullscreen *fs)
+empathy_streamed_media_window_fullscreen_hide_popup (EmpathyStreamedMediaWindowFullscreen *fs)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (fs);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (fs);
 
   if (priv->video_widget == NULL || !fs->is_fullscreen)
     return TRUE;
 
   gtk_widget_hide (priv->leave_fullscreen_popup);
-  empathy_call_window_fullscreen_remove_popup_timeout (fs);
+  empathy_streamed_media_window_fullscreen_remove_popup_timeout (fs);
 
-  empathy_call_window_fullscreen_set_cursor_visible (fs, FALSE);
+  empathy_streamed_media_window_fullscreen_set_cursor_visible (fs, FALSE);
 
   return FALSE;
 }
 
 static void
-empathy_call_window_fullscreen_init (EmpathyCallWindowFullscreen *self)
+empathy_streamed_media_window_fullscreen_init (EmpathyStreamedMediaWindowFullscreen *self)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
   GtkBuilder *gui;
   gchar *filename;
 
@@ -198,22 +198,22 @@ empathy_call_window_fullscreen_init (EmpathyCallWindowFullscreen *self)
 }
 
 static void
-empathy_call_window_fullscreen_class_init (
-    EmpathyCallWindowFullscreenClass *klass)
+empathy_streamed_media_window_fullscreen_class_init (
+    EmpathyStreamedMediaWindowFullscreenClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  g_type_class_add_private (klass, sizeof (EmpathyCallWindowFullscreenPriv));
+  g_type_class_add_private (klass, sizeof (EmpathyStreamedMediaWindowFullscreenPriv));
 
-  object_class->dispose = empathy_call_window_fullscreen_dispose;
-  object_class->finalize = empathy_call_window_fullscreen_finalize;
+  object_class->dispose = empathy_streamed_media_window_fullscreen_dispose;
+  object_class->finalize = empathy_streamed_media_window_fullscreen_finalize;
 }
 
 void
-empathy_call_window_fullscreen_dispose (GObject *object)
+empathy_streamed_media_window_fullscreen_dispose (GObject *object)
 {
-  EmpathyCallWindowFullscreen *self = EMPATHY_CALL_WINDOW_FULLSCREEN (object);
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreen *self = EMPATHY_STREAMED_MEDIA_WINDOW_FULLSCREEN (object);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   if (priv->dispose_has_run)
     return;
@@ -224,29 +224,29 @@ empathy_call_window_fullscreen_dispose (GObject *object)
     gtk_widget_destroy (priv->leave_fullscreen_popup);
   priv->leave_fullscreen_popup = NULL;
 
-  if (G_OBJECT_CLASS (empathy_call_window_fullscreen_parent_class)->dispose)
+  if (G_OBJECT_CLASS (empathy_streamed_media_window_fullscreen_parent_class)->dispose)
     {
       G_OBJECT_CLASS (
-          empathy_call_window_fullscreen_parent_class)->dispose (object);
+          empathy_streamed_media_window_fullscreen_parent_class)->dispose (object);
     }
 }
 
 void
-empathy_call_window_fullscreen_finalize (GObject *object)
+empathy_streamed_media_window_fullscreen_finalize (GObject *object)
 {
-  EmpathyCallWindowFullscreen *self = EMPATHY_CALL_WINDOW_FULLSCREEN (object);
+  EmpathyStreamedMediaWindowFullscreen *self = EMPATHY_STREAMED_MEDIA_WINDOW_FULLSCREEN (object);
 
-  empathy_call_window_fullscreen_remove_popup_timeout (self);
+  empathy_streamed_media_window_fullscreen_remove_popup_timeout (self);
 
   G_OBJECT_CLASS (
-      empathy_call_window_fullscreen_parent_class)->finalize (object);
+      empathy_streamed_media_window_fullscreen_parent_class)->finalize (object);
 }
 
 static void
-empathy_call_window_fullscreen_parent_window_notify (GtkWidget *parent_window,
-    GParamSpec *property, EmpathyCallWindowFullscreen *fs)
+empathy_streamed_media_window_fullscreen_parent_window_notify (GtkWidget *parent_window,
+    GParamSpec *property, EmpathyStreamedMediaWindowFullscreen *fs)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (fs);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (fs);
 
   if (!fs->is_fullscreen)
     return;
@@ -254,54 +254,54 @@ empathy_call_window_fullscreen_parent_window_notify (GtkWidget *parent_window,
   if (parent_window == GTK_WIDGET (priv->parent_window) &&
         !gtk_window_is_active (GTK_WINDOW (parent_window)))
     {
-      empathy_call_window_fullscreen_hide_popup (fs);
-      empathy_call_window_fullscreen_set_cursor_visible (fs, TRUE);
+      empathy_streamed_media_window_fullscreen_hide_popup (fs);
+      empathy_streamed_media_window_fullscreen_set_cursor_visible (fs, TRUE);
     }
 }
 
-EmpathyCallWindowFullscreen *
-empathy_call_window_fullscreen_new (EmpathyStreamedMediaWindow *parent_window)
+EmpathyStreamedMediaWindowFullscreen *
+empathy_streamed_media_window_fullscreen_new (EmpathyStreamedMediaWindow *parent_window)
 {
-  EmpathyCallWindowFullscreen *self = EMPATHY_CALL_WINDOW_FULLSCREEN (
-    g_object_new (EMPATHY_TYPE_CALL_WINDOW_FULLSCREEN, NULL));
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreen *self = EMPATHY_STREAMED_MEDIA_WINDOW_FULLSCREEN (
+    g_object_new (EMPATHY_TYPE_STREAMED_MEDIA_WINDOW_FULLSCREEN, NULL));
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   priv->parent_window = parent_window;
   g_signal_connect (G_OBJECT (priv->parent_window), "notify::is-active",
-    G_CALLBACK (empathy_call_window_fullscreen_parent_window_notify), self);
+    G_CALLBACK (empathy_streamed_media_window_fullscreen_parent_window_notify), self);
 
   return self;
 }
 
 void
-empathy_call_window_fullscreen_set_fullscreen (EmpathyCallWindowFullscreen *fs,
+empathy_streamed_media_window_fullscreen_set_fullscreen (EmpathyStreamedMediaWindowFullscreen *fs,
   gboolean set_fullscreen)
 {
 
   if (set_fullscreen)
-      empathy_call_window_fullscreen_remove_popup_timeout (fs);
+      empathy_streamed_media_window_fullscreen_remove_popup_timeout (fs);
   else
-      empathy_call_window_fullscreen_hide_popup (fs);
+      empathy_streamed_media_window_fullscreen_hide_popup (fs);
 
-  empathy_call_window_fullscreen_set_cursor_visible (fs, !set_fullscreen);
+  empathy_streamed_media_window_fullscreen_set_cursor_visible (fs, !set_fullscreen);
   fs->is_fullscreen = set_fullscreen;
 }
 
 static void
 video_widget_destroy_cb (GtkWidget *widget,
-    EmpathyCallWindowFullscreen *self)
+    EmpathyStreamedMediaWindowFullscreen *self)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (self);
 
   priv->video_widget = NULL;
 }
 
 void
-empathy_call_window_fullscreen_set_video_widget (
-    EmpathyCallWindowFullscreen *fs,
+empathy_streamed_media_window_fullscreen_set_video_widget (
+    EmpathyStreamedMediaWindowFullscreen *fs,
     GtkWidget *video_widget)
 {
-  EmpathyCallWindowFullscreenPriv *priv = GET_PRIV (fs);
+  EmpathyStreamedMediaWindowFullscreenPriv *priv = GET_PRIV (fs);
   priv->video_widget = video_widget;
 
   tp_g_signal_connect_object (video_widget, "destroy",
