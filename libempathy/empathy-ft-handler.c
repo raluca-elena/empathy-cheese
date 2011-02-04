@@ -30,7 +30,6 @@
 
 #include "empathy-ft-handler.h"
 #include "empathy-tp-contact-factory.h"
-#include "empathy-dispatcher.h"
 #include "empathy-marshal.h"
 #include "empathy-time.h"
 #include "empathy-utils.h"
@@ -124,8 +123,6 @@ typedef struct {
   EmpathyTpFile *tpfile;
   GCancellable *cancellable;
   gboolean use_hash;
-
-  EmpathyDispatcher *dispatcher;
 
   /* request for the new transfer */
   GHashTable *request;
@@ -274,12 +271,6 @@ do_dispose (GObject *object)
     {
       g_hash_table_unref (priv->request);
       priv->request = NULL;
-    }
-
-  if (priv->dispatcher != NULL)
-    {
-      g_object_unref (priv->dispatcher);
-      priv->dispatcher = NULL;
     }
 
   G_OBJECT_CLASS (empathy_ft_handler_parent_class)->dispose (object);
@@ -544,7 +535,6 @@ empathy_ft_handler_init (EmpathyFTHandler *self)
 
   self->priv = priv;
   priv->cancellable = g_cancellable_new ();
-  priv->dispatcher = empathy_dispatcher_dup_singleton ();
 }
 
 /* private functions */
