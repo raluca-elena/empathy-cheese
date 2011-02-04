@@ -109,7 +109,6 @@ struct _EmpathyApp
 
   GtkWidget *window;
   EmpathyStatusIcon *icon;
-  EmpathyDispatcher *dispatcher;
   TpAccountManager *account_manager;
   TplLogManager *log_manager;
   EmpathyChatroomManager *chatroom_manager;
@@ -151,7 +150,6 @@ empathy_app_dispose (GObject *object)
   tp_clear_object (&self->icon);
   tp_clear_object (&self->account_manager);
   tp_clear_object (&self->log_manager);
-  tp_clear_object (&self->dispatcher);
   tp_clear_object (&self->chatroom_manager);
 #ifdef HAVE_GEOCLUE
   tp_clear_object (&self->location_manager);
@@ -668,10 +666,6 @@ empathy_app_constructed (GObject *object)
   self->account_manager = tp_account_manager_dup ();
   tp_account_manager_prepare_async (self->account_manager, NULL,
       account_manager_ready_cb, self);
-
-  /* The EmpathyDispatcher doesn't dispatch anything any more but we have to
-   * keep it around as we still use it to request channels */
-  self->dispatcher = empathy_dispatcher_dup_singleton ();
 
   migrate_config_to_xdg_dir ();
 
