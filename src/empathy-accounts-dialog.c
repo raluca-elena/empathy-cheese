@@ -987,8 +987,22 @@ accounts_dialog_row_changed_foreach (GtkTreeModel *model,
     GtkTreeIter *iter,
     gpointer user_data)
 {
-  gtk_tree_model_row_changed (model, path, iter);
+  TpAccount *account;
 
+  gtk_tree_model_get (model, iter, COL_ACCOUNT, &account, -1);
+
+  if (account == NULL)
+    return FALSE;
+
+  if (tp_account_get_connection_status (account, NULL) ==
+      TP_CONNECTION_STATUS_CONNECTING)
+    {
+      /* Only update the row where we have a connecting account as that's the
+       * ones having a blinking icon. */
+      gtk_tree_model_row_changed (model, path, iter);
+    }
+
+  g_object_unref (account);
   return FALSE;
 }
 
