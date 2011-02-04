@@ -31,32 +31,6 @@
 
 G_BEGIN_DECLS
 
-#define EMPATHY_TYPE_DISPATCHER         (empathy_dispatcher_get_type ())
-#define EMPATHY_DISPATCHER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), EMPATHY_TYPE_DISPATCHER, EmpathyDispatcher))
-#define EMPATHY_DISPATCHER_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST((k), EMPATHY_TYPE_DISPATCHER, EmpathyDispatcherClass))
-#define EMPATHY_IS_DISPATCHER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), EMPATHY_TYPE_DISPATCHER))
-#define EMPATHY_IS_DISPATCHER_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_DISPATCHER))
-#define EMPATHY_DISPATCHER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_DISPATCHER, EmpathyDispatcherClass))
-
-typedef struct _EmpathyDispatcher      EmpathyDispatcher;
-typedef struct _EmpathyDispatcherClass EmpathyDispatcherClass;
-
-struct _EmpathyDispatcher
-{
-  GObject parent;
-  gpointer priv;
-};
-
-struct _EmpathyDispatcherClass
-{
- GObjectClass parent_class;
-};
-
-typedef void (EmpathyDispatcherFindChannelClassCb) (
-  GList *channel_classes, gpointer user_data);
-
-GType empathy_dispatcher_get_type (void) G_GNUC_CONST;
-
 /* Requesting 1 to 1 text channels */
 void empathy_dispatcher_chat_with_contact_id (TpAccount *account,
   const gchar *contact_id,
@@ -69,14 +43,6 @@ void  empathy_dispatcher_chat_with_contact (EmpathyContact *contact,
 void empathy_dispatcher_join_muc (TpAccount *account,
   const gchar *roomname,
   gint64 timestamp);
-
-GList * empathy_dispatcher_find_requestable_channel_classes
-    (EmpathyDispatcher *dispatcher, TpConnection *connection,
-     const gchar *channel_type, guint handle_type,
-     const char *first_property_name, ...);
-
-/* Get the dispatcher singleton */
-EmpathyDispatcher *    empathy_dispatcher_dup_singleton (void);
 
 G_END_DECLS
 
