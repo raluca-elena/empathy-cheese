@@ -2,6 +2,14 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkListStore" id="blocked-contacts">
+    <columns>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+      <!-- column-name handle -->
+      <column type="guint"/>
+    </columns>
+  </object>
   <object class="GtkVBox" id="contents">
     <property name="visible">True</property>
     <property name="border_width">6</property>
@@ -42,14 +50,16 @@
             <property name="vscrollbar_policy">automatic</property>
             <property name="shadow_type">etched-in</property>
             <child>
-              <object class="GtkTreeView" id="treeview1">
+              <object class="GtkTreeView" id="blocked-contacts-view">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">blocked-contacts</property>
                 <property name="headers_clickable">False</property>
+                <property name="search_column">0</property>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn1">
                     <property name="title">Blocked Contacts</property>
+                    <property name="sort_indicator">True</property>
                     <property name="sort_column_id">0</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext1"/>
@@ -74,12 +84,14 @@
               <object class="GtkButton" id="remove-button">
                 <property name="label">gtk-remove</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
@@ -128,18 +140,10 @@
       </packing>
     </child>
   </object>
-  <object class="GtkListStore" id="blocked-contacts">
-    <columns>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-      <!-- column-name handle -->
-      <column type="guint"/>
-    </columns>
-  </object>
   <object class="GtkSizeGroup" id="sizegroup1">
     <widgets>
-      <widget name="remove-button"/>
       <widget name="add-button"/>
+      <widget name="remove-button"/>
     </widgets>
   </object>
 </interface>

@@ -45,8 +45,11 @@ struct _EmpathyContactBlockingDialogPrivate
 {
   GHashTable *channels; /* TpConnection* -> TpChannel* */
   GtkListStore *blocked_contacts;
+  GtkTreeSelection *selection;
 
   GtkWidget *account_chooser;
+  GtkWidget *add_contact_entry;
+  GtkWidget *remove_button;
 };
 
 enum /* blocked-contacts columns */
@@ -387,6 +390,142 @@ contact_blocking_dialog_deny_channel_prepared (GObject *channel,
       G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed), self);
 }
 
+static void contact_blocking_dialog_add_contact_got_handle (TpConnection *,
+    const GArray *, const GError *, gpointer, GObject *);
+
+static void
+contact_blocking_dialog_add_contact (GtkWidget *widget,
+    EmpathyContactBlockingDialog *self)
+{
+  TpConnection *conn = empathy_account_chooser_get_connection (
+      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser));
+  const char *identifiers[2] = { NULL, };
+
+  identifiers[0] = gtk_entry_get_text (
+      GTK_ENTRY (self->priv->add_contact_entry));
+
+  DEBUG ("Looking up handle for '%s'", identifiers[0]);
+
+  tp_cli_connection_call_request_handles (conn, -1,
+      TP_HANDLE_TYPE_CONTACT, identifiers,
+      contact_blocking_dialog_add_contact_got_handle,
+      NULL, NULL, G_OBJECT (self));
+
+  gtk_entry_set_text (GTK_ENTRY (self->priv->add_contact_entry), "");
+}
+
+static void
+contact_blocking_dialog_added_contact (TpChannel *, const GError *,
+    gpointer, GObject *);
+
+static void
+contact_blocking_dialog_add_contact_got_handle (TpConnection *conn,
+    const GArray *handles,
+    const GError *in_error,
+    gpointer user_data,
+    GObject *self)
+{
+  EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
+  TpChannel *channel = g_hash_table_lookup (priv->channels, conn);
+
+  if (in_error != NULL)
+    {
+      DEBUG ("Error getting handle: %s", in_error->message);
+      /* FIXME: expose error to user */
+      return;
+    }
+
+  g_return_if_fail (handles->len == 1);
+
+  DEBUG ("Adding handle %u to deny channel",
+      g_array_index (handles, TpHandle, 0));
+
+  tp_cli_channel_interface_group_call_add_members (channel, -1,
+      handles, "",
+      contact_blocking_dialog_added_contact, NULL, NULL, self);
+}
+
+static void
+contact_blocking_dialog_added_contact (TpChannel *channel,
+    const GError *in_error,
+    gpointer user_data,
+    GObject *self)
+{
+  if (in_error != NULL)
+    {
+      DEBUG ("Error adding contact to deny list: %s", in_error->message);
+      /* FIXME: expose error to user */
+      return;
+    }
+
+  DEBUG ("Contact added");
+}
+
+static void
+contact_blocking_dialog_removed_contacts (TpChannel *,
+    const GError *, gpointer, GObject *);
+
+static void
+contact_blocking_dialog_remove_contacts (GtkWidget *button,
+    EmpathyContactBlockingDialog *self)
+{
+  TpConnection *conn = empathy_account_chooser_get_connection (
+      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser));
+  TpChannel *channel = g_hash_table_lookup (self->priv->channels, conn);
+  GtkTreeModel *model;
+  GList *rows, *ptr;
+  GArray *handles = g_array_new (FALSE, FALSE, sizeof (TpHandle));
+
+  rows = gtk_tree_selection_get_selected_rows (self->priv->selection, &model);
+
+  for (ptr = rows; ptr != NULL; ptr = ptr->next)
+    {
+      GtkTreePath *path = ptr->data;
+      GtkTreeIter iter;
+      TpHandle handle;
+
+      if (!gtk_tree_model_get_iter (model, &iter, path))
+        continue;
+
+      gtk_tree_model_get (model, &iter,
+          COL_HANDLE, &handle,
+          -1);
+
+      g_array_append_val (handles, handle);
+      gtk_tree_path_free (path);
+    }
+
+  g_list_free (rows);
+
+  if (handles->len > 0)
+    {
+      DEBUG ("Removing %u handles", handles->len);
+
+      tp_cli_channel_interface_group_call_remove_members (channel, -1,
+          handles, "",
+          contact_blocking_dialog_removed_contacts,
+          NULL, NULL, G_OBJECT (self));
+    }
+
+  g_array_unref (handles);
+}
+
+static void
+contact_blocking_dialog_removed_contacts (TpChannel *channel,
+    const GError *in_error,
+    gpointer user_data,
+    GObject *self)
+{
+  if (in_error != NULL)
+    {
+      DEBUG ("Error removing contacts from deny list: %s", in_error->message);
+      /* FIXME: expose error to user */
+      return;
+    }
+
+  DEBUG ("Contacts removed");
+}
+
 static void
 contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
     EmpathyContactBlockingDialog *self)
@@ -421,6 +560,19 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
 }
 
 static void
+contact_blocking_dialog_view_selection_changed (GtkTreeSelection *selection,
+    EmpathyContactBlockingDialog *self)
+{
+  GList *rows = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+  /* update the sensitivity of the remove button */
+  gtk_widget_set_sensitive (self->priv->remove_button, rows != NULL);
+
+  g_list_foreach (rows, (GFunc) gtk_tree_path_free, NULL);
+  g_list_free (rows);
+}
+
+static void
 contact_blocking_dialog_dispose (GObject *self)
 {
   EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
@@ -446,7 +598,7 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   GtkBuilder *gui;
   char *filename;
   GtkWidget *contents;
-  GtkWidget *account_hbox, *add_contact_entry;
+  GtkWidget *account_hbox, *blocked_contacts_view;
   TpAccountManager *am;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
@@ -466,8 +618,16 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   gui = empathy_builder_get_file (filename,
       "contents", &contents,
       "account-hbox", &account_hbox,
-      "add-contact-entry", &add_contact_entry,
+      "add-contact-entry", &self->priv->add_contact_entry,
       "blocked-contacts", &self->priv->blocked_contacts,
+      "blocked-contacts-view", &blocked_contacts_view,
+      "remove-button", &self->priv->remove_button,
+      NULL);
+
+  empathy_builder_connect (gui, self,
+      "add-button", "clicked", contact_blocking_dialog_add_contact,
+      "add-contact-entry", "activate", contact_blocking_dialog_add_contact,
+      "remove-button", "clicked", contact_blocking_dialog_remove_contacts,
       NULL);
 
   /* add the contents to the dialog */
@@ -487,6 +647,13 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   gtk_box_pack_start (GTK_BOX (account_hbox), self->priv->account_chooser,
       TRUE, TRUE, 0);
   gtk_widget_show (self->priv->account_chooser);
+
+  /* set up the tree selection */
+  self->priv->selection = gtk_tree_view_get_selection (
+      GTK_TREE_VIEW (blocked_contacts_view));
+  gtk_tree_selection_set_mode (self->priv->selection, GTK_SELECTION_MULTIPLE);
+  g_signal_connect (self->priv->selection, "changed",
+      G_CALLBACK (contact_blocking_dialog_view_selection_changed), self);
 
   /* build the contact entry */
   // FIXME
