@@ -383,7 +383,10 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
     EmpathyContact *contact)
 {
   EmpathyIndividualManagerPriv *priv;
-  GHashTable* details;
+  FolksBackendStore *backend_store;
+  FolksBackend *backend;
+  FolksPersonaStore *persona_store;
+  GHashTable* details, *persona_stores;
   TpAccount *account;
   const gchar *store_id;
 
@@ -402,15 +405,41 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
   account = empathy_contact_get_account (contact);
   store_id = tp_proxy_get_object_path (TP_PROXY (account));
 
+  /* Get the persona store to use */
+  backend_store = folks_backend_store_dup ();
+  backend =
+      folks_backend_store_dup_backend_by_name (backend_store, "telepathy");
+
+  if (backend == NULL)
+    {
+      g_warning ("Failed to add individual from contact: couldn't get "
+          "'telepathy' backend");
+      goto finish;
+    }
+
+  persona_stores = folks_backend_get_persona_stores (backend);
+  persona_store = g_hash_table_lookup (persona_stores, store_id);
+
+  if (persona_store == NULL)
+    {
+      g_warning ("Failed to add individual from contact: couldn't get persona "
+          "store '%s'", store_id);
+      goto finish;
+    }
+
   details = tp_asv_new (
       "contact", G_TYPE_STRING, empathy_contact_get_id (contact),
       NULL);
 
   folks_individual_aggregator_add_persona_from_details (
-      priv->aggregator, NULL, "telepathy", store_id, details,
+      priv->aggregator, NULL, persona_store, details,
       aggregator_add_persona_from_details_cb, contact);
 
   g_hash_table_destroy (details);
+
+finish:
+  tp_clear_object (&backend);
+  tp_clear_object (&backend_store);
 }
 
 static void

@@ -837,7 +837,7 @@ empathy_get_persona_store_for_connection (TpConnection *connection)
   TpfPersonaStore *result = NULL;
 
   backend_store = folks_backend_store_dup ();
-  backend = folks_backend_store_get_backend_by_name (backend_store,
+  backend = folks_backend_store_dup_backend_by_name (backend_store,
       "telepathy");
   if (backend != NULL)
     {
