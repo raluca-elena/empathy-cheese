@@ -50,6 +50,7 @@
 #include <libempathy-gtk/empathy-contact-list-store.h>
 #include <libempathy-gtk/empathy-contact-list-view.h>
 #include <libempathy-gtk/empathy-live-search.h>
+#include <libempathy-gtk/empathy-contact-blocking-dialog.h>
 #include <libempathy-gtk/empathy-contact-search-dialog.h>
 #include <libempathy-gtk/empathy-geometry.h>
 #include <libempathy-gtk/empathy-gtk-enum-types.h>
@@ -1461,6 +1462,18 @@ main_window_edit_personal_information_cb (GtkAction         *action,
 }
 
 static void
+main_window_edit_blocked_contacts_cb (GtkAction         *action,
+		                      EmpathyMainWindow *window)
+{
+	GtkWidget *dialog;
+
+	dialog = empathy_contact_blocking_dialog_new (GTK_WINDOW (window));
+	gtk_widget_show (dialog);
+	g_signal_connect (dialog, "response",
+			G_CALLBACK (gtk_widget_destroy), NULL);
+}
+
+static void
 main_window_edit_preferences_cb (GtkAction         *action,
 				 EmpathyMainWindow *window)
 {
@@ -1619,7 +1632,8 @@ main_window_connection_items_setup (EmpathyMainWindow *window,
 		"chat_new_message",
 		"chat_new_call",
 		"chat_add_contact",
-		"edit_personal_information"
+		"edit_personal_information",
+		"edit_blocked_contacts"
 	};
 
 	for (i = 0, list = NULL; i < G_N_ELEMENTS (actions_connected); i++) {
@@ -1798,6 +1812,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 			      "edit", "activate", main_window_edit_cb,
 			      "edit_accounts", "activate", main_window_edit_accounts_cb,
 			      "edit_personal_information", "activate", main_window_edit_personal_information_cb,
+			      "edit_blocked_contacts", "activate", main_window_edit_blocked_contacts_cb,
 			      "edit_preferences", "activate", main_window_edit_preferences_cb,
 			      "edit_search_contacts", "activate", main_window_edit_search_contacts_cb,
 			      "help_about", "activate", main_window_help_about_cb,

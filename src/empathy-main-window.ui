@@ -107,6 +107,12 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="edit_blocked_contacts">
+            <property name="name">edit_blocked_contacts</property>
+            <property name="label" translatable="yes">_Blocked Contacts</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="edit_preferences">
             <property name="stock_id">gtk-preferences</property>
             <property name="name">edit_preferences</property>
@@ -249,6 +255,7 @@
           <menuitem action="edit_accounts"/>
           <menuitem action="edit_personal_information"/>
           <menuitem action="edit_search_contacts"/>
+          <menuitem action="edit_blocked_contacts"/>
           <separator/>
           <menuitem action="edit_preferences"/>
         </menu>
