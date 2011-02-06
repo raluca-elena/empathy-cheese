@@ -26,6 +26,9 @@
 
 #include <libempathy/empathy-utils.h>
 
+#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-tp-contact-list.h>
+
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
@@ -45,6 +48,7 @@ struct _EmpathyContactBlockingDialogPrivate
 {
   GHashTable *channels; /* TpConnection* -> TpChannel* */
   GtkListStore *blocked_contacts;
+  GtkListStore *completion_contacts;
   GtkTreeSelection *selection;
 
   GtkWidget *account_chooser;
@@ -534,16 +538,18 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
       EMPATHY_ACCOUNT_CHOOSER (account_chooser));
   TpChannel *channel;
   GArray *blocked;
+  EmpathyContactManager *contact_manager;
+  EmpathyTpContactList *contact_list;
+  GList *members, *ptr;
 
   if (conn == NULL)
     return;
 
   DEBUG ("Account changed: %s", get_pretty_conn_name (conn));
 
-  /* FIXME: clear the completion, get the new blocked list */
-
-  /* clear the list of blocked contacts */
+  /* clear the lists of contacts */
   gtk_list_store_clear (self->priv->blocked_contacts);
+  gtk_list_store_clear (self->priv->completion_contacts);
 
   /* load the deny list */
   channel = g_hash_table_lookup (self->priv->channels, conn);
@@ -555,8 +561,32 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
   DEBUG ("%u contacts on blocked list", blocked->len);
 
   contact_blocking_dialog_add_contacts_to_list (self, conn, blocked);
-
   g_array_unref (blocked);
+
+  /* load the completion list */
+  g_return_if_fail (empathy_contact_manager_initialized ());
+
+  DEBUG ("Loading contacts");
+
+  contact_manager = empathy_contact_manager_dup_singleton ();
+  contact_list = empathy_contact_manager_get_list (contact_manager, conn);
+  members = empathy_contact_list_get_members (
+      EMPATHY_CONTACT_LIST (contact_list));
+
+  for (ptr = members; ptr != NULL; ptr = ptr->next)
+    {
+      EmpathyContact *contact = ptr->data;
+
+      gtk_list_store_insert_with_values (self->priv->completion_contacts,
+          NULL, -1,
+          COL_IDENTIFIER, empathy_contact_get_id (contact),
+          -1);
+
+      g_object_unref (contact);
+    }
+
+  g_list_free (members);
+  g_object_unref (contact_manager);
 }
 
 static void
@@ -578,6 +608,8 @@ contact_blocking_dialog_dispose (GObject *self)
   EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
 
   tp_clear_pointer (&priv->channels, g_hash_table_destroy);
+
+  G_OBJECT_CLASS (empathy_contact_blocking_dialog_parent_class)->dispose (self);
 }
 
 static void
@@ -599,6 +631,7 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   char *filename;
   GtkWidget *contents;
   GtkWidget *account_hbox, *blocked_contacts_view;
+  GtkEntryCompletion *completion;
   TpAccountManager *am;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
@@ -656,11 +689,20 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       G_CALLBACK (contact_blocking_dialog_view_selection_changed), self);
 
   /* build the contact entry */
-  // FIXME
+  self->priv->completion_contacts = gtk_list_store_new (1, G_TYPE_STRING);
+  completion = gtk_entry_completion_new ();
+  gtk_entry_completion_set_model (completion,
+      GTK_TREE_MODEL (self->priv->completion_contacts));
+  gtk_entry_completion_set_text_column (completion, COL_IDENTIFIER);
+  gtk_entry_set_completion (GTK_ENTRY (self->priv->add_contact_entry),
+      completion);
+  g_object_unref (completion);
+  g_object_unref (self->priv->completion_contacts);
 
   /* prepare the account manager */
   am = tp_account_manager_dup ();
   tp_proxy_prepare_async (am, NULL, contact_blocking_dialog_am_prepared, self);
+  g_object_unref (am);
 
   g_free (filename);
   g_object_unref (gui);
