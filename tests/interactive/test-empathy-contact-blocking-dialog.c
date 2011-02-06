@@ -37,6 +37,9 @@ main (int argc,
 
     dialog = empathy_contact_blocking_dialog_new (NULL);
 
+    g_signal_connect_swapped (dialog, "response",
+        G_CALLBACK (gtk_main_quit), NULL);
+
     gtk_widget_show (dialog);
 
     gtk_main ();
