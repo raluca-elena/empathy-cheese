@@ -23,6 +23,8 @@
 
 #include <gtk/gtk.h>
 
+#include <libempathy/empathy-contact-manager.h>
+
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-contact-blocking-dialog.h>
 
@@ -30,11 +32,13 @@ int
 main (int argc,
     char **argv)
   {
+    EmpathyContactManager *manager;
     GtkWidget *dialog;
 
     gtk_init (&argc, &argv);
     empathy_gtk_init ();
 
+    manager = empathy_contact_manager_dup_singleton ();
     dialog = empathy_contact_blocking_dialog_new (NULL);
 
     g_signal_connect_swapped (dialog, "response",
@@ -43,6 +47,9 @@ main (int argc,
     gtk_widget_show (dialog);
 
     gtk_main ();
+
+    gtk_widget_destroy (dialog);
+    g_object_unref (manager);
 
     return 0;
   }
