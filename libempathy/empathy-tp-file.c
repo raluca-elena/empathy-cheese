@@ -95,8 +95,6 @@ struct _EmpathyTpFilePrivate {
 
   gboolean is_closing;
   gboolean is_closed;
-
-  gboolean dispose_run;
 };
 
 enum {
@@ -702,27 +700,16 @@ do_dispose (GObject *object)
 {
   EmpathyTpFile *self = (EmpathyTpFile *) object;
 
-  if (self->priv->dispose_run)
-    return;
-
-  self->priv->dispose_run = TRUE;
-
   if (self->priv->channel != NULL)
     {
       g_signal_handlers_disconnect_by_func (self->priv->channel,
           tp_file_invalidated_cb, object);
-      g_object_unref (self->priv->channel);
-      self->priv->channel = NULL;
+      tp_clear_object (&self->priv->channel);
     }
 
-  if (self->priv->in_stream != NULL)
-    g_object_unref (self->priv->in_stream);
-
-  if (self->priv->out_stream != NULL)
-    g_object_unref (self->priv->out_stream);
-
-  if (self->priv->cancellable != NULL)
-    g_object_unref (self->priv->cancellable);
+  tp_clear_object (&self->priv->in_stream);
+  tp_clear_object (&self->priv->out_stream);
+  tp_clear_object (&self->priv->cancellable);
 
   G_OBJECT_CLASS (empathy_tp_file_parent_class)->dispose (object);
 }
