@@ -1449,9 +1449,10 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 	}
 
 	if (needs_urgency) {
+		chat_window_set_highlight_room_labels (chat);
+
 		if (!has_focus) {
 			chat_window_set_urgency_hint (window, TRUE);
-			chat_window_set_highlight_room_labels (chat);
 		}
 
 		/* Pending messages have already been displayed and notified in the
