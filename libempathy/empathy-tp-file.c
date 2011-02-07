@@ -65,7 +65,7 @@
 
 /* EmpathyTpFile object */
 
-typedef struct {
+struct _EmpathyTpFilePrivate {
   TpChannel *channel;
 
   GInputStream *in_stream;
@@ -97,15 +97,13 @@ typedef struct {
   gboolean is_closed;
 
   gboolean dispose_run;
-} EmpathyTpFilePriv;
+};
 
 enum {
   PROP_0,
   PROP_CHANNEL,
   PROP_INCOMING
 };
-
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyTpFile)
 
 G_DEFINE_TYPE (EmpathyTpFile, empathy_tp_file, G_TYPE_OBJECT);
 
@@ -118,16 +116,16 @@ tp_file_get_state_cb (TpProxy *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (weak_object);
+  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
 
   if (error != NULL)
     {
       /* set a default value for the state */
-      priv->state = TP_FILE_TRANSFER_STATE_NONE;
+      self->priv->state = TP_FILE_TRANSFER_STATE_NONE;
       return;
     }
 
-  priv->state = g_value_get_uint (value);
+  self->priv->state = g_value_get_uint (value);
 }
 
 static void
@@ -137,7 +135,7 @@ tp_file_get_available_socket_types_cb (TpProxy *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (weak_object);
+  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
   GHashTable *socket_types;
   GArray *access_controls;
 
@@ -145,8 +143,8 @@ tp_file_get_available_socket_types_cb (TpProxy *proxy,
       !G_VALUE_HOLDS (value, TP_HASH_TYPE_SUPPORTED_SOCKET_MAP))
     {
       /* set a default value */
-      priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_UNIX;
-      priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
+      self->priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_UNIX;
+      self->priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
       goto out;
     }
 
@@ -156,26 +154,26 @@ tp_file_get_available_socket_types_cb (TpProxy *proxy,
   if ((access_controls = g_hash_table_lookup (socket_types,
       GUINT_TO_POINTER (TP_SOCKET_ADDRESS_TYPE_UNIX))) != NULL)
     {
-      priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_UNIX;
-      priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
+      self->priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_UNIX;
+      self->priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
       goto out;
     }
 
   if ((access_controls = g_hash_table_lookup (socket_types,
       GUINT_TO_POINTER (TP_SOCKET_ADDRESS_TYPE_IPV4))) != NULL)
     {
-      priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_IPV4;
+      self->priv->socket_address_type = TP_SOCKET_ADDRESS_TYPE_IPV4;
 
       /* TODO: we should prefer PORT over LOCALHOST when the CM will
        * support it.
        */
 
-      priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
+      self->priv->socket_access_control = TP_SOCKET_ACCESS_CONTROL_LOCALHOST;
     }
 
 out:
   DEBUG ("Socket address type: %u, access control %u",
-      priv->socket_address_type, priv->socket_access_control);
+      self->priv->socket_address_type, self->priv->socket_access_control);
 }
 
 static void
@@ -183,57 +181,51 @@ tp_file_invalidated_cb (TpProxy       *proxy,
     guint          domain,
     gint           code,
     gchar         *message,
-    EmpathyTpFile *tp_file)
+    EmpathyTpFile *self)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
   DEBUG ("Channel invalidated: %s", message);
 
-  if (priv->state != TP_FILE_TRANSFER_STATE_COMPLETED &&
-      priv->state != TP_FILE_TRANSFER_STATE_CANCELLED)
+  if (self->priv->state != TP_FILE_TRANSFER_STATE_COMPLETED &&
+      self->priv->state != TP_FILE_TRANSFER_STATE_CANCELLED)
     {
       /* The channel is not in a finished state, an error occured */
-      priv->state = TP_FILE_TRANSFER_STATE_CANCELLED;
-      priv->state_change_reason =
+      self->priv->state = TP_FILE_TRANSFER_STATE_CANCELLED;
+      self->priv->state_change_reason =
           TP_FILE_TRANSFER_STATE_CHANGE_REASON_LOCAL_ERROR;
     }
 }
 
 static void
-ft_operation_close_clean (EmpathyTpFile *tp_file)
+ft_operation_close_clean (EmpathyTpFile *self)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
-  if (priv->is_closed)
+  if (self->priv->is_closed)
     return;
 
   DEBUG ("FT operation close clean");
 
-  priv->is_closed = TRUE;
+  self->priv->is_closed = TRUE;
 
-  if (priv->op_callback != NULL)
-    priv->op_callback (tp_file, NULL, priv->op_user_data);
+  if (self->priv->op_callback != NULL)
+    self->priv->op_callback (self, NULL, self->priv->op_user_data);
 }
 
 static void
-ft_operation_close_with_error (EmpathyTpFile *tp_file,
+ft_operation_close_with_error (EmpathyTpFile *self,
     GError *error)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
-  if (priv->is_closed)
+  if (self->priv->is_closed)
     return;
 
   DEBUG ("FT operation close with error %s", error->message);
 
-  priv->is_closed = TRUE;
+  self->priv->is_closed = TRUE;
 
   /* close the channel if it's not cancelled already */
-  if (priv->state != TP_FILE_TRANSFER_STATE_CANCELLED)
-    empathy_tp_file_cancel (tp_file);
+  if (self->priv->state != TP_FILE_TRANSFER_STATE_CANCELLED)
+    empathy_tp_file_cancel (self);
 
-  if (priv->op_callback != NULL)
-    priv->op_callback (tp_file, error, priv->op_user_data);
+  if (self->priv->op_callback != NULL)
+    self->priv->op_callback (self, error, self->priv->op_user_data);
 }
 
 static void
@@ -241,39 +233,34 @@ splice_stream_ready_cb (GObject *source,
     GAsyncResult *res,
     gpointer user_data)
 {
-  EmpathyTpFile *tp_file;
-  EmpathyTpFilePriv *priv;
+  EmpathyTpFile *self = user_data;
   GError *error = NULL;
-
-  tp_file = user_data;
-  priv = GET_PRIV (tp_file);
 
   g_output_stream_splice_finish (G_OUTPUT_STREAM (source), res, &error);
 
   DEBUG ("Splice stream ready cb, error %p", error);
 
-  if (error != NULL && !priv->is_closing)
+  if (error != NULL && !self->priv->is_closing)
     {
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       g_clear_error (&error);
       return;
     }
 }
 
 static void
-tp_file_start_transfer (EmpathyTpFile *tp_file)
+tp_file_start_transfer (EmpathyTpFile *self)
 {
   gint fd, domain, res = 0;
   GError *error = NULL;
   struct sockaddr *my_addr = NULL;
   size_t my_size = 0;
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
 
-  if (priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_UNIX)
+  if (self->priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_UNIX)
     {
       domain = AF_UNIX;
     }
-  else if (priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_IPV4)
+  else if (self->priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_IPV4)
     {
       domain = AF_INET;
     }
@@ -284,7 +271,7 @@ tp_file_start_transfer (EmpathyTpFile *tp_file)
 
       DEBUG ("Socket not supported, closing channel");
 
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       g_clear_error (&error);
 
       return;
@@ -301,32 +288,32 @@ tp_file_start_transfer (EmpathyTpFile *tp_file)
 
       DEBUG ("Failed to create socket, closing channel");
 
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       g_clear_error (&error);
 
       return;
     }
 
-  if (priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_UNIX)
+  if (self->priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_UNIX)
     {
       struct sockaddr_un addr;
 
       memset (&addr, 0, sizeof (addr));
       addr.sun_family = domain;
-      strncpy (addr.sun_path, priv->socket_address->data,
-          priv->socket_address->len);
+      strncpy (addr.sun_path, self->priv->socket_address->data,
+          self->priv->socket_address->len);
 
       my_addr = (struct sockaddr *) &addr;
       my_size = sizeof (addr);
     }
-  else if (priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_IPV4)
+  else if (self->priv->socket_address_type == TP_SOCKET_ADDRESS_TYPE_IPV4)
     {
       struct sockaddr_in addr;
 
       memset (&addr, 0, sizeof (addr));
       addr.sin_family = domain;
-      inet_pton (AF_INET, priv->socket_address->data, &addr.sin_addr);
-      addr.sin_port = htons (priv->port);
+      inet_pton (AF_INET, self->priv->socket_address->data, &addr.sin_addr);
+      addr.sin_port = htons (self->priv->port);
 
       my_addr = (struct sockaddr *) &addr;
       my_size = sizeof (addr);
@@ -343,7 +330,7 @@ tp_file_start_transfer (EmpathyTpFile *tp_file)
 
       DEBUG ("Failed to connect socket, closing channel");
 
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       close (fd);
       g_clear_error (&error);
 
@@ -352,23 +339,23 @@ tp_file_start_transfer (EmpathyTpFile *tp_file)
 
   DEBUG ("Start the transfer");
 
-  priv->start_time = empathy_time_get_current ();
+  self->priv->start_time = empathy_time_get_current ();
 
   /* notify we're starting a transfer */
-  if (priv->progress_callback != NULL)
-    priv->progress_callback (tp_file, 0, priv->progress_user_data);
+  if (self->priv->progress_callback != NULL)
+    self->priv->progress_callback (self, 0, self->priv->progress_user_data);
 
-  if (priv->incoming)
+  if (self->priv->incoming)
     {
       GInputStream *socket_stream;
 
       socket_stream = g_unix_input_stream_new (fd, TRUE);
 
-      g_output_stream_splice_async (priv->out_stream, socket_stream,
+      g_output_stream_splice_async (self->priv->out_stream, socket_stream,
           G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE |
           G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
-          G_PRIORITY_DEFAULT, priv->cancellable,
-          splice_stream_ready_cb, tp_file);
+          G_PRIORITY_DEFAULT, self->priv->cancellable,
+          splice_stream_ready_cb, self);
 
       g_object_unref (socket_stream);
     }
@@ -378,11 +365,11 @@ tp_file_start_transfer (EmpathyTpFile *tp_file)
 
       socket_stream = g_unix_output_stream_new (fd, TRUE);
 
-      g_output_stream_splice_async (socket_stream, priv->in_stream,
+      g_output_stream_splice_async (socket_stream, self->priv->in_stream,
           G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE |
           G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
-          G_PRIORITY_DEFAULT, priv->cancellable,
-          splice_stream_ready_cb, tp_file);
+          G_PRIORITY_DEFAULT, self->priv->cancellable,
+          splice_stream_ready_cb, self);
 
       g_object_unref (socket_stream);
     }
@@ -434,29 +421,29 @@ tp_file_state_changed_cb (TpChannel *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (weak_object);
+  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
   GError *error = NULL;
 
-  if (state == priv->state)
+  if (state == self->priv->state)
     return;
 
   DEBUG ("File transfer state changed:\n"
       "old state = %u, state = %u, reason = %u\n"
       "\tincoming = %s, in_stream = %s, out_stream = %s",
-      priv->state, state, reason,
-      priv->incoming ? "yes" : "no",
-      priv->in_stream ? "present" : "not present",
-      priv->out_stream ? "present" : "not present");
+      self->priv->state, state, reason,
+      self->priv->incoming ? "yes" : "no",
+      self->priv->in_stream ? "present" : "not present",
+      self->priv->out_stream ? "present" : "not present");
 
-  priv->state = state;
-  priv->state_change_reason = reason;
+  self->priv->state = state;
+  self->priv->state_change_reason = reason;
 
   /* If the channel is open AND we have the socket path, we can start the
    * transfer. The socket path could be NULL if we are not doing the actual
    * data transfer but are just an observer for the channel.
    */
   if (state == TP_FILE_TRANSFER_STATE_OPEN &&
-      priv->socket_address != NULL)
+      self->priv->socket_address != NULL)
     tp_file_start_transfer (EMPATHY_TP_FILE (weak_object));
 
   if (state == TP_FILE_TRANSFER_STATE_COMPLETED)
@@ -464,7 +451,7 @@ tp_file_state_changed_cb (TpChannel *proxy,
 
   if (state == TP_FILE_TRANSFER_STATE_CANCELLED)
     {
-      error = error_from_state_change_reason (priv->state_change_reason);
+      error = error_from_state_change_reason (self->priv->state_change_reason);
       ft_operation_close_with_error (EMPATHY_TP_FILE (weak_object), error);
       g_clear_error (&error);
     }
@@ -476,16 +463,16 @@ tp_file_transferred_bytes_changed_cb (TpChannel *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (weak_object);
+  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
 
   /* don't notify for 0 bytes count */
   if (count == 0)
     return;
 
   /* notify clients */
-  if (priv->progress_callback != NULL)
-    priv->progress_callback (EMPATHY_TP_FILE (weak_object),
-        count, priv->progress_user_data);
+  if (self->priv->progress_callback != NULL)
+    self->priv->progress_callback (EMPATHY_TP_FILE (weak_object),
+        count, self->priv->progress_user_data);
 }
 
 static void
@@ -495,11 +482,10 @@ ft_operation_provide_or_accept_file_cb (TpChannel *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFile *tp_file = EMPATHY_TP_FILE (weak_object);
+  EmpathyTpFile *self = EMPATHY_TP_FILE (weak_object);
   GError *myerr = NULL;
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
 
-  g_cancellable_set_error_if_cancelled (priv->cancellable, &myerr);
+  g_cancellable_set_error_if_cancelled (self->priv->cancellable, &myerr);
 
   if (error != NULL)
     {
@@ -517,14 +503,14 @@ ft_operation_provide_or_accept_file_cb (TpChannel *proxy,
   if (myerr != NULL)
     {
       DEBUG ("Error: %s", myerr->message);
-      ft_operation_close_with_error (tp_file, myerr);
+      ft_operation_close_with_error (self, myerr);
       g_clear_error (&myerr);
       return;
     }
 
   if (G_VALUE_TYPE (address) == DBUS_TYPE_G_UCHAR_ARRAY)
     {
-      priv->socket_address = g_value_dup_boxed (address);
+      self->priv->socket_address = g_value_dup_boxed (address);
     }
   else if (G_VALUE_TYPE (address) == G_TYPE_STRING)
     {
@@ -533,9 +519,9 @@ ft_operation_provide_or_accept_file_cb (TpChannel *proxy,
       const gchar *path;
 
       path = g_value_get_string (address);
-      priv->socket_address = g_array_sized_new (TRUE, FALSE, sizeof (gchar),
-          strlen (path));
-      g_array_insert_vals (priv->socket_address, 0, path, strlen (path));
+      self->priv->socket_address = g_array_sized_new (TRUE, FALSE,
+          sizeof (gchar), strlen (path));
+      g_array_insert_vals (self->priv->socket_address, 0, path, strlen (path));
     }
   else if (G_VALUE_TYPE (address) == TP_STRUCT_TYPE_SOCKET_ADDRESS_IPV4)
     {
@@ -548,23 +534,23 @@ ft_operation_provide_or_accept_file_cb (TpChannel *proxy,
       /* IPV4 address */
       v = g_value_array_get_nth (val_array, 0);
       addr = g_value_get_string (v);
-      priv->socket_address = g_array_sized_new (TRUE, FALSE, sizeof (gchar),
-          strlen (addr));
-      g_array_insert_vals (priv->socket_address, 0, addr, strlen (addr));
+      self->priv->socket_address = g_array_sized_new (TRUE, FALSE,
+          sizeof (gchar), strlen (addr));
+      g_array_insert_vals (self->priv->socket_address, 0, addr, strlen (addr));
 
       /* port number */
       v = g_value_array_get_nth (val_array, 1);
-      priv->port = g_value_get_uint (v);
+      self->priv->port = g_value_get_uint (v);
     }
 
   DEBUG ("Got socket address: %s, port (not zero if IPV4): %d",
-      priv->socket_address->data, priv->port);
+      self->priv->socket_address->data, self->priv->port);
 
   /* if the channel is already open, start the transfer now, otherwise,
    * wait for the state change signal.
    */
-  if (priv->state == TP_FILE_TRANSFER_STATE_OPEN)
-    tp_file_start_transfer (tp_file);
+  if (self->priv->state == TP_FILE_TRANSFER_STATE_OPEN)
+    tp_file_start_transfer (self);
 }
 
 static void
@@ -585,34 +571,31 @@ file_read_async_cb (GObject *source,
     gpointer user_data)
 {
   GValue nothing = { 0 };
-  EmpathyTpFile *tp_file = user_data;
-  EmpathyTpFilePriv *priv;
+  EmpathyTpFile *self = user_data;
   GFileInputStream *in_stream;
   GError *error = NULL;
 
-  priv = GET_PRIV (tp_file);
-
   in_stream = g_file_read_finish (G_FILE (source), res, &error);
 
-  if (error != NULL && !priv->is_closing)
+  if (error != NULL && !self->priv->is_closing)
     {
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       g_clear_error (&error);
       return;
     }
 
-  priv->in_stream = G_INPUT_STREAM (in_stream);
+  self->priv->in_stream = G_INPUT_STREAM (in_stream);
 
   /* we don't impose specific interface/port requirements even
    * if we're not using UNIX sockets.
    */
-  initialize_empty_ac_variant (priv->socket_access_control, &nothing);
+  initialize_empty_ac_variant (self->priv->socket_access_control, &nothing);
 
   tp_cli_channel_type_file_transfer_call_provide_file (
-      priv->channel, -1,
-      priv->socket_address_type, priv->socket_access_control,
+      self->priv->channel, -1,
+      self->priv->socket_address_type, self->priv->socket_access_control,
       &nothing, ft_operation_provide_or_accept_file_cb,
-      NULL, NULL, G_OBJECT (tp_file));
+      NULL, NULL, G_OBJECT (self));
 }
 
 static void
@@ -623,7 +606,6 @@ file_transfer_set_uri_cb (TpProxy *proxy,
 {
   GValue nothing = { 0 };
   EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
-  EmpathyTpFilePriv *priv = GET_PRIV (self);
 
   if (error != NULL)
     {
@@ -634,11 +616,11 @@ file_transfer_set_uri_cb (TpProxy *proxy,
   /* we don't impose specific interface/port requirements even
    * if we're not using UNIX sockets.
    */
-  initialize_empty_ac_variant (priv->socket_access_control, &nothing);
+  initialize_empty_ac_variant (self->priv->socket_access_control, &nothing);
 
-  tp_cli_channel_type_file_transfer_call_accept_file (priv->channel,
-      -1, priv->socket_address_type, priv->socket_access_control,
-      &nothing, priv->offset,
+  tp_cli_channel_type_file_transfer_call_accept_file (self->priv->channel,
+      -1, self->priv->socket_address_type, self->priv->socket_access_control,
+      &nothing, self->priv->offset,
       ft_operation_provide_or_accept_file_cb, NULL, NULL, weak_object);
 }
 
@@ -647,35 +629,32 @@ file_replace_async_cb (GObject *source,
     GAsyncResult *res,
     gpointer user_data)
 {
-  EmpathyTpFile *tp_file = user_data;
-  EmpathyTpFilePriv *priv;
+  EmpathyTpFile *self = user_data;
   GError *error = NULL;
   GFileOutputStream *out_stream;
   GFile *file = G_FILE (source);
   gchar *uri;
   GValue *value;
 
-  priv = GET_PRIV (tp_file);
-
   out_stream = g_file_replace_finish (file, res, &error);
 
   if (error != NULL)
     {
-      ft_operation_close_with_error (tp_file, error);
+      ft_operation_close_with_error (self, error);
       g_clear_error (&error);
 
       return;
     }
 
-  priv->out_stream = G_OUTPUT_STREAM (out_stream);
+  self->priv->out_stream = G_OUTPUT_STREAM (out_stream);
 
   /* Try setting FileTranfer.URI before accepting the file */
   uri = g_file_get_uri (file);
   value = tp_g_value_slice_new_take_string (uri);
 
-  tp_cli_dbus_properties_call_set (priv->channel, -1,
+  tp_cli_dbus_properties_call_set (self->priv->channel, -1,
       TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "URI", value,
-      file_transfer_set_uri_cb, NULL, NULL, G_OBJECT (tp_file));
+      file_transfer_set_uri_cb, NULL, NULL, G_OBJECT (self));
 
   tp_g_value_slice_free (value);
 }
@@ -686,71 +665,64 @@ channel_closed_cb (TpChannel *proxy,
     gpointer user_data,
     GObject *weak_object)
 {
-  EmpathyTpFile *tp_file = EMPATHY_TP_FILE (weak_object);
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
+  EmpathyTpFile *self = EMPATHY_TP_FILE (weak_object);
   gboolean cancel = GPOINTER_TO_INT (user_data);
 
   DEBUG ("Channel is closed, should cancel %s", cancel ? "True" : "False");
 
-  if (priv->cancellable != NULL &&
-      !g_cancellable_is_cancelled (priv->cancellable) && cancel)
-    g_cancellable_cancel (priv->cancellable);
+  if (self->priv->cancellable != NULL &&
+      !g_cancellable_is_cancelled (self->priv->cancellable) && cancel)
+    g_cancellable_cancel (self->priv->cancellable);
 }
 
 static void
-close_channel_internal (EmpathyTpFile *tp_file,
+close_channel_internal (EmpathyTpFile *self,
     gboolean cancel)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
   DEBUG ("Closing channel, should cancel %s", cancel ?
          "True" : "False");
 
-  priv->is_closing = TRUE;
+  self->priv->is_closing = TRUE;
 
-  tp_cli_channel_call_close (priv->channel, -1,
-    channel_closed_cb, GINT_TO_POINTER (cancel), NULL, G_OBJECT (tp_file));
+  tp_cli_channel_call_close (self->priv->channel, -1,
+    channel_closed_cb, GINT_TO_POINTER (cancel), NULL, G_OBJECT (self));
 }
 
 /* GObject methods */
 
 static void
-empathy_tp_file_init (EmpathyTpFile *tp_file)
+empathy_tp_file_init (EmpathyTpFile *self)
 {
-  EmpathyTpFilePriv *priv;
-
-  priv = G_TYPE_INSTANCE_GET_PRIVATE ((tp_file),
-      EMPATHY_TYPE_TP_FILE, EmpathyTpFilePriv);
-
-  tp_file->priv = priv;
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE ((self),
+      EMPATHY_TYPE_TP_FILE, EmpathyTpFilePrivate);
 }
 
 static void
 do_dispose (GObject *object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (object);
+  EmpathyTpFile *self = (EmpathyTpFile *) object;
 
-  if (priv->dispose_run)
+  if (self->priv->dispose_run)
     return;
 
-  priv->dispose_run = TRUE;
+  self->priv->dispose_run = TRUE;
 
-  if (priv->channel != NULL)
+  if (self->priv->channel != NULL)
     {
-      g_signal_handlers_disconnect_by_func (priv->channel,
+      g_signal_handlers_disconnect_by_func (self->priv->channel,
           tp_file_invalidated_cb, object);
-      g_object_unref (priv->channel);
-      priv->channel = NULL;
+      g_object_unref (self->priv->channel);
+      self->priv->channel = NULL;
     }
 
-  if (priv->in_stream != NULL)
-    g_object_unref (priv->in_stream);
+  if (self->priv->in_stream != NULL)
+    g_object_unref (self->priv->in_stream);
 
-  if (priv->out_stream != NULL)
-    g_object_unref (priv->out_stream);
+  if (self->priv->out_stream != NULL)
+    g_object_unref (self->priv->out_stream);
 
-  if (priv->cancellable != NULL)
-    g_object_unref (priv->cancellable);
+  if (self->priv->cancellable != NULL)
+    g_object_unref (self->priv->cancellable);
 
   G_OBJECT_CLASS (empathy_tp_file_parent_class)->dispose (object);
 }
@@ -758,14 +730,14 @@ do_dispose (GObject *object)
 static void
 do_finalize (GObject *object)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (object);
+  EmpathyTpFile *self = (EmpathyTpFile *) object;
 
   DEBUG ("%p", object);
 
-  if (priv->socket_address != NULL)
+  if (self->priv->socket_address != NULL)
     {
-      g_array_free (priv->socket_address, TRUE);
-      priv->socket_address = NULL;
+      g_array_free (self->priv->socket_address, TRUE);
+      self->priv->socket_address = NULL;
     }
 
   G_OBJECT_CLASS (empathy_tp_file_parent_class)->finalize (object);
@@ -777,15 +749,15 @@ do_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (object);
+  EmpathyTpFile *self = (EmpathyTpFile *) object;
 
   switch (param_id)
     {
       case PROP_CHANNEL:
-        g_value_set_object (value, priv->channel);
+        g_value_set_object (value, self->priv->channel);
         break;
       case PROP_INCOMING:
-        g_value_set_boolean (value, priv->incoming);
+        g_value_set_boolean (value, self->priv->incoming);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -799,11 +771,12 @@ do_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (object);
+  EmpathyTpFile *self = (EmpathyTpFile *) object;
+
   switch (param_id)
     {
       case PROP_CHANNEL:
-        priv->channel = g_object_ref (g_value_get_object (value));
+        self->priv->channel = g_object_ref (g_value_get_object (value));
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -814,33 +787,29 @@ do_set_property (GObject *object,
 static void
 do_constructed (GObject *object)
 {
-  EmpathyTpFile *tp_file;
-  EmpathyTpFilePriv *priv;
+  EmpathyTpFile *self = (EmpathyTpFile *) object;
 
-  tp_file = EMPATHY_TP_FILE (object);
-  priv = GET_PRIV (tp_file);
+  g_signal_connect (self->priv->channel, "invalidated",
+    G_CALLBACK (tp_file_invalidated_cb), self);
 
-  g_signal_connect (priv->channel, "invalidated",
-    G_CALLBACK (tp_file_invalidated_cb), tp_file);
-
-  priv->incoming = !tp_channel_get_requested (priv->channel);
+  self->priv->incoming = !tp_channel_get_requested (self->priv->channel);
 
   tp_cli_channel_type_file_transfer_connect_to_file_transfer_state_changed (
-      priv->channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
+      self->priv->channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
 
   tp_cli_channel_type_file_transfer_connect_to_transferred_bytes_changed (
-      priv->channel, tp_file_transferred_bytes_changed_cb,
+      self->priv->channel, tp_file_transferred_bytes_changed_cb,
       NULL, NULL, object, NULL);
 
-  tp_cli_dbus_properties_call_get (priv->channel,
+  tp_cli_dbus_properties_call_get (self->priv->channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "State", tp_file_get_state_cb,
       NULL, NULL, object);
 
-  tp_cli_dbus_properties_call_get (priv->channel,
+  tp_cli_dbus_properties_call_get (self->priv->channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "AvailableSocketTypes",
       tp_file_get_available_socket_types_cb, NULL, NULL, object);
 
-  priv->state_change_reason =
+  self->priv->state_change_reason =
       TP_FILE_TRANSFER_STATE_CHANGE_REASON_NONE;
 }
 
@@ -884,7 +853,7 @@ empathy_tp_file_class_init (EmpathyTpFileClass *klass)
           FALSE,
           G_PARAM_READABLE));
 
-  g_type_class_add_private (object_class, sizeof (EmpathyTpFilePriv));
+  g_type_class_add_private (object_class, sizeof (EmpathyTpFilePrivate));
 }
 
 /* public methods */
@@ -903,20 +872,20 @@ empathy_tp_file_class_init (EmpathyTpFileClass *klass)
 EmpathyTpFile *
 empathy_tp_file_new (TpChannel *channel)
 {
-  EmpathyTpFile *tp_file;
+  EmpathyTpFile *self;
 
   g_return_val_if_fail (TP_IS_CHANNEL (channel), NULL);
 
-  tp_file = g_object_new (EMPATHY_TYPE_TP_FILE,
+  self = g_object_new (EMPATHY_TYPE_TP_FILE,
       "channel", channel,
       NULL);
 
-  return tp_file;
+  return self;
 }
 
 /**
  * empathy_tp_file_accept:
- * @tp_file: an incoming #EmpathyTpFile
+ * @self: an incoming #EmpathyTpFile
  * @offset: the offset of @gfile where we should start writing
  * @gfile: the destination #GFile for the transfer
  * @cancellable: a #GCancellable
@@ -934,7 +903,7 @@ empathy_tp_file_new (TpChannel *channel)
  * actually cancel an ongoing #EmpathyTpFile.
  */
 void
-empathy_tp_file_accept (EmpathyTpFile *tp_file,
+empathy_tp_file_accept (EmpathyTpFile *self,
     guint64 offset,
     GFile *gfile,
     GCancellable *cancellable,
@@ -943,27 +912,25 @@ empathy_tp_file_accept (EmpathyTpFile *tp_file,
     EmpathyTpFileOperationCallback op_callback,
     gpointer op_user_data)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
-  g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
+  g_return_if_fail (EMPATHY_IS_TP_FILE (self));
   g_return_if_fail (G_IS_FILE (gfile));
   g_return_if_fail (G_IS_CANCELLABLE (cancellable));
 
-  priv->cancellable = g_object_ref (cancellable);
-  priv->progress_callback = progress_callback;
-  priv->progress_user_data = progress_user_data;
-  priv->op_callback = op_callback;
-  priv->op_user_data = op_user_data;
-  priv->offset = offset;
+  self->priv->cancellable = g_object_ref (cancellable);
+  self->priv->progress_callback = progress_callback;
+  self->priv->progress_user_data = progress_user_data;
+  self->priv->op_callback = op_callback;
+  self->priv->op_user_data = op_user_data;
+  self->priv->offset = offset;
 
   g_file_replace_async (gfile, NULL, FALSE, G_FILE_CREATE_NONE,
-      G_PRIORITY_DEFAULT, cancellable, file_replace_async_cb, tp_file);
+      G_PRIORITY_DEFAULT, cancellable, file_replace_async_cb, self);
 }
 
 
 /**
  * empathy_tp_file_offer:
- * @tp_file: an outgoing #EmpathyTpFile
+ * @self: an outgoing #EmpathyTpFile
  * @gfile: the source #GFile for the transfer
  * @cancellable: a #GCancellable
  * @progress_callback: function to callback with progress information
@@ -980,7 +947,7 @@ empathy_tp_file_accept (EmpathyTpFile *tp_file,
  * actually cancel an ongoing #EmpathyTpFile.
  */
 void
-empathy_tp_file_offer (EmpathyTpFile *tp_file,
+empathy_tp_file_offer (EmpathyTpFile *self,
     GFile *gfile,
     GCancellable *cancellable,
     EmpathyTpFileProgressCallback progress_callback,
@@ -988,68 +955,62 @@ empathy_tp_file_offer (EmpathyTpFile *tp_file,
     EmpathyTpFileOperationCallback op_callback,
     gpointer op_user_data)
 {
-  EmpathyTpFilePriv *priv = GET_PRIV (tp_file);
-
-  g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
+  g_return_if_fail (EMPATHY_IS_TP_FILE (self));
   g_return_if_fail (G_IS_FILE (gfile));
   g_return_if_fail (G_IS_CANCELLABLE (cancellable));
 
-  priv->cancellable = g_object_ref (cancellable);
-  priv->progress_callback = progress_callback;
-  priv->progress_user_data = progress_user_data;
-  priv->op_callback = op_callback;
-  priv->op_user_data = op_user_data;
+  self->priv->cancellable = g_object_ref (cancellable);
+  self->priv->progress_callback = progress_callback;
+  self->priv->progress_user_data = progress_user_data;
+  self->priv->op_callback = op_callback;
+  self->priv->op_user_data = op_user_data;
 
   g_file_read_async (gfile, G_PRIORITY_DEFAULT, cancellable,
-      file_read_async_cb, tp_file);
+      file_read_async_cb, self);
 }
 
 /**
  * empathy_tp_file_is_incoming:
- * @tp_file: an #EmpathyTpFile
+ * @self: an #EmpathyTpFile
  *
- * Returns whether @tp_file is incoming.
+ * Returns whether @self is incoming.
  *
- * Return value: %TRUE if the @tp_file is incoming, otherwise %FALSE
+ * Return value: %TRUE if the @self is incoming, otherwise %FALSE
  */
 gboolean
-empathy_tp_file_is_incoming (EmpathyTpFile *tp_file)
+empathy_tp_file_is_incoming (EmpathyTpFile *self)
 {
-  EmpathyTpFilePriv *priv;
+  g_return_val_if_fail (EMPATHY_IS_TP_FILE (self), FALSE);
 
-  g_return_val_if_fail (EMPATHY_IS_TP_FILE (tp_file), FALSE);
-
-  priv = GET_PRIV (tp_file);
-
-  return priv->incoming;
+  return self->priv->incoming;
 }
 
 /**
  * empathy_tp_file_cancel:
- * @tp_file: an #EmpathyTpFile
+ * @self: an #EmpathyTpFile
  *
  * Cancels an ongoing #EmpathyTpFile, first closing the channel and then
  * cancelling any I/O operation and closing the socket.
  */
 void
-empathy_tp_file_cancel (EmpathyTpFile *tp_file)
+empathy_tp_file_cancel (EmpathyTpFile *self)
 {
-  g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
+  g_return_if_fail (EMPATHY_IS_TP_FILE (self));
 
-  close_channel_internal (tp_file, TRUE);
+  close_channel_internal (self, TRUE);
 }
 
 /**
  * empathy_tp_file_close:
- * @tp_file: an #EmpathyTpFile
+ * @self: an #EmpathyTpFile
  *
  * Closes the channel for an ongoing #EmpathyTpFile. It's safe to call this
  * method after the transfer has ended.
  */
 void
-empathy_tp_file_close (EmpathyTpFile *tp_file)
+empathy_tp_file_close (EmpathyTpFile *self)
 {
-  g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
+  g_return_if_fail (EMPATHY_IS_TP_FILE (self));
 
-  close_channel_internal (tp_file, FALSE);
+  close_channel_internal (self, FALSE);
 }

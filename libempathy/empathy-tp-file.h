@@ -56,11 +56,12 @@ typedef enum {
 } EmpathyFTErrorEnum;
 
 typedef struct _EmpathyTpFile EmpathyTpFile;
+typedef struct _EmpathyTpFilePrivate EmpathyTpFilePrivate;
 typedef struct _EmpathyTpFileClass EmpathyTpFileClass;
 
 struct _EmpathyTpFile {
   GObject  parent;
-  gpointer priv;
+  EmpathyTpFilePrivate *priv;
 };
 
 struct _EmpathyTpFileClass {
