@@ -616,19 +616,48 @@ file_read_async_cb (GObject *source,
 }
 
 static void
+file_transfer_set_uri_cb (TpProxy *proxy,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  GValue nothing = { 0 };
+  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
+  EmpathyTpFilePriv *priv = GET_PRIV (self);
+
+  if (error != NULL)
+    {
+      DEBUG ("Failed to set FileTransfer.URI: %s", error->message);
+      /* We don't return as that's not a big issue */
+    }
+
+  /* we don't impose specific interface/port requirements even
+   * if we're not using UNIX sockets.
+   */
+  initialize_empty_ac_variant (priv->socket_access_control, &nothing);
+
+  tp_cli_channel_type_file_transfer_call_accept_file (priv->channel,
+      -1, priv->socket_address_type, priv->socket_access_control,
+      &nothing, priv->offset,
+      ft_operation_provide_or_accept_file_cb, NULL, NULL, weak_object);
+}
+
+static void
 file_replace_async_cb (GObject *source,
     GAsyncResult *res,
     gpointer user_data)
 {
-  GValue nothing = { 0 };
   EmpathyTpFile *tp_file = user_data;
   EmpathyTpFilePriv *priv;
   GError *error = NULL;
   GFileOutputStream *out_stream;
+  GFile *file = G_FILE (source);
+  gchar *uri;
+  GValue *value;
 
   priv = GET_PRIV (tp_file);
 
-  out_stream = g_file_replace_finish (G_FILE (source), res, &error);
+  out_stream = g_file_replace_finish (file, res, &error);
 
   if (error != NULL)
     {
@@ -640,15 +669,15 @@ file_replace_async_cb (GObject *source,
 
   priv->out_stream = G_OUTPUT_STREAM (out_stream);
 
-  /* we don't impose specific interface/port requirements even
-   * if we're not using UNIX sockets.
-   */
-  initialize_empty_ac_variant (priv->socket_access_control, &nothing);
+  /* Try setting FileTranfer.URI before accepting the file */
+  uri = g_file_get_uri (file);
+  value = tp_g_value_slice_new_take_string (uri);
 
-  tp_cli_channel_type_file_transfer_call_accept_file (priv->channel,
-      -1, priv->socket_address_type, priv->socket_access_control,
-      &nothing, priv->offset,
-      ft_operation_provide_or_accept_file_cb, NULL, NULL, G_OBJECT (tp_file));
+  tp_cli_dbus_properties_call_set (priv->channel, -1,
+      TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "URI", value,
+      file_transfer_set_uri_cb, NULL, NULL, G_OBJECT (tp_file));
+
+  tp_g_value_slice_free (value);
 }
 
 static void
