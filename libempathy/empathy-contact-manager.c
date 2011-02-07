@@ -865,6 +865,45 @@ contact_manager_remove_group (EmpathyContactList *manager,
 }
 
 static void
+contact_manager_set_blocked (EmpathyContactList *manager,
+			     EmpathyContact     *contact,
+			     gboolean            blocked)
+{
+	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
+	EmpathyContactList        *list;
+	TpConnection              *connection;
+
+	g_return_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager));
+
+	connection = empathy_contact_get_connection (contact);
+	list = g_hash_table_lookup (priv->lists, connection);
+
+	if (list != NULL) {
+		empathy_contact_list_set_blocked (list, contact, blocked);
+	}
+}
+
+static gboolean
+contact_manager_get_blocked (EmpathyContactList *manager,
+			     EmpathyContact     *contact)
+{
+	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
+	EmpathyContactList        *list;
+	TpConnection              *connection;
+
+	g_return_val_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager), FALSE);
+
+	connection = empathy_contact_get_connection (contact);
+	list = g_hash_table_lookup (priv->lists, connection);
+
+	if (list != NULL) {
+		return empathy_contact_list_get_blocked (list, contact);
+	} else {
+		return FALSE;
+	}
+}
+
+static void
 contact_manager_iface_init (EmpathyContactListIface *iface)
 {
 	iface->add               = contact_manager_add;
@@ -880,6 +919,8 @@ contact_manager_iface_init (EmpathyContactListIface *iface)
 	iface->is_favourite      = contact_manager_is_favourite;
 	iface->remove_favourite  = contact_manager_remove_favourite;
 	iface->add_favourite     = contact_manager_add_favourite;
+	iface->set_blocked	 = contact_manager_set_blocked;
+	iface->get_blocked	 = contact_manager_get_blocked;
 }
 
 EmpathyContactListFlags

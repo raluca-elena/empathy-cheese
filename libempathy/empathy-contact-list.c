@@ -278,3 +278,26 @@ empathy_contact_list_remove_from_favourites (EmpathyContactList *list,
 			contact);
 	}
 }
+
+void
+empathy_contact_list_set_blocked (EmpathyContactList *list,
+				  EmpathyContact     *contact,
+				  gboolean            blocked)
+{
+	EmpathyContactListIface *iface = EMPATHY_CONTACT_LIST_GET_IFACE (list);
+
+	if (iface->set_blocked != NULL)
+		iface->set_blocked (list, contact, blocked);
+}
+
+gboolean
+empathy_contact_list_get_blocked (EmpathyContactList *list,
+				  EmpathyContact     *contact)
+{
+	EmpathyContactListIface *iface = EMPATHY_CONTACT_LIST_GET_IFACE (list);
+
+	if (iface->get_blocked != NULL)
+		return iface->get_blocked (list, contact);
+	else
+		return FALSE;
+}
