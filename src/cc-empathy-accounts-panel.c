@@ -52,6 +52,7 @@ struct CcEmpathyAccountsPanelPrivate
   GtkWidget *accounts_window;
 
   GtkWidget *assistant;
+  GtkWidget *container;
 };
 
 G_DEFINE_DYNAMIC_TYPE (CcEmpathyAccountsPanel, cc_empathy_accounts_panel, CC_TYPE_PANEL)
@@ -79,7 +80,7 @@ panel_pack_with_accounts_dialog (CcEmpathyAccountsPanel *panel)
     gtk_widget_set_no_show_all (action_area, TRUE);
     gtk_widget_hide (action_area);
 
-    gtk_widget_reparent (content, GTK_WIDGET (panel));
+    gtk_widget_reparent (content, GTK_WIDGET (panel->priv->container));
 }
 
 static void
@@ -216,6 +217,14 @@ cc_empathy_accounts_panel_init (CcEmpathyAccountsPanel *panel)
   TpAccountManager *account_manager;
 
   panel->priv = CC_EMPATHY_ACCOUNTS_PANEL_GET_PRIVATE (panel);
+
+  /* create a container widget immediately, and pack it into the panel,
+   * because the CC library expects a children to exist after
+   * the object is constructed.
+   */
+  panel->priv->container = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_show (panel->priv->container);
+  gtk_container_add (GTK_CONTAINER (panel), panel->priv->container);
 
   empathy_gtk_init ();
 
