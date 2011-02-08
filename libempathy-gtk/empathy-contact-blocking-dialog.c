@@ -46,12 +46,17 @@ G_DEFINE_TYPE (EmpathyContactBlockingDialog, empathy_contact_blocking_dialog,
 
 struct _EmpathyContactBlockingDialogPrivate
 {
-  GHashTable *channels; /* TpConnection* -> TpChannel* */
+  /* a map of all active connections to their 'deny' channel */
+  GHashTable *channels; /* reffed TpConnection* -> reffed TpChannel* */
+
+  guint block_account_changed;
+
   GtkListStore *blocked_contacts;
   GtkListStore *completion_contacts;
   GtkTreeSelection *selection;
 
   GtkWidget *account_chooser;
+  GtkWidget *add_button;
   GtkWidget *add_contact_entry;
   GtkWidget *remove_button;
 };
@@ -84,6 +89,40 @@ contact_blocking_dialog_filter_account_chooser (TpAccount *account,
     g_hash_table_lookup (self->priv->channels, conn) != NULL;
 
   callback (enable, callback_data);
+}
+
+static void contact_blocking_dialog_account_changed (GtkWidget *,
+    EmpathyContactBlockingDialog *);
+
+static void
+contact_blocking_dialog_refilter_account_chooser (
+    EmpathyContactBlockingDialog *self)
+{
+  EmpathyAccountChooser *chooser =
+    EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser);
+  TpConnection *conn;
+  gboolean enabled;
+
+  DEBUG ("Refiltering account chooser");
+
+  /* set the filter to refilter the account chooser */
+  self->priv->block_account_changed++;
+  empathy_account_chooser_set_filter (chooser,
+      contact_blocking_dialog_filter_account_chooser, self);
+  self->priv->block_account_changed--;
+
+  conn = empathy_account_chooser_get_connection (chooser);
+  enabled = (empathy_account_chooser_get_account (chooser) != NULL &&
+             conn != NULL &&
+             g_hash_table_lookup (self->priv->channels, conn) != NULL);
+
+  if (!enabled)
+    DEBUG ("No account selected");
+
+  gtk_widget_set_sensitive (self->priv->add_button, enabled);
+  gtk_widget_set_sensitive (self->priv->add_contact_entry, enabled);
+
+  contact_blocking_dialog_account_changed (self->priv->account_chooser, self);
 }
 
 static void contact_blocking_dialog_inspected_handles (TpConnection *,
@@ -154,11 +193,7 @@ contact_blocking_dialog_connection_status_changed (TpAccount *account,
 
         /* remove the channel from the hash table */
         g_hash_table_remove (self->priv->channels, conn);
-
-        /* set the filter again to refilter the account list */
-        empathy_account_chooser_set_filter (
-            EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser),
-            contact_blocking_dialog_filter_account_chooser, self);
+        contact_blocking_dialog_refilter_account_chooser (self);
         break;
 
       case TP_CONNECTION_STATUS_CONNECTING:
@@ -365,11 +400,7 @@ contact_blocking_dialog_deny_channel_prepared (GObject *channel,
 
   g_hash_table_insert (self->priv->channels,
       g_object_ref (conn), channel);
-
-  /* set the filter again to refilter the account list */
-  empathy_account_chooser_set_filter (
-      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser),
-      contact_blocking_dialog_filter_account_chooser, self);
+  contact_blocking_dialog_refilter_account_chooser (self);
 
   g_signal_connect (channel, "group-members-changed",
       G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed), self);
@@ -523,17 +554,23 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
   EmpathyTpContactList *contact_list;
   GList *members, *ptr;
 
-  if (conn == NULL)
+  if (self->priv->block_account_changed > 0)
     return;
-
-  DEBUG ("Account changed: %s", get_pretty_conn_name (conn));
 
   /* clear the lists of contacts */
   gtk_list_store_clear (self->priv->blocked_contacts);
   gtk_list_store_clear (self->priv->completion_contacts);
 
+  if (conn == NULL)
+    return;
+
+  DEBUG ("Account changed: %s", get_pretty_conn_name (conn));
+
   /* load the deny list */
   channel = g_hash_table_lookup (self->priv->channels, conn);
+
+  if (channel == NULL)
+    return;
 
   g_return_if_fail (TP_IS_CHANNEL (channel));
 
@@ -632,6 +669,7 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   gui = empathy_builder_get_file (filename,
       "contents", &contents,
       "account-hbox", &account_hbox,
+      "add-button", &self->priv->add_button,
       "add-contact-entry", &self->priv->add_contact_entry,
       "blocked-contacts", &self->priv->blocked_contacts,
       "blocked-contacts-view", &blocked_contacts_view,
@@ -650,18 +688,6 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       contents);
   gtk_widget_show (contents);
 
-  /* add the account chooser */
-  self->priv->account_chooser = empathy_account_chooser_new ();
-  empathy_account_chooser_set_filter (
-      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser),
-      contact_blocking_dialog_filter_account_chooser, self);
-  g_signal_connect (self->priv->account_chooser, "changed",
-      G_CALLBACK (contact_blocking_dialog_account_changed), self);
-
-  gtk_box_pack_start (GTK_BOX (account_hbox), self->priv->account_chooser,
-      TRUE, TRUE, 0);
-  gtk_widget_show (self->priv->account_chooser);
-
   /* set up the tree selection */
   self->priv->selection = gtk_tree_view_get_selection (
       GTK_TREE_VIEW (blocked_contacts_view));
@@ -679,6 +705,16 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       completion);
   g_object_unref (completion);
   g_object_unref (self->priv->completion_contacts);
+
+  /* add the account chooser */
+  self->priv->account_chooser = empathy_account_chooser_new ();
+  contact_blocking_dialog_refilter_account_chooser (self);
+  g_signal_connect (self->priv->account_chooser, "changed",
+      G_CALLBACK (contact_blocking_dialog_account_changed), self);
+
+  gtk_box_pack_start (GTK_BOX (account_hbox), self->priv->account_chooser,
+      TRUE, TRUE, 0);
+  gtk_widget_show (self->priv->account_chooser);
 
   /* prepare the account manager */
   am = tp_account_manager_dup ();
