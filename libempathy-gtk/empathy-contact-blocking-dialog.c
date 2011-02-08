@@ -223,7 +223,7 @@ contact_blocking_dialog_deny_channel_members_changed (TpChannel *channel,
   tp_intset_destroy (removed_set);
 }
 
-DECLARE_CALLBACK (contact_blocking_dialog_account_prepared);
+DECLARE_CALLBACK (contact_blocking_dialog_connection_prepared);
 
 static void
 contact_blocking_dialog_am_prepared (GObject *am,
@@ -246,40 +246,21 @@ contact_blocking_dialog_am_prepared (GObject *am,
   for (ptr = accounts; ptr != NULL; ptr = ptr->next)
     {
       TpAccount *account = ptr->data;
+      TpConnection *conn;
 
-      tp_proxy_prepare_async (account, NULL,
-          contact_blocking_dialog_account_prepared, self);
+      g_signal_connect (account, "status-changed",
+          G_CALLBACK (contact_blocking_dialog_connection_status_changed), self);
+
+      conn = tp_account_get_connection (TP_ACCOUNT (account));
+
+      if (conn != NULL)
+        {
+          tp_proxy_prepare_async (conn, NULL,
+              contact_blocking_dialog_connection_prepared, self);
+        }
     }
 
   g_list_free (accounts);
-}
-
-static void
-contact_blocking_dialog_account_prepared (GObject *account,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  EmpathyContactBlockingDialog *self = user_data;
-  TpConnection *conn;
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (account, result, &error))
-    {
-      DEBUG ("Could not prepare Account: %s", error->message);
-      g_error_free (error);
-      return;
-    }
-
-  g_signal_connect (account, "status-changed",
-      G_CALLBACK (contact_blocking_dialog_connection_status_changed), self);
-
-  conn = tp_account_get_connection (TP_ACCOUNT (account));
-
-  if (conn != NULL)
-    {
-      tp_proxy_prepare_async (conn, NULL,
-          contact_blocking_dialog_connection_prepared, self);
-    }
 }
 
 static void contact_blocking_dialog_got_deny_channel (TpConnection *,
