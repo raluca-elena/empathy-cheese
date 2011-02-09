@@ -84,7 +84,10 @@ libexec_PROGRAMS = \
 	empathy-auth-client \
 	empathy-chat
 
-BUILT_SOURCES=
+BUILT_SOURCES = \
+	src-marshal.h \
+	src-marshal.c \
+	src-marshal.list
 
 empathy_accounts_SOURCES =						\
 	empathy-accounts.c empathy-accounts.h				\
@@ -204,6 +207,24 @@ endif
 dist_man_MANS =			\
 	empathy.1 \
 	empathy-accounts.1
+
+src-marshal.list: $(empathy_SOURCES) Makefile.am
+	$(AM_V_GEN)( cd $(srcdir) && \
+	sed -n -e 's/.*src_marshal_\([[:upper:][:digit:]]*__[[:upper:][:digit:]_]*\).*/\1/p' \
+	$(wildcard *.c) ) \
+	| sed -e 's/__/:/' -e 'y/_/,/' | sort -u > $@.tmp
+	@if cmp -s $@.tmp $@; then \
+		rm $@.tmp; \
+	else \
+		mv $@.tmp $@; \
+	fi
+
+%-marshal.h: %-marshal.list Makefile
+	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.h
+
+%-marshal.c: %-marshal.list Makefile
+	$(AM_V_GEN)echo "#include \"src-marshal.h\"" > $@ && \
+	$(GLIB_GENMARSHAL) --body --prefix=_$(subst -,_,$*)_marshal $< >> $*-marshal.c
 
 # rules for making the glib enum objects
 %-enumtypes.h: %.h Makefile.in
