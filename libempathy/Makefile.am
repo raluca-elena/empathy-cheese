@@ -52,8 +52,6 @@ libempathy_headers =				\
 	empathy-server-sasl-handler.h		\
 	empathy-server-tls-handler.h		\
 	empathy-status-presets.h		\
-	empathy-streamed-media-factory.h	\
-	empathy-streamed-media-handler.h	\
 	empathy-time.h				\
 	empathy-tls-certificate.h		\
 	empathy-tls-verifier.h			\
@@ -92,8 +90,6 @@ libempathy_la_SOURCES =					\
 	empathy-server-sasl-handler.c			\
 	empathy-server-tls-handler.c			\
 	empathy-status-presets.c			\
-	empathy-streamed-media-factory.c		\
-	empathy-streamed-media-handler.c		\
 	empathy-time.c					\
 	empathy-tls-certificate.c			\
 	empathy-tls-verifier.c				\

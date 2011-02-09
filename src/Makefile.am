@@ -80,8 +80,8 @@ bin_PROGRAMS =			\
 	$(NULL)
 
 libexec_PROGRAMS = \
-	empathy-av \
 	empathy-auth-client \
+	empathy-av \
 	empathy-chat
 
 BUILT_SOURCES = \
@@ -103,16 +103,21 @@ empathy_debugger_SOURCES =						\
 	empathy-debugger.c		 				\
 	$(NULL)
 
-empathy_handwritten_av_source = \
+empathy_av_SOURCES = \
 	empathy-av.c \
-	empathy-streamed-media-window-fullscreen.c empathy-streamed-media-window-fullscreen.h	\
-	empathy-streamed-media-window.c empathy-streamed-media-window.h	\
+	empathy-streamed-media-factory.c \
+	empathy-streamed-media-factory.h \
+	empathy-streamed-media-handler.c \
+	empathy-streamed-media-handler.h \
+	empathy-streamed-media-window-fullscreen.c \
+	empathy-streamed-media-window-fullscreen.h \
+	empathy-streamed-media-window.c \
+	empathy-streamed-media-window.h \
+	ev-sidebar.c \
+	ev-sidebar.h \
 	$(NULL)
 
-empathy_av_SOURCES =						\
-	$(empathy_handwritten_av_source) \
-	ev-sidebar.c ev-sidebar.h \
-	$(NULL)
+nodist_empathy_av_SOURCES = $(BUILT_SOURCES)
 
 empathy_auth_client_SOURCES =						\
 	empathy-auth-client.c \

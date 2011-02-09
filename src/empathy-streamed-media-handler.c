@@ -29,9 +29,10 @@
 #include <telepathy-farsight/channel.h>
 #include <telepathy-farsight/stream.h>
 
+#include <libempathy/empathy-utils.h>
+
 #include "empathy-streamed-media-handler.h"
-#include "empathy-marshal.h"
-#include "empathy-utils.h"
+#include "src-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -346,14 +347,14 @@ empathy_streamed_media_handler_class_init (EmpathyStreamedMediaHandlerClass *kla
   signals[SRC_PAD_ADDED] =
     g_signal_new ("src-pad-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      _empathy_marshal_BOOLEAN__OBJECT_UINT,
+      _src_marshal_BOOLEAN__OBJECT_UINT,
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
   signals[SINK_PAD_ADDED] =
     g_signal_new ("sink-pad-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      _empathy_marshal_BOOLEAN__OBJECT_UINT,
+      _src_marshal_BOOLEAN__OBJECT_UINT,
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
@@ -361,7 +362,7 @@ empathy_streamed_media_handler_class_init (EmpathyStreamedMediaHandlerClass *kla
     g_signal_new ("request-resource", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       g_signal_accumulator_true_handled, NULL,
-      _empathy_marshal_BOOLEAN__UINT_UINT,
+      _src_marshal_BOOLEAN__UINT_UINT,
       G_TYPE_BOOLEAN, 2, G_TYPE_UINT, G_TYPE_UINT);
 
   signals[CLOSED] =

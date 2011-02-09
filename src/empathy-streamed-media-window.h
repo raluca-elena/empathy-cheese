@@ -23,7 +23,8 @@
 
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <libempathy/empathy-streamed-media-handler.h>
+
+#include "empathy-streamed-media-handler.h"
 
 G_BEGIN_DECLS
 

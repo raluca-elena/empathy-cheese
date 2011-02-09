@@ -23,9 +23,6 @@
 
 #include <glib-object.h>
 
-#include <libempathy/empathy-streamed-media-handler.h>
-#include <libempathy/empathy-dispatcher.h>
-
 G_BEGIN_DECLS
 
 typedef struct _EmpathyStreamedMediaFactory EmpathyStreamedMediaFactory;

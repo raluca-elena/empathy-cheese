@@ -27,10 +27,11 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/util.h>
 
-#include "empathy-dispatcher.h"
-#include "empathy-marshal.h"
+#include <libempathy/empathy-utils.h>
+
 #include "empathy-streamed-media-factory.h"
-#include "empathy-utils.h"
+#include "empathy-streamed-media-handler.h"
+#include "src-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -171,7 +172,7 @@ empathy_streamed_media_factory_class_init (
       G_TYPE_FROM_CLASS (empathy_streamed_media_factory_class),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _empathy_marshal_VOID__OBJECT_BOOLEAN,
+      _src_marshal_VOID__OBJECT_BOOLEAN,
       G_TYPE_NONE,
       2, EMPATHY_TYPE_STREAMED_MEDIA_HANDLER, G_TYPE_BOOLEAN);
 }

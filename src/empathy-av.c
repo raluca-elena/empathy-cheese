@@ -28,10 +28,10 @@
 
 #include <telepathy-glib/debug-sender.h>
 
-#include <libempathy/empathy-streamed-media-factory.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-streamed-media-window.h"
+#include "empathy-streamed-media-factory.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
