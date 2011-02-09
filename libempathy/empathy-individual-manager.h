@@ -36,6 +36,16 @@ G_BEGIN_DECLS
 #define EMPATHY_IS_INDIVIDUAL_MANAGER_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_INDIVIDUAL_MANAGER))
 #define EMPATHY_INDIVIDUAL_MANAGER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_INDIVIDUAL_MANAGER, EmpathyIndividualManagerClass))
 
+typedef enum
+{
+  EMPATHY_INDIVIDUAL_MANAGER_NO_FLAGS = 0,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_ADD = 1 << 0,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_REMOVE = 1 << 1,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_ALIAS = 1 << 2,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_GROUP = 1 << 3,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_BLOCK = 1 << 4,
+} EmpathyIndividualManagerFlags;
+
 typedef struct _EmpathyIndividualManager EmpathyIndividualManager;
 typedef struct _EmpathyIndividualManagerClass EmpathyIndividualManagerClass;
 
@@ -80,6 +90,14 @@ void empathy_individual_manager_link_personas (EmpathyIndividualManager *self,
 void empathy_individual_manager_unlink_individual (
     EmpathyIndividualManager *self,
     FolksIndividual *individual);
+
+gboolean empathy_individual_manager_supports_blocking (
+    EmpathyIndividualManager *self,
+    FolksIndividual *individual);
+
+void empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
+    FolksIndividual *individual,
+    gboolean blocked);
 
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_MANAGER_H__ */
