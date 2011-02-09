@@ -2269,16 +2269,22 @@ empathy_individual_view_dup_selected_group (EmpathyIndividualView *view,
   return name;
 }
 
-static gboolean
+static int
 individual_view_remove_dialog_show (GtkWindow *parent,
     const gchar *message,
-    const gchar *secondary_text)
+    const gchar *secondary_text,
+    gboolean block_button)
 {
   GtkWidget *dialog;
   gboolean res;
 
   dialog = gtk_message_dialog_new (parent, GTK_DIALOG_MODAL,
       GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", message);
+
+  if (block_button)
+    gtk_dialog_add_button (GTK_DIALOG (dialog),
+        _("Delete and Block"), GTK_RESPONSE_REJECT);
+
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
       GTK_STOCK_CANCEL, GTK_RESPONSE_NO,
       GTK_STOCK_DELETE, GTK_RESPONSE_YES, NULL);
@@ -2290,7 +2296,7 @@ individual_view_remove_dialog_show (GtkWindow *parent,
   res = gtk_dialog_run (GTK_DIALOG (dialog));
   gtk_widget_destroy (dialog);
 
-  return (res == GTK_RESPONSE_YES);
+  return res;
 }
 
 static void
@@ -2310,7 +2316,7 @@ individual_view_group_remove_activate_cb (GtkMenuItem *menuitem,
           group);
       parent = empathy_get_toplevel_window (GTK_WIDGET (view));
       if (individual_view_remove_dialog_show (parent, _("Removing group"),
-              text))
+              text, FALSE) == GTK_RESPONSE_YES)
         {
           EmpathyIndividualManager *manager =
               empathy_individual_manager_dup_singleton ();
@@ -2389,10 +2395,13 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
 
   if (individual != NULL)
     {
+      EmpathyIndividualManager *manager;
       gchar *text;
       GtkWindow *parent;
       GList *l, *personas;
       guint persona_count = 0;
+      gboolean can_block;
+      int res;
 
       personas = folks_individual_get_personas (individual);
 
@@ -2428,20 +2437,25 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
                   folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
         }
 
+
+      manager = empathy_individual_manager_dup_singleton ();
+      can_block = empathy_individual_manager_supports_blocking (manager,
+          individual);
       parent = empathy_get_toplevel_window (GTK_WIDGET (view));
+      res = individual_view_remove_dialog_show (parent, _("Removing contact"),
+              text, can_block);
 
-      if (individual_view_remove_dialog_show (parent, _("Removing contact"),
-              text))
+      if (res == GTK_RESPONSE_YES || res == GTK_RESPONSE_REJECT)
         {
-          EmpathyIndividualManager *manager;
-
-          manager = empathy_individual_manager_dup_singleton ();
           empathy_individual_manager_remove (manager, individual, "");
-          g_object_unref (G_OBJECT (manager));
+
+          if (res == GTK_RESPONSE_REJECT)
+            empathy_individual_manager_set_blocked (manager, individual, TRUE);
         }
 
       g_free (text);
       g_object_unref (individual);
+      g_object_unref (manager);
     }
 }
 
