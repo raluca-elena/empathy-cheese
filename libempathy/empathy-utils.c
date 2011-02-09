@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2003-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -235,6 +235,66 @@ empathy_xml_node_find_child_prop_value (xmlNodePtr   node,
 	}
 
 	return found;
+}
+
+GHashTable *
+empathy_call_create_streamed_media_request (EmpathyContact *contact,
+					    gboolean initial_audio,
+					    gboolean initial_video)
+{
+	return tp_asv_new (
+		TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+			TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
+		TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
+			TP_HANDLE_TYPE_CONTACT,
+		TP_PROP_CHANNEL_TARGET_HANDLE, G_TYPE_UINT,
+			empathy_contact_get_handle (contact),
+		TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_AUDIO, G_TYPE_BOOLEAN,
+			initial_audio,
+		TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO, G_TYPE_BOOLEAN,
+			initial_video,
+		NULL);
+}
+
+static void
+create_media_channel_cb (GObject *source,
+			 GAsyncResult *result,
+			 gpointer user_data)
+{
+	GError *error = NULL;
+
+	if (!tp_account_channel_request_create_channel_finish (TP_ACCOUNT_CHANNEL_REQUEST (source),
+							       result,
+							       &error)) {
+		DEBUG ("Failed to create StreamedMedia channel: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+void
+empathy_call_new_with_streams (EmpathyContact *contact,
+			       gboolean initial_audio,
+			       gboolean initial_video,
+			       gint64 timestamp)
+{
+	GHashTable *request;
+	TpAccount *account;
+	TpAccountChannelRequest *req;
+
+	request = empathy_call_create_streamed_media_request (contact,
+							      initial_audio,
+							      initial_video);
+
+	account = empathy_contact_get_account (contact);
+
+	req = tp_account_channel_request_new (account, request, timestamp);
+
+	tp_account_channel_request_create_channel_async (req, NULL, NULL,
+							 create_media_channel_cb,
+							 NULL);
+
+	g_hash_table_unref (request);
+	g_object_unref (req);
 }
 
 const gchar *

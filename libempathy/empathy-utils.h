@@ -1,7 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2003-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -65,6 +65,15 @@ xmlChar *    empathy_xml_node_get_child_content     (xmlNodePtr       node,
 xmlNodePtr   empathy_xml_node_find_child_prop_value (xmlNodePtr       node,
 						    const gchar     *prop_name,
 						    const gchar     *prop_value);
+
+/* Calls */
+void         empathy_call_new_with_streams		(EmpathyContact *contact,
+							 gboolean initial_audio,
+							 gboolean initial_video,
+							 gint64 timestamp);
+GHashTable * empathy_call_create_streamed_media_request (EmpathyContact *contact,
+							 gboolean initial_audio,
+							 gboolean initial_video);
 
 /* Others */
 const gchar * empathy_presence_get_default_message  (TpConnectionPresenceType presence);

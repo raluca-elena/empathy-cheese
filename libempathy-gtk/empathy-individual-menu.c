@@ -31,7 +31,6 @@
 #include <folks/folks.h>
 #include <folks/folks-telepathy.h>
 
-#include <libempathy/empathy-streamed-media-factory.h>
 #include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-chatroom-manager.h>
@@ -543,8 +542,8 @@ empathy_individual_audio_call_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_streamed_media_factory_new_call_with_streams (contact, TRUE, FALSE,
-      gtk_get_current_event_time (), NULL);
+  empathy_call_new_with_streams (contact, TRUE, FALSE,
+      gtk_get_current_event_time ());
 }
 
 GtkWidget *
@@ -585,8 +584,8 @@ empathy_individual_video_call_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_streamed_media_factory_new_call_with_streams (contact, TRUE, TRUE,
-      gtk_get_current_event_time (), NULL);
+  empathy_call_new_with_streams (contact, TRUE, TRUE,
+      gtk_get_current_event_time ());
 }
 
 GtkWidget *

@@ -64,18 +64,8 @@ EmpathyStreamedMediaFactory *empathy_streamed_media_factory_initialise (void);
 
 EmpathyStreamedMediaFactory *empathy_streamed_media_factory_get (void);
 
-void empathy_streamed_media_factory_new_call_with_streams (EmpathyContact *contact,
-  gboolean initial_audio,
-  gboolean initial_video,
-  gint64 timestamp,
-  gpointer user_data);
-
 gboolean empathy_streamed_media_factory_register (EmpathyStreamedMediaFactory *self,
     GError **error);
-
-GHashTable * empathy_streamed_media_factory_create_request (EmpathyContact *contact,
-    gboolean initial_audio,
-    gboolean initial_video);
 
 G_END_DECLS
 
