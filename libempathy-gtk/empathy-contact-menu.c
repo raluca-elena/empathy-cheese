@@ -40,6 +40,8 @@
 #include "empathy-ui-utils.h"
 #include "empathy-share-my-desktop.h"
 
+static GtkWidget *empathy_contact_block_menu_item_new (EmpathyContact *);
+
 GtkWidget *
 empathy_contact_menu_new (EmpathyContact             *contact,
 			  EmpathyContactFeatureFlags  features)
@@ -139,6 +141,19 @@ empathy_contact_menu_new (EmpathyContact             *contact,
 		gtk_widget_show (item);
 	}
 
+	/* Separator & Block */
+	if (features & EMPATHY_CONTACT_FEATURE_BLOCK &&
+	    (item = empathy_contact_block_menu_item_new (contact)) != NULL) {
+		GtkWidget *sep;
+
+		sep = gtk_separator_menu_item_new ();
+		gtk_menu_shell_append (shell, sep);
+		gtk_widget_show (sep);
+
+		gtk_menu_shell_append (shell, item);
+		gtk_widget_show (item);
+	}
+
 	return menu;
 }
 
@@ -208,6 +223,62 @@ empathy_contact_add_menu_item_new (EmpathyContact *contact)
 
 	g_signal_connect (item, "activate",
 			G_CALLBACK (empathy_contact_add_menu_item_activated),
+			contact);
+
+	return item;
+}
+
+static void
+empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
+					 EmpathyContact   *contact)
+{
+	EmpathyContactManager *manager;
+	gboolean blocked;
+
+	manager = empathy_contact_manager_dup_singleton ();
+	blocked = gtk_check_menu_item_get_active (item);
+
+	empathy_contact_list_set_blocked (EMPATHY_CONTACT_LIST (manager),
+					  contact, blocked);
+
+	g_object_unref (manager);
+}
+
+static GtkWidget *
+empathy_contact_block_menu_item_new (EmpathyContact *contact)
+{
+	GtkWidget *item;
+	EmpathyContactManager *manager;
+	TpConnection *connection;
+	EmpathyContactListFlags flags;
+	gboolean blocked;
+
+	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
+
+	if (!empathy_contact_manager_initialized ()) {
+		return NULL;
+	}
+
+	manager = empathy_contact_manager_dup_singleton ();
+	connection = empathy_contact_get_connection (contact);
+
+	flags = empathy_contact_manager_get_flags_for_connection (manager,
+			connection);
+
+	if (!(flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)) {
+		return NULL;
+	}
+
+	item = gtk_check_menu_item_new_with_mnemonic (_("_Block Contact"));
+	/* FIXME: this doesn't always get updated immediately */
+	blocked = empathy_contact_list_get_blocked (
+			EMPATHY_CONTACT_LIST (manager),
+			contact);
+
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), blocked);
+
+	g_signal_connect (item, "toggled",
+			G_CALLBACK (empathy_contact_block_menu_item_toggled),
 			contact);
 
 	return item;
