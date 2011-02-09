@@ -145,7 +145,6 @@ AC_SUBST(ERROR_CFLAGS)
 PKG_CHECK_MODULES(EMPATHY,
 [
    dbus-glib-1
-   farsight2-0.10
    folks >= $FOLKS_REQUIRED
    folks-telepathy >= $FOLKS_REQUIRED
    gio-2.0 >= $GLIB_REQUIRED
@@ -158,7 +157,6 @@ PKG_CHECK_MODULES(EMPATHY,
    gstreamer-0.10
    gstreamer-interfaces-0.10
    libxml-2.0
-   telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
    telepathy-glib >= $TELEPATHY_GLIB_REQUIRED
    telepathy-logger-0.1 >= $TELEPATHY_LOGGER
    x11
@@ -166,6 +164,12 @@ PKG_CHECK_MODULES(EMPATHY,
    libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED
    libnotify >= $LIBNOTIFY_REQUIRED
    gcr-3 >= $GCR_REQUIRED
+])
+
+PKG_CHECK_MODULES(EMPATHY_AV,
+[
+   farsight2-0.10
+   telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
 ])
 
 # -----------------------------------------------------------
