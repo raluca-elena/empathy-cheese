@@ -34,7 +34,6 @@
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/util.h>
 
-#include <libempathy/empathy-call-factory.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-contact-groups.h>

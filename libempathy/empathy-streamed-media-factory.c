@@ -1,6 +1,6 @@
 /*
- * empathy-call-factory.c - Source for EmpathyCallFactory
- * Copyright (C) 2008 Collabora Ltd.
+ * empathy-streamed-media-factory.c - Source for EmpathyStreamedMediaFactory
+ * Copyright (C) 2008-2011 Collabora Ltd.
  * @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *
  * This library is free software; you can redistribute it and/or
@@ -29,13 +29,13 @@
 
 #include "empathy-dispatcher.h"
 #include "empathy-marshal.h"
-#include "empathy-call-factory.h"
+#include "empathy-streamed-media-factory.h"
 #include "empathy-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
 
-G_DEFINE_TYPE(EmpathyCallFactory, empathy_call_factory, G_TYPE_OBJECT)
+G_DEFINE_TYPE(EmpathyStreamedMediaFactory, empathy_streamed_media_factory, G_TYPE_OBJECT)
 
 static void handle_channels_cb (TpSimpleHandler *handler,
     TpAccount *account,
@@ -59,17 +59,17 @@ static guint signals[LAST_SIGNAL] = {0};
 typedef struct {
   TpBaseClient *handler;
   gboolean dispose_has_run;
-} EmpathyCallFactoryPriv;
+} EmpathyStreamedMediaFactoryPriv;
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyCallFactory)
+#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyStreamedMediaFactory)
 
 static GObject *call_factory = NULL;
 
 static void
-empathy_call_factory_init (EmpathyCallFactory *obj)
+empathy_streamed_media_factory_init (EmpathyStreamedMediaFactory *obj)
 {
-  EmpathyCallFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
-    EMPATHY_TYPE_CALL_FACTORY, EmpathyCallFactoryPriv);
+  EmpathyStreamedMediaFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
+    EMPATHY_TYPE_STREAMED_MEDIA_FACTORY, EmpathyStreamedMediaFactoryPriv);
   TpDBusDaemon *dbus;
   GError *error = NULL;
 
@@ -116,12 +116,12 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
 }
 
 static GObject *
-empathy_call_factory_constructor (GType type, guint n_construct_params,
+empathy_streamed_media_factory_constructor (GType type, guint n_construct_params,
   GObjectConstructParam *construct_params)
 {
   g_return_val_if_fail (call_factory == NULL, NULL);
 
-  call_factory = G_OBJECT_CLASS (empathy_call_factory_parent_class)->constructor
+  call_factory = G_OBJECT_CLASS (empathy_streamed_media_factory_parent_class)->constructor
           (type, n_construct_params, construct_params);
   g_object_add_weak_pointer (call_factory, (gpointer)&call_factory);
 
@@ -129,18 +129,18 @@ empathy_call_factory_constructor (GType type, guint n_construct_params,
 }
 
 static void
-empathy_call_factory_finalize (GObject *object)
+empathy_streamed_media_factory_finalize (GObject *object)
 {
   /* free any data held directly by the object here */
 
-  if (G_OBJECT_CLASS (empathy_call_factory_parent_class)->finalize)
-    G_OBJECT_CLASS (empathy_call_factory_parent_class)->finalize (object);
+  if (G_OBJECT_CLASS (empathy_streamed_media_factory_parent_class)->finalize)
+    G_OBJECT_CLASS (empathy_streamed_media_factory_parent_class)->finalize (object);
 }
 
 static void
-empathy_call_factory_dispose (GObject *object)
+empathy_streamed_media_factory_dispose (GObject *object)
 {
-  EmpathyCallFactoryPriv *priv = GET_PRIV (object);
+  EmpathyStreamedMediaFactoryPriv *priv = GET_PRIV (object);
 
   if (priv->dispose_has_run)
     return;
@@ -149,26 +149,26 @@ empathy_call_factory_dispose (GObject *object)
 
   tp_clear_object (&priv->handler);
 
-  if (G_OBJECT_CLASS (empathy_call_factory_parent_class)->dispose)
-    G_OBJECT_CLASS (empathy_call_factory_parent_class)->dispose (object);
+  if (G_OBJECT_CLASS (empathy_streamed_media_factory_parent_class)->dispose)
+    G_OBJECT_CLASS (empathy_streamed_media_factory_parent_class)->dispose (object);
 }
 
 static void
-empathy_call_factory_class_init (
-  EmpathyCallFactoryClass *empathy_call_factory_class)
+empathy_streamed_media_factory_class_init (
+  EmpathyStreamedMediaFactoryClass *empathy_streamed_media_factory_class)
 {
-  GObjectClass *object_class = G_OBJECT_CLASS (empathy_call_factory_class);
+  GObjectClass *object_class = G_OBJECT_CLASS (empathy_streamed_media_factory_class);
 
-  g_type_class_add_private (empathy_call_factory_class,
-    sizeof (EmpathyCallFactoryPriv));
+  g_type_class_add_private (empathy_streamed_media_factory_class,
+    sizeof (EmpathyStreamedMediaFactoryPriv));
 
-  object_class->constructor = empathy_call_factory_constructor;
-  object_class->dispose = empathy_call_factory_dispose;
-  object_class->finalize = empathy_call_factory_finalize;
+  object_class->constructor = empathy_streamed_media_factory_constructor;
+  object_class->dispose = empathy_streamed_media_factory_dispose;
+  object_class->finalize = empathy_streamed_media_factory_finalize;
 
   signals[NEW_STREAMED_MEDIA_HANDLER] =
     g_signal_new ("new-streamed-media-handler",
-      G_TYPE_FROM_CLASS (empathy_call_factory_class),
+      G_TYPE_FROM_CLASS (empathy_streamed_media_factory_class),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
       _empathy_marshal_VOID__OBJECT_BOOLEAN,
@@ -176,24 +176,24 @@ empathy_call_factory_class_init (
       2, EMPATHY_TYPE_STREAMED_MEDIA_HANDLER, G_TYPE_BOOLEAN);
 }
 
-EmpathyCallFactory *
-empathy_call_factory_initialise (void)
+EmpathyStreamedMediaFactory *
+empathy_streamed_media_factory_initialise (void)
 {
   g_return_val_if_fail (call_factory == NULL, NULL);
 
-  return EMPATHY_CALL_FACTORY (g_object_new (EMPATHY_TYPE_CALL_FACTORY, NULL));
+  return EMPATHY_STREAMED_MEDIA_FACTORY (g_object_new (EMPATHY_TYPE_STREAMED_MEDIA_FACTORY, NULL));
 }
 
-EmpathyCallFactory *
-empathy_call_factory_get (void)
+EmpathyStreamedMediaFactory *
+empathy_streamed_media_factory_get (void)
 {
   g_return_val_if_fail (call_factory != NULL, NULL);
 
-  return EMPATHY_CALL_FACTORY (call_factory);
+  return EMPATHY_STREAMED_MEDIA_FACTORY (call_factory);
 }
 
 GHashTable *
-empathy_call_factory_create_request (EmpathyContact *contact,
+empathy_streamed_media_factory_create_request (EmpathyContact *contact,
     gboolean initial_audio,
     gboolean initial_video)
 {
@@ -226,8 +226,8 @@ create_media_channel_cb (GObject *source,
 }
 
 /**
- * empathy_call_factory_new_call_with_streams:
- * @factory: an #EmpathyCallFactory
+ * empathy_streamed_media_factory_new_call_with_streams:
+ * @factory: an #EmpathyStreamedMediaFactory
  * @contact: an #EmpathyContact
  * @initial_audio: if %TRUE the call will be started with audio
  * @initial_video: if %TRUE the call will be started with video
@@ -235,7 +235,7 @@ create_media_channel_cb (GObject *source,
  * Initiate a new call with @contact.
  */
 void
-empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
+empathy_streamed_media_factory_new_call_with_streams (EmpathyContact *contact,
     gboolean initial_audio,
     gboolean initial_video,
     gint64 timestamp,
@@ -245,7 +245,7 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
   TpAccount *account;
   TpAccountChannelRequest *req;
 
-  request = empathy_call_factory_create_request (contact, initial_audio,
+  request = empathy_streamed_media_factory_create_request (contact, initial_audio,
       initial_video);
 
   account = empathy_contact_get_account (contact);
@@ -260,7 +260,7 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
 }
 
 static void
-create_call_handler (EmpathyCallFactory *factory,
+create_streamed_media_handler (EmpathyStreamedMediaFactory *factory,
   EmpathyTpStreamedMedia *call)
 {
   EmpathyStreamedMediaHandler *handler;
@@ -278,12 +278,12 @@ create_call_handler (EmpathyCallFactory *factory,
 static void
 call_status_changed_cb (EmpathyTpStreamedMedia *call,
     GParamSpec *spec,
-    EmpathyCallFactory *self)
+    EmpathyStreamedMediaFactory *self)
 {
   if (empathy_tp_streamed_media_get_status (call) <= EMPATHY_TP_STREAMED_MEDIA_STATUS_READYING)
     return;
 
-  create_call_handler (self, call);
+  create_streamed_media_handler (self, call);
 
   g_signal_handlers_disconnect_by_func (call, call_status_changed_cb, self);
   g_object_unref (call);
@@ -299,7 +299,7 @@ handle_channels_cb (TpSimpleHandler *handler,
     TpHandleChannelsContext *context,
     gpointer user_data)
 {
-  EmpathyCallFactory *self = user_data;
+  EmpathyStreamedMediaFactory *self = user_data;
   GList *l;
 
   for (l = channels; l != NULL; l = g_list_next (l))
@@ -325,7 +325,7 @@ handle_channels_cb (TpSimpleHandler *handler,
           continue;
         }
 
-      create_call_handler (self, call);
+      create_streamed_media_handler (self, call);
       g_object_unref (call);
     }
 
@@ -333,10 +333,10 @@ handle_channels_cb (TpSimpleHandler *handler,
 }
 
 gboolean
-empathy_call_factory_register (EmpathyCallFactory *self,
+empathy_streamed_media_factory_register (EmpathyStreamedMediaFactory *self,
     GError **error)
 {
-  EmpathyCallFactoryPriv *priv = GET_PRIV (self);
+  EmpathyStreamedMediaFactoryPriv *priv = GET_PRIV (self);
 
   return tp_base_client_register (priv->handler, error);
 }

@@ -1,5 +1,5 @@
 /*
- * empathy-call-handler.h - Header for EmpathyStreamedMediaHandler
+ * empathy-streamed-media-handler.h - Header for EmpathyStreamedMediaHandler
  * Copyright (C) 2008-2009 Collabora Ltd.
  * @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *

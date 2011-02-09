@@ -36,7 +36,6 @@
 #include <libempathy/empathy-tp-streamed-media.h>
 #include <libempathy/empathy-tp-file.h>
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-call-factory.h>
 #include <libempathy/empathy-gsettings.h>
 
 #include <extensions/extensions.h>

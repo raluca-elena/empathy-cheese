@@ -27,7 +27,7 @@
 #include <gtk/gtk.h>
 #include <telepathy-logger/log-manager.h>
 
-#include <libempathy/empathy-call-factory.h>
+#include <libempathy/empathy-streamed-media-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-utils.h>
@@ -248,7 +248,7 @@ empathy_contact_audio_call_menu_item_activated (GtkMenuItem *item,
 	EmpathyContact *contact)
 {
 
-	empathy_call_factory_new_call_with_streams (contact, TRUE, FALSE,
+	empathy_streamed_media_factory_new_call_with_streams (contact, TRUE, FALSE,
 		gtk_get_current_event_time (), NULL);
 }
 
@@ -279,7 +279,7 @@ static void
 empathy_contact_video_call_menu_item_activated (GtkMenuItem *item,
 	EmpathyContact *contact)
 {
-	empathy_call_factory_new_call_with_streams (contact, TRUE, TRUE,
+	empathy_streamed_media_factory_new_call_with_streams (contact, TRUE, TRUE,
 		gtk_get_current_event_time (), NULL);
 }
 

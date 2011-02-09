@@ -36,7 +36,6 @@
 #include <gst/farsight/fs-element-added-notifier.h>
 
 #include <libempathy/empathy-tp-contact-factory.h>
-#include <libempathy/empathy-call-factory.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy-gtk/empathy-avatar-image.h>
 #include <libempathy-gtk/empathy-video-widget.h>

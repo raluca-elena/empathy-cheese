@@ -38,7 +38,6 @@
 #include <folks/folks.h>
 #include <folks/folks-telepathy.h>
 
-#include <libempathy/empathy-call-factory.h>
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-contact-groups.h>
 #include <libempathy/empathy-dispatcher.h>

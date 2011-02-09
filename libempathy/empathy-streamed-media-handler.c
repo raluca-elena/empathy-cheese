@@ -1,6 +1,6 @@
 /*
- * empathy-call-handler.c - Source for EmpathyStreamedMediaHandler
- * Copyright (C) 2008-2009 Collabora Ltd.
+ * empathy-streamed-media-handler.c - Source for EmpathyStreamedMediaHandler
+ * Copyright (C) 2008-2011 Collabora Ltd.
  * @author Sjoerd Simons <sjoerd.simons@collabora.co.uk>
  *
  * This library is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@
 #include <telepathy-farsight/stream.h>
 
 #include "empathy-streamed-media-handler.h"
-#include "empathy-call-factory.h"
+#include "empathy-streamed-media-factory.h"
 #include "empathy-marshal.h"
 #include "empathy-utils.h"
 
@@ -806,7 +806,7 @@ empathy_streamed_media_handler_start_call (EmpathyStreamedMediaHandler *handler,
   g_assert (priv->contact != NULL);
 
   account = empathy_contact_get_account (priv->contact);
-  request = empathy_call_factory_create_request (priv->contact,
+  request = empathy_streamed_media_factory_create_request (priv->contact,
       priv->initial_audio, priv->initial_video);
 
   req = tp_account_channel_request_new (account, request, timestamp);

@@ -28,7 +28,7 @@
 
 #include <telepathy-glib/debug-sender.h>
 
-#include <libempathy/empathy-call-factory.h>
+#include <libempathy/empathy-streamed-media-factory.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-streamed-media-window.h"
@@ -47,17 +47,17 @@ static GtkApplication *app = NULL;
 static gboolean activated = FALSE;
 static gboolean use_timer = TRUE;
 
-static EmpathyCallFactory *call_factory = NULL;
+static EmpathyStreamedMediaFactory *call_factory = NULL;
 
 static void
-new_call_handler_cb (EmpathyCallFactory *factory,
+new_call_handler_cb (EmpathyStreamedMediaFactory *factory,
     EmpathyStreamedMediaHandler *handler,
     gboolean outgoing,
     gpointer user_data)
 {
   EmpathyStreamedMediaWindow *window;
 
-  DEBUG ("Create a new call window");
+  DEBUG ("Create a new StreamedMedia window");
 
   window = empathy_streamed_media_window_new (handler);
 
@@ -86,12 +86,12 @@ activate_cb (GApplication *application)
     }
 
   g_assert (call_factory == NULL);
-  call_factory = empathy_call_factory_initialise ();
+  call_factory = empathy_streamed_media_factory_initialise ();
 
   g_signal_connect (G_OBJECT (call_factory), "new-streamed-media-handler",
       G_CALLBACK (new_call_handler_cb), NULL);
 
-  if (!empathy_call_factory_register (call_factory, &error))
+  if (!empathy_streamed_media_factory_register (call_factory, &error))
     {
       g_critical ("Failed to register Handler: %s", error->message);
       g_error_free (error);

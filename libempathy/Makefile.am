@@ -28,7 +28,6 @@ noinst_LTLIBRARIES = libempathy.la
 libempathy_headers =				\
 	empathy-account-settings.h		\
 	empathy-auth-factory.h			\
-	empathy-call-factory.h			\
 	empathy-chatroom-manager.h		\
 	empathy-chatroom.h			\
 	empathy-connection-managers.h		\
@@ -53,6 +52,7 @@ libempathy_headers =				\
 	empathy-server-sasl-handler.h		\
 	empathy-server-tls-handler.h		\
 	empathy-status-presets.h		\
+	empathy-streamed-media-factory.h	\
 	empathy-streamed-media-handler.h	\
 	empathy-time.h				\
 	empathy-tls-certificate.h		\
@@ -70,7 +70,6 @@ libempathy_la_SOURCES =					\
 	$(libempathy_headers)				\
 	empathy-account-settings.c			\
 	empathy-auth-factory.c				\
-	empathy-call-factory.c				\
 	empathy-chatroom-manager.c			\
 	empathy-chatroom.c				\
 	empathy-connection-managers.c			\
@@ -93,6 +92,7 @@ libempathy_la_SOURCES =					\
 	empathy-server-sasl-handler.c			\
 	empathy-server-tls-handler.c			\
 	empathy-status-presets.c			\
+	empathy-streamed-media-factory.c		\
 	empathy-streamed-media-handler.c		\
 	empathy-time.c					\
 	empathy-tls-certificate.c			\

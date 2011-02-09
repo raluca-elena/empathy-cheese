@@ -30,7 +30,6 @@
 
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
-#include <libempathy/empathy-call-factory.h>
 #include <libempathy/empathy-utils.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
