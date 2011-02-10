@@ -58,6 +58,8 @@ struct _EmpathyContactBlockingDialogPrivate
   GtkWidget *account_chooser;
   GtkWidget *add_button;
   GtkWidget *add_contact_entry;
+  GtkWidget *info_bar;
+  GtkWidget *info_bar_label;
   GtkWidget *remove_button;
 };
 
@@ -406,6 +408,31 @@ contact_blocking_dialog_deny_channel_prepared (GObject *channel,
       G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed), self);
 }
 
+static void
+contact_blocking_dialog_set_error (EmpathyContactBlockingDialog *self,
+    const GError *error)
+{
+  const char *msg = NULL;
+
+  if (error->domain == TP_ERRORS)
+    {
+      if (error->code == TP_ERROR_INVALID_HANDLE)
+        msg = _("Unknown or invalid identifier");
+      else if (error->code == TP_ERROR_NOT_AVAILABLE)
+        msg = _("Contact blocking temporarily unavailable");
+      else if (error->code == TP_ERROR_NOT_CAPABLE)
+        msg = _("Contact blocking unavailable");
+      else if (error->code == TP_ERROR_PERMISSION_DENIED)
+        msg = _("Permission Denied");
+    }
+
+  if (msg == NULL)
+    msg = _("Could not block contact");
+
+  gtk_label_set_text (GTK_LABEL (self->priv->info_bar_label), msg);
+  gtk_widget_show (self->priv->info_bar);
+}
+
 static void contact_blocking_dialog_add_contact_got_handle (TpConnection *,
     const GArray *, const GError *, gpointer, GObject *);
 
@@ -428,6 +455,7 @@ contact_blocking_dialog_add_contact (GtkWidget *widget,
       NULL, NULL, G_OBJECT (self));
 
   gtk_entry_set_text (GTK_ENTRY (self->priv->add_contact_entry), "");
+  gtk_widget_hide (self->priv->info_bar);
 }
 
 static void
@@ -447,7 +475,10 @@ contact_blocking_dialog_add_contact_got_handle (TpConnection *conn,
   if (in_error != NULL)
     {
       DEBUG ("Error getting handle: %s", in_error->message);
-      /* FIXME: expose error to user */
+
+      contact_blocking_dialog_set_error (
+          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
+
       return;
     }
 
@@ -470,7 +501,10 @@ contact_blocking_dialog_added_contact (TpChannel *channel,
   if (in_error != NULL)
     {
       DEBUG ("Error adding contact to deny list: %s", in_error->message);
-      /* FIXME: expose error to user */
+
+      contact_blocking_dialog_set_error (
+          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
+
       return;
     }
 
@@ -535,7 +569,10 @@ contact_blocking_dialog_removed_contacts (TpChannel *channel,
   if (in_error != NULL)
     {
       DEBUG ("Error removing contacts from deny list: %s", in_error->message);
-      /* FIXME: expose error to user */
+
+      contact_blocking_dialog_set_error (
+          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
+
       return;
     }
 
@@ -715,6 +752,18 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   gtk_box_pack_start (GTK_BOX (account_hbox), self->priv->account_chooser,
       TRUE, TRUE, 0);
   gtk_widget_show (self->priv->account_chooser);
+
+  /* add an error warning info bar */
+  self->priv->info_bar = gtk_info_bar_new ();
+  gtk_box_pack_start (GTK_BOX (contents), self->priv->info_bar, FALSE, TRUE, 0);
+  gtk_info_bar_set_message_type (GTK_INFO_BAR (self->priv->info_bar),
+      GTK_MESSAGE_ERROR);
+
+  self->priv->info_bar_label = gtk_label_new ("");
+  gtk_container_add (GTK_CONTAINER (
+        gtk_info_bar_get_content_area (GTK_INFO_BAR (self->priv->info_bar))),
+      self->priv->info_bar_label);
+  gtk_widget_show (self->priv->info_bar_label);
 
   /* prepare the account manager */
   am = tp_account_manager_dup ();
