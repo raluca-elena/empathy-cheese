@@ -207,8 +207,8 @@ empathy_connectivity_init (EmpathyConnectivity *connectivity)
   if (connection != NULL)
     {
       priv->proxy = dbus_g_proxy_new_for_name (connection,
-          "org.moblin.connman", "/",
-          "org.moblin.connman.Manager");
+          "net.connman", "/",
+          "net.connman.Manager");
 
       dbus_g_object_register_marshaller (
           _empathy_marshal_VOID__STRING,
