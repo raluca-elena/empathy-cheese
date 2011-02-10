@@ -232,15 +232,57 @@ static void
 empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 					 EmpathyContact   *contact)
 {
+	static guint block_signal = 0;
 	EmpathyContactManager *manager;
 	gboolean blocked;
+
+	if (block_signal > 0)
+		return;
 
 	manager = empathy_contact_manager_dup_singleton ();
 	blocked = gtk_check_menu_item_get_active (item);
 
+	if (blocked) {
+		/* confirm the user really wishes to block the contact */
+		int res;
+		GtkWidget *parent, *dialog;
+
+		/* gtk_menu_get_attach_widget() doesn't behave properly here
+		 * for some reason */
+		parent = g_object_get_data (
+			G_OBJECT (gtk_widget_get_parent (GTK_WIDGET (item))),
+			"window");
+		dialog = gtk_message_dialog_new (GTK_WINDOW (parent),
+				GTK_DIALOG_MODAL,
+				GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+				_("Block %s?"),
+				empathy_contact_get_id (contact));
+
+		gtk_message_dialog_format_secondary_text (
+			GTK_MESSAGE_DIALOG (dialog),
+			_("Are you sure you want to block the contact %s?"),
+			empathy_contact_get_id (contact));
+		gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+				GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				_("Block"), GTK_RESPONSE_REJECT,
+				NULL);
+
+		res = gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);
+
+		if (res != GTK_RESPONSE_REJECT)
+			goto finally;
+	}
+
 	empathy_contact_list_set_blocked (EMPATHY_CONTACT_LIST (manager),
 					  contact, blocked);
 
+	/* update the toggle with the blocked status */
+	block_signal++;
+	gtk_check_menu_item_set_active (item, blocked);
+	block_signal--;
+
+finally:
 	g_object_unref (manager);
 }
 
@@ -270,7 +312,6 @@ empathy_contact_block_menu_item_new (EmpathyContact *contact)
 	}
 
 	item = gtk_check_menu_item_new_with_mnemonic (_("_Block Contact"));
-	/* FIXME: this doesn't always get updated immediately */
 	blocked = empathy_contact_list_get_blocked (
 			EMPATHY_CONTACT_LIST (manager),
 			contact);
