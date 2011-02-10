@@ -43,7 +43,14 @@ uri_regex_dup_singleton (void)
 
 	/* We intentionally leak the regex so it's not recomputed */
 	if (!uri_regex) {
-		uri_regex = g_regex_new (URI_REGEX, 0, 0, NULL);
+		GError *error = NULL;
+
+		uri_regex = g_regex_new (URI_REGEX, 0, 0, &error);
+		if (uri_regex == NULL) {
+			g_warning ("Failed to create reg exp: %s", error->message);
+			g_error_free (error);
+			return NULL;
+		}
 	}
 
 	return g_regex_ref (uri_regex);
@@ -75,6 +82,11 @@ empathy_string_match_link (const gchar *text,
 	gint        last = 0;
 
 	uri_regex = uri_regex_dup_singleton ();
+	if (uri_regex == NULL) {
+		empathy_string_parser_substr (text, len, sub_parsers, user_data);
+		return;
+	}
+
 	match = g_regex_match_full (uri_regex, text, len, 0, 0, &match_info, NULL);
 	if (match) {
 		gint s = 0, e = 0;
