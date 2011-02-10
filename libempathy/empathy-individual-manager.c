@@ -552,6 +552,8 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
       empathy_contact_list_set_blocked (
           EMPATHY_CONTACT_LIST (priv->contact_manager),
           contact, blocked);
+
+      g_object_unref (contact);
     }
 }
 
