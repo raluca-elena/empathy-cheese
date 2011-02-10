@@ -79,9 +79,15 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		empathy_contact_set_alias (contact,
 			empathy_contact_widget_get_alias (contact_widget));
 	}
-	else if (response == GTK_RESPONSE_NO) {
+	else if (response == GTK_RESPONSE_NO ||
+		 response == GTK_RESPONSE_REJECT) {
 		empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
 					     contact, "");
+
+		if (response == GTK_RESPONSE_REJECT) {
+			empathy_contact_list_set_blocked (
+				EMPATHY_CONTACT_LIST (manager), contact, TRUE);
+		}
 	}
 
 	subscription_dialogs = g_list_remove (subscription_dialogs, dialog);
@@ -99,8 +105,13 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	GtkWidget *hbox_subscription;
 	GtkWidget *vbox;
 	GtkWidget *contact_widget;
+	GtkWidget *block_user_button;
 	GList     *l;
 	gchar     *filename;
+	EmpathyContactManager *manager;
+	EmpathyContactListFlags flags;
+
+	manager = empathy_contact_manager_dup_singleton ();
 
 	g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
@@ -117,6 +128,7 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	gui = empathy_builder_get_file (filename,
 				      "subscription_request_dialog", &dialog,
 				      "hbox_subscription", &hbox_subscription,
+				      "block-user-button", &block_user_button,
 				      NULL);
 	g_free (filename);
 	g_object_unref (gui);
@@ -161,10 +173,17 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 			  G_CALLBACK (subscription_dialog_response_cb),
 			  contact_widget);
 
+	flags = empathy_contact_manager_get_flags_for_connection (manager,
+				empathy_contact_get_connection (contact));
+
+	if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+		gtk_widget_show (block_user_button);
+
 	if (parent) {
 		gtk_window_set_transient_for (GTK_WINDOW (dialog), parent);
 	}
 
+	g_object_unref (manager);
 	gtk_widget_show (dialog);
 }
 
