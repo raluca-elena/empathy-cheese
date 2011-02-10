@@ -1066,7 +1066,7 @@ event_manager_pendings_changed_cb (EmpathyContactList  *list,
     }
 
   header = g_strdup_printf (
-      _("%s would like permission to see when you are available"),
+      _("%s would like permission to see when you are online"),
       empathy_contact_get_alias (contact));
 
   if (!EMP_STR_EMPTY (message))
