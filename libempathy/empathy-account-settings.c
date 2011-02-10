@@ -1646,8 +1646,16 @@ empathy_account_settings_set_regex (EmpathyAccountSettings *settings,
 {
   EmpathyAccountSettingsPriv *priv = GET_PRIV (settings);
   GRegex *regex;
+  GError *error = NULL;
 
-  regex = g_regex_new (pattern, 0, 0, NULL);
+  regex = g_regex_new (pattern, 0, 0, &error);
+  if (regex == NULL)
+    {
+      g_warning ("Failed to create reg exp: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
   g_hash_table_insert (priv->param_regexps, g_strdup (param), regex);
 }
 
