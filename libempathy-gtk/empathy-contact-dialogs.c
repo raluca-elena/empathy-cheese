@@ -80,19 +80,31 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		empathy_contact_set_alias (contact,
 			empathy_contact_widget_get_alias (contact_widget));
 	}
-	else if (response == GTK_RESPONSE_NO ||
-		 response == GTK_RESPONSE_REJECT) {
+	else if (response == GTK_RESPONSE_NO) {
 		empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
 					     contact, "");
-
-		if (response == GTK_RESPONSE_REJECT) {
+	}
+	else if (response == GTK_RESPONSE_REJECT) {
+		/* confirm the blocking */
+		if (empathy_block_contact_dialog_show (GTK_WINDOW (dialog),
+						       contact, NULL)) {
+			empathy_contact_list_remove (
+					EMPATHY_CONTACT_LIST (manager),
+					contact, "");
 			empathy_contact_list_set_blocked (
-				EMPATHY_CONTACT_LIST (manager), contact, TRUE);
+					EMPATHY_CONTACT_LIST (manager),
+					contact, TRUE);
+		} else {
+			/* if they don't confirm, return back to the
+			 * first dialog */
+			goto finally;
 		}
 	}
 
 	subscription_dialogs = g_list_remove (subscription_dialogs, dialog);
 	gtk_widget_destroy (GTK_WIDGET (dialog));
+
+finally:
 	g_object_unref (manager);
 }
 
