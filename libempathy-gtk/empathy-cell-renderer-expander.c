@@ -20,15 +20,6 @@
  * Authors: Kristian Rietveld <kris@imendio.com>
  */
 
-/* To do:
- *  - should probably cancel animation if model changes
- *  - need to handle case where node-in-animation is removed
- *  - it only handles a single animation at a time; but I guess users
- *    aren't fast enough to trigger two or more animations at once anyway :P
- *    (could guard for this by just cancelling the "old" animation, and
- *     start the new one).
- */
-
 #include <gtk/gtk.h>
 
 #include <libempathy/empathy-utils.h>
@@ -39,14 +30,7 @@ typedef struct {
 	GtkExpanderStyle     expander_style;
 	gint                 expander_size;
 
-	GtkTreeView         *animation_view;
-	GtkTreeRowReference *animation_node;
-	GtkExpanderStyle     animation_style;
-	guint                animation_timeout;
-	GdkRectangle         animation_area;
-
 	guint                activatable : 1;
-	guint                animation_expanding : 1;
 } EmpathyCellRendererExpanderPriv;
 
 enum {
@@ -98,7 +82,6 @@ empathy_cell_renderer_expander_init (EmpathyCellRendererExpander *expander)
 	priv->expander_style = GTK_EXPANDER_COLLAPSED;
 	priv->expander_size = 12;
 	priv->activatable = TRUE;
-	priv->animation_node = NULL;
 
 	g_object_set (expander,
 		      "xpad", 2,
@@ -224,15 +207,6 @@ empathy_cell_renderer_expander_finalize (GObject *object)
 
 	priv = GET_PRIV (object);
 
-	if (priv->animation_timeout) {
-		g_source_remove (priv->animation_timeout);
-		priv->animation_timeout = 0;
-	}
-
-	if (priv->animation_node) {
-		gtk_tree_row_reference_free (priv->animation_node);
-	}
-
 	(* G_OBJECT_CLASS (empathy_cell_renderer_expander_parent_class)->finalize) (object);
 }
 
@@ -301,30 +275,12 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 {
 	EmpathyCellRendererExpander     *expander;
 	EmpathyCellRendererExpanderPriv *priv;
-	GtkExpanderStyle                expander_style;
 	gint                            x_offset, y_offset;
 	guint                           xpad, ypad;
 
 
 	expander = (EmpathyCellRendererExpander *) cell;
 	priv = GET_PRIV (expander);
-
-	if (priv->animation_node) {
-		GtkTreePath *path;
-		GdkRectangle rect;
-
-		/* Not sure if I like this ... */
-		path = gtk_tree_row_reference_get_path (priv->animation_node);
-		gtk_tree_view_get_background_area (priv->animation_view, path,
-						   NULL, &rect);
-		gtk_tree_path_free (path);
-
-		if (background_area->y == rect.y)
-			expander_style = priv->animation_style;
-		else
-			expander_style = priv->expander_style;
-	} else
-		expander_style = priv->expander_style;
 
 	empathy_cell_renderer_expander_get_size (cell, widget,
 						(GdkRectangle *) cell_area,
@@ -344,109 +300,6 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 			     priv->expander_size);
 }
 
-static void
-invalidate_node (GtkTreeView *tree_view,
-		 GtkTreePath *path)
-{
-       GdkWindow    *bin_window;
-       GdkRectangle  rect;
-       GtkAllocation allocation;
-
-       bin_window = gtk_tree_view_get_bin_window (tree_view);
-
-       gtk_tree_view_get_background_area (tree_view, path, NULL, &rect);
-
-       rect.x = 0;
-       gtk_widget_get_allocation (GTK_WIDGET (tree_view), &allocation);
-       rect.width = allocation.width;
-
-       gdk_window_invalidate_rect (bin_window, &rect, TRUE);
-}
-
-static gboolean
-do_animation (EmpathyCellRendererExpander *expander)
-{
-	EmpathyCellRendererExpanderPriv *priv;
-	GtkTreePath                    *path;
-	gboolean                        done = FALSE;
-
-	priv = GET_PRIV (expander);
-
-	if (priv->animation_expanding) {
-		if (priv->animation_style == GTK_EXPANDER_SEMI_COLLAPSED)
-			priv->animation_style = GTK_EXPANDER_SEMI_EXPANDED;
-		else if (priv->animation_style == GTK_EXPANDER_SEMI_EXPANDED) {
-			priv->animation_style = GTK_EXPANDER_EXPANDED;
-			done = TRUE;
-		}
-	} else {
-		if (priv->animation_style == GTK_EXPANDER_SEMI_EXPANDED)
-			priv->animation_style = GTK_EXPANDER_SEMI_COLLAPSED;
-		else if (priv->animation_style == GTK_EXPANDER_SEMI_COLLAPSED) {
-			priv->animation_style = GTK_EXPANDER_COLLAPSED;
-			done = TRUE;
-		}
-	}
-
-	path = gtk_tree_row_reference_get_path (priv->animation_node);
-	invalidate_node (priv->animation_view, path);
-	gtk_tree_path_free (path);
-
-	if (done) {
-		gtk_tree_row_reference_free (priv->animation_node);
-		priv->animation_node = NULL;
-		priv->animation_timeout = 0;
-	}
-
-	return !done;
-}
-
-static gboolean
-animation_timeout (gpointer data)
-{
-	gboolean retval;
-
-	GDK_THREADS_ENTER ();
-
-	retval = do_animation (data);
-
-	GDK_THREADS_LEAVE ();
-
-	return retval;
-}
-
-static void
-empathy_cell_renderer_expander_start_animation (EmpathyCellRendererExpander *expander,
-					       GtkTreeView                *tree_view,
-					       GtkTreePath                *path,
-					       gboolean                    expanding,
-					       const GdkRectangle         *background_area)
-{
-	EmpathyCellRendererExpanderPriv *priv;
-
-	priv = GET_PRIV (expander);
-
-	if (priv->animation_timeout != 0) {
-		g_source_remove (priv->animation_timeout);
-		priv->animation_timeout = 0;
-		gtk_tree_row_reference_free (priv->animation_node);
-		priv->animation_node = NULL;
-	}
-
-	if (expanding) {
-		priv->animation_style = GTK_EXPANDER_SEMI_COLLAPSED;
-	} else {
-		priv->animation_style = GTK_EXPANDER_SEMI_EXPANDED;
-	}
-
-	invalidate_node (tree_view, path);
-
-	priv->animation_expanding = expanding;
-	priv->animation_view = tree_view;
-	priv->animation_node = gtk_tree_row_reference_new (gtk_tree_view_get_model (tree_view), path);
-	priv->animation_timeout = g_timeout_add (50, animation_timeout, expander);
-}
-
 static gboolean
 empathy_cell_renderer_expander_activate (GtkCellRenderer      *cell,
 					GdkEvent             *event,
@@ -459,8 +312,6 @@ empathy_cell_renderer_expander_activate (GtkCellRenderer      *cell,
 	EmpathyCellRendererExpander     *expander;
 	EmpathyCellRendererExpanderPriv *priv;
 	GtkTreePath                    *path;
-	gboolean                        animate;
-	gboolean                        expanding;
 
 	expander = EMPATHY_CELL_RENDERER_EXPANDER (cell);
 	priv = GET_PRIV (cell);
@@ -475,24 +326,10 @@ empathy_cell_renderer_expander_activate (GtkCellRenderer      *cell,
 		return TRUE;
 	}
 
-	g_object_get (gtk_widget_get_settings (GTK_WIDGET (widget)),
-		      "gtk-enable-animations", &animate,
-		      NULL);
-
 	if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (widget), path)) {
 		gtk_tree_view_collapse_row (GTK_TREE_VIEW (widget), path);
-		expanding = FALSE;
 	} else {
 		gtk_tree_view_expand_row (GTK_TREE_VIEW (widget), path, FALSE);
-		expanding = TRUE;
-	}
-
-	if (animate) {
-		empathy_cell_renderer_expander_start_animation (expander,
-							       GTK_TREE_VIEW (widget),
-							       path,
-							       expanding,
-							       background_area);
 	}
 
 	gtk_tree_path_free (path);
