@@ -40,6 +40,7 @@ typedef enum {
 	EMPATHY_CONTACT_LIST_CAN_ALIAS		= 1 << 2,
 	EMPATHY_CONTACT_LIST_CAN_GROUP		= 1 << 3,
 	EMPATHY_CONTACT_LIST_CAN_BLOCK		= 1 << 4,
+	EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE = 1 << 5,
 } EmpathyContactListFlags;
 
 typedef struct _EmpathyContactListIface EmpathyContactListIface;

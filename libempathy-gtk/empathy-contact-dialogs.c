@@ -502,8 +502,15 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 				   EmpathyContact *contact,
 				   gboolean       *abusive)
 {
+	EmpathyContactManager *manager;
+	EmpathyContactListFlags flags;
 	GtkWidget *dialog;
+	GtkWidget *abusive_check = NULL;
 	int res;
+
+	manager = empathy_contact_manager_dup_singleton ();
+	flags = empathy_contact_manager_get_flags_for_connection (manager,
+			empathy_contact_get_connection (contact));
 
 	dialog = gtk_message_dialog_new (parent,
 			GTK_DIALOG_MODAL,
@@ -520,13 +527,33 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 			_("_Block"), GTK_RESPONSE_REJECT,
 			NULL);
 
-	/* FIXME: support reporting abusive contacts */
+	/* ask the user if they want to also report the contact as abusive */
+	if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE) {
+		GtkWidget *vbox;
+
+		vbox = gtk_message_dialog_get_message_area (
+				GTK_MESSAGE_DIALOG (dialog));
+		abusive_check = gtk_check_button_new_with_mnemonic (
+				_("_Report this contact as abusive"));
+
+		gtk_box_pack_start (GTK_BOX (vbox), abusive_check,
+				    FALSE, TRUE, 0);
+		gtk_widget_show (abusive_check);
+	}
 
 	res = gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 
-	if (abusive != NULL)
-		*abusive = FALSE;
+	if (abusive != NULL) {
+		if (abusive_check != NULL) {
+			*abusive = gtk_toggle_button_get_active (
+					GTK_TOGGLE_BUTTON (abusive_check));
+		} else {
+			*abusive = FALSE;
+		}
+	}
+
+	g_object_unref (manager);
 
 	return res == GTK_RESPONSE_REJECT;
 }
