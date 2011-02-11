@@ -628,6 +628,8 @@ empathy_individual_manager_get_flags_for_connection (
     flags |= EMPATHY_INDIVIDUAL_MANAGER_CAN_GROUP;
   if (list_flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
     flags |= EMPATHY_INDIVIDUAL_MANAGER_CAN_BLOCK;
+  if (list_flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE)
+    flags |= EMPATHY_INDIVIDUAL_MANAGER_CAN_REPORT_ABUSIVE;
 
   return flags;
 }

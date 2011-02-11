@@ -29,6 +29,7 @@
 
 #include <telepathy-glib/util.h>
 #include <folks/folks.h>
+#include <folks/folks-telepathy.h>
 
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-utils.h>
@@ -155,4 +156,97 @@ empathy_new_individual_dialog_show_with_individual (GtkWindow *parent,
   gtk_widget_show (dialog);
 
   tp_clear_object (&contact);
+}
+
+/*
+ * Block contact dialog
+ */
+gboolean
+empathy_block_individual_dialog_show (GtkWindow *parent,
+    FolksIndividual *individual,
+    gboolean *abusive)
+{
+  EmpathyIndividualManager *manager =
+    empathy_individual_manager_dup_singleton ();
+  GtkWidget *dialog;
+  GtkWidget *abusive_check = NULL;
+  GList *personas, *l;
+  GString *str = g_string_new ("");
+  guint npersonas = 0;
+  gboolean can_report_abuse = FALSE;
+  int res;
+
+  dialog = gtk_message_dialog_new (parent,
+      GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+      _("Block %s?"),
+      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+
+  /* build a list of personas that support blocking */
+  personas = folks_individual_get_personas (individual);
+
+  for (l = personas; l != NULL; l = l->next)
+    {
+      TpfPersona *persona = l->data;
+      TpContact *contact;
+      EmpathyIndividualManagerFlags flags;
+
+      if (!TPF_IS_PERSONA (persona))
+          continue;
+
+      contact = tpf_persona_get_contact (persona);
+      flags = empathy_individual_manager_get_flags_for_connection (manager,
+          tp_contact_get_connection (contact));
+
+      if (!(flags & EMPATHY_INDIVIDUAL_MANAGER_CAN_BLOCK))
+        continue;
+      else if (flags & EMPATHY_INDIVIDUAL_MANAGER_CAN_REPORT_ABUSIVE)
+        can_report_abuse = TRUE;
+
+      g_string_append_printf (str, "\n \342\200\242 %s",
+          tp_contact_get_identifier (contact));
+      npersonas++;
+    }
+
+  gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
+    "%s\n%s",
+    ngettext ("Are you sure you want to block the following contact?",
+              "Are you sure you want to block the following contacts?",
+              npersonas),
+    str->str);
+
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+      _("_Block"), GTK_RESPONSE_REJECT,
+      NULL);
+
+  if (can_report_abuse)
+    {
+      GtkWidget *vbox;
+
+      vbox = gtk_message_dialog_get_message_area (GTK_MESSAGE_DIALOG (dialog));
+      abusive_check = gtk_check_button_new_with_mnemonic (
+          ngettext ("_Report this contact as abusive",
+                    "_Report these contacts as abusive",
+                    npersonas));
+
+      gtk_box_pack_start (GTK_BOX (vbox), abusive_check, FALSE, TRUE, 0);
+      gtk_widget_show (abusive_check);
+    }
+
+  g_object_unref (manager);
+  g_string_free (str, TRUE);
+
+  res = gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
+
+  if (abusive != NULL)
+    {
+      if (abusive_check != NULL)
+        *abusive = gtk_toggle_button_get_active (
+            GTK_TOGGLE_BUTTON (abusive_check));
+      else
+        *abusive = FALSE;
+    }
+
+  return res == GTK_RESPONSE_REJECT;
 }

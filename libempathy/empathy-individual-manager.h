@@ -44,6 +44,7 @@ typedef enum
   EMPATHY_INDIVIDUAL_MANAGER_CAN_ALIAS = 1 << 2,
   EMPATHY_INDIVIDUAL_MANAGER_CAN_GROUP = 1 << 3,
   EMPATHY_INDIVIDUAL_MANAGER_CAN_BLOCK = 1 << 4,
+  EMPATHY_INDIVIDUAL_MANAGER_CAN_REPORT_ABUSIVE = 1 << 5,
 } EmpathyIndividualManagerFlags;
 
 typedef struct _EmpathyIndividualManager EmpathyIndividualManager;
