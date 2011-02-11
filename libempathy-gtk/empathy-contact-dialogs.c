@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Authors: Xavier Claessens <xclaesse@gmail.com>
+ *          Danielle Madeley <danielle.madeley@collabora.co.uk>
  */
 
 #include <config.h>
@@ -487,3 +488,45 @@ empathy_new_contact_dialog_show_with_contact (GtkWindow *parent,
 	gtk_widget_show (dialog);
 }
 
+/**
+ * empathy_block_contact_dialog_show:
+ * @parent: the parent of this dialog (or %NULL)
+ * @contact: the contact for this dialog
+ * @abusive: a pointer to store the value of the abusive contact check box
+ *  (or %NULL)
+ *
+ * Returns: %TRUE if the user wishes to block the contact
+ */
+gboolean
+empathy_block_contact_dialog_show (GtkWindow      *parent,
+				   EmpathyContact *contact,
+				   gboolean       *abusive)
+{
+	GtkWidget *dialog;
+	int res;
+
+	dialog = gtk_message_dialog_new (parent,
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+			_("Block %s?"),
+			empathy_contact_get_id (contact));
+
+	gtk_message_dialog_format_secondary_text (
+			GTK_MESSAGE_DIALOG (dialog),
+			_("Are you sure you want to block the contact %s?"),
+			empathy_contact_get_id (contact));
+	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			_("_Block"), GTK_RESPONSE_REJECT,
+			NULL);
+
+	/* FIXME: support reporting abusive contacts */
+
+	res = gtk_dialog_run (GTK_DIALOG (dialog));
+	gtk_widget_destroy (dialog);
+
+	if (abusive != NULL)
+		*abusive = FALSE;
+
+	return res == GTK_RESPONSE_REJECT;
+}
