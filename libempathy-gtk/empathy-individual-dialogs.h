@@ -33,7 +33,8 @@ void empathy_new_individual_dialog_show (GtkWindow *parent);
 void empathy_new_individual_dialog_show_with_individual (GtkWindow *parent,
     FolksIndividual *individual);
 gboolean empathy_block_individual_dialog_show (GtkWindow *parent,
-    FolksIndividual *individual, gboolean *abusive);
+    FolksIndividual *individual,
+    gboolean *abusive);
 
 G_END_DECLS
 

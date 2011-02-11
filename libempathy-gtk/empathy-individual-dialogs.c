@@ -38,6 +38,8 @@
 #include "empathy-contact-widget.h"
 #include "empathy-ui-utils.h"
 
+#define BULLET_POINT "\342\200\242"
+
 static GtkWidget *new_individual_dialog = NULL;
 
 /*
@@ -202,7 +204,7 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       else if (flags & EMPATHY_INDIVIDUAL_MANAGER_CAN_REPORT_ABUSIVE)
         can_report_abuse = TRUE;
 
-      g_string_append_printf (str, "\n \342\200\242 %s",
+      g_string_append_printf (str, "\n " BULLET_POINT " %s",
           tp_contact_get_identifier (contact));
       npersonas++;
     }
