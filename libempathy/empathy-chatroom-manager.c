@@ -882,18 +882,16 @@ observe_channels_cb (TpSimpleObserver *observer,
 
   for (l = channels; l != NULL; l = g_list_next (l))
     {
-      TpChannel *channel = l->data;
-      EmpathyTpChat *tp_chat;
+      EmpathyTpChat *tp_chat = l->data;
       const gchar *roomname;
       EmpathyChatroom *chatroom;
 
-      if (tp_proxy_get_invalidated (channel) != NULL)
+      if (tp_proxy_get_invalidated ((TpChannel *) tp_chat) != NULL)
         continue;
 
-      if (!TP_IS_TEXT_CHANNEL (channel))
+      if (!EMPATHY_IS_TP_CHAT (tp_chat))
         continue;
 
-      tp_chat = empathy_tp_chat_new (account, channel);
       roomname = empathy_tp_chat_get_id (tp_chat);
       chatroom = empathy_chatroom_manager_find (self, account, roomname);
 
@@ -906,7 +904,6 @@ observe_channels_cb (TpSimpleObserver *observer,
         }
 
       empathy_chatroom_set_tp_chat (chatroom, tp_chat);
-      g_object_unref (tp_chat);
 
       /* A TpChat is always destroyed as it only gets unreffed after the channel
        * has been invalidated in the dispatcher..  */

@@ -192,8 +192,6 @@ process_tp_chat (EmpathyChatManager *self,
        * channel has been approved. */
       empathy_tp_chat_join (tp_chat);
     }
-
-  g_object_unref (tp_chat);
 }
 
 typedef struct
@@ -264,22 +262,19 @@ handle_channels (TpSimpleHandler *handler,
 
   for (l = channels; l != NULL; l = g_list_next (l))
     {
-      TpChannel *channel = l->data;
-      EmpathyTpChat *tp_chat;
+      EmpathyTpChat *tp_chat = l->data;
 
-      if (tp_proxy_get_invalidated (channel) != NULL)
+      if (tp_proxy_get_invalidated (tp_chat) != NULL)
         continue;
 
-      if (!TP_IS_TEXT_CHANNEL (channel))
+      if (!EMPATHY_IS_TP_CHAT (tp_chat))
         {
           DEBUG ("Channel %s doesn't implement Messages; can't handle it",
-              tp_proxy_get_object_path (channel));
+              tp_proxy_get_object_path (tp_chat));
           continue;
         }
 
-      DEBUG ("Now handling channel %s", tp_proxy_get_object_path (channel));
-
-      tp_chat = empathy_tp_chat_new (account, channel);
+      DEBUG ("Now handling channel %s", tp_proxy_get_object_path (tp_chat));
 
       if (empathy_tp_chat_is_ready (tp_chat))
         {

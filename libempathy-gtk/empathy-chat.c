@@ -709,10 +709,8 @@ static gboolean
 part_command_supported (EmpathyChat *chat)
 {
 	EmpathyChatPriv * priv = GET_PRIV (chat);
-	TpChannel *channel;
 
-	channel = empathy_tp_chat_get_channel (priv->tp_chat);
-	return tp_proxy_has_interface_by_id (channel,
+	return tp_proxy_has_interface_by_id (priv->tp_chat,
 			TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP);
 }
 
@@ -866,14 +864,11 @@ chat_command_me (EmpathyChat *chat,
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 	TpMessage *message;
-	TpChannel *channel;
+	TpTextChannel *channel;
 
-	channel = empathy_tp_chat_get_channel (priv->tp_chat);
+	channel = (TpTextChannel *) (priv->tp_chat);
 
-	/* Strictly speaking we don't depend yet on Messages so best to check that
-	 * the channel is actually a TpTextChannel before casting it. */
-	if (TP_IS_TEXT_CHANNEL (channel) &&
-		!tp_text_channel_supports_message_type (TP_TEXT_CHANNEL (channel),
+	if (!tp_text_channel_supports_message_type (channel,
 			TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)) {
 		/* Action message are not supported, 'simulate' the action */
 		EmpathyContact *self_contact;
@@ -2600,10 +2595,7 @@ chat_remote_contact_changed_cb (EmpathyChat *chat)
 		priv->handle_type = TP_HANDLE_TYPE_CONTACT;
 	}
 	else if (priv->tp_chat != NULL) {
-		TpChannel *channel;
-
-		channel = empathy_tp_chat_get_channel (priv->tp_chat);
-		g_object_get (channel, "handle-type", &priv->handle_type, NULL);
+		tp_channel_get_handle ((TpChannel *) priv->tp_chat, &priv->handle_type);
 	}
 
 	chat_update_contacts_visibility (chat, priv->show_contacts);
@@ -3540,7 +3532,7 @@ display_password_info_bar (EmpathyChat *self)
 			    TRUE, TRUE, 3);
 	gtk_widget_show_all (hbox);
 
-	tp_g_signal_connect_object (empathy_tp_chat_get_channel (priv->tp_chat),
+	tp_g_signal_connect_object (priv->tp_chat,
 				  "invalidated", G_CALLBACK (chat_invalidated_cb),
 				  info_bar, 0);
 

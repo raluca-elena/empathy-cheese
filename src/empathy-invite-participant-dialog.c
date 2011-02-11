@@ -168,7 +168,6 @@ filter_func (GtkTreeModel *model,
   gboolean is_online;
   GList *members, *l;
   gboolean display = FALSE;
-  TpChannel *channel;
 
   gtk_tree_model_get (model, iter,
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
@@ -190,7 +189,6 @@ filter_func (GtkTreeModel *model,
         self->priv->tp_chat));
 
   display = TRUE;
-  channel = empathy_tp_chat_get_channel (self->priv->tp_chat);
 
   for (l = members; l != NULL; l = g_list_next (l))
     {
@@ -198,7 +196,8 @@ filter_func (GtkTreeModel *model,
       TpHandle handle;
 
       /* Try to get the non-channel specific handle. */
-      handle = tp_channel_group_get_handle_owner (channel,
+      handle = tp_channel_group_get_handle_owner (
+          TP_CHANNEL (self->priv->tp_chat),
           empathy_contact_get_handle (member));
       if (handle == 0)
         handle = empathy_contact_get_handle (member);

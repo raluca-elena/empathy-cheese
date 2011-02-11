@@ -233,17 +233,10 @@ contact_list_store_iface_setup (gpointer user_data)
 			  store);
 
 	if (EMPATHY_IS_TP_CHAT (priv->list)) {
-		TpChannel *channel;
-
-		channel = empathy_tp_chat_get_channel (EMPATHY_TP_CHAT (priv->list));
-		if (!tp_proxy_is_prepared (channel, TP_CHANNEL_FEATURE_CHAT_STATES)) {
-			DEBUG ("Chat state feature not prepared");
-		} else {
-			g_signal_connect (channel,
+			g_signal_connect (priv->list,
 					  "chat-state-changed",
 					  G_CALLBACK (contact_list_store_chat_state_changed_cb),
 					  store);
-		}
 	}
 
 	/* Add contacts already created. */

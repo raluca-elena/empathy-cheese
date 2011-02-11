@@ -45,12 +45,12 @@ typedef struct _EmpathyTpChatClass EmpathyTpChatClass;
 typedef struct _EmpathyTpChatPrivate EmpathyTpChatPrivate;
 
 struct _EmpathyTpChat {
-	GObject parent;
+	TpTextChannel parent;
 	EmpathyTpChatPrivate *priv;
 };
 
 struct _EmpathyTpChatClass {
-	GObjectClass parent_class;
+	TpTextChannelClass parent_class;
 };
 
 typedef struct {
@@ -67,11 +67,14 @@ typedef enum {
 } EmpathyDeliveryStatus;
 
 GType          empathy_tp_chat_get_type             (void) G_GNUC_CONST;
+
 EmpathyTpChat *empathy_tp_chat_new                  (TpAccount *account,
-						     TpChannel *channel);
+						     TpConnection *connection,
+						     const gchar *object_path,
+						     const GHashTable *immutable_properties);
+
 const gchar *  empathy_tp_chat_get_id               (EmpathyTpChat      *chat);
 EmpathyContact *empathy_tp_chat_get_remote_contact   (EmpathyTpChat      *chat);
-TpChannel *    empathy_tp_chat_get_channel          (EmpathyTpChat      *chat);
 TpAccount    * empathy_tp_chat_get_account          (EmpathyTpChat      *chat);
 TpConnection * empathy_tp_chat_get_connection       (EmpathyTpChat      *chat);
 gboolean       empathy_tp_chat_is_ready             (EmpathyTpChat      *chat);

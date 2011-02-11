@@ -928,10 +928,9 @@ approve_channels (TpSimpleApprover *approver,
 
   if (TP_IS_TEXT_CHANNEL (channel))
     {
-      EmpathyTpChat *tp_chat;
+      EmpathyTpChat *tp_chat = EMPATHY_TP_CHAT (channel);
 
-      tp_chat = empathy_tp_chat_new (account, channel);
-      approval->handler_instance = G_OBJECT (tp_chat);
+      approval->handler_instance = g_object_ref (tp_chat);
 
       if (tp_proxy_has_interface (channel, TP_IFACE_CHANNEL_INTERFACE_GROUP))
         {

@@ -21,6 +21,9 @@
 
 #include "empathy-channel-factory.h"
 
+#include "empathy-tp-chat.h"
+#include "empathy-utils.h"
+
 #include <telepathy-glib/telepathy-glib.h>
 
 static void factory_iface_init (gpointer, gpointer);
@@ -98,6 +101,18 @@ empathy_channel_factory_create_channel (
     GError **error)
 {
   EmpathyChannelFactory *self = (EmpathyChannelFactory *) factory;
+  const gchar *chan_type;
+
+  chan_type = tp_asv_get_string (properties, TP_PROP_CHANNEL_CHANNEL_TYPE);
+
+  if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_TEXT))
+    {
+      TpAccount *account;
+
+      account = empathy_get_account_for_connection (conn);
+
+      return TP_CHANNEL (empathy_tp_chat_new (account, conn, path, properties));
+    }
 
   return tp_client_channel_factory_create_channel (
       self->priv->automatic_factory, conn, path, properties, error);
@@ -109,9 +124,19 @@ empathy_channel_factory_dup_channel_features (
     TpChannel *channel)
 {
   EmpathyChannelFactory *self = (EmpathyChannelFactory *) factory;
+  GArray *features;
+  GQuark feature;
 
-  return tp_client_channel_factory_dup_channel_features (
+  features =  tp_client_channel_factory_dup_channel_features (
       self->priv->automatic_factory, channel);
+
+  if (EMPATHY_IS_TP_CHAT (channel))
+    {
+      feature = TP_CHANNEL_FEATURE_CHAT_STATES;
+      g_array_append_val (features, feature);
+    }
+
+  return features;
 }
 
 static void
