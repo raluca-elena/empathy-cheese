@@ -29,6 +29,7 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/simple-approver.h>
 
+#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
@@ -1249,6 +1250,7 @@ empathy_event_manager_init (EmpathyEventManager *manager)
     EMPATHY_TYPE_EVENT_MANAGER, EmpathyEventManagerPriv);
   TpDBusDaemon *dbus;
   GError *error = NULL;
+  EmpathyChannelFactory *factory;
 
   manager->priv = priv;
 
@@ -1332,6 +1334,11 @@ empathy_event_manager_init (EmpathyEventManager *manager)
           TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
         NULL));
 
+  factory = empathy_channel_factory_dup ();
+
+  tp_base_client_set_channel_factory (priv->approver,
+      TP_CLIENT_CHANNEL_FACTORY (factory));
+
   if (!tp_base_client_register (priv->approver, &error))
     {
       DEBUG ("Failed to register Approver: %s", error->message);
@@ -1344,6 +1351,7 @@ empathy_event_manager_init (EmpathyEventManager *manager)
       g_error_free (error);
     }
 
+  g_object_unref (factory);
   g_object_unref (dbus);
 }
 

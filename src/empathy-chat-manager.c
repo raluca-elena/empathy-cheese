@@ -20,6 +20,7 @@
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/proxy-subclass.h>
 
+#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
@@ -303,6 +304,7 @@ empathy_chat_manager_init (EmpathyChatManager *self)
   EmpathyChatManagerPriv *priv = GET_PRIV (self);
   TpDBusDaemon *dbus;
   GError *error = NULL;
+  EmpathyChannelFactory *factory;
 
   priv->closed_queue = g_queue_new ();
   priv->messages = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -345,11 +347,18 @@ empathy_chat_manager_init (EmpathyChatManager *self)
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_NONE,
         NULL));
 
+  factory = empathy_channel_factory_dup ();
+
+  tp_base_client_set_channel_factory (priv->handler,
+      TP_CLIENT_CHANNEL_FACTORY (factory));
+
   if (!tp_base_client_register (priv->handler, &error))
     {
       g_critical ("Failed to register text handler: %s", error->message);
       g_error_free (error);
     }
+
+  g_object_unref (factory);
 }
 
 static void

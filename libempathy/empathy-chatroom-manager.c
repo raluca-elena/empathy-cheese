@@ -37,6 +37,7 @@
 
 #include "empathy-tp-chat.h"
 #include "empathy-chatroom-manager.h"
+#include "empathy-channel-factory.h"
 #include "empathy-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -538,6 +539,7 @@ empathy_chatroom_manager_constructor (GType type,
   EmpathyChatroomManagerPriv *priv;
   GError *error = NULL;
   TpDBusDaemon *dbus;
+  EmpathyChannelFactory *factory;
 
   if (chatroom_manager_singleton != NULL)
     return g_object_ref (chatroom_manager_singleton);
@@ -597,6 +599,11 @@ empathy_chatroom_manager_constructor (GType type,
   tp_base_client_add_connection_features_varargs (priv->observer,
       TP_CONNECTION_FEATURE_CAPABILITIES, NULL);
 
+  factory = empathy_channel_factory_dup ();
+
+  tp_base_client_set_channel_factory (priv->observer,
+      TP_CLIENT_CHANNEL_FACTORY (factory));
+
   if (!tp_base_client_register (priv->observer, &error))
     {
       g_critical ("Failed to register Observer: %s", error->message);
@@ -604,6 +611,7 @@ empathy_chatroom_manager_constructor (GType type,
       g_error_free (error);
     }
 
+  g_object_unref (factory);
   return obj;
 }
 
