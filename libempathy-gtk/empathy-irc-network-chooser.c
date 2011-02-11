@@ -41,6 +41,8 @@
 #include "empathy-irc-network-chooser.h"
 
 #define DEFAULT_IRC_NETWORK "irc.gimp.org"
+#define DEFAULT_IRC_PORT 6667
+#define DEFAULT_IRC_SSL FALSE
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIrcNetworkChooser)
 
@@ -222,7 +224,22 @@ set_label_from_settings (EmpathyIrcNetworkChooser *self)
   /* Set default network */
   priv->network = empathy_irc_network_manager_find_network_by_address (
           priv->network_manager, DEFAULT_IRC_NETWORK);
-  g_assert (priv->network != NULL);
+
+  if (priv->network == NULL)
+    {
+      /* Default network is not known, recreate it */
+      EmpathyIrcServer *srv;
+
+      priv->network = empathy_irc_network_new (DEFAULT_IRC_NETWORK);
+
+      srv = empathy_irc_server_new (DEFAULT_IRC_NETWORK, DEFAULT_IRC_PORT,
+          DEFAULT_IRC_SSL);
+
+      empathy_irc_network_append_server (priv->network, srv);
+      empathy_irc_network_manager_add (priv->network_manager, priv->network);
+
+      g_object_unref (srv);
+    }
 
   set_label (self);
   update_server_params (self);
