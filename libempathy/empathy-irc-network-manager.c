@@ -366,7 +366,7 @@ empathy_irc_network_manager_remove (EmpathyIrcNetworkManager *self,
 }
 
 static void
-append_network_to_list (const gchar *id,
+append_active_networks_to_list (const gchar *id,
                         EmpathyIrcNetwork *network,
                         GSList **list)
 {
@@ -374,6 +374,42 @@ append_network_to_list (const gchar *id,
     return;
 
   *list = g_slist_prepend (*list, g_object_ref (network));
+}
+
+static void
+append_dropped_networks_to_list (const gchar *id,
+                        EmpathyIrcNetwork *network,
+                        GSList **list)
+{
+  if (!network->dropped)
+    return;
+
+  *list = g_slist_prepend (*list, g_object_ref (network));
+}
+
+static GSList *
+get_network_list (EmpathyIrcNetworkManager *self,
+    gboolean get_active)
+{
+  EmpathyIrcNetworkManagerPriv *priv;
+  GSList *irc_networks = NULL;
+
+  g_return_val_if_fail (EMPATHY_IS_IRC_NETWORK_MANAGER (self), NULL);
+
+  priv = GET_PRIV (self);
+
+  if (get_active)
+    {
+      g_hash_table_foreach (priv->networks,
+          (GHFunc) append_active_networks_to_list, &irc_networks);
+    }
+  else
+    {
+      g_hash_table_foreach (priv->networks,
+          (GHFunc) append_dropped_networks_to_list, &irc_networks);
+    }
+
+  return irc_networks;
 }
 
 /**
@@ -388,17 +424,22 @@ append_network_to_list (const gchar *id,
 GSList *
 empathy_irc_network_manager_get_networks (EmpathyIrcNetworkManager *self)
 {
-  EmpathyIrcNetworkManagerPriv *priv;
-  GSList *irc_networks = NULL;
+  return get_network_list (self, TRUE);
+}
 
-  g_return_val_if_fail (EMPATHY_IS_IRC_NETWORK_MANAGER (self), NULL);
-
-  priv = GET_PRIV (self);
-
-  g_hash_table_foreach (priv->networks, (GHFunc) append_network_to_list,
-      &irc_networks);
-
-  return irc_networks;
+/**
+ * empathy_irc_network_manager_get_dropped_networks:
+ * @manager: an #EmpathyIrcNetworkManager
+ *
+ * Get the list of dropped #EmpathyIrcNetworks associated with the given
+ * manager.
+ *
+ * Returns: a new #GSList of refed dropped #EmpathyIrcNetworks
+ */
+GSList *
+empathy_irc_network_manager_get_dropped_networks (EmpathyIrcNetworkManager *self)
+{
+  return get_network_list (self, FALSE);
 }
 
 /*

@@ -47,6 +47,10 @@ enum {
     PROP_NETWORK
 };
 
+enum {
+	RESPONSE_RESET = 0
+};
+
 typedef struct {
     EmpathyAccountSettings *settings;
     EmpathyIrcNetwork *network;
@@ -390,6 +394,32 @@ remove_network (EmpathyIrcNetworkChooserDialog *self)
 }
 
 static void
+reset_networks (EmpathyIrcNetworkChooserDialog *self)
+{
+  EmpathyIrcNetworkChooserDialogPriv *priv = GET_PRIV (self);
+  GSList *networks, *l;
+
+  networks = empathy_irc_network_manager_get_dropped_networks (
+      priv->network_manager);
+
+  for (l = networks; l != NULL; l = g_slist_next (l))
+    {
+      EmpathyIrcNetwork *network;
+      GtkTreeIter iter;
+
+      network = EMPATHY_IRC_NETWORK (l->data);
+      empathy_irc_network_activate (network);
+
+      gtk_list_store_insert_with_values (priv->store, &iter, -1,
+          COL_NETWORK_OBJ, network,
+          COL_NETWORK_NAME, empathy_irc_network_get_name (network),
+          -1);
+    }
+
+  g_slist_foreach (networks, (GFunc) g_object_unref, NULL);
+}
+
+static void
 dialog_response_cb (GtkDialog *dialog,
     gint response,
     EmpathyIrcNetworkChooserDialog *self)
@@ -400,6 +430,8 @@ dialog_response_cb (GtkDialog *dialog,
     edit_network (self);
   else if (response == GTK_RESPONSE_REJECT)
     remove_network (self);
+  else if (response == RESPONSE_RESET)
+    reset_networks (self);
 }
 
 static gboolean
@@ -549,6 +581,7 @@ empathy_irc_network_chooser_dialog_constructed (GObject *object)
       GTK_STOCK_ADD, GTK_RESPONSE_OK,
       GTK_STOCK_EDIT, GTK_RESPONSE_APPLY,
       GTK_STOCK_REMOVE, GTK_RESPONSE_REJECT,
+      _("Reset _Networks List"), RESPONSE_RESET,
       NULL);
 
   priv->select_button = gtk_dialog_add_button (dialog,
