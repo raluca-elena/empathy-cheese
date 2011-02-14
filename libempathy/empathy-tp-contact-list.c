@@ -1358,14 +1358,23 @@ tp_contact_list_set_blocked (EmpathyContactList *list,
 
 	g_return_if_fail (TP_IS_CHANNEL (priv->deny));
 
-	if (blocked)
+	if (blocked && abusive) {
+		/* we have to do this via the new interface */
+		g_return_if_fail (priv->flags &
+				EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE);
+
+		emp_cli_connection_interface_contact_blocking_call_block_contacts (
+			TP_PROXY (priv->connection), -1,
+			&handles, TRUE, NULL, NULL, NULL, NULL);
+	} else if (blocked) {
 		tp_cli_channel_interface_group_call_add_members (
 			priv->deny, -1,
 			&handles, NULL, NULL, NULL, NULL, NULL);
-	else
+	} else {
 		tp_cli_channel_interface_group_call_remove_members (
 			priv->deny, -1,
 			&handles, NULL, NULL, NULL, NULL, NULL);
+	}
 }
 
 static gboolean
