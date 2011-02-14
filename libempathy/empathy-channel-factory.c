@@ -134,6 +134,9 @@ empathy_channel_factory_dup_channel_features (
     {
       feature = TP_CHANNEL_FEATURE_CHAT_STATES;
       g_array_append_val (features, feature);
+
+      feature = EMPATHY_TP_CHAT_FEATURE_READY;
+      g_array_append_val (features, feature);
     }
 
   return features;

@@ -54,12 +54,14 @@ struct _EmpathyTpChatPrivate {
 	/* TRUE if we fetched the password flag of the channel or if it's not needed
 	 * (channel doesn't implement the Password interface) */
 	gboolean               got_password_flags;
-	gboolean               ready;
 	gboolean               can_upgrade_to_muc;
 	gboolean               got_sms_channel;
 	gboolean               sms_channel;
 
 	GHashTable            *messages_being_sent;
+
+	/* GSimpleAsyncResult used when preparing EMPATHY_TP_CHAT_FEATURE_CORE */
+	GSimpleAsyncResult    *ready_result;
 };
 
 static void tp_chat_iface_init         (EmpathyContactListIface *iface);
@@ -69,7 +71,6 @@ enum {
 	PROP_ACCOUNT,
 	PROP_REMOTE_CONTACT,
 	PROP_PASSWORD_NEEDED,
-	PROP_READY,
 	PROP_SMS_CHANNEL,
 	PROP_N_MESSAGES_SENDING,
 };
@@ -122,6 +123,11 @@ tp_chat_set_delivery_status (EmpathyTpChat         *self,
 		g_object_notify (G_OBJECT (self), "n-messages-sending");
 	}
 }
+
+static void tp_chat_prepare_ready_async (TpProxy *proxy,
+	const TpProxyFeature *feature,
+	GAsyncReadyCallback callback,
+	gpointer user_data);
 
 static void
 tp_chat_invalidated_cb (TpProxy       *proxy,
@@ -257,7 +263,7 @@ tp_chat_get_members (EmpathyContactList *list)
 static void
 check_ready (EmpathyTpChat *self)
 {
-	if (self->priv->ready)
+	if (self->priv->ready_result == NULL)
 		return;
 
 	if (g_queue_get_length (self->priv->messages_queue) > 0)
@@ -265,8 +271,8 @@ check_ready (EmpathyTpChat *self)
 
 	DEBUG ("Ready");
 
-	self->priv->ready = TRUE;
-	g_object_notify (G_OBJECT (self), "ready");
+	g_simple_async_result_complete (self->priv->ready_result);
+	tp_clear_object (&self->priv->ready_result);
 }
 
 static void
@@ -843,6 +849,8 @@ tp_chat_dispose (GObject *object)
 		(GFunc) g_object_unref, NULL);
 	g_queue_clear (self->priv->pending_messages_queue);
 
+	tp_clear_object (&self->priv->ready_result);
+
 	if (G_OBJECT_CLASS (empathy_tp_chat_parent_class)->dispose)
 		G_OBJECT_CLASS (empathy_tp_chat_parent_class)->dispose (object);
 }
@@ -879,7 +887,7 @@ tp_chat_finalize (GObject *object)
 static void
 check_almost_ready (EmpathyTpChat *self)
 {
-	if (self->priv->ready)
+	if (self->priv->ready_result == NULL)
 		return;
 
 	if (self->priv->user == NULL)
@@ -898,7 +906,6 @@ check_almost_ready (EmpathyTpChat *self)
 	    self->priv->remote_contact == NULL)
 		return;
 
-	/* We use the default factory so this feature should have been prepared */
 	g_assert (tp_proxy_is_prepared (self,
 		TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES));
 
@@ -1321,124 +1328,12 @@ tp_chat_constructor (GType                  type,
 		     guint                  n_props,
 		     GObjectConstructParam *props)
 {
-	GObject *object;
-	EmpathyTpChat *self;
-	TpHandle           handle;
-	TpChannel         *channel;
-	TpConnection *connection;
-
+	GObject           *object;
 
 	object = G_OBJECT_CLASS (empathy_tp_chat_parent_class)->constructor (type, n_props, props);
-	self = (EmpathyTpChat *) object;
-	channel = (TpChannel *) object;
 
-	connection = tp_channel_borrow_connection (channel);
-
-	tp_g_signal_connect_object (self, "invalidated",
-			  G_CALLBACK (tp_chat_invalidated_cb),
-			  self, 0);
-
-	g_assert (tp_proxy_is_prepared (connection,
-		TP_CONNECTION_FEATURE_CAPABILITIES));
-
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP)) {
-		const TpIntSet *members;
-		GArray *handles;
-
-		/* Get self contact from the group's self handle */
-		handle = tp_channel_group_get_self_handle (channel);
-		empathy_tp_contact_factory_get_from_handle (connection,
-			handle, tp_chat_got_self_contact_cb,
-			NULL, NULL, object);
-
-		/* Get initial member contacts */
-		members = tp_channel_group_get_members (channel);
-		handles = tp_intset_to_array (members);
-		empathy_tp_contact_factory_get_from_handles (connection,
-			handles->len, (TpHandle *) handles->data,
-			tp_chat_got_added_contacts_cb, NULL, NULL, object);
-
-		self->priv->can_upgrade_to_muc = FALSE;
-
-		tp_g_signal_connect_object (self, "group-members-changed",
-			G_CALLBACK (tp_chat_group_members_changed_cb), self, 0);
-	} else {
-		TpCapabilities *caps;
-		GPtrArray *classes;
-		guint i;
-
-		/* Get the self contact from the connection's self handle */
-		handle = tp_connection_get_self_handle (connection);
-		empathy_tp_contact_factory_get_from_handle (connection,
-			handle, tp_chat_got_self_contact_cb,
-			NULL, NULL, object);
-
-		/* Get the remote contact */
-		handle = tp_channel_get_handle (channel, NULL);
-		empathy_tp_contact_factory_get_from_handle (connection,
-			handle, tp_chat_got_remote_contact_cb,
-			NULL, NULL, object);
-
-		caps = tp_connection_get_capabilities (connection);
-		g_assert (caps != NULL);
-
-		classes = tp_capabilities_get_channel_classes (caps);
-
-		for (i = 0; i < classes->len; i++) {
-			GValueArray *array = g_ptr_array_index (classes, i);
-			const char **oprops = g_value_get_boxed (
-				g_value_array_get_nth (array, 1));
-
-			if (tp_strv_contains (oprops, TP_PROP_CHANNEL_INTERFACE_CONFERENCE_INITIAL_CHANNELS)) {
-				self->priv->can_upgrade_to_muc = TRUE;
-				break;
-			}
-		}
-	}
-
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_PROPERTIES_INTERFACE)) {
-		tp_cli_properties_interface_call_list_properties (channel, -1,
-								  tp_chat_list_properties_cb,
-								  NULL, NULL, object);
-		tp_cli_properties_interface_connect_to_properties_changed (channel,
-									   tp_chat_properties_changed_cb,
-									   NULL, NULL, object, NULL);
-		tp_cli_properties_interface_connect_to_property_flags_changed (channel,
-									       tp_chat_property_flags_changed_cb,
-									       NULL, NULL, object, NULL);
-	}
-
-	/* Check if the chat is password protected */
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_PASSWORD)) {
-		self->priv->got_password_flags = FALSE;
-
-		tp_cli_channel_interface_password_connect_to_password_flags_changed
-			(channel, password_flags_changed_cb, self, NULL,
-			 object, NULL);
-
-		tp_cli_channel_interface_password_call_get_password_flags
-			(channel, -1, got_password_flags_cb, self, NULL, object);
-	} else {
-		/* No Password interface, so no need to fetch the password flags */
-		self->priv->got_password_flags = TRUE;
-	}
-
-	/* Check if the chat is for SMS */
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_SMS)) {
-		tp_cli_channel_interface_sms_connect_to_sms_channel_changed (
-			channel, sms_channel_changed_cb, self, NULL, object, NULL);
-
-		tp_cli_dbus_properties_call_get (self, -1,
-			TP_IFACE_CHANNEL_INTERFACE_SMS, "SMSChannel",
-			get_sms_channel_cb, self, NULL, object);
-	} else {
-		/* if there's no SMS support, then we're not waiting for it */
-		self->priv->got_sms_channel = TRUE;
-	}
+	tp_g_signal_connect_object (object, "invalidated",
+			  G_CALLBACK (tp_chat_invalidated_cb), object, 0);
 
 	return object;
 }
@@ -1457,9 +1352,6 @@ tp_chat_get_property (GObject    *object,
 		break;
 	case PROP_REMOTE_CONTACT:
 		g_value_set_object (value, self->priv->remote_contact);
-		break;
-	case PROP_READY:
-		g_value_set_boolean (value, self->priv->ready);
 		break;
 	case PROP_PASSWORD_NEEDED:
 		g_value_set_boolean (value, empathy_tp_chat_password_needed (self));
@@ -1495,16 +1387,45 @@ tp_chat_set_property (GObject      *object,
 	};
 }
 
+enum {
+	FEAT_READY,
+	N_FEAT
+};
+
+static const TpProxyFeature *
+tp_chat_list_features (TpProxyClass *cls G_GNUC_UNUSED)
+{
+	static TpProxyFeature features[N_FEAT + 1] = { { 0 } };
+  static GQuark need[2] = {0, 0};
+
+	if (G_LIKELY (features[0].name != 0))
+		return features;
+
+	features[FEAT_READY].name = EMPATHY_TP_CHAT_FEATURE_READY;
+	need[0] = TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES;
+	features[FEAT_READY].depends_on = need;
+	features[FEAT_READY].prepare_async =
+		tp_chat_prepare_ready_async;
+
+	/* assert that the terminator at the end is there */
+	g_assert (features[N_FEAT].name == 0);
+
+	return features;
+}
+
 static void
 empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	TpProxyClass *proxy_class = TP_PROXY_CLASS (klass);
 
 	object_class->dispose = tp_chat_dispose;
 	object_class->finalize = tp_chat_finalize;
 	object_class->constructor = tp_chat_constructor;
 	object_class->get_property = tp_chat_get_property;
 	object_class->set_property = tp_chat_set_property;
+
+	proxy_class->list_features = tp_chat_list_features;
 
 	g_object_class_install_property (object_class,
 					 PROP_ACCOUNT,
@@ -1523,14 +1444,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 							      "The remote contact if there is no group iface on the channel",
 							      EMPATHY_TYPE_CONTACT,
 							      G_PARAM_READABLE));
-
-	g_object_class_install_property (object_class,
-					 PROP_READY,
-					 g_param_spec_boolean ("ready",
-							       "Is the object ready",
-							       "This object can't be used until this becomes true",
-							       FALSE,
-							       G_PARAM_READABLE));
 
 	g_object_class_install_property (object_class,
 					 PROP_PASSWORD_NEEDED,
@@ -1597,6 +1510,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_TYPE_NONE,
 			      2, G_TYPE_STRING, G_TYPE_VALUE);
 
+	/* TODO: remove, should just use invalidated */
 	signals[DESTROY] =
 		g_signal_new ("destroy",
 			      G_TYPE_FROM_CLASS (klass),
@@ -1683,7 +1597,6 @@ EmpathyContact *
 empathy_tp_chat_get_remote_contact (EmpathyTpChat *self)
 {
 	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), NULL);
-	g_return_val_if_fail (self->priv->ready, NULL);
 
 	return self->priv->remote_contact;
 }
@@ -1696,14 +1609,6 @@ empathy_tp_chat_get_account (EmpathyTpChat *self)
 	return self->priv->account;
 }
 
-gboolean
-empathy_tp_chat_is_ready (EmpathyTpChat *self)
-{
-	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), FALSE);
-
-	return self->priv->ready;
-}
-
 void
 empathy_tp_chat_send (EmpathyTpChat *self,
 		      TpMessage *message)
@@ -1712,7 +1617,6 @@ empathy_tp_chat_send (EmpathyTpChat *self,
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
 	g_return_if_fail (TP_IS_CLIENT_MESSAGE (message));
-	g_return_if_fail (self->priv->ready);
 
 	message_body = tp_message_to_text (message, NULL);
 
@@ -1730,7 +1634,6 @@ empathy_tp_chat_set_state (EmpathyTpChat *self,
 			   TpChannelChatState  state)
 {
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
-	g_return_if_fail (self->priv->ready);
 
 	if (tp_proxy_has_interface_by_id (self,
 					  TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE)) {
@@ -1749,7 +1652,6 @@ const GList *
 empathy_tp_chat_get_pending_messages (EmpathyTpChat *self)
 {
 	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), NULL);
-	g_return_val_if_fail (self->priv->ready, NULL);
 
 	return self->priv->pending_messages_queue->head;
 }
@@ -1760,7 +1662,6 @@ empathy_tp_chat_acknowledge_message (EmpathyTpChat *self,
 	TpMessage *tp_msg;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
-	g_return_if_fail (self->priv->ready);
 
 	if (!empathy_message_is_incoming (message))
 		return;
@@ -1777,7 +1678,6 @@ empathy_tp_chat_acknowledge_messages (EmpathyTpChat *self,
 	GList *messages_to_ack = NULL;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
-	g_return_if_fail (self->priv->ready);
 
 	if (messages == NULL)
 		return;
@@ -1975,10 +1875,161 @@ empathy_tp_chat_get_self_contact (EmpathyTpChat *self)
 	return self->priv->user;
 }
 
+
 gboolean
 empathy_tp_chat_is_sms_channel (EmpathyTpChat *self)
 {
 	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), FALSE);
 
 	return self->priv->sms_channel;
+}
+
+GQuark
+empathy_tp_chat_get_feature_ready (void)
+{
+	return g_quark_from_static_string ("empathy-tp-chat-feature-ready");
+}
+
+static void
+conn_prepared_cb (GObject *source,
+	GAsyncResult *result,
+	gpointer user_data)
+{
+	EmpathyTpChat *self = user_data;
+	TpChannel *channel = (TpChannel *) self;
+	GError *error = NULL;
+	TpHandle handle;
+	TpConnection *connection = (TpConnection *) source;
+
+	if (!tp_proxy_prepare_finish (source, result, &error)) {
+		g_simple_async_result_set_from_error (self->priv->ready_result, error);
+		g_error_free (error);
+		g_simple_async_result_complete (self->priv->ready_result);
+		tp_clear_object (&self->priv->ready_result);
+		return;
+	}
+
+	if (tp_proxy_has_interface_by_id (self,
+					  TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP)) {
+		const TpIntSet *members;
+		GArray *handles;
+
+		/* Get self contact from the group's self handle */
+		handle = tp_channel_group_get_self_handle (channel);
+		empathy_tp_contact_factory_get_from_handle (connection,
+			handle, tp_chat_got_self_contact_cb,
+			NULL, NULL, G_OBJECT (self));
+
+		/* Get initial member contacts */
+		members = tp_channel_group_get_members (channel);
+		handles = tp_intset_to_array (members);
+		empathy_tp_contact_factory_get_from_handles (connection,
+			handles->len, (TpHandle *) handles->data,
+			tp_chat_got_added_contacts_cb, NULL, NULL, G_OBJECT (self));
+
+		self->priv->can_upgrade_to_muc = FALSE;
+
+		tp_g_signal_connect_object (self, "group-members-changed",
+			G_CALLBACK (tp_chat_group_members_changed_cb), self, 0);
+	} else {
+		TpCapabilities *caps;
+		GPtrArray *classes;
+		guint i;
+
+		/* Get the self contact from the connection's self handle */
+		handle = tp_connection_get_self_handle (connection);
+		empathy_tp_contact_factory_get_from_handle (connection,
+			handle, tp_chat_got_self_contact_cb,
+			NULL, NULL, G_OBJECT (self));
+
+		/* Get the remote contact */
+		handle = tp_channel_get_handle (channel, NULL);
+		empathy_tp_contact_factory_get_from_handle (connection,
+			handle, tp_chat_got_remote_contact_cb,
+			NULL, NULL, G_OBJECT (self));
+
+		caps = tp_connection_get_capabilities (connection);
+		g_assert (caps != NULL);
+
+		classes = tp_capabilities_get_channel_classes (caps);
+
+		for (i = 0; i < classes->len; i++) {
+			GValueArray *array = g_ptr_array_index (classes, i);
+			const char **oprops = g_value_get_boxed (
+				g_value_array_get_nth (array, 1));
+
+			if (tp_strv_contains (oprops, TP_PROP_CHANNEL_INTERFACE_CONFERENCE_INITIAL_CHANNELS)) {
+				self->priv->can_upgrade_to_muc = TRUE;
+				break;
+			}
+		}
+	}
+
+	if (tp_proxy_has_interface_by_id (self,
+					  TP_IFACE_QUARK_PROPERTIES_INTERFACE)) {
+		tp_cli_properties_interface_call_list_properties (channel, -1,
+								  tp_chat_list_properties_cb,
+								  NULL, NULL,
+								  G_OBJECT (self));
+		tp_cli_properties_interface_connect_to_properties_changed (channel,
+									   tp_chat_properties_changed_cb,
+									   NULL, NULL,
+									   G_OBJECT (self), NULL);
+		tp_cli_properties_interface_connect_to_property_flags_changed (channel,
+									       tp_chat_property_flags_changed_cb,
+									       NULL, NULL,
+									       G_OBJECT (self), NULL);
+	}
+
+	/* Check if the chat is password protected */
+	if (tp_proxy_has_interface_by_id (self,
+					  TP_IFACE_QUARK_CHANNEL_INTERFACE_PASSWORD)) {
+		self->priv->got_password_flags = FALSE;
+
+		tp_cli_channel_interface_password_connect_to_password_flags_changed
+			(channel, password_flags_changed_cb, self, NULL,
+			 G_OBJECT (self), NULL);
+
+		tp_cli_channel_interface_password_call_get_password_flags
+			(channel, -1, got_password_flags_cb, self, NULL, G_OBJECT (self));
+	} else {
+		/* No Password interface, so no need to fetch the password flags */
+		self->priv->got_password_flags = TRUE;
+	}
+
+	/* Check if the chat is for SMS */
+	if (tp_proxy_has_interface_by_id (channel,
+					  TP_IFACE_QUARK_CHANNEL_INTERFACE_SMS)) {
+		tp_cli_channel_interface_sms_connect_to_sms_channel_changed (
+			channel,
+			sms_channel_changed_cb, self, NULL, G_OBJECT (self), NULL);
+
+		tp_cli_dbus_properties_call_get (channel, -1,
+			TP_IFACE_CHANNEL_INTERFACE_SMS, "SMSChannel",
+			get_sms_channel_cb, self, NULL, G_OBJECT (self));
+	} else {
+		/* if there's no SMS support, then we're not waiting for it */
+		self->priv->got_sms_channel = TRUE;
+	}
+}
+
+static void
+tp_chat_prepare_ready_async (TpProxy *proxy,
+	const TpProxyFeature *feature,
+	GAsyncReadyCallback callback,
+	gpointer user_data)
+{
+	EmpathyTpChat *self = (EmpathyTpChat *) proxy;
+	TpChannel *channel = (TpChannel *) proxy;
+	TpConnection *connection;
+	GQuark conn_features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
+
+	g_assert (self->priv->ready_result == NULL);
+	self->priv->ready_result = g_simple_async_result_new (G_OBJECT (self),
+		callback, user_data, tp_chat_prepare_ready_async);
+
+	connection = tp_channel_borrow_connection (channel);
+
+	tp_proxy_prepare_async (connection, conn_features,
+		conn_prepared_cb, self);
 }

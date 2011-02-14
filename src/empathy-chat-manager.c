@@ -194,59 +194,6 @@ process_tp_chat (EmpathyChatManager *self,
     }
 }
 
-typedef struct
-{
-  EmpathyChatManager *self;
-  EmpathyTpChat *tp_chat;
-  TpAccount *account;
-  gint64 user_action_time;
-  gulong sig_id;
-} chat_ready_ctx;
-
-static chat_ready_ctx *
-chat_ready_ctx_new (EmpathyChatManager *self,
-    EmpathyTpChat *tp_chat,
-    TpAccount *account,
-    gint64 user_action_time)
-{
-  chat_ready_ctx *ctx = g_slice_new0 (chat_ready_ctx);
-
-  ctx->self = g_object_ref (self);
-  ctx->tp_chat = g_object_ref (tp_chat);
-  ctx->account = g_object_ref (account);
-  ctx->user_action_time = user_action_time;
-  return ctx;
-}
-
-static void
-chat_ready_ctx_free (chat_ready_ctx *ctx)
-{
-  g_object_unref (ctx->self);
-  g_object_unref (ctx->tp_chat);
-  g_object_unref (ctx->account);
-
-  if (ctx->sig_id != 0)
-    g_signal_handler_disconnect (ctx->tp_chat, ctx->sig_id);
-
-  g_slice_free (chat_ready_ctx, ctx);
-}
-
-static void
-tp_chat_ready_cb (GObject *object,
-  GParamSpec *spec,
-  gpointer user_data)
-{
-  EmpathyTpChat *tp_chat = EMPATHY_TP_CHAT (object);
-  chat_ready_ctx *ctx = user_data;
-
-  if (!empathy_tp_chat_is_ready (tp_chat))
-    return;
-
-  process_tp_chat (ctx->self, tp_chat, ctx->account, ctx->user_action_time);
-
-  chat_ready_ctx_free (ctx);
-}
-
 static void
 handle_channels (TpSimpleHandler *handler,
     TpAccount *account,
@@ -276,18 +223,7 @@ handle_channels (TpSimpleHandler *handler,
 
       DEBUG ("Now handling channel %s", tp_proxy_get_object_path (tp_chat));
 
-      if (empathy_tp_chat_is_ready (tp_chat))
-        {
-          process_tp_chat (self, tp_chat, account, user_action_time);
-        }
-      else
-        {
-          chat_ready_ctx *ctx = chat_ready_ctx_new (self, tp_chat, account,
-              user_action_time);
-
-          ctx->sig_id = g_signal_connect (tp_chat, "notify::ready",
-              G_CALLBACK (tp_chat_ready_cb), ctx);
-        }
+      process_tp_chat (self, tp_chat, account, user_action_time);
     }
 
   tp_handle_channels_context_accept (context);

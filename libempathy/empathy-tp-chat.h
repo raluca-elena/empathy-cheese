@@ -66,6 +66,9 @@ typedef enum {
 	EMPATHY_DELIVERY_STATUS_ACCEPTED
 } EmpathyDeliveryStatus;
 
+#define EMPATHY_TP_CHAT_FEATURE_READY empathy_tp_chat_get_feature_ready ()
+GQuark empathy_tp_chat_get_feature_ready (void) G_GNUC_CONST;
+
 GType          empathy_tp_chat_get_type             (void) G_GNUC_CONST;
 
 EmpathyTpChat *empathy_tp_chat_new                  (TpAccount *account,
@@ -76,7 +79,6 @@ EmpathyTpChat *empathy_tp_chat_new                  (TpAccount *account,
 const gchar *  empathy_tp_chat_get_id               (EmpathyTpChat      *chat);
 EmpathyContact *empathy_tp_chat_get_remote_contact   (EmpathyTpChat      *chat);
 TpAccount    * empathy_tp_chat_get_account          (EmpathyTpChat      *chat);
-gboolean       empathy_tp_chat_is_ready             (EmpathyTpChat      *chat);
 void           empathy_tp_chat_send                 (EmpathyTpChat      *chat,
 						     TpMessage     *message);
 void           empathy_tp_chat_set_state            (EmpathyTpChat      *chat,
