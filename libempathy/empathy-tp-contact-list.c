@@ -31,6 +31,8 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/interfaces.h>
 
+#include <extensions/extensions.h>
+
 #include "empathy-tp-contact-list.h"
 #include "empathy-tp-contact-factory.h"
 #include "empathy-contact-list.h"
@@ -809,6 +811,27 @@ list_ensure_channel_cb (TpConnection *conn,
 }
 
 static void
+list_get_contact_blocking_capabilities_cb (TpProxy *conn,
+					   const GValue *value,
+					   const GError *in_error,
+					   gpointer user_data,
+					   GObject *weak_object)
+{
+	EmpathyTpContactList *list = EMPATHY_TP_CONTACT_LIST (weak_object);
+	EmpathyTpContactListPriv *priv = GET_PRIV (list);
+	EmpContactBlockingCapabilities caps;
+
+	g_return_if_fail (G_VALUE_HOLDS_UINT (value));
+
+	caps = g_value_get_uint (value);
+
+	if (caps & EMP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE) {
+		DEBUG ("Connection can report abusive contacts");
+		priv->flags |= EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE;
+	}
+}
+
+static void
 iterate_on_channels (EmpathyTpContactList *list,
 		     const GPtrArray *channels)
 {
@@ -922,6 +945,19 @@ conn_ready_cb (TpConnection *connection,
 		G_MAXINT, request, list_ensure_channel_cb, list, NULL, G_OBJECT (list));
 
 	g_hash_table_unref (request);
+
+	/* Find out if we support reporting abusive contacts --
+	 * this is done via the new Conn.I.ContactBlocking interface */
+	if (tp_proxy_has_interface_by_id (priv->connection,
+	    EMP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING)) {
+		DEBUG ("Have Conn.I.ContactBlocking");
+
+		tp_cli_dbus_properties_call_get (priv->connection, -1,
+			EMP_IFACE_CONNECTION_INTERFACE_CONTACT_BLOCKING,
+			"ContactBlockingCapabilities",
+			list_get_contact_blocking_capabilities_cb,
+			NULL, NULL, G_OBJECT (list));
+	}
 out:
 	g_object_unref (list);
 }
