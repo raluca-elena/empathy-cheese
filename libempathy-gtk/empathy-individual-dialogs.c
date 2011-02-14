@@ -240,7 +240,6 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
   g_string_free (str, TRUE);
 
   res = gtk_dialog_run (GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
 
   if (abusive != NULL)
     {
@@ -250,6 +249,8 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       else
         *abusive = FALSE;
     }
+
+  gtk_widget_destroy (dialog);
 
   return res == GTK_RESPONSE_REJECT;
 }

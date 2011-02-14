@@ -556,8 +556,6 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 	}
 
 	res = gtk_dialog_run (GTK_DIALOG (dialog));
-	gtk_widget_destroy (dialog);
-
 	if (abusive != NULL) {
 		if (abusive_check != NULL) {
 			*abusive = gtk_toggle_button_get_active (
@@ -567,6 +565,7 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 		}
 	}
 
+	gtk_widget_destroy (dialog);
 	g_object_unref (manager);
 
 	return res == GTK_RESPONSE_REJECT;
