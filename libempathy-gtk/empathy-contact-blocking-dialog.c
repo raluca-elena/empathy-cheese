@@ -285,8 +285,9 @@ contact_blocking_dialog_am_prepared (GObject *am,
       TpAccount *account = ptr->data;
       TpConnection *conn;
 
-      g_signal_connect (account, "status-changed",
-          G_CALLBACK (contact_blocking_dialog_connection_status_changed), self);
+      tp_g_signal_connect_object (account, "status-changed",
+          G_CALLBACK (contact_blocking_dialog_connection_status_changed),
+          self, 0);
 
       conn = tp_account_get_connection (TP_ACCOUNT (account));
 
@@ -404,8 +405,9 @@ contact_blocking_dialog_deny_channel_prepared (GObject *channel,
       g_object_ref (conn), channel);
   contact_blocking_dialog_refilter_account_chooser (self);
 
-  g_signal_connect (channel, "group-members-changed",
-      G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed), self);
+  tp_g_signal_connect_object (channel, "group-members-changed",
+      G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed),
+      self, 0);
 }
 
 static void
