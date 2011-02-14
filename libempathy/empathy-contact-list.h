@@ -81,7 +81,8 @@ struct _EmpathyContactListIface {
 					       EmpathyContact     *contact);
 	void             (*set_blocked)       (EmpathyContactList *list,
 			                       EmpathyContact     *contact,
-					       gboolean            blocked);
+					       gboolean            blocked,
+					       gboolean            abusive);
 	gboolean         (*get_blocked)       (EmpathyContactList *list,
 			                       EmpathyContact     *contact);
 };
@@ -125,7 +126,8 @@ void     empathy_contact_list_remove_from_favourites
 
 void     empathy_contact_list_set_blocked       (EmpathyContactList *list,
 		                                 EmpathyContact     *contact,
-						 gboolean            blocked);
+						 gboolean            blocked,
+						 gboolean            abusive);
 gboolean empathy_contact_list_get_blocked       (EmpathyContactList *list,
 						 EmpathyContact     *contact);
 

@@ -867,7 +867,8 @@ contact_manager_remove_group (EmpathyContactList *manager,
 static void
 contact_manager_set_blocked (EmpathyContactList *manager,
 			     EmpathyContact     *contact,
-			     gboolean            blocked)
+			     gboolean            blocked,
+			     gboolean            abusive)
 {
 	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
 	EmpathyContactList        *list;
@@ -879,7 +880,8 @@ contact_manager_set_blocked (EmpathyContactList *manager,
 	list = g_hash_table_lookup (priv->lists, connection);
 
 	if (list != NULL) {
-		empathy_contact_list_set_blocked (list, contact, blocked);
+		empathy_contact_list_set_blocked (list, contact,
+						  blocked, abusive);
 	}
 }
 

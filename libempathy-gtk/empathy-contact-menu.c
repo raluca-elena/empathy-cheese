@@ -234,7 +234,7 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 {
 	static guint block_signal = 0;
 	EmpathyContactManager *manager;
-	gboolean blocked;
+	gboolean blocked, abusive;
 
 	if (block_signal > 0)
 		return;
@@ -252,13 +252,13 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 			"window");
 
 		if (!empathy_block_contact_dialog_show (GTK_WINDOW (parent),
-					contact, NULL))
+					contact, &abusive))
 			return;
 	}
 
 	manager = empathy_contact_manager_dup_singleton ();
 	empathy_contact_list_set_blocked (EMPATHY_CONTACT_LIST (manager),
-					  contact, blocked);
+					  contact, blocked, abusive);
 	g_object_unref (manager);
 
 	/* update the toggle with the blocked status */

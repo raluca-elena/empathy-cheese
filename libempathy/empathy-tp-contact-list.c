@@ -1313,7 +1313,8 @@ tp_contact_list_get_flags (EmpathyContactList *list)
 static void
 tp_contact_list_set_blocked (EmpathyContactList *list,
 			     EmpathyContact     *contact,
-			     gboolean            blocked)
+			     gboolean            blocked,
+			     gboolean            abusive)
 {
 	EmpathyTpContactListPriv *priv = GET_PRIV (list);
 	TpHandle handle = empathy_contact_get_handle (contact);

@@ -532,7 +532,8 @@ empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
 void
 empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
     FolksIndividual *individual,
-    gboolean blocked)
+    gboolean blocked,
+    gboolean abusive)
 {
   EmpathyIndividualManagerPriv *priv;
   GList *personas, *l;
@@ -558,7 +559,7 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
       manager = empathy_contact_manager_dup_singleton ();
       empathy_contact_list_set_blocked (
           EMPATHY_CONTACT_LIST (manager),
-          contact, blocked);
+          contact, blocked, abusive);
 
       g_object_unref (manager);
       g_object_unref (contact);

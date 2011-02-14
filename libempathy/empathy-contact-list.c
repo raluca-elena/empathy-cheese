@@ -282,12 +282,13 @@ empathy_contact_list_remove_from_favourites (EmpathyContactList *list,
 void
 empathy_contact_list_set_blocked (EmpathyContactList *list,
 				  EmpathyContact     *contact,
-				  gboolean            blocked)
+				  gboolean            blocked,
+				  gboolean            abusive)
 {
 	EmpathyContactListIface *iface = EMPATHY_CONTACT_LIST_GET_IFACE (list);
 
 	if (iface->set_blocked != NULL)
-		iface->set_blocked (list, contact, blocked);
+		iface->set_blocked (list, contact, blocked, abusive);
 }
 
 gboolean

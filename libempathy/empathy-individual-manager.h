@@ -87,7 +87,8 @@ gboolean empathy_individual_manager_supports_blocking (
 
 void empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
     FolksIndividual *individual,
-    gboolean blocked);
+    gboolean blocked,
+    gboolean abusive);
 
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_MANAGER_H__ */
