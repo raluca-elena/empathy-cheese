@@ -148,6 +148,13 @@ password_entry_changed_cb (GtkEditable *entry,
       !EMP_STR_EMPTY (str));
 }
 
+static void
+password_entry_activate_cb (GtkEntry *entry,
+    EmpathyPasswordDialog *self)
+{
+  gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_OK);
+}
+
 static gboolean
 password_dialog_grab_keyboard (GtkWidget *widget,
     GdkEvent *event,
@@ -294,6 +301,8 @@ empathy_password_dialog_constructed (GObject *object)
       G_CALLBACK (clear_icon_released_cb), NULL);
   g_signal_connect (priv->entry, "changed",
       G_CALLBACK (password_entry_changed_cb), dialog);
+  g_signal_connect (priv->entry, "activate",
+      G_CALLBACK (password_entry_activate_cb), dialog);
 
   gtk_box_pack_start (box, priv->entry, FALSE, FALSE, 0);
   gtk_widget_show (priv->entry);
