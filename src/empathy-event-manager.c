@@ -929,6 +929,7 @@ approve_channels (TpSimpleApprover *approver,
   if (TP_IS_TEXT_CHANNEL (channel))
     {
       EmpathyTpChat *tp_chat = EMPATHY_TP_CHAT (channel);
+      GList *messages, *l;
 
       approval->handler_instance = g_object_ref (tp_chat);
 
@@ -968,6 +969,14 @@ approve_channels (TpSimpleApprover *approver,
       /* 1-1 text channel, wait for the first message */
       approval->handler = g_signal_connect (tp_chat, "message-received-empathy",
         G_CALLBACK (event_manager_chat_message_received_cb), approval);
+
+      messages = (GList *) empathy_tp_chat_get_pending_messages (tp_chat);
+      for (l = messages; l != NULL; l = g_list_next (l))
+        {
+          EmpathyMessage *msg = l->data;
+
+          event_manager_chat_message_received_cb (tp_chat, msg, approval);
+        }
     }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
     {
