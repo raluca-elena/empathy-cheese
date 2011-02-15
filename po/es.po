@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&component=general\n"
-"POT-Creation-Date: 2011-02-10 10:58+0000\n"
-"PO-Revision-Date: 2011-02-10 17:05+0100\n"
+"POT-Creation-Date: 2011-02-15 08:20+0000\n"
+"PO-Revision-Date: 2011-02-15 10:29+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -1215,7 +1215,7 @@ msgstr "_Ignorar invitaciones a conferencias y salas de chat"
 
 #. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
-#: ../libempathy-gtk/empathy-password-dialog.c:302
+#: ../libempathy-gtk/empathy-password-dialog.c:311
 msgid "Remember password"
 msgstr "Recordar contraseña"
 
@@ -1988,15 +1988,19 @@ msgstr "<b>Ubicación</b> en (fecha)"
 msgid "Online from a phone or mobile device"
 msgstr "Conectado desde un teléfono o un dispositivo móvil"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:328
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:332
 msgid "New Network"
 msgstr "Red nueva"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:495
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:527
 msgid "Choose an IRC network"
 msgstr "Elegir una red IRC"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:555
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:584
+msgid "Reset _Networks List"
+msgstr "Rei_niciar lista de redes"
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:588
 msgctxt "verb displayed on a button to select an IRC network"
 msgid "Select"
 msgstr "Seleccionar"
@@ -2116,7 +2120,7 @@ msgstr "_Llamar"
 msgid "New Call"
 msgstr "Llamada nueva"
 
-#: ../libempathy-gtk/empathy-password-dialog.c:267
+#: ../libempathy-gtk/empathy-password-dialog.c:274
 #, c-format
 msgid ""
 "Enter your password for account\n"
@@ -3337,7 +3341,6 @@ msgstr "Se requiere una contraseña"
 
 #: ../src/empathy-event-manager.c:1069
 #, c-format
-#| msgid "%s would like permission to see when you are available"
 msgid "%s would like permission to see when you are online"
 msgstr "%s quiere permiso para ver cuándo está en línea"
 
