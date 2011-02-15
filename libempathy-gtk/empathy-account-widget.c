@@ -923,8 +923,10 @@ account_widget_applied_cb (GObject *source_object,
   EmpathyAccountSettings *settings = EMPATHY_ACCOUNT_SETTINGS (source_object);
   EmpathyAccountWidget *widget = EMPATHY_ACCOUNT_WIDGET (user_data);
   EmpathyAccountWidgetPriv *priv = GET_PRIV (widget);
+  gboolean reconnect_required;
 
-  empathy_account_settings_apply_finish (settings, res, &error);
+  empathy_account_settings_apply_finish (settings, res, &reconnect_required,
+      &error);
 
   if (error != NULL)
     {
@@ -961,10 +963,19 @@ account_widget_applied_cb (GObject *source_object,
                 GTK_TOGGLE_BUTTON (priv->enabled_checkbox));
 #endif /* HAVE_MEEGO */
 
-          if (tp_account_is_enabled (account) && enabled_checked)
+          /* If the account was offline, we always want to try reconnecting,
+           * to give it a chance to connect if the previous params were wrong.
+           * tp_account_reconnect_async() won't do anything if the requested
+           * presence is offline anyway. */
+          if (tp_account_get_connection_status (account, NULL) ==
+              TP_CONNECTION_STATUS_DISCONNECTED)
+            reconnect_required = TRUE;
+
+          if (reconnect_required && tp_account_is_enabled (account)
+              && enabled_checked)
             {
               /* After having applied changes to a user account, we
-               * automatically reconnect it. This is done so the new
+               * reconnect it if needed. This is done so the new
                * information entered by the user is validated on the server. */
               tp_account_reconnect_async (account, NULL, NULL);
             }

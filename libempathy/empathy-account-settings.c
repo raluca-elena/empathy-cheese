@@ -1422,9 +1422,10 @@ empathy_account_settings_account_updated (GObject *source,
   EmpathyAccountSettingsPriv *priv = GET_PRIV (settings);
   GSimpleAsyncResult *r;
   GError *error = NULL;
+  GStrv reconnect_required;
 
   if (!tp_account_update_parameters_finish (TP_ACCOUNT (source),
-          result, NULL, &error))
+          result, &reconnect_required, &error))
     {
       g_simple_async_result_set_from_error (priv->apply_result, error);
       g_error_free (error);
@@ -1449,6 +1450,9 @@ empathy_account_settings_account_updated (GObject *source,
       return;
     }
 
+  g_simple_async_result_set_op_res_gboolean (priv->apply_result,
+      g_strv_length (reconnect_required) > 0);
+
 out:
   empathy_account_settings_discard_changes (settings);
 
@@ -1457,6 +1461,7 @@ out:
 
   g_simple_async_result_complete (r);
   g_object_unref (r);
+  g_strfreev (reconnect_required);
 }
 
 static void
@@ -1589,6 +1594,10 @@ empathy_account_settings_apply_async (EmpathyAccountSettings *settings,
   priv->apply_result = g_simple_async_result_new (G_OBJECT (settings),
       callback, user_data, empathy_account_settings_apply_finish);
 
+  /* We'll have to reconnect only if we change none DBus_Property on an
+   * existing account. */
+  g_simple_async_result_set_op_res_gboolean (priv->apply_result, FALSE);
+
   if (priv->account == NULL)
     {
       tp_account_manager_prepare_async (priv->account_manager, NULL,
@@ -1605,6 +1614,7 @@ empathy_account_settings_apply_async (EmpathyAccountSettings *settings,
 gboolean
 empathy_account_settings_apply_finish (EmpathyAccountSettings *settings,
     GAsyncResult *result,
+    gboolean *reconnect_required,
     GError **error)
 {
   if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result),
@@ -1613,6 +1623,10 @@ empathy_account_settings_apply_finish (EmpathyAccountSettings *settings,
 
   g_return_val_if_fail (g_simple_async_result_is_valid (result,
     G_OBJECT (settings), empathy_account_settings_apply_finish), FALSE);
+
+  if (reconnect_required != NULL)
+    *reconnect_required = g_simple_async_result_get_op_res_gboolean (
+        G_SIMPLE_ASYNC_RESULT (result));
 
   return TRUE;
 }

@@ -174,6 +174,7 @@ void empathy_account_settings_apply_async (EmpathyAccountSettings *settings,
 gboolean empathy_account_settings_apply_finish (
   EmpathyAccountSettings *settings,
   GAsyncResult *result,
+  gboolean *reconnect_required,
   GError **error);
 
 void empathy_account_settings_set_regex (EmpathyAccountSettings *settings,

@@ -319,7 +319,7 @@ account_assistant_apply_account_cb (GObject *source,
   EmpathyAccountSettings *settings = EMPATHY_ACCOUNT_SETTINGS (source);
   TpAccount *account;
 
-  empathy_account_settings_apply_finish (settings, result, &error);
+  empathy_account_settings_apply_finish (settings, result, NULL, &error);
 
   priv->is_creating = FALSE;
 
