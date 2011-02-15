@@ -206,7 +206,8 @@ empathy_irc_network_class_init (EmpathyIrcNetworkClass *klass)
    * EmpathyIrcNetwork::modified:
    * @network: the object that received the signal
    *
-   * Emitted when either a property or a server of the network is modified.
+   * Emitted when either a property or a server of the network is modified or
+   * when a network is activated.
    *
    */
   signals[MODIFIED] = g_signal_new (
@@ -217,6 +218,24 @@ empathy_irc_network_class_init (EmpathyIrcNetworkClass *klass)
       NULL, NULL,
       g_cclosure_marshal_VOID__VOID,
       G_TYPE_NONE, 0);
+}
+
+/**
+ * empathy_irc_network_activate:
+ * @self: the name of the network
+ *
+ * Activates a #EmpathyIrcNetwork.
+ *
+ */
+void
+empathy_irc_network_activate (EmpathyIrcNetwork *self)
+{
+  g_return_if_fail (EMPATHY_IS_IRC_NETWORK (self));
+  g_return_if_fail (self->dropped);
+
+  self->dropped = FALSE;
+
+  g_signal_emit (self, signals[MODIFIED], 0);
 }
 
 /**

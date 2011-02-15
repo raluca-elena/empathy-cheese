@@ -74,6 +74,9 @@ void empathy_irc_network_manager_remove (EmpathyIrcNetworkManager *manager,
 GSList * empathy_irc_network_manager_get_networks (
     EmpathyIrcNetworkManager *manager);
 
+GSList * empathy_irc_network_manager_get_dropped_networks (
+    EmpathyIrcNetworkManager *manager);
+
 EmpathyIrcNetwork * empathy_irc_network_manager_find_network_by_address (
     EmpathyIrcNetworkManager *manager, const gchar *address);
 
