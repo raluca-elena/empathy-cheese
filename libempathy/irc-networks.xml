@@ -208,9 +208,14 @@
   </network>
   <network name="freenode" id="freenode">
     <servers>
-      <server ssl="FALSE" port="8001" address="chat.freenode.net"/>
+      <server ssl="TRUE" port="7000" address="chat.freenode.net"/>
+      <server ssl="TRUE" port="7070" address="chat.freenode.net"/>
+      <server ssl="FALSE" port="6665" address="chat.freenode.net"/>
+      <server ssl="FALSE" port="6666" address="chat.freenode.net"/>
       <server ssl="FALSE" port="6667" address="chat.freenode.net"/>
-      <server ssl="FALSE" port="6667" address="irc.freenode.net"/>
+      <server ssl="FALSE" port="8000" address="chat.freenode.net"/>
+      <server ssl="FALSE" port="8001" address="chat.freenode.net"/>
+      <server ssl="FALSE" port="8002" address="chat.freenode.net"/>
     </servers>
   </network>
   <network name="GalaxyNet" id="galaxynet">
