@@ -65,6 +65,8 @@ main (int argc,
 
   g_set_application_name (_("Empathy Debugger"));
 
+  /* Make empathy and empathy-debugger appear as the same app in gnome-shell */
+  gdk_set_program_class ("Empathy");
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
 

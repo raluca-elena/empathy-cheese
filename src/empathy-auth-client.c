@@ -258,6 +258,9 @@ main (int argc,
   gnutls_global_init ();
   g_set_application_name (_("Empathy authentication client"));
 
+  /* Make empathy and empathy-auth-client appear as the same app in
+   * gnome-shell */
+  gdk_set_program_class ("Empathy");
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
 
