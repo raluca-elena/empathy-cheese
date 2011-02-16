@@ -1912,11 +1912,11 @@ static void
 menu_deactivate_cb (GtkMenu *menu,
 	gpointer user_data)
 {
-	gtk_menu_detach (menu);
-
 	/* FIXME: we shouldn't have to disconnect the signal (bgo #641327) */
 	g_signal_handlers_disconnect_by_func (menu,
 		     menu_deactivate_cb, user_data);
+
+	gtk_menu_detach (menu);
 }
 
 /* Convenient function to create a GtkMenu attached to @attach_to and detach

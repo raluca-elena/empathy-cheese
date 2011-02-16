@@ -807,11 +807,11 @@ static void
 menu_deactivate_cb (GtkMenuShell *menushell,
 		    gpointer user_data)
 {
-	gtk_menu_detach (GTK_MENU (menushell));
-
 	/* FIXME: we shouldn't have to disconnec the signal (bgo #641327) */
 	g_signal_handlers_disconnect_by_func (menushell,
 		menu_deactivate_cb, user_data);
+
+	gtk_menu_detach (GTK_MENU (menushell));
 }
 
 static gboolean
