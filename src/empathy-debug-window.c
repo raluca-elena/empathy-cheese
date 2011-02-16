@@ -32,6 +32,7 @@
 
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-geometry.h>
+#include <libempathy-gtk/empathy-ui-utils.h>
 
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/interfaces.h>
@@ -1026,7 +1027,7 @@ debug_window_show_menu (gpointer user_data)
   GtkWidget *menu, *item;
   GtkMenuShell *shell;
 
-  menu = gtk_menu_new ();
+  menu = empathy_context_menu_new (GTK_WIDGET (data->debug_window));
   shell = GTK_MENU_SHELL (menu);
 
   item = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, NULL);
@@ -1039,8 +1040,6 @@ debug_window_show_menu (gpointer user_data)
 
   gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
      data->button, data->time);
-  g_object_ref_sink (menu);
-  g_object_unref (menu);
 
   g_slice_free (MenuPopupData, user_data);
 
