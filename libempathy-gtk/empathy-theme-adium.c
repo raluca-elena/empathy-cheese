@@ -752,7 +752,7 @@ theme_adium_context_menu_for_event (EmpathyThemeAdium *theme, GdkEventButton *ev
 	g_object_get (G_OBJECT (hit_test_result), "context", &context, NULL);
 
 	/* The menu */
-	menu = gtk_menu_new ();
+	menu = empathy_context_menu_new (GTK_WIDGET (view));
 
 	/* Select all item */
 	item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_ALL, NULL);
@@ -813,8 +813,6 @@ theme_adium_context_menu_for_event (EmpathyThemeAdium *theme, GdkEventButton *ev
 	gtk_widget_show_all (menu);
 	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
 			event->button, event->time);
-	g_object_ref_sink (menu);
-	g_object_unref (menu);
 }
 
 static gboolean
