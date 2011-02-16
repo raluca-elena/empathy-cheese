@@ -1556,7 +1556,7 @@ accounts_dialog_treeview_button_press_event_cb (GtkTreeView *view,
   gtk_tree_model_get (model, &iter, COL_ACCOUNT, &account, -1);
 
   /* Create the menu */
-  menu = gtk_menu_new ();
+  menu = empathy_context_menu_new (GTK_WIDGET (view));
 
   /* Get images for menu items */
   image_enable = gtk_image_new_from_icon_name (empathy_icon_name_for_presence (
