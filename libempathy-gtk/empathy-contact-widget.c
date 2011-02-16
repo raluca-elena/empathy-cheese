@@ -1071,7 +1071,7 @@ popup_avatar_menu (EmpathyContactWidget *information,
       empathy_contact_get_avatar (information->contact) == NULL)
       return;
 
-  menu = gtk_menu_new ();
+  menu = empathy_context_menu_new (parent);
 
   /* Add "Save as..." entry */
   item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SAVE_AS, NULL);
@@ -1094,8 +1094,6 @@ popup_avatar_menu (EmpathyContactWidget *information,
 
   gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
       button, event_time);
-  g_object_ref_sink (menu);
-  g_object_unref (menu);
 }
 
 static gboolean
