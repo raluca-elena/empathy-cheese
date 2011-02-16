@@ -1051,7 +1051,7 @@ individual_view_call_activated_cb (EmpathyCellRendererActivatable *cell,
 
   event = (GdkEventButton *) gtk_get_current_event ();
 
-  menu = gtk_menu_new ();
+  menu = empathy_context_menu_new (GTK_WIDGET (view));
   shell = GTK_MENU_SHELL (menu);
 
   /* audio */
@@ -1064,12 +1064,9 @@ individual_view_call_activated_cb (EmpathyCellRendererActivatable *cell,
   gtk_menu_shell_append (shell, item);
   gtk_widget_show (item);
 
-  gtk_menu_attach_to_widget (GTK_MENU (menu), GTK_WIDGET (view), NULL);
   gtk_widget_show (menu);
   gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
       event->button, event->time);
-  g_object_ref_sink (menu);
-  g_object_unref (menu);
 
   g_object_unref (individual);
 }
