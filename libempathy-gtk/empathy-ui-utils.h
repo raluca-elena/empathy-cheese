@@ -148,6 +148,8 @@ void        empathy_receive_file_with_file_chooser      (EmpathyFTHandler *handl
 /* Misc */
 void        empathy_make_color_whiter                   (GdkRGBA *color);
 
+GtkWidget * empathy_context_menu_new                    (GtkWidget *attach_to);
+
 G_END_DECLS
 
 #endif /*  __EMPATHY_UI_UTILS_H__ */

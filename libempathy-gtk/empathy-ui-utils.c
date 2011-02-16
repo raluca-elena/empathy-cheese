@@ -1907,3 +1907,37 @@ empathy_make_color_whiter (GdkRGBA *color)
 	color->green = (color->green + white.green) / 2;
 	color->blue = (color->blue + white.blue) / 2;
 }
+
+static void
+menu_deactivate_cb (GtkMenu *menu,
+	gpointer user_data)
+{
+	gtk_menu_detach (menu);
+
+	/* FIXME: we shouldn't have to disconnect the signal (bgo #641327) */
+	g_signal_handlers_disconnect_by_func (menu,
+		     menu_deactivate_cb, user_data);
+}
+
+/* Convenient function to create a GtkMenu attached to @attach_to and detach
+ * it when the menu is not displayed any more. This is useful when creating a
+ * context menu that we want to get rid as soon as it as been displayed. */
+GtkWidget *
+empathy_context_menu_new (GtkWidget *attach_to)
+{
+	GtkWidget *menu;
+
+	menu = gtk_menu_new ();
+
+	gtk_menu_attach_to_widget (GTK_MENU (menu), attach_to, NULL);
+
+	/* menu is initially unowned but gtk_menu_attach_to_widget() taked its
+	 * floating ref. We can either wait that @attach_to releases its ref when
+	 * it will be destroyed (when leaving Empathy most of the time) or explicitely
+	 * detach the menu when it's not displayed any more.
+	 * We go for the latter as we don't want to keep useless menus in memory
+	 * during the whole lifetime of Empathy. */
+	g_signal_connect (menu, "deactivate", G_CALLBACK (menu_deactivate_cb), NULL);
+
+	return menu;
+}
