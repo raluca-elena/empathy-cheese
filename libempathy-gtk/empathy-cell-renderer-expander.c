@@ -278,7 +278,7 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 	EmpathyCellRendererExpanderPriv *priv;
 	gint                            x_offset, y_offset;
 	guint                           xpad, ypad;
-
+	GtkStyleContext                 *style;
 
 	expander = (EmpathyCellRendererExpander *) cell;
 	priv = GET_PRIV (expander);
@@ -293,12 +293,23 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 		      "ypad", &ypad,
 		      NULL);
 
-	gtk_render_expander (gtk_widget_get_style_context (widget),
+	style = gtk_widget_get_style_context (widget);
+
+	gtk_style_context_save (style);
+
+	if (priv->expander_style == GTK_EXPANDER_COLLAPSED)
+		gtk_style_context_set_state (style, GTK_STATE_NORMAL);
+	else
+		gtk_style_context_set_state (style, GTK_STATE_ACTIVE);
+
+	gtk_render_expander (style,
 			     cr,
 			     cell_area->x + x_offset + xpad,
 			     cell_area->y + y_offset + ypad,
 			     priv->expander_size,
 			     priv->expander_size);
+
+	gtk_style_context_restore (style);
 }
 
 static gboolean
