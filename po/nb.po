@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy 2.92.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-12 13:48+0100\n"
-"PO-Revision-Date: 2011-02-12 13:49+0100\n"
+"POT-Creation-Date: 2011-02-17 13:12+0100\n"
+"PO-Revision-Date: 2011-02-17 13:13+0100\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: no\n"
@@ -441,7 +441,7 @@ msgstr "Håndter meldings- og VoIP-kontoer"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2215
+#: ../src/empathy-accounts-dialog.c:2229
 msgid "Messaging and VoIP Accounts"
 msgstr "Meldings- og VoIP-kontoer"
 
@@ -727,56 +727,56 @@ msgstr "Port"
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1152
+#: ../libempathy-gtk/empathy-account-widget.c:1163
 #, c-format
 msgid "The account %s is edited via My Web Accounts."
 msgstr "Konto %s er redigert via Mine nettkontoer."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1158
+#: ../libempathy-gtk/empathy-account-widget.c:1169
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Konto %s kan ikke redigeres i Empathy."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1178
+#: ../libempathy-gtk/empathy-account-widget.c:1189
 msgid "Launch My Web Accounts"
 msgstr "Start Mine nettkontoer"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1516
+#: ../libempathy-gtk/empathy-account-widget.c:1527
 msgid "Username:"
 msgstr "Brukernavn:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1883
+#: ../libempathy-gtk/empathy-account-widget.c:1894
 msgid "A_pply"
 msgstr "_Bruk"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1913
+#: ../libempathy-gtk/empathy-account-widget.c:1924
 msgid "L_og in"
 msgstr "L_ogg inn"
 
 #. Account and Identifier
-#: ../libempathy-gtk/empathy-account-widget.c:1979
+#: ../libempathy-gtk/empathy-account-widget.c:1990
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:451
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1489
+#: ../libempathy-gtk/empathy-individual-widget.c:1486
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
 msgid "Account:"
 msgstr "Konto:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1990
+#: ../libempathy-gtk/empathy-account-widget.c:2001
 msgid "_Enabled"
 msgstr "Slått _på"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2055
+#: ../libempathy-gtk/empathy-account-widget.c:2066
 msgid "This account already exists on the server"
 msgstr "Denne kontoen eksisterer allerede på tjeneren"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2058
+#: ../libempathy-gtk/empathy-account-widget.c:2069
 msgid "Create a new account on the server"
 msgstr "Lag en ny konto på tjeneren"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2250
+#: ../libempathy-gtk/empathy-account-widget.c:2261
 msgid "Ca_ncel"
 msgstr "A_vbryt"
 
@@ -785,19 +785,19 @@ msgstr "A_vbryt"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2547
+#: ../libempathy-gtk/empathy-account-widget.c:2558
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s av %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2573
+#: ../libempathy-gtk/empathy-account-widget.c:2584
 #, c-format
 msgid "%s Account"
 msgstr "%s-konto"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2577
+#: ../libempathy-gtk/empathy-account-widget.c:2588
 msgid "New account"
 msgstr "Ny konto"
 
@@ -1171,7 +1171,7 @@ msgstr "I_gnorer invitasjoner til konferanser og praterom"
 
 #. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
-#: ../libempathy-gtk/empathy-password-dialog.c:302
+#: ../libempathy-gtk/empathy-password-dialog.c:311
 msgid "Remember password"
 msgstr "Husk passord"
 
@@ -1522,34 +1522,34 @@ msgstr "Ikke gruppert"
 msgid "Favorite People"
 msgstr "Favorittpersoner"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2016
-#: ../libempathy-gtk/empathy-individual-view.c:2296
+#: ../libempathy-gtk/empathy-contact-list-view.c:2012
+#: ../libempathy-gtk/empathy-individual-view.c:2293
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Vil du virkelig fjerne gruppen «%s»?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2018
-#: ../libempathy-gtk/empathy-individual-view.c:2299
+#: ../libempathy-gtk/empathy-contact-list-view.c:2014
+#: ../libempathy-gtk/empathy-individual-view.c:2296
 msgid "Removing group"
 msgstr "Fjerner gruppe"
 
 #. Remove
-#: ../libempathy-gtk/empathy-contact-list-view.c:2067
-#: ../libempathy-gtk/empathy-contact-list-view.c:2144
-#: ../libempathy-gtk/empathy-individual-view.c:2354
-#: ../libempathy-gtk/empathy-individual-view.c:2501
+#: ../libempathy-gtk/empathy-contact-list-view.c:2063
+#: ../libempathy-gtk/empathy-contact-list-view.c:2140
+#: ../libempathy-gtk/empathy-individual-view.c:2351
+#: ../libempathy-gtk/empathy-individual-view.c:2498
 #: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "Fje_rn"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2097
-#: ../libempathy-gtk/empathy-individual-view.c:2404
+#: ../libempathy-gtk/empathy-contact-list-view.c:2093
+#: ../libempathy-gtk/empathy-individual-view.c:2401
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "Vil du virkelig fjerne kontakten «%s»?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2099
-#: ../libempathy-gtk/empathy-individual-view.c:2420
+#: ../libempathy-gtk/empathy-contact-list-view.c:2095
+#: ../libempathy-gtk/empathy-individual-view.c:2417
 msgid "Removing contact"
 msgstr "Fjerner kontakt"
 
@@ -1593,9 +1593,9 @@ msgid "Share My Desktop"
 msgstr "Del mitt skrivebord"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:419
-#: ../libempathy-gtk/empathy-contact-widget.c:1684
+#: ../libempathy-gtk/empathy-contact-widget.c:1682
 #: ../libempathy-gtk/empathy-individual-menu.c:762
-#: ../libempathy-gtk/empathy-individual-widget.c:1380
+#: ../libempathy-gtk/empathy-individual-widget.c:1377
 msgid "Favorite"
 msgstr "Favoritt"
 
@@ -1818,7 +1818,7 @@ msgstr "<b>Plassering</b> (dato)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1315
+#: ../libempathy-gtk/empathy-individual-widget.c:1312
 msgid "Alias:"
 msgstr "Alias:"
 
@@ -1838,7 +1838,7 @@ msgstr "Kontaktdetaljer"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1519
+#: ../libempathy-gtk/empathy-individual-widget.c:1516
 msgid "Identifier:"
 msgstr "Identifikator:"
 
@@ -1918,7 +1918,7 @@ msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "Koble kontakter …"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2412
+#: ../libempathy-gtk/empathy-individual-view.c:2409
 #, c-format
 msgid ""
 "Do you really want to remove the linked contact '%s'? Note that this will "
@@ -1927,7 +1927,7 @@ msgstr ""
 "Vil du virkelig fjerne lenket kontakt «%s»? Merk at dette vil fjerne alle "
 "kontaktene den lenkede kontakten består av."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1660
+#: ../libempathy-gtk/empathy-individual-widget.c:1657
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -1942,15 +1942,19 @@ msgstr "<b>Plassering</b> (dato)"
 msgid "Online from a phone or mobile device"
 msgstr "Tilkoblet fra en telefon eller mobil enhet"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:328
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:332
 msgid "New Network"
 msgstr "Nytt nettverk"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:495
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:527
 msgid "Choose an IRC network"
 msgstr "Velg et IRC-nettverk"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:555
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:584
+msgid "Reset _Networks List"
+msgstr "Nullstill _nettverksliste"
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:588
 msgctxt "verb displayed on a button to select an IRC network"
 msgid "Select"
 msgstr "Velg"
@@ -2068,7 +2072,7 @@ msgstr "S_amtale"
 msgid "New Call"
 msgstr "Ny samtale"
 
-#: ../libempathy-gtk/empathy-password-dialog.c:267
+#: ../libempathy-gtk/empathy-password-dialog.c:274
 #, c-format
 msgid ""
 "Enter your password for account\n"
@@ -2755,16 +2759,16 @@ msgstr ""
 "Du er i ferd med å lage en ny konto hvilket vil forkaste\n"
 "dine endringer. Er du sikker på at du vil fortsette?"
 
-#: ../src/empathy-accounts-dialog.c:1119
+#: ../src/empathy-accounts-dialog.c:1133
 #, c-format
 msgid "Do you want to remove %s from your computer?"
 msgstr "Vil du fjerne %s fra din datamaskin?"
 
-#: ../src/empathy-accounts-dialog.c:1123
+#: ../src/empathy-accounts-dialog.c:1137
 msgid "This will not remove your account on the server."
 msgstr "Dette vil ikke fjerne din konto på tjeneren."
 
-#: ../src/empathy-accounts-dialog.c:1361
+#: ../src/empathy-accounts-dialog.c:1375
 msgid ""
 "You are about to select another account, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2773,15 +2777,15 @@ msgstr ""
 "dine endringer. Er du sikker på at du vil fortsette?"
 
 #. Menu items: to enabled/disable the account
-#: ../src/empathy-accounts-dialog.c:1557
+#: ../src/empathy-accounts-dialog.c:1571
 msgid "_Enable"
 msgstr "Slå _på"
 
-#: ../src/empathy-accounts-dialog.c:1558
+#: ../src/empathy-accounts-dialog.c:1572
 msgid "_Disable"
 msgstr "Slå _av"
 
-#: ../src/empathy-accounts-dialog.c:2059
+#: ../src/empathy-accounts-dialog.c:2073
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -3806,63 +3810,63 @@ msgstr "_Avslutt"
 msgid "Contact Map View"
 msgstr "Kartvisning for kontakter"
 
-#: ../src/empathy-debug-window.c:1219
+#: ../src/empathy-debug-window.c:1218
 msgid "Save"
 msgstr "Lagre"
 
-#: ../src/empathy-debug-window.c:1395
+#: ../src/empathy-debug-window.c:1394
 msgid "Debug Window"
 msgstr "Feilsøkingsvindu"
 
-#: ../src/empathy-debug-window.c:1475
+#: ../src/empathy-debug-window.c:1474
 msgid "Pause"
 msgstr "Pause"
 
-#: ../src/empathy-debug-window.c:1487
+#: ../src/empathy-debug-window.c:1486
 msgid "Level "
 msgstr "Nivå "
 
-#: ../src/empathy-debug-window.c:1507
+#: ../src/empathy-debug-window.c:1506
 msgid "Debug"
 msgstr "Feilsøk"
 
-#: ../src/empathy-debug-window.c:1513
+#: ../src/empathy-debug-window.c:1512
 msgid "Info"
 msgstr "Info"
 
-#: ../src/empathy-debug-window.c:1519 ../src/empathy-debug-window.c:1568
+#: ../src/empathy-debug-window.c:1518 ../src/empathy-debug-window.c:1567
 msgid "Message"
 msgstr "Melding"
 
-#: ../src/empathy-debug-window.c:1525
+#: ../src/empathy-debug-window.c:1524
 msgid "Warning"
 msgstr "Advarsel"
 
-#: ../src/empathy-debug-window.c:1531
+#: ../src/empathy-debug-window.c:1530
 msgid "Critical"
 msgstr "Kritisk"
 
-#: ../src/empathy-debug-window.c:1537
+#: ../src/empathy-debug-window.c:1536
 msgid "Error"
 msgstr "Feil"
 
-#: ../src/empathy-debug-window.c:1556
+#: ../src/empathy-debug-window.c:1555
 msgid "Time"
 msgstr "Tid"
 
-#: ../src/empathy-debug-window.c:1559
+#: ../src/empathy-debug-window.c:1558
 msgid "Domain"
 msgstr "Domene"
 
-#: ../src/empathy-debug-window.c:1561
+#: ../src/empathy-debug-window.c:1560
 msgid "Category"
 msgstr "Kategori"
 
-#: ../src/empathy-debug-window.c:1563
+#: ../src/empathy-debug-window.c:1562
 msgid "Level"
 msgstr "Nivå"
 
-#: ../src/empathy-debug-window.c:1600
+#: ../src/empathy-debug-window.c:1599
 msgid ""
 "The selected connection manager does not support the remote debugging "
 "extension."
