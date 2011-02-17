@@ -568,7 +568,7 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 
   if (tp_protocol == NULL)
     {
-      priv->manager = NULL;
+      tp_clear_object (&priv->manager);
       return;
     }
 
