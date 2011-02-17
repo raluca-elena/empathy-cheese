@@ -223,6 +223,7 @@ empathy_log_window_show (TpAccount  *account,
 	GtkBuilder             *gui;
 	gchar                  *filename;
 	EmpathyLogWindow       *window;
+	EmpathyThemeManager    *theme_mgr;
 
 	if (log_window != NULL) {
 		gtk_window_present (GTK_WINDOW (log_window->window));
@@ -286,16 +287,18 @@ empathy_log_window_show (TpAccount  *account,
 			  window);
 
 	/* Configure Search EmpathyChatView */
-	window->chatview_find = empathy_theme_manager_create_view (empathy_theme_manager_get ());
+	theme_mgr = empathy_theme_manager_dup_singleton ();
+	window->chatview_find = empathy_theme_manager_create_view (theme_mgr);
 	gtk_container_add (GTK_CONTAINER (window->scrolledwindow_find),
 			   GTK_WIDGET (window->chatview_find));
 	gtk_widget_show (GTK_WIDGET (window->chatview_find));
 
 	/* Configure Contacts EmpathyChatView */
-	window->chatview_chats = empathy_theme_manager_create_view (empathy_theme_manager_get ());
+	window->chatview_chats = empathy_theme_manager_create_view (theme_mgr);
 	gtk_container_add (GTK_CONTAINER (window->scrolledwindow_chats),
 			   GTK_WIDGET (window->chatview_chats));
 	gtk_widget_show (GTK_WIDGET (window->chatview_chats));
+	g_object_unref (theme_mgr);
 
 	/* Account chooser for chats */
 	window->account_chooser_chats = empathy_account_chooser_new ();

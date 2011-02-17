@@ -49,7 +49,7 @@ struct _EmpathyThemeManagerClass {
 };
 
 GType                   empathy_theme_manager_get_type    (void) G_GNUC_CONST;
-EmpathyThemeManager *   empathy_theme_manager_get         (void);
+EmpathyThemeManager *   empathy_theme_manager_dup_singleton (void);
 const gchar **          empathy_theme_manager_get_themes  (void);
 GList *                 empathy_theme_manager_get_adium_themes (void);
 EmpathyChatView *       empathy_theme_manager_create_view (EmpathyThemeManager *manager);

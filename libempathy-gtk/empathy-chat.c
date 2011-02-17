@@ -2570,6 +2570,7 @@ chat_create_ui (EmpathyChat *chat)
 	gchar           *filename;
 	GtkTextBuffer   *buffer;
 	gint              paned_pos;
+	EmpathyThemeManager *theme_mgr;
 
 	filename = empathy_file_lookup ("empathy-chat.ui",
 					"libempathy-gtk");
@@ -2594,7 +2595,9 @@ chat_create_ui (EmpathyChat *chat)
 	g_free (filename);
 
 	/* Add message view. */
-	chat->view = empathy_theme_manager_create_view (empathy_theme_manager_get ());
+	theme_mgr = empathy_theme_manager_dup_singleton ();
+	chat->view = empathy_theme_manager_create_view (theme_mgr);
+	g_object_unref (theme_mgr);
 	/* If this is a GtkTextView, it's set as a drag destination for text/plain
 	   and other types, even though it's non-editable and doesn't accept any
 	   drags.  This steals drag motion for anything inside the scrollbars,

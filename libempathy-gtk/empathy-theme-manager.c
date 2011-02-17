@@ -523,7 +523,7 @@ empathy_theme_manager_init (EmpathyThemeManager *manager)
 }
 
 EmpathyThemeManager *
-empathy_theme_manager_get (void)
+empathy_theme_manager_dup_singleton (void)
 {
 	static EmpathyThemeManager *manager = NULL;
 
