@@ -728,8 +728,8 @@ location_update (EmpathyIndividualWidget *self)
 #ifdef HAVE_LIBCHAMPLAIN
   if (display_map == TRUE)
     {
-      GPtrArray *markers;
-      ChamplainLayer *layer;
+      ChamplainMarkerLayer *layer;
+      ChamplainBoundingBox *bbox;
 
       priv->map_view_embed = gtk_champlain_embed_new ();
       priv->map_view = gtk_champlain_embed_get_view (
@@ -738,14 +738,12 @@ location_update (EmpathyIndividualWidget *self)
       gtk_container_add (GTK_CONTAINER (priv->viewport_map),
           priv->map_view_embed);
       g_object_set (G_OBJECT (priv->map_view),
-          "show-license", TRUE,
-          "scroll-mode", CHAMPLAIN_SCROLL_MODE_KINETIC,
+          "kinetic-mode", TRUE,
           "zoom-level", 10,
           NULL);
 
-      layer = champlain_layer_new ();
-      champlain_view_add_layer (priv->map_view, layer);
-      markers = g_ptr_array_new ();
+      layer = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_NONE);
+      champlain_view_add_layer (priv->map_view, CHAMPLAIN_LAYER (layer));
 
       /* FIXME: For now, we have to do this manually. Once libfolks grows a
        * location interface, we can use that. (bgo#627400) */
@@ -793,24 +791,21 @@ location_update (EmpathyIndividualWidget *self)
               lon = g_value_get_double (value);
 
               /* Add a marker to the map */
-              marker = champlain_marker_new_with_text (
+              marker = champlain_label_new_with_text (
                   folks_aliasable_get_alias (FOLKS_ALIASABLE (persona)), NULL,
                   NULL, NULL);
-              champlain_base_marker_set_position (
-                  CHAMPLAIN_BASE_MARKER (marker), lat, lon);
-              clutter_container_add (CLUTTER_CONTAINER (layer), marker, NULL);
-
-              g_ptr_array_add (markers, marker);
+              champlain_location_set_location (CHAMPLAIN_LOCATION (marker),
+                  lat, lon);
+              champlain_marker_layer_add_marker (layer,
+                  CHAMPLAIN_MARKER (marker));
 
               g_object_unref (contact);
             }
         }
 
       /* Zoom to show all of the markers */
-      g_ptr_array_add (markers, NULL); /* NULL-terminate the array */
-      champlain_view_ensure_markers_visible (priv->map_view,
-          (ChamplainBaseMarker **) markers->pdata, FALSE);
-      g_ptr_array_free (markers, TRUE);
+      bbox = champlain_layer_get_bounding_box (CHAMPLAIN_LAYER (layer));
+      champlain_view_ensure_visible (priv->map_view, bbox, FALSE);
 
       gtk_widget_show_all (priv->viewport_map);
     }

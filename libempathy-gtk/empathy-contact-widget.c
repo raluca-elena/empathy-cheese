@@ -946,7 +946,7 @@ contact_widget_location_update (EmpathyContactWidget *information)
   if (display_map)
     {
       ClutterActor *marker;
-      ChamplainLayer *layer;
+      ChamplainMarkerLayer *layer;
 
       information->map_view_embed = gtk_champlain_embed_new ();
       information->map_view = gtk_champlain_embed_get_view (
@@ -955,18 +955,17 @@ contact_widget_location_update (EmpathyContactWidget *information)
       gtk_container_add (GTK_CONTAINER (information->viewport_map),
           information->map_view_embed);
       g_object_set (G_OBJECT (information->map_view),
-          "show-license", TRUE,
-          "scroll-mode", CHAMPLAIN_SCROLL_MODE_KINETIC,
+          "kinetic-mode", TRUE,
           "zoom-level", 10,
           NULL);
 
-      layer = champlain_layer_new ();
-      champlain_view_add_layer (information->map_view, layer);
+      layer = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_NONE);
+      champlain_view_add_layer (information->map_view, CHAMPLAIN_LAYER (layer));
 
-      marker = champlain_marker_new_with_text (
+      marker = champlain_label_new_with_text (
           empathy_contact_get_alias (information->contact), NULL, NULL, NULL);
-      champlain_base_marker_set_position (CHAMPLAIN_BASE_MARKER (marker), lat, lon);
-      clutter_container_add (CLUTTER_CONTAINER (layer), marker, NULL);
+      champlain_location_set_location (CHAMPLAIN_LOCATION (marker), lat, lon);
+      champlain_marker_layer_add_marker (layer, CHAMPLAIN_MARKER (marker));
 
       champlain_view_center_on (information->map_view, lat, lon);
       gtk_widget_show_all (information->viewport_map);

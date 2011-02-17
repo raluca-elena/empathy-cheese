@@ -49,7 +49,7 @@ ENCHANT_REQUIRED=1.2.0
 GEOCLUE_REQUIRED=0.11
 ISO_CODES_REQUIRED=0.35
 LIBCHAMPLAIN_GTK_REQUIRED=0.7.1
-LIBCHAMPLAIN_REQUIRED=0.7.1
+LIBCHAMPLAIN_REQUIRED=0.9
 NAUTILUS_SENDTO_REQUIRED=2.90.0
 NETWORK_MANAGER_REQUIRED=0.7.0
 WEBKIT_REQUIRED=1.3.2
@@ -328,10 +328,9 @@ if test "x$enable_map" != "xno"; then
 
    PKG_CHECK_MODULES(LIBCHAMPLAIN,
     [
-       champlain-0.8 >= $LIBCHAMPLAIN_REQUIRED,
-# champplain-gtk3 doesn't exist. Fix the name once bgo #631009
-       champlain-gtk3-0.8 >= $LIBCHAMPLAIN_GTK_REQUIRED
-       clutter-gtk >= $CLUTTER_GTK_REQUIRED
+       champlain-0.10
+       champlain-gtk-0.10
+       clutter-gtk-1.0
     ], have_libchamplain="yes", have_libchamplain="no")
 
    if test "x$have_libchamplain" = "xyes"; then

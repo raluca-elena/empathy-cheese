@@ -54,7 +54,7 @@ struct _EmpathyMapViewPriv {
   GtkWidget *zoom_out;
   GtkWidget *throbber;
   ChamplainView *map_view;
-  ChamplainLayer *layer;
+  ChamplainMarkerLayer *layer;
   guint timeout_id;
   /* reffed (EmpathyContact *) => borrowed (ChamplainMarker *) */
   GHashTable *markers;
@@ -95,7 +95,7 @@ contact_has_location (EmpathyContact *contact)
   return TRUE;
 }
 
-static ChamplainMarker * create_marker (EmpathyMapView *window,
+static ClutterActor * create_marker (EmpathyMapView *window,
     EmpathyContact *contact);
 
 static void
@@ -106,7 +106,7 @@ map_view_update_contact_position (EmpathyMapView *self,
   gdouble lon, lat;
   GValue *value;
   GHashTable *location;
-  ChamplainMarker *marker;
+  ClutterActor *marker;
   gboolean has_location;
 
   has_location = contact_has_location (contact);
@@ -121,7 +121,7 @@ map_view_update_contact_position (EmpathyMapView *self,
     }
   else if (!has_location)
     {
-      champlain_base_marker_animate_out (CHAMPLAIN_BASE_MARKER (marker));
+      champlain_marker_animate_out (CHAMPLAIN_MARKER (marker));
       return;
     }
 
@@ -130,7 +130,7 @@ map_view_update_contact_position (EmpathyMapView *self,
   value = g_hash_table_lookup (location, EMPATHY_LOCATION_LAT);
   if (value == NULL)
     {
-      clutter_actor_hide (CLUTTER_ACTOR (marker));
+      clutter_actor_hide (marker);
       return;
     }
   lat = g_value_get_double (value);
@@ -138,13 +138,13 @@ map_view_update_contact_position (EmpathyMapView *self,
   value = g_hash_table_lookup (location, EMPATHY_LOCATION_LON);
   if (value == NULL)
     {
-      clutter_actor_hide (CLUTTER_ACTOR (marker));
+      clutter_actor_hide (marker);
       return;
     }
   lon = g_value_get_double (value);
 
-  champlain_base_marker_set_position (CHAMPLAIN_BASE_MARKER (marker), lat, lon);
-  champlain_base_marker_animate_in (CHAMPLAIN_BASE_MARKER (marker));
+  champlain_location_set_location (CHAMPLAIN_LOCATION (marker), lat, lon);
+  champlain_marker_animate_in (CHAMPLAIN_MARKER (marker));
 }
 
 static void
@@ -178,33 +178,24 @@ map_view_zoom_fit_cb (GtkWidget *widget,
     EmpathyMapView *self)
 {
   EmpathyMapViewPriv *priv = GET_PRIV (self);
-  GList *item, *children;
-  GPtrArray *markers;
+  ChamplainBoundingBox *bbox;
 
-  children = clutter_container_get_children (CLUTTER_CONTAINER (priv->layer));
-  markers =  g_ptr_array_sized_new (g_list_length (children) + 1);
-
-  for (item = children; item != NULL; item = g_list_next (item))
-    g_ptr_array_add (markers, (gpointer) item->data);
-
-  g_ptr_array_add (markers, (gpointer) NULL);
-  champlain_view_ensure_markers_visible (priv->map_view,
-    (ChamplainBaseMarker **) markers->pdata,
-    TRUE);
-
-  g_ptr_array_free (markers, TRUE);
-  g_list_free (children);
+  bbox = champlain_layer_get_bounding_box (CHAMPLAIN_LAYER (priv->layer));
+  champlain_view_ensure_visible (priv->map_view, bbox, TRUE);
 }
 
 static gboolean
 marker_clicked_cb (ChamplainMarker *marker,
     ClutterButtonEvent *event,
-    EmpathyContact *contact)
+    EmpathyMapView *self)
 {
   GtkWidget *menu;
+  EmpathyContact *contact;
 
   if (event->button != 3)
     return FALSE;
+
+  contact = g_object_get_data (G_OBJECT (marker), "contact");
 
   menu = empathy_contact_menu_new (contact,
       EMPATHY_CONTACT_FEATURE_CHAT |
@@ -216,17 +207,17 @@ marker_clicked_cb (ChamplainMarker *marker,
   if (menu == NULL)
     return FALSE;
 
+  gtk_menu_attach_to_widget (GTK_MENU (menu), GTK_WIDGET (self), NULL);
+
   gtk_widget_show (menu);
   gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
       event->button, event->time);
-  g_object_ref_sink (menu);
-  g_object_unref (menu);
 
   return FALSE;
 }
 
 static void
-map_view_contacts_update_label (ChamplainMarker *marker)
+map_view_contacts_update_label (ClutterActor *marker)
 {
   const gchar *name;
   gchar *date;
@@ -254,58 +245,58 @@ map_view_contacts_update_label (ChamplainMarker *marker)
 
       /* if location is older than a week */
       if (now - loctime > (60 * 60 * 24 * 7))
-        clutter_actor_set_opacity (CLUTTER_ACTOR (marker), 0.75 * 255);
+        clutter_actor_set_opacity (marker, 0.75 * 255);
     }
   else
     {
       label = g_strconcat ("<b>", name, "</b>\n", NULL);
     }
 
-  champlain_marker_set_use_markup (CHAMPLAIN_MARKER (marker), TRUE);
-  champlain_marker_set_text (CHAMPLAIN_MARKER (marker), label);
+  champlain_label_set_use_markup (CHAMPLAIN_LABEL (marker), TRUE);
+  champlain_label_set_text (CHAMPLAIN_LABEL (marker), label);
 
   g_free (label);
 }
 
-static ChamplainMarker *
+static ClutterActor *
 create_marker (EmpathyMapView *self,
     EmpathyContact *contact)
 {
   EmpathyMapViewPriv *priv = GET_PRIV (self);
   ClutterActor *marker;
-  ClutterActor *texture;
   GdkPixbuf *avatar;
-
-  marker = champlain_marker_new ();
+  ClutterActor *texture = NULL;
 
   avatar = empathy_pixbuf_avatar_from_contact_scaled (contact, 32, 32);
   if (avatar != NULL)
     {
-      texture = clutter_texture_new ();
-      gtk_clutter_texture_set_from_pixbuf (CLUTTER_TEXTURE (texture), avatar,
-          NULL);
-      champlain_marker_set_image (CHAMPLAIN_MARKER (marker), texture);
+      texture = gtk_clutter_texture_new ();
+
+      gtk_clutter_texture_set_from_pixbuf (GTK_CLUTTER_TEXTURE (texture),
+          avatar, NULL);
+
       g_object_unref (avatar);
     }
-  else
-    champlain_marker_set_image (CHAMPLAIN_MARKER (marker), NULL);
+
+  marker = champlain_label_new_with_image (texture);
 
   g_object_set_data_full (G_OBJECT (marker), "contact",
       g_object_ref (contact), g_object_unref);
 
   g_hash_table_insert (priv->markers, g_object_ref (contact), marker);
 
-  map_view_contacts_update_label (CHAMPLAIN_MARKER (marker));
+  map_view_contacts_update_label (marker);
 
   clutter_actor_set_reactive (CLUTTER_ACTOR (marker), TRUE);
   g_signal_connect (marker, "button-release-event",
-      G_CALLBACK (marker_clicked_cb), contact);
+      G_CALLBACK (marker_clicked_cb), self);
 
-  clutter_container_add (CLUTTER_CONTAINER (priv->layer), marker, NULL);
+  champlain_marker_layer_add_marker (priv->layer, CHAMPLAIN_MARKER (marker));
 
   DEBUG ("Create marker for %s", empathy_contact_get_id (contact));
 
-  return CHAMPLAIN_MARKER (marker);
+  tp_clear_object (&texture);
+  return marker;
 }
 
 static void
@@ -323,8 +314,8 @@ map_view_key_press_cb (GtkWidget *widget,
     GdkEventKey *event,
     gpointer user_data)
 {
-  if ((event->state & GDK_CONTROL_MASK && event->keyval == GDK_w)
-      || event->keyval == GDK_Escape)
+  if ((event->state & GDK_CONTROL_MASK && event->keyval == GDK_KEY_w)
+      || event->keyval == GDK_KEY_Escape)
     {
       gtk_widget_destroy (widget);
       return TRUE;
@@ -339,7 +330,7 @@ map_view_tick (EmpathyMapView *self)
   EmpathyMapViewPriv *priv = GET_PRIV (self);
   GList *marker, *l;
 
-  marker = clutter_container_get_children (CLUTTER_CONTAINER (priv->layer));
+  marker = champlain_marker_layer_get_markers (priv->layer);
 
   for (l = marker; l != NULL; l = g_list_next (l))
     map_view_contacts_update_label (l->data);
@@ -492,15 +483,18 @@ empathy_map_view_init (EmpathyMapView *self)
   /* Set up map view */
   embed = gtk_champlain_embed_new ();
   priv->map_view = gtk_champlain_embed_get_view (GTK_CHAMPLAIN_EMBED (embed));
-  g_object_set (G_OBJECT (priv->map_view), "zoom-level", 1,
-     "scroll-mode", CHAMPLAIN_SCROLL_MODE_KINETIC, NULL);
+  g_object_set (G_OBJECT (priv->map_view),
+     "zoom-level", 1,
+     "kinetic-mode", TRUE,
+     NULL);
   champlain_view_center_on (priv->map_view, 36, 0);
 
   gtk_container_add (GTK_CONTAINER (sw), embed);
   gtk_widget_show_all (embed);
 
-  priv->layer = g_object_ref (champlain_layer_new ());
-  champlain_view_add_layer (priv->map_view, priv->layer);
+  priv->layer = g_object_ref (champlain_marker_layer_new_full (
+        CHAMPLAIN_SELECTION_NONE));
+  champlain_view_add_layer (priv->map_view, CHAMPLAIN_LAYER (priv->layer));
 
   g_signal_connect (priv->map_view, "notify::state",
       G_CALLBACK (map_view_state_changed), self);
