@@ -118,6 +118,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       if ((account = tp_account_new (bus, account_path, &error)))
         {
           tp_account_prepare_async (account, NULL, account_prepare_cb, manager);
+          g_object_unref (bus);
           return;
         }
       else
