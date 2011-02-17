@@ -279,6 +279,7 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
   g_free (name);
   g_free (room);
   g_free (account_id);
+  g_object_unref (chatroom);
 }
 
 static gboolean
