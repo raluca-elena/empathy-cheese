@@ -1691,8 +1691,8 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
       return FALSE;
     }
 
-  is_favorite = folks_favourite_get_is_favourite (
-      FOLKS_FAVOURITE (individual));
+  is_favorite = folks_favouritable_get_is_favourite (
+      FOLKS_FAVOURITABLE (individual));
   if (is_searching == FALSE)
     return (priv->show_offline || is_online || is_favorite);
 
