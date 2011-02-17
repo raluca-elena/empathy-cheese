@@ -561,16 +561,16 @@ empathy_protocol_chooser_set_visible (EmpathyProtocolChooser *protocol_chooser,
 EmpathyAccountSettings *
 empathy_protocol_chooser_create_account_settings (EmpathyProtocolChooser *self)
 {
-  EmpathyAccountSettings *settings;
+  EmpathyAccountSettings *settings = NULL;
   gchar *str;
   const gchar *display_name;
   TpConnectionManager *cm;
   TpConnectionManagerProtocol *proto;
-  gchar *service;
+  gchar *service = NULL;
 
   cm = empathy_protocol_chooser_dup_selected (self, &proto, &service);
   if (cm == NULL || proto == NULL)
-    return NULL;
+    goto out;
 
   if (service != NULL)
     display_name = empathy_service_name_to_display_name (service);
@@ -609,7 +609,8 @@ empathy_protocol_chooser_create_account_settings (EmpathyProtocolChooser *self)
           "chat.facebook.com");
     }
 
-  g_object_unref (cm);
+out:
+  tp_clear_object (&cm);
   g_free (service);
   return settings;
 }
