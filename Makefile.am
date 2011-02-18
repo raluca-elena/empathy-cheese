@@ -1,4 +1,4 @@
-MY_SUBDIRS = tools extensions po data libempathy libempathy-gtk src help tests
+MY_SUBDIRS = tools extensions po data telepathy-yell libempathy libempathy-gtk src help tests
 NST_SUBDIRS = nautilus-sendto-plugin
 
 DIST_SUBDIRS = $(MY_SUBDIRS) $(NST_SUBDIRS)

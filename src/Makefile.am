@@ -2,6 +2,7 @@ include $(top_srcdir)/tools/flymake.mk
 
 CPPFLAGS_COMMON =					\
 	$(EMPATHY_CFLAGS)				\
+	$(YELL_CFLAGS)					\
 	$(EDS_CFLAGS)					\
 	$(ERROR_CFLAGS)					\
 	-I$(top_srcdir)                          	\
@@ -24,6 +25,7 @@ LDADD =								\
 	$(top_builddir)/extensions/libemp-extensions.la		\
 	$(GCR_LIBS) 						\
 	$(EMPATHY_LIBS)						\
+	$(YELL_LIBS)						\
 	$(LIBCHAMPLAIN_LIBS)					\
 	$(WEBKIT_LIBS)
 
@@ -142,6 +144,38 @@ empathy_chat_SOURCES =						\
 	empathy-chat.c \
 	gedit-close-button.c gedit-close-button.h \
 	$(NULL)
+
+if HAVE_CALL
+
+libexec_PROGRAMS += empathy-call
+
+empathy_call_SOURCES = \
+       empathy-call.c \
+       empathy-call-factory.c \
+       empathy-call-factory.h \
+       empathy-call-handler.c \
+       empathy-call-handler.h \
+       empathy-call-window.c \
+       empathy-call-window.h \
+       empathy-call-window-fullscreen.c \
+       empathy-call-window-fullscreen.h \
+       empathy-audio-sink.c \
+       empathy-audio-sink.h \
+       empathy-audio-src.c \
+       empathy-audio-src.h \
+       empathy-video-src.c \
+       empathy-video-src.h \
+       empathy-video-widget.c \
+       empathy-video-widget.h \
+       ev-sidebar.c \
+       ev-sidebar.h
+
+nodist_empathy_call_SOURCES = $(BUILT_SOURCES)
+
+empathy_call_CFLAGS = $(EMPATHY_CALL_CFLAGS)
+empathy_call_LDFLAGS = $(EMPATHY_CALL_LIBS)
+
+endif
 
 empathy_handwritten_source = \
 	empathy-about-dialog.c empathy-about-dialog.h			\
