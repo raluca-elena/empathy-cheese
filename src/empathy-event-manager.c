@@ -29,6 +29,10 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/simple-approver.h>
 
+#if HAVE_CALL
+ #include <telepathy-yell/telepathy-yell.h>
+#endif
+
 #include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
@@ -406,6 +410,14 @@ reject_channel_claim_cb (GObject *source,
     {
       empathy_tp_streamed_media_close (user_data);
     }
+#if HAVE_CALL
+  else if (TPY_IS_CALL_CHANNEL (user_data))
+    {
+      tpy_call_channel_hangup_async (user_data,
+          TPY_CALL_STATE_CHANGE_REASON_USER_REQUESTED,
+          "", "", NULL, NULL);
+    }
+#endif
   else if (EMPATHY_IS_TP_CHAT (user_data))
     {
       empathy_tp_chat_leave (user_data, "");
@@ -491,7 +503,6 @@ event_channel_process_voip_func (EventPriv *event)
   GtkWidget *dialog;
   GtkWidget *button;
   GtkWidget *image;
-  EmpathyTpStreamedMedia *call;
   gboolean video;
   gchar *title;
 
@@ -501,9 +512,25 @@ event_channel_process_voip_func (EventPriv *event)
       return;
     }
 
-  call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
-
-  video = empathy_tp_streamed_media_has_initial_video (call);
+  if (event->public.type == EMPATHY_EVENT_TYPE_VOIP)
+    {
+      EmpathyTpStreamedMedia *call;
+      call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
+      video = empathy_tp_streamed_media_has_initial_video (call);
+    }
+#if HAVE_CALL
+  else if (event->public.type == EMPATHY_EVENT_TYPE_CALL)
+    {
+      TpyCallChannel *call;
+      call = TPY_CALL_CHANNEL (event->approval->handler_instance);
+      g_object_get (G_OBJECT (call), "initial-video", &video, NULL);
+    }
+#endif
+  else
+    {
+      g_warning ("Unknown event type: %d", event->public.type);
+      return;
+    }
 
   dialog = gtk_message_dialog_new (NULL, 0,
       GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
@@ -649,6 +676,41 @@ cdo_invalidated_cb (TpProxy *cdo,
 
   event_manager_approval_done (approval);
 }
+
+#if HAVE_CALL
+static void
+event_manager_call_channel_got_contact (EventManagerApproval *approval)
+{
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
+  GtkWidget *window = empathy_main_window_dup ();
+  TpyCallChannel *call;
+  gchar *header;
+  gboolean video;
+
+  call = TPY_CALL_CHANNEL (approval->handler_instance);
+
+  g_object_get (G_OBJECT (call), "initial-video", &video, NULL);
+
+  header = g_strdup_printf (
+    video ? _("Incoming video call from %s") :_("Incoming call from %s"),
+    empathy_contact_get_alias (approval->contact));
+
+  event_manager_add (approval->manager, NULL,
+      approval->contact, EMPATHY_EVENT_TYPE_CALL,
+      video ? EMPATHY_IMAGE_VIDEO_CALL : EMPATHY_IMAGE_VOIP,
+      header, NULL, approval,
+      event_channel_process_voip_func, NULL);
+
+  g_free (header);
+
+  priv->ringing++;
+  if (priv->ringing == 1)
+    empathy_sound_manager_start_playing (priv->sound_mgr, window,
+        EMPATHY_SOUND_PHONE_INCOMING, MS_BETWEEN_RING);
+
+  g_object_unref (window);
+}
+#endif
 
 static void
 event_manager_media_channel_got_contact (EventManagerApproval *approval)
@@ -884,6 +946,9 @@ find_main_channel (GList *channels)
       channel_type = tp_channel_get_channel_type_id (channel);
 
       if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA ||
+#if HAVE_CALL
+          channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL ||
+#endif
           channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER ||
           channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
         return channel;
@@ -1004,6 +1069,15 @@ approve_channels (TpSimpleApprover *approver,
         }
 
     }
+#if HAVE_CALL
+  else if (channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
+    {
+      TpyCallChannel *call = TPY_CALL_CHANNEL (channel);
+
+      approval->handler_instance = G_OBJECT (call);
+      event_manager_call_channel_got_contact (approval);
+    }
+#endif
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
     {
       TpHandle handle;
@@ -1322,6 +1396,14 @@ empathy_event_manager_init (EmpathyEventManager *manager)
           TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         NULL));
+#if HAVE_CALL
+  tp_base_client_take_approver_filter (priv->approver,
+      tp_asv_new (
+        TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TPY_IFACE_CHANNEL_TYPE_CALL,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        NULL));
+#endif
 
   /* I don't feel good about doing this, and I'm sorry, but the
    * capabilities connection feature is added earlier because it's
