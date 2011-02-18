@@ -44,6 +44,10 @@
 #include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/interfaces.h>
 
+#if HAVE_CALL
+ #include <telepathy-yell/telepathy-yell.h>
+#endif
+
 #include <telepathy-logger/log-manager.h>
 
 #include <libempathy/empathy-presence-manager.h>
@@ -711,6 +715,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_LIBCHAMPLAIN
   gtk_clutter_init (&argc, &argv);
 #endif
+
+  tpy_cli_init ();
 
   empathy_init ();
   gtk_init (&argc, &argv);
