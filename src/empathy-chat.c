@@ -31,6 +31,8 @@
 #include <telepathy-glib/debug-sender.h>
 
 #include <libempathy/empathy-presence-manager.h>
+
+#include <libempathy-gtk/empathy-theme-manager.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-chat-manager.h"
@@ -96,6 +98,7 @@ main (int argc,
 #endif
   GError *error = NULL;
   EmpathyPresenceManager *presence_mgr;
+  EmpathyThemeManager *theme_mgr;
   gint retval;
 
   /* Init */
@@ -137,6 +140,9 @@ main (int argc,
   /* Setting up Idle */
   presence_mgr = empathy_presence_manager_dup_singleton ();
 
+  /* Keep the theme manager alive as it does some caching */
+  theme_mgr = empathy_theme_manager_dup_singleton ();
+
   if (g_getenv ("EMPATHY_PERSIST") != NULL)
     {
       DEBUG ("Disable timer");
@@ -155,6 +161,7 @@ main (int argc,
 
   g_object_unref (app);
   g_object_unref (presence_mgr);
+  g_object_unref (theme_mgr);
   tp_clear_object (&chat_mgr);
 
 #ifdef ENABLE_DEBUG
