@@ -203,24 +203,6 @@ empathy_call_factory_get (void)
   return EMPATHY_CALL_FACTORY (call_factory);
 }
 
-GHashTable *
-empathy_call_factory_create_call_request (EmpathyContact *contact,
-    gboolean initial_audio,
-    gboolean initial_video)
-{
-  return tp_asv_new (
-      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
-        TPY_IFACE_CHANNEL_TYPE_CALL,
-      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
-      TP_PROP_CHANNEL_TARGET_HANDLE, G_TYPE_UINT,
-        empathy_contact_get_handle (contact),
-      TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO, G_TYPE_BOOLEAN,
-        initial_audio,
-      TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO, G_TYPE_BOOLEAN,
-        initial_video,
-      NULL);
-}
-
 static void
 create_call_channel_cb (GObject *source,
     GAsyncResult *result,
@@ -256,7 +238,7 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
   TpAccount *account;
   TpAccountChannelRequest *call_req;
 
-  call_request = empathy_call_factory_create_call_request (contact,
+  call_request = empathy_call_create_call_request (contact,
       initial_audio, initial_video);
 
   account = empathy_contact_get_account (contact);

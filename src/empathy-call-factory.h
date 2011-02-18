@@ -70,11 +70,6 @@ void empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
 gboolean empathy_call_factory_register (EmpathyCallFactory *self,
     GError **error);
 
-GHashTable * empathy_call_factory_create_call_request (
-    EmpathyContact *contact,
-    gboolean initial_audio,
-    gboolean initial_video);
-
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_CALL_FACTORY_H__*/
