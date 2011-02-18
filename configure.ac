@@ -62,6 +62,12 @@ GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 #ifelse(empathy_released, 1, [], [enable_maintainer_mode="yes"])
 #GNOME_MAINTAINER_MODE_DEFINES
 
+# telepathy-yell
+prev_top_build_prefix=$ac_top_build_prefix
+AX_CONFIG_DIR([telepathy-yell])
+ac_top_build_prefix=$prev_top_build_prefix
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:"$ac_top_build_prefix"telepathy-yell/telepathy-yell
+
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([configure.ac])
@@ -171,6 +177,17 @@ PKG_CHECK_MODULES(EMPATHY_AV,
    farsight2-0.10
    telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
 ])
+
+# -----------------------------------------------------------
+# Call interface
+# -----------------------------------------------------------
+AC_ARG_WITH(call,
+            AC_HELP_STRING([--with-call], [build with Call interface support]),,
+            [with_call=yes])
+if test "x$with_call" = "xyes" ; then
+   PKG_CHECK_MODULES(YELL, [telepathy-yell])
+   AC_DEFINE(HAVE_CALL, 1, [Define if we have Call interface support])
+fi
 
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
