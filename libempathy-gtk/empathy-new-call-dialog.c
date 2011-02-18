@@ -28,6 +28,10 @@
 
 #include <telepathy-glib/interfaces.h>
 
+#if HAVE_CALL
+#include <telepathy-yell/telepathy-yell.h>
+#endif
+
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-utils.h>
@@ -54,6 +58,11 @@ typedef struct {
   gpointer                                  user_data;
 } FilterCallbackData;
 
+typedef struct {
+  gboolean video;
+  gint64 timestamp;
+} ContactCallbackData;
+
 struct _EmpathyNewCallDialogPriv {
   GtkWidget *check_video;
 };
@@ -61,21 +70,6 @@ struct _EmpathyNewCallDialogPriv {
 #define GET_PRIV(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_NEW_CALL_DIALOG, \
     EmpathyNewCallDialogPriv))
-
-static void
-create_media_channel_cb (GObject *source,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  GError *error = NULL;
-
-  if (!tp_account_channel_request_create_channel_finish (
-        TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
-    {
-      DEBUG ("Failed to create media channel: %s", error->message);
-      g_error_free (error);
-    }
-}
 
 /**
  * SECTION:empathy-new-call-dialog
@@ -88,31 +82,38 @@ create_media_channel_cb (GObject *source,
  */
 
 static void
+got_contact_cb (TpConnection *connection,
+    EmpathyContact *contact,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  ContactCallbackData *data = user_data;
+
+  if (error != NULL)
+    g_warning ("Could not get contact: %s", error->message);
+  else
+    empathy_call_new_with_streams (contact,
+        TRUE, data->video, data->timestamp);
+
+  g_slice_free (ContactCallbackData, data);
+}
+
+static void
 call_contact (TpAccount *account,
     const gchar *contact_id,
     gboolean video,
     gint64 timestamp)
 {
-  GHashTable *request;
-  TpAccountChannelRequest *req;
+  ContactCallbackData *data = g_slice_new0 (ContactCallbackData);
 
-  request = tp_asv_new (
-      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
-        TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
-      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
-      TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, contact_id,
-      TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_AUDIO, G_TYPE_BOOLEAN,
-        TRUE,
-      TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO, G_TYPE_BOOLEAN,
-        video,
-      NULL);
+  data->video = video;
+  data->timestamp = timestamp;
 
-  req = tp_account_channel_request_new (account, request, timestamp);
-
-  tp_account_channel_request_create_channel_async (req, EMPATHY_AV_BUS_NAME,
-      NULL, create_media_channel_cb, NULL);
-
-  g_object_unref (req);
+  empathy_tp_contact_factory_get_from_id (tp_account_get_connection (account),
+      contact_id,
+      got_contact_cb, data,
+      NULL, NULL);
 }
 
 static void
@@ -169,7 +170,11 @@ conn_prepared_cb (GObject *conn,
 
       chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
 
-      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA))
+      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA)
+#if HAVE_CALL
+          && tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL)
+#endif
+         )
         continue;
 
       if (tp_asv_get_uint32 (fixed, TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) !=

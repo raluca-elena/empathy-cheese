@@ -8,6 +8,7 @@ AM_CPPFLAGS =                                           \
 	-DPKGDATADIR=\""$(pkgdatadir)"\"		\
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
+	$(YELL_CFLAGS)					\
 	$(ENCHANT_CFLAGS)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
 	$(GEOCLUE_CFLAGS)				\
@@ -158,6 +159,7 @@ nodist_libempathy_gtk_la_SOURCES =\
 	$(BUILT_SOURCES)
 
 libempathy_gtk_la_LIBADD =			\
+	$(EMPATHY_LIBS)			\
 	$(EMPATHY_LIBS)			\
 	$(GTK_LIBS)			\
 	$(LIBNOTIFY_LIBS)			\
