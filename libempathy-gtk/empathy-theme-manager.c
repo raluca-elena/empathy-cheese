@@ -527,11 +527,14 @@ empathy_theme_manager_dup_singleton (void)
 {
 	static EmpathyThemeManager *manager = NULL;
 
-	if (!manager) {
+	if (manager == NULL) {
 		manager = g_object_new (EMPATHY_TYPE_THEME_MANAGER, NULL);
+		g_object_add_weak_pointer (G_OBJECT (manager), (gpointer *) &manager);
+
+		return manager;
 	}
 
-	return manager;
+	return g_object_ref (manager);
 }
 
 const gchar **
