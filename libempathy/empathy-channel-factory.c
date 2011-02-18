@@ -19,12 +19,18 @@
  * Authors: Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
  */
 
+#include <config.h>
+
 #include "empathy-channel-factory.h"
 
 #include "empathy-tp-chat.h"
 #include "empathy-utils.h"
 
 #include <telepathy-glib/telepathy-glib.h>
+
+#if HAVE_CALL
+ #include <telepathy-yell/telepathy-yell.h>
+#endif
 
 static void factory_iface_init (gpointer, gpointer);
 
@@ -113,6 +119,13 @@ empathy_channel_factory_create_channel (
 
       return TP_CHANNEL (empathy_tp_chat_new (account, conn, path, properties));
     }
+#if HAVE_CALL
+  else if (!tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL))
+    {
+      return TP_CHANNEL (tpy_call_channel_new (conn, path, properties,
+            error));
+    }
+#endif
 
   return tp_client_channel_factory_create_channel (
       self->priv->automatic_factory, conn, path, properties, error);
