@@ -147,6 +147,7 @@ PKG_CHECK_MODULES(EMPATHY,
    dbus-glib-1
    folks >= $FOLKS_REQUIRED
    folks-telepathy >= $FOLKS_REQUIRED
+   glib-2.0 >= $GLIB_REQUIRED
    gio-2.0 >= $GLIB_REQUIRED
    gio-unix-2.0 >= $GLIB_REQUIRED
    gnome-keyring-1 >= $KEYRING_REQUIRED
