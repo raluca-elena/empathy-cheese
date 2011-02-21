@@ -1422,7 +1422,7 @@ empathy_account_settings_account_updated (GObject *source,
   EmpathyAccountSettingsPriv *priv = GET_PRIV (settings);
   GSimpleAsyncResult *r;
   GError *error = NULL;
-  GStrv reconnect_required;
+  GStrv reconnect_required = NULL;
 
   if (!tp_account_update_parameters_finish (TP_ACCOUNT (source),
           result, &reconnect_required, &error))
