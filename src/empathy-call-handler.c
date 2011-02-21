@@ -210,14 +210,17 @@ empathy_call_handler_constructed (GObject *object)
 {
   EmpathyCallHandler *self = EMPATHY_CALL_HANDLER (object);
   EmpathyCallHandlerPriv *priv = GET_PRIV (self);
-  GHashTable *members;
+//  GHashTable *members;
 
   g_signal_connect (priv->call, "members-changed",
       G_CALLBACK (on_members_changed_cb), object);
 
+/* FIXME
   g_object_get (priv->call, "members", &members, NULL);
 
-  on_members_changed_cb (priv->call, members, self);
+  if (members)
+    on_members_changed_cb (priv->call, members, self);
+*/
 }
 
 static void
