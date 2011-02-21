@@ -2453,8 +2453,8 @@ empathy_call_window_connected (gpointer user_data)
   if (priv->video_input == NULL)
     empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
 
-  priv->sending_video = can_send_video ?
-    tpy_call_channel_is_sending_video (call) : FALSE;
+  priv->sending_video = can_send_video &&
+    empathy_call_handler_has_initial_video (priv->handler);
 
   gtk_toggle_tool_button_set_active (
       GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on),
