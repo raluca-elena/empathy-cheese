@@ -1931,7 +1931,7 @@ empathy_context_menu_new (GtkWidget *attach_to)
 
 	gtk_menu_attach_to_widget (GTK_MENU (menu), attach_to, NULL);
 
-	/* menu is initially unowned but gtk_menu_attach_to_widget() taked its
+	/* menu is initially unowned but gtk_menu_attach_to_widget () taked its
 	 * floating ref. We can either wait that @attach_to releases its ref when
 	 * it will be destroyed (when leaving Empathy most of the time) or explicitely
 	 * detach the menu when it's not displayed any more.

@@ -833,7 +833,7 @@ contact_list_view_popup_menu_idle_cb (gpointer user_data)
 				NULL, NULL, NULL, NULL,
 				data->button, data->time);
 
-		/* menu is initially unowned but gtk_menu_attach_to_widget() taked its
+		/* menu is initially unowned but gtk_menu_attach_to_widget () taked its
 		 * floating ref. We can either wait that the treeview releases its ref
 		 * when it will be destroyed (when leaving Empathy) or explicitely
 		 * detach the menu when it's not displayed any more.
