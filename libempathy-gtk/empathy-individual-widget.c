@@ -742,7 +742,7 @@ location_update (EmpathyIndividualWidget *self)
           "zoom-level", 10,
           NULL);
 
-      layer = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_NONE);
+      layer = champlain_marker_layer_new ();
       champlain_view_add_layer (priv->map_view, CHAMPLAIN_LAYER (layer));
 
       /* FIXME: For now, we have to do this manually. Once libfolks grows a

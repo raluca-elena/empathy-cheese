@@ -959,7 +959,7 @@ contact_widget_location_update (EmpathyContactWidget *information)
           "zoom-level", 10,
           NULL);
 
-      layer = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_NONE);
+      layer = champlain_marker_layer_new ();
       champlain_view_add_layer (information->map_view, CHAMPLAIN_LAYER (layer));
 
       marker = champlain_label_new_with_text (

@@ -492,8 +492,7 @@ empathy_map_view_init (EmpathyMapView *self)
   gtk_container_add (GTK_CONTAINER (sw), embed);
   gtk_widget_show_all (embed);
 
-  priv->layer = g_object_ref (champlain_marker_layer_new_full (
-        CHAMPLAIN_SELECTION_NONE));
+  priv->layer = g_object_ref (champlain_marker_layer_new ());
   champlain_view_add_layer (priv->map_view, CHAMPLAIN_LAYER (priv->layer));
 
   g_signal_connect (priv->map_view, "notify::state",
