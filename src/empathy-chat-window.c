@@ -59,6 +59,7 @@
 #include "empathy-chat-window.h"
 #include "empathy-about-dialog.h"
 #include "empathy-invite-participant-dialog.h"
+#include "gedit-close-button.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CHAT
 #include <libempathy/empathy-debug.h>
@@ -260,8 +261,6 @@ chat_window_create_label (EmpathyChatWindow *window,
 	GtkWidget            *hbox;
 	GtkWidget            *name_label;
 	GtkWidget            *status_image;
-	GtkWidget            *close_button;
-	GtkWidget            *close_image;
 	GtkWidget            *event_box;
 	GtkWidget            *event_box_hbox;
 	PangoAttrList        *attr_list;
@@ -312,8 +311,9 @@ chat_window_create_label (EmpathyChatWindow *window,
 	gtk_box_pack_start (GTK_BOX (hbox), event_box, TRUE, TRUE, 0);
 
 	if (is_tab_label) {
-		close_button = gtk_button_new ();
-		gtk_button_set_relief (GTK_BUTTON (close_button), GTK_RELIEF_NONE);
+		GtkWidget            *close_button;
+
+		close_button = gedit_close_button_new ();
 		g_object_set_data (G_OBJECT (chat), "chat-window-tab-close-button", close_button);
 
 		/* We don't want focus/keynav for the button to avoid clutter, and
@@ -321,13 +321,6 @@ chat_window_create_label (EmpathyChatWindow *window,
 		 */
 		gtk_widget_set_can_focus (close_button, FALSE);
 		gtk_widget_set_can_default (close_button, FALSE);
-
-		/* Set the name to make the special rc style match. */
-		gtk_widget_set_name (close_button, "empathy-close-button");
-
-		close_image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
-
-		gtk_container_add (GTK_CONTAINER (close_button), close_image);
 
 		gtk_box_pack_end (GTK_BOX (hbox), close_button, FALSE, FALSE, 0);
 
@@ -1911,16 +1904,6 @@ empathy_chat_window_class_init (EmpathyChatWindowClass *klass)
 	object_class->finalize = chat_window_finalize;
 
 	g_type_class_add_private (object_class, sizeof (EmpathyChatWindowPriv));
-
-	/* Set up a style for the close button with no focus padding. */
-	gtk_rc_parse_string (
-		"style \"empathy-close-button-style\"\n"
-		"{\n"
-		"  GtkWidget::focus-padding = 0\n"
-		"  xthickness = 0\n"
-		"  ythickness = 0\n"
-		"}\n"
-		"widget \"*.empathy-close-button\" style \"empathy-close-button-style\"");
 }
 
 static void
