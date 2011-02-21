@@ -178,10 +178,8 @@ map_view_zoom_fit_cb (GtkWidget *widget,
     EmpathyMapView *self)
 {
   EmpathyMapViewPriv *priv = GET_PRIV (self);
-  ChamplainBoundingBox *bbox;
 
-  bbox = champlain_layer_get_bounding_box (CHAMPLAIN_LAYER (priv->layer));
-  champlain_view_ensure_visible (priv->map_view, bbox, TRUE);
+  champlain_view_ensure_layers_visible (priv->map_view, TRUE);
 }
 
 static gboolean

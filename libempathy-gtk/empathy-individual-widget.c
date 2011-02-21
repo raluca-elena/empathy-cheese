@@ -729,7 +729,6 @@ location_update (EmpathyIndividualWidget *self)
   if (display_map == TRUE)
     {
       ChamplainMarkerLayer *layer;
-      ChamplainBoundingBox *bbox;
 
       priv->map_view_embed = gtk_champlain_embed_new ();
       priv->map_view = gtk_champlain_embed_get_view (
@@ -804,8 +803,7 @@ location_update (EmpathyIndividualWidget *self)
         }
 
       /* Zoom to show all of the markers */
-      bbox = champlain_layer_get_bounding_box (CHAMPLAIN_LAYER (layer));
-      champlain_view_ensure_visible (priv->map_view, bbox, FALSE);
+      champlain_view_ensure_layers_visible (priv->map_view, FALSE);
 
       gtk_widget_show_all (priv->viewport_map);
     }
