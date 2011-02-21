@@ -38,10 +38,6 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy-gtk/empathy-avatar-image.h>
-#include <libempathy-gtk/empathy-video-widget.h>
-#include <libempathy-gtk/empathy-audio-src.h>
-#include <libempathy-gtk/empathy-audio-sink.h>
-#include <libempathy-gtk/empathy-video-src.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-sound-manager.h>
 #include <libempathy-gtk/empathy-geometry.h>
@@ -52,6 +48,10 @@
 
 #include "empathy-streamed-media-window.h"
 #include "empathy-streamed-media-window-fullscreen.h"
+#include "empathy-video-widget.h"
+#include "empathy-audio-src.h"
+#include "empathy-audio-sink.h"
+#include "empathy-video-src.h"
 #include "ev-sidebar.h"
 
 #define BUTTON_ID "empathy-call-dtmf-button-id"

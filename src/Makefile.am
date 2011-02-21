@@ -105,6 +105,10 @@ empathy_debugger_SOURCES =						\
 
 empathy_av_SOURCES = \
 	empathy-av.c \
+	empathy-audio-sink.c \
+	empathy-audio-sink.h \
+	empathy-audio-src.c \
+	empathy-audio-src.h \
 	empathy-streamed-media-factory.c \
 	empathy-streamed-media-factory.h \
 	empathy-streamed-media-handler.c \
@@ -113,6 +117,10 @@ empathy_av_SOURCES = \
 	empathy-streamed-media-window-fullscreen.h \
 	empathy-streamed-media-window.c \
 	empathy-streamed-media-window.h \
+	empathy-video-src.c \
+	empathy-video-src.h \
+	empathy-video-widget.c \
+	empathy-video-widget.h \
 	ev-sidebar.c \
 	ev-sidebar.h \
 	$(NULL)

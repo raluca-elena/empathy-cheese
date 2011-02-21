@@ -31,8 +31,6 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-account-widget-private.h	\
 	empathy-account-widget-sip.c		\
 	empathy-account-widget.c		\
-	empathy-audio-sink.c			\
-	empathy-audio-src.c			\
 	empathy-avatar-chooser.c		\
 	empathy-avatar-image.c			\
 	empathy-cell-renderer-activatable.c	\
@@ -85,17 +83,13 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-theme-irc.c			\
 	empathy-theme-manager.c			\
 	empathy-tls-dialog.c			\
-	empathy-ui-utils.c			\
-	empathy-video-src.c			\
-	empathy-video-widget.c
+	empathy-ui-utils.c
 
 libempathy_gtk_headers =			\
 	empathy-account-chooser.h		\
 	empathy-account-widget-irc.h		\
 	empathy-account-widget-sip.h		\
 	empathy-account-widget.h		\
-	empathy-audio-sink.h			\
-	empathy-audio-src.h			\
 	empathy-avatar-chooser.h		\
 	empathy-avatar-image.h			\
 	empathy-cell-renderer-activatable.h	\
@@ -149,9 +143,7 @@ libempathy_gtk_headers =			\
 	empathy-theme-irc.h			\
 	empathy-theme-manager.h			\
 	empathy-tls-dialog.h			\
-	empathy-ui-utils.h			\
-	empathy-video-src.h			\
-	empathy-video-widget.h
+	empathy-ui-utils.h
 
 libempathy_gtk_la_SOURCES =			\
 	$(libempathy_gtk_handwritten_source)	\
