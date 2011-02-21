@@ -2427,7 +2427,7 @@ empathy_call_window_connected (gpointer user_data)
 
   empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
-  can_send_video = priv->video_input != NULL && priv->contact != NULL &&
+  can_send_video = priv->video_input != NULL && priv->members != NULL &&
     empathy_contact_can_voip_video (priv->contact);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
