@@ -1,3 +1,61 @@
+NEW in 2.91.90 (21/02/2011)
+==============
+
+Champlain support, which was disabled during the GTK+3 transition, is now
+back.
+
+Dependencies:
+
+ • folks ≥ 0.3.5
+ • telepathy-glib ≥ 0.13.12
+ • champlain ≥ 0.10 (optional)
+
+Bugs fixed:
+ - Fixed #641861, Can't setup an irc server (Guillaume Desmottes)
+ - Fixed #642358, Empathy should check Reconnect_Required before calling Reconnect() (Guillaume Desmottes)
+ - Fixed #592595, Allow pinning contacts (showing them even when they are offline) (Guillaume Desmottes)
+ - Fixed #634679, Implement a channel factory (Guillaume Desmottes)
+ - Fixed #637151, Hide the user Individual from the contact list (Philip Withnall)
+ - Fixed #640914, MUC does not show user status (Guillaume Desmottes)
+ - Fixed #641119, Assertion failure when sending a file to yourself (Guillaume Desmottes)
+ - Fixed #641157, contact tooltip are never destroyed (Guillaume Desmottes)
+ - Fixed #641161, Crash when trying to show contact info (Guillaume Desmottes)
+ - Fixed #641662, Update for libfolks API changes to IndividualAggregator.add_persona_from_details (Philip Withnall)
+ - Fixed #641707, Set FileTransfer.URI (Guillaume Desmottes)
+ - Fixed #641867, cc-panel: make sure to always pack a widget during construction (Cosimo Cecchi)
+ - Fixed #641868, accounts: fill in the right categories to show up in control-center (Cosimo Cecchi)
+ - Fixed #641985, connectivity: Uses old connman D-BUS names (Rob Bradford)
+ - Fixed #642010, Port to champlain 0.10 (Guillaume Desmottes)
+ - Fixed #642098, Group expander is always in the same state (Guillaume Desmottes)
+ - Fixed #642264, Reset Networks' list button in IRC network chooser dialog (Chandni Verma)
+ - Fixed #642296, Hitting Enter doesn't activate the "Enter password" dialog (Guillaume Desmottes)
+ - Fixed #642385, Incomplete list of servers and port numbers for Freenode (Debarshi Ray)
+ - Fixed #642440, Empathy and empathy-chat should appear as the same app in gnome-shell (Guillaume Desmottes)
+ - Fixed #642461, Improve context menu reference management (Guillaume Desmottes)
+ - Fixed #642700, Wrong capitalization for check-boxes (Milo Casagrande)
+ - Fixed #642865, Chat window close button is huge (Guillaume Desmottes)
+
+Translations:
+ - Updated ar Translation (Khaled Hosny)
+ - Updated ast Translation (Xandru Armesto)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated et Translation (Ivar Smolin)
+ - Updated fa Translation (Mahyar Moghimi)
+ - Updated fr Translation (Bruno Brouard)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated gu Translation (Sweta Kothari)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pa Translation (A S Alam)
+ - Updated pl Translation (Asia Słowik)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+ - Updated zu Translation (Friedel Wolff)
+
+Documentation translations:
+ - Updated es Documentation translation (Daniel Mustieles)
+
 NEW in 2.91.6.1 (01/02/2011)
 ===============
 
