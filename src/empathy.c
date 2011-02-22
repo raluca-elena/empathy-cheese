@@ -716,8 +716,8 @@ main (int argc, char *argv[])
   gtk_clutter_init (&argc, &argv);
 #endif
 
+  g_type_init ();
   tpy_cli_init ();
-
   empathy_init ();
   gtk_init (&argc, &argv);
   empathy_gtk_init ();
