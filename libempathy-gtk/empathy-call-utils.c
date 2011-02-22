@@ -20,6 +20,10 @@
 
 #include "config.h"
 
+#include <glib/gi18n.h>
+
+#include <gtk/gtk.h>
+
 #include <telepathy-glib/telepathy-glib.h>
 
 #if HAVE_CALL
@@ -32,6 +36,22 @@
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
+
+static void
+show_call_error (GError *error)
+{
+  GtkWidget *dialog;
+
+  dialog = gtk_message_dialog_new (NULL, 0,
+      GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+      _("There was an error starting the call"));
+
+  g_signal_connect_swapped (dialog, "response",
+      G_CALLBACK (gtk_widget_destroy),
+      dialog);
+
+  gtk_widget_show (dialog);
+}
 
 #if HAVE_CALL
 GHashTable *
@@ -86,6 +106,7 @@ create_streamed_media_channel_cb (GObject *source,
            &error))
     {
       DEBUG ("Failed to create StreamedMedia channel: %s", error->message);
+      show_call_error (error);
       g_error_free (error);
     }
 }
@@ -109,7 +130,10 @@ create_call_channel_cb (GObject *source,
   DEBUG ("Failed to create Call channel: %s", error->message);
 
   if (error->code != TP_ERROR_NOT_IMPLEMENTED)
-    return;
+    {
+      show_call_error (error);
+      return;
+    }
 
   DEBUG ("Let's try with an StreamedMedia channel");
   g_error_free (error);
