@@ -117,8 +117,6 @@ connection_managers_prepare (GObject *source,
 
   panel_pack_with_accounts_dialog (panel);
 
-  empathy_accounts_import (account_mgr, cm_mgr);
-
   if (!empathy_accounts_has_non_salut_accounts (account_mgr))
     {
       GtkWindow *parent;
