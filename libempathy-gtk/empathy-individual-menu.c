@@ -46,6 +46,7 @@
 #include "empathy-ui-utils.h"
 #include "empathy-share-my-desktop.h"
 #include "empathy-linking-dialog.h"
+#include "empathy-call-utils.h"
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIndividualMenu)
 

@@ -31,6 +31,8 @@
 
 #include <libempathy/empathy-utils.h>
 
+#include <libempathy-gtk/empathy-call-utils.h>
+
 #include "empathy-streamed-media-handler.h"
 #include "src-marshal.h"
 

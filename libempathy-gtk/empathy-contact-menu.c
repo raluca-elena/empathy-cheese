@@ -39,6 +39,7 @@
 #include "empathy-contact-dialogs.h"
 #include "empathy-ui-utils.h"
 #include "empathy-share-my-desktop.h"
+#include "empathy-call-utils.h"
 
 static GtkWidget *empathy_contact_block_menu_item_new (EmpathyContact *);
 
