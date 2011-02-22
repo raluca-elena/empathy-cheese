@@ -186,6 +186,7 @@ add_notification_actions (EmpathyNotificationsApprover *self,
       break;
 
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
       notify_notification_add_action (notification,
         "reject", _("Reject"), (NotifyActionCallback) notification_decline_cb,
           self, NULL);
@@ -241,6 +242,7 @@ notification_is_urgent (EmpathyNotificationsApprover *self,
   switch (self->priv->event->type) {
     case EMPATHY_EVENT_TYPE_CHAT:
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
     case EMPATHY_EVENT_TYPE_TRANSFER:
     case EMPATHY_EVENT_TYPE_INVITATION:
     case EMPATHY_EVENT_TYPE_AUTH:
@@ -266,6 +268,7 @@ get_category_for_event_type (EmpathyEventType type)
     case EMPATHY_EVENT_TYPE_PRESENCE_OFFLINE:
       return "presence.offline";
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
     case EMPATHY_EVENT_TYPE_TRANSFER:
     case EMPATHY_EVENT_TYPE_INVITATION:
     case EMPATHY_EVENT_TYPE_AUTH:
