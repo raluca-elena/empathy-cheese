@@ -35,7 +35,7 @@
 
 #if HAVE_CALL
 GHashTable *
-empathy_call_create_call_request (EmpathyContact *contact,
+empathy_call_create_call_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video)
 {
@@ -44,8 +44,8 @@ empathy_call_create_call_request (EmpathyContact *contact,
       TPY_IFACE_CHANNEL_TYPE_CALL,
     TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
       TP_HANDLE_TYPE_CONTACT,
-    TP_PROP_CHANNEL_TARGET_HANDLE, G_TYPE_UINT,
-      empathy_contact_get_handle (contact),
+    TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING,
+      contact,
     TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO, G_TYPE_BOOLEAN,
       initial_audio,
     TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO, G_TYPE_BOOLEAN,
@@ -55,7 +55,7 @@ empathy_call_create_call_request (EmpathyContact *contact,
 #endif
 
 GHashTable *
-empathy_call_create_streamed_media_request (EmpathyContact *contact,
+empathy_call_create_streamed_media_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video)
 {
@@ -64,8 +64,8 @@ empathy_call_create_streamed_media_request (EmpathyContact *contact,
       TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
     TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
       TP_HANDLE_TYPE_CONTACT,
-    TP_PROP_CHANNEL_TARGET_HANDLE, G_TYPE_UINT,
-      empathy_contact_get_handle (contact),
+    TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING,
+      contact,
     TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_AUDIO, G_TYPE_BOOLEAN,
       initial_audio,
     TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO, G_TYPE_BOOLEAN,
@@ -121,14 +121,14 @@ create_call_channel_cb (GObject *source,
 #endif
 
 void
-empathy_call_new_with_streams (EmpathyContact *contact,
+empathy_call_new_with_streams (const gchar *contact,
+    TpAccount *account,
     gboolean initial_audio,
     gboolean initial_video,
     gint64 timestamp)
 {
 #if HAVE_CALL
   GHashTable *call_request, *streamed_media_request;
-  TpAccount *account;
   TpAccountChannelRequest *call_req, *streamed_media_req;
 
   call_request = empathy_call_create_call_request (contact,
@@ -137,8 +137,6 @@ empathy_call_new_with_streams (EmpathyContact *contact,
 
   streamed_media_request = empathy_call_create_streamed_media_request (
       contact, initial_audio, initial_video);
-
-  account = empathy_contact_get_account (contact);
 
   call_req = tp_account_channel_request_new (account, call_request, timestamp);
   streamed_media_req = tp_account_channel_request_new (account,

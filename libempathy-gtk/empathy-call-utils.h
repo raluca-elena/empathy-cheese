@@ -21,23 +21,20 @@
 #ifndef __EMPATHY_CALL_UTILS_H__
 #define __EMPATHY_CALL_UTILS_H__
 
-#include <libempathy/empathy-contact.h>
-
 G_BEGIN_DECLS
 
 /* Calls */
-void empathy_call_new_with_streams (EmpathyContact *contact,
+void empathy_call_new_with_streams (const gchar *contact,
+    TpAccount *account,
     gboolean initial_audio,
     gboolean initial_video,
     gint64 timestamp);
 
-GHashTable * empathy_call_create_call_request (
-    EmpathyContact *contact,
+GHashTable * empathy_call_create_call_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video);
 
-GHashTable * empathy_call_create_streamed_media_request (
-    EmpathyContact *contact,
+GHashTable * empathy_call_create_streamed_media_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video);
 

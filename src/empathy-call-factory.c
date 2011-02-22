@@ -240,7 +240,8 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
   TpAccount *account;
   TpAccountChannelRequest *call_req;
 
-  call_request = empathy_call_create_call_request (contact,
+  call_request = empathy_call_create_call_request (
+      empathy_contact_get_id (contact),
       initial_audio, initial_video);
 
   account = empathy_contact_get_account (contact);

@@ -59,11 +59,6 @@ typedef struct {
   gpointer                                  user_data;
 } FilterCallbackData;
 
-typedef struct {
-  gboolean video;
-  gint64 timestamp;
-} ContactCallbackData;
-
 struct _EmpathyNewCallDialogPriv {
   GtkWidget *check_video;
 };
@@ -81,41 +76,6 @@ struct _EmpathyNewCallDialogPriv {
  * #EmpathyNewCallDialog is a dialog which allows a call
  * to be started with any contact on any enabled account.
  */
-
-static void
-got_contact_cb (TpConnection *connection,
-    EmpathyContact *contact,
-    const GError *error,
-    gpointer user_data,
-    GObject *weak_object)
-{
-  ContactCallbackData *data = user_data;
-
-  if (error != NULL)
-    g_warning ("Could not get contact: %s", error->message);
-  else
-    empathy_call_new_with_streams (contact,
-        TRUE, data->video, data->timestamp);
-
-  g_slice_free (ContactCallbackData, data);
-}
-
-static void
-call_contact (TpAccount *account,
-    const gchar *contact_id,
-    gboolean video,
-    gint64 timestamp)
-{
-  ContactCallbackData *data = g_slice_new0 (ContactCallbackData);
-
-  data->video = video;
-  data->timestamp = timestamp;
-
-  empathy_tp_contact_factory_get_from_id (tp_account_get_connection (account),
-      contact_id,
-      got_contact_cb, data,
-      NULL, NULL);
-}
 
 static void
 empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
@@ -136,7 +96,8 @@ empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
    * we return from this function. */
   video = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->check_video));
 
-  call_contact (account, contact_id, video,
+  empathy_call_new_with_streams (contact_id,
+      account, TRUE, video,
       empathy_get_current_action_time ());
 
 out:

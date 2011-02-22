@@ -808,7 +808,8 @@ empathy_streamed_media_handler_start_call (EmpathyStreamedMediaHandler *handler,
   g_assert (priv->contact != NULL);
 
   account = empathy_contact_get_account (priv->contact);
-  request = empathy_call_create_streamed_media_request (priv->contact,
+  request = empathy_call_create_streamed_media_request (
+      empathy_contact_get_id (priv->contact),
       priv->initial_audio, priv->initial_video);
 
   req = tp_account_channel_request_new (account, request, timestamp);
