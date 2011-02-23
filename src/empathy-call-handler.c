@@ -151,8 +151,6 @@ on_get_contacts_cb (TpConnection *connection,
   EmpathyCallHandlerPriv *priv = GET_PRIV (self);
   guint i;
 
-  g_print ("\nGot %d EmpathyContacts\n\n", n_contacts);
-
   if (n_failed > 0)
     g_warning ("Failed to get %d EmpathyContacts: %s",
         n_failed, error->message);
@@ -180,16 +178,10 @@ on_members_changed_cb (TpyCallChannel *call,
   guint n_handles;
   guint i = 0;
 
-  g_print ("\non_members_changed!\n\n");
-
   if (members == NULL)
-    {
-      g_print ("\nmembers is null!\n\n");
-      return;
-    }
+    return;
 
   n_handles = g_hash_table_size (members);
-  g_print ("\nn_handles: %d\n\n", n_handles);
   if (n_handles == 0)
     return;
 
