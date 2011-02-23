@@ -96,9 +96,6 @@ typedef enum {
   CAMERA_STATE_ON,
 } CameraState;
 
-/* private structure */
-typedef struct _EmpathyCallWindowPriv EmpathyCallWindowPriv;
-
 struct _EmpathyCallWindowPriv
 {
   gboolean dispose_has_run;
@@ -217,9 +214,7 @@ struct _EmpathyCallWindowPriv
   EmpathySoundManager *sound_mgr;
 };
 
-#define GET_PRIV(o) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_CALL_WINDOW, \
-    EmpathyCallWindowPriv))
+#define GET_PRIV(o) (EMPATHY_CALL_WINDOW (o)->priv)
 
 static void empathy_call_window_realized_cb (GtkWidget *widget,
   EmpathyCallWindow *window);
@@ -1020,13 +1015,16 @@ create_pipeline (EmpathyCallWindow *self)
 static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  EmpathyCallWindowPriv *priv;
   GtkBuilder *gui;
   GtkWidget *top_vbox;
   GtkWidget *h;
   GtkWidget *arrow;
   GtkWidget *page;
   gchar *filename;
+
+  priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+    EMPATHY_TYPE_CALL_WINDOW, EmpathyCallWindowPriv);
 
   filename = empathy_file_lookup ("empathy-call-window.ui", "src");
   gui = empathy_builder_get_file (filename,

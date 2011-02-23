@@ -29,6 +29,7 @@
 G_BEGIN_DECLS
 
 typedef struct _EmpathyCallWindow EmpathyCallWindow;
+typedef struct _EmpathyCallWindowPriv EmpathyCallWindowPriv;
 typedef struct _EmpathyCallWindowClass EmpathyCallWindowClass;
 
 struct _EmpathyCallWindowClass {
@@ -37,6 +38,7 @@ struct _EmpathyCallWindowClass {
 
 struct _EmpathyCallWindow {
     GtkWindow parent;
+    EmpathyCallWindowPriv *priv;
 };
 
 GType empathy_call_window_get_type (void);
