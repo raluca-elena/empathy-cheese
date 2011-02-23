@@ -1057,7 +1057,8 @@ approve_channels (TpSimpleApprover *approver,
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
     {
       EmpathyContact *contact;
-      EmpathyTpStreamedMedia *call = empathy_tp_streamed_media_new (account, channel);
+      EmpathyTpStreamedMedia *call = empathy_tp_streamed_media_new (account,
+        channel);
 
       approval->handler_instance = G_OBJECT (call);
 
