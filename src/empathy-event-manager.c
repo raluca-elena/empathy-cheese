@@ -1099,7 +1099,6 @@ approve_channels (TpSimpleApprover *approver,
 
       handle = tp_channel_get_handle (channel, NULL);
 
-      connection = tp_channel_borrow_connection (channel);
       empathy_tp_contact_factory_get_from_handle (connection, handle,
         event_manager_ft_got_contact_cb, approval, NULL, G_OBJECT (self));
     }
