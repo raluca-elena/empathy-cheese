@@ -44,6 +44,8 @@
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-marshal.h>
+#include <libempathy/empathy-chatroom-manager.h>
+#include <src/empathy-chat-window.h>
 
 #include "empathy-chat.h"
 #include "empathy-spell.h"
@@ -684,6 +686,17 @@ nick_command_supported (EmpathyChat *chat)
 		EMP_IFACE_QUARK_CONNECTION_INTERFACE_RENAMING);
 }
 
+static gboolean
+part_command_supported (EmpathyChat *chat)
+{
+	EmpathyChatPriv * priv = GET_PRIV (chat);
+	TpChannel *channel;
+
+	channel = empathy_tp_chat_get_channel (priv->tp_chat);
+	return tp_proxy_has_interface_by_id (channel,
+			TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP);
+}
+
 static void
 chat_command_clear (EmpathyChat *chat,
 		    GStrv        strv)
@@ -718,12 +731,21 @@ chat_command_topic (EmpathyChat *chat,
 	g_value_unset (&value);
 }
 
+void
+empathy_chat_join_muc (EmpathyChat *chat,
+		   const gchar   *room)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
+	empathy_dispatcher_join_muc (priv->account, room,
+		gtk_get_current_event_time ());
+}
+
 static void
 chat_command_join (EmpathyChat *chat,
 		   GStrv        strv)
 {
 	guint i = 0;
-	EmpathyChatPriv *priv = GET_PRIV (chat);
 
 	GStrv rooms = g_strsplit_set (strv[1], ", ", -1);
 
@@ -733,15 +755,39 @@ chat_command_join (EmpathyChat *chat,
 	while (rooms[i] != NULL) {
 		/* ignore empty strings */
 		if (!EMP_STR_EMPTY (rooms[i])) {
-			TpConnection *connection;
-
-			connection = empathy_tp_chat_get_connection (priv->tp_chat);
-			empathy_dispatcher_join_muc (priv->account, rooms[i],
-				gtk_get_current_event_time ());
+			empathy_chat_join_muc (chat, rooms[i]);
 		}
 		i++;
 	}
 	g_strfreev (rooms);
+}
+
+void
+empathy_chat_leave_chat (EmpathyChat *chat)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
+	empathy_tp_chat_leave (priv->tp_chat, "");
+}
+
+static void
+chat_command_part (EmpathyChat *chat,
+			   GStrv        strv)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+	EmpathyChat *chat_to_be_parted;
+
+	if (strv[1] == NULL) {
+		empathy_tp_chat_leave (priv->tp_chat, "");
+		return;
+	}
+	chat_to_be_parted = empathy_chat_window_find_chat (priv->account, strv[1]);
+
+	if (chat_to_be_parted != NULL) {
+		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat_to_be_parted), strv[2]);
+	} else {
+		empathy_tp_chat_leave (priv->tp_chat, strv[1]);
+	}
 }
 
 static void
@@ -866,6 +912,10 @@ static ChatCommandItem commands[] = {
 
 	{"j", 2, 2, chat_command_join, NULL,
 	 N_("/j <chat room ID>: join a new chat room")},
+
+	{"part", 1, 3, chat_command_part, part_command_supported,
+	 N_("/part [<chat room ID>] [<reason>]: leave the chat room, "
+	    "by default the current one")},
 
 	{"query", 2, 3, chat_command_query, NULL,
 	 N_("/query <contact ID> [<message>]: open a private chat")},
