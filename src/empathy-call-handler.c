@@ -59,6 +59,7 @@ static guint signals[LAST_SIGNAL] = {0};
 enum {
   PROP_CALL_CHANNEL = 1,
   PROP_GST_BUS,
+  PROP_CONTACT,
   PROP_MEMBERS,
   PROP_INITIAL_AUDIO,
   PROP_INITIAL_VIDEO,
@@ -77,6 +78,7 @@ enum {
 typedef struct {
   TpyCallChannel *call;
 
+  EmpathyContact *contact;
   /* GArray of TpContacts */
   GArray *members;
   TfChannel *tfchannel;
@@ -102,6 +104,7 @@ empathy_call_handler_dispose (GObject *object)
 
   tp_clear_object (&priv->tfchannel);
   tp_clear_object (&priv->call);
+  tp_clear_object (&priv->contact);
 
   tp_clear_pointer (&priv->members, g_array_unref);
 
@@ -231,6 +234,9 @@ empathy_call_handler_set_property (GObject *object,
 
   switch (property_id)
     {
+      case PROP_CONTACT:
+        priv->contact = g_value_dup_object (value);
+        break;
       case PROP_MEMBERS:
         priv->members = g_value_get_boxed (value);
         break;
@@ -256,6 +262,9 @@ empathy_call_handler_get_property (GObject *object,
 
   switch (property_id)
     {
+      case PROP_CONTACT:
+        g_value_set_object (value, priv->contact);
+        break;
       case PROP_MEMBERS:
         g_value_set_boxed (value, priv->members);
         break;
@@ -311,6 +320,12 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
   object_class->get_property = empathy_call_handler_get_property;
   object_class->dispose = empathy_call_handler_dispose;
   object_class->finalize = empathy_call_handler_finalize;
+
+  param_spec = g_param_spec_object ("target-contact",
+    "TargetContact", "The contact",
+    EMPATHY_TYPE_CONTACT,
+    G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_CONTACT, param_spec);
 
   param_spec = g_param_spec_boxed ("members",
     "call members", "The call participants",
@@ -448,11 +463,13 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
 }
 
 EmpathyCallHandler *
-empathy_call_handler_new_for_channel (TpyCallChannel *call)
+empathy_call_handler_new_for_channel (TpyCallChannel *call,
+  EmpathyContact *contact)
 {
   return EMPATHY_CALL_HANDLER (g_object_new (EMPATHY_TYPE_CALL_HANDLER,
     "call-channel", call,
     "initial-video", tpy_call_channel_has_initial_video (call),
+    "target-contact", contact,
     NULL));
 }
 
@@ -925,7 +942,10 @@ empathy_call_handler_stop_call (EmpathyCallHandler *handler)
       tpy_call_channel_hangup_async (priv->call,
           TPY_CALL_STATE_CHANGE_REASON_USER_REQUESTED,
           "", "", NULL, NULL);
+      tp_channel_close_async (TP_CHANNEL (priv->call),
+        NULL, NULL);
       tp_clear_object (&priv->call);
+      tp_clear_object (&priv->tfchannel);
     }
 }
 

@@ -31,6 +31,7 @@
 
 #include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-request-util.h>
+#include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-call-utils.h>
@@ -256,20 +257,34 @@ empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
 }
 
 static void
-create_call_handler (EmpathyCallFactory *factory,
-  TpyCallChannel *call)
+call_channel_got_contact (TpConnection *connection,
+  EmpathyContact *contact,
+  const GError *error,
+  gpointer user_data,
+  GObject *weak_object)
 {
+  EmpathyCallFactory *factory = EMPATHY_CALL_FACTORY (weak_object);
   EmpathyCallHandler *handler;
+  TpyCallChannel *call = TPY_CALL_CHANNEL (user_data);
 
-  g_return_if_fail (factory != NULL);
+  if (contact == NULL)
+    {
+      /* FIXME use hangup with an appropriate error */
+      tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
+      goto out;
+    }
 
-  handler = empathy_call_handler_new_for_channel (call);
+  handler = empathy_call_handler_new_for_channel (call, contact);
 
   g_signal_emit (factory, signals[NEW_CALL_HANDLER], 0,
     handler, FALSE);
 
   g_object_unref (handler);
+
+out:
+  g_object_unref (call);
 }
+
 
 static void
 handle_channels_cb (TpSimpleHandler *handler,
@@ -288,6 +303,7 @@ handle_channels_cb (TpSimpleHandler *handler,
     {
       TpChannel *channel = l->data;
       TpyCallChannel *call;
+      const gchar *id;
 
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
@@ -300,8 +316,14 @@ handle_channels_cb (TpSimpleHandler *handler,
         continue;
 
       call = TPY_CALL_CHANNEL (channel);
-      create_call_handler (self, call);
-      g_object_unref (call);
+
+      id = tp_channel_get_identifier (channel);
+      empathy_tp_contact_factory_get_from_id (connection,
+        id,
+        call_channel_got_contact,
+        g_object_ref (channel),
+        g_object_unref,
+        (GObject *) self);
     }
 
   tp_handle_channels_context_accept (context);

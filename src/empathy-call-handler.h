@@ -67,7 +67,8 @@ EmpathyCallHandler * empathy_call_handler_new_for_contact (
   EmpathyContact *contact);
 
 EmpathyCallHandler * empathy_call_handler_new_for_channel (
-  TpyCallChannel *call);
+  TpyCallChannel *call,
+  EmpathyContact *contact);
 
 void empathy_call_handler_start_call (EmpathyCallHandler *handler,
     gint64 timestamp);
