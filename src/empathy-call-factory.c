@@ -103,20 +103,23 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
-        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
+          G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         NULL));
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
-        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
+          G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO, G_TYPE_BOOLEAN, TRUE,
         NULL));
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
-        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
+          G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO, G_TYPE_BOOLEAN, TRUE,
         NULL));
 
