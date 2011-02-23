@@ -559,7 +559,7 @@ Configure summary:
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
 	Adium themes (Webkit).......:  ${have_webkit}
-	Meego widgets ..............:  ${have_meego}
+	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
 
