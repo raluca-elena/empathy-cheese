@@ -184,8 +184,9 @@ PKG_CHECK_MODULES(EMPATHY_AV,
 # Call interface
 # -----------------------------------------------------------
 AC_ARG_WITH(call,
-            AC_HELP_STRING([--with-call], [build with Call interface support]),,
-            [with_call=yes])
+            AC_HELP_STRING([--enable-call=@<:@no/yes/auto@:>@],
+            [build with Call interface support]),,
+            [with_call=auto])
 if test "x$with_call" != "xno" ; then
    PKG_CHECK_MODULES(EMPATHY_CALL,
    [
