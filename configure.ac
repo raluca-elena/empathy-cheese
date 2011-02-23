@@ -186,14 +186,24 @@ PKG_CHECK_MODULES(EMPATHY_AV,
 AC_ARG_WITH(call,
             AC_HELP_STRING([--with-call], [build with Call interface support]),,
             [with_call=yes])
-if test "x$with_call" = "xyes" ; then
+if test "x$with_call" != "xno" ; then
    PKG_CHECK_MODULES(EMPATHY_CALL,
    [
       farsight2-0.10
       telepathy-farstream
-   ])
+   ], have_farstream="yes", have_farstream="no" )
+
+   if test "x$have_farstream" = "xyes"; then
+      AC_DEFINE(HAVE_CALL, 1, [Define if you have Call channel support])
+   fi
+else
+  have_farstream=no
 fi
-AM_CONDITIONAL(HAVE_CALL, test "x$with_call" = "xyes")
+
+if test "x$with_call" = "xyes" -a "x$have_farstream" != "xyes"; then
+   AC_MSG_ERROR([Could not find Call handler dependencies.])
+fi
+AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
 
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
@@ -560,4 +570,5 @@ Configure summary:
     Extras:
 	Nautilus-sendto plugin......:  ${have_nst}
 	Salut E-D-S support.........:  ${with_eds}
+	Exp. Call channel handler...:  ${have_farstream}
 "
