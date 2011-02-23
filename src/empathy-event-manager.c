@@ -409,7 +409,7 @@ reject_channel_claim_cb (GObject *source,
     }
   else if (EMPATHY_IS_TP_CHAT (user_data))
     {
-      empathy_tp_chat_leave (user_data);
+      empathy_tp_chat_leave (user_data, "");
     }
   else if (EMPATHY_IS_TP_FILE (user_data))
     {

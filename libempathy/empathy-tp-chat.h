@@ -100,7 +100,8 @@ gboolean       empathy_tp_chat_provide_password_finish (EmpathyTpChat *chat,
 							GError **error);
 gboolean       empathy_tp_chat_can_add_contact (EmpathyTpChat *self);
 
-void           empathy_tp_chat_leave                (EmpathyTpChat      *chat);
+void           empathy_tp_chat_leave                (EmpathyTpChat      *chat,
+						       const gchar *message);
 void           empathy_tp_chat_join                 (EmpathyTpChat      *chat);
 
 gboolean       empathy_tp_chat_is_invited           (EmpathyTpChat      *chat,

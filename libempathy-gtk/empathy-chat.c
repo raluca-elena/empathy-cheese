@@ -2765,7 +2765,7 @@ chat_finalize (GObject *object)
 			chat_members_changed_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_remote_contact_changed_cb, chat);
-		empathy_tp_chat_leave (priv->tp_chat);
+		empathy_tp_chat_leave (priv->tp_chat, "");
 		g_object_unref (priv->tp_chat);
 	}
 	if (priv->account) {

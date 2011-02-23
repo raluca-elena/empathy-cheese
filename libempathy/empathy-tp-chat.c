@@ -1185,7 +1185,7 @@ tp_chat_got_remote_contact_cb (TpConnection            *connection,
 
 	if (error) {
 		DEBUG ("Error: %s", error->message);
-		empathy_tp_chat_leave (EMPATHY_TP_CHAT (chat));
+		empathy_tp_chat_leave (EMPATHY_TP_CHAT (chat), "");
 		return;
 	}
 
@@ -1206,7 +1206,7 @@ tp_chat_got_self_contact_cb (TpConnection            *connection,
 
 	if (error) {
 		DEBUG ("Error: %s", error->message);
-		empathy_tp_chat_leave (EMPATHY_TP_CHAT (chat));
+		empathy_tp_chat_leave (EMPATHY_TP_CHAT (chat), "");
 		return;
 	}
 
@@ -1557,16 +1557,6 @@ empathy_tp_chat_new (TpAccount *account,
 			     NULL);
 }
 
-static void
-empathy_tp_chat_close (EmpathyTpChat *chat) {
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-
-	/* If there are still messages left, it'll come back..
-	 * We loose the ordering of sent messages though */
-	tp_cli_channel_call_close (priv->channel, -1, tp_chat_async_cb,
-		"closing channel", NULL, NULL);
-}
-
 const gchar *
 empathy_tp_chat_get_id (EmpathyTpChat *chat)
 {
@@ -1867,47 +1857,27 @@ empathy_tp_chat_can_add_contact (EmpathyTpChat *self)
 }
 
 static void
-leave_remove_members_cb (TpChannel *proxy,
-			 const GError *error,
-			 gpointer user_data,
-			 GObject *weak_object)
+tp_channel_leave_async_cb (GObject *source_object,
+        GAsyncResult *res,
+        gpointer user_data)
 {
-	EmpathyTpChat *self = user_data;
+	GError *error = NULL;
 
-	if (error == NULL)
-		return;
-
-	DEBUG ("RemoveMembers failed (%s); closing the channel", error->message);
-	empathy_tp_chat_close (self);
+	if (!tp_channel_leave_finish (TP_CHANNEL (source_object), res, &error)) {
+		DEBUG ("Could not leave channel properly: (%s); closing the channel",
+			error->message);
+		g_error_free (error);
+	}
 }
 
 void
-empathy_tp_chat_leave (EmpathyTpChat *self)
+empathy_tp_chat_leave (EmpathyTpChat *self,
+		const gchar *message)
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (self);
-	TpHandle self_handle;
-	GArray *array;
 
-	if (!tp_proxy_has_interface_by_id (priv->channel,
-		TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP)) {
-		empathy_tp_chat_close (self);
-		return;
-	}
-
-	self_handle = tp_channel_group_get_self_handle (priv->channel);
-	if (self_handle == 0) {
-		/* we are not member of the channel */
-		empathy_tp_chat_close (self);
-		return;
-	}
-
-	array = g_array_sized_new (FALSE, FALSE, sizeof (TpHandle), 1);
-	g_array_insert_val (array, 0, self_handle);
-
-	tp_cli_channel_interface_group_call_remove_members (priv->channel, -1, array,
-		"", leave_remove_members_cb, self, NULL, G_OBJECT (self));
-
-	g_array_free (array, TRUE);
+	tp_channel_leave_async (priv->channel, TP_CHANNEL_GROUP_CHANGE_REASON_NONE,
+		message, tp_channel_leave_async_cb, self);
 }
 
 static void
