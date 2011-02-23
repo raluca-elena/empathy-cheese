@@ -2442,6 +2442,16 @@ empathy_call_window_connected (gpointer user_data)
   return FALSE;
 }
 
+static gboolean
+emapthy_call_window_show_video_output_cb (gpointer user_data)
+{
+  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
+
+  gtk_widget_hide (self->priv->remote_user_avatar_widget);
+  gtk_widget_show (self->priv->video_output);
+
+  return FALSE;
+}
 
 /* Called from the streaming thread */
 static gboolean
@@ -2469,8 +2479,7 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
         pad = empathy_call_window_get_audio_sink_pad (self);
         break;
       case TP_MEDIA_STREAM_TYPE_VIDEO:
-        gtk_widget_hide (priv->remote_user_avatar_widget);
-        gtk_widget_show (priv->video_output);
+        g_idle_add (emapthy_call_window_show_video_output_cb, self);
         pad = empathy_call_window_get_video_sink_pad (self);
         break;
       default:
