@@ -26,9 +26,7 @@
 
 #include <telepathy-glib/telepathy-glib.h>
 
-#if HAVE_CALL
- #include <telepathy-yell/telepathy-yell.h>
-#endif
+#include <telepathy-yell/telepathy-yell.h>
 
 #include "empathy-call-utils.h"
 
@@ -53,7 +51,6 @@ show_call_error (GError *error)
   gtk_widget_show (dialog);
 }
 
-#if HAVE_CALL
 GHashTable *
 empathy_call_create_call_request (const gchar *contact,
     gboolean initial_audio,
@@ -72,7 +69,6 @@ empathy_call_create_call_request (const gchar *contact,
       initial_video,
     NULL);
 }
-#endif
 
 GHashTable *
 empathy_call_create_streamed_media_request (const gchar *contact,
@@ -111,7 +107,6 @@ create_streamed_media_channel_cb (GObject *source,
     }
 }
 
-#if HAVE_CALL
 static void
 create_call_channel_cb (GObject *source,
     GAsyncResult *result,
@@ -142,7 +137,6 @@ create_call_channel_cb (GObject *source,
       create_streamed_media_channel_cb,
       NULL);
 }
-#endif
 
 void
 empathy_call_new_with_streams (const gchar *contact,
@@ -151,7 +145,6 @@ empathy_call_new_with_streams (const gchar *contact,
     gboolean initial_video,
     gint64 timestamp)
 {
-#if HAVE_CALL
   GHashTable *call_request, *streamed_media_request;
   TpAccountChannelRequest *call_req, *streamed_media_req;
 
@@ -175,22 +168,4 @@ empathy_call_new_with_streams (const gchar *contact,
   g_hash_table_unref (call_request);
   g_hash_table_unref (streamed_media_request);
   g_object_unref (call_req);
-#else
-  GHashTable *request;
-  TpAccountChannelRequest *req;
-
-  request = empathy_call_create_streamed_media_request (contact,
-      initial_audio,
-      initial_video);
-
-  req = tp_account_channel_request_new (account, request, timestamp);
-
-  tp_account_channel_request_create_channel_async (req,
-      EMPATHY_AV_BUS_NAME, NULL,
-      create_streamed_media_channel_cb,
-      NULL);
-
-  g_hash_table_unref (request);
-  g_object_unref (req);
-#endif
 }

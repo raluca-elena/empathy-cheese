@@ -44,9 +44,7 @@
 #include <telepathy-glib/connection-manager.h>
 #include <telepathy-glib/interfaces.h>
 
-#if HAVE_CALL
- #include <telepathy-yell/telepathy-yell.h>
-#endif
+#include <telepathy-yell/telepathy-yell.h>
 
 #include <telepathy-logger/log-manager.h>
 

@@ -28,9 +28,7 @@
 
 #include <telepathy-glib/interfaces.h>
 
-#if HAVE_CALL
 #include <telepathy-yell/telepathy-yell.h>
-#endif
 
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
@@ -133,10 +131,7 @@ conn_prepared_cb (GObject *conn,
       chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
 
       if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA)
-#if HAVE_CALL
-          && tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL)
-#endif
-         )
+          && tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL))
         continue;
 
       if (tp_asv_get_uint32 (fixed, TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) !=

@@ -172,6 +172,8 @@ PKG_CHECK_MODULES(EMPATHY,
    gcr-3 >= $GCR_REQUIRED
 ])
 
+PKG_CHECK_MODULES(YELL, [telepathy-yell])
+
 PKG_CHECK_MODULES(EMPATHY_AV,
 [
    farsight2-0.10
@@ -185,13 +187,11 @@ AC_ARG_WITH(call,
             AC_HELP_STRING([--with-call], [build with Call interface support]),,
             [with_call=yes])
 if test "x$with_call" = "xyes" ; then
-   PKG_CHECK_MODULES(YELL, [telepathy-yell])
    PKG_CHECK_MODULES(EMPATHY_CALL,
    [
       farsight2-0.10
       telepathy-farstream
    ])
-   AC_DEFINE(HAVE_CALL, 1, [Define if we have Call interface support])
 fi
 AM_CONDITIONAL(HAVE_CALL, test "x$with_call" = "xyes")
 
