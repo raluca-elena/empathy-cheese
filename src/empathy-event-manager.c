@@ -416,6 +416,7 @@ reject_channel_claim_cb (GObject *source,
       tpy_call_channel_hangup_async (user_data,
           TPY_CALL_STATE_CHANGE_REASON_USER_REQUESTED,
           "", "", NULL, NULL);
+      tp_channel_close_async (user_data, NULL, NULL);
     }
 #endif
   else if (EMPATHY_IS_TP_CHAT (user_data))
