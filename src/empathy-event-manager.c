@@ -674,13 +674,28 @@ cdo_invalidated_cb (TpProxy *cdo,
 }
 
 static void
-event_manager_call_channel_got_contact (EventManagerApproval *approval)
+event_manager_call_channel_got_contact_cb (TpConnection *connection,
+                                 EmpathyContact *contact,
+                                 const GError *error,
+                                 gpointer user_data,
+                                 GObject *object)
 {
+  EventManagerApproval *approval = (EventManagerApproval *) user_data;
   EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
-  GtkWidget *window = empathy_main_window_dup ();
+  GtkWidget *window;
   TpyCallChannel *call;
   gchar *header;
   gboolean video;
+
+  if (error != NULL)
+    {
+      DEBUG ("Can't get the contact for the call.. Rejecting?");
+      reject_approval (approval);
+      return;
+    }
+
+  window = empathy_main_window_dup ();
+  approval->contact = g_object_ref (contact);
 
   call = TPY_CALL_CHANNEL (approval->handler_instance);
 
@@ -1064,9 +1079,15 @@ approve_channels (TpSimpleApprover *approver,
   else if (channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
     {
       TpyCallChannel *call = TPY_CALL_CHANNEL (channel);
+      const gchar *id;
 
       approval->handler_instance = G_OBJECT (call);
-      event_manager_call_channel_got_contact (approval);
+
+      id = tp_channel_get_identifier (channel);
+
+      empathy_tp_contact_factory_get_from_id (connection, id,
+        event_manager_call_channel_got_contact_cb,
+        approval, NULL, G_OBJECT (self));
     }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
     {
