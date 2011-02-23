@@ -101,7 +101,6 @@ struct _EmpathyCallWindowPriv
   gboolean dispose_has_run;
   EmpathyCallHandler *handler;
 
-  GArray *members;
   EmpathyContact *contact;
 
   guint call_state;
@@ -1293,45 +1292,22 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
     EmpathyCallHandler *handler)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  TpConnection *connection;
 
-  g_object_get (handler, "members", &(priv->members), NULL);
+  g_signal_connect (priv->contact, "notify::name",
+      G_CALLBACK (contact_name_changed_cb), self);
+  g_signal_connect (priv->contact, "notify::avatar",
+    G_CALLBACK (contact_avatar_changed_cb),
+    priv->remote_user_avatar_widget);
 
-  if (priv->members != NULL)
-    {
-      TpConnection *connection;
+  /* Retrieving the self avatar */
+  connection = empathy_contact_get_connection (priv->contact);
+  empathy_tp_contact_factory_get_from_handle (connection,
+      tp_connection_get_self_handle (connection),
+      empathy_call_window_got_self_contact_cb, self, NULL,
+      G_OBJECT (self));
 
-      if (priv->members->len == 1)
-        {
-          priv->contact = g_array_index (priv->members, EmpathyContact *, 0);
-          g_signal_connect (priv->contact, "notify::name",
-              G_CALLBACK (contact_name_changed_cb), self);
-          g_signal_connect (priv->contact, "notify::avatar",
-              G_CALLBACK (contact_avatar_changed_cb),
-              priv->remote_user_avatar_widget);
-
-          /* Retreiving the self avatar */
-          connection = empathy_contact_get_connection (priv->contact);
-          empathy_tp_contact_factory_get_from_handle (connection,
-              tp_connection_get_self_handle (connection),
-              empathy_call_window_got_self_contact_cb, self, NULL,
-              G_OBJECT (self));
-        }
-
-      set_window_title (self);
-    }
-  else
-    {
-      g_warning ("call handler doesn't have a contact");
-      /* translators: Call is a noun. This string is used in the window
-       * title */
-      gtk_window_set_title (GTK_WINDOW (self), _("Call"));
-
-      /* Since we can't access the remote contact, we can't get a connection
-         to it and can't get the self contact (and its avatar). This means
-         that we have to manually set the self avatar. */
-      init_contact_avatar_with_size (NULL, priv->self_user_avatar_widget,
-          MIN (SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH));
-    }
+  set_window_title (self);
 
   init_contact_avatar_with_size (priv->contact,
       priv->remote_user_avatar_widget,
@@ -1566,6 +1542,9 @@ empathy_call_window_constructed (GObject *object)
   if (call != NULL)
     g_object_unref (call);
 
+  g_object_get (priv->handler, "target-contact", &priv->contact, NULL);
+  g_assert (priv->contact != NULL);
+
   empathy_call_window_setup_avatars (self, priv->handler);
   empathy_call_window_set_state_connecting (self);
 
@@ -1703,13 +1682,6 @@ empathy_call_window_dispose (GObject *object)
       priv->contact = NULL;
     }
 
-#if 0
-  if (priv->members != NULL)
-    {
-      g_list_free_full (priv->members, g_object_unref);
-      priv->members = NULL;
-    }
-#endif
 
   tp_clear_object (&priv->sound_mgr);
 
@@ -2425,7 +2397,8 @@ empathy_call_window_connected (gpointer user_data)
 
   empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
-  can_send_video = priv->video_input != NULL && priv->members != NULL &&
+
+  can_send_video = priv->video_input != NULL &&
     empathy_contact_can_voip_video (priv->contact);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
@@ -2774,14 +2747,6 @@ call_handler_notify_call_cb (EmpathyCallHandler *handler,
 }
 
 static void
-on_call_members_changed_cb (EmpathyCallHandler *handler,
-    GParamSpec *spec,
-    EmpathyCallWindow *self)
-{
-  empathy_call_window_setup_avatars (self, handler);
-}
-
-static void
 empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
@@ -2799,9 +2764,6 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
     G_CALLBACK (empathy_call_window_sink_added_cb), window);
   g_signal_connect (priv->handler, "sink-pad-removed",
     G_CALLBACK (empathy_call_window_sink_removed_cb), window);
-
-  g_signal_connect (priv->handler, "notify::members",
-    G_CALLBACK (on_call_members_changed_cb), window);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
