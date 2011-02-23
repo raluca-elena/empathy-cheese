@@ -134,12 +134,12 @@ empathy-marshal.list: $(libempathy_la_SOURCES) Makefile.am
 		mv $@.tmp $@; \
 	fi
 
-%-marshal.h: %-marshal.list Makefile
-	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.h
+empathy-marshal.h: empathy-marshal.list Makefile
+	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_empathy_marshal $< > empathy-marshal.h
 
-%-marshal.c: %-marshal.list Makefile
+empathy-marshal.c: empathy-marshal.list Makefile
 	$(AM_V_GEN)echo "#include \"empathy-marshal.h\"" > $@ && \
-	$(GLIB_GENMARSHAL) --body --prefix=_$(subst -,_,$*)_marshal $< >> $*-marshal.c
+	$(GLIB_GENMARSHAL) --body --prefix=_empathy_marshal $< >> empathy-marshal.c
 
 empathy-enum-types.h: stamp-empathy-enum-types.h
 	$(AM_V_GEN)true
