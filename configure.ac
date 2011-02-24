@@ -158,7 +158,7 @@ PKG_CHECK_MODULES(EMPATHY,
    gstreamer-interfaces-0.10
    libxml-2.0
    telepathy-glib >= $TELEPATHY_GLIB_REQUIRED
-   telepathy-logger-0.1 >= $TELEPATHY_LOGGER
+   telepathy-logger-0.2 >= $TELEPATHY_LOGGER
    x11
    gtk+-3.0 >= $GTK_REQUIRED
    libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED
