@@ -257,6 +257,16 @@ checkbox_toggled_cb (GtkToggleButton *checkbox,
 }
 
 static void
+certificate_invalidated_cb (EmpathyTLSCertificate *certificate,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyTLSDialog *self)
+{
+  gtk_widget_destroy (GTK_WIDGET (self));
+}
+
+static void
 empathy_tls_dialog_constructed (GObject *object)
 {
   GtkWidget *content_area, *expander, *details, *checkbox;
@@ -310,6 +320,9 @@ empathy_tls_dialog_constructed (GObject *object)
   details = build_gcr_widget (self);
   gtk_container_add (GTK_CONTAINER (expander), details);
   gtk_widget_show (details);
+
+  tp_g_signal_connect_object (priv->certificate, "invalidated",
+      G_CALLBACK (certificate_invalidated_cb), self, 0);
 }
 
 static void
