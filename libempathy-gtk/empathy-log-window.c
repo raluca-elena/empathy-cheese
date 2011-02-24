@@ -820,27 +820,27 @@ log_manager_got_entities_cb (GObject *manager,
 	store = GTK_LIST_STORE (model);
 
 	for (l = entities; l; l = l->next) {
-			TplEntity *entity;
+		TplEntity *entity;
 
-			entity = TPL_ENTITY (l->data);
+		entity = TPL_ENTITY (l->data);
 
-			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter,
-					COL_CHAT_ICON, "empathy-available", /* FIXME */
-					COL_CHAT_NAME, tpl_entity_get_alias (entity),
-					COL_CHAT_ACCOUNT, account,
-					COL_CHAT_TARGET, entity,
-					-1);
+		gtk_list_store_append (store, &iter);
+		gtk_list_store_set (store, &iter,
+				COL_CHAT_ICON, "empathy-available", /* FIXME */
+				COL_CHAT_NAME, tpl_entity_get_alias (entity),
+				COL_CHAT_ACCOUNT, account,
+				COL_CHAT_TARGET, entity,
+				-1);
 
-			if (window->selected_account != NULL &&
-			    !tp_strdiff (tp_proxy_get_object_path (account),
-			    tp_proxy_get_object_path (window->selected_account)))
-				select_account = TRUE;
+		if (window->selected_account != NULL &&
+		    !tp_strdiff (tp_proxy_get_object_path (account),
+		    tp_proxy_get_object_path (window->selected_account)))
+			select_account = TRUE;
 
-			/* FIXME: Update COL_CHAT_ICON/NAME */
-			if (tpl_entity_get_entity_type (entity) == TPL_ENTITY_ROOM) {
-			} else {
-			}
+		/* FIXME: Update COL_CHAT_ICON/NAME */
+		if (tpl_entity_get_entity_type (entity) == TPL_ENTITY_ROOM) {
+		} else {
+		}
 	}
 	g_list_free_full (entities, g_object_unref);
 
