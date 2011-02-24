@@ -841,10 +841,8 @@ log_manager_got_entities_cb (GObject *manager,
 			if (tpl_entity_get_entity_type (entity) == TPL_ENTITY_ROOM) {
 			} else {
 			}
-
-			g_object_unref (entity);
 	}
-	g_list_free (entities);
+	g_list_free_full (entities, g_object_unref);
 
 	/* Unblock signals */
 	g_signal_handlers_unblock_by_func (selection,
