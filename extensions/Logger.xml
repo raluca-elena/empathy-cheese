@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <node name="/Logger"
   xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
-  <tp:copyright>Copyright © 2009 Collabora Ltd.</tp:copyright>
+  <tp:copyright>Copyright © 2009-2011 Collabora Ltd.</tp:copyright>
   <tp:license xmlns="http://www.w3.org/1999/xhtml">
     <p>This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -19,77 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</
   </tp:license>
   <interface name="org.freedesktop.Telepathy.Logger.DRAFT"
     tp:causes-havoc="experimental">
-    <tp:added version="0.1">(as a draft)</tp:added>
+    <tp:added version="0.3">(as a draft)</tp:added>
 
     <tp:docstring>
       An interface for requesting information from the Telepathy Logger
       service.
     </tp:docstring>
-
-    <tp:struct name="Chat_Message" array-name="Chat_Message_List">
-      <tp:member type="s" name="Sender">
-        <tp:docstring>
-          The identifier of the contact who originated this message.
-        </tp:docstring>
-      </tp:member>
-
-      <tp:member type="s" name="Message">
-        <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
-        The body of the message sent to a 1-1 Chat or a Chat Room.
-        </tp:docstring>
-      </tp:member>
-
-      <tp:member type="x" name="Timestamp" tp:type="Unix_Timestamp64">
-        <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
-        Unix timestamp for the log entry
-        </tp:docstring>
-      </tp:member>
-
-      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
-        <p>It represents a single message, received or sent.</p>
-        <p>The receiver is implicit in the request: if the sender is the user,
-        the receiver is the identifier in chat_id paramenter, if the sender is
-        not the user, the user is consequently the receiver of the message</p>
-      </tp:docstring>
-    </tp:struct>
-
-    <method name="GetRecentMessages"
-            tp:name-for-bindings="Get_Recent_Messages">
-      <arg direction="in" name="Account" type="o" tp:type="Account">
-        <tp:docstring>
-        The account path for the TpAccount to which the conversation is related
-        </tp:docstring>
-      </arg>
-
-      <arg direction="in" name="Identifier" type="s">
-        <tp:docstring>
-        The buddy's identifier for the conversation
-        </tp:docstring>
-      </arg>
-
-      <arg direction="in" name="Is_Chatroom" type="b">
-        <tp:docstring>
-        Whether the conversation is a chatroom (i.e., XMPP MUC) or not
-        </tp:docstring>
-      </arg>
-
-      <arg direction="in" name="Lines" type="u">
-        <tp:docstring>
-        how many entries will be returned.
-
-        NOTE: to retreive information that would generate high traffic, use
-        the library API approach instead of DBus.
-        </tp:docstring>
-      </arg>
-
-      <arg direction="out" name="Messages" type="a(ssx)"
-           tp:type="Chat_Message[]" />
-
-      <tp:docstring>
-        Request the last Lines entries of logs for the specified couple
-        Account+Identifier.
-      </tp:docstring>
-    </method>
 
     <method name="GetFavouriteContacts"
             tp:name-for-bindings="Get_Favourite_Contacts">
@@ -146,6 +81,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</
         called until the service is ready. See the <tp:dbus-ref
         namespace="org.freedesktop.Telepathy.Logger.DRAFT">FavouriteContactsReady</tp:dbus-ref> signal and <tp:dbus-ref
         namespace="org.freedesktop.Telepathy.Logger.DRAFT">FavouriteContactsIsReady</tp:dbus-ref> property.
+      </tp:docstring>
+    </method>
+
+    <method name="Clear"
+            tp:name-for-bindings="Clear">
+      <tp:docstring>
+        Clear all the logs. This will not erase the favourite contacts.
+      </tp:docstring>
+    </method>
+
+    <method name="ClearAccount"
+            tp:name-for-bindings="Clear_Account">
+      <arg direction="in" name="Account" type="o" tp:type="Account">
+        <tp:docstring>
+        The object path for the TpAccount in which logs will be cleared.
+        </tp:docstring>
+      </arg>
+
+      <tp:docstring>
+        Clear all logs stored for specified account.
+      </tp:docstring>
+    </method>
+
+    <method name="ClearEntity"
+            tp:name-for-bindings="Clear_Entity">
+      <arg direction="in" name="Account" type="o" tp:type="Account">
+        <tp:docstring>
+        The object path for the TpAccount in which logs will be cleared.
+        </tp:docstring>
+      </arg>
+
+      <arg direction="in" name="Identifier" type="s">
+        <tp:docstring>
+        The entity identifier.
+        </tp:docstring>
+      </arg>
+
+      <arg direction="in" name="Type" type="i">
+        <tp:docstring>
+        The entity type, should be one of TPL_ENTITY_CONTACT (1) or TPL_ENTITY_ROOM (2).
+        </tp:docstring>
+      </arg>
+
+      <tp:docstring>
+        Clear all logs stored for discussions with entity in account.
       </tp:docstring>
     </method>
 
