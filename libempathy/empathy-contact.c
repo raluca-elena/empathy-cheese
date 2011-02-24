@@ -1161,12 +1161,17 @@ static gboolean
 contact_has_log (EmpathyContact *contact)
 {
   TplLogManager *manager;
+  TplEntity *entity;
   gboolean have_log;
 
   manager = tpl_log_manager_dup_singleton ();
+  entity = tpl_entity_new (empathy_contact_get_id (contact),
+      TPL_ENTITY_CONTACT, NULL, NULL);
+
   have_log = tpl_log_manager_exists (manager,
-      empathy_contact_get_account (contact), empathy_contact_get_id (contact),
-      FALSE);
+      empathy_contact_get_account (contact), entity, TPL_EVENT_MASK_TEXT);
+
+  g_object_unref (entity);
   g_object_unref (manager);
 
   return have_log;

@@ -317,6 +317,7 @@ GtkWidget *
 empathy_contact_log_menu_item_new (EmpathyContact *contact)
 {
 	TplLogManager     *manager;
+	TplEntity         *entity;
 	gboolean           have_log;
 	GtkWidget         *item;
 	GtkWidget         *image;
@@ -324,11 +325,15 @@ empathy_contact_log_menu_item_new (EmpathyContact *contact)
 	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
 
 	manager = tpl_log_manager_dup_singleton ();
-	have_log = tpl_log_manager_exists (manager,
-					       empathy_contact_get_account (contact),
-					       empathy_contact_get_id (contact),
-					       FALSE);
+	entity = tpl_entity_new_from_tp_contact (empathy_contact_get_tp_contact (contact),
+						 TPL_ENTITY_CONTACT);
 
+	have_log = tpl_log_manager_exists (manager,
+					   empathy_contact_get_account (contact),
+					   entity,
+					   TPL_EVENT_MASK_TEXT);
+
+	g_object_unref (entity);
 	g_object_unref (manager);
 
 	item = gtk_image_menu_item_new_with_mnemonic (_("_Previous Conversations"));

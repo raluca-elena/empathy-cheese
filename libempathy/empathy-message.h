@@ -26,7 +26,7 @@
 #define __EMPATHY_MESSAGE_H__
 
 #include <glib-object.h>
-#include <telepathy-logger/entry.h>
+#include <telepathy-logger/event.h>
 
 #include "empathy-contact.h"
 #include "empathy-time.h"
@@ -54,7 +54,7 @@ struct _EmpathyMessageClass {
 
 GType                    empathy_message_get_type          (void) G_GNUC_CONST;
 EmpathyMessage *         empathy_message_new               (const gchar              *body);
-EmpathyMessage *         empathy_message_from_tpl_log_entry (TplEntry                *logentry);
+EmpathyMessage *         empathy_message_from_tpl_log_event (TplEvent                *logevent);
 TpChannelTextMessageType empathy_message_get_tptype        (EmpathyMessage           *message);
 void                     empathy_message_set_tptype        (EmpathyMessage           *message,
 							    TpChannelTextMessageType  type);

@@ -31,8 +31,8 @@
 #include <telepathy-glib/account-manager.h>
 
 #include <telepathy-logger/entity.h>
-#include <telepathy-logger/entry.h>
-#include <telepathy-logger/entry-text.h>
+#include <telepathy-logger/event.h>
+#include <telepathy-logger/text-event.h>
 
 #include "empathy-message.h"
 #include "empathy-utils.h"
@@ -259,7 +259,7 @@ empathy_message_new (const gchar *body)
 }
 
 EmpathyMessage *
-empathy_message_from_tpl_log_entry (TplEntry *logentry)
+empathy_message_from_tpl_log_event (TplEvent *logevent)
 {
 	EmpathyMessage *retval = NULL;
 	TpAccountManager *acc_man = NULL;
@@ -269,7 +269,7 @@ empathy_message_from_tpl_log_entry (TplEntry *logentry)
 	gchar *body= NULL;
 	EmpathyContact *contact;
 
-	g_return_val_if_fail (TPL_IS_ENTRY (logentry), NULL);
+	g_return_val_if_fail (TPL_IS_EVENT (logevent), NULL);
 
 	acc_man = tp_account_manager_dup ();
 	/* FIXME Currently Empathy shows in the log viewer only valid accounts, so it
@@ -284,24 +284,24 @@ empathy_message_from_tpl_log_entry (TplEntry *logentry)
 	 * needed anymore any TpAccount passing and the following call will be
 	 * useless */
 	account = tp_account_manager_ensure_account (acc_man,
-			tpl_entry_get_account_path (logentry));
+			tpl_event_get_account_path (logevent));
 	g_object_unref (acc_man);
 
-	/* TODO Currently only TplLogEntryText exists as subclass of TplEntry, in
-	 * future more TplEntry will exist and EmpathyMessage should probably
-	 * be enhanced to support other types of log entries (ie TplLogEntryCall).
+	/* TODO Currently only TplTextEvent exists as subclass of TplEvent, in
+	 * future more TplEvent will exist and EmpathyMessage should probably
+	 * be enhanced to support other types of log entries (ie TplCallEvent).
 	 *
 	 * For now we just check (simply) that we are dealing with the only supported type,
 	 * then there will be a if/then/else or switch handling all the supported
 	 * cases.
 	 */
-	if (!TPL_IS_ENTRY_TEXT (logentry))
+	if (!TPL_IS_TEXT_EVENT (logevent))
 		return NULL;
 
-	body = g_strdup (tpl_entry_text_get_message (
-				TPL_ENTRY_TEXT (logentry)));
-	receiver = tpl_entry_get_receiver (logentry);
-	sender = tpl_entry_get_sender (logentry);
+	body = g_strdup (tpl_text_event_get_message (
+				TPL_TEXT_EVENT (logevent)));
+	receiver = tpl_event_get_receiver (logevent);
+	sender = tpl_event_get_sender (logevent);
 
 	retval = empathy_message_new (body);
 	if (receiver != NULL) {
@@ -317,9 +317,7 @@ empathy_message_from_tpl_log_entry (TplEntry *logentry)
 	}
 
 	empathy_message_set_timestamp (retval,
-			tpl_entry_get_timestamp (logentry));
-	empathy_message_set_id (retval,
-			tpl_entry_text_get_pending_msg_id (TPL_ENTRY_TEXT (logentry)));
+			tpl_event_get_timestamp (logevent));
 	empathy_message_set_is_backlog (retval, TRUE);
 
 	g_free (body);
