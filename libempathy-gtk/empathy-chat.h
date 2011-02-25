@@ -85,7 +85,6 @@ void               empathy_chat_correct_word         (EmpathyChat   *chat,
 						      const gchar   *new_word);
 void               empathy_chat_join_muc             (EmpathyChat   *chat,
 						      const gchar   *room);
-void               empathy_chat_leave_chat           (EmpathyChat *chat);
 gboolean           empathy_chat_is_room              (EmpathyChat   *chat);
 void               empathy_chat_set_show_contacts    (EmpathyChat *chat,
                                                       gboolean     show);
