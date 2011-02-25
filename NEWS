@@ -1,3 +1,28 @@
+NEW in 2.91.90.1 (25/02/2011)
+================
+
+The goal of this release is to provide an Empathy version which can be built
+using latest telepathy-logger releases.
+
+Dependencies:
+
+ • telepathy-glib ≥ 0.13.14
+ • telepathy-logger ≥ 0.2.0
+
+Bugs fixed:
+ - Fixed #604348, /part not implemented (Chandni Verma)
+ - Fixed #623682, /query and /msg command are broken (Guillaume Desmottes)
+ - Fixed #641491, Use tp_capabilities_supports_room_list() (Guillaume Desmottes)
+ - Fixed #643078, Header collision between clutter-gtk-1.0 and clutter-gtk-0.10 due to include path order (Nirbheek Chauhan)
+ - Fixed #643186, Certificate dialog should disappear if the connection goes away (Guillaume Desmottes)
+ - Fixed #611913, Empathy preferences appears in "Appearence" in control-center (Cosimo Cecchi)
+
+Translations:
+ - Updated et Translation (Ivar Smolin)
+ - Updated fr Translation (Bruno Brouard)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+
 NEW in 2.91.90 (21/02/2011)
 ==============
 
