@@ -318,6 +318,8 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 
 	empathy_message_set_timestamp (retval,
 			tpl_event_get_timestamp (logevent));
+        empathy_message_set_tptype (retval,
+            tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)));
 	empathy_message_set_is_backlog (retval, TRUE);
 
 	g_free (body);
