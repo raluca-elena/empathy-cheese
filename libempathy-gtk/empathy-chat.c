@@ -686,6 +686,7 @@ nick_command_supported (EmpathyChat *chat)
 		EMP_IFACE_QUARK_CONNECTION_INTERFACE_RENAMING);
 }
 
+#if 0
 static gboolean
 part_command_supported (EmpathyChat *chat)
 {
@@ -696,6 +697,7 @@ part_command_supported (EmpathyChat *chat)
 	return tp_proxy_has_interface_by_id (channel,
 			TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP);
 }
+#endif
 
 static void
 chat_command_clear (EmpathyChat *chat,
@@ -770,6 +772,7 @@ empathy_chat_leave_chat (EmpathyChat *chat)
 	empathy_tp_chat_leave (priv->tp_chat, "");
 }
 
+#if 0
 static void
 chat_command_part (EmpathyChat *chat,
 			   GStrv        strv)
@@ -789,6 +792,7 @@ chat_command_part (EmpathyChat *chat,
 		empathy_tp_chat_leave (priv->tp_chat, strv[1]);
 	}
 }
+#endif
 
 static void
 chat_command_msg_internal (EmpathyChat *chat,
@@ -913,9 +917,12 @@ static ChatCommandItem commands[] = {
 	{"j", 2, 2, chat_command_join, NULL,
 	 N_("/j <chat room ID>: join a new chat room")},
 
+#if 0
+	/* FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=643295 */
 	{"part", 1, 3, chat_command_part, part_command_supported,
 	 N_("/part [<chat room ID>] [<reason>]: leave the chat room, "
 	    "by default the current one")},
+#endif
 
 	{"query", 2, 3, chat_command_query, NULL,
 	 N_("/query <contact ID> [<message>]: open a private chat")},
