@@ -1499,7 +1499,20 @@ chat_window_command_part (EmpathyChat *chat,
 		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat_to_be_parted),
 			strv[2]);
 	} else {
-		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat), strv[1]);
+		gchar *message;
+
+		/* Going by the syntax of PART command:
+		 *
+		 * /PART [<chatroom-ID>] [<reason>]
+		 *
+		 * Chatroom-ID is not a must to specify a reason.
+		 * If strv[1] (chatroom-ID) is not a valid identifier for a connected
+		 * MUC then the current chatroom should be parted and srtv[1] should
+		 * be treated as part of the optional part-message. */
+		message = g_strconcat (strv[1], " ", strv[2], NULL);
+		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat), message);
+
+		g_free (message);
 	}
 }
 

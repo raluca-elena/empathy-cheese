@@ -1837,6 +1837,9 @@ empathy_tp_chat_leave (EmpathyTpChat *self,
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (self);
 
+	DEBUG ("Leaving channel %s with message \"%s\"",
+		tp_channel_get_identifier (priv->channel), message);
+
 	tp_channel_leave_async (priv->channel, TP_CHANNEL_GROUP_CHANGE_REASON_NONE,
 		message, tp_channel_leave_async_cb, self);
 }
