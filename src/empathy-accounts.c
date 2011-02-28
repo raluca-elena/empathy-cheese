@@ -112,8 +112,12 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
 
       /* create and prep the corresponding TpAccount so it's fully ready by the
        * time we try to select it in the accounts dialog */
-      account_path = g_strdup_printf ("%s%s", TP_ACCOUNT_OBJECT_PATH_BASE,
-          selected_account_name);
+      if (g_str_has_prefix (selected_account_name, TP_ACCOUNT_OBJECT_PATH_BASE))
+        account_path = g_strdup (selected_account_name);
+      else
+        account_path = g_strdup_printf ("%s%s", TP_ACCOUNT_OBJECT_PATH_BASE,
+            selected_account_name);
+
       bus = tp_dbus_daemon_dup (NULL);
       if ((account = tp_account_new (bus, account_path, &error)))
         {
