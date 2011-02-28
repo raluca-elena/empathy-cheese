@@ -1943,7 +1943,20 @@ accounts_dialog_set_selected_account (EmpathyAccountsDialog *dialog,
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
   if (accounts_dialog_get_account_iter (dialog, account, &iter))
-    gtk_tree_selection_select_iter (selection, &iter);
+    {
+      GtkTreePath *path;
+      GtkTreeModel *model;
+
+      gtk_tree_selection_select_iter (selection, &iter);
+
+      model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->treeview));
+      path = gtk_tree_model_get_path (model, &iter);
+
+      gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (priv->treeview), path, NULL,
+          TRUE, 0, 0.5);
+
+      gtk_tree_path_free (path);
+    }
 }
 
 static void
