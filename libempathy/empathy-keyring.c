@@ -55,6 +55,7 @@ find_items_cb (GnomeKeyringResult result,
     gpointer user_data)
 {
   GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
+  GnomeKeyringFound *found;
 
   if (result != GNOME_KEYRING_RESULT_OK)
     {
@@ -63,17 +64,25 @@ find_items_cb (GnomeKeyringResult result,
           gnome_keyring_result_to_message (result));
       g_simple_async_result_set_from_error (simple, error);
       g_clear_error (&error);
+      goto out;
     }
 
-  if (g_list_length (list) == 1)
+  if (list == NULL)
     {
-      GnomeKeyringFound *found = list->data;
-
-      DEBUG ("Got secret");
-
-      g_simple_async_result_set_op_res_gpointer (simple, found->secret, NULL);
+      g_simple_async_result_set_error (simple, TP_ERROR,
+          TP_ERROR_DOES_NOT_EXIST, "Password not found");
+      goto out;
     }
 
+  /* Get the first password returned. Ideally we should use the latest
+   * modified or something but we don't have this information from
+   * gnome-keyring atm. */
+  found = list->data;
+  DEBUG ("Got secret");
+
+  g_simple_async_result_set_op_res_gpointer (simple, found->secret, NULL);
+
+out:
   g_simple_async_result_complete (simple);
   g_object_unref (simple);
 }
