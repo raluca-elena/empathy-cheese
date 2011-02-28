@@ -80,7 +80,8 @@ find_items_cb (GnomeKeyringResult result,
   found = list->data;
   DEBUG ("Got secret");
 
-  g_simple_async_result_set_op_res_gpointer (simple, found->secret, NULL);
+  g_simple_async_result_set_op_res_gpointer (simple, g_strdup (found->secret),
+      g_free);
 
 out:
   g_simple_async_result_complete (simple);
