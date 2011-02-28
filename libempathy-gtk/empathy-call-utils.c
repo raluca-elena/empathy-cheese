@@ -35,6 +35,27 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
 
+static const gchar *
+get_error_display_message (GError *error)
+{
+  if (error->domain != TP_ERROR)
+    return _("There was an error starting the call");
+
+  switch (error->code)
+    {
+      case TP_ERROR_NETWORK_ERROR:
+        return _("Network error");
+      case TP_ERROR_NOT_CAPABLE:
+        return _("The specified contact doesn't support calls");
+      case TP_ERROR_OFFLINE:
+        return _("The specified contact is offline");
+      case TP_ERROR_INVALID_HANDLE:
+        return _("The specified contact is not valid");
+    }
+
+  return _("There was an error starting the call");
+}
+
 static void
 show_call_error (GError *error)
 {
@@ -42,7 +63,7 @@ show_call_error (GError *error)
 
   dialog = gtk_message_dialog_new (NULL, 0,
       GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-      _("There was an error starting the call"));
+      get_error_display_message (error));
 
   g_signal_connect_swapped (dialog, "response",
       G_CALLBACK (gtk_widget_destroy),
