@@ -1851,6 +1851,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	gtk_widget_show (priv->presence_chooser);
 	item = gtk_tool_item_new ();
 	gtk_widget_show (GTK_WIDGET (item));
+	gtk_widget_set_size_request (priv->presence_chooser, 10, -1);
 	gtk_container_add (GTK_CONTAINER (item), priv->presence_chooser);
 	gtk_tool_item_set_is_important (item, TRUE);
 	gtk_tool_item_set_expand (item, TRUE);
