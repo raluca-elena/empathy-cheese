@@ -16,6 +16,7 @@ EXTRA_DIST = \
     Logger.xml \
     Connection_Interface_Renaming.xml \
     Authentication_TLS_Certificate.xml \
+    Channel_Interface_Credentials_Storage.xml \
     Channel_Type_Server_TLS_Connection.xml \
     $(NULL)
 
