@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-27 15:33+0200\n"
-"PO-Revision-Date: 2011-02-27 17:15+0300\n"
+"POT-Creation-Date: 2011-03-03 22:04+0200\n"
+"PO-Revision-Date: 2011-03-03 22:05+0300\n"
 "Last-Translator: Korostil Daniel <ted.korostiled@gmail.com>\n"
 "Language-Team: translation@linux.org.ua\n"
 "Language: uk\n"
@@ -107,13 +107,11 @@ msgstr "Empathy може використовувати GPS для визнач�
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:15
 msgid "Empathy can use the cellular network to guess the location"
 msgstr ""
-"Empathy може використовувати стільникову мережу для визначення  "
-"місцевості"
+"Empathy може використовувати стільникову мережу для визначення  місцевості"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:16
 msgid "Empathy can use the network to guess the location"
-msgstr ""
-"Empathy може використовувати  мережу для припущень щодо місцевості"
+msgstr "Empathy може використовувати  мережу для припущень щодо місцевості"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:17
 msgid "Empathy default download folder"
@@ -446,7 +444,7 @@ msgstr "Керування обліковими записами повідом�
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2229
+#: ../src/empathy-accounts-dialog.c:2242
 msgid "Messaging and VoIP Accounts"
 msgstr "Облікові записи повідомлень та VoIP"
 
@@ -766,7 +764,7 @@ msgstr "_Увійти"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-account-widget.c:1990
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:451
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:463
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
 #: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
@@ -1644,15 +1642,19 @@ msgid "_Invite to Chat Room"
 msgstr "_Запросити до кімнати"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:445
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:456
 msgid "Search contacts"
 msgstr "Пошук контактів"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:473
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:486
 msgid "Search: "
 msgstr "Пошук:"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:534
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:537
+msgid "_Add Contact"
+msgstr "_Додати контакт"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:555
 msgid "No contacts found"
 msgstr "Не знайдено жодного контакту"
 
@@ -2642,15 +2644,14 @@ msgid ""
 "programs. With a microphone or a webcam you can also have audio or video "
 "calls."
 msgstr ""
-"Empathy підтримує чат зі іншими особами у онлайн та з друзями і колегами, які "
-"користуються Google Talk, AIM, Windows Live та багатьма іншими програмами "
-"для чату. Якщо у вас є мікрофон чи веб-камера, ви також можете робити "
-"голосові та відео дзвінки."
+"Empathy підтримує чат зі іншими особами у онлайн та з друзями і колегами, "
+"які користуються Google Talk, AIM, Windows Live та багатьма іншими "
+"програмами для чату. Якщо у вас є мікрофон чи веб-камера, ви також можете "
+"робити голосові та відео дзвінки."
 
 #: ../src/empathy-account-assistant.c:629
 msgid "Do you have an account you've been using with another chat program?"
-msgstr ""
-"У вас є обліковий запис, який ви використовувати з іншою програмою?"
+msgstr "У вас є обліковий запис, який ви використовувати з іншою програмою?"
 
 #: ../src/empathy-account-assistant.c:652
 msgid "Yes, import my account details from "
@@ -2809,7 +2810,7 @@ msgstr "_Увімкнено"
 msgid "_Disable"
 msgstr "_Вимкнено"
 
-#: ../src/empathy-accounts-dialog.c:2073
+#: ../src/empathy-accounts-dialog.c:2086
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -3500,7 +3501,7 @@ msgstr "Співрозмовник"
 msgid "Contact List"
 msgstr "Список співрозмовників"
 
-#: ../src/empathy-main-window.c:1862
+#: ../src/empathy-main-window.c:1863
 msgid "Show and edit accounts"
 msgstr "Показати та редагувати облікові записи"
 
@@ -3761,9 +3762,8 @@ msgid ""
 "state and country will be published.  GPS coordinates will be accurate to 1 "
 "decimal place."
 msgstr ""
-"Зниження точності визначення місцевості дозволяє публікувати лише "
-"місто,регіон та країну. Точність GPS координат визначається 1 десятковою "
-"позицією."
+"Зниження точності визначення місцевості дозволяє публікувати лише місто,"
+"регіон та країну. Точність GPS координат визначається 1 десятковою позицією."
 
 #: ../src/empathy-preferences.ui.h:19
 msgid "Show _smileys as images"
@@ -3918,32 +3918,33 @@ msgstr "Виберіть співрозмовника для запрошенн�
 msgid "Invite"
 msgstr "Запросити"
 
-#: ../src/empathy-accounts.c:179
+#: ../src/empathy-accounts.c:183
 msgid "Don't display any dialogs; do any work (eg, importing) and exit"
 msgstr ""
-"Не показувати діалогові вікна; виконати роботу (наприклад, імпортування) та вийти"
+"Не показувати діалогові вікна; виконати роботу (наприклад, імпортування) та "
+"вийти"
 
-#: ../src/empathy-accounts.c:183
+#: ../src/empathy-accounts.c:187
 msgid ""
 "Don't display any dialogs unless there are only \"People Nearby\" accounts"
 msgstr ""
 "Не показувати які-небудь вікна, якщо це не обліковий запис «Людей поблизу»"
 
-#: ../src/empathy-accounts.c:187
+#: ../src/empathy-accounts.c:191
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr ""
 "Спочатку виберіть обліковий запис (наприклад, gabble/jabber/"
 "foo_40example_2eorg0)"
 
-#: ../src/empathy-accounts.c:189
+#: ../src/empathy-accounts.c:193
 msgid "<account-id>"
 msgstr "<account-id>"
 
-#: ../src/empathy-accounts.c:194
+#: ../src/empathy-accounts.c:198
 msgid "- Empathy Accounts"
 msgstr "— облікові записи Empathy"
 
-#: ../src/empathy-accounts.c:233
+#: ../src/empathy-accounts.c:237
 msgid "Empathy Accounts"
 msgstr "Облікові записи Empathy"
 
