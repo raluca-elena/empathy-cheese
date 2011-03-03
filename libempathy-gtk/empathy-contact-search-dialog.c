@@ -520,8 +520,10 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
       GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
 
   priv->add_button = gtk_dialog_add_button (GTK_DIALOG (self),
-      GTK_STOCK_ADD, GTK_RESPONSE_APPLY);
+      _("_Add Contact"), GTK_RESPONSE_APPLY);
   gtk_widget_set_sensitive (priv->add_button, FALSE);
+  gtk_button_set_image (GTK_BUTTON (priv->add_button),
+      gtk_image_new_from_stock (GTK_STOCK_ADD, GTK_ICON_SIZE_BUTTON));
 
   /* Pack the dialog */
   priv->notebook = gtk_notebook_new ();
