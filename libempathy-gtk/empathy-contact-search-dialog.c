@@ -344,7 +344,7 @@ _account_chooser_changed (EmpathyAccountChooser *chooser,
 }
 
 static void
-_on_button_search_clicked (GtkButton *button,
+_on_button_search_clicked (GtkWidget *widget,
     EmpathyContactSearchDialog *self)
 {
   empathy_contact_search_dialog_do_search (self);
@@ -479,6 +479,8 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
 
   priv->search_entry = gtk_entry_new ();
   gtk_box_pack_start (GTK_BOX (hbox), priv->search_entry, TRUE, TRUE, 0);
+  g_signal_connect (priv->search_entry, "activate",
+      G_CALLBACK (_on_button_search_clicked), self);
 
   priv->find_button = gtk_button_new_from_stock (GTK_STOCK_FIND);
   g_signal_connect (priv->find_button, "clicked",
