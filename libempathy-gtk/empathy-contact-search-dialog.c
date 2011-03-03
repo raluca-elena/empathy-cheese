@@ -439,26 +439,29 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   GtkCellRenderer *cell;
   GtkTreeViewColumn *col;
   GtkTreeSelection *selection;
+  GtkSizeGroup *size_group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
   gchar *tmp;
 
   /* Title */
   gtk_window_set_title (GTK_WINDOW (self), _("Search contacts"));
 
-  vbox = gtk_vbox_new (FALSE, 6);
+  vbox = gtk_vbox_new (FALSE, 3);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
 
   /* Account chooser */
   hbox = gtk_hbox_new (FALSE, 6);
   label = gtk_label_new (_("Account:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+  gtk_size_group_add_widget (size_group, label);
 
   priv->chooser = empathy_account_chooser_new ();
   empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (priv->chooser),
       empathy_account_chooser_filter_supports_contact_search, NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->chooser, FALSE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->chooser, TRUE, TRUE, 0);
   g_signal_connect (priv->chooser, "changed",
       G_CALLBACK (_account_chooser_changed), self);
 
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
 #if 0
   /* Server entry */
@@ -471,18 +474,20 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   /* Search input */
   hbox = gtk_hbox_new (FALSE, 6);
   label = gtk_label_new (_("Search: "));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+  gtk_size_group_add_widget (size_group, label);
 
   priv->search_entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), priv->search_entry, TRUE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->search_entry, TRUE, TRUE, 0);
 
   priv->find_button = gtk_button_new_from_stock (GTK_STOCK_FIND);
-  g_signal_connect (priv->find_button, "clicked", G_CALLBACK (_on_button_search_clicked), self);
-  gtk_box_pack_end (GTK_BOX (hbox), priv->find_button, FALSE, TRUE, 6);
+  g_signal_connect (priv->find_button, "clicked",
+      G_CALLBACK (_on_button_search_clicked), self);
+  gtk_box_pack_end (GTK_BOX (hbox), priv->find_button, FALSE, TRUE, 0);
 
   priv->spinner = gtk_spinner_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), priv->spinner, FALSE, TRUE, 6);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 6);
+  gtk_box_pack_end (GTK_BOX (hbox), priv->spinner, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 0);
 
   /* Search results */
   priv->store = gtk_list_store_new (N_COLUMNS,
@@ -538,16 +543,15 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   gtk_label_set_ellipsize (GTK_LABEL (priv->no_contact_found),
       PANGO_ELLIPSIZE_END);
 
-
   gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook), scrolled_window,
       NULL);
   gtk_notebook_append_page (GTK_NOTEBOOK (priv->notebook),
       priv->no_contact_found, NULL);
 
-  gtk_box_pack_start (GTK_BOX (vbox), priv->notebook, TRUE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (vbox), priv->notebook, TRUE, TRUE, 3);
 
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (
-          GTK_DIALOG (self))), vbox, TRUE, TRUE, 6);
+          GTK_DIALOG (self))), vbox, TRUE, TRUE, 0);
 
   gtk_window_set_default_size (GTK_WINDOW (self), 200, 400);
   gtk_widget_show_all (vbox);
