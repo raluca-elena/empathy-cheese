@@ -19,7 +19,9 @@
 
 #include "empathy-server-sasl-handler.h"
 
-#include <telepathy-glib/util.h>
+#include <telepathy-glib/telepathy-glib.h>
+
+#include <extensions/extensions.h>
 
 #include <string.h>
 
@@ -394,6 +396,7 @@ empathy_server_sasl_handler_provide_password (
 {
   EmpathyServerSASLHandlerPriv *priv;
   GArray *array;
+  gboolean may_save_response, may_save_response_valid;
 
   g_return_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler));
 
@@ -414,10 +417,44 @@ empathy_server_sasl_handler_provide_password (
 
   DEBUG ("%sremembering the password", remember ? "" : "not ");
 
+  /* determine if we are permitted to save the password locally */
+  may_save_response = tp_asv_get_boolean (
+      tp_channel_borrow_immutable_properties (priv->channel),
+      TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_MAY_SAVE_RESPONSE,
+      &may_save_response_valid);
+
+  if (!may_save_response_valid)
+    {
+      DEBUG ("MaySaveResponse unknown, assuming TRUE");
+      may_save_response = TRUE;
+    }
+
   if (remember)
     {
-      empathy_keyring_set_account_password_async (priv->account, password,
-          empathy_server_sasl_handler_set_password_cb, NULL);
+      if (may_save_response)
+        {
+          DEBUG ("Saving password in keyring");
+          empathy_keyring_set_account_password_async (priv->account, password,
+              empathy_server_sasl_handler_set_password_cb, NULL);
+        }
+      else if (tp_proxy_has_interface_by_id (priv->channel,
+            EMP_IFACE_QUARK_CHANNEL_INTERFACE_CREDENTIALS_STORAGE))
+        {
+          DEBUG ("Channel implements Ch.I.CredentialsStorage");
+        }
+      else
+        {
+          DEBUG ("Asked to remember password, but doing so is not permitted");
+        }
+    }
+
+  /* Additionally, if we implement Ch.I.CredentialsStorage, inform that
+   * whether we want to remember the password */
+  if (tp_proxy_has_interface_by_id (priv->channel,
+        EMP_IFACE_QUARK_CHANNEL_INTERFACE_CREDENTIALS_STORAGE))
+    {
+      emp_cli_channel_interface_credentials_storage_call_store_credentials (
+          TP_PROXY (priv->channel), -1, remember, NULL, NULL, NULL, NULL);
     }
 }
 
