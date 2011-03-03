@@ -432,6 +432,16 @@ empathy_account_chooser_filter_supports_contact_search (
 }
 
 static void
+contact_search_dialog_row_activated_cb (GtkTreeView *tv,
+    GtkTreePath *path,
+    GtkTreeViewColumn *column,
+    EmpathyContactSearchDialog *self)
+{
+  /* just emit the same response as the Add Button */
+  gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_APPLY);
+}
+
+static void
 empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
 {
   EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
@@ -500,6 +510,8 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->tree_view));
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
+  g_signal_connect (priv->tree_view, "row-activated",
+      G_CALLBACK (contact_search_dialog_row_activated_cb), self);
   g_signal_connect (selection, "changed",
       G_CALLBACK (on_selection_changed), self);
 
