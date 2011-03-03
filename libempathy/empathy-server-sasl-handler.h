@@ -77,6 +77,9 @@ TpAccount * empathy_server_sasl_handler_get_account (
 gboolean empathy_server_sasl_handler_has_password (
     EmpathyServerSASLHandler *handler);
 
+gboolean empathy_server_sasl_handler_can_save_response_somewhere (
+    EmpathyServerSASLHandler *self);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_SERVER_SASL_HANDLER_H__*/

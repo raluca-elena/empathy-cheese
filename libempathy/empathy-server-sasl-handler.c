@@ -498,3 +498,40 @@ empathy_server_sasl_handler_has_password (EmpathyServerSASLHandler *handler)
 
   return (priv->password != NULL);
 }
+
+/**
+ * empathy_server_sasl_handler_can_save_response_somewhere:
+ * @self:
+ *
+ * Returns: %TRUE if the response can be saved somewhere, either the keyring
+ *   or via Ch.I.CredentialsStorage
+ */
+gboolean
+empathy_server_sasl_handler_can_save_response_somewhere (
+    EmpathyServerSASLHandler *self)
+{
+  EmpathyServerSASLHandlerPriv *priv;
+  gboolean may_save_response, may_save_response_valid;
+  gboolean has_storage_iface;
+
+  g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (self), FALSE);
+
+  priv = self->priv;
+
+  /* determine if we are permitted to save the password locally */
+  may_save_response = tp_asv_get_boolean (
+      tp_channel_borrow_immutable_properties (priv->channel),
+      TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_MAY_SAVE_RESPONSE,
+      &may_save_response_valid);
+
+  if (!may_save_response_valid)
+    {
+      DEBUG ("MaySaveResponse unknown, assuming TRUE");
+      may_save_response = TRUE;
+    }
+
+  has_storage_iface = tp_proxy_has_interface_by_id (priv->channel,
+      EMP_IFACE_QUARK_CHANNEL_INTERFACE_CREDENTIALS_STORAGE);
+
+  return may_save_response || has_storage_iface;
+}

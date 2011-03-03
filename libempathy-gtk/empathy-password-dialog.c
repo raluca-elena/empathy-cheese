@@ -311,7 +311,10 @@ empathy_password_dialog_constructed (GObject *object)
   priv->ticky = gtk_check_button_new_with_label (_("Remember password"));
 
   gtk_box_pack_start (box, priv->ticky, FALSE, FALSE, 0);
-  gtk_widget_show (priv->ticky);
+
+  /* only show it if we actually support it */
+  if (empathy_server_sasl_handler_can_save_response_somewhere (priv->handler))
+    gtk_widget_show (priv->ticky);
 
   g_signal_connect (dialog, "response",
       G_CALLBACK (password_dialog_response_cb), dialog);
