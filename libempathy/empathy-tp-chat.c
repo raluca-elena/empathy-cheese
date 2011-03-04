@@ -337,7 +337,8 @@ tp_chat_received_cb (TpChannel   *channel,
 		return;
 	}
 
- 	DEBUG ("Message received: %s", message_body);
+	DEBUG ("Message received from channel %s: %s",
+		tp_proxy_get_object_path (channel), message_body);
 
 	if (message_flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT &&
 	    !tp_strdiff (message_body, "")) {
