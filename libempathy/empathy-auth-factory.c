@@ -489,6 +489,8 @@ empathy_auth_factory_constructed (GObject *obj)
           TP_PROP_CHANNEL_TYPE_SERVER_AUTHENTICATION_AUTHENTICATION_METHOD,
           G_TYPE_STRING, TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
           NULL));
+
+  tp_base_client_set_observer_delay_approvers (client, TRUE);
 }
 
 static void
