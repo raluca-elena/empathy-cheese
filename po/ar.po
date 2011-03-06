@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gossip.HEAD\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-20 23:46+0200\n"
-"PO-Revision-Date: 2011-02-20 23:47+0300\n"
+"POT-Creation-Date: 2011-03-06 15:40+0200\n"
+"PO-Revision-Date: 2011-03-06 15:41+0300\n"
 "Last-Translator: Khaled Hosny <khaledhosny@eglug.org>\n"
 "Language-Team: Arabic <doc@arabeyes.org>\n"
 "Language: ar\n"
@@ -437,23 +437,23 @@ msgstr "أدر حسابات التراسل والصوت عبر الشبكة"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2229
+#: ../src/empathy-accounts-dialog.c:2242
 msgid "Messaging and VoIP Accounts"
 msgstr "حسابات التراسل"
 
-#: ../libempathy/empathy-ft-handler.c:835
+#: ../libempathy/empathy-ft-handler.c:825
 msgid "File transfer completed, but the file was corrupted"
 msgstr "تم نقل الملف لكن الملف كان تالفا"
 
-#: ../libempathy/empathy-ft-handler.c:1126
+#: ../libempathy/empathy-ft-handler.c:1116
 msgid "File transfer not supported by remote contact"
 msgstr "لا يدعم المتراسل البعيد نقل الملفات"
 
-#: ../libempathy/empathy-ft-handler.c:1182
+#: ../libempathy/empathy-ft-handler.c:1172
 msgid "The selected file is not a regular file"
 msgstr "الملف المختار ليس ملفا اعتياديا"
 
-#: ../libempathy/empathy-ft-handler.c:1191
+#: ../libempathy/empathy-ft-handler.c:1181
 msgid "The selected file is empty"
 msgstr "الملف المختار فارغ"
 
@@ -720,7 +720,7 @@ msgid "All"
 msgstr "الكل"
 
 #: ../libempathy-gtk/empathy-account-widget.c:679
-#: ../libempathy-gtk/empathy-log-window.c:653
+#: ../libempathy-gtk/empathy-log-window.c:647
 #: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "حساب"
@@ -773,9 +773,9 @@ msgstr "_لُج"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-account-widget.c:1990
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:451
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:463
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1486
+#: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
@@ -851,36 +851,47 @@ msgstr "كلمة ال_سر:"
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:10
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:5
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:15
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
 msgid "Remember Password"
 msgstr "تذكر كلمة السر"
 
+#. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-aim.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
+#: ../libempathy-gtk/empathy-password-dialog.c:311
+msgid "Remember password"
+msgstr "تذكّر كلمة السر"
+
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
 msgid "Screen _Name:"
 msgstr "الاسم الم_عروض:"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
 msgid "What is your AIM password?"
 msgstr "ما كلمة سرك على AIM؟"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
 msgid "What is your AIM screen name?"
 msgstr "ما اسم الشاشة في AIM؟"
-
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
-msgid "_Port:"
-msgstr "ال_منْفذ:"
 
 #: ../libempathy-gtk/empathy-account-widget-aim.ui.h:9
 #: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:9
 #: ../libempathy-gtk/empathy-account-widget-icq.ui.h:10
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:26
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
+msgid "_Port:"
+msgstr "ال_منْفذ:"
+
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:27
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:10
 #: ../src/empathy-new-chatroom-dialog.ui.h:9
 msgid "_Server:"
 msgstr "ال_خادوم:"
@@ -896,11 +907,11 @@ msgstr "<b>مثال:</b> username"
 msgid "Login I_D:"
 msgstr "ا_سم المستخدم:"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
 msgid "What is your GroupWise User ID?"
 msgstr "ما معرّفك على GroupWise؟"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
 msgid "What is your GroupWise password?"
 msgstr "ما كلمة سرك على GroupWise؟"
 
@@ -917,11 +928,11 @@ msgstr "ال_ترمير:"
 msgid "ICQ _UIN:"
 msgstr "ICQ _UIN:"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
 msgid "What is your ICQ UIN?"
 msgstr "ما معرفك على ICQ؟"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
 msgid "What is your ICQ password?"
 msgstr "ما كلمة سرك على ICQ؟"
 
@@ -1022,12 +1033,12 @@ msgstr "تجاوز إعدادات الخادوم"
 msgid "Priori_ty:"
 msgstr "الأو_لويّة:"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:12
 msgid "Reso_urce:"
 msgstr "الم_ورد:"
 
 #. This string is not wrapped in the dialog so you may have to add some '\n' to make it look nice.
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:13
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:14
 msgid ""
 "This is your username, not your normal Facebook login.\n"
 "If you are facebook.com/<b>badger</b>, enter <b>badger</b>.\n"
@@ -1039,39 +1050,39 @@ msgstr ""
 "استخدم <a href=\"http://www.facebook.com/username/\">هذه الصفحة</a> لاختيار "
 "اسم مستخدم على فيسبوك إذا لم يكن لك واحد."
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
 msgid "Use old SS_L"
 msgstr "استعمل SS_L القديم"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
 msgid "What is your Facebook password?"
 msgstr "ما كلمة سرك على فيسبوك؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
 msgid "What is your Facebook username?"
 msgstr "ما اسم مستخدمك على فيسبوك؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
 msgid "What is your Google ID?"
 msgstr "ما معرفك على جوجل؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
 msgid "What is your Google password?"
 msgstr "ما كلمة سرك على جوجل؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
 msgid "What is your Jabber ID?"
 msgstr "ما معرفك على جابِر؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
 msgid "What is your Jabber password?"
 msgstr "ما كلمة سرك على جابِر؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
 msgid "What is your desired Jabber ID?"
 msgstr "ما المعرف الذي تريده على جابِر؟"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
 msgid "What is your desired Jabber password?"
 msgstr "ما كلمة السر التي تريدها على جابِر؟"
 
@@ -1079,11 +1090,11 @@ msgstr "ما كلمة السر التي تريدها على جابِر؟"
 msgid "<b>Example:</b> user@hotmail.com"
 msgstr "<b>مثال:</b> user@hotmail.com"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
 msgid "What is your Windows Live ID?"
 msgstr "ما معرّفك على Windows Live؟"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
 msgid "What is your Windows Live password?"
 msgstr "ما كلمة سرك على Windows Live؟"
 
@@ -1159,27 +1170,27 @@ msgstr "المنْفذ:"
 msgid "Proxy Options"
 msgstr "خيارات الوسيط"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
 msgid "STUN Server:"
 msgstr "خادوم STUN:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
 msgid "Server:"
 msgstr "الخادوم:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
 msgid "Transport:"
 msgstr "النقل:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
 msgid "What is your SIP account password?"
 msgstr "ما كلمة سر حسابك على SIP؟"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
 msgid "What is your SIP login ID?"
 msgstr "ما معرف ولوجك على SIP؟"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:22
 msgid "_Username:"
 msgstr "اسم المست_خدم:"
 
@@ -1187,25 +1198,19 @@ msgstr "اسم المست_خدم:"
 msgid "I_gnore conference and chat room invitations"
 msgstr "_تجاهل دعوات المؤتمرات وغرف الدردشة"
 
-#. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
-#: ../libempathy-gtk/empathy-password-dialog.c:311
-msgid "Remember password"
-msgstr "تذكّر كلمة السر"
-
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
 msgid "What is your Yahoo! ID?"
 msgstr "ما معرفك على ياهو!؟"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
 msgid "What is your Yahoo! password?"
 msgstr "ما كلمة سرك على ياهو!؟"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
 msgid "Yahoo! I_D:"
 msgstr "مُعرّف _ياهو"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:12
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
 msgid "_Room List locale:"
 msgstr "محلية لائحة ال_غرف:"
 
@@ -1238,67 +1243,73 @@ msgstr "كل الملفّات"
 msgid "Click to enlarge"
 msgstr "انقر للتكبير"
 
-#: ../libempathy-gtk/empathy-chat.c:646
+#: ../libempathy-gtk/empathy-chat.c:655
 msgid "Failed to open private chat"
 msgstr "فشل فتح دردشة خصوصية"
 
-#: ../libempathy-gtk/empathy-chat.c:697
+#: ../libempathy-gtk/empathy-chat.c:720
 msgid "Topic not supported on this conversation"
 msgstr "الموضوع غير مدعوم في هذه المحادثة"
 
-#: ../libempathy-gtk/empathy-chat.c:703
+#: ../libempathy-gtk/empathy-chat.c:726
 msgid "You are not allowed to change the topic"
 msgstr "لا يُسمح لك بتغيير الموضوع"
 
-#: ../libempathy-gtk/empathy-chat.c:842
+#: ../libempathy-gtk/empathy-chat.c:909
 msgid "/clear: clear all messages from the current conversation"
 msgstr ""
 "/clear:\n"
 "يمسح كل الرسائل من المحادثة الحالية"
 
-#: ../libempathy-gtk/empathy-chat.c:845
+#: ../libempathy-gtk/empathy-chat.c:912
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr ""
 "/topic <موضوع>:\n"
 "يحدد موضوع المحادثة الحالية"
 
-#: ../libempathy-gtk/empathy-chat.c:848
+#: ../libempathy-gtk/empathy-chat.c:915
 msgid "/join <chat room ID>: join a new chat room"
 msgstr ""
 "/join <معرّف غرفة دردشة>:\n"
 "انضم إلى غرفة دردشة جديدة"
 
-#: ../libempathy-gtk/empathy-chat.c:851
+#: ../libempathy-gtk/empathy-chat.c:918
 msgid "/j <chat room ID>: join a new chat room"
 msgstr ""
 "/j <معرّف غرفة دردشة>:\n"
 "انضم إلى غرفة دردشة جديدة"
 
-#: ../libempathy-gtk/empathy-chat.c:856
+#: ../libempathy-gtk/empathy-chat.c:923
+msgid ""
+"/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
+"current one"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:928
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr ""
 "/query <معرّف متراسل>‎ [<رسالة>]:\n"
 "افتح دردشة خصوصية"
 
-#: ../libempathy-gtk/empathy-chat.c:859
+#: ../libempathy-gtk/empathy-chat.c:931
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr ""
 "/msg <معرّف متراسل>‎ <رسالة>:\n"
 "افتح دردشة خصوصية"
 
-#: ../libempathy-gtk/empathy-chat.c:863
+#: ../libempathy-gtk/empathy-chat.c:934
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr ""
 "/nick <اسم مستعار>:\n"
 "غيّر اسمك المستعار على الخادوم الحالي"
 
-#: ../libempathy-gtk/empathy-chat.c:866
+#: ../libempathy-gtk/empathy-chat.c:937
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr ""
 "/me <message>:\n"
 "يرسل رسالة إجراء إلى المحادثة الحالية"
 
-#: ../libempathy-gtk/empathy-chat.c:869
+#: ../libempathy-gtk/empathy-chat.c:940
 msgid ""
 "/say <message>: send <message> to the current conversation. This is used to "
 "send a message starting with a '/'. For example: \"/say /join is used to "
@@ -1308,7 +1319,7 @@ msgstr ""
 "يرسل <رسالة> إلى المحادثة الحالية. يستخدم هذا لإرسال رسالة تبدأ بشرطة مائلة "
 "'/'. مثلا: \"‪/say /join‬ تستخدم للانضمام إلى غرفة دردشة جديدة\""
 
-#: ../libempathy-gtk/empathy-chat.c:874
+#: ../libempathy-gtk/empathy-chat.c:945
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -1316,98 +1327,98 @@ msgstr ""
 "/help [<أمر>]:\n"
 "اعرض كل الأوامر المدعومة. إذا كان <أمر> فسيعرض كيفية استخدامه."
 
-#: ../libempathy-gtk/empathy-chat.c:884
+#: ../libempathy-gtk/empathy-chat.c:955
 #, c-format
 msgid "Usage: %s"
 msgstr "الاستخدام: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:926
+#: ../libempathy-gtk/empathy-chat.c:997
 msgid "Unknown command"
 msgstr "أمرٌ مجهول"
 
-#: ../libempathy-gtk/empathy-chat.c:1052
+#: ../libempathy-gtk/empathy-chat.c:1123
 msgid "Unknown command; see /help for the available commands"
 msgstr "أمرٌ مجهول؛ راجع ‪/help‬ لتعرف الأوامر المتاحة"
 
-#: ../libempathy-gtk/empathy-chat.c:1192
+#: ../libempathy-gtk/empathy-chat.c:1263
 msgid "offline"
 msgstr "غير متّصل"
 
-#: ../libempathy-gtk/empathy-chat.c:1195
+#: ../libempathy-gtk/empathy-chat.c:1266
 msgid "invalid contact"
 msgstr "متراسل غير صحيح"
 
-#: ../libempathy-gtk/empathy-chat.c:1198
+#: ../libempathy-gtk/empathy-chat.c:1269
 msgid "permission denied"
 msgstr "رُفض التّصريح"
 
-#: ../libempathy-gtk/empathy-chat.c:1201
+#: ../libempathy-gtk/empathy-chat.c:1272
 msgid "too long message"
 msgstr "الرسالة طويلة جدا"
 
-#: ../libempathy-gtk/empathy-chat.c:1204
+#: ../libempathy-gtk/empathy-chat.c:1275
 msgid "not implemented"
 msgstr "غير مطبق"
 
-#: ../libempathy-gtk/empathy-chat.c:1208
+#: ../libempathy-gtk/empathy-chat.c:1279
 msgid "unknown"
 msgstr "مجهول"
 
-#: ../libempathy-gtk/empathy-chat.c:1212
+#: ../libempathy-gtk/empathy-chat.c:1283
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "خطأ في ارسال الرسالة '%s': %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1273 ../src/empathy-chat-window.c:711
+#: ../libempathy-gtk/empathy-chat.c:1344 ../src/empathy-chat-window.c:704
 msgid "Topic:"
 msgstr "الموضوع:"
 
-#: ../libempathy-gtk/empathy-chat.c:1285
+#: ../libempathy-gtk/empathy-chat.c:1356
 #, c-format
 msgid "Topic set to: %s"
 msgstr "الموضوع: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1287
+#: ../libempathy-gtk/empathy-chat.c:1358
 msgid "No topic defined"
 msgstr "لم يحدد أي موضوع"
 
-#: ../libempathy-gtk/empathy-chat.c:1786
+#: ../libempathy-gtk/empathy-chat.c:1857
 msgid "(No Suggestions)"
 msgstr "(لا اقتراحات)"
 
 #. translators: %s is the selected word
-#: ../libempathy-gtk/empathy-chat.c:1854
+#: ../libempathy-gtk/empathy-chat.c:1925
 #, c-format
 msgid "Add '%s' to Dictionary"
 msgstr "أضِف '%s' إلى القاموس"
 
 #. translators: first %s is the selected word,
 #. * second %s is the language name of the target dictionary
-#: ../libempathy-gtk/empathy-chat.c:1891
+#: ../libempathy-gtk/empathy-chat.c:1962
 #, c-format
 msgid "Add '%s' to %s Dictionary"
 msgstr "أضِف '%s' إلى قاموس %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1950
+#: ../libempathy-gtk/empathy-chat.c:2021
 msgid "Insert Smiley"
 msgstr "أدرج التعابير المرسومة"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:1968
+#: ../libempathy-gtk/empathy-chat.c:2039
 #: ../libempathy-gtk/empathy-ui-utils.c:1810
 msgid "_Send"
 msgstr "أ_رسل"
 
 #. Spelling suggestions
-#: ../libempathy-gtk/empathy-chat.c:2003
+#: ../libempathy-gtk/empathy-chat.c:2074
 msgid "_Spelling Suggestions"
 msgstr "ا_قتراحات الإملاء"
 
-#: ../libempathy-gtk/empathy-chat.c:2092
+#: ../libempathy-gtk/empathy-chat.c:2163
 msgid "Failed to retrieve recent logs"
 msgstr "فشل جلب السجلات الحديثة"
 
-#: ../libempathy-gtk/empathy-chat.c:2198
+#: ../libempathy-gtk/empathy-chat.c:2274
 #, c-format
 msgid "%s has disconnected"
 msgstr "‏%s قطع الاتصال"
@@ -1415,12 +1426,12 @@ msgstr "‏%s قطع الاتصال"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2205
+#: ../libempathy-gtk/empathy-chat.c:2281
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "‏طرد %1$s‏  %2$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2208
+#: ../libempathy-gtk/empathy-chat.c:2284
 #, c-format
 msgid "%s was kicked"
 msgstr "‏%s طُرِد"
@@ -1428,17 +1439,17 @@ msgstr "‏%s طُرِد"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2216
+#: ../libempathy-gtk/empathy-chat.c:2292
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "حظر  %1$s‏  %2$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2219
+#: ../libempathy-gtk/empathy-chat.c:2295
 #, c-format
 msgid "%s was banned"
 msgstr "‏%s حُظِر"
 
-#: ../libempathy-gtk/empathy-chat.c:2223
+#: ../libempathy-gtk/empathy-chat.c:2299
 #, c-format
 msgid "%s has left the room"
 msgstr "‏%s غادر الغرفة"
@@ -1448,63 +1459,63 @@ msgstr "‏%s غادر الغرفة"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2232
+#: ../libempathy-gtk/empathy-chat.c:2308
 #, c-format
 msgid " (%s)"
 msgstr "‏‏ (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2257
+#: ../libempathy-gtk/empathy-chat.c:2333
 #, c-format
 msgid "%s has joined the room"
 msgstr "انضم %s إلى الغرفة"
 
-#: ../libempathy-gtk/empathy-chat.c:2282
+#: ../libempathy-gtk/empathy-chat.c:2358
 #, c-format
 msgid "%s is now known as %s"
 msgstr "يعرف %s الآن باسم %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2421
+#: ../libempathy-gtk/empathy-chat.c:2497
 #: ../src/empathy-streamed-media-window.c:1942
 #: ../src/empathy-event-manager.c:1122
 msgid "Disconnected"
 msgstr "غير متَصل"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3051
+#: ../libempathy-gtk/empathy-chat.c:3127
 msgid "Would you like to store this password?"
 msgstr "أترغب في حفظ كلمة السر هذه؟"
 
-#: ../libempathy-gtk/empathy-chat.c:3057
+#: ../libempathy-gtk/empathy-chat.c:3133
 msgid "Remember"
 msgstr "تذكّر"
 
-#: ../libempathy-gtk/empathy-chat.c:3067
+#: ../libempathy-gtk/empathy-chat.c:3143
 msgid "Not now"
 msgstr "ليس الآن"
 
-#: ../libempathy-gtk/empathy-chat.c:3111
+#: ../libempathy-gtk/empathy-chat.c:3187
 msgid "Retry"
 msgstr "أعد المحاولة"
 
-#: ../libempathy-gtk/empathy-chat.c:3115
+#: ../libempathy-gtk/empathy-chat.c:3191
 msgid "Wrong password; please try again:"
 msgstr "كلمة سر خطأ؛ من فضلك أعد المحاولة:"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3232
+#: ../libempathy-gtk/empathy-chat.c:3308
 msgid "This room is protected by a password:"
 msgstr "هذه الغرفة محمية بكلمة سر:"
 
-#: ../libempathy-gtk/empathy-chat.c:3259
+#: ../libempathy-gtk/empathy-chat.c:3335
 msgid "Join"
 msgstr "انضم"
 
-#: ../libempathy-gtk/empathy-chat.c:3429 ../src/empathy-event-manager.c:1144
+#: ../libempathy-gtk/empathy-chat.c:3505 ../src/empathy-event-manager.c:1144
 msgid "Connected"
 msgstr "متَصل"
 
-#: ../libempathy-gtk/empathy-chat.c:3482
-#: ../libempathy-gtk/empathy-log-window.c:660
+#: ../libempathy-gtk/empathy-chat.c:3558
+#: ../libempathy-gtk/empathy-log-window.c:654
 msgid "Conversation"
 msgstr "محادثة"
 
@@ -1610,60 +1621,64 @@ msgctxt "menu item"
 msgid "_Video Call"
 msgstr "_مكالمة مرئية"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:334
+#: ../libempathy-gtk/empathy-contact-menu.c:339
 #: ../libempathy-gtk/empathy-individual-menu.c:645
 #: ../src/empathy-main-window.ui.h:25
 msgid "_Previous Conversations"
 msgstr "المحادثات ال_سابقة"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:356
+#: ../libempathy-gtk/empathy-contact-menu.c:361
 #: ../libempathy-gtk/empathy-individual-menu.c:686
 msgid "Send File"
 msgstr "أرسل ملفا"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:379
+#: ../libempathy-gtk/empathy-contact-menu.c:384
 #: ../libempathy-gtk/empathy-individual-menu.c:728
 msgid "Share My Desktop"
 msgstr "شارك سطح مكتبي"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:419
-#: ../libempathy-gtk/empathy-contact-widget.c:1682
+#: ../libempathy-gtk/empathy-contact-menu.c:424
+#: ../libempathy-gtk/empathy-contact-widget.c:1681
 #: ../libempathy-gtk/empathy-individual-menu.c:762
-#: ../libempathy-gtk/empathy-individual-widget.c:1377
+#: ../libempathy-gtk/empathy-individual-widget.c:1370
 msgid "Favorite"
 msgstr "مفضّل"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:448
+#: ../libempathy-gtk/empathy-contact-menu.c:453
 #: ../libempathy-gtk/empathy-individual-menu.c:789
 msgid "Infor_mation"
 msgstr "_معلومات"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:494
+#: ../libempathy-gtk/empathy-contact-menu.c:499
 msgctxt "Edit contact (contextual menu)"
 msgid "_Edit"
 msgstr "_حرّر"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:548
+#: ../libempathy-gtk/empathy-contact-menu.c:553
 #: ../libempathy-gtk/empathy-individual-menu.c:970
-#: ../src/empathy-chat-window.c:923
+#: ../src/empathy-chat-window.c:916
 msgid "Inviting you to this room"
 msgstr "يدعوك إلى هذه الغرفة"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:579
+#: ../libempathy-gtk/empathy-contact-menu.c:584
 #: ../libempathy-gtk/empathy-individual-menu.c:1017
 msgid "_Invite to Chat Room"
 msgstr "ا_دع إلى غرفة المحادثة"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:445
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:456
 msgid "Search contacts"
 msgstr "ابحث عن المتراسلين"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:473
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:486
 msgid "Search: "
 msgstr "ابحث:"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:534
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:537
+msgid "_Add Contact"
+msgstr "أ_ضف متراسلا"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:555
 msgid "No contacts found"
 msgstr "لم يُعثَر على متراسلين"
 
@@ -1836,13 +1851,13 @@ msgstr "‏%s، ‏%s"
 msgid "%B %e, %Y at %R UTC"
 msgstr "%e %B، %Y في %R ت‌ع‌م"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:987
-#: ../libempathy-gtk/empathy-individual-widget.c:925
+#: ../libempathy-gtk/empathy-contact-widget.c:986
+#: ../libempathy-gtk/empathy-individual-widget.c:918
 msgid "Save Avatar"
 msgstr "احفظ الصور الشخصية"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1043
-#: ../libempathy-gtk/empathy-individual-widget.c:983
+#: ../libempathy-gtk/empathy-contact-widget.c:1042
+#: ../libempathy-gtk/empathy-individual-widget.c:976
 msgid "Unable to save avatar"
 msgstr "لا يمكن حفظ الصورة الشخصية"
 
@@ -1852,7 +1867,7 @@ msgstr "<b>المكان</b> في (تاريخ)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1312
+#: ../libempathy-gtk/empathy-individual-widget.c:1305
 msgid "Alias:"
 msgstr "الكنية:"
 
@@ -1872,7 +1887,7 @@ msgstr "تفاصيل المتراسل"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1516
+#: ../libempathy-gtk/empathy-individual-widget.c:1509
 msgid "Identifier:"
 msgstr "المعرف:"
 
@@ -1961,7 +1976,7 @@ msgstr ""
 "أتريد حقا حذف المتراسل المرتبط '%s'؟ لاحظ أن هذا سيحذف كل المتراسلين التي "
 "يتشكل منها."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1657
+#: ../libempathy-gtk/empathy-individual-widget.c:1650
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -2048,7 +2063,7 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "ا_فصل"
 
-#: ../libempathy-gtk/empathy-log-window.c:670
+#: ../libempathy-gtk/empathy-log-window.c:664
 msgid "Date"
 msgstr "التاريخ"
 
@@ -2304,19 +2319,19 @@ msgstr "اسم المستضيف المتوقع: %s"
 msgid "Certificate hostname: %s"
 msgstr "اسم المستضيف في الشهادة: %s"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:271
+#: ../libempathy-gtk/empathy-tls-dialog.c:281
 msgid "Continue"
 msgstr "أكمل"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:277
+#: ../libempathy-gtk/empathy-tls-dialog.c:287
 msgid "This connection is untrusted. Would you like to continue anyway?"
 msgstr "الاتصال غير موثوق. أتريد المتابعة بغض النظر عن هذا؟"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:294
+#: ../libempathy-gtk/empathy-tls-dialog.c:304
 msgid "Remember this choice for future connections"
 msgstr "تذكر هذا الاختيار للاتصالات المستقبلية"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:302
+#: ../libempathy-gtk/empathy-tls-dialog.c:312
 msgid "Certificate Details"
 msgstr "تفاصيل الشهادة"
 
@@ -2516,23 +2531,23 @@ msgstr "لا رسالة خطأ"
 msgid "Instant Message (Empathy)"
 msgstr "رسالة فورية (إمبَثي)"
 
-#: ../src/empathy.c:310
+#: ../src/empathy.c:308
 msgid "Don't connect on startup"
 msgstr "لا تتصل عند بدء التشغيل"
 
-#: ../src/empathy.c:314
+#: ../src/empathy.c:312
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "لا تعرض قائمة المتراسلين أو أي حوارات أخرى عند بدء التشغيل"
 
-#: ../src/empathy.c:322
+#: ../src/empathy.c:320
 msgid "- Empathy IM Client"
 msgstr "- المرسال إمبثي"
 
-#: ../src/empathy.c:501
+#: ../src/empathy.c:499
 msgid "Error contacting the Account Manager"
 msgstr "عُطل أثناء الاتصال بمدير الحسابات"
 
-#: ../src/empathy.c:503
+#: ../src/empathy.c:501
 #, c-format
 msgid ""
 "There was an error while trying to connect to the Telepathy Account Manager. "
@@ -2684,8 +2699,8 @@ msgid "Select the accounts you want to import:"
 msgstr "اختر الحسابات التي تريد استيرادها:"
 
 #: ../src/empathy-account-assistant.c:810
-#: ../src/empathy-new-chatroom-dialog.c:567
-#: ../src/empathy-new-chatroom-dialog.c:568
+#: ../src/empathy-new-chatroom-dialog.c:562
+#: ../src/empathy-new-chatroom-dialog.c:563
 msgid "Yes"
 msgstr "نعم"
 
@@ -2818,7 +2833,7 @@ msgstr "_فعّل"
 msgid "_Disable"
 msgstr "_عطّل"
 
-#: ../src/empathy-accounts-dialog.c:2073
+#: ../src/empathy-accounts-dialog.c:2086
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -3111,7 +3126,7 @@ msgstr "_اتصال"
 msgid "_View"
 msgstr "_عرض"
 
-#: ../src/empathy-chat-window.c:476 ../src/empathy-chat-window.c:496
+#: ../src/empathy-chat-window.c:469 ../src/empathy-chat-window.c:489
 #, c-format
 msgid "%s (%d unread)"
 msgid_plural "%s (%d unread)"
@@ -3122,7 +3137,7 @@ msgstr[3] "%s (%d غير مقروة)"
 msgstr[4] "%s (%d غير مقروة)"
 msgstr[5] "%s (%d غير مقروة)"
 
-#: ../src/empathy-chat-window.c:488
+#: ../src/empathy-chat-window.c:481
 #, c-format
 msgid "%s (and %u other)"
 msgid_plural "%s (and %u others)"
@@ -3133,7 +3148,7 @@ msgstr[3] "%s (و %u أخرى)"
 msgstr[4] "%s (و %u أخرى)"
 msgstr[5] "%s (و %u أخرى)"
 
-#: ../src/empathy-chat-window.c:504
+#: ../src/empathy-chat-window.c:497
 #, c-format
 msgid "%s (%d unread from others)"
 msgid_plural "%s (%d unread from others)"
@@ -3144,7 +3159,7 @@ msgstr[3] "%s (%d غير مقروة من الآخرين)"
 msgstr[4] "%s (%d غير مقروة من الآخرين)"
 msgstr[5] "%s (%d غير مقروة من الآخرين)"
 
-#: ../src/empathy-chat-window.c:513
+#: ../src/empathy-chat-window.c:506
 #, c-format
 msgid "%s (%d unread from all)"
 msgid_plural "%s (%d unread from all)"
@@ -3155,7 +3170,7 @@ msgstr[3] "%s (%d غير مقروة من الكل)"
 msgstr[4] "%s (%d غير مقروة من الكل)"
 msgstr[5] "%s (%d غير مقروة من الكل)"
 
-#: ../src/empathy-chat-window.c:715
+#: ../src/empathy-chat-window.c:708
 msgid "Typing a message."
 msgstr "يكتب رسالة..."
 
@@ -3510,7 +3525,7 @@ msgstr "متراسل"
 msgid "Contact List"
 msgstr "قائمة المتراسلين"
 
-#: ../src/empathy-main-window.c:1862
+#: ../src/empathy-main-window.c:1863
 msgid "Show and edit accounts"
 msgstr "اعرض و _حرّر الحسابات"
 
@@ -3608,7 +3623,7 @@ msgstr "الأعضاء"
 
 #. Translators: Room/Join's roomlist tooltip. Parameters are a channel name,
 #. yes/no, yes/no and a number.
-#: ../src/empathy-new-chatroom-dialog.c:565
+#: ../src/empathy-new-chatroom-dialog.c:560
 #, c-format
 msgid ""
 "%s\n"
@@ -3621,16 +3636,16 @@ msgstr ""
 "مطلوب كلمة سر: %s\n"
 "الأعضاء: %s"
 
-#: ../src/empathy-new-chatroom-dialog.c:567
-#: ../src/empathy-new-chatroom-dialog.c:568
+#: ../src/empathy-new-chatroom-dialog.c:562
+#: ../src/empathy-new-chatroom-dialog.c:563
 msgid "No"
 msgstr "لا"
 
-#: ../src/empathy-new-chatroom-dialog.c:596
+#: ../src/empathy-new-chatroom-dialog.c:591
 msgid "Could not start room listing"
 msgstr "تعذّر بدء سرد الغرف"
 
-#: ../src/empathy-new-chatroom-dialog.c:606
+#: ../src/empathy-new-chatroom-dialog.c:601
 msgid "Could not stop room listing"
 msgstr "تعذّر إيقاف سرد الغرف"
 
@@ -3845,7 +3860,7 @@ msgstr "الحالة"
 msgid "_Quit"
 msgstr "أ_نه"
 
-#: ../src/empathy-map-view.c:453
+#: ../src/empathy-map-view.c:442
 msgid "Contact Map View"
 msgstr "مشهد خريطة المتراسَلين"
 
@@ -3924,28 +3939,28 @@ msgstr "اختر متراسلا لدعوته إلى المحادثة:"
 msgid "Invite"
 msgstr "ادعُ"
 
-#: ../src/empathy-accounts.c:179
+#: ../src/empathy-accounts.c:183
 msgid "Don't display any dialogs; do any work (eg, importing) and exit"
 msgstr "لا تعرض أي حوارات، قم بالعمل (مثلا: الاستيراد) ثم أغلق"
 
-#: ../src/empathy-accounts.c:183
+#: ../src/empathy-accounts.c:187
 msgid ""
 "Don't display any dialogs unless there are only \"People Nearby\" accounts"
 msgstr "لا تعرض أي حوارات إلا في حال وجود حسابات \"أشخاص قريبون\""
 
-#: ../src/empathy-accounts.c:187
+#: ../src/empathy-accounts.c:191
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr "حدد الحساب المعطى (مثلا gabble/jabber/foo_40example_2eorg0)"
 
-#: ../src/empathy-accounts.c:189
+#: ../src/empathy-accounts.c:193
 msgid "<account-id>"
 msgstr "<account-id>"
 
-#: ../src/empathy-accounts.c:194
+#: ../src/empathy-accounts.c:198
 msgid "- Empathy Accounts"
 msgstr "- حسابات إمبثي"
 
-#: ../src/empathy-accounts.c:233
+#: ../src/empathy-accounts.c:237
 msgid "Empathy Accounts"
 msgstr "حسابات إمبثي"
 
