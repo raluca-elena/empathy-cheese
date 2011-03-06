@@ -271,6 +271,8 @@ empathy_call_observer_init (EmpathyCallObserver *self)
           TP_HANDLE_TYPE_CONTACT,
         NULL));
 
+  tp_base_client_set_observer_delay_approvers (self->priv->observer, TRUE);
+
   if (!tp_base_client_register (self->priv->observer, &error))
     {
       DEBUG ("Failed to register observer: %s", error->message);
