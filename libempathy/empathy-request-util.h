@@ -30,6 +30,15 @@
 
 G_BEGIN_DECLS
 
+#define EMPATHY_CHAT_BUS_NAME_SUFFIX "Empathy.Chat"
+#define EMPATHY_CHAT_BUS_NAME TP_CLIENT_BUS_NAME_BASE EMPATHY_CHAT_BUS_NAME_SUFFIX
+
+#define EMPATHY_AV_BUS_NAME_SUFFIX "Empathy.AudioVideo"
+#define EMPATHY_AV_BUS_NAME TP_CLIENT_BUS_NAME_BASE EMPATHY_AV_BUS_NAME_SUFFIX
+
+#define EMPATHY_FT_BUS_NAME_SUFFIX "Empathy.FileTransfer"
+#define EMPATHY_FT_BUS_NAME TP_CLIENT_BUS_NAME_BASE EMPATHY_FT_BUS_NAME_SUFFIX
+
 /* Requesting 1 to 1 text channels */
 void empathy_chat_with_contact_id (TpAccount *account,
   const gchar *contact_id,

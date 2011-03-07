@@ -286,8 +286,8 @@ empathy_chat_manager_init (EmpathyChatManager *self)
   priv->chatroom_mgr = empathy_chatroom_manager_dup_singleton (NULL);
 
   /* Text channels handler */
-  priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE, "Empathy.Chat",
-      FALSE, handle_channels, self, NULL);
+  priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
+      EMPATHY_CHAT_BUS_NAME_SUFFIX, FALSE, handle_channels, self, NULL);
 
   /* EmpathyTpChat relies on these features being prepared */
   tp_base_client_add_connection_features_varargs (priv->handler,

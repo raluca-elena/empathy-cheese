@@ -27,6 +27,7 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/util.h>
 
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-streamed-media-factory.h"
@@ -85,7 +86,7 @@ empathy_streamed_media_factory_init (EmpathyStreamedMediaFactory *obj)
     }
 
   priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
-      "Empathy.AudioVideo", FALSE, handle_channels_cb, obj, NULL);
+      EMPATHY_AV_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, obj, NULL);
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
