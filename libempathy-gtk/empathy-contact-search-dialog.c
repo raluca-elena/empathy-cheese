@@ -33,6 +33,7 @@
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-cell-renderer-text.h>
 #include <libempathy-gtk/empathy-cell-renderer-activatable.h>
+#include <libempathy-gtk/empathy-contact-dialogs.h>
 #include <libempathy-gtk/empathy-images.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -469,7 +470,6 @@ on_profile_button_clicked_cb (EmpathyCellRendererActivatable *cell,
     EmpathyContactSearchDialog *self)
 {
   EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
-  GtkTreeSelection *selection;
   TpConnection *conn;
   GtkTreeIter iter;
   GtkTreeModel *model;
