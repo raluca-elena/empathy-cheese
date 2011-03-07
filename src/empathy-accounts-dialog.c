@@ -1532,7 +1532,7 @@ accounts_dialog_model_set_selected (EmpathyAccountsDialog *dialog,
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
   if (accounts_dialog_get_settings_iter (dialog, settings, &iter))
-    gtk_tree_selection_select_iter (selection, &iter);
+    select_and_scroll_to_iter (dialog, &iter);
 }
 
 static void
