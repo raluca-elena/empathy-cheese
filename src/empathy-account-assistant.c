@@ -1100,8 +1100,8 @@ account_assistant_build_salut_page (EmpathyAccountAssistant *self)
 
   g_object_unref (pix);
 
-  w = gtk_check_button_new_with_label (
-      _("I don't want to enable this feature for now"));
+  w = gtk_check_button_new_with_mnemonic (
+      _("I do _not want to enable this feature for now"));
   gtk_box_pack_start (GTK_BOX (main_vbox), w, FALSE, FALSE, 0);
   g_signal_connect (w, "toggled",
       G_CALLBACK (create_salut_check_box_toggled_cb), self);
