@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-03 00:14+0100\n"
-"PO-Revision-Date: 2011-03-03 00:14+0100\n"
+"POT-Creation-Date: 2011-03-07 12:01+0100\n"
+"PO-Revision-Date: 2011-03-07 12:01+0100\n"
 "Last-Translator: Gil Forcada <gilforcada@guifi.net>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -788,7 +788,7 @@ msgstr "_Entra"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-account-widget.c:1990
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:451
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:463
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
 #: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
@@ -1667,15 +1667,19 @@ msgid "_Invite to Chat Room"
 msgstr "_Convida a la sala de xat"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:445
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:456
 msgid "Search contacts"
 msgstr "Cerca de contactes"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:473
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:486
 msgid "Search: "
 msgstr "Cerca: "
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:534
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:537
+msgid "_Add Contact"
+msgstr "_Afegeix un contacte"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:555
 msgid "No contacts found"
 msgstr "No s'ha trobat cap contacte"
 
@@ -2340,7 +2344,20 @@ msgstr "No s'ha pogut obrir l'URI"
 msgid "Select a file"
 msgstr "Seleccioneu un fitxer"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1871
+#: ../libempathy-gtk/empathy-ui-utils.c:1874
+msgid "Insufficient free space to save file"
+msgstr "No hi ha prou espai lliure per desar el fitxer"
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1882
+#, c-format
+msgid ""
+"%s of free space are required to save this file, but only %s is available. "
+"Please choose another location."
+msgstr ""
+"Es necessita %s d'espai lliure per desar el fitxer, però només hi ha %s."
+"Seleccioneu una altra ubicació."
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1926
 #, c-format
 msgid "Incoming file from %s"
 msgstr "%s us envia un fitxer"
