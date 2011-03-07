@@ -31,6 +31,7 @@
 #include "empathy-tp-contact-factory.h"
 #include "empathy-contact-list.h"
 #include "empathy-marshal.h"
+#include "empathy-request-util.h"
 #include "empathy-time.h"
 #include "empathy-utils.h"
 
@@ -170,8 +171,8 @@ tp_chat_add (EmpathyContactList *list,
 
 		/* Although this is a MUC, it's anonymous, so CreateChannel is
 		 * valid. */
-		tp_account_channel_request_create_channel_async (req, NULL, NULL,
-			create_conference_cb, NULL);
+		tp_account_channel_request_create_channel_async (req, EMPATHY_CHAT_BUS_NAME,
+			NULL, create_conference_cb, NULL);
 
 		g_object_unref (req);
 		g_hash_table_unref (props);

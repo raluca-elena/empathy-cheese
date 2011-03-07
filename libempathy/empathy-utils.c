@@ -49,6 +49,7 @@
 #include "empathy-contact-manager.h"
 #include "empathy-individual-manager.h"
 #include "empathy-presence-manager.h"
+#include "empathy-request-util.h"
 #include "empathy-tp-contact-factory.h"
 
 #include <extensions/extensions.h>
@@ -288,9 +289,8 @@ empathy_call_new_with_streams (EmpathyContact *contact,
 
 	req = tp_account_channel_request_new (account, request, timestamp);
 
-	tp_account_channel_request_create_channel_async (req, NULL, NULL,
-							 create_media_channel_cb,
-							 NULL);
+	tp_account_channel_request_create_channel_async (req, EMPATHY_AV_BUS_NAME,
+							 NULL, create_media_channel_cb, NULL);
 
 	g_hash_table_unref (request);
 	g_object_unref (req);

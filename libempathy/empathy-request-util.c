@@ -75,8 +75,8 @@ empathy_chat_with_contact_id (TpAccount *account,
 
   req = tp_account_channel_request_new (account, request, timestamp);
 
-  tp_account_channel_request_ensure_channel_async (req, NULL, NULL,
-      ensure_text_channel_cb, NULL);
+  tp_account_channel_request_ensure_channel_async (req, EMPATHY_CHAT_BUS_NAME,
+      NULL, ensure_text_channel_cb, NULL);
 
   g_hash_table_unref (request);
   g_object_unref (req);
@@ -99,8 +99,8 @@ empathy_join_muc (TpAccount *account,
 
   req = tp_account_channel_request_new (account, request, timestamp);
 
-  tp_account_channel_request_ensure_channel_async (req, NULL, NULL,
-      ensure_text_channel_cb, NULL);
+  tp_account_channel_request_ensure_channel_async (req, EMPATHY_CHAT_BUS_NAME,
+      NULL, ensure_text_channel_cb, NULL);
 
   g_hash_table_unref (request);
   g_object_unref (req);

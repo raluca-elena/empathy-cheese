@@ -31,6 +31,7 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-utils.h>
+#include <libempathy/empathy-request-util.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
@@ -108,8 +109,8 @@ call_contact (TpAccount *account,
 
   req = tp_account_channel_request_new (account, request, timestamp);
 
-  tp_account_channel_request_create_channel_async (req, NULL, NULL,
-      create_media_channel_cb, NULL);
+  tp_account_channel_request_create_channel_async (req, EMPATHY_AV_BUS_NAME,
+      NULL, create_media_channel_cb, NULL);
 
   g_object_unref (req);
 }
