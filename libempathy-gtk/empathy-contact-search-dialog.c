@@ -104,7 +104,11 @@ on_searcher_reset (GObject *source_object,
   search = g_hash_table_new (g_str_hash, g_str_equal);
 
   search_criteria = gtk_entry_get_text (GTK_ENTRY (priv->search_entry));
-  g_hash_table_insert (search, "fn", (gpointer) search_criteria);
+
+  if (tp_strv_contains (tp_contact_search_get_search_keys (searcher), ""))
+    g_hash_table_insert (search, "", (gpointer) search_criteria);
+  else
+    g_hash_table_insert (search, "fn", (gpointer) search_criteria);
 
   gtk_list_store_clear (priv->store);
   tp_contact_search_start (priv->searcher, search);
