@@ -1774,6 +1774,7 @@ accounts_dialog_add_account (EmpathyAccountsDialog *dialog,
   const gchar        *name;
   gboolean            enabled;
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
+  gboolean selected = FALSE;
 
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->treeview));
   status = tp_account_get_connection_status (account, NULL);
@@ -1783,7 +1784,16 @@ accounts_dialog_add_account (EmpathyAccountsDialog *dialog,
   settings = empathy_account_settings_new_for_account (account);
 
   if (!accounts_dialog_get_account_iter (dialog, account, &iter))
-    gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+    {
+      gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+    }
+  else
+    {
+      GtkTreeSelection *selection;
+
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
+      selected = gtk_tree_selection_iter_is_selected (selection, &iter);
+    }
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
       COL_NAME, name,
@@ -1791,6 +1801,14 @@ accounts_dialog_add_account (EmpathyAccountsDialog *dialog,
       COL_ACCOUNT, account,
       COL_ACCOUNT_SETTINGS, settings,
       -1);
+
+  if (selected)
+    {
+      /* We just modified the selected account. Its display name may have been
+       * changed and so it's place in the treeview. Scroll to it so it stays
+       * visible. */
+      select_and_scroll_to_iter (dialog, &iter);
+    }
 
   accounts_dialog_connection_changed_cb (account,
       0,
