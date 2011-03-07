@@ -598,7 +598,7 @@ empathy_protocol_name_to_display_name (const gchar *proto_name)
     gboolean translated;
   } names[] = {
     { "jabber", "Jabber", FALSE },
-    { "msn", "MSN", FALSE, },
+    { "msn", "Windows Live (MSN)", FALSE, },
     { "local-xmpp", N_("People Nearby"), TRUE },
     { "irc", "IRC", FALSE },
     { "icq", "ICQ", FALSE },
