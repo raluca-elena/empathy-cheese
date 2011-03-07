@@ -1407,6 +1407,8 @@ am_prepared_cb (GObject *am,
   gtk_toolbar_set_show_arrow (GTK_TOOLBAR (toolbar), TRUE);
   gtk_toolbar_set_icon_size (GTK_TOOLBAR (toolbar),
       GTK_ICON_SIZE_SMALL_TOOLBAR);
+  gtk_style_context_add_class (gtk_widget_get_style_context (toolbar),
+			       GTK_STYLE_CLASS_PRIMARY_TOOLBAR);
   gtk_widget_show (toolbar);
 
   gtk_box_pack_start (GTK_BOX (vbox), toolbar, FALSE, FALSE, 0);
