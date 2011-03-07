@@ -1839,11 +1839,66 @@ file_manager_receive_file_response_cb (GtkDialog *dialog,
 	GFile *file;
 
 	if (response == GTK_RESPONSE_OK) {
-		factory = empathy_ft_factory_dup_singleton ();
-		file = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
+		GFile *parent;
+		GFileInfo *info;
+		guint64 free_space, file_size;
+		GError *error = NULL;
 
-		empathy_ft_factory_set_destination_for_incoming_handler
-			(factory, handler, file);
+		file = gtk_file_chooser_get_file (GTK_FILE_CHOOSER (dialog));
+		parent = g_file_get_parent (file);
+		info = g_file_query_filesystem_info (parent,
+				G_FILE_ATTRIBUTE_FILESYSTEM_FREE,
+				NULL, &error);
+
+		g_object_unref (parent);
+
+		if (error != NULL) {
+			g_warning ("Error: %s", error->message);
+
+			g_object_unref (file);
+			return;
+		}
+
+		free_space = g_file_info_get_attribute_uint64 (info,
+				G_FILE_ATTRIBUTE_FILESYSTEM_FREE);
+		file_size = empathy_ft_handler_get_total_bytes (handler);
+
+		g_object_unref (info);
+
+		if (file_size > free_space) {
+			GtkWidget *message = gtk_message_dialog_new (
+				GTK_WINDOW (dialog),
+				GTK_DIALOG_MODAL,
+				GTK_MESSAGE_ERROR,
+				GTK_BUTTONS_CLOSE,
+				_("Insufficient free space to save file"));
+			char *file_size_str, *free_space_str;
+
+			file_size_str = g_format_size_for_display (file_size);
+			free_space_str = g_format_size_for_display (free_space);
+
+			gtk_message_dialog_format_secondary_text (
+				GTK_MESSAGE_DIALOG (message),
+				_("%s of free space are required to save this "
+				  "file, but only %s is available. Please "
+				  "choose another location."),
+				file_size_str, free_space_str);
+
+			gtk_dialog_run (GTK_DIALOG (message));
+
+			g_free (file_size_str);
+			g_free (free_space_str);
+			gtk_widget_destroy (message);
+
+			g_object_unref (file);
+
+			return;
+		}
+
+		factory = empathy_ft_factory_dup_singleton ();
+
+		empathy_ft_factory_set_destination_for_incoming_handler (
+				factory, handler, file);
 
 		g_object_unref (factory);
 		g_object_unref (file);
