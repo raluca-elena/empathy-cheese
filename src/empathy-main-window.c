@@ -64,6 +64,7 @@
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-accounts-dialog.h"
+#include "empathy-call-observer.h"
 #include "empathy-chat-manager.h"
 #include "empathy-main-window.h"
 #include "empathy-preferences.h"
@@ -107,7 +108,8 @@ struct _EmpathyMainWindowPriv {
 	TpAccountManager        *account_manager;
 	EmpathyChatroomManager  *chatroom_manager;
 	EmpathyEventManager     *event_manager;
-	EmpathySoundManager     *sound_mgr;;
+	EmpathySoundManager     *sound_mgr;
+	EmpathyCallObserver     *call_observer;
 	guint                    flash_timeout_id;
 	gboolean                 flash_on;
 	gboolean                 empty;
@@ -873,6 +875,7 @@ empathy_main_window_finalize (GObject *window)
 	g_signal_handlers_disconnect_by_func (priv->event_manager,
 			  		      main_window_event_removed_cb,
 			  		      window);
+	g_object_unref (priv->call_observer);
 	g_object_unref (priv->event_manager);
 	g_object_unref (priv->ui_manager);
 	g_object_unref (priv->chatroom_manager);
@@ -1930,6 +1933,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	empathy_geometry_bind (GTK_WINDOW (window), GEOMETRY_NAME);
 
 	/* Enable event handling */
+	priv->call_observer = empathy_call_observer_dup_singleton ();
 	priv->event_manager = empathy_event_manager_dup_singleton ();
 
 	g_signal_connect (priv->event_manager, "event-added",
