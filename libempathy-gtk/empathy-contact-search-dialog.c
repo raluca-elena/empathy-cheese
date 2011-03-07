@@ -32,6 +32,8 @@
 
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-cell-renderer-text.h>
+#include <libempathy-gtk/empathy-cell-renderer-activatable.h>
+#include <libempathy-gtk/empathy-images.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
@@ -446,6 +448,52 @@ contact_search_dialog_row_activated_cb (GtkTreeView *tv,
 }
 
 static void
+on_profile_button_got_contact_cb (TpConnection *connection,
+    EmpathyContact *contact,
+    const GError *error,
+    gpointer user_data,
+    GObject *object)
+{
+ if (error != NULL)
+   {
+     g_warning ("Error while getting the contact: %s", error->message);
+     return;
+   }
+
+  empathy_contact_information_dialog_show (contact, NULL);
+}
+
+static void
+on_profile_button_clicked_cb (EmpathyCellRendererActivatable *cell,
+    const gchar *path_string,
+    EmpathyContactSearchDialog *self)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  GtkTreeSelection *selection;
+  TpConnection *conn;
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+  gboolean valid;
+  gchar *id;
+
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->tree_view));
+
+  conn = empathy_account_chooser_get_connection (
+      EMPATHY_ACCOUNT_CHOOSER (priv->chooser));
+
+  valid = gtk_tree_model_get_iter_from_string (model, &iter, path_string);
+  g_return_if_fail (valid == TRUE);
+
+  gtk_tree_model_get (model, &iter, LOGIN_COLUMN, &id, -1);
+
+  DEBUG ("Requested to show profile for contact: %s", id);
+
+  empathy_tp_contact_factory_get_from_id (conn, id,
+      on_profile_button_got_contact_cb, NULL,
+      NULL, NULL);
+}
+
+static void
 empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
 {
   EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
@@ -522,6 +570,7 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (priv->tree_view), FALSE);
 
   col = gtk_tree_view_column_new ();
+
   cell = empathy_cell_renderer_text_new ();
   gtk_tree_view_column_pack_start (col, cell, TRUE);
   /* EmpathyCellRendererText displays "name" above and "status" below.
@@ -531,6 +580,12 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
       "name", LOGIN_COLUMN);
   gtk_tree_view_column_add_attribute (col, cell,
       "status", NAME_COLUMN);
+
+  cell = empathy_cell_renderer_activatable_new ();
+  gtk_tree_view_column_pack_end (col, cell, FALSE);
+  g_object_set (cell, "stock-id", EMPATHY_IMAGE_CONTACT_INFORMATION, NULL);
+  g_signal_connect (cell, "path-activated",
+      G_CALLBACK (on_profile_button_clicked_cb), self);
 
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->tree_view), col);
 
