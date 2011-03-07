@@ -40,7 +40,7 @@
 
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-contact-groups.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-individual-view.h"
@@ -1019,7 +1019,7 @@ individual_view_row_activated (GtkTreeView *view,
     {
       DEBUG ("Starting a chat");
 
-      empathy_dispatcher_chat_with_contact (contact,
+      empathy_chat_with_contact (contact,
           gtk_get_current_event_time ());
     }
 

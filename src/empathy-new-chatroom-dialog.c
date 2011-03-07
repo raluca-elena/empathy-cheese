@@ -36,7 +36,7 @@
 #include <libempathy/empathy-tp-roomlist.h>
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -690,7 +690,7 @@ new_chatroom_dialog_join (EmpathyNewChatroomDialog *dialog)
 	g_strstrip (room_name);
 
 	DEBUG ("Requesting channel for '%s'", room_name);
-	empathy_dispatcher_join_muc (account, room_name,
+	empathy_join_muc (account, room_name,
 		gtk_get_current_event_time ());
 
 	g_free (room_name);

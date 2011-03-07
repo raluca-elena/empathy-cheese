@@ -42,7 +42,7 @@
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-keyring.h>
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-marshal.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <src/empathy-chat-window.h>
@@ -249,11 +249,11 @@ account_reconnected (EmpathyChat *chat,
 	* https://bugs.freedesktop.org/show_bug.cgi?id=13422 */
 	switch (priv->handle_type) {
 		case TP_HANDLE_TYPE_CONTACT:
-			empathy_dispatcher_chat_with_contact_id (
+			empathy_chat_with_contact_id (
 				account, priv->id, TP_USER_ACTION_TIME_NOT_USER_ACTION);
 			break;
 		case TP_HANDLE_TYPE_ROOM:
-			empathy_dispatcher_join_muc (account, priv->id,
+			empathy_join_muc (account, priv->id,
 				TP_USER_ACTION_TIME_NOT_USER_ACTION);
 			break;
 		case TP_HANDLE_TYPE_NONE:
@@ -739,7 +739,7 @@ empathy_chat_join_muc (EmpathyChat *chat,
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 
-	empathy_dispatcher_join_muc (priv->account, room,
+	empathy_join_muc (priv->account, room,
 		gtk_get_current_event_time ());
 }
 

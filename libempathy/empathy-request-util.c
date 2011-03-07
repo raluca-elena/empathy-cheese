@@ -1,4 +1,4 @@
-/* * Copyright (C) 2007-2009 Collabora Ltd.
+/* * Copyright (C) 2007-2010 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 
 #include <telepathy-glib/telepathy-glib.h>
 
-#include "empathy-dispatcher.h"
+#include "empathy-request-util.h"
 #include "empathy-utils.h"
 #include "empathy-utils.h"
 
@@ -35,10 +35,10 @@
 #include <libempathy/empathy-debug.h>
 
 void
-empathy_dispatcher_chat_with_contact (EmpathyContact *contact,
+empathy_chat_with_contact (EmpathyContact *contact,
     gint64 timestamp)
 {
-  empathy_dispatcher_chat_with_contact_id (
+  empathy_chat_with_contact_id (
       empathy_contact_get_account (contact), empathy_contact_get_id (contact),
       timestamp);
 }
@@ -59,7 +59,7 @@ ensure_text_channel_cb (GObject *source,
 }
 
 void
-empathy_dispatcher_chat_with_contact_id (TpAccount *account,
+empathy_chat_with_contact_id (TpAccount *account,
     const gchar *contact_id,
     gint64 timestamp)
 {
@@ -83,7 +83,7 @@ empathy_dispatcher_chat_with_contact_id (TpAccount *account,
 }
 
 void
-empathy_dispatcher_join_muc (TpAccount *account,
+empathy_join_muc (TpAccount *account,
     const gchar *room_name,
     gint64 timestamp)
 {

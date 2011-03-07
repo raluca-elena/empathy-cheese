@@ -45,6 +45,7 @@
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-list.h>
+#include <libempathy/empathy-request-util.h>
 
 #include <libempathy-gtk/empathy-images.h>
 #include <libempathy-gtk/empathy-contact-dialogs.h>
@@ -1768,7 +1769,7 @@ chat_window_drag_data_received (GtkWidget        *widget,
 		}
 
 		if (!chat) {
-			empathy_dispatcher_chat_with_contact_id (
+			empathy_chat_with_contact_id (
 				account, contact_id, gtk_get_current_event_time ());
 
 			g_strfreev (strv);

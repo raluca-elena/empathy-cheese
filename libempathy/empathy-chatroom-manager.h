@@ -29,7 +29,6 @@
 #include <telepathy-glib/account.h>
 
 #include "empathy-chatroom.h"
-#include "empathy-dispatcher.h"
 
 G_BEGIN_DECLS
 

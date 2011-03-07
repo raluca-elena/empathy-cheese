@@ -38,7 +38,6 @@ libempathy_headers =				\
 	empathy-contact-manager.h		\
 	empathy-contact.h			\
 	empathy-debug.h				\
-	empathy-dispatcher.h			\
 	empathy-ft-factory.h			\
 	empathy-ft-handler.h			\
 	empathy-gsettings.h			\
@@ -50,6 +49,7 @@ libempathy_headers =				\
 	empathy-keyring.h 			\
 	empathy-location.h			\
 	empathy-message.h			\
+	empathy-request-util.h			\
 	empathy-server-sasl-handler.h		\
 	empathy-server-tls-handler.h		\
 	empathy-status-presets.h		\
@@ -79,7 +79,6 @@ libempathy_la_SOURCES =					\
 	empathy-contact-manager.c			\
 	empathy-contact.c				\
 	empathy-debug.c					\
-	empathy-dispatcher.c				\
 	empathy-ft-factory.c				\
 	empathy-ft-handler.c				\
 	empathy-presence-manager.c					\
@@ -89,6 +88,7 @@ libempathy_la_SOURCES =					\
 	empathy-irc-server.c				\
 	empathy-keyring.c				\
 	empathy-message.c				\
+	empathy-request-util.c				\
 	empathy-server-sasl-handler.c			\
 	empathy-server-tls-handler.c			\
 	empathy-status-presets.c			\

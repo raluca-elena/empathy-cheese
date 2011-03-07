@@ -1,6 +1,5 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2010 Collabora Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,15 +31,15 @@
 G_BEGIN_DECLS
 
 /* Requesting 1 to 1 text channels */
-void empathy_dispatcher_chat_with_contact_id (TpAccount *account,
+void empathy_chat_with_contact_id (TpAccount *account,
   const gchar *contact_id,
   gint64 timestamp);
 
-void  empathy_dispatcher_chat_with_contact (EmpathyContact *contact,
+void  empathy_chat_with_contact (EmpathyContact *contact,
   gint64 timestamp);
 
 /* Request a muc channel */
-void empathy_dispatcher_join_muc (TpAccount *account,
+void empathy_join_muc (TpAccount *account,
   const gchar *roomname,
   gint64 timestamp);
 

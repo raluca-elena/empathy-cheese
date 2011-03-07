@@ -27,8 +27,6 @@
 #include <telepathy-glib/channel.h>
 #include <telepathy-glib/interfaces.h>
 
-#include <libempathy/empathy-dispatcher.h>
-
 #define DEBUG_FLAG EMPATHY_DEBUG_SHARE_DESKTOP
 #include <libempathy/empathy-debug.h>
 

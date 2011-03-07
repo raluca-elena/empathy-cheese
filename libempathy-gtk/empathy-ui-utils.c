@@ -49,7 +49,6 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-dispatcher.h>
 #include <libempathy/empathy-ft-factory.h>
 
 void

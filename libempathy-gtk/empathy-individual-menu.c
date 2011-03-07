@@ -31,7 +31,7 @@
 #include <folks/folks.h>
 #include <folks/folks-telepathy.h>
 
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-utils.h>
@@ -499,7 +499,7 @@ empathy_individual_chat_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_dispatcher_chat_with_contact (contact, gtk_get_current_event_time ());
+  empathy_chat_with_contact (contact, gtk_get_current_event_time ());
 }
 
 GtkWidget *

@@ -35,7 +35,7 @@
 
 #include <libempathy/empathy-contact.h>
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-contact-list.h>
@@ -1157,7 +1157,7 @@ join_chatroom (EmpathyChatroom *chatroom,
 	room = empathy_chatroom_get_room (chatroom);
 
 	DEBUG ("Requesting channel for '%s'", room);
-	empathy_dispatcher_join_muc (account, room, timestamp);
+	empathy_join_muc (account, room, timestamp);
 }
 
 typedef struct

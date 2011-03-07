@@ -30,7 +30,7 @@
 
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
@@ -75,7 +75,7 @@ empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
 
   if (EMP_STR_EMPTY (contact_id) || account == NULL) goto out;
 
-  empathy_dispatcher_chat_with_contact_id (account, contact_id,
+  empathy_chat_with_contact_id (account, contact_id,
       gtk_get_current_event_time ());
 
 out:

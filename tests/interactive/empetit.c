@@ -3,7 +3,7 @@
 #include <gtk/gtk.h>
 
 #include <libempathy/empathy-contact-manager.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-contact-list-store.h>
@@ -23,7 +23,7 @@ clicked_cb (GtkButton *button,
   if (!contact)
     return;
 
-  empathy_dispatcher_chat_with_contact (contact, gtk_get_current_event_time ());
+  empathy_chat_with_contact (contact, gtk_get_current_event_time ());
 
   g_object_unref (contact);
 }

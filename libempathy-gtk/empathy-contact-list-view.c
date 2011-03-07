@@ -37,7 +37,7 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-contact-groups.h>
-#include <libempathy/empathy-dispatcher.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-contact-list-view.h"
@@ -906,7 +906,7 @@ contact_list_view_row_activated (GtkTreeView       *view,
 
 	if (contact) {
 		DEBUG ("Starting a chat");
-		empathy_dispatcher_chat_with_contact (contact,
+		empathy_chat_with_contact (contact,
 			gtk_get_current_event_time ());
 		g_object_unref (contact);
 	}
