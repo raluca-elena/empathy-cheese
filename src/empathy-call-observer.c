@@ -22,8 +22,6 @@
 
 #include <telepathy-glib/telepathy-glib.h>
 
-#include <telepathy-yell/telepathy-yell.h>
-
 #include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-utils.h>
 
@@ -102,8 +100,7 @@ find_main_channel (GList *channels)
 
       channel_type = tp_channel_get_channel_type_id (channel);
 
-      if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA ||
-          channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
+      if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
         return channel;
     }
 
@@ -113,21 +110,8 @@ find_main_channel (GList *channels)
 static gboolean
 has_ongoing_calls (EmpathyCallObserver *self)
 {
-  GList *l;
-
-  for (l = self->priv->channels; l != NULL; l = l->next)
-    {
-      TpChannel *channel = TP_CHANNEL (l->data);
-      GQuark type = tp_channel_get_channel_type_id (channel);
-
-      /* Check that Call channels are not ended */
-      if (type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL &&
-          tpy_call_channel_get_state (TPY_CALL_CHANNEL (channel), NULL, NULL)
-               == TPY_CALL_STATE_ENDED)
-        continue;
-
-      return TRUE;
-    }
+  if (self->priv->channels != NULL)
+    return TRUE;
 
   return FALSE;
 }
@@ -255,18 +239,11 @@ empathy_call_observer_init (EmpathyCallObserver *self)
       TP_CLIENT_CHANNEL_FACTORY (factory));
   g_object_unref (factory);
 
-  /* Observe Call and StreamedMedia channels */
+  /* Observe StreamedMedia channels */
   tp_base_client_take_observer_filter (self->priv->observer,
       tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
-        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
-          TP_HANDLE_TYPE_CONTACT,
-        NULL));
-  tp_base_client_take_observer_filter (self->priv->observer,
-      tp_asv_new (
-        TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
-          TPY_IFACE_CHANNEL_TYPE_CALL,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT,
           TP_HANDLE_TYPE_CONTACT,
         NULL));
