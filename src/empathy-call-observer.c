@@ -64,14 +64,40 @@ on_channel_closed (TpProxy *proxy,
   g_object_unref (proxy);
 }
 
+typedef struct
+{
+  EmpathyCallObserver *self;
+  TpObserveChannelsContext *context;
+} AutoRejectCtx;
+
+static AutoRejectCtx *
+auto_reject_ctx_new (EmpathyCallObserver *self,
+    TpObserveChannelsContext *context)
+{
+  AutoRejectCtx *ctx = g_slice_new (AutoRejectCtx);
+
+  ctx->self = g_object_ref (self);
+  ctx->context = g_object_ref (context);
+  return ctx;
+}
+
+static void
+auto_reject_ctx_free (AutoRejectCtx *ctx)
+{
+  g_object_unref (ctx->self);
+  g_object_unref (ctx->context);
+  g_slice_free (AutoRejectCtx, ctx);
+}
+
 static void
 on_cdo_claim_cb (GObject *source_object,
     GAsyncResult *result,
     gpointer user_data)
 {
   TpChannelDispatchOperation *cdo;
-  TpChannel *channel = TP_CHANNEL (user_data);
   GError *error = NULL;
+  GPtrArray *channels;
+  guint i;
 
   cdo = TP_CHANNEL_DISPATCH_OPERATION (source_object);
 
@@ -83,9 +109,44 @@ on_cdo_claim_cb (GObject *source_object,
       return;
     }
 
-  tp_channel_leave_async (channel,
-      TP_CHANNEL_GROUP_CHANGE_REASON_BUSY, "Already in a call",
-      NULL, NULL);
+  channels = tp_channel_dispatch_operation_borrow_channels (cdo);
+  for (i = 0; i < channels->len; i++)
+    {
+      TpChannel *channel = g_ptr_array_index (channels, i);
+
+      tp_channel_leave_async (channel,
+          TP_CHANNEL_GROUP_CHANGE_REASON_BUSY, "Already in a call",
+          NULL, NULL);
+    }
+}
+
+static void
+cdo_prepare_cb (GObject *source_object,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  AutoRejectCtx *ctx = user_data;
+  GError *error = NULL;
+  TpChannelDispatchOperation *cdo;
+
+  cdo = TP_CHANNEL_DISPATCH_OPERATION (source_object);
+
+  if (!tp_proxy_prepare_finish (source_object, result, &error))
+    {
+      DEBUG ("Failed to prepare ChannelDispatchOperation: %s", error->message);
+
+      tp_observe_channels_context_fail (ctx->context, error);
+
+      g_error_free (error);
+      goto out;
+    }
+
+  tp_channel_dispatch_operation_claim_async (cdo, on_cdo_claim_cb, ctx->self);
+
+  tp_observe_channels_context_accept (ctx->context);
+
+out:
+  auto_reject_ctx_free (ctx);
 }
 
 static TpChannel *
@@ -148,12 +209,18 @@ observe_channels (TpSimpleObserver *observer,
   /* Autoreject if there are other ongoing calls */
   if (has_ongoing_calls (self))
     {
+      AutoRejectCtx *ctx = auto_reject_ctx_new (self, context);
+      GQuark features[] = { TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE, 0 };
+
       DEBUG ("Autorejecting incoming call since there are others in "
           "progress: %s", tp_proxy_get_object_path (channel));
-      tp_channel_dispatch_operation_claim_async (dispatch_operation,
-          on_cdo_claim_cb, g_object_ref (channel));
 
-      tp_observe_channels_context_accept (context);
+      /* We have to prepare dispatch_operation so we'll be able to get the
+       * channels from it. */
+      tp_proxy_prepare_async (dispatch_operation, features,
+          cdo_prepare_cb, ctx);
+
+      tp_observe_channels_context_delay (context);
       return;
     }
 
