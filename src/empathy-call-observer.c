@@ -20,10 +20,17 @@
 
 #include <config.h>
 
+#include <glib/gi18n-lib.h>
+
 #include <telepathy-glib/telepathy-glib.h>
+
+#include <libnotify/notification.h>
 
 #include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-utils.h>
+
+#include <libempathy-gtk/empathy-images.h>
+#include <libempathy-gtk/empathy-notify-manager.h>
 
 #include <extensions/extensions.h>
 
@@ -33,6 +40,8 @@
 #include <libempathy/empathy-debug.h>
 
 struct _EmpathyCallObserverPriv {
+  EmpathyNotifyManager *notify_mgr;
+
   TpBaseClient *observer;
 
   /* Ongoing calls, as reffed TpChannels */
@@ -68,16 +77,19 @@ typedef struct
 {
   EmpathyCallObserver *self;
   TpObserveChannelsContext *context;
+  TpChannel *main_channel;
 } AutoRejectCtx;
 
 static AutoRejectCtx *
 auto_reject_ctx_new (EmpathyCallObserver *self,
-    TpObserveChannelsContext *context)
+    TpObserveChannelsContext *context,
+    TpChannel *main_channel)
 {
   AutoRejectCtx *ctx = g_slice_new (AutoRejectCtx);
 
   ctx->self = g_object_ref (self);
   ctx->context = g_object_ref (context);
+  ctx->main_channel = g_object_ref (main_channel);
   return ctx;
 }
 
@@ -86,7 +98,71 @@ auto_reject_ctx_free (AutoRejectCtx *ctx)
 {
   g_object_unref (ctx->self);
   g_object_unref (ctx->context);
+  g_object_unref (ctx->main_channel);
   g_slice_free (AutoRejectCtx, ctx);
+}
+
+static void
+get_contact_cb (TpConnection *connection,
+    guint n_contacts,
+    TpContact * const *contacts,
+    guint n_failed,
+    const TpHandle *failed,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  EmpathyCallObserver *self = (EmpathyCallObserver *) weak_object;
+  NotifyNotification *notification;
+  TpContact *contact;
+  gchar *summary, *body;
+  EmpathyContact *emp_contact;
+  GdkPixbuf *pixbuf;
+
+  if (n_contacts != 1)
+    return;
+
+  contact = contacts[0];
+
+  summary = g_strdup_printf (_("Missed call from %s"),
+      tp_contact_get_alias (contact));
+  body = g_strdup_printf (
+      _("%s just tried to call you, but you were in another call."),
+      tp_contact_get_alias (contact));
+
+  notification = notify_notification_new (summary, body, NULL);
+
+  emp_contact = empathy_contact_dup_from_tp_contact (contact);
+  pixbuf = empathy_notify_manager_get_pixbuf_for_notification (
+      self->priv->notify_mgr, emp_contact, EMPATHY_IMAGE_AVATAR_DEFAULT);
+
+  if (pixbuf != NULL)
+    {
+      notify_notification_set_icon_from_pixbuf (notification, pixbuf);
+      g_object_unref (pixbuf);
+    }
+
+  notify_notification_show (notification, NULL);
+
+  g_object_unref (notification);
+  g_free (summary);
+  g_free (body);
+  g_object_unref (emp_contact);
+}
+
+static void
+display_reject_notification (EmpathyCallObserver *self,
+    TpChannel *channel)
+{
+  TpHandle handle;
+  TpContactFeature features[] = { TP_CONTACT_FEATURE_ALIAS,
+      TP_CONTACT_FEATURE_AVATAR_DATA };
+
+  handle = tp_channel_get_handle (channel, NULL);
+
+  tp_connection_get_contacts_by_handle (tp_channel_borrow_connection (channel),
+      1, &handle, G_N_ELEMENTS (features), features, get_contact_cb,
+      g_object_ref (channel), g_object_unref, G_OBJECT (self));
 }
 
 static void
@@ -94,6 +170,7 @@ on_cdo_claim_cb (GObject *source_object,
     GAsyncResult *result,
     gpointer user_data)
 {
+  AutoRejectCtx *ctx = user_data;
   TpChannelDispatchOperation *cdo;
   GError *error = NULL;
   GPtrArray *channels;
@@ -106,7 +183,7 @@ on_cdo_claim_cb (GObject *source_object,
     {
       DEBUG ("Could not claim CDO: %s", error->message);
       g_error_free (error);
-      return;
+      goto out;
     }
 
   channels = tp_channel_dispatch_operation_borrow_channels (cdo);
@@ -118,6 +195,11 @@ on_cdo_claim_cb (GObject *source_object,
           TP_CHANNEL_GROUP_CHANGE_REASON_BUSY, "Already in a call",
           NULL, NULL);
     }
+
+  display_reject_notification (ctx->self, ctx->main_channel);
+
+out:
+  auto_reject_ctx_free (ctx);
 }
 
 static void
@@ -138,15 +220,13 @@ cdo_prepare_cb (GObject *source_object,
       tp_observe_channels_context_fail (ctx->context, error);
 
       g_error_free (error);
-      goto out;
+      auto_reject_ctx_free (ctx);
+      return;
     }
 
-  tp_channel_dispatch_operation_claim_async (cdo, on_cdo_claim_cb, ctx->self);
+  tp_channel_dispatch_operation_claim_async (cdo, on_cdo_claim_cb, ctx);
 
   tp_observe_channels_context_accept (ctx->context);
-
-out:
-  auto_reject_ctx_free (ctx);
 }
 
 static TpChannel *
@@ -209,7 +289,7 @@ observe_channels (TpSimpleObserver *observer,
   /* Autoreject if there are other ongoing calls */
   if (has_ongoing_calls (self))
     {
-      AutoRejectCtx *ctx = auto_reject_ctx_new (self, context);
+      AutoRejectCtx *ctx = auto_reject_ctx_new (self, context, channel);
       GQuark features[] = { TP_CHANNEL_DISPATCH_OPERATION_FEATURE_CORE, 0 };
 
       DEBUG ("Autorejecting incoming call since there are others in "
@@ -271,6 +351,7 @@ observer_dispose (GObject *object)
 {
   EmpathyCallObserver *self = EMPATHY_CALL_OBSERVER (object);
 
+  tp_clear_object (&self->priv->notify_mgr);
   tp_clear_object (&self->priv->observer);
   g_list_free_full (self->priv->channels, g_object_unref);
   self->priv->channels = NULL;
@@ -297,6 +378,8 @@ empathy_call_observer_init (EmpathyCallObserver *self)
   GError *error = NULL;
 
   self->priv = priv;
+
+  self->priv->notify_mgr = empathy_notify_manager_dup_singleton ();
 
   dbus = tp_dbus_daemon_dup (&error);
   if (dbus == NULL)
