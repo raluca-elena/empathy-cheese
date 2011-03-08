@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-01 09:13+0100\n"
-"PO-Revision-Date: 2011-03-01 09:15+0100\n"
+"POT-Creation-Date: 2011-03-08 08:30+0100\n"
+"PO-Revision-Date: 2011-03-08 08:31+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -724,7 +724,7 @@ msgstr "L_ogga in"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-account-widget.c:1990
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:451
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:515
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
 #: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
@@ -1589,15 +1589,19 @@ msgid "_Invite to Chat Room"
 msgstr "_Bjud in till chattrum"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:445
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:508
 msgid "Search contacts"
 msgstr "Sök efter kontakter"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:473
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:538
 msgid "Search: "
 msgstr "Sök: "
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:534
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:596
+msgid "_Add Contact"
+msgstr "_Lägg till kontakt"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:614
 msgid "No contacts found"
 msgstr "Inga kontakter hittades"
 
@@ -1842,7 +1846,7 @@ msgid "Select"
 msgstr "Välj"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:408
-#: ../src/empathy-main-window.c:1432
+#: ../src/empathy-main-window.c:1437
 msgid "Group"
 msgstr "Grupp"
 
@@ -2246,7 +2250,16 @@ msgstr "Kunde inte öppna uri"
 msgid "Select a file"
 msgstr "Välj en fil"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1871
+#: ../libempathy-gtk/empathy-ui-utils.c:1874
+msgid "Insufficient free space to save file"
+msgstr "Otillräckligt med ledigt utrymme för att spara filen"
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1882
+#, c-format
+msgid "%s of free space are required to save this file, but only %s is available. Please choose another location."
+msgstr "%s ledigt utrymme krävs för att spara denna fil men endast %s finns tillgängligt. Välj en annan plats."
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1926
 #, c-format
 msgid "Incoming file from %s"
 msgstr "Inkommande fil från %s"
@@ -2590,8 +2603,8 @@ msgid "Edit->Accounts"
 msgstr "Redigera->Konton"
 
 #: ../src/empathy-account-assistant.c:1104
-msgid "I don't want to enable this feature for now"
-msgstr "Jag vill inte aktivera denna funktion just nu"
+msgid "I do _not want to enable this feature for now"
+msgstr "Jag vill _inte aktivera denna funktion just nu"
 
 #: ../src/empathy-account-assistant.c:1140
 msgid "You won't be able to chat with people connected to your local network, as telepathy-salut is not installed. If you want to enable this feature, please install the telepathy-salut package and create a People Nearby account from the Accounts dialog"
@@ -3172,7 +3185,7 @@ msgid "Incoming file transfer from %s"
 msgstr "Inkommande filöverföring från %s"
 
 #: ../src/empathy-event-manager.c:1013
-#: ../src/empathy-main-window.c:367
+#: ../src/empathy-main-window.c:369
 msgid "Password required"
 msgstr "Lösenord krävs"
 
@@ -3325,39 +3338,39 @@ msgstr "Protokoll"
 msgid "Source"
 msgstr "Källa"
 
-#: ../src/empathy-main-window.c:384
+#: ../src/empathy-main-window.c:386
 msgid "Provide Password"
 msgstr "Ange lösenord"
 
-#: ../src/empathy-main-window.c:390
+#: ../src/empathy-main-window.c:392
 msgid "Disconnect"
 msgstr "Koppla ifrån"
 
-#: ../src/empathy-main-window.c:530
+#: ../src/empathy-main-window.c:532
 msgid "No match found"
 msgstr "Ingen träff hittades"
 
-#: ../src/empathy-main-window.c:685
+#: ../src/empathy-main-window.c:687
 msgid "Reconnect"
 msgstr "Anslut igen"
 
-#: ../src/empathy-main-window.c:691
+#: ../src/empathy-main-window.c:693
 msgid "Edit Account"
 msgstr "Redigera konto"
 
-#: ../src/empathy-main-window.c:697
+#: ../src/empathy-main-window.c:699
 msgid "Close"
 msgstr "Stäng"
 
-#: ../src/empathy-main-window.c:1414
+#: ../src/empathy-main-window.c:1419
 msgid "Contact"
 msgstr "Kontakt"
 
-#: ../src/empathy-main-window.c:1748
+#: ../src/empathy-main-window.c:1753
 msgid "Contact List"
 msgstr "Kontaktlista"
 
-#: ../src/empathy-main-window.c:1863
+#: ../src/empathy-main-window.c:1868
 msgid "Show and edit accounts"
 msgstr "Visa och redigera konton"
 
@@ -3694,56 +3707,56 @@ msgstr "Spara"
 msgid "Debug Window"
 msgstr "Felsökningsfönster"
 
-#: ../src/empathy-debug-window.c:1474
+#: ../src/empathy-debug-window.c:1476
 msgid "Pause"
 msgstr "Gör paus"
 
-#: ../src/empathy-debug-window.c:1486
+#: ../src/empathy-debug-window.c:1488
 msgid "Level "
 msgstr "Nivå "
 
-#: ../src/empathy-debug-window.c:1506
+#: ../src/empathy-debug-window.c:1508
 msgid "Debug"
 msgstr "Felsökning"
 
-#: ../src/empathy-debug-window.c:1512
+#: ../src/empathy-debug-window.c:1514
 msgid "Info"
 msgstr "Info"
 
-#: ../src/empathy-debug-window.c:1518
-#: ../src/empathy-debug-window.c:1567
+#: ../src/empathy-debug-window.c:1520
+#: ../src/empathy-debug-window.c:1569
 msgid "Message"
 msgstr "Meddelande"
 
-#: ../src/empathy-debug-window.c:1524
+#: ../src/empathy-debug-window.c:1526
 msgid "Warning"
 msgstr "Varning"
 
-#: ../src/empathy-debug-window.c:1530
+#: ../src/empathy-debug-window.c:1532
 msgid "Critical"
 msgstr "Kritiskt"
 
-#: ../src/empathy-debug-window.c:1536
+#: ../src/empathy-debug-window.c:1538
 msgid "Error"
 msgstr "Fel"
 
-#: ../src/empathy-debug-window.c:1555
+#: ../src/empathy-debug-window.c:1557
 msgid "Time"
 msgstr "Tid"
 
-#: ../src/empathy-debug-window.c:1558
+#: ../src/empathy-debug-window.c:1560
 msgid "Domain"
 msgstr "Domän"
 
-#: ../src/empathy-debug-window.c:1560
+#: ../src/empathy-debug-window.c:1562
 msgid "Category"
 msgstr "Kategori"
 
-#: ../src/empathy-debug-window.c:1562
+#: ../src/empathy-debug-window.c:1564
 msgid "Level"
 msgstr "Nivå"
 
-#: ../src/empathy-debug-window.c:1599
+#: ../src/empathy-debug-window.c:1601
 msgid "The selected connection manager does not support the remote debugging extension."
 msgstr "Den valda anslutningshanteraren saknar stöd för tillägg för fjärrfelsökning."
 
