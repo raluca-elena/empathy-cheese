@@ -306,7 +306,7 @@ empathy_call_observer_init (EmpathyCallObserver *self)
       return;
     }
 
-  self->priv->observer = tp_simple_observer_new (dbus, FALSE,
+  self->priv->observer = tp_simple_observer_new (dbus, TRUE,
       "Empathy.CallObserver", FALSE,
       observe_channels, self, NULL);
 
