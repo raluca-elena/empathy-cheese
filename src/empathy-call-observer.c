@@ -152,6 +152,8 @@ observe_channels (TpSimpleObserver *observer,
           "progress: %s", tp_proxy_get_object_path (channel));
       tp_channel_dispatch_operation_claim_async (dispatch_operation,
           on_cdo_claim_cb, g_object_ref (channel));
+
+      tp_observe_channels_context_accept (context);
       return;
     }
 
