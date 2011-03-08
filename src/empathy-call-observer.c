@@ -159,6 +159,8 @@ observe_channels (TpSimpleObserver *observer,
     {
       DEBUG ("The channel has already been invalidated: %s",
           error->message);
+
+      tp_observe_channels_context_fail (context, error);
       return;
     }
 
