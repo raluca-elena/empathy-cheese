@@ -1,3 +1,51 @@
+NEW in 2.91.91 (08/03/2011)
+==============
+
+Dependencies:
+
+ • telepathy-glib ≥ 0.13.16
+ • GTK+ ≥ 3.0.2
+
+Empathy will now automatically reject new incoming calls while there is
+another active call. A notification will be displayed telling you about the
+call you just missed.
+
+We strongly recommend that you update to telepathy-mission-control 5.7.6 to
+avoid races between the different Empathy components.
+
+Bugs fixed:
+ - Fixed #583317, throbber/status message input widget disapper when contact list too narrow (Robert Sajdok)
+ - Fixed #641121, Empathy ask to confirm certificate even if it is trusted in system stash (Stef Walter)
+ - Fixed #643656, Autoreject incoming calls when there is one in progress (Emilio Pozuelo Monfort)
+ - Fixed #643745, Support Ch.I.CredentialsStorage in auth-client (Danielle Madeley)
+ - Fixed #643872, Auth client should have Observer.DelayApprovers (Guillaume Desmottes)
+ - Fixed #643920, MSN protocol name may not be recognizable to some users (Guillaume Desmottes)
+ - Fixed #644058, Missing mnemonic for "I don't want to enable this feature for now" (Guillaume Desmottes)
+ - Fixed #644062, Warn if the user has insufficient disk space to receive file (Danielle Madeley)
+ - Fixed #644121, all: set the primary-toolbar style class on primary toolbars (Cosimo Cecchi)
+ - Fixed #644127, Display a notification when rejecting a call (Guillaume Desmottes)
+ - Fixed #644210, Fix various issues in the Call observer (Guillaume Desmottes)
+
+Translations:
+ - Updated ar Translation (Khaled Hosny)
+ - Updated bg Translation (Krasimir Chonov)
+ - Updated ca Translation (Gil Forcada)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated et Translation (Ivar Smolin)
+ - Updated fr Translation (Bruno Brouard)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated ko Translation (Changwoo Ryu)
+ - Updated lt Translation (Žygimantas Beručka)
+ - Updated lv Translation (Rudolfs Mazurs)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pa Translation (A S Alam)
+ - Updated pt Translation (Duarte Loreto)
+ - Updated ru Translation (Yuri Myasoedov, Leonid Kanter)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated uk Translation (Daniel Korostil)
+ - Updated zh_CN Translation (liuzhen)
+
 NEW in 2.91.90.2 (25/02/2011)
 ================
 
