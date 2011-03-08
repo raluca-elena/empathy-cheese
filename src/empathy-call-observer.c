@@ -120,7 +120,10 @@ get_contact_cb (TpConnection *connection,
   GdkPixbuf *pixbuf;
 
   if (n_contacts != 1)
-    return;
+    {
+      DEBUG ("Failed to get TpContact; ignoring notification bubble");
+      return;
+    }
 
   contact = contacts[0];
 
