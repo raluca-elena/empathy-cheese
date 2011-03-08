@@ -33,6 +33,7 @@
 
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-utils.h>
+#include <libempathy/empathy-contact-manager.h>
 
 #include "empathy-individual-dialogs.h"
 #include "empathy-contact-widget.h"
@@ -168,8 +169,8 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
     FolksIndividual *individual,
     gboolean *abusive)
 {
-  EmpathyIndividualManager *manager =
-    empathy_individual_manager_dup_singleton ();
+  EmpathyContactManager *contact_manager =
+    empathy_contact_manager_dup_singleton ();
   GtkWidget *dialog;
   GtkWidget *abusive_check = NULL;
   GList *personas, *l;
@@ -190,18 +191,18 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
     {
       TpfPersona *persona = l->data;
       TpContact *contact;
-      EmpathyIndividualManagerFlags flags;
+      EmpathyContactListFlags flags;
 
       if (!TPF_IS_PERSONA (persona))
           continue;
 
       contact = tpf_persona_get_contact (persona);
-      flags = empathy_individual_manager_get_flags_for_connection (manager,
-          tp_contact_get_connection (contact));
+      flags = empathy_contact_manager_get_flags_for_connection (
+          contact_manager, tp_contact_get_connection (contact));
 
-      if (!(flags & EMPATHY_INDIVIDUAL_MANAGER_CAN_BLOCK))
+      if (!(flags & EMPATHY_CONTACT_LIST_CAN_BLOCK))
         continue;
-      else if (flags & EMPATHY_INDIVIDUAL_MANAGER_CAN_REPORT_ABUSIVE)
+      else if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE)
         can_report_abuse = TRUE;
 
       g_string_append_printf (str, "\n " BULLET_POINT " %s",
@@ -235,7 +236,7 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       gtk_widget_show (abusive_check);
     }
 
-  g_object_unref (manager);
+  g_object_unref (contact_manager);
   g_string_free (str, TRUE);
 
   res = gtk_dialog_run (GTK_DIALOG (dialog));
