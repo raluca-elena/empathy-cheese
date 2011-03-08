@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy 2.92.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-01 18:16+0100\n"
-"PO-Revision-Date: 2011-03-01 18:18+0100\n"
+"POT-Creation-Date: 2011-03-08 14:41+0100\n"
+"PO-Revision-Date: 2011-03-08 14:42+0100\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: no\n"
@@ -755,7 +755,7 @@ msgstr "L_ogg inn"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-account-widget.c:1990
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:451
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:515
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
 #: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
@@ -1257,7 +1257,9 @@ msgstr "/j <prateroms-ID>: bli med i et nytt praterom"
 msgid ""
 "/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
 "current one"
-msgstr "/part [<praterom-ID>] [<årsak>]: forlat praterommet, forvalg er det aktive rommet"
+msgstr ""
+"/part [<praterom-ID>] [<årsak>]: forlat praterommet, forvalg er det aktive "
+"rommet"
 
 #: ../libempathy-gtk/empathy-chat.c:928
 msgid "/query <contact ID> [<message>]: open a private chat"
@@ -1632,15 +1634,19 @@ msgid "_Invite to Chat Room"
 msgstr "_Inviter til praterom"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:445
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:508
 msgid "Search contacts"
 msgstr "Søk i kontakter"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:473
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:538
 msgid "Search: "
 msgstr "Søk: "
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:534
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:596
+msgid "_Add Contact"
+msgstr "_Legg til kontakt"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:614
 msgid "No contacts found"
 msgstr "Ingen kontakter funnet"
 
@@ -1888,7 +1894,7 @@ msgid "Select"
 msgstr "Velg"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:408
-#: ../src/empathy-main-window.c:1432
+#: ../src/empathy-main-window.c:1437
 msgid "Group"
 msgstr "Gruppe"
 
@@ -2303,7 +2309,18 @@ msgstr "Kan ikke åpne URI"
 msgid "Select a file"
 msgstr "Velg en fil"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1871
+#: ../libempathy-gtk/empathy-ui-utils.c:1874
+msgid "Insufficient free space to save file"
+msgstr "Ikke nok ledig plass til å lagre filen"
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1882
+#, c-format
+msgid ""
+"%s of free space are required to save this file, but only %s is available. "
+"Please choose another location."
+msgstr "%s ledig plass kreves for å lagre denne filen, men kun %s er tilgjengelig. Vennligst velg en annen lokasjon."
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1926
 #, c-format
 msgid "Incoming file from %s"
 msgstr "Innkommende fil fra %s"
@@ -2687,8 +2704,8 @@ msgid "Edit->Accounts"
 msgstr "Rediger->Kontoer"
 
 #: ../src/empathy-account-assistant.c:1104
-msgid "I don't want to enable this feature for now"
-msgstr "Jeg vil ikke slå på denne funksjonen ennå"
+msgid "I do _not want to enable this feature for now"
+msgstr "Jeg vil ikke slå på de_nne funksjonen nå"
 
 #: ../src/empathy-account-assistant.c:1140
 msgid ""
@@ -3297,7 +3314,7 @@ msgstr "Du har blitt invitert til å bli med i %s"
 msgid "Incoming file transfer from %s"
 msgstr "Innkommende filoverføring fra %s"
 
-#: ../src/empathy-event-manager.c:1013 ../src/empathy-main-window.c:367
+#: ../src/empathy-event-manager.c:1013 ../src/empathy-main-window.c:369
 msgid "Password required"
 msgstr "Passord kreves"
 
@@ -3449,39 +3466,39 @@ msgstr "Protokoll"
 msgid "Source"
 msgstr "Kilde"
 
-#: ../src/empathy-main-window.c:384
+#: ../src/empathy-main-window.c:386
 msgid "Provide Password"
 msgstr "Oppgi passord"
 
-#: ../src/empathy-main-window.c:390
+#: ../src/empathy-main-window.c:392
 msgid "Disconnect"
 msgstr "Koble fra"
 
-#: ../src/empathy-main-window.c:530
+#: ../src/empathy-main-window.c:532
 msgid "No match found"
 msgstr "Ingen treff funnet"
 
-#: ../src/empathy-main-window.c:685
+#: ../src/empathy-main-window.c:687
 msgid "Reconnect"
 msgstr "Koble til på nytt"
 
-#: ../src/empathy-main-window.c:691
+#: ../src/empathy-main-window.c:693
 msgid "Edit Account"
 msgstr "Rediger konto"
 
-#: ../src/empathy-main-window.c:697
+#: ../src/empathy-main-window.c:699
 msgid "Close"
 msgstr "Lukk"
 
-#: ../src/empathy-main-window.c:1414
+#: ../src/empathy-main-window.c:1419
 msgid "Contact"
 msgstr "Kontakt"
 
-#: ../src/empathy-main-window.c:1748
+#: ../src/empathy-main-window.c:1753
 msgid "Contact List"
 msgstr "Kontaktliste"
 
-#: ../src/empathy-main-window.c:1863
+#: ../src/empathy-main-window.c:1868
 msgid "Show and edit accounts"
 msgstr "Vis og rediger kontoer"
 
@@ -3829,55 +3846,55 @@ msgstr "Lagre"
 msgid "Debug Window"
 msgstr "Feilsøkingsvindu"
 
-#: ../src/empathy-debug-window.c:1474
+#: ../src/empathy-debug-window.c:1476
 msgid "Pause"
 msgstr "Pause"
 
-#: ../src/empathy-debug-window.c:1486
+#: ../src/empathy-debug-window.c:1488
 msgid "Level "
 msgstr "Nivå "
 
-#: ../src/empathy-debug-window.c:1506
+#: ../src/empathy-debug-window.c:1508
 msgid "Debug"
 msgstr "Feilsøk"
 
-#: ../src/empathy-debug-window.c:1512
+#: ../src/empathy-debug-window.c:1514
 msgid "Info"
 msgstr "Info"
 
-#: ../src/empathy-debug-window.c:1518 ../src/empathy-debug-window.c:1567
+#: ../src/empathy-debug-window.c:1520 ../src/empathy-debug-window.c:1569
 msgid "Message"
 msgstr "Melding"
 
-#: ../src/empathy-debug-window.c:1524
+#: ../src/empathy-debug-window.c:1526
 msgid "Warning"
 msgstr "Advarsel"
 
-#: ../src/empathy-debug-window.c:1530
+#: ../src/empathy-debug-window.c:1532
 msgid "Critical"
 msgstr "Kritisk"
 
-#: ../src/empathy-debug-window.c:1536
+#: ../src/empathy-debug-window.c:1538
 msgid "Error"
 msgstr "Feil"
 
-#: ../src/empathy-debug-window.c:1555
+#: ../src/empathy-debug-window.c:1557
 msgid "Time"
 msgstr "Tid"
 
-#: ../src/empathy-debug-window.c:1558
+#: ../src/empathy-debug-window.c:1560
 msgid "Domain"
 msgstr "Domene"
 
-#: ../src/empathy-debug-window.c:1560
+#: ../src/empathy-debug-window.c:1562
 msgid "Category"
 msgstr "Kategori"
 
-#: ../src/empathy-debug-window.c:1562
+#: ../src/empathy-debug-window.c:1564
 msgid "Level"
 msgstr "Nivå"
 
-#: ../src/empathy-debug-window.c:1599
+#: ../src/empathy-debug-window.c:1601
 msgid ""
 "The selected connection manager does not support the remote debugging "
 "extension."
