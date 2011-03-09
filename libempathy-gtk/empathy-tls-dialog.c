@@ -293,21 +293,12 @@ empathy_tls_dialog_constructed (GObject *object)
 
   content_area = gtk_dialog_get_content_area (dialog);
 
-  /* FIXME: right now we do this only if the error is SelfSigned, as we can
-   * easily store the new CA cert in $XDG_CONFIG_DIR/telepathy/certs in that
-   * case. For the other errors, we probably need a smarter/more powerful
-   * certificate storage.
-   */
-  if (priv->reason == EMP_TLS_CERTIFICATE_REJECT_REASON_SELF_SIGNED)
-    {
-      checkbox = gtk_check_button_new_with_label (
-          _("Remember this choice for future connections"));
-      gtk_box_pack_end (GTK_BOX (content_area), checkbox, FALSE, FALSE, 0);
-      gtk_widget_show (checkbox);
-
-      g_signal_connect (checkbox, "toggled",
-          G_CALLBACK (checkbox_toggled_cb), self);
-    }
+  checkbox = gtk_check_button_new_with_label (
+      _("Remember this choice for future connections"));
+  gtk_box_pack_end (GTK_BOX (content_area), checkbox, FALSE, FALSE, 0);
+  gtk_widget_show (checkbox);
+  g_signal_connect (checkbox, "toggled", G_CALLBACK (checkbox_toggled_cb),
+      self);
 
   text = g_strdup_printf ("<b>%s</b>", _("Certificate Details"));
   expander = gtk_expander_new (text);
