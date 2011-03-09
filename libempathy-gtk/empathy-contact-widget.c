@@ -441,6 +441,7 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
       TpContactInfoField *field = l->data;
       InfoFieldData *field_data;
       GtkWidget *w;
+      TpContactInfoFieldSpec *spec;
 
       field_data = find_info_field_data (field->field_name);
       if (field_data == NULL)
@@ -449,6 +450,18 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
            * But we put it in the details_to_set list so it won't be erased
            * when calling SetContactInfo (bgo #630427) */
           DEBUG ("Unhandled ContactInfo field spec: %s", field->field_name);
+          continue;
+        }
+
+      spec = get_spec_from_list (specs, field->field_name);
+      /* We shouldn't have added the field to details_to_set if it's not
+       * supported by the CM */
+      g_assert (spec != NULL);
+
+      if (spec->flags & TP_CONTACT_INFO_FIELD_FLAG_OVERWRITTEN_BY_NICKNAME)
+        {
+          DEBUG ("Ignoring field '%s' due it to having the "
+              "Overwritten_By_Nickname flag", field->field_name);
           continue;
         }
 
