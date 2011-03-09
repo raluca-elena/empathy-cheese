@@ -76,6 +76,8 @@
 /* Delay before updating the widget when the id entry changed (seconds) */
 #define ID_CHANGED_TIMEOUT 1
 
+#define DATA_FIELD "contact-info-field"
+
 typedef struct
 {
   EmpathyContactManager *manager;
@@ -123,6 +125,7 @@ typedef struct
   GtkWidget *spinner_details;
   GList *details_to_set;
   GCancellable *details_cancellable;
+  gboolean details_changed;
 
   /* Client */
   GtkWidget *vbox_client;
@@ -207,8 +210,12 @@ contact_widget_save (EmpathyContactWidget *information)
 
   if (information->details_to_set != NULL)
     {
-      tp_connection_set_contact_info_async (connection,
-          information->details_to_set, set_contact_info_cb, NULL);
+      if (information->details_changed)
+        {
+          tp_connection_set_contact_info_async (connection,
+              information->details_to_set, set_contact_info_cb, NULL);
+        }
+
       tp_contact_info_list_free (information->details_to_set);
       information->details_to_set = NULL;
     }
@@ -227,9 +234,15 @@ contact_widget_details_setup (EmpathyContactWidget *information)
 
 static void
 contact_widget_details_changed_cb (GtkEntry *entry,
-    TpContactInfoField *field)
+    EmpathyContactWidget *self)
 {
   const gchar *strv[] = { NULL, NULL };
+  TpContactInfoField *field;
+
+  self->details_changed = TRUE;
+
+  field = g_object_get_data ((GObject *) entry, DATA_FIELD);
+  g_assert (field != NULL);
 
   strv[0] = gtk_entry_get_text (entry);
 
@@ -240,12 +253,18 @@ contact_widget_details_changed_cb (GtkEntry *entry,
 
 static void
 contact_widget_bday_changed_cb (GtkCalendar *calendar,
-    TpContactInfoField *field)
+    EmpathyContactWidget *self)
 {
   guint year, month, day;
   GDate *date;
   gchar tmp[255];
   const gchar *strv[] = { NULL, NULL };
+  TpContactInfoField *field;
+
+  self->details_changed = TRUE;
+
+  field = g_object_get_data ((GObject *) calendar, DATA_FIELD);
+  g_assert (field != NULL);
 
   gtk_calendar_get_date (calendar, &year, &month, &day);
   date = g_date_new_dmy (day, month+1, year);
@@ -368,6 +387,8 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
 
   g_assert (information->details_to_set == NULL);
 
+  information->details_changed = FALSE;
+
   contact = empathy_contact_get_tp_contact (information->contact);
   connection = tp_contact_get_connection (contact);
 
@@ -461,10 +482,12 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
               w, 1, 2, n_rows, n_rows + 1);
           gtk_widget_show (w);
 
+          g_object_set_data ((GObject *) w, DATA_FIELD, field);
+
           g_signal_connect (w, "day-selected-double-click",
-            G_CALLBACK (contact_widget_bday_changed_cb), field);
+            G_CALLBACK (contact_widget_bday_changed_cb), information);
           g_signal_connect (w, "month-changed",
-            G_CALLBACK (contact_widget_bday_changed_cb), field);
+            G_CALLBACK (contact_widget_bday_changed_cb), information);
         }
       else
         {
@@ -475,8 +498,10 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
               w, 1, 2, n_rows, n_rows + 1);
           gtk_widget_show (w);
 
+          g_object_set_data ((GObject *) w, DATA_FIELD, field);
+
           g_signal_connect (w, "changed",
-            G_CALLBACK (contact_widget_details_changed_cb), field);
+            G_CALLBACK (contact_widget_details_changed_cb), information);
         }
 
       n_rows++;
