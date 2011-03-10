@@ -1214,15 +1214,6 @@ set_nickname_cb (GObject *source,
     }
 }
 
-static void
-set_alias_on_account (TpAccount *account,
-    const gchar *alias)
-{
-  DEBUG ("Set Account.Nickname to %s", alias);
-
-  tp_account_set_nickname_async (account, alias, set_nickname_cb, NULL);
-}
-
 static gboolean
 contact_widget_entry_alias_focus_event_cb (GtkEditable *editable,
                                            GdkEventFocus *event,
@@ -1239,7 +1230,9 @@ contact_widget_entry_alias_focus_event_cb (GtkEditable *editable,
           TpAccount * account;
 
           account = empathy_contact_get_account (information->contact);
-          set_alias_on_account (account, alias);
+
+          DEBUG ("Set Account.Nickname to %s", alias);
+          tp_account_set_nickname_async (account, alias, set_nickname_cb, NULL);
         }
       else
         {
