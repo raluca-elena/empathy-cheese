@@ -358,6 +358,8 @@ create_errors_to_message_hash (void)
     _("The length of the server certificate, or the depth of the "
     "server certificate chain, exceed the limits imposed by the "
     "cryptography library"));
+  g_hash_table_insert (errors, TP_ERROR_STR_SOFTWARE_UPGRADE_REQUIRED,
+    _("Your software is too old"));
 
   return errors;
 }
