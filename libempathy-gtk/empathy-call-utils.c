@@ -51,6 +51,8 @@ get_error_display_message (GError *error)
         return _("The specified contact is offline");
       case TP_ERROR_INVALID_HANDLE:
         return _("The specified contact is not valid");
+      case TP_ERROR_EMERGENCY_CALLS_NOT_SUPPORTED:
+        return _("Emergency calls are not supported on this protocol");
     }
 
   return _("There was an error starting the call");
