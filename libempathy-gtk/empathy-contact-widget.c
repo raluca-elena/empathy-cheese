@@ -1214,6 +1214,46 @@ set_nickname_cb (GObject *source,
     }
 }
 
+/* Update all the contact info fields having the
+* Overwritten_By_Nickname flag to the new alias. This avoid accidentally
+* reseting the alias when calling SetContactInfo(). See bgo #644298 for
+* details. */
+static void
+update_nickname_in_contact_info (EmpathyContactWidget *self,
+    TpConnection *connection,
+    const gchar *nickname)
+{
+  GList *specs, *l;
+
+  specs = tp_connection_get_contact_info_supported_fields (connection);
+
+  for (l = self->details_to_set; l != NULL; l= g_list_next (l))
+    {
+      TpContactInfoField *field = l->data;
+      TpContactInfoFieldSpec *spec;
+
+      spec = get_spec_from_list (specs, field->field_name);
+      /* We shouldn't have added the field to details_to_set if it's not
+       * supported by the CM */
+      g_assert (spec != NULL);
+
+      if (spec->flags & TP_CONTACT_INFO_FIELD_FLAG_OVERWRITTEN_BY_NICKNAME)
+        {
+          const gchar *strv[] = { nickname, NULL };
+
+          DEBUG ("Updating field '%s' to '%s' as it has the "
+              "Overwritten_By_Nickname flag and Account.Nickname has "
+              "been updated", field->field_name, nickname);
+
+          if (field->field_value != NULL)
+            g_strfreev (field->field_value);
+          field->field_value = g_strdupv ((GStrv) strv);
+        }
+    }
+
+  g_list_free (specs);
+}
+
 static gboolean
 contact_widget_entry_alias_focus_event_cb (GtkEditable *editable,
                                            GdkEventFocus *event,
@@ -1239,6 +1279,9 @@ contact_widget_entry_alias_focus_event_cb (GtkEditable *editable,
 
               tp_account_set_nickname_async (account, alias, set_nickname_cb,
                   NULL);
+
+              update_nickname_in_contact_info (information,
+                  empathy_contact_get_connection (information->contact), alias);
             }
         }
       else
