@@ -99,6 +99,49 @@ network_changed_cb (EmpathyIrcNetworkChooser *chooser,
   empathy_account_widget_changed (settings->self);
 }
 
+/**
+ * set_password_prompt_if_needed:
+ *
+ * If @password is not empty, this function sets the 'password-prompt' param
+ * on @ac_settings. This will ensure that Idle actually asks for the password
+ * when connecting.
+ *
+ * Return: %TRUE if the password-prompt param has been changed
+ */
+static gboolean
+set_password_prompt_if_needed (EmpathyAccountSettings *ac_settings,
+    const gchar *password)
+{
+  gboolean prompt;
+
+  prompt = !tp_str_empty (password);
+
+  if (prompt == empathy_account_settings_get_boolean (ac_settings,
+        "password-prompt"))
+    return FALSE;
+
+  empathy_account_settings_set_boolean (ac_settings, "password-prompt",
+      prompt);
+
+  return TRUE;
+}
+
+static void
+entry_password_changed_cb (GtkEntry *entry,
+    EmpathyAccountWidgetIrc *settings)
+{
+  const gchar *password;
+  EmpathyAccountSettings *ac_settings;
+
+  g_object_get (settings->self, "settings", &ac_settings, NULL);
+
+  password = gtk_entry_get_text (entry);
+
+  set_password_prompt_if_needed (ac_settings, password);
+
+  g_object_unref (ac_settings);
+}
+
 EmpathyIrcNetworkChooser *
 empathy_account_widget_irc_build (EmpathyAccountWidget *self,
     const char *filename,
@@ -106,6 +149,8 @@ empathy_account_widget_irc_build (EmpathyAccountWidget *self,
 {
   EmpathyAccountWidgetIrc *settings;
   EmpathyAccountSettings *ac_settings;
+  GtkWidget *entry_password;
+  const gchar *password;
 
   settings = g_slice_new0 (EmpathyAccountWidgetIrc);
   settings->self = self;
@@ -114,6 +159,7 @@ empathy_account_widget_irc_build (EmpathyAccountWidget *self,
       "table_irc_settings", table_common_settings,
       "vbox_irc", &self->ui_details->widget,
       "table_irc_settings", &settings->vbox_settings,
+      "entry_password", &entry_password,
       NULL);
 
   /* Add network chooser button */
@@ -145,6 +191,18 @@ empathy_account_widget_irc_build (EmpathyAccountWidget *self,
   self->ui_details->default_focus = g_strdup ("entry_nick");
 
   g_object_unref (ac_settings);
+
+  /* Automatically set password-prompt when needed */
+  password = empathy_account_settings_get_string (ac_settings, "password");
+
+  if (set_password_prompt_if_needed (ac_settings, password))
+    {
+      /* Apply right now to save password-prompt */
+      empathy_account_settings_apply_async (ac_settings, NULL, NULL);
+    }
+
+  g_signal_connect (entry_password, "changed",
+      G_CALLBACK (entry_password_changed_cb), settings);
 
   return EMPATHY_IRC_NETWORK_CHOOSER (settings->network_chooser);
 }
