@@ -1228,11 +1228,18 @@ contact_widget_entry_alias_focus_event_cb (GtkEditable *editable,
       if (empathy_contact_is_user (information->contact))
         {
           TpAccount * account;
+          const gchar *current_nickname;
 
           account = empathy_contact_get_account (information->contact);
+          current_nickname = tp_account_get_nickname (account);
 
-          DEBUG ("Set Account.Nickname to %s", alias);
-          tp_account_set_nickname_async (account, alias, set_nickname_cb, NULL);
+          if (tp_strdiff (current_nickname, alias))
+            {
+              DEBUG ("Set Account.Nickname to %s", alias);
+
+              tp_account_set_nickname_async (account, alias, set_nickname_cb,
+                  NULL);
+            }
         }
       else
         {
