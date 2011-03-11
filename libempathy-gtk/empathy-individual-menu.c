@@ -750,7 +750,8 @@ static void
 favourite_menu_item_toggled_cb (GtkCheckMenuItem *item,
   FolksIndividual *individual)
 {
-  folks_favouritable_set_is_favourite (FOLKS_FAVOURITABLE (individual),
+  folks_favourite_details_set_is_favourite (
+      FOLKS_FAVOURITE_DETAILS (individual),
       gtk_check_menu_item_get_active (item));
 }
 
@@ -762,7 +763,8 @@ empathy_individual_favourite_menu_item_new (FolksIndividual *individual)
   item = gtk_check_menu_item_new_with_label (_("Favorite"));
 
   gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item),
-      folks_favouritable_get_is_favourite (FOLKS_FAVOURITABLE (individual)));
+      folks_favourite_details_get_is_favourite (
+          FOLKS_FAVOURITE_DETAILS (individual)));
 
   g_signal_connect (item, "toggled",
       G_CALLBACK (favourite_menu_item_toggled_cb), individual);

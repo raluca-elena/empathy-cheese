@@ -84,8 +84,8 @@ individual_notify_is_favourite_cb (FolksIndividual *individual,
     GParamSpec *pspec,
     EmpathyIndividualManager *self)
 {
-  gboolean is_favourite = folks_favouritable_get_is_favourite (
-      FOLKS_FAVOURITABLE (individual));
+  gboolean is_favourite = folks_favourite_details_get_is_favourite (
+      FOLKS_FAVOURITE_DETAILS (individual));
   g_signal_emit (self, signals[FAVOURITES_CHANGED], 0, individual,
       is_favourite);
 }

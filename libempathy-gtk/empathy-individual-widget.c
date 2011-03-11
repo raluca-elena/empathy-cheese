@@ -1145,8 +1145,8 @@ favourite_toggled_cb (GtkToggleButton *button,
     EmpathyIndividualWidget *self)
 {
   gboolean active = gtk_toggle_button_get_active (button);
-  folks_favouritable_set_is_favourite (
-      FOLKS_FAVOURITABLE (GET_PRIV (self)->individual), active);
+  folks_favourite_details_set_is_favourite (
+      FOLKS_FAVOURITE_DETAILS (GET_PRIV (self)->individual), active);
 }
 
 static void
@@ -1288,8 +1288,8 @@ notify_is_favourite_cb (gpointer folks_object,
   if (GTK_IS_TOGGLE_BUTTON (favourite_widget))
     {
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (favourite_widget),
-          folks_favouritable_get_is_favourite (
-              FOLKS_FAVOURITABLE (folks_object)));
+          folks_favourite_details_get_is_favourite (
+              FOLKS_FAVOURITE_DETAILS (folks_object)));
     }
 }
 

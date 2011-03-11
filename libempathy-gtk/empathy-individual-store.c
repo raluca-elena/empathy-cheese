@@ -479,7 +479,8 @@ individual_store_add_individual (EmpathyIndividualStore *self,
   g_list_free (groups);
 
   if (priv->show_groups &&
-      folks_favouritable_get_is_favourite (FOLKS_FAVOURITABLE (individual)))
+      folks_favourite_details_get_is_favourite (
+          FOLKS_FAVOURITE_DETAILS (individual)))
     {
       /* Add contact to the fake 'Favorites' group */
       GtkTreeIter iter_group;

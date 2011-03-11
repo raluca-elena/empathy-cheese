@@ -374,14 +374,16 @@ real_drag_individual_received_cb (EmpathyIndividualView *self,
   if (!tp_strdiff (new_group, EMPATHY_INDIVIDUAL_STORE_FAVORITE))
     {
       /* Mark contact as favourite */
-      folks_favouritable_set_is_favourite (FOLKS_FAVOURITABLE (individual), TRUE);
+      folks_favourite_details_set_is_favourite (
+          FOLKS_FAVOURITE_DETAILS (individual), TRUE);
       return;
     }
 
   if (!tp_strdiff (old_group, EMPATHY_INDIVIDUAL_STORE_FAVORITE))
     {
       /* Remove contact as favourite */
-      folks_favouritable_set_is_favourite (FOLKS_FAVOURITABLE (individual), FALSE);
+      folks_favourite_details_set_is_favourite (
+          FOLKS_FAVOURITE_DETAILS (individual), FALSE);
 
       /* Don't try to remove it */
       old_group = NULL;
@@ -1706,8 +1708,8 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
   if (contains_interesting_persona == FALSE)
     return FALSE;
 
-  is_favorite = folks_favouritable_get_is_favourite (
-      FOLKS_FAVOURITABLE (individual));
+  is_favorite = folks_favourite_details_get_is_favourite (
+      FOLKS_FAVOURITE_DETAILS (individual));
   if (is_searching == FALSE)
     return (priv->show_offline || is_online || is_favorite);
 
