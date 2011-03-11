@@ -1712,7 +1712,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     return (priv->show_offline || is_online || is_favorite);
 
   /* check alias name */
-  str = folks_aliasable_get_alias (FOLKS_ALIASABLE (individual));
+  str = folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual));
 
   if (empathy_live_search_match (live, str))
     return TRUE;
@@ -2436,7 +2436,8 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
           text =
               g_strdup_printf (
                   _("Do you really want to remove the contact '%s'?"),
-                  folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+                  folks_alias_details_get_alias (
+                      FOLKS_ALIAS_DETAILS (individual)));
         }
       else
         {
@@ -2446,7 +2447,8 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
                   _("Do you really want to remove the linked contact '%s'? "
                     "Note that this will remove all the contacts which make up "
                     "this linked contact."),
-                  folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+                  folks_alias_details_get_alias (
+                      FOLKS_ALIAS_DETAILS (individual)));
         }
 
 

@@ -791,8 +791,8 @@ location_update (EmpathyIndividualWidget *self)
 
               /* Add a marker to the map */
               marker = champlain_label_new_with_text (
-                  folks_aliasable_get_alias (FOLKS_ALIASABLE (persona)), NULL,
-                  NULL, NULL);
+                  folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (persona)),
+                  NULL, NULL, NULL);
               champlain_location_set_location (CHAMPLAIN_LOCATION (marker),
                   lat, lon);
               champlain_marker_layer_add_marker (layer,
@@ -1132,7 +1132,8 @@ entry_alias_focus_event_cb (GtkEditable *editable,
         }
       else
         {
-          folks_aliasable_set_alias (FOLKS_ALIASABLE (priv->individual), alias);
+          folks_alias_details_set_alias (FOLKS_ALIAS_DETAILS (priv->individual),
+              alias);
         }
     }
 
@@ -1207,12 +1208,12 @@ notify_alias_cb (gpointer folks_object,
   if (GTK_IS_ENTRY (alias_widget))
     {
       gtk_entry_set_text (GTK_ENTRY (alias_widget),
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (folks_object)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (folks_object)));
     }
   else
     {
       gtk_label_set_label (GTK_LABEL (alias_widget),
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (folks_object)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (folks_object)));
     }
 }
 

@@ -204,7 +204,7 @@ add_individual_to_store (GtkTreeStore *self,
 
   gtk_tree_store_insert_with_values (self, iter, parent, 0,
       EMPATHY_INDIVIDUAL_STORE_COL_NAME,
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)),
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, individual,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP, FALSE,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, FALSE,
@@ -422,7 +422,8 @@ individual_store_add_individual (EmpathyIndividualStore *self,
 
   priv = GET_PRIV (self);
 
-  if (EMP_STR_EMPTY (folks_aliasable_get_alias (FOLKS_ALIASABLE (individual))))
+  if (EMP_STR_EMPTY (folks_alias_details_get_alias (
+          FOLKS_ALIAS_DETAILS (individual))))
     return;
 
   if (priv->show_groups)
@@ -558,7 +559,7 @@ individual_store_contact_active_new (EmpathyIndividualStore *self,
   ShowActiveData *data;
 
   DEBUG ("Individual'%s' now active, and %s be removed",
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)),
       remove_ ? "WILL" : "WILL NOT");
 
   data = g_slice_new0 (ShowActiveData);
@@ -603,12 +604,13 @@ individual_store_contact_active_cb (ShowActiveData *data)
   if (data->remove)
     {
       DEBUG ("Individual'%s' active timeout, removing item",
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (data->individual)));
+          folks_alias_details_get_alias (
+            FOLKS_ALIAS_DETAILS (data->individual)));
       individual_store_remove_individual (data->self, data->individual);
     }
 
   DEBUG ("Individual'%s' no longer active",
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (data->individual)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (data->individual)));
 
   individual_store_contact_set_active (data->self,
       data->individual, FALSE, TRUE);
@@ -637,7 +639,7 @@ individual_avatar_pixbuf_received_cb (FolksIndividual *individual,
   if (error != NULL)
     {
       DEBUG ("failed to retrieve pixbuf for individual %s: %s",
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)),
           error->message);
       g_clear_error (&error);
     }
@@ -712,7 +714,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
   if (!in_list)
     {
       DEBUG ("Individual'%s' in list:NO, should be:YES",
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
       individual_store_add_individual (self, individual);
 
@@ -726,7 +728,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
   else
     {
       DEBUG ("Individual'%s' in list:YES, should be:YES",
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
       /* Get online state before. */
       if (iters && g_list_length (iters) > 0)
@@ -795,7 +797,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_ICON_STATUS, pixbuf_status,
           EMPATHY_INDIVIDUAL_STORE_COL_PIXBUF_AVATAR_VISIBLE, show_avatar,
           EMPATHY_INDIVIDUAL_STORE_COL_NAME,
-            folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)),
+            folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)),
           EMPATHY_INDIVIDUAL_STORE_COL_PRESENCE_TYPE,
             folks_presence_owner_get_presence_type (
                 FOLKS_PRESENCE_OWNER (individual)),
@@ -841,7 +843,7 @@ individual_store_individual_updated_cb (FolksIndividual *individual,
     EmpathyIndividualStore *self)
 {
   DEBUG ("Individual'%s' updated, checking roster is in sync...",
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
   individual_store_contact_update (self, individual);
 }
@@ -1392,8 +1394,8 @@ individual_store_contact_sort (FolksIndividual *individual_a,
 
   /* alias */
   ret_val = g_utf8_collate (
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual_a)),
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual_b)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual_a)),
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual_b)));
 
   if (ret_val != 0)
     goto out;

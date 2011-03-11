@@ -196,7 +196,7 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
   dialog = gtk_message_dialog_new (parent,
       GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
       _("Block %s?"),
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
   /* build a list of personas that support blocking */
   personas = folks_individual_get_personas (individual);
@@ -237,7 +237,7 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
 
   g_string_append_printf (text,
       _("Are you sure you want to block '%s' from contacting you again?"),
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
   if (npersonas_blocked > 0)
     g_string_append_printf (text, "\n\n%s\n%s",

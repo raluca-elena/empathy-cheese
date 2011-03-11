@@ -180,7 +180,7 @@ individual_information_dialog_set_individual (
 
       /* Update the UI */
       gtk_window_set_title (GTK_WINDOW (dialog),
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
       empathy_individual_widget_set_individual (
           EMPATHY_INDIVIDUAL_WIDGET (priv->individual_widget), individual);
       set_label_visibility (dialog);

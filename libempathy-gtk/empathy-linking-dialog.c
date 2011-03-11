@@ -181,7 +181,7 @@ linking_response_cb (EmpathyLinkingDialog *self,
       dialog = gtk_message_dialog_new (GTK_WINDOW (self), GTK_DIALOG_MODAL,
           GTK_MESSAGE_WARNING, GTK_BUTTONS_NONE,
           _("Unlink linked contacts '%s'?"),
-          folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+          folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
           _("Are you sure you want to unlink these linked contacts? This will "
             "completely split the linked contacts into separate contacts."));

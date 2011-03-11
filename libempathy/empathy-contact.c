@@ -729,12 +729,12 @@ empathy_contact_set_alias (EmpathyContact *contact,
 
   /* Set the alias on the persona if possible */
   persona = empathy_contact_get_persona (contact);
-  if (persona != NULL && FOLKS_IS_ALIASABLE (persona))
+  if (persona != NULL && FOLKS_IS_ALIAS_DETAILS (persona))
     {
       DEBUG ("Setting alias for contact %s to %s",
           empathy_contact_get_id (contact), alias);
 
-      folks_aliasable_set_alias (FOLKS_ALIASABLE (persona), alias);
+      folks_alias_details_set_alias (FOLKS_ALIAS_DETAILS (persona), alias);
     }
 
   if (tp_strdiff (alias, priv->alias))

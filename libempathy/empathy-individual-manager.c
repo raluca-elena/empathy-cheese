@@ -479,7 +479,7 @@ empathy_individual_manager_remove (EmpathyIndividualManager *self,
 
   DEBUG ("removing individual %s (%s)",
       folks_individual_get_id (individual),
-      folks_aliasable_get_alias (FOLKS_ALIASABLE (individual)));
+      folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
   folks_individual_aggregator_remove_individual (priv->aggregator, individual,
       aggregator_remove_individual_cb, self);
