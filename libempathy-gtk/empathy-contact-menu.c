@@ -278,11 +278,12 @@ empathy_contact_block_menu_item_new (EmpathyContact *contact)
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
 
+	manager = empathy_contact_manager_dup_singleton ();
+
 	if (!empathy_contact_manager_initialized ()) {
 		return NULL;
 	}
 
-	manager = empathy_contact_manager_dup_singleton ();
 	connection = empathy_contact_get_connection (contact);
 
 	flags = empathy_contact_manager_get_flags_for_connection (manager,
