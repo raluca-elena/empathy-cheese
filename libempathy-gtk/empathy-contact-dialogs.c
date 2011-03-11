@@ -530,12 +530,13 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 			GTK_DIALOG_MODAL,
 			GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
 			_("Block %s?"),
-			empathy_contact_get_id (contact));
+			empathy_contact_get_alias (contact));
 
 	gtk_message_dialog_format_secondary_text (
 			GTK_MESSAGE_DIALOG (dialog),
-			_("Are you sure you want to block the contact %s?"),
-			empathy_contact_get_id (contact));
+			_("Are you sure you want to block '%s' from "
+			  "contacting you again?"),
+			empathy_contact_get_alias (contact));
 	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
 			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			_("_Block"), GTK_RESPONSE_REJECT,
