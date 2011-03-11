@@ -468,9 +468,9 @@ groups_update (EmpathyIndividualWidget *self)
   if (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_EDIT_GROUPS &&
       priv->individual != NULL)
     {
-      empathy_groups_widget_set_groupable (
+      empathy_groups_widget_set_group_details (
           EMPATHY_GROUPS_WIDGET (priv->groups_widget),
-          FOLKS_GROUPABLE (priv->individual));
+          FOLKS_GROUP_DETAILS (priv->individual));
       gtk_widget_show (priv->groups_widget);
     }
   else

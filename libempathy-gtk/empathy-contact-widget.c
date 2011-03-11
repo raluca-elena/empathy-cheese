@@ -739,11 +739,11 @@ contact_widget_groups_update (EmpathyContactWidget *information)
       FolksPersona *persona =
           empathy_contact_get_persona (information->contact);
 
-      if (FOLKS_IS_GROUPABLE (persona))
+      if (FOLKS_IS_GROUP_DETAILS (persona))
         {
-          empathy_groups_widget_set_groupable (
+          empathy_groups_widget_set_group_details (
               EMPATHY_GROUPS_WIDGET (information->groups_widget),
-              FOLKS_GROUPABLE (persona));
+              FOLKS_GROUP_DETAILS (persona));
           gtk_widget_show (information->groups_widget);
 
           return;

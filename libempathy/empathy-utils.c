@@ -824,7 +824,7 @@ empathy_contact_dup_from_folks_individual (FolksIndividual *individual)
 
 TpChannelGroupChangeReason
 tp_channel_group_change_reason_from_folks_groups_change_reason (
-    FolksGroupableChangeReason reason)
+    FolksGroupDetailsChangeReason reason)
 {
   return (TpChannelGroupChangeReason) reason;
 }

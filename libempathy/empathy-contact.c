@@ -752,10 +752,10 @@ groups_change_group_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
-  FolksGroupable *groupable = FOLKS_GROUPABLE (source);
+  FolksGroupDetails *group_details = FOLKS_GROUP_DETAILS (source);
   GError *error = NULL;
 
-  folks_groupable_change_group_finish (groupable, result, &error);
+  folks_group_details_change_group_finish (group_details, result, &error);
   if (error != NULL)
     {
       g_warning ("failed to change group: %s", error->message);
@@ -779,9 +779,9 @@ empathy_contact_change_group (EmpathyContact *contact, const gchar *group,
   persona = empathy_contact_get_persona (contact);
   if (persona != NULL)
     {
-      if (FOLKS_IS_GROUPABLE (persona))
-        folks_groupable_change_group (FOLKS_GROUPABLE (persona), group, is_member,
-          groups_change_group_cb, contact);
+      if (FOLKS_IS_GROUP_DETAILS (persona))
+        folks_group_details_change_group (FOLKS_GROUP_DETAILS (persona), group,
+            is_member, groups_change_group_cb, contact);
       return;
     }
 
@@ -944,7 +944,8 @@ empathy_contact_set_persona (EmpathyContact *contact,
   /* Set the persona's groups */
   if (priv->groups != NULL)
     {
-      folks_groupable_set_groups (FOLKS_GROUPABLE (persona), priv->groups);
+      folks_group_details_set_groups (FOLKS_GROUP_DETAILS (persona),
+          priv->groups);
       g_hash_table_destroy (priv->groups);
       priv->groups = NULL;
     }

@@ -428,7 +428,8 @@ individual_store_add_individual (EmpathyIndividualStore *self,
 
   if (priv->show_groups)
     {
-      group_set = folks_groupable_get_groups (FOLKS_GROUPABLE (individual));
+      group_set = folks_group_details_get_groups (
+          FOLKS_GROUP_DETAILS (individual));
       groups = g_hash_table_get_keys (group_set);
     }
 

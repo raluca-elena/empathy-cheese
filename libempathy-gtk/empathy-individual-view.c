@@ -240,10 +240,10 @@ groups_change_group_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
-  FolksGroupable *groupable = FOLKS_GROUPABLE (source);
+  FolksGroupDetails *group_details = FOLKS_GROUP_DETAILS (source);
   GError *error = NULL;
 
-  folks_groupable_change_group_finish (groupable, result, &error);
+  folks_group_details_change_group_finish (group_details, result, &error);
   if (error != NULL)
     {
       g_warning ("failed to change group: %s", error->message);
@@ -391,14 +391,14 @@ real_drag_individual_received_cb (EmpathyIndividualView *self,
 
   if (new_group != NULL)
     {
-      folks_groupable_change_group (FOLKS_GROUPABLE (individual), new_group, TRUE,
-          groups_change_group_cb, NULL);
+      folks_group_details_change_group (FOLKS_GROUP_DETAILS (individual),
+          new_group, TRUE, groups_change_group_cb, NULL);
     }
 
   if (old_group != NULL && action == GDK_ACTION_MOVE)
     {
-      folks_groupable_change_group (FOLKS_GROUPABLE (individual), old_group,
-          FALSE, groups_change_group_cb, NULL);
+      folks_group_details_change_group (FOLKS_GROUP_DETAILS (individual),
+          old_group, FALSE, groups_change_group_cb, NULL);
     }
 }
 

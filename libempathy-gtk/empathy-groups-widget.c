@@ -40,20 +40,20 @@
 /**
  * SECTION:empathy-groups-widget
  * @title:EmpathyGroupsWidget
- * @short_description: A widget used to edit the groups of a #FolksGroupable
+ * @short_description: A widget used to edit the groups of a #FolksGroupDetails
  * @include: libempathy-gtk/empathy-groups-widget.h
  *
- * #EmpathyGroupsWidget is a widget which lists the groups of a #FolksGroupable
- * (i.e. a #FolksPersona or a #FolksIndividual) and allows them to be added and
- * removed.
+ * #EmpathyGroupsWidget is a widget which lists the groups of a
+ * #FolksGroupDetails (i.e. a #FolksPersona or a #FolksIndividual) and allows
+ * them to be added and removed.
  */
 
 /**
  * EmpathyGroupsWidget:
  * @parent: parent object
  *
- * Widget which displays and allows editing of the groups of a #FolksGroupable
- * (i.e. a #FolksPersona or #FolksIndividual).
+ * Widget which displays and allows editing of the groups of a
+ * #FolksGroupDetails (i.e. a #FolksPersona or #FolksIndividual).
  */
 
 /* Delay before updating the widget when the id entry changed (seconds) */
@@ -64,7 +64,7 @@
 typedef struct
 {
   /* The object we're actually changing the groups of */
-  FolksGroupable *groupable; /* owned */
+  FolksGroupDetails *group_details; /* owned */
   GtkListStore *group_store; /* owned */
 
   GtkWidget *add_group_entry; /* child widget */
@@ -72,7 +72,7 @@ typedef struct
 } EmpathyGroupsWidgetPriv;
 
 enum {
-  PROP_GROUPABLE = 1,
+  PROP_GROUP_DETAILS = 1,
 };
 
 enum {
@@ -165,8 +165,8 @@ populate_data (EmpathyGroupsWidget *self)
       EMPATHY_CONTACT_LIST (manager));
   g_object_unref (manager);
 
-  /* Get the list of groups that this #FolksGroupable is currently in */
-  my_groups = folks_groupable_get_groups (priv->groupable);
+  /* Get the list of groups that this #FolksGroupDetails is currently in */
+  my_groups = folks_group_details_get_groups (priv->group_details);
 
   for (l = all_groups; l != NULL; l = l->next)
     {
@@ -217,13 +217,13 @@ add_group_entry_activate_cb (GtkEntry *entry,
 }
 
 static void
-change_group_cb (FolksGroupable *groupable,
+change_group_cb (FolksGroupDetails *group_details,
     GAsyncResult *async_result,
     EmpathyGroupsWidget *self)
 {
   GError *error = NULL;
 
-  folks_groupable_change_group_finish (groupable, async_result, &error);
+  folks_group_details_change_group_finish (group_details, async_result, &error);
 
   if (error != NULL)
     {
@@ -248,7 +248,7 @@ add_group_button_clicked_cb (GtkButton *button,
       COL_ENABLED, TRUE,
       -1);
 
-  folks_groupable_change_group (priv->groupable, group, TRUE,
+  folks_group_details_change_group (priv->group_details, group, TRUE,
       (GAsyncReadyCallback) change_group_cb, self);
 }
 
@@ -280,15 +280,15 @@ cell_toggled_cb (GtkCellRendererToggle *cell,
 
   if (group != NULL)
     {
-      folks_groupable_change_group (priv->groupable, group, !was_enabled,
-          (GAsyncReadyCallback) change_group_cb, self);
+      folks_group_details_change_group (priv->group_details, group,
+          !was_enabled, (GAsyncReadyCallback) change_group_cb, self);
       g_free (group);
     }
 }
 
 
 static void
-groupable_group_changed_cb (FolksGroupable *groups,
+group_details_group_changed_cb (FolksGroupDetails *groups,
     const gchar *group,
     gboolean is_member,
     EmpathyGroupsWidget *self)
@@ -453,8 +453,8 @@ get_property (GObject *object,
 
   switch (param_id)
     {
-      case PROP_GROUPABLE:
-        g_value_set_object (value, priv->groupable);
+      case PROP_GROUP_DETAILS:
+        g_value_set_object (value, priv->group_details);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -474,8 +474,8 @@ set_property (GObject *object,
 
   switch (param_id)
     {
-      case PROP_GROUPABLE:
-        empathy_groups_widget_set_groupable (EMPATHY_GROUPS_WIDGET (object),
+      case PROP_GROUP_DETAILS:
+        empathy_groups_widget_set_group_details (EMPATHY_GROUPS_WIDGET (object),
             g_value_get_object (value));
         break;
       default:
@@ -489,7 +489,8 @@ dispose (GObject *object)
 {
   EmpathyGroupsWidgetPriv *priv = GET_PRIV (object);
 
-  empathy_groups_widget_set_groupable (EMPATHY_GROUPS_WIDGET (object), NULL);
+  empathy_groups_widget_set_group_details (EMPATHY_GROUPS_WIDGET (object),
+      NULL);
   tp_clear_object (&priv->group_store);
 
   G_OBJECT_CLASS (empathy_groups_widget_parent_class)->dispose (object);
@@ -505,16 +506,16 @@ empathy_groups_widget_class_init (EmpathyGroupsWidgetClass *klass)
   object_class->dispose = dispose;
 
   /**
-   * EmpathyGroupsWidget:groupable:
+   * EmpathyGroupsWidget:group_details:
    *
-   * The #FolksGroupable whose group membership is to be edited by the
+   * The #FolksGroupDetails whose group membership is to be edited by the
    * #EmpathyGroupsWidget.
    */
-  g_object_class_install_property (object_class, PROP_GROUPABLE,
-      g_param_spec_object ("groupable",
-          "Groupable",
-          "The #FolksGroupable whose groups are being edited.",
-          FOLKS_TYPE_GROUPABLE,
+  g_object_class_install_property (object_class, PROP_GROUP_DETAILS,
+      g_param_spec_object ("group-details",
+          "Group Details",
+          "The #FolksGroupDetails whose groups are being edited.",
+          FOLKS_TYPE_GROUP_DETAILS,
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_type_class_add_private (object_class, sizeof (EmpathyGroupsWidgetPriv));
@@ -522,80 +523,83 @@ empathy_groups_widget_class_init (EmpathyGroupsWidgetClass *klass)
 
 /**
  * empathy_groups_widget_new:
- * @groupable: a #FolksGroupable, or %NULL
+ * @group_details: a #FolksGroupDetails, or %NULL
  *
  * Creates a new #EmpathyGroupsWidget to edit the groups of the given
- * @groupable.
+ * @group_details.
  *
  * Return value: a new #EmpathyGroupsWidget
  */
 GtkWidget *
-empathy_groups_widget_new (FolksGroupable *groupable)
+empathy_groups_widget_new (FolksGroupDetails *group_details)
 {
-  g_return_val_if_fail (groupable == NULL || FOLKS_IS_GROUPABLE (groupable),
+  g_return_val_if_fail (
+      group_details == NULL || FOLKS_IS_GROUP_DETAILS (group_details),
       NULL);
 
   return GTK_WIDGET (g_object_new (EMPATHY_TYPE_GROUPS_WIDGET,
-      "groupable", groupable,
+      "group-details", group_details,
       NULL));
 }
 
 /**
- * empathy_groups_widget_get_groupable:
+ * empathy_groups_widget_get_group_details:
  * @self: an #EmpathyGroupsWidget
  *
- * Get the #FolksGroupable whose group membership is being edited by the
+ * Get the #FolksGroupDetails whose group membership is being edited by the
  * #EmpathyGroupsWidget.
  *
- * Returns: the #FolksGroupable associated with @widget, or %NULL
+ * Returns: the #FolksGroupDetails associated with @widget, or %NULL
  */
-FolksGroupable *
-empathy_groups_widget_get_groupable (EmpathyGroupsWidget *self)
+FolksGroupDetails *
+empathy_groups_widget_get_group_details (EmpathyGroupsWidget *self)
 {
   g_return_val_if_fail (EMPATHY_IS_GROUPS_WIDGET (self), NULL);
 
-  return GET_PRIV (self)->groupable;
+  return GET_PRIV (self)->group_details;
 }
 
 /**
- * empathy_groups_widget_set_groupable:
+ * empathy_groups_widget_set_group_details:
  * @self: an #EmpathyGroupsWidget
- * @groupable: the #FolksGroupable whose membership is to be edited, or %NULL
+ * @group_details: the #FolksGroupDetails whose membership is to be edited, or
+ * %NULL
  *
- * Change the #FolksGroupable whose group membership is to be edited by the
+ * Change the #FolksGroupDetails whose group membership is to be edited by the
  * #EmpathyGroupsWidget.
  */
 void
-empathy_groups_widget_set_groupable (EmpathyGroupsWidget *self,
-    FolksGroupable *groupable)
+empathy_groups_widget_set_group_details (EmpathyGroupsWidget *self,
+    FolksGroupDetails *group_details)
 {
   EmpathyGroupsWidgetPriv *priv;
 
   g_return_if_fail (EMPATHY_IS_GROUPS_WIDGET (self));
-  g_return_if_fail (groupable == NULL || FOLKS_IS_GROUPABLE (groupable));
+  g_return_if_fail (
+      group_details == NULL || FOLKS_IS_GROUP_DETAILS (group_details));
 
   priv = GET_PRIV (self);
 
-  if (groupable == priv->groupable)
+  if (group_details == priv->group_details)
     return;
 
-  if (priv->groupable != NULL)
+  if (priv->group_details != NULL)
     {
-      g_signal_handlers_disconnect_by_func (priv->groupable,
-          groupable_group_changed_cb, self);
+      g_signal_handlers_disconnect_by_func (priv->group_details,
+          group_details_group_changed_cb, self);
     }
 
-  tp_clear_object (&priv->groupable);
+  tp_clear_object (&priv->group_details);
 
-  if (groupable != NULL)
+  if (group_details != NULL)
     {
-      priv->groupable = g_object_ref (groupable);
+      priv->group_details = g_object_ref (group_details);
 
-      g_signal_connect (priv->groupable, "group-changed",
-          (GCallback) groupable_group_changed_cb, self);
+      g_signal_connect (priv->group_details, "group-changed",
+          (GCallback) group_details_group_changed_cb, self);
 
       populate_data (self);
     }
 
-  g_object_notify (G_OBJECT (self), "groupable");
+  g_object_notify (G_OBJECT (self), "group-details");
 }

@@ -54,12 +54,12 @@ typedef struct {
 
 GType empathy_groups_widget_get_type (void) G_GNUC_CONST;
 
-GtkWidget * empathy_groups_widget_new (FolksGroupable *groupable);
+GtkWidget * empathy_groups_widget_new (FolksGroupDetails *group_details);
 
-FolksGroupable * empathy_groups_widget_get_groupable (
+FolksGroupDetails * empathy_groups_widget_get_group_details (
     EmpathyGroupsWidget *self);
-void empathy_groups_widget_set_groupable (EmpathyGroupsWidget *self,
-    FolksGroupable *groupable);
+void empathy_groups_widget_set_group_details (EmpathyGroupsWidget *self,
+    FolksGroupDetails *group_details);
 
 G_END_DECLS
 
