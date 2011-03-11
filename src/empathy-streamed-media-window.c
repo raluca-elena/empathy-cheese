@@ -188,7 +188,6 @@ struct _EmpathyStreamedMediaWindowPriv
   GstElement *video_tee;
 
   GstElement *funnel;
-  GstElement *liveadder;
 
   FsElementAddedNotifier *fsnotifier;
 
@@ -636,17 +635,6 @@ create_video_output_widget (EmpathyStreamedMediaWindow *self)
       G_CALLBACK (empathy_streamed_media_window_video_button_press_cb), self);
 
   g_object_unref (bus);
-}
-
-static void
-create_audio_output (EmpathyStreamedMediaWindow *self)
-{
-  EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
-
-  g_assert (priv->audio_output == NULL);
-  priv->audio_output = empathy_audio_sink_new ();
-  gst_object_ref (priv->audio_output);
-  gst_object_sink (priv->audio_output);
 }
 
 static void
@@ -1131,7 +1119,6 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   create_pipeline (self);
   create_video_output_widget (self);
   create_audio_input (self);
-  create_audio_output (self);
   create_video_input (self);
 
   priv->fsnotifier = fs_element_added_notifier_new ();
@@ -1733,17 +1720,9 @@ empathy_streamed_media_window_dispose (GObject *object)
     g_object_unref (priv->audio_input);
   priv->audio_input = NULL;
 
-  if (priv->audio_output != NULL)
-    g_object_unref (priv->audio_output);
-  priv->audio_output = NULL;
-
   if (priv->video_tee != NULL)
     g_object_unref (priv->video_tee);
   priv->video_tee = NULL;
-
-  if (priv->liveadder != NULL)
-    gst_object_unref (priv->liveadder);
-  priv->liveadder = NULL;
 
   if (priv->fsnotifier != NULL)
     g_object_unref (priv->fsnotifier);
@@ -1877,7 +1856,6 @@ empathy_streamed_media_window_reset_pipeline (EmpathyStreamedMediaWindow *self)
         gtk_widget_destroy (priv->video_preview);
       priv->video_preview = NULL;
 
-      priv->liveadder = NULL;
       priv->funnel = NULL;
 
       create_pipeline (self);
@@ -2051,14 +2029,12 @@ empathy_streamed_media_window_channel_stream_closed_cb (EmpathyStreamedMediaHand
     }
   else if (media_type == TP_MEDIA_STREAM_TYPE_AUDIO)
     {
-      if (priv->liveadder != NULL)
+      if (priv->audio_output != NULL)
         {
           gst_element_set_state (priv->audio_output, GST_STATE_NULL);
-          gst_element_set_state (priv->liveadder, GST_STATE_NULL);
 
           gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_output);
-          gst_bin_remove (GST_BIN (priv->pipeline), priv->liveadder);
-          priv->liveadder = NULL;
+          priv->audio_output = NULL;
         }
     }
 }
@@ -2150,28 +2126,17 @@ empathy_streamed_media_window_get_audio_sink_pad (EmpathyStreamedMediaWindow *se
 {
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GstPad *pad;
-  GstElement *filter;
-  GError *gerror = NULL;
+  GstPadTemplate *template;
 
-  if (priv->liveadder == NULL)
+  if (priv->audio_output == NULL)
     {
-      priv->liveadder = gst_element_factory_make ("liveadder", NULL);
+      priv->audio_output = empathy_audio_sink_new ();
 
-      if (!gst_bin_add (GST_BIN (priv->pipeline), priv->liveadder))
-        {
-          g_warning ("Could not add liveadder to the pipeline");
-          goto error_add_liveadder;
-        }
       if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_output))
         {
           g_warning ("Could not add audio sink to pipeline");
+          g_object_unref (priv->audio_output);
           goto error_add_output;
-        }
-
-      if (gst_element_set_state (priv->liveadder, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
-        {
-          g_warning ("Could not start liveadder");
-          goto error;
         }
 
       if (gst_element_set_state (priv->audio_output, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
@@ -2179,83 +2144,29 @@ empathy_streamed_media_window_get_audio_sink_pad (EmpathyStreamedMediaWindow *se
           g_warning ("Could not start audio sink");
           goto error;
         }
-
-      if (GST_PAD_LINK_FAILED (
-              gst_element_link (priv->liveadder, priv->audio_output)))
-        {
-          g_warning ("Could not link liveadder to audio output");
-          goto error;
-        }
     }
 
-  filter = gst_parse_bin_from_description (
-      "audioconvert ! audioresample ! audioconvert", TRUE, &gerror);
-  if (filter == NULL)
-    {
-      g_warning ("Could not make audio conversion filter: %s", gerror->message);
-      g_clear_error (&gerror);
-      goto error;
-    }
+  template = gst_element_class_get_pad_template (
+    GST_ELEMENT_GET_CLASS (priv->audio_output), "sink%d");
 
-  if (!gst_bin_add (GST_BIN (priv->pipeline), filter))
-    {
-      g_warning ("Could not add audio conversion filter to pipeline");
-      gst_object_unref (filter);
-      goto error;
-    }
-
-  if (gst_element_set_state (filter, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE)
-    {
-      g_warning ("Could not start audio conversion filter");
-      goto error_filter;
-    }
-
-  if (!gst_element_link (filter, priv->liveadder))
-    {
-      g_warning ("Could not link audio conversion filter to liveadder");
-      goto error_filter;
-    }
-
-  pad = gst_element_get_static_pad (filter, "sink");
+  pad = gst_element_request_pad (priv->audio_output,
+    template, NULL, NULL);
 
   if (pad == NULL)
     {
-      g_warning ("Could not get sink pad from filter");
-      goto error_filter;
+      g_warning ("Could not get sink pad from sink");
+      return NULL;
     }
 
   return pad;
 
- error_filter:
-
-  gst_element_set_locked_state (filter, TRUE);
-  gst_element_set_state (filter, GST_STATE_NULL);
-  gst_bin_remove (GST_BIN (priv->pipeline), filter);
-
- error:
-
-  gst_element_set_locked_state (priv->liveadder, TRUE);
+error:
   gst_element_set_locked_state (priv->audio_output, TRUE);
-
-  gst_element_set_state (priv->liveadder, GST_STATE_NULL);
   gst_element_set_state (priv->audio_output, GST_STATE_NULL);
-
   gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_output);
+  priv->audio_output = NULL;
 
- error_add_output:
-
-  gst_bin_remove (GST_BIN (priv->pipeline), priv->liveadder);
-
-  gst_element_set_locked_state (priv->liveadder, FALSE);
-  gst_element_set_locked_state (priv->audio_output, FALSE);
-
- error_add_liveadder:
-
-  if (priv->liveadder != NULL)
-    {
-      gst_object_unref (priv->liveadder);
-      priv->liveadder = NULL;
-    }
+error_add_output:
 
   return NULL;
 }
