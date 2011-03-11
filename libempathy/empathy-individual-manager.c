@@ -485,6 +485,8 @@ empathy_individual_manager_remove (EmpathyIndividualManager *self,
       aggregator_remove_individual_cb, self);
 }
 
+/* FIXME: The parameter @self is not required and the method can be placed in
+ * utilities. I left it as it is to stay coherent with empathy-2.34 */
 /**
  * empathy_individual_manager_supports_blocking
  * @self: the #EmpathyIndividualManager
