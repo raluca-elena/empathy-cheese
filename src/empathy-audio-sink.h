@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyGstAudioSink EmpathyGstAudioSink;
 typedef struct _EmpathyGstAudioSinkClass EmpathyGstAudioSinkClass;
+typedef struct _EmpathyGstAudioSinkPrivate EmpathyGstAudioSinkPrivate;
 
 struct _EmpathyGstAudioSinkClass {
     GstBinClass parent_class;
@@ -35,6 +36,7 @@ struct _EmpathyGstAudioSinkClass {
 
 struct _EmpathyGstAudioSink {
     GstBin parent;
+    EmpathyGstAudioSinkPrivate *priv;
 };
 
 GType empathy_audio_sink_get_type (void);
