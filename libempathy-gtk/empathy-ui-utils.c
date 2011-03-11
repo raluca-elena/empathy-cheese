@@ -231,8 +231,8 @@ empathy_icon_name_for_individual (FolksIndividual *individual)
 	TpConnectionPresenceType presence;
 
 	folks_presence =
-	    folks_presence_owner_get_presence_type (
-	        FOLKS_PRESENCE_OWNER (individual));
+	    folks_presence_details_get_presence_type (
+	        FOLKS_PRESENCE_DETAILS (individual));
 	presence = empathy_folks_presence_type_to_tp (folks_presence);
 
 	return empathy_icon_name_for_presence (presence);

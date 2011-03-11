@@ -438,8 +438,8 @@ update_persona (EmpathyPersonaStore *self,
       gtk_tree_path_free (path);
 
       /* Get online state now. */
-      now_online = folks_presence_owner_is_online (
-          FOLKS_PRESENCE_OWNER (persona));
+      now_online = folks_presence_details_is_online (
+          FOLKS_PRESENCE_DETAILS (persona));
 
       /* Get online state before. */
       gtk_tree_model_get (GTK_TREE_MODEL (self), &iter,
@@ -485,11 +485,11 @@ update_persona (EmpathyPersonaStore *self,
           EMPATHY_PERSONA_STORE_COL_DISPLAY_ID,
               folks_persona_get_display_id (persona),
           EMPATHY_PERSONA_STORE_COL_PRESENCE_TYPE,
-              folks_presence_owner_get_presence_type (
-                  FOLKS_PRESENCE_OWNER (persona)),
+              folks_presence_details_get_presence_type (
+                  FOLKS_PRESENCE_DETAILS (persona)),
           EMPATHY_PERSONA_STORE_COL_STATUS,
-              folks_presence_owner_get_presence_message (
-                  FOLKS_PRESENCE_OWNER (persona)),
+              folks_presence_details_get_presence_message (
+                  FOLKS_PRESENCE_DETAILS (persona)),
           EMPATHY_PERSONA_STORE_COL_IS_ONLINE, now_online,
           EMPATHY_PERSONA_STORE_COL_CAN_AUDIO_CALL,
               empathy_contact_get_capabilities (contact) &
@@ -629,9 +629,10 @@ state_sort_func (GtkTreeModel *model,
    * the presences.
    */
   ret_val = -tp_connection_presence_type_cmp_availability (
-      folks_presence_owner_get_presence_type (FOLKS_PRESENCE_OWNER (persona_a)),
-      folks_presence_owner_get_presence_type (
-          FOLKS_PRESENCE_OWNER (persona_b)));
+      folks_presence_details_get_presence_type (
+          FOLKS_PRESENCE_DETAILS (persona_a)),
+      folks_presence_details_get_presence_type (
+          FOLKS_PRESENCE_DETAILS (persona_b)));
 
   if (ret_val == 0) {
     /* Fallback: compare by name et al. */

@@ -228,20 +228,21 @@ update_weak_contact (EmpathyIndividualWidget *self)
       personas = folks_individual_get_personas (priv->individual);
       for (l = personas; l != NULL; l = l->next)
         {
-          FolksPresenceOwner *presence;
+          FolksPresenceDetails *presence;
 
           /* We only want personas which implement FolksPresence */
-          if (!FOLKS_IS_PRESENCE_OWNER (l->data))
+          if (!FOLKS_IS_PRESENCE_DETAILS (l->data))
             continue;
 
-          presence = FOLKS_PRESENCE_OWNER (l->data);
+          presence = FOLKS_PRESENCE_DETAILS (l->data);
 
-          if (folks_presence_owner_typecmp (
-                  folks_presence_owner_get_presence_type (presence),
+          if (folks_presence_details_typecmp (
+                  folks_presence_details_get_presence_type (presence),
                   presence_type) > 0 &&
               empathy_folks_persona_is_interesting (FOLKS_PERSONA (presence)))
             {
-              presence_type = folks_presence_owner_get_presence_type (presence);
+              presence_type = folks_presence_details_get_presence_type (
+                  presence);
               tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
             }
         }
@@ -1242,13 +1243,13 @@ notify_presence_cb (gpointer folks_object,
   state_image = g_object_get_data (table, "state-image");
 
   /* FIXME: Default messages should be moved into libfolks (bgo#627403) */
-  message = folks_presence_owner_get_presence_message (
-      FOLKS_PRESENCE_OWNER (folks_object));
+  message = folks_presence_details_get_presence_message (
+      FOLKS_PRESENCE_DETAILS (folks_object));
   if (EMP_STR_EMPTY (message))
     {
       message = empathy_presence_get_default_message (
-          folks_presence_owner_get_presence_type (
-              FOLKS_PRESENCE_OWNER (folks_object)));
+          folks_presence_details_get_presence_type (
+              FOLKS_PRESENCE_DETAILS (folks_object)));
     }
 
   if (message != NULL)
@@ -1258,8 +1259,8 @@ notify_presence_cb (gpointer folks_object,
 
   gtk_image_set_from_icon_name (GTK_IMAGE (state_image),
       empathy_icon_name_for_presence (
-          folks_presence_owner_get_presence_type (
-              FOLKS_PRESENCE_OWNER (folks_object))),
+          folks_presence_details_get_presence_type (
+              FOLKS_PRESENCE_DETAILS (folks_object))),
       GTK_ICON_SIZE_BUTTON);
   gtk_widget_show (state_image);
 }
