@@ -1,22 +1,22 @@
 # BSD Licence
 # Alex Szasz 2008
 # Adi Roiban https://adi.roiban.ro, 2009
-# Lucian Adrian Grijincu <lucian.grijincu@gmail.com>, 2009, 2010.
+# Lucian Adrian Grijincu <lucian.grijincu@gmail.com>, 2009, 2010, 2011.
 # Daniel Șerbănescu <cyber19rider@gmail.com>, 2010.
 # Simion Ruxandra <ruxy.simion@gmail.com>, 2010.
 msgid ""
 msgstr ""
 "Project-Id-Version: Empathy\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=empathy&keywords=I18N+L10N&component=general\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empath"
+"y&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2011-03-10 23:23+0000\n"
-"PO-Revision-Date: 2010-12-31 19:54+0300\n"
-"Last-Translator: Simion Ruxandra <ruxy.simion@gmail.com>\n"
-"Language-Team: Romanian\n"
+"PO-Revision-Date: 2011-03-12 04:13+0200\n"
+"Last-Translator: Lucian Adrian Grijincu <lucian.grijincu@gmail.com>\n"
+"Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ro\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);;\n"
 "X-Generator: Virtaal 0.6.1\n"
@@ -1295,6 +1295,8 @@ msgid ""
 "/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
 "current one"
 msgstr ""
+"/part [<chat room ID>] [<reason>]: părăsește canalul de discuții, implicit "
+"cel curent"
 
 #: ../libempathy-gtk/empathy-chat.c:928
 msgid "/query <contact ID> [<message>]: open a private chat"
@@ -1487,17 +1489,16 @@ msgstr "Deconectat"
 #. Add message
 #: ../libempathy-gtk/empathy-chat.c:3127
 msgid "Would you like to store this password?"
-msgstr ""
+msgstr "Doriți să se stocheze această parolă?"
 
 #: ../libempathy-gtk/empathy-chat.c:3133
-#, fuzzy
 #| msgid "Members"
 msgid "Remember"
-msgstr "Membri"
+msgstr "Reține"
 
 #: ../libempathy-gtk/empathy-chat.c:3143
 msgid "Not now"
-msgstr ""
+msgstr "Nu acum"
 
 #: ../libempathy-gtk/empathy-chat.c:3187
 msgid "Retry"
@@ -1675,28 +1676,24 @@ msgstr "_Invită într-o cameră de discuții"
 
 #. Title
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:508
-#, fuzzy
 #| msgid "Select a contact"
 msgid "Search contacts"
-msgstr "Alege un contact"
+msgstr "Caută contacte"
 
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:538
-#, fuzzy
 #| msgid "Search"
 msgid "Search: "
-msgstr "Caută"
+msgstr "Caută:"
 
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:596
-#, fuzzy
 #| msgid "_Add Contact…"
 msgid "_Add Contact"
-msgstr "_Adaugă contact…"
+msgstr "_Adaugă contact"
 
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:614
-#, fuzzy
 #| msgid "No match found"
 msgid "No contacts found"
-msgstr "Nicio potrivire"
+msgstr "Nu s-a găsit niciun contact"
 
 #: ../libempathy-gtk/empathy-contact-selector.c:129
 msgid "Select a contact"
@@ -2280,8 +2277,7 @@ msgstr "Albastru"
 
 #: ../libempathy-gtk/empathy-tls-dialog.c:150
 msgid "The identity provided by the chat server cannot be verified."
-msgstr ""
-"Identitatea furnizată de către serverul de chat nu poate fi verificată."
+msgstr "Identitatea furnizată de către serverul de chat nu poate fi verificată."
 
 #: ../libempathy-gtk/empathy-tls-dialog.c:157
 msgid "The certificate is not signed by a Certification Authority."
@@ -2363,7 +2359,7 @@ msgstr "Alegeți un fișier"
 
 #: ../libempathy-gtk/empathy-ui-utils.c:1874
 msgid "Insufficient free space to save file"
-msgstr ""
+msgstr "Spațiu liber insuficient pentru a salva fișierul"
 
 #: ../libempathy-gtk/empathy-ui-utils.c:1882
 #, c-format
@@ -2371,6 +2367,8 @@ msgid ""
 "%s of free space are required to save this file, but only %s is available. "
 "Please choose another location."
 msgstr ""
+"Este necesari un spațiu liber de %s pentru a salva acest fișier, dar doar %s "
+"sunt disponibili. Alegeți altă locație."
 
 #: ../libempathy-gtk/empathy-ui-utils.c:1926
 #, c-format
@@ -2768,10 +2766,9 @@ msgid "Edit->Accounts"
 msgstr "Editare->Conturi"
 
 #: ../src/empathy-account-assistant.c:1104
-#, fuzzy
 #| msgid "I don't want to enable this feature for now"
 msgid "I do _not want to enable this feature for now"
-msgstr "Nu vreau să activez această facilitate acum"
+msgstr "_Nu vreau să activez această facilitate acum"
 
 #: ../src/empathy-account-assistant.c:1140
 msgid ""
@@ -3390,7 +3387,7 @@ msgid "Password required"
 msgstr "Necesită parolă"
 
 #: ../src/empathy-event-manager.c:1069
-#, fuzzy, c-format
+#, c-format
 #| msgid "%s would like permission to see when you are available"
 msgid "%s would like permission to see when you are online"
 msgstr "%s cere permisiunea să vadă când sunteți conectat"
@@ -3658,11 +3655,10 @@ msgid "_Room"
 msgstr "Came_ră"
 
 #: ../src/empathy-main-window.ui.h:27
-#, fuzzy
 #| msgctxt "Link individual (contextual menu)"
 #| msgid "_Link Contacts…"
 msgid "_Search for Contacts…"
-msgstr "Îm_bină contactele…"
+msgstr "_Caută contacte…"
 
 #: ../src/empathy-new-chatroom-dialog.c:337
 msgid "Chat Room"
@@ -4004,7 +4000,6 @@ msgid ""
 msgstr ""
 "Nu afișa niciun dialog, decât dacă sunt numai conturi de „Persoane din apropiere”"
 
-
 #: ../src/empathy-accounts.c:191
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr "Alege inițial contul dat (ex: gabble/jabber/foo_40example_2eorg0)"
@@ -4052,15 +4047,15 @@ msgid "Accept"
 msgstr "Acceptă"
 
 #: ../src/empathy-call-observer.c:130
-#, fuzzy, c-format
+#, c-format
 #| msgid "Incoming call from %s"
 msgid "Missed call from %s"
-msgstr "Apel primit de la %s"
+msgstr "Apel pierdut de la %s"
 
 #: ../src/empathy-call-observer.c:133
 #, c-format
 msgid "%s just tried to call you, but you were in another call."
-msgstr ""
+msgstr "%s a încercat să vă sune, dar erați deja în alt apel."
 
 #~ msgid "%s is now offline."
 #~ msgstr "%s s-a deconectat."
