@@ -10,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empath"
 "y&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2011-03-10 23:23+0000\n"
-"PO-Revision-Date: 2011-03-12 04:13+0200\n"
+"PO-Revision-Date: 2011-03-12 04:20+0200\n"
 "Last-Translator: Lucian Adrian Grijincu <lucian.grijincu@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -227,7 +227,7 @@ msgstr "Arată avatare"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:43
 msgid "Show contact list in rooms"
-msgstr "Arată lista contactelor în camerele de discuții"
+msgstr "Arată lista contactelor în canale de discuții"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:44
 msgid "Show hint about closing the main window"
@@ -277,7 +277,7 @@ msgstr "Folosește sunete de notificare"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:55
 msgid "Use theme for chat rooms"
-msgstr "Folosește tema pentru camerele de discuții"
+msgstr "Folosește tema pentru canalele de discuții"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:56
 msgid "Whether Empathy can publish the user's location to their contacts."
@@ -436,7 +436,7 @@ msgstr ""
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:86
 msgid "Whether to show the contact list in chat rooms."
-msgstr "Dacă să afișeze lista de contacte în camerele de discuții."
+msgstr "Dacă să afișeze lista de contacte în canalele de discuții."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:87
 msgid "Whether to show the contact list in compact mode."
@@ -452,7 +452,7 @@ msgstr ""
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:89
 msgid "Whether to use the theme for chat rooms."
-msgstr "Dacă să se folosească tema pentru camerele de discuții."
+msgstr "Dacă să se folosească tema pentru canalele de discuții."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:90
 msgid ""
@@ -1214,7 +1214,7 @@ msgstr "_Utilizator:"
 
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:4
 msgid "I_gnore conference and chat room invitations"
-msgstr "I_gnoră invitații la camere de discuții și conferințe"
+msgstr "I_gnoră invitații la canale de discuții și conferințe"
 
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
 msgid "What is your Yahoo! ID?"
@@ -1230,7 +1230,7 @@ msgstr "I_D Yahoo!:"
 
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
 msgid "_Room List locale:"
-msgstr "Configurări regionale listă came_re:"
+msgstr "Configurări regionale listă cana_le:"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:448
 #: ../libempathy-gtk/empathy-avatar-chooser.c:524
@@ -1284,11 +1284,11 @@ msgstr "/topic <topic>: modifică subiectul conversației curente"
 
 #: ../libempathy-gtk/empathy-chat.c:915
 msgid "/join <chat room ID>: join a new chat room"
-msgstr "/join <identificator cameră>: alăturare la o nouă cameră de discuții"
+msgstr "/join <identificator cameră>: alăturare la un nou canal de discuții"
 
 #: ../libempathy-gtk/empathy-chat.c:918
 msgid "/j <chat room ID>: join a new chat room"
-msgstr "/j <identificator cameră>: alăturare la o nouă cameră de discuții"
+msgstr "/j <identificator cameră>: alăturare la un nou canal de discuții"
 
 #: ../libempathy-gtk/empathy-chat.c:923
 msgid ""
@@ -1322,7 +1322,7 @@ msgid ""
 msgstr ""
 "/say <mesaj>: trimite <mesaj> conversației curente. Această comandă vă "
 "permite să trimiteți un mesaj ce începe cu „/”. De exemplu: „/say /join este "
-"folosit pentru alăturarea la o nouă cameră de discuții”"
+"folosit pentru alăturarea la un nou canal de discuții”"
 
 #: ../libempathy-gtk/empathy-chat.c:945
 msgid ""
@@ -1458,7 +1458,7 @@ msgstr "%s a fost blocat"
 #: ../libempathy-gtk/empathy-chat.c:2299
 #, c-format
 msgid "%s has left the room"
-msgstr "%s a părăsit camera de discuții"
+msgstr "%s a părăsit canalul de discuții"
 
 #. Note to translators: this string is appended to
 #. * notifications like "foo has left the room", with the message
@@ -1473,7 +1473,7 @@ msgstr " (%s)"
 #: ../libempathy-gtk/empathy-chat.c:2333
 #, c-format
 msgid "%s has joined the room"
-msgstr "%s s-a alăturat camerei de discuții"
+msgstr "%s s-a alăturat canalului de discuții"
 
 #: ../libempathy-gtk/empathy-chat.c:2358
 #, c-format
@@ -1511,7 +1511,7 @@ msgstr "Parolă incorectă; încercați din nou:"
 #. Add message
 #: ../libempathy-gtk/empathy-chat.c:3308
 msgid "This room is protected by a password:"
-msgstr "Această cameră este protejată de o parolă:"
+msgstr "Acest canal este protejată de o parolă:"
 
 #: ../libempathy-gtk/empathy-chat.c:3335
 msgid "Join"
@@ -1667,12 +1667,12 @@ msgstr "_Editare"
 #: ../libempathy-gtk/empathy-individual-menu.c:970
 #: ../src/empathy-chat-window.c:916
 msgid "Inviting you to this room"
-msgstr "Sunteți invitat în această cameră"
+msgstr "Sunteți invitat în acest canal de discuții"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:584
 #: ../libempathy-gtk/empathy-individual-menu.c:1017
 msgid "_Invite to Chat Room"
-msgstr "_Invită într-o cameră de discuții"
+msgstr "_Invită într-un canal de discuții"
 
 #. Title
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:508
@@ -1772,7 +1772,7 @@ msgstr "Etaj:"
 #: ../libempathy-gtk/empathy-contact-widget.c:780
 #: ../libempathy-gtk/empathy-individual-widget.c:505
 msgid "Room:"
-msgstr "Cameră de discuții:"
+msgstr "Canal de discuții:"
 
 #: ../libempathy-gtk/empathy-contact-widget.c:782
 #: ../libempathy-gtk/empathy-individual-widget.c:507
@@ -3266,7 +3266,7 @@ msgstr "_Editare"
 
 #: ../src/empathy-chat-window.ui.h:13
 msgid "_Favorite Chat Room"
-msgstr "Cameră de discuții _favorită"
+msgstr "Canal de discuții _favorit"
 
 #: ../src/empathy-chat-window.ui.h:14 ../src/empathy-main-window.ui.h:20
 msgid "_Help"
@@ -3298,7 +3298,7 @@ msgstr "Nume"
 
 #: ../src/empathy-chatrooms-window.c:259
 msgid "Room"
-msgstr "Cameră"
+msgstr "Canal de discuții"
 
 #: ../src/empathy-chatrooms-window.c:267
 msgid "Auto-Connect"
@@ -3306,7 +3306,7 @@ msgstr "Conectare automată"
 
 #: ../src/empathy-chatrooms-window.ui.h:2
 msgid "Manage Favorite Rooms"
-msgstr "Gestionează camerele favorite"
+msgstr "Gestionează canalele de discuții favorite"
 
 #: ../src/empathy-event-manager.c:507
 msgid "Incoming video call"
@@ -3346,7 +3346,7 @@ msgstr "Apel video primit de la %s"
 
 #: ../src/empathy-event-manager.c:737
 msgid "Room invitation"
-msgstr "Invitație cameră"
+msgstr "Invitație canal de discuție"
 
 #: ../src/empathy-event-manager.c:739
 #, c-format
@@ -3652,7 +3652,7 @@ msgstr "Informații _personale"
 
 #: ../src/empathy-main-window.ui.h:26
 msgid "_Room"
-msgstr "Came_ră"
+msgstr "Cana_l de discuții"
 
 #: ../src/empathy-main-window.ui.h:27
 #| msgctxt "Link individual (contextual menu)"
@@ -3662,7 +3662,7 @@ msgstr "_Caută contacte…"
 
 #: ../src/empathy-new-chatroom-dialog.c:337
 msgid "Chat Room"
-msgstr "Cameră de discuții"
+msgstr "Canal de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.c:353
 msgid "Members"
@@ -3690,42 +3690,42 @@ msgstr "Nu"
 
 #: ../src/empathy-new-chatroom-dialog.c:591
 msgid "Could not start room listing"
-msgstr "Nu s-a putut porni afișarea camerei de discuții"
+msgstr "Nu s-a putut porni afișarea canalelor de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.c:601
 msgid "Could not stop room listing"
-msgstr "Nu s-a putut opri afișarea camerei de discuții"
+msgstr "Nu s-a putut opri afișarea canalelor de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:2
 msgid "Couldn't load room list"
-msgstr "Nu s-a putut încărca lista camerei de discuții"
+msgstr "Nu s-a putut încărca lista canalelor de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:3
 msgid ""
 "Enter the room name to join here or click on one or more rooms in the list."
 msgstr ""
-"Introduceți numele camerei la care doriți să vă alăturați sau faceți clic pe "
-"una sau mai multe camere din listă."
+"Introduceți numele canalului la care doriți să vă alăturați sau faceți clic "
+"pe unul sau mai multe canale din listă."
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:4
 msgid ""
 "Enter the server which hosts the room, or leave it empty if the room is on "
 "the current account's server"
 msgstr ""
-"Introduceți serverul care găzduiește camera sau lăsați spațiul gol dacă "
-"camera este pe serverul contului curent"
+"Introduceți serverul care găzduiește canalul sau lăsați spațiul gol dacă "
+"canalul este pe serverul contului curent"
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:5
 msgid "Join Room"
-msgstr "Alăturare la camera de discuții"
+msgstr "Alăturare la canal de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:6
 msgid "Room List"
-msgstr "Listă camere de discuții"
+msgstr "Listă canale de discuții"
 
 #: ../src/empathy-new-chatroom-dialog.ui.h:8
 msgid "_Room:"
-msgstr "Came_ră:"
+msgstr "Cana_l:"
 
 #: ../src/empathy-preferences.c:139
 msgid "Message received"
@@ -3843,7 +3843,7 @@ msgstr "Arată e_moticoanele ca imagini"
 
 #: ../src/empathy-preferences.ui.h:20
 msgid "Show contact _list in rooms"
-msgstr "Afișează _lista de contacte în camerele de discuții"
+msgstr "Afișează _lista de contacte în canale de discuții"
 
 #: ../src/empathy-preferences.ui.h:21
 msgid "Sounds"
