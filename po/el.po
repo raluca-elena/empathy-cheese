@@ -6,22 +6,23 @@
 # Marios Zindilis <m.zindilis@dmajor.org>, 2009.
 # Jennie Petoumenou <epetoumenou@gmail.com>, 2009, 2010.
 # Russell Kyaw <rkyaw@yahoo.com>, 2010.
-# Simos Xenitellis <simos@gnome.org>, 2010.
 # Michael Kotsarinis <mk73628@gmail.com>, 2011.
+# Simos Xenitellis <simos@gnome.org>, 2010, 2011.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy.HEAD\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-01-13 12:34+0200\n"
-"PO-Revision-Date: 2011-01-13 09:00+0200\n"
-"Last-Translator: Michael Kotsarinis <mk73628@gmail.com>\n"
-"Language-Team: team@gnome.gr\n"
-"Language: el\n"
+"POT-Creation-Date: 2011-03-13 20:04+0200\n"
+"PO-Revision-Date: 2011-03-13 20:04+0200\n"
+"Last-Translator: Simos Xenitellis <simos@gnome.org>\n"
+"Language-Team: Greek <team@gnome.gr>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Virtaal 0.6.1\n"
+"Language: el\n"
+"Plural-Forms: nplurals=2; plural=n>1;\n"
+"X-Generator: Virtaal 0.5.2\n"
 
 #: ../data/empathy.desktop.in.in.h:1
 msgid "Chat on Google Talk, Facebook, MSN and many other chat services"
@@ -477,189 +478,192 @@ msgstr "Διαχείριση λογαριασμών μηνυμάτων και τ
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2202
+#: ../src/empathy-accounts-dialog.c:2242
 msgid "Messaging and VoIP Accounts"
 msgstr "Λογαριασμοί μηνυμάτων και τηλεφωνίας"
 
-#: ../libempathy/empathy-ft-handler.c:830
+#: ../libempathy/empathy-ft-handler.c:825
 msgid "File transfer completed, but the file was corrupted"
 msgstr "Ολοκληρώθηκε η μεταφορά του αρχείου, αλλά το αρχείο έχει πρόβλημα"
 
-#: ../libempathy/empathy-ft-handler.c:1121
+#: ../libempathy/empathy-ft-handler.c:1116
 msgid "File transfer not supported by remote contact"
 msgstr "Η απομακρυσμένη επαφή δεν υποστηρίζει τη μεταφορά αρχείων"
 
-#: ../libempathy/empathy-ft-handler.c:1177
+#: ../libempathy/empathy-ft-handler.c:1172
 msgid "The selected file is not a regular file"
 msgstr "Το επιλεγμένο αρχείο δεν είναι κανονικό αρχείο"
 
-#: ../libempathy/empathy-ft-handler.c:1186
+#: ../libempathy/empathy-ft-handler.c:1181
 msgid "The selected file is empty"
 msgstr "Το επιλεγμένο αρχείο είναι κενό"
 
-#: ../libempathy/empathy-tp-file.c:283
+#: ../libempathy/empathy-tp-file.c:268
 msgid "Socket type not supported"
 msgstr "Δεν υποστηρίζεται αυτός ο τύπος υποδοχής"
 
-#: ../libempathy/empathy-tp-file.c:402
+#: ../libempathy/empathy-tp-file.c:387
 msgid "No reason was specified"
 msgstr "Δε διευκρινίστηκε η αιτία"
 
-#: ../libempathy/empathy-tp-file.c:405
+#: ../libempathy/empathy-tp-file.c:390
 msgid "The change in state was requested"
 msgstr "Ζητήθηκε η αλλαγή της κατάστασης"
 
-#: ../libempathy/empathy-tp-file.c:408
+#: ../libempathy/empathy-tp-file.c:393
 msgid "You canceled the file transfer"
 msgstr "Ακυρώσατε τη μεταφορά του αρχείου"
 
-#: ../libempathy/empathy-tp-file.c:411
+#: ../libempathy/empathy-tp-file.c:396
 msgid "The other participant canceled the file transfer"
 msgstr "Ο συνομιλητής σας ακύρωσε τη μεταφορά του αρχείου"
 
-#: ../libempathy/empathy-tp-file.c:414
+#: ../libempathy/empathy-tp-file.c:399
 msgid "Error while trying to transfer the file"
 msgstr "Σφάλμα κατά τη μεταφορά του αρχείου"
 
-#: ../libempathy/empathy-tp-file.c:417
+#: ../libempathy/empathy-tp-file.c:402
 msgid "The other participant is unable to transfer the file"
 msgstr "Ο συνομιλητής σας δεν μπορεί να μεταφέρει το αρχείο"
 
-#: ../libempathy/empathy-tp-file.c:420 ../libempathy/empathy-utils.c:324
+#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:383
 msgid "Unknown reason"
 msgstr "Άγνωστος λόγος"
 
-#: ../libempathy/empathy-utils.c:246
+#: ../libempathy/empathy-utils.c:305
 msgid "Available"
 msgstr "Διαθέσιμος/η"
 
-#: ../libempathy/empathy-utils.c:248
+#: ../libempathy/empathy-utils.c:307
 msgid "Busy"
 msgstr "Απασχολημένος/η"
 
-#: ../libempathy/empathy-utils.c:251
+#: ../libempathy/empathy-utils.c:310
 msgid "Away"
 msgstr "Απουσιάζει"
 
-#: ../libempathy/empathy-utils.c:253
+#: ../libempathy/empathy-utils.c:312
 msgid "Invisible"
 msgstr "Αόρατος"
 
-#: ../libempathy/empathy-utils.c:255
+#: ../libempathy/empathy-utils.c:314
 msgid "Offline"
 msgstr "Εκτός σύνδεσης"
 
-#: ../libempathy/empathy-utils.c:257 ../src/empathy-call-window.c:1900
-#: ../src/empathy-call-window.c:1901 ../src/empathy-call-window.c:1902
-#: ../src/empathy-call-window.c:1903 ../src/empathy-call-window.ui.h:18
+#: ../libempathy/empathy-utils.c:316
+#: ../src/empathy-streamed-media-window.c:1897
+#: ../src/empathy-streamed-media-window.c:1898
+#: ../src/empathy-streamed-media-window.c:1899
+#: ../src/empathy-streamed-media-window.c:1900
+#: ../src/empathy-call-window.ui.h:18
 msgid "Unknown"
 msgstr "Άγνωστο"
 
-#: ../libempathy/empathy-utils.c:296
+#: ../libempathy/empathy-utils.c:355
 msgid "No reason specified"
 msgstr "Δε διευκρινίστηκε αιτία"
 
-#: ../libempathy/empathy-utils.c:298 ../libempathy/empathy-utils.c:354
+#: ../libempathy/empathy-utils.c:357 ../libempathy/empathy-utils.c:413
 msgid "Status is set to offline"
 msgstr "Η κατάσταση έχει καθορισθεί σε ανενεργός"
 
-#: ../libempathy/empathy-utils.c:300 ../libempathy/empathy-utils.c:334
+#: ../libempathy/empathy-utils.c:359 ../libempathy/empathy-utils.c:393
 msgid "Network error"
 msgstr "Σφάλμα σύνδεσης στο δίκτυο"
 
-#: ../libempathy/empathy-utils.c:302 ../libempathy/empathy-utils.c:336
+#: ../libempathy/empathy-utils.c:361 ../libempathy/empathy-utils.c:395
 msgid "Authentication failed"
 msgstr "Η πιστοποίηση απέτυχε"
 
-#: ../libempathy/empathy-utils.c:304 ../libempathy/empathy-utils.c:338
+#: ../libempathy/empathy-utils.c:363 ../libempathy/empathy-utils.c:397
 msgid "Encryption error"
 msgstr "Σφάλμα κρυπτογράφησης"
 
-#: ../libempathy/empathy-utils.c:306
+#: ../libempathy/empathy-utils.c:365
 msgid "Name in use"
 msgstr "Χρησιμοποιούμενο όνομα"
 
-#: ../libempathy/empathy-utils.c:308 ../libempathy/empathy-utils.c:340
+#: ../libempathy/empathy-utils.c:367 ../libempathy/empathy-utils.c:399
 msgid "Certificate not provided"
 msgstr "Δεν παρέχεται πιστοποιητικό"
 
-#: ../libempathy/empathy-utils.c:310 ../libempathy/empathy-utils.c:342
+#: ../libempathy/empathy-utils.c:369 ../libempathy/empathy-utils.c:401
 msgid "Certificate untrusted"
 msgstr "Μη έμπιστο πιστοποιητικό"
 
-#: ../libempathy/empathy-utils.c:312 ../libempathy/empathy-utils.c:344
+#: ../libempathy/empathy-utils.c:371 ../libempathy/empathy-utils.c:403
 msgid "Certificate expired"
 msgstr "Το πιστοποιητικό έχει λήξει"
 
-#: ../libempathy/empathy-utils.c:314 ../libempathy/empathy-utils.c:346
+#: ../libempathy/empathy-utils.c:373 ../libempathy/empathy-utils.c:405
 msgid "Certificate not activated"
 msgstr "Το πιστοποιητικό δεν είναι ενεργοποιημένο"
 
-#: ../libempathy/empathy-utils.c:316 ../libempathy/empathy-utils.c:348
+#: ../libempathy/empathy-utils.c:375 ../libempathy/empathy-utils.c:407
 msgid "Certificate hostname mismatch"
 msgstr "Αναντιστοιχία ονόματος συστήματος και πιστοποιητικού"
 
-#: ../libempathy/empathy-utils.c:318 ../libempathy/empathy-utils.c:350
+#: ../libempathy/empathy-utils.c:377 ../libempathy/empathy-utils.c:409
 msgid "Certificate fingerprint mismatch"
 msgstr "Αναντιστοιχία αποτυπώματος και πιστοποιητικού"
 
-#: ../libempathy/empathy-utils.c:320 ../libempathy/empathy-utils.c:352
+#: ../libempathy/empathy-utils.c:379 ../libempathy/empathy-utils.c:411
 msgid "Certificate self-signed"
 msgstr "Αυτο-υπογεγραμμένο πιστοποιητικό "
 
-#: ../libempathy/empathy-utils.c:322
+#: ../libempathy/empathy-utils.c:381
 msgid "Certificate error"
 msgstr "Σφάλμα πιστοποιητικού"
 
-#: ../libempathy/empathy-utils.c:356
+#: ../libempathy/empathy-utils.c:415
 msgid "Encryption is not available"
 msgstr "Μη διαθέσιμη κρυπτογράφηση"
 
-#: ../libempathy/empathy-utils.c:358
+#: ../libempathy/empathy-utils.c:417
 msgid "Certificate is invalid"
 msgstr "Το πιστοποιητικό δεν είναι έγκυρο"
 
-#: ../libempathy/empathy-utils.c:360
+#: ../libempathy/empathy-utils.c:419
 msgid "Connection has been refused"
 msgstr "Άρνηση σύνδεσης"
 
-#: ../libempathy/empathy-utils.c:362
+#: ../libempathy/empathy-utils.c:421
 msgid "Connection can't be established"
 msgstr "Αποτυχία σύνδεσης"
 
-#: ../libempathy/empathy-utils.c:364
+#: ../libempathy/empathy-utils.c:423
 msgid "Connection has been lost"
 msgstr "Απώλεια σύνδεσης"
 
-#: ../libempathy/empathy-utils.c:366
+#: ../libempathy/empathy-utils.c:425
 msgid "This resource is already connected to the server"
 msgstr "Αυτός ο πόρος είναι ήδη συνδεδεμένος στον διακομιστή"
 
-#: ../libempathy/empathy-utils.c:368
+#: ../libempathy/empathy-utils.c:427
 msgid ""
 "Connection has been replaced by a new connection using the same resource"
 msgstr "Η σύνδεση αντικαταστάθηκε από νέα σύνδεση με χρήση του ίδιου πόρου"
 
-#: ../libempathy/empathy-utils.c:371
+#: ../libempathy/empathy-utils.c:430
 msgid "The account already exists on the server"
 msgstr "Αυτός ο λογαριασμός υπάρχει ήδη στο διακομιστή"
 
-#: ../libempathy/empathy-utils.c:373
+#: ../libempathy/empathy-utils.c:432
 msgid "Server is currently too busy to handle the connection"
 msgstr "Ο διακομιστής είναι πολύ απασχολημένος για να χειρισθεί τη σύνδεση"
 
-#: ../libempathy/empathy-utils.c:375
+#: ../libempathy/empathy-utils.c:434
 msgid "Certificate has been revoked"
 msgstr "Το πιστοποιητικό έχει ανακληθεί"
 
-#: ../libempathy/empathy-utils.c:377
+#: ../libempathy/empathy-utils.c:436
 msgid ""
 "Certificate uses an insecure cipher algorithm or is cryptographically weak"
 msgstr ""
 "Το πιστοποιητικό χρησιμοποιεί ανασφαλές αλγόριθμο ή είναι κρυπτογραφικά "
 "αδύναμο"
 
-#: ../libempathy/empathy-utils.c:380
+#: ../libempathy/empathy-utils.c:439
 msgid ""
 "The length of the server certificate, or the depth of the server certificate "
 "chain, exceed the limits imposed by the cryptography library"
@@ -668,20 +672,20 @@ msgstr ""
 "πιστοποιητικών, υπερβαίνει τα όρια που τίθενται από τη βιβλιοθήκη "
 "κρυπτογράφησης"
 
-#: ../libempathy/empathy-utils.c:543
+#: ../libempathy/empathy-utils.c:602
 #: ../libempathy-gtk/empathy-contact-list-store.h:73
 msgid "People Nearby"
 msgstr "Γειτονικά άτομα"
 
-#: ../libempathy/empathy-utils.c:548
+#: ../libempathy/empathy-utils.c:607
 msgid "Yahoo! Japan"
 msgstr "Yahoo! Japan"
 
-#: ../libempathy/empathy-utils.c:577
+#: ../libempathy/empathy-utils.c:636
 msgid "Google Talk"
 msgstr "Google Talk"
 
-#: ../libempathy/empathy-utils.c:578
+#: ../libempathy/empathy-utils.c:637
 msgid "Facebook Chat"
 msgstr "Συζήτηση Facebook"
 
@@ -736,7 +740,7 @@ msgid "All"
 msgstr "Όλα"
 
 #: ../libempathy-gtk/empathy-account-widget.c:679
-#: ../libempathy-gtk/empathy-log-window.c:650
+#: ../libempathy-gtk/empathy-log-window.c:647
 #: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "Λογαριασμός"
@@ -761,55 +765,56 @@ msgstr "Θύρα"
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1152
+#: ../libempathy-gtk/empathy-account-widget.c:1163
 #, c-format
 msgid "The account %s is edited via My Web Accounts."
 msgstr "Η επεξεργασία του λογαριασμού %s γίνεται μέσω του My Web Accounts."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1158
+#: ../libempathy-gtk/empathy-account-widget.c:1169
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Ο λογαριασμός %s δεν γίνεται να επεξεργασθεί στο Empathy."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1178
+#: ../libempathy-gtk/empathy-account-widget.c:1189
 msgid "Launch My Web Accounts"
 msgstr "Εκκίνηση My Web Accounts"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1516
+#: ../libempathy-gtk/empathy-account-widget.c:1527
 msgid "Username:"
 msgstr "Όνομα χρήστη: "
 
-#: ../libempathy-gtk/empathy-account-widget.c:1884
+#: ../libempathy-gtk/empathy-account-widget.c:1894
 msgid "A_pply"
 msgstr "Ε_φαρμογή"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1914
+#: ../libempathy-gtk/empathy-account-widget.c:1924
 msgid "L_og in"
 msgstr "_Είσοδος"
 
 #. Account and Identifier
-#: ../libempathy-gtk/empathy-account-widget.c:1980
+#: ../libempathy-gtk/empathy-account-widget.c:1990
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:515
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1486
+#: ../libempathy-gtk/empathy-individual-widget.c:1479
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
 msgid "Account:"
 msgstr "Λογαριασμός:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1991
+#: ../libempathy-gtk/empathy-account-widget.c:2001
 msgid "_Enabled"
 msgstr "_Ενεργοποιημένο"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2056
+#: ../libempathy-gtk/empathy-account-widget.c:2066
 msgid "This account already exists on the server"
 msgstr "Αυτός ο λογαριασμός υπάρχει ήδη στον εξυπηρετητή"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2059
+#: ../libempathy-gtk/empathy-account-widget.c:2069
 msgid "Create a new account on the server"
 msgstr "Δημιουργία νέου λογαριασμού στον εξυπηρετητή"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2251
+#: ../libempathy-gtk/empathy-account-widget.c:2261
 msgid "Ca_ncel"
 msgstr "Α_κύρωση"
 
@@ -818,19 +823,19 @@ msgstr "Α_κύρωση"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2548
+#: ../libempathy-gtk/empathy-account-widget.c:2558
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s στο %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2574
+#: ../libempathy-gtk/empathy-account-widget.c:2584
 #, c-format
 msgid "%s Account"
 msgstr "Λογαριασμός %s "
 
-#: ../libempathy-gtk/empathy-account-widget.c:2578
+#: ../libempathy-gtk/empathy-account-widget.c:2588
 msgid "New account"
 msgstr "Νέος λογαριασμός"
 
@@ -866,37 +871,47 @@ msgstr "_Συνθηματικό:"
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:10
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:5
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:15
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
 msgid "Remember Password"
 msgstr "Απομνημόνευση συνθηματικού:"
 
+#. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-aim.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
+#: ../libempathy-gtk/empathy-password-dialog.c:311
+msgid "Remember password"
+msgstr "Απομνημόνευση συνθηματικού"
+
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
 msgid "Screen _Name:"
 msgstr "Ψευδώ_νυμο:"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
 msgid "What is your AIM password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο AIM;"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
 msgid "What is your AIM screen name?"
 msgstr "Ποιο είναι το ψευδώνυμό σας στο AIM;"
-
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
-msgid "_Port:"
-msgstr "_Θύρα:"
 
 #: ../libempathy-gtk/empathy-account-widget-aim.ui.h:9
 #: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:9
 #: ../libempathy-gtk/empathy-account-widget-icq.ui.h:10
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:26
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:9
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:13
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
+msgid "_Port:"
+msgstr "_Θύρα:"
+
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:27
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:10
 #: ../src/empathy-new-chatroom-dialog.ui.h:9
 msgid "_Server:"
 msgstr "_Εξυπηρετητής:"
@@ -912,11 +927,11 @@ msgstr "<b>Παράδειγμα:</b> όνομαχρήστη"
 msgid "Login I_D:"
 msgstr "Όνομα ει_σόδου:"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
 msgid "What is your GroupWise User ID?"
 msgstr "Ποιο είναι το όνομα χρήστη σας για το GroupWise;"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
 msgid "What is your GroupWise password?"
 msgstr "Ποιο είναι το συνθηματικό σας για το GroupWise;"
 
@@ -933,11 +948,11 @@ msgstr "_Κωδικοποίηση χαρακτήρων:"
 msgid "ICQ _UIN:"
 msgstr "ICQ _UIN:"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
 msgid "What is your ICQ UIN?"
 msgstr "Ποιο είναι το UIN σας στο ICQ;"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
 msgid "What is your ICQ password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο ICQ;"
 
@@ -1038,12 +1053,12 @@ msgstr "Παράκαμψη ρυθμίσεων του εξυπηρετητή"
 msgid "Priori_ty:"
 msgstr "_Προτεραιότητα:"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:12
 msgid "Reso_urce:"
 msgstr "_Πόρος:"
 
 #. This string is not wrapped in the dialog so you may have to add some '\n' to make it look nice.
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:13
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:14
 msgid ""
 "This is your username, not your normal Facebook login.\n"
 "If you are facebook.com/<b>badger</b>, enter <b>badger</b>.\n"
@@ -1057,39 +1072,39 @@ msgstr ""
 "a> για να αποκτήσετε λογαριασμό στο Facebook, \n"
 "αν δεν έχετε ήδη."
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
 msgid "Use old SS_L"
 msgstr "Χρήση παλιού SS_L"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
 msgid "What is your Facebook password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο Facebook;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
 msgid "What is your Facebook username?"
 msgstr "Ποιο είναι το όνομα χρήστη σας στο Facebook;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
 msgid "What is your Google ID?"
 msgstr "Ποιο είναι το όνομα χρήστη σας στο Google;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
 msgid "What is your Google password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο Google;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
 msgid "What is your Jabber ID?"
 msgstr "Ποιο είναι το όνομα χρήστη σας στο Jabber;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
 msgid "What is your Jabber password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο Jabber;"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
 msgid "What is your desired Jabber ID?"
 msgstr "Επιλέξτε όνομα χρήστη για το Jabber."
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
 msgid "What is your desired Jabber password?"
 msgstr "Επιλέξτε συνθηματικό για το Jabber."
 
@@ -1097,11 +1112,11 @@ msgstr "Επιλέξτε συνθηματικό για το Jabber."
 msgid "<b>Example:</b> user@hotmail.com"
 msgstr "<b>Παράδειγμα:</b> myusername@hotmail.com"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
 msgid "What is your Windows Live ID?"
 msgstr "Ποιο είναι το όνομα χρήστη σας στο Windows Live;"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
 msgid "What is your Windows Live password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο Windows Live;"
 
@@ -1177,27 +1192,27 @@ msgstr "Θύρα:"
 msgid "Proxy Options"
 msgstr "Επιλογές διαμεσολαβητή"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
 msgid "STUN Server:"
 msgstr "Εξυπηρετητής STUN:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
 msgid "Server:"
 msgstr "Εξυπηρετητής:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
 msgid "Transport:"
 msgstr "Μεταφορά:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
 msgid "What is your SIP account password?"
 msgstr "Ποιο είναι το συνθηματικό σας για το SIP;"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
 msgid "What is your SIP login ID?"
 msgstr "Ποιο είναι το όνομα εισόδου σας για το SIP;"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:22
 msgid "_Username:"
 msgstr "Ό_νομα χρήστη: "
 
@@ -1205,25 +1220,19 @@ msgstr "Ό_νομα χρήστη: "
 msgid "I_gnore conference and chat room invitations"
 msgstr "Α_γνόηση προσκλήσεων σε δωμάτια συζήτησης ή διασκέψεις"
 
-#. remember password ticky box
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
-#: ../libempathy-gtk/empathy-password-dialog.c:302
-msgid "Remember password"
-msgstr "Απομνημόνευση συνθηματικού"
-
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
 msgid "What is your Yahoo! ID?"
 msgstr "Ποιο είναι το όνομα χρήστη σας στο Yahoo!;"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
 msgid "What is your Yahoo! password?"
 msgstr "Ποιο είναι το συνθηματικό σας στο Yahoo!;"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
 msgid "Yahoo! I_D:"
 msgstr "Yahoo! I_D:"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:12
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
 msgid "_Room List locale:"
 msgstr "Τοπική λίστα _δωματίων:"
 
@@ -1257,51 +1266,59 @@ msgstr "Όλα τα αρχεία"
 msgid "Click to enlarge"
 msgstr "Κλικ για μεγέθυνση"
 
-#: ../libempathy-gtk/empathy-chat.c:645
+#: ../libempathy-gtk/empathy-chat.c:655
 msgid "Failed to open private chat"
 msgstr "Αποτυχία ανοίγματος ιδιωτικής συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:696
+#: ../libempathy-gtk/empathy-chat.c:720
 msgid "Topic not supported on this conversation"
 msgstr "Η συζήτηση δεν υποστηρίζει θέματα"
 
-#: ../libempathy-gtk/empathy-chat.c:702
+#: ../libempathy-gtk/empathy-chat.c:726
 msgid "You are not allowed to change the topic"
 msgstr "Δεν έχετε δικαίωμα αλλαγής του θέματος"
 
-#: ../libempathy-gtk/empathy-chat.c:841
+#: ../libempathy-gtk/empathy-chat.c:909
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: Εκκαθάριση όλων των μηνυμάτων της τρέχουσας συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:844
+#: ../libempathy-gtk/empathy-chat.c:912
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr "/topic <θέμα>: Ορισμός του θέματος της τρέχουσας συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:847
+#: ../libempathy-gtk/empathy-chat.c:915
 msgid "/join <chat room ID>: join a new chat room"
 msgstr "/join <όνομα δωματίου>: Είσοδος σε νέο δωμάτιο συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:850
+#: ../libempathy-gtk/empathy-chat.c:918
 msgid "/j <chat room ID>: join a new chat room"
 msgstr "/ <όνομα δωματίου>: Είσοδος σε νέο δωμάτιο συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:855
+#: ../libempathy-gtk/empathy-chat.c:923
+msgid ""
+"/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
+"current one"
+msgstr ""
+"/part [<chat room ID>] [<reason>]: έξοδος από το κανάλι, ως προεπιλογή το "
+"τρέχον κανάλι"
+
+#: ../libempathy-gtk/empathy-chat.c:928
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr "/query <όνομα επαφής> [<μήνυμα>]: Άνοιγμα ιδιωτικής συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:858
+#: ../libempathy-gtk/empathy-chat.c:931
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr "/msg <όνομα επαφής> <μήνυμα>: Άνοιγμα ιδιωτικής συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:862
+#: ../libempathy-gtk/empathy-chat.c:934
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr "/nick <ψευδώνυμο>: Αλλαγή του ψευδωνύμου σας στον τρέχοντα εξυπηρετητή"
 
-#: ../libempathy-gtk/empathy-chat.c:865
+#: ../libempathy-gtk/empathy-chat.c:937
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr "/me <μήνυμα>: Αποστολή μηνύματος ΕΝΕΡΓΕΙΑΣ στην τρέχουσα συζήτηση"
 
-#: ../libempathy-gtk/empathy-chat.c:868
+#: ../libempathy-gtk/empathy-chat.c:940
 msgid ""
 "/say <message>: send <message> to the current conversation. This is used to "
 "send a message starting with a '/'. For example: \"/say /join is used to "
@@ -1311,7 +1328,7 @@ msgstr ""
 "για την αποστολή μηνυμάτων που ξεκινούν από '/'. Π.χ.: \"/say /join - "
 "χρησιμοποιείται για είσοδο σε νέο δωμάτιο\""
 
-#: ../libempathy-gtk/empathy-chat.c:873
+#: ../libempathy-gtk/empathy-chat.c:945
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -1319,99 +1336,99 @@ msgstr ""
 "/help [<εντολή>]: Εμφάνιση όλων των υποστηριζόμενων εντολών. Αν έχει οριστεί "
 "συγκεκριμένη <εντολή>, εμφάνιση του τρόπου χρήσης της."
 
-#: ../libempathy-gtk/empathy-chat.c:883
+#: ../libempathy-gtk/empathy-chat.c:955
 #, c-format
 msgid "Usage: %s"
 msgstr "Χρήση: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:925
+#: ../libempathy-gtk/empathy-chat.c:997
 msgid "Unknown command"
 msgstr "Άγνωστη εντολή"
 
-#: ../libempathy-gtk/empathy-chat.c:1051
+#: ../libempathy-gtk/empathy-chat.c:1123
 msgid "Unknown command; see /help for the available commands"
 msgstr ""
 "Άγνωστη εντολή. Πληκτρολογήστε /help για να δείτε τις διαθέσιμες εντολές"
 
-#: ../libempathy-gtk/empathy-chat.c:1191
+#: ../libempathy-gtk/empathy-chat.c:1263
 msgid "offline"
 msgstr "εκτός σύνδεσης"
 
-#: ../libempathy-gtk/empathy-chat.c:1194
+#: ../libempathy-gtk/empathy-chat.c:1266
 msgid "invalid contact"
 msgstr "μη έγκυρη επαφή"
 
-#: ../libempathy-gtk/empathy-chat.c:1197
+#: ../libempathy-gtk/empathy-chat.c:1269
 msgid "permission denied"
 msgstr "δε δόθηκε άδεια"
 
-#: ../libempathy-gtk/empathy-chat.c:1200
+#: ../libempathy-gtk/empathy-chat.c:1272
 msgid "too long message"
 msgstr "υπερβολικά μεγάλο μήνυμα"
 
-#: ../libempathy-gtk/empathy-chat.c:1203
+#: ../libempathy-gtk/empathy-chat.c:1275
 msgid "not implemented"
 msgstr "δεν υποστηρίζεται"
 
-#: ../libempathy-gtk/empathy-chat.c:1207
+#: ../libempathy-gtk/empathy-chat.c:1279
 msgid "unknown"
 msgstr "άγνωστο"
 
-#: ../libempathy-gtk/empathy-chat.c:1211
+#: ../libempathy-gtk/empathy-chat.c:1283
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "Σφάλμα κατά την αποστολή του μηνύματος '%s': %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1272 ../src/empathy-chat-window.c:711
+#: ../libempathy-gtk/empathy-chat.c:1344 ../src/empathy-chat-window.c:704
 msgid "Topic:"
 msgstr "Θέμα:"
 
-#: ../libempathy-gtk/empathy-chat.c:1284
+#: ../libempathy-gtk/empathy-chat.c:1356
 #, c-format
 msgid "Topic set to: %s"
 msgstr "Το θέμα ορίστηκε ως: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1286
+#: ../libempathy-gtk/empathy-chat.c:1358
 msgid "No topic defined"
 msgstr "Δεν έχει οριστεί θέμα"
 
-#: ../libempathy-gtk/empathy-chat.c:1785
+#: ../libempathy-gtk/empathy-chat.c:1857
 msgid "(No Suggestions)"
 msgstr "(Δεν υπάρχουν υποδείξεις)"
 
 #. translators: %s is the selected word
-#: ../libempathy-gtk/empathy-chat.c:1853
+#: ../libempathy-gtk/empathy-chat.c:1925
 #, c-format
 msgid "Add '%s' to Dictionary"
 msgstr "Προσθήκη '%s' στο Λεξικό"
 
 #. translators: first %s is the selected word,
 #. * second %s is the language name of the target dictionary
-#: ../libempathy-gtk/empathy-chat.c:1890
+#: ../libempathy-gtk/empathy-chat.c:1962
 #, c-format
 msgid "Add '%s' to %s Dictionary"
 msgstr "Προσθήκη '%s' στο Λεξικό %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1949
+#: ../libempathy-gtk/empathy-chat.c:2021
 msgid "Insert Smiley"
 msgstr "Εισαγωγή χαμόγελου"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:1967
-#: ../libempathy-gtk/empathy-ui-utils.c:1811
+#: ../libempathy-gtk/empathy-chat.c:2039
+#: ../libempathy-gtk/empathy-ui-utils.c:1810
 msgid "_Send"
 msgstr "Α_ποστολή"
 
 #. Spelling suggestions
-#: ../libempathy-gtk/empathy-chat.c:2002
+#: ../libempathy-gtk/empathy-chat.c:2074
 msgid "_Spelling Suggestions"
 msgstr "_Υποδείξεις ορθογραφίας"
 
-#: ../libempathy-gtk/empathy-chat.c:2091
+#: ../libempathy-gtk/empathy-chat.c:2163
 msgid "Failed to retrieve recent logs"
 msgstr "Αποτυχία ανάκτησης των προσφάτων αρχείων καταγραφής"
 
-#: ../libempathy-gtk/empathy-chat.c:2197
+#: ../libempathy-gtk/empathy-chat.c:2274
 #, c-format
 msgid "%s has disconnected"
 msgstr "Ο/Η %s αποσυνδέθηκε"
@@ -1419,12 +1436,12 @@ msgstr "Ο/Η %s αποσυνδέθηκε"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2204
+#: ../libempathy-gtk/empathy-chat.c:2281
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "Ο/Η %2$s έδιωξε τον/την %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2207
+#: ../libempathy-gtk/empathy-chat.c:2284
 #, c-format
 msgid "%s was kicked"
 msgstr "Ο/Η %s διώχτηκε"
@@ -1432,17 +1449,17 @@ msgstr "Ο/Η %s διώχτηκε"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2215
+#: ../libempathy-gtk/empathy-chat.c:2292
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "Ο/Η %2$s απαγόρευσε την είσοδο στον/στην %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2218
+#: ../libempathy-gtk/empathy-chat.c:2295
 #, c-format
 msgid "%s was banned"
 msgstr "Απαγορεύτηκε η είσοδος στον/στην %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2222
+#: ../libempathy-gtk/empathy-chat.c:2299
 #, c-format
 msgid "%s has left the room"
 msgstr "Ο/Η %s βγήκε από το δωμάτιο συζήτησης"
@@ -1452,47 +1469,63 @@ msgstr "Ο/Η %s βγήκε από το δωμάτιο συζήτησης"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2231
+#: ../libempathy-gtk/empathy-chat.c:2308
 #, c-format
 msgid " (%s)"
 msgstr " (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2256
+#: ../libempathy-gtk/empathy-chat.c:2333
 #, c-format
 msgid "%s has joined the room"
 msgstr "Ο/Η %s μπήκε στο δωμάτιο συζήτησης"
 
-#: ../libempathy-gtk/empathy-chat.c:2281
+#: ../libempathy-gtk/empathy-chat.c:2358
 #, c-format
 msgid "%s is now known as %s"
 msgstr "Ο/Η %s ονομάζεται πλέον %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2420 ../src/empathy-call-window.c:1945
+#: ../libempathy-gtk/empathy-chat.c:2497
+#: ../src/empathy-streamed-media-window.c:1942
+#: ../src/empathy-event-manager.c:1122
 msgid "Disconnected"
 msgstr "Εκτός σύνδεσης"
 
-#: ../libempathy-gtk/empathy-chat.c:3051
-msgid "Wrong password; please try again:"
-msgstr "Λάθος συνθηματικό. Παρακαλώ, προσπαθήστε ξανά:"
+#. Add message
+#: ../libempathy-gtk/empathy-chat.c:3127
+msgid "Would you like to store this password?"
+msgstr "Θα θέλατε να αποθηκεύσετε αυτό το συνθηματικό;"
 
-#: ../libempathy-gtk/empathy-chat.c:3052
+#: ../libempathy-gtk/empathy-chat.c:3133
+msgid "Remember"
+msgstr "Απομνημόνευση"
+
+#: ../libempathy-gtk/empathy-chat.c:3143
+msgid "Not now"
+msgstr "Όχι τώρα"
+
+#: ../libempathy-gtk/empathy-chat.c:3187
 msgid "Retry"
 msgstr "Προσπάθεια ξανά"
 
-#: ../libempathy-gtk/empathy-chat.c:3057
+#: ../libempathy-gtk/empathy-chat.c:3191
+msgid "Wrong password; please try again:"
+msgstr "Λάθος συνθηματικό. Παρακαλώ, προσπαθήστε ξανά:"
+
+#. Add message
+#: ../libempathy-gtk/empathy-chat.c:3308
 msgid "This room is protected by a password:"
 msgstr "Αυτό το δωμάτιο προστατεύεται με συνθηματικό:"
 
-#: ../libempathy-gtk/empathy-chat.c:3058
+#: ../libempathy-gtk/empathy-chat.c:3335
 msgid "Join"
 msgstr "Είσοδος"
 
-#: ../libempathy-gtk/empathy-chat.c:3196
+#: ../libempathy-gtk/empathy-chat.c:3505 ../src/empathy-event-manager.c:1144
 msgid "Connected"
 msgstr "Σε σύνδεση"
 
-#: ../libempathy-gtk/empathy-chat.c:3249
-#: ../libempathy-gtk/empathy-log-window.c:657
+#: ../libempathy-gtk/empathy-chat.c:3558
+#: ../libempathy-gtk/empathy-log-window.c:654
 msgid "Conversation"
 msgstr "Συζήτηση"
 
@@ -1544,280 +1577,297 @@ msgstr "Μη ομαδοποιημένα"
 msgid "Favorite People"
 msgstr "Αγαπημένοι άνθρωποι:"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:1999
-#: ../libempathy-gtk/empathy-individual-view.c:2283
+#: ../libempathy-gtk/empathy-contact-list-view.c:2012
+#: ../libempathy-gtk/empathy-individual-view.c:2309
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Σίγουρα θέλετε να διαγράψετε την ομάδα '%s';"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2001
-#: ../libempathy-gtk/empathy-individual-view.c:2286
+#: ../libempathy-gtk/empathy-contact-list-view.c:2014
+#: ../libempathy-gtk/empathy-individual-view.c:2312
 msgid "Removing group"
 msgstr "Διαγραφή ομάδας"
 
 #. Remove
-#: ../libempathy-gtk/empathy-contact-list-view.c:2050
-#: ../libempathy-gtk/empathy-contact-list-view.c:2127
-#: ../libempathy-gtk/empathy-individual-view.c:2341
-#: ../libempathy-gtk/empathy-individual-view.c:2488
+#: ../libempathy-gtk/empathy-contact-list-view.c:2063
+#: ../libempathy-gtk/empathy-contact-list-view.c:2140
+#: ../libempathy-gtk/empathy-individual-view.c:2367
+#: ../libempathy-gtk/empathy-individual-view.c:2514
 #: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "_Διαγραφή"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2080
-#: ../libempathy-gtk/empathy-individual-view.c:2391
+#: ../libempathy-gtk/empathy-contact-list-view.c:2093
+#: ../libempathy-gtk/empathy-individual-view.c:2417
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "Σίγουρα θέλετε να διαγράψετε την επαφή '%s';"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2082
-#: ../libempathy-gtk/empathy-individual-view.c:2407
+#: ../libempathy-gtk/empathy-contact-list-view.c:2095
+#: ../libempathy-gtk/empathy-individual-view.c:2433
 msgid "Removing contact"
 msgstr "Διαγραφή επαφής"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:203
-#: ../src/empathy-main-window.ui.h:14
+#: ../libempathy-gtk/empathy-contact-menu.c:204
+#: ../src/empathy-main-window.ui.h:13
 msgid "_Add Contact…"
 msgstr "Προσ_θήκη επαφής…"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:230
-#: ../libempathy-gtk/empathy-individual-menu.c:516
-#: ../src/empathy-main-window.ui.h:15
+#: ../libempathy-gtk/empathy-contact-menu.c:231
+#: ../libempathy-gtk/empathy-individual-menu.c:517
+#: ../src/empathy-main-window.ui.h:14
 msgid "_Chat"
 msgstr "_Συζήτηση"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:261
-#: ../libempathy-gtk/empathy-individual-menu.c:559
+#: ../libempathy-gtk/empathy-contact-menu.c:262
+#: ../libempathy-gtk/empathy-individual-menu.c:560
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "_Φωνητική κλήση"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:292
-#: ../libempathy-gtk/empathy-individual-menu.c:601
+#: ../libempathy-gtk/empathy-contact-menu.c:293
+#: ../libempathy-gtk/empathy-individual-menu.c:602
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "_Βιντεοκλήση"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:333
-#: ../libempathy-gtk/empathy-individual-menu.c:644
-#: ../src/empathy-main-window.ui.h:26
+#: ../libempathy-gtk/empathy-contact-menu.c:339
+#: ../libempathy-gtk/empathy-individual-menu.c:645
+#: ../src/empathy-main-window.ui.h:25
 msgid "_Previous Conversations"
 msgstr "_Προηγούμενες συζητήσεις"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:355
-#: ../libempathy-gtk/empathy-individual-menu.c:685
+#: ../libempathy-gtk/empathy-contact-menu.c:361
+#: ../libempathy-gtk/empathy-individual-menu.c:686
 msgid "Send File"
 msgstr "Αποστολή αρχείου"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:378
-#: ../libempathy-gtk/empathy-individual-menu.c:727
+#: ../libempathy-gtk/empathy-contact-menu.c:384
+#: ../libempathy-gtk/empathy-individual-menu.c:728
 msgid "Share My Desktop"
 msgstr "Κοινή χρήση της επιφάνειας εργασίας μου"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:418
-#: ../libempathy-gtk/empathy-contact-widget.c:1630
-#: ../libempathy-gtk/empathy-individual-menu.c:761
-#: ../libempathy-gtk/empathy-individual-widget.c:1377
+#: ../libempathy-gtk/empathy-contact-menu.c:424
+#: ../libempathy-gtk/empathy-contact-widget.c:1762
+#: ../libempathy-gtk/empathy-individual-menu.c:762
+#: ../libempathy-gtk/empathy-individual-widget.c:1370
 msgid "Favorite"
 msgstr "Αγαπημένο"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:447
-#: ../libempathy-gtk/empathy-individual-menu.c:788
+#: ../libempathy-gtk/empathy-contact-menu.c:453
+#: ../libempathy-gtk/empathy-individual-menu.c:789
 msgid "Infor_mation"
 msgstr "Πληροφο_ρίες"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:493
+#: ../libempathy-gtk/empathy-contact-menu.c:499
 msgctxt "Edit contact (contextual menu)"
 msgid "_Edit"
 msgstr "_Επεξεργασία"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:547
-#: ../libempathy-gtk/empathy-individual-menu.c:969
-#: ../src/empathy-chat-window.c:923
+#: ../libempathy-gtk/empathy-contact-menu.c:553
+#: ../libempathy-gtk/empathy-individual-menu.c:970
+#: ../src/empathy-chat-window.c:916
 msgid "Inviting you to this room"
 msgstr "Πρόσκληση στο δωμάτιο"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:578
-#: ../libempathy-gtk/empathy-individual-menu.c:1016
+#: ../libempathy-gtk/empathy-contact-menu.c:584
+#: ../libempathy-gtk/empathy-individual-menu.c:1017
 msgid "_Invite to Chat Room"
 msgstr "_Πρόσκληση στο δωμάτιο συζήτησης"
+
+#. Title
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:508
+msgid "Search contacts"
+msgstr "Αναζήτηση επαφών"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:538
+msgid "Search: "
+msgstr "Αναζήτηση: "
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:596
+msgid "_Add Contact"
+msgstr "Προσ_θήκη επαφής"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:614
+msgid "No contacts found"
+msgstr "Δεν βρέθηκαν επαφές"
 
 #: ../libempathy-gtk/empathy-contact-selector.c:129
 msgid "Select a contact"
 msgstr "Επιλογή επαφής"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:252
+#: ../libempathy-gtk/empathy-contact-widget.c:295
 #: ../libempathy-gtk/empathy-individual-widget.c:153
 msgid "Full name:"
 msgstr "Πλήρες όνομα:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:253
+#: ../libempathy-gtk/empathy-contact-widget.c:296
 #: ../libempathy-gtk/empathy-individual-widget.c:154
 msgid "Phone number:"
 msgstr "Αριθμός τηλεφώνου:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:254
+#: ../libempathy-gtk/empathy-contact-widget.c:297
 #: ../libempathy-gtk/empathy-individual-widget.c:155
 msgid "E-mail address:"
 msgstr "Ηλ. διεύθυνση:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:255
+#: ../libempathy-gtk/empathy-contact-widget.c:298
 #: ../libempathy-gtk/empathy-individual-widget.c:156
 msgid "Website:"
 msgstr "Ιστότοπος:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:256
+#: ../libempathy-gtk/empathy-contact-widget.c:299
 #: ../libempathy-gtk/empathy-individual-widget.c:157
 msgid "Birthday:"
 msgstr "Γενέθλια:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:670
-#: ../libempathy-gtk/empathy-individual-widget.c:477
+#: ../libempathy-gtk/empathy-contact-widget.c:762
+#: ../libempathy-gtk/empathy-individual-widget.c:487
 msgid "Country ISO Code:"
 msgstr "Κωδικός ISO χώρας:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:672
-#: ../libempathy-gtk/empathy-individual-widget.c:479
+#: ../libempathy-gtk/empathy-contact-widget.c:764
+#: ../libempathy-gtk/empathy-individual-widget.c:489
 msgid "Country:"
 msgstr "Χώρα:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:674
-#: ../libempathy-gtk/empathy-individual-widget.c:481
+#: ../libempathy-gtk/empathy-contact-widget.c:766
+#: ../libempathy-gtk/empathy-individual-widget.c:491
 msgid "State:"
 msgstr "Πολιτεία:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:676
-#: ../libempathy-gtk/empathy-individual-widget.c:483
+#: ../libempathy-gtk/empathy-contact-widget.c:768
+#: ../libempathy-gtk/empathy-individual-widget.c:493
 msgid "City:"
 msgstr "Πόλη:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:678
-#: ../libempathy-gtk/empathy-individual-widget.c:485
+#: ../libempathy-gtk/empathy-contact-widget.c:770
+#: ../libempathy-gtk/empathy-individual-widget.c:495
 msgid "Area:"
 msgstr "Περιοχή:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:680
-#: ../libempathy-gtk/empathy-individual-widget.c:487
+#: ../libempathy-gtk/empathy-contact-widget.c:772
+#: ../libempathy-gtk/empathy-individual-widget.c:497
 msgid "Postal Code:"
 msgstr "Ταχ. κώδικας:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:682
-#: ../libempathy-gtk/empathy-individual-widget.c:489
+#: ../libempathy-gtk/empathy-contact-widget.c:774
+#: ../libempathy-gtk/empathy-individual-widget.c:499
 msgid "Street:"
 msgstr "Οδός:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:684
-#: ../libempathy-gtk/empathy-individual-widget.c:491
+#: ../libempathy-gtk/empathy-contact-widget.c:776
+#: ../libempathy-gtk/empathy-individual-widget.c:501
 msgid "Building:"
 msgstr "Κτίριο:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:686
-#: ../libempathy-gtk/empathy-individual-widget.c:493
+#: ../libempathy-gtk/empathy-contact-widget.c:778
+#: ../libempathy-gtk/empathy-individual-widget.c:503
 msgid "Floor:"
 msgstr "Όροφος:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:688
-#: ../libempathy-gtk/empathy-individual-widget.c:495
+#: ../libempathy-gtk/empathy-contact-widget.c:780
+#: ../libempathy-gtk/empathy-individual-widget.c:505
 msgid "Room:"
 msgstr "Δωμάτιο:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:690
-#: ../libempathy-gtk/empathy-individual-widget.c:497
+#: ../libempathy-gtk/empathy-contact-widget.c:782
+#: ../libempathy-gtk/empathy-individual-widget.c:507
 msgid "Text:"
 msgstr "Κείμενο:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:692
-#: ../libempathy-gtk/empathy-individual-widget.c:499
+#: ../libempathy-gtk/empathy-contact-widget.c:784
+#: ../libempathy-gtk/empathy-individual-widget.c:509
 msgid "Description:"
 msgstr "Περιγραφή:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:694
-#: ../libempathy-gtk/empathy-individual-widget.c:501
+#: ../libempathy-gtk/empathy-contact-widget.c:786
+#: ../libempathy-gtk/empathy-individual-widget.c:511
 msgid "URI:"
 msgstr "URI:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:696
-#: ../libempathy-gtk/empathy-individual-widget.c:503
+#: ../libempathy-gtk/empathy-contact-widget.c:788
+#: ../libempathy-gtk/empathy-individual-widget.c:513
 msgid "Accuracy Level:"
 msgstr "Επίπεδο ακρίβειας:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:698
-#: ../libempathy-gtk/empathy-individual-widget.c:505
+#: ../libempathy-gtk/empathy-contact-widget.c:790
+#: ../libempathy-gtk/empathy-individual-widget.c:515
 msgid "Error:"
 msgstr "Σφάλμα:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:700
-#: ../libempathy-gtk/empathy-individual-widget.c:507
+#: ../libempathy-gtk/empathy-contact-widget.c:792
+#: ../libempathy-gtk/empathy-individual-widget.c:517
 msgid "Vertical Error (meters):"
 msgstr "Κάθετο σφάλμα (σε μέτρα):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:702
-#: ../libempathy-gtk/empathy-individual-widget.c:509
+#: ../libempathy-gtk/empathy-contact-widget.c:794
+#: ../libempathy-gtk/empathy-individual-widget.c:519
 msgid "Horizontal Error (meters):"
 msgstr "Οριζόντιο σφάλμα (σε μέτρα):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:704
-#: ../libempathy-gtk/empathy-individual-widget.c:511
+#: ../libempathy-gtk/empathy-contact-widget.c:796
+#: ../libempathy-gtk/empathy-individual-widget.c:521
 msgid "Speed:"
 msgstr "Ταχύτητα:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:706
-#: ../libempathy-gtk/empathy-individual-widget.c:513
+#: ../libempathy-gtk/empathy-contact-widget.c:798
+#: ../libempathy-gtk/empathy-individual-widget.c:523
 msgid "Bearing:"
 msgstr "Προσανατολισμός:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:708
-#: ../libempathy-gtk/empathy-individual-widget.c:515
+#: ../libempathy-gtk/empathy-contact-widget.c:800
+#: ../libempathy-gtk/empathy-individual-widget.c:525
 msgid "Climb Speed:"
 msgstr "Ταχύτητα ανάβασης:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:710
-#: ../libempathy-gtk/empathy-individual-widget.c:517
+#: ../libempathy-gtk/empathy-contact-widget.c:802
+#: ../libempathy-gtk/empathy-individual-widget.c:527
 msgid "Last Updated on:"
 msgstr "Τελευταία ενημέρωση στις:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:712
-#: ../libempathy-gtk/empathy-individual-widget.c:519
+#: ../libempathy-gtk/empathy-contact-widget.c:804
+#: ../libempathy-gtk/empathy-individual-widget.c:529
 msgid "Longitude:"
 msgstr "Γεωγρ. μήκος:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:714
-#: ../libempathy-gtk/empathy-individual-widget.c:521
+#: ../libempathy-gtk/empathy-contact-widget.c:806
+#: ../libempathy-gtk/empathy-individual-widget.c:531
 msgid "Latitude:"
 msgstr "Γεωγρ. πλάτος:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:716
-#: ../libempathy-gtk/empathy-individual-widget.c:523
+#: ../libempathy-gtk/empathy-contact-widget.c:808
+#: ../libempathy-gtk/empathy-individual-widget.c:533
 msgid "Altitude:"
 msgstr "Υψόμετρο:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:779
-#: ../libempathy-gtk/empathy-contact-widget.c:796
-#: ../libempathy-gtk/empathy-individual-widget.c:605
-#: ../libempathy-gtk/empathy-individual-widget.c:622
+#: ../libempathy-gtk/empathy-contact-widget.c:871
+#: ../libempathy-gtk/empathy-contact-widget.c:888
+#: ../libempathy-gtk/empathy-individual-widget.c:615
+#: ../libempathy-gtk/empathy-individual-widget.c:632
 #: ../src/empathy-preferences.ui.h:12
 msgid "Location"
 msgstr "Τοποθεσία"
 
 #. translators: format is "Location, $date"
-#: ../libempathy-gtk/empathy-contact-widget.c:798
-#: ../libempathy-gtk/empathy-individual-widget.c:624
+#: ../libempathy-gtk/empathy-contact-widget.c:890
+#: ../libempathy-gtk/empathy-individual-widget.c:634
 #, c-format
 msgid "%s, %s"
 msgstr "%s (%s)"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:850
-#: ../libempathy-gtk/empathy-individual-widget.c:673
+#: ../libempathy-gtk/empathy-contact-widget.c:942
+#: ../libempathy-gtk/empathy-individual-widget.c:683
 msgid "%B %e, %Y at %R UTC"
 msgstr "%B %e, %Y στις %R UTC"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:933
-#: ../libempathy-gtk/empathy-individual-widget.c:922
+#: ../libempathy-gtk/empathy-contact-widget.c:1024
+#: ../libempathy-gtk/empathy-individual-widget.c:918
 msgid "Save Avatar"
 msgstr "Αποθήκευση προσωπικής εικόνας"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:989
-#: ../libempathy-gtk/empathy-individual-widget.c:980
+#: ../libempathy-gtk/empathy-contact-widget.c:1080
+#: ../libempathy-gtk/empathy-individual-widget.c:976
 msgid "Unable to save avatar"
 msgstr "Αδυναμία αποθήκευσης προσωπικής εικόνας"
 
@@ -1827,7 +1877,7 @@ msgstr "<b>Τοποθεσία</b> στις (ημερομηνία)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1312
+#: ../libempathy-gtk/empathy-individual-widget.c:1305
 msgid "Alias:"
 msgstr "Ψευδώνυμο:"
 
@@ -1847,7 +1897,7 @@ msgstr "Στοιχεία επαφής"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1516
+#: ../libempathy-gtk/empathy-individual-widget.c:1509
 msgid "Identifier:"
 msgstr "Αναγνωριστικό:"
 
@@ -1886,7 +1936,7 @@ msgid "Select"
 msgstr "Επιλογή"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:408
-#: ../src/empathy-main-window.c:1423
+#: ../src/empathy-main-window.c:1435
 msgid "Group"
 msgstr "Ομάδα"
 
@@ -1911,24 +1961,24 @@ msgstr ""
 #. Translators: this is used in the context menu for a contact. The first
 #. * parameter is a contact ID (e.g. foo@jabber.org) and the second is one
 #. * of the user's account IDs (e.g. me@hotmail.com).
-#: ../libempathy-gtk/empathy-individual-menu.c:132
+#: ../libempathy-gtk/empathy-individual-menu.c:131
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:836
+#: ../libempathy-gtk/empathy-individual-menu.c:837
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "_Επεξεργασία"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:862
+#: ../libempathy-gtk/empathy-individual-menu.c:863
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "_Σύνδεση επαφών…"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2399
+#: ../libempathy-gtk/empathy-individual-view.c:2425
 #, c-format
 msgid ""
 "Do you really want to remove the linked contact '%s'? Note that this will "
@@ -1937,7 +1987,7 @@ msgstr ""
 "Θέλετε πράγματι να αφαιρέσετε τη μετα-επαφή '%s'; Σημειώστε ότι αυτό θα "
 "αφαιρέσει όλες τις επαφές που απαρτίζουν αυτή τη μετα-επαφή."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1657
+#: ../libempathy-gtk/empathy-individual-widget.c:1650
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -1952,15 +2002,19 @@ msgstr "<b>Τοποθεσία</b> στις (ημερομηνία)"
 msgid "Online from a phone or mobile device"
 msgstr "Σύνδεση στο δίκτυο από τηλέφωνο ή κινητή συσκευή"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:328
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:332
 msgid "New Network"
 msgstr "Νέα σύνδεση δικτύου"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:495
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:527
 msgid "Choose an IRC network"
 msgstr "Επιλέξτε ένα δίκτυο IRC"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:555
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:584
+msgid "Reset _Networks List"
+msgstr "Επαναφορά λίστας _δικτύων"
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:588
 msgctxt "verb displayed on a button to select an IRC network"
 msgid "Select"
 msgstr "Επιλογή"
@@ -2017,7 +2071,7 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Διάσπαση"
 
-#: ../libempathy-gtk/empathy-log-window.c:667
+#: ../libempathy-gtk/empathy-log-window.c:664
 msgid "Date"
 msgstr "Ημερομηνία"
 
@@ -2065,21 +2119,21 @@ msgid "New Conversation"
 msgstr "Νέα συζήτηση"
 
 #. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:253
+#: ../libempathy-gtk/empathy-new-call-dialog.c:252
 msgid "Send _Video"
 msgstr "Αποστολή _βίντεο"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:261
+#: ../libempathy-gtk/empathy-new-call-dialog.c:260
 msgid "C_all"
 msgstr "Κ_λήση"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:271
+#: ../libempathy-gtk/empathy-new-call-dialog.c:270
 msgid "New Call"
 msgstr "Νέα κλήση"
 
-#: ../libempathy-gtk/empathy-password-dialog.c:267
+#: ../libempathy-gtk/empathy-password-dialog.c:274
 #, c-format
 msgid ""
 "Enter your password for account\n"
@@ -2276,31 +2330,44 @@ msgstr "Αναμενόμενο όνομα συστήματος: %s"
 msgid "Certificate hostname: %s"
 msgstr "Όνομα συστήματος πιστοποιητικού: %s"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:271
+#: ../libempathy-gtk/empathy-tls-dialog.c:281
 msgid "Continue"
 msgstr "Συνέχεια"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:277
+#: ../libempathy-gtk/empathy-tls-dialog.c:287
 msgid "This connection is untrusted. Would you like to continue anyway?"
 msgstr "Αυτή η σύνδεση είναι αναξιόπιστη, θέλετε να συνεχίσετε ούτως ή άλλως;"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:294
+#: ../libempathy-gtk/empathy-tls-dialog.c:297
 msgid "Remember this choice for future connections"
 msgstr "Απομνημόνευση αυτής της επιλογής για μελλοντικές συνδέσεις"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:302
+#: ../libempathy-gtk/empathy-tls-dialog.c:303
 msgid "Certificate Details"
 msgstr "Λεπτομέρειες πιστοποιητικού"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1708
+#: ../libempathy-gtk/empathy-ui-utils.c:1707
 msgid "Unable to open URI"
 msgstr "Αδυναμία ανοίγματος της διεύθυνσης"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1803
+#: ../libempathy-gtk/empathy-ui-utils.c:1802
 msgid "Select a file"
 msgstr "Επιλογή αρχείου"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1872
+#: ../libempathy-gtk/empathy-ui-utils.c:1874
+msgid "Insufficient free space to save file"
+msgstr "Μη επαρκής χώρος για την αποθήκευση του αρχείου"
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1882
+#, c-format
+msgid ""
+"%s of free space are required to save this file, but only %s is available. "
+"Please choose another location."
+msgstr ""
+"Απαιτούνται %s ελεύθερου χώρου για την αποθήκευση του αρχείου, ωστόσο μόνο %"
+"s είναι διαθέσιμα. Παρακαλώ επιλέξτε άλλη τοποθεσία αποθήκευσης."
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1926
 #, c-format
 msgid "Incoming file from %s"
 msgstr "Εισερχόμενο αρχείο από %s"
@@ -2488,23 +2555,23 @@ msgstr "Χωρίς μήνυμα σφάλματος"
 msgid "Instant Message (Empathy)"
 msgstr "Άμεσο μήνυμα (Empathy)"
 
-#: ../src/empathy.c:309
+#: ../src/empathy.c:308
 msgid "Don't connect on startup"
 msgstr "Να μη γίνεται σύνδεση κατά την εκκίνηση"
 
-#: ../src/empathy.c:313
+#: ../src/empathy.c:312
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "Να μην εμφανίζεται η λίστα επαφών ή άλλοι διάλογοι κατά την εκκίνηση"
 
-#: ../src/empathy.c:321
+#: ../src/empathy.c:320
 msgid "- Empathy IM Client"
 msgstr "- Αποστολέας άμεσων μηνυμάτων Empathy"
 
-#: ../src/empathy.c:500
+#: ../src/empathy.c:499
 msgid "Error contacting the Account Manager"
 msgstr "Σφάλμα κατά τη σύνδεση με το Διαχειριστή λογαριασμών"
 
-#: ../src/empathy.c:502
+#: ../src/empathy.c:501
 #, c-format
 msgid ""
 "There was an error while trying to connect to the Telepathy Account Manager. "
@@ -2664,8 +2731,8 @@ msgid "Select the accounts you want to import:"
 msgstr "Επιλέξτε τους λογαριασμούς που θέλετε να εισάγετε:"
 
 #: ../src/empathy-account-assistant.c:810
-#: ../src/empathy-new-chatroom-dialog.c:567
-#: ../src/empathy-new-chatroom-dialog.c:568
+#: ../src/empathy-new-chatroom-dialog.c:562
+#: ../src/empathy-new-chatroom-dialog.c:563
 msgid "Yes"
 msgstr "Ναι"
 
@@ -2692,8 +2759,8 @@ msgid "Edit->Accounts"
 msgstr "Επεξεργασία->Λογαριασμοί"
 
 #: ../src/empathy-account-assistant.c:1104
-msgid "I don't want to enable this feature for now"
-msgstr "Προς το παρόν δεν επιθυμώ να ενεργοποιήσω αυτή τη δυνατότητα"
+msgid "I do _not want to enable this feature for now"
+msgstr "Προς το παρόν _δεν επιθυμώ να ενεργοποιήσω αυτή τη δυνατότητα"
 
 #: ../src/empathy-account-assistant.c:1140
 msgid ""
@@ -2740,33 +2807,34 @@ msgstr "Υπάρχουν μη αποθηκευμένες αλλαγές στο �
 msgid "Your new account has not been saved yet."
 msgstr "Ο νέος λογαριασμός δεν έχει αποθηκευτεί ακόμη."
 
-#: ../src/empathy-accounts-dialog.c:280 ../src/empathy-call-window.c:811
+#: ../src/empathy-accounts-dialog.c:286
+#: ../src/empathy-streamed-media-window.c:809
 msgid "Connecting…"
 msgstr "Γίνεται σύνδεση…"
 
-#: ../src/empathy-accounts-dialog.c:321
+#: ../src/empathy-accounts-dialog.c:327
 #, c-format
 msgid "Offline — %s"
 msgstr "Εκτός σύνδεσης — %s"
 
-#: ../src/empathy-accounts-dialog.c:333
+#: ../src/empathy-accounts-dialog.c:339
 #, c-format
 msgid "Disconnected — %s"
 msgstr "Αποσυνδέθηκε — %s"
 
-#: ../src/empathy-accounts-dialog.c:344
+#: ../src/empathy-accounts-dialog.c:350
 msgid "Offline — No Network Connection"
 msgstr "Εκτός σύνδεσης — Δεν υπάρχει σύνδεση δικτύου"
 
-#: ../src/empathy-accounts-dialog.c:351
+#: ../src/empathy-accounts-dialog.c:357
 msgid "Unknown Status"
 msgstr "Άγνωστη κατάσταση"
 
-#: ../src/empathy-accounts-dialog.c:363
+#: ../src/empathy-accounts-dialog.c:369
 msgid "Offline — Account Disabled"
 msgstr "Εκτός σύνδεσης — απενεργοποιημένος λογαριασμός"
 
-#: ../src/empathy-accounts-dialog.c:759
+#: ../src/empathy-accounts-dialog.c:772
 msgid ""
 "You are about to create a new account, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2774,16 +2842,16 @@ msgstr ""
 "Αν δημιουργήσετε νέο λογαριασμό, θα απορριφθούν \n"
 "οι αλλαγές σας. Σίγουρα θέλετε να συνεχίσετε;"
 
-#: ../src/empathy-accounts-dialog.c:1106
+#: ../src/empathy-accounts-dialog.c:1133
 #, c-format
 msgid "Do you want to remove %s from your computer?"
 msgstr "Θέλετε να διαγράψετε το '%s' από τον υπολογιστή;"
 
-#: ../src/empathy-accounts-dialog.c:1110
+#: ../src/empathy-accounts-dialog.c:1137
 msgid "This will not remove your account on the server."
 msgstr "Ο λογαριασμός σας δε θα διαγραφεί από τον εξυπηρετητή."
 
-#: ../src/empathy-accounts-dialog.c:1348
+#: ../src/empathy-accounts-dialog.c:1375
 msgid ""
 "You are about to select another account, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2792,15 +2860,15 @@ msgstr ""
 "οι αλλαγές σας. Σίγουρα θέλετε να συνεχίσετε;"
 
 #. Menu items: to enabled/disable the account
-#: ../src/empathy-accounts-dialog.c:1544
+#: ../src/empathy-accounts-dialog.c:1571
 msgid "_Enable"
 msgstr "_Ενεργοποίηση"
 
-#: ../src/empathy-accounts-dialog.c:1545
+#: ../src/empathy-accounts-dialog.c:1572
 msgid "_Disable"
 msgstr "_Απενεργοποίηση"
 
-#: ../src/empathy-accounts-dialog.c:2046
+#: ../src/empathy-accounts-dialog.c:2086
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2856,86 +2924,86 @@ msgstr "- Σύστημα εικόνας/ήχου Empathy"
 msgid "Empathy Audio/Video Client"
 msgstr "Σύστημα εικόνας/ήχου Empathy"
 
-#: ../src/empathy-call-window.c:481
+#: ../src/empathy-streamed-media-window.c:479
 msgid "Contrast"
 msgstr "Αντίθεση"
 
-#: ../src/empathy-call-window.c:484
+#: ../src/empathy-streamed-media-window.c:482
 msgid "Brightness"
 msgstr "Φωτεινότητα"
 
-#: ../src/empathy-call-window.c:487
+#: ../src/empathy-streamed-media-window.c:485
 msgid "Gamma"
 msgstr "Γάμμα"
 
-#: ../src/empathy-call-window.c:592
+#: ../src/empathy-streamed-media-window.c:590
 msgid "Volume"
 msgstr "Ένταση ήχου"
 
-#: ../src/empathy-call-window.c:1168
+#: ../src/empathy-streamed-media-window.c:1165
 msgid "_Sidebar"
 msgstr "_Πλευρική στήλη"
 
-#: ../src/empathy-call-window.c:1188
+#: ../src/empathy-streamed-media-window.c:1185
 msgid "Audio input"
 msgstr "Είσοδος ήχου"
 
-#: ../src/empathy-call-window.c:1192
+#: ../src/empathy-streamed-media-window.c:1189
 msgid "Video input"
 msgstr "Είσοδος βίντεο"
 
-#: ../src/empathy-call-window.c:1196
+#: ../src/empathy-streamed-media-window.c:1193
 msgid "Dialpad"
 msgstr "Καντράν τηλ/νου"
 
-#: ../src/empathy-call-window.c:1201
+#: ../src/empathy-streamed-media-window.c:1198
 msgid "Details"
 msgstr "Λεπτομέρειες"
 
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
-#: ../src/empathy-call-window.c:1270
+#: ../src/empathy-streamed-media-window.c:1267
 #, c-format
 msgid "Call with %s"
 msgstr "Κλήση: %s"
 
 #. translators: Call is a noun. This string is used in the window
 #. * title
-#: ../src/empathy-call-window.c:1349
+#: ../src/empathy-streamed-media-window.c:1346
 msgid "Call"
 msgstr "Κλήση"
 
-#: ../src/empathy-call-window.c:1503
+#: ../src/empathy-streamed-media-window.c:1500
 msgid "The IP address as seen by the machine"
 msgstr "Η διεύθυνση IP όπως τη βλέπει το μηχάνημα"
 
-#: ../src/empathy-call-window.c:1505
+#: ../src/empathy-streamed-media-window.c:1502
 msgid "The IP address as seen by a server on the Internet"
 msgstr "Η διεύθυνση IP όπως τη βλέπει ένας διακομιστής στο διαδίκτυο"
 
-#: ../src/empathy-call-window.c:1507
+#: ../src/empathy-streamed-media-window.c:1504
 msgid "The IP address of the peer as seen by the other side"
 msgstr "Η διεύθυνση IP της ομότιμης σύνδεσης όπως τη βλέπει η άλλη πλευρά"
 
-#: ../src/empathy-call-window.c:1509
+#: ../src/empathy-streamed-media-window.c:1506
 msgid "The IP address of a relay server"
 msgstr "Η διεύθυνση IP ενός διακομιστή συζητήσεων"
 
-#: ../src/empathy-call-window.c:1511
+#: ../src/empathy-streamed-media-window.c:1508
 msgid "The IP address of the multicast group"
 msgstr "Η διεύθυνση IP μιας ομάδας πολλαπλής αναμετάδοσης (multicast)"
 
 #. Translators: number of minutes:seconds the caller has been connected
-#: ../src/empathy-call-window.c:2261
+#: ../src/empathy-streamed-media-window.c:2259
 #, c-format
 msgid "Connected — %d:%02dm"
 msgstr "Διάρκεια -- %d:%02dλ."
 
-#: ../src/empathy-call-window.c:2322
+#: ../src/empathy-streamed-media-window.c:2320
 msgid "Technical Details"
 msgstr "Τεχνικές λεπτομέρειες"
 
-#: ../src/empathy-call-window.c:2360
+#: ../src/empathy-streamed-media-window.c:2358
 #, c-format
 msgid ""
 "%s's software does not understand any of the audio formats supported by your "
@@ -2944,7 +3012,7 @@ msgstr ""
 "Το λογισμικό του %s δεν υποστηρίζει καμία από τις μορφές ήχου που "
 "υποστηρίζει ο υπολογιστής σας"
 
-#: ../src/empathy-call-window.c:2365
+#: ../src/empathy-streamed-media-window.c:2363
 #, c-format
 msgid ""
 "%s's software does not understand any of the video formats supported by your "
@@ -2953,7 +3021,7 @@ msgstr ""
 "Το λογισμικό του %s δεν υποστηρίζει καμία από τις μορφές βίντεο που "
 "υποστηρίζει ο υπολογιστής σας"
 
-#: ../src/empathy-call-window.c:2371
+#: ../src/empathy-streamed-media-window.c:2369
 #, c-format
 msgid ""
 "Can't establish a connection to %s. One of you might be on a network that "
@@ -2962,25 +3030,25 @@ msgstr ""
 "Αδυναμία σύνδεσης με %s. Ένας από εσάς μπορεί να χρησιμοποιεί δίκτυο που δεν "
 "επιτρέπει άμεσες συνδέσεις."
 
-#: ../src/empathy-call-window.c:2377
+#: ../src/empathy-streamed-media-window.c:2375
 msgid "There was a failure on the network"
 msgstr "Παρουσιάστηκε κώλυμα στο δίκτυο"
 
-#: ../src/empathy-call-window.c:2381
+#: ../src/empathy-streamed-media-window.c:2379
 msgid ""
 "The audio formats necessary for this call are not installed on your computer"
 msgstr ""
 "Δεν είναι εγκατεστημένη η υποστήριξη για τις μορφές ήχου που απαιτεί αυτή η "
 "κλήση"
 
-#: ../src/empathy-call-window.c:2384
+#: ../src/empathy-streamed-media-window.c:2382
 msgid ""
 "The video formats necessary for this call are not installed on your computer"
 msgstr ""
 "Δεν είναι εγκατεστημένη η υποστήριξη για τις μορφές βίντεο που απαιτεί αυτή "
 "η κλήση"
 
-#: ../src/empathy-call-window.c:2394
+#: ../src/empathy-streamed-media-window.c:2392
 #, c-format
 msgid ""
 "Something unexpected happened in a Telepathy component. Please <a href=\"%s"
@@ -2991,19 +3059,19 @@ msgstr ""
 "Παρακαλώ, κάνετε <a href=\"%s\">αναφορά του σφάλματος</a>, επισυνάπτοντας "
 "τις καταγραφές από το παράθυρο 'Αποσφαλμάτωση' του μενού Βοήθεια."
 
-#: ../src/empathy-call-window.c:2402
+#: ../src/empathy-streamed-media-window.c:2400
 msgid "There was a failure in the call engine"
 msgstr "Αποτυχία του μηχανισμού κλήσης"
 
-#: ../src/empathy-call-window.c:2405
+#: ../src/empathy-streamed-media-window.c:2403
 msgid "The end of the stream was reached"
 msgstr "Έχει φθάσει στο τέλος της ροής"
 
-#: ../src/empathy-call-window.c:2445
+#: ../src/empathy-streamed-media-window.c:2443
 msgid "Can't establish audio stream"
 msgstr "Αδυναμία δημιουργίας ροής ήχου"
 
-#: ../src/empathy-call-window.c:2455
+#: ../src/empathy-streamed-media-window.c:2453
 msgid "Can't establish video stream"
 msgstr "Αδυναμία δημιουργίας ροής βίντεο"
 
@@ -3103,35 +3171,35 @@ msgstr "_Κλήση"
 msgid "_View"
 msgstr "_Προβολή"
 
-#: ../src/empathy-chat-window.c:476 ../src/empathy-chat-window.c:496
+#: ../src/empathy-chat-window.c:469 ../src/empathy-chat-window.c:489
 #, c-format
 msgid "%s (%d unread)"
 msgid_plural "%s (%d unread)"
 msgstr[0] "%s (%d μη αναγνωσμένο)"
 msgstr[1] "%s (%d μη αναγνωσμένα)"
 
-#: ../src/empathy-chat-window.c:488
+#: ../src/empathy-chat-window.c:481
 #, c-format
 msgid "%s (and %u other)"
 msgid_plural "%s (and %u others)"
 msgstr[0] "%s (και %u άλλο)"
 msgstr[1] "%s (και %u άλλα)"
 
-#: ../src/empathy-chat-window.c:504
+#: ../src/empathy-chat-window.c:497
 #, c-format
 msgid "%s (%d unread from others)"
 msgid_plural "%s (%d unread from others)"
 msgstr[0] "%s (%d μη αναγνωσμένο από άλλους)"
 msgstr[1] "%s (%d μη αναγνωσμένα από άλλους)"
 
-#: ../src/empathy-chat-window.c:513
+#: ../src/empathy-chat-window.c:506
 #, c-format
 msgid "%s (%d unread from all)"
 msgid_plural "%s (%d unread from all)"
 msgstr[0] "%s (%d μη αναγνωσμένο από κανένα)"
 msgstr[1] "%s (%d μη αναγνωσμένα από κανένα)"
 
-#: ../src/empathy-chat-window.c:715
+#: ../src/empathy-chat-window.c:708
 msgid "Typing a message."
 msgstr "Γράφει μήνυμα."
 
@@ -3167,7 +3235,7 @@ msgstr "Μετακίνηση καρτέλας _δεξιά"
 msgid "Notify for All Messages"
 msgstr "Ειδοποίηση για όαλ τα μηνύματα"
 
-#: ../src/empathy-chat-window.ui.h:9 ../src/empathy-main-window.ui.h:17
+#: ../src/empathy-chat-window.ui.h:9 ../src/empathy-main-window.ui.h:16
 msgid "_Contents"
 msgstr "_Περιεχόμενα"
 
@@ -3179,7 +3247,7 @@ msgstr "_Συζήτηση"
 msgid "_Detach Tab"
 msgstr "Από_σπαση καρτέλας"
 
-#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:19
+#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:18
 msgid "_Edit"
 msgstr "_Επεξεργασία"
 
@@ -3187,7 +3255,7 @@ msgstr "_Επεξεργασία"
 msgid "_Favorite Chat Room"
 msgstr "_Αγαπημένο δωμάτιο συζήτησης"
 
-#: ../src/empathy-chat-window.ui.h:14 ../src/empathy-main-window.ui.h:21
+#: ../src/empathy-chat-window.ui.h:14 ../src/empathy-main-window.ui.h:20
 msgid "_Help"
 msgstr "_Βοήθεια"
 
@@ -3227,90 +3295,90 @@ msgstr "Αυτόματη Σύνδεση"
 msgid "Manage Favorite Rooms"
 msgstr "Διαχείριση αγαπημένων δωματίων"
 
-#: ../src/empathy-event-manager.c:508
+#: ../src/empathy-event-manager.c:507
 msgid "Incoming video call"
 msgstr "Εισερχόμενη βιντεοκλήση"
 
-#: ../src/empathy-event-manager.c:508
+#: ../src/empathy-event-manager.c:507
 msgid "Incoming call"
 msgstr "Εισερχόμενη κλήση"
 
-#: ../src/empathy-event-manager.c:512
+#: ../src/empathy-event-manager.c:511
 #, c-format
 msgid "%s is video calling you. Do you want to answer?"
 msgstr "Ο/Η %s σας καλεί για βιντεοκλήση. Θέλετε να απαντήσετε;"
 
-#: ../src/empathy-event-manager.c:513
+#: ../src/empathy-event-manager.c:512
 #, c-format
 msgid "%s is calling you. Do you want to answer?"
 msgstr "Ο/Η %s σας καλεί. Θέλετε να απαντήσετε;"
 
-#: ../src/empathy-event-manager.c:516 ../src/empathy-event-manager.c:661
+#: ../src/empathy-event-manager.c:515 ../src/empathy-event-manager.c:660
 #, c-format
 msgid "Incoming call from %s"
 msgstr "Εισερχόμενη κλήση από: %s"
 
-#: ../src/empathy-event-manager.c:541
+#: ../src/empathy-event-manager.c:540
 msgid "_Reject"
 msgstr "Απόρρι_ψη"
 
-#: ../src/empathy-event-manager.c:547
+#: ../src/empathy-event-manager.c:546
 msgid "_Answer"
 msgstr "_Απάντηση"
 
-#: ../src/empathy-event-manager.c:661
+#: ../src/empathy-event-manager.c:660
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "Εισερχόμενη βιντεοκλήση από: %s"
 
-#: ../src/empathy-event-manager.c:738
+#: ../src/empathy-event-manager.c:737
 msgid "Room invitation"
 msgstr "Πρόσκληση δωματίου"
 
-#: ../src/empathy-event-manager.c:740
+#: ../src/empathy-event-manager.c:739
 #, c-format
 msgid "Invitation to join %s"
 msgstr "Πρόσκληση να μπείτε στο %s"
 
-#: ../src/empathy-event-manager.c:747
+#: ../src/empathy-event-manager.c:746
 #, c-format
 msgid "%s is inviting you to join %s"
 msgstr "Ο/Η %s σας προσκαλεί να μπείτε στο %s"
 
-#: ../src/empathy-event-manager.c:755
+#: ../src/empathy-event-manager.c:754
 msgid "_Decline"
 msgstr "Ά_ρνηση"
 
-#: ../src/empathy-event-manager.c:760
+#: ../src/empathy-event-manager.c:759
 #: ../src/empathy-new-chatroom-dialog.ui.h:7
 msgid "_Join"
 msgstr "_Είσοδος"
 
-#: ../src/empathy-event-manager.c:787
+#: ../src/empathy-event-manager.c:786
 #, c-format
 msgid "%s invited you to join %s"
 msgstr "Ο/Η %s σας προσκάλεσε να μπείτε στο %s"
 
-#: ../src/empathy-event-manager.c:793
+#: ../src/empathy-event-manager.c:792
 #, c-format
 msgid "You have been invited to join %s"
 msgstr "Έχετε προσκληθεί να μπείτε στο %s"
 
-#: ../src/empathy-event-manager.c:844
+#: ../src/empathy-event-manager.c:843
 #, c-format
 msgid "Incoming file transfer from %s"
 msgstr "Εισερχόμενη μεταφορά αρχείου από: %s"
 
-#: ../src/empathy-event-manager.c:1014 ../src/empathy-main-window.c:367
+#: ../src/empathy-event-manager.c:1013 ../src/empathy-main-window.c:369
 msgid "Password required"
 msgstr "Απαιτείται συνθηματικό"
 
-#: ../src/empathy-event-manager.c:1070
+#: ../src/empathy-event-manager.c:1069
 #, c-format
-msgid "%s would like permission to see when you are available"
-msgstr "%s θα ήθελε άδεια να βλέπει πότε είστε διαθέσιμος"
+msgid "%s would like permission to see when you are online"
+msgstr "%s θα ήθελε άδεια να βλέπει πότε είστε σε σύνδεση"
 
-#: ../src/empathy-event-manager.c:1074
+#: ../src/empathy-event-manager.c:1073
 #, c-format
 msgid ""
 "\n"
@@ -3318,16 +3386,6 @@ msgid ""
 msgstr ""
 "\n"
 "Μήνυμα: %s"
-
-#: ../src/empathy-event-manager.c:1118
-#, c-format
-msgid "%s is now offline."
-msgstr "Ο/Η %s μόλις αποσυνδέθηκε."
-
-#: ../src/empathy-event-manager.c:1139
-#, c-format
-msgid "%s is now online."
-msgstr "Ο/Η %s μόλις συνδέθηκε."
 
 #. Translators: time left, when it is more than one hour
 #: ../src/empathy-ft-manager.c:99
@@ -3466,39 +3524,39 @@ msgstr "Πρωτόκολλο"
 msgid "Source"
 msgstr "Πηγή"
 
-#: ../src/empathy-main-window.c:384
+#: ../src/empathy-main-window.c:386
 msgid "Provide Password"
 msgstr "Δώστε συνθηματικό"
 
-#: ../src/empathy-main-window.c:390
+#: ../src/empathy-main-window.c:392
 msgid "Disconnect"
 msgstr "Αποσύνδεση"
 
-#: ../src/empathy-main-window.c:530
+#: ../src/empathy-main-window.c:532
 msgid "No match found"
 msgstr "Δεν βρέθηκε αντιστοιχία"
 
-#: ../src/empathy-main-window.c:685
+#: ../src/empathy-main-window.c:687
 msgid "Reconnect"
 msgstr "Επανασύνδεση"
 
-#: ../src/empathy-main-window.c:691
+#: ../src/empathy-main-window.c:693
 msgid "Edit Account"
 msgstr "Επεξεργασία λογαριασμού"
 
-#: ../src/empathy-main-window.c:697
+#: ../src/empathy-main-window.c:699
 msgid "Close"
 msgstr "Κλείσιμο"
 
-#: ../src/empathy-main-window.c:1405
+#: ../src/empathy-main-window.c:1417
 msgid "Contact"
 msgstr "Επαφή"
 
-#: ../src/empathy-main-window.c:1739
+#: ../src/empathy-main-window.c:1751
 msgid "Contact List"
 msgstr "Λίστα επαφών"
 
-#: ../src/empathy-main-window.c:1852
+#: ../src/empathy-main-window.c:1866
 msgid "Show and edit accounts"
 msgstr "Εμφάνιση και επεξεργασία λογαριασμών"
 
@@ -3507,84 +3565,84 @@ msgid "Contacts on a _Map"
 msgstr "_Χάρτης επαφών"
 
 #: ../src/empathy-main-window.ui.h:2
-msgid "Context"
-msgstr "Περιεχόμενο"
-
-#: ../src/empathy-main-window.ui.h:3
 msgid "Find in Contact _List"
 msgstr "Εύρεση στη _λίστα επαφών"
 
-#: ../src/empathy-main-window.ui.h:4
+#: ../src/empathy-main-window.ui.h:3
 msgid "Join _Favorites"
 msgstr "Είσοδος στα α_γαπημένα"
 
-#: ../src/empathy-main-window.ui.h:5
+#: ../src/empathy-main-window.ui.h:4
 msgid "Manage Favorites"
 msgstr "Διαχείριση αγαπημένων"
 
-#: ../src/empathy-main-window.ui.h:6
+#: ../src/empathy-main-window.ui.h:5
 msgid "N_ormal Size"
 msgstr "_Κανονικό μέγεθος"
 
-#: ../src/empathy-main-window.ui.h:7 ../src/empathy-status-icon.ui.h:1
+#: ../src/empathy-main-window.ui.h:6 ../src/empathy-status-icon.ui.h:1
 msgid "New _Call…"
 msgstr "Νέα _κλήση…"
 
-#: ../src/empathy-main-window.ui.h:8
+#: ../src/empathy-main-window.ui.h:7
 msgid "Normal Size With _Avatars"
 msgstr "Κανονικό μέγεθος με _προσωπικές εικόνες"
 
-#: ../src/empathy-main-window.ui.h:9
+#: ../src/empathy-main-window.ui.h:8
 msgid "P_references"
 msgstr "_Προτιμήσεις"
 
-#: ../src/empathy-main-window.ui.h:10
+#: ../src/empathy-main-window.ui.h:9
 msgid "Show P_rotocols"
 msgstr "Εμφάνιση πρ_ωτοκόλλων"
 
-#: ../src/empathy-main-window.ui.h:11
+#: ../src/empathy-main-window.ui.h:10
 msgid "Sort by _Name"
 msgstr "Ταξινόμηση κατά ό_νομα"
 
-#: ../src/empathy-main-window.ui.h:12
+#: ../src/empathy-main-window.ui.h:11
 msgid "Sort by _Status"
 msgstr "Ταξινόμηση κατά _κατάσταση"
 
-#: ../src/empathy-main-window.ui.h:13
+#: ../src/empathy-main-window.ui.h:12
 msgid "_Accounts"
 msgstr "_Λογαριασμοί"
 
-#: ../src/empathy-main-window.ui.h:16
+#: ../src/empathy-main-window.ui.h:15
 msgid "_Compact Size"
 msgstr "_Συμπτυγμένο μέγεθος"
 
-#: ../src/empathy-main-window.ui.h:18
+#: ../src/empathy-main-window.ui.h:17
 msgid "_Debug"
 msgstr "Αποσφα_λμάτωση"
 
-#: ../src/empathy-main-window.ui.h:20
+#: ../src/empathy-main-window.ui.h:19
 msgid "_File Transfers"
 msgstr "Μετα_φορές αρχείων"
 
-#: ../src/empathy-main-window.ui.h:22
+#: ../src/empathy-main-window.ui.h:21
 msgid "_Join…"
 msgstr "_Σύνδεση…"
 
-#: ../src/empathy-main-window.ui.h:23 ../src/empathy-status-icon.ui.h:3
+#: ../src/empathy-main-window.ui.h:22 ../src/empathy-status-icon.ui.h:3
 msgid "_New Conversation…"
 msgstr "Νέα _συζήτηση…"
 
-#: ../src/empathy-main-window.ui.h:24
+#: ../src/empathy-main-window.ui.h:23
 msgid "_Offline Contacts"
 msgstr "Επαφές ε_κτός σύνδεσης"
 
-#: ../src/empathy-main-window.ui.h:25
+#: ../src/empathy-main-window.ui.h:24
 msgid "_Personal Information"
 msgstr "Π_ροσωπικές πληροφορίες"
 
-#: ../src/empathy-main-window.ui.h:27
+#: ../src/empathy-main-window.ui.h:26
 msgid "_Room"
 msgstr "_Δωμάτιο"
+
+#: ../src/empathy-main-window.ui.h:27
+msgid "_Search for Contacts…"
+msgstr "_Αναζήτηση επαφών…"
 
 #: ../src/empathy-new-chatroom-dialog.c:337
 msgid "Chat Room"
@@ -3596,7 +3654,7 @@ msgstr "Μέλη"
 
 #. Translators: Room/Join's roomlist tooltip. Parameters are a channel name,
 #. yes/no, yes/no and a number.
-#: ../src/empathy-new-chatroom-dialog.c:565
+#: ../src/empathy-new-chatroom-dialog.c:560
 #, c-format
 msgid ""
 "%s\n"
@@ -3609,16 +3667,16 @@ msgstr ""
 "Απαιτείται συνθηματικό: %s\n"
 "Μέλη: %s"
 
-#: ../src/empathy-new-chatroom-dialog.c:567
-#: ../src/empathy-new-chatroom-dialog.c:568
+#: ../src/empathy-new-chatroom-dialog.c:562
+#: ../src/empathy-new-chatroom-dialog.c:563
 msgid "No"
 msgstr "Όχι"
 
-#: ../src/empathy-new-chatroom-dialog.c:596
+#: ../src/empathy-new-chatroom-dialog.c:591
 msgid "Could not start room listing"
 msgstr "Αδυναμία έναρξης της εμφάνισης της λίστας δωματίων"
 
-#: ../src/empathy-new-chatroom-dialog.c:606
+#: ../src/empathy-new-chatroom-dialog.c:601
 msgid "Could not stop room listing"
 msgstr "Αδυναμία διακοπής της εμφάνισης της λίστας δωματίων"
 
@@ -3836,67 +3894,67 @@ msgstr "Κατάσταση"
 msgid "_Quit"
 msgstr "Έ_ξοδος"
 
-#: ../src/empathy-map-view.c:452
+#: ../src/empathy-map-view.c:442
 msgid "Contact Map View"
 msgstr "Προβολή χάρτη επαφών"
 
-#: ../src/empathy-debug-window.c:1219
+#: ../src/empathy-debug-window.c:1218
 msgid "Save"
 msgstr "Αποθήκευση"
 
-#: ../src/empathy-debug-window.c:1395
+#: ../src/empathy-debug-window.c:1394
 msgid "Debug Window"
 msgstr "Παράθυρο αποσφαλμάτωσης"
 
-#: ../src/empathy-debug-window.c:1475
+#: ../src/empathy-debug-window.c:1476
 msgid "Pause"
 msgstr "Παύση"
 
-#: ../src/empathy-debug-window.c:1487
+#: ../src/empathy-debug-window.c:1488
 msgid "Level "
 msgstr "Επίπεδο"
 
-#: ../src/empathy-debug-window.c:1507
+#: ../src/empathy-debug-window.c:1508
 msgid "Debug"
 msgstr "Αποσφαλμάτωση"
 
-#: ../src/empathy-debug-window.c:1513
+#: ../src/empathy-debug-window.c:1514
 msgid "Info"
 msgstr "Πληροφορίες"
 
-#: ../src/empathy-debug-window.c:1519 ../src/empathy-debug-window.c:1568
+#: ../src/empathy-debug-window.c:1520 ../src/empathy-debug-window.c:1569
 msgid "Message"
 msgstr "Μήνυμα"
 
-#: ../src/empathy-debug-window.c:1525
+#: ../src/empathy-debug-window.c:1526
 msgid "Warning"
 msgstr "Προειδοποίηση"
 
-#: ../src/empathy-debug-window.c:1531
+#: ../src/empathy-debug-window.c:1532
 msgid "Critical"
 msgstr "Κρίσιμο"
 
-#: ../src/empathy-debug-window.c:1537
+#: ../src/empathy-debug-window.c:1538
 msgid "Error"
 msgstr "Σφάλμα"
 
-#: ../src/empathy-debug-window.c:1556
+#: ../src/empathy-debug-window.c:1557
 msgid "Time"
 msgstr "Ώρα"
 
-#: ../src/empathy-debug-window.c:1559
+#: ../src/empathy-debug-window.c:1560
 msgid "Domain"
 msgstr "Τομέας"
 
-#: ../src/empathy-debug-window.c:1561
+#: ../src/empathy-debug-window.c:1562
 msgid "Category"
 msgstr "Κατηγορία"
 
-#: ../src/empathy-debug-window.c:1563
+#: ../src/empathy-debug-window.c:1564
 msgid "Level"
 msgstr "Επίπεδο"
 
-#: ../src/empathy-debug-window.c:1600
+#: ../src/empathy-debug-window.c:1601
 msgid ""
 "The selected connection manager does not support the remote debugging "
 "extension."
@@ -3917,32 +3975,32 @@ msgstr "Επιλέξτε ποια επαφή θα προσκαλέσετε στ�
 msgid "Invite"
 msgstr "Πρόσκληση"
 
-#: ../src/empathy-accounts.c:178
+#: ../src/empathy-accounts.c:183
 msgid "Don't display any dialogs; do any work (eg, importing) and exit"
 msgstr ""
 "Να μην εμφανιστούν διάλογοι. Εκτέλεση των εργασιών (π.χ. εισαγωγή) κα έξοδος"
 
-#: ../src/empathy-accounts.c:182
+#: ../src/empathy-accounts.c:187
 msgid ""
 "Don't display any dialogs unless there are only \"People Nearby\" accounts"
 msgstr ""
 "Απενεργοποίηση προβολής κάθε διαλόγου εκτός εάν υπάρχουν μόνο λογαριασμοί "
 "\"Γειτονικά άτομα\""
 
-#: ../src/empathy-accounts.c:186
+#: ../src/empathy-accounts.c:191
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr ""
 "Αρχικά, επιλογή δοσμένου λογαριασμού (π.χ., gabble/jabber/bla_40bla_2bla0)"
 
-#: ../src/empathy-accounts.c:188
+#: ../src/empathy-accounts.c:193
 msgid "<account-id>"
 msgstr "<όνομα χρήστη λογαριασμού>"
 
-#: ../src/empathy-accounts.c:193
+#: ../src/empathy-accounts.c:198
 msgid "- Empathy Accounts"
 msgstr "- λογαριασμοί Empathy"
 
-#: ../src/empathy-accounts.c:232
+#: ../src/empathy-accounts.c:237
 msgid "Empathy Accounts"
 msgstr "Λογαριασμοί Empathy"
 
@@ -3950,7 +4008,7 @@ msgstr "Λογαριασμοί Empathy"
 msgid "Empathy Debugger"
 msgstr "Αποσφαλματωτής Empathy"
 
-#: ../src/empathy-chat.c:104
+#: ../src/empathy-chat.c:107
 msgid "- Empathy Chat Client"
 msgstr "- Πρόγραμμα συζητήσεων Empathy"
 
@@ -3975,6 +4033,25 @@ msgstr "Άρνηση"
 #: ../src/empathy-notifications-approver.c:216
 msgid "Accept"
 msgstr "Αποδοχή"
+
+#: ../src/empathy-call-observer.c:130
+#, c-format
+msgid "Missed call from %s"
+msgstr "Αναπάντητη κλήση από %s"
+
+#: ../src/empathy-call-observer.c:133
+#, c-format
+msgid "%s just tried to call you, but you were in another call."
+msgstr "Λάβατε κλήση από %s αλλά ήσασταν σε άλλη κλήση."
+
+#~ msgid "%s is now offline."
+#~ msgstr "Ο/Η %s μόλις αποσυνδέθηκε."
+
+#~ msgid "%s is now online."
+#~ msgstr "Ο/Η %s μόλις συνδέθηκε."
+
+#~ msgid "Context"
+#~ msgstr "Περιεχόμενο"
 
 #~ msgid "Empathy has asked about importing accounts"
 #~ msgstr "Το Empathy έχει ζητήσει την εισαγωγή λογαριασμών"
