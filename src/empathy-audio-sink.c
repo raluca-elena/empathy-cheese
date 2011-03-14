@@ -357,14 +357,22 @@ empathy_audio_sink_request_new_pad (GstElement *element,
   if (!gst_element_add_pad (GST_ELEMENT (bin), subpad))
     goto error;
 
+
+  /* Ensure that state changes only happen _after_ the element has been added
+   * to the hash table. But add it to the bin first so we can create our
+   * ghostpad (if we create the ghostpad before adding it to the bin it will
+   * get unlinked) */
+  gst_element_set_locked_state (GST_ELEMENT (bin), TRUE);
   gst_bin_add (GST_BIN (self), bin);
 
-  /* Add elemnt into the hash table before syncing state so we know about it
-   * when elements are added */
   pad = gst_ghost_pad_new (name, subpad);
+  g_assert (pad != NULL);
+
   audiobin = audio_bin_new (pad, bin, volume, sink);
 
   g_hash_table_insert (self->priv->audio_bins, pad, audiobin);
+
+  gst_element_set_locked_state (GST_ELEMENT (bin), FALSE);
 
   if (!gst_element_sync_state_with_parent (bin))
     goto error;
