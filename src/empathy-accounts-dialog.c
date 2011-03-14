@@ -47,6 +47,7 @@
 #include <libempathy-gtk/empathy-account-widget-sip.h>
 #include <libempathy-gtk/empathy-cell-renderer-activatable.h>
 #include <libempathy-gtk/empathy-images.h>
+#include <libempathy-gtk/mx-gtk-light-switch.h>
 
 #include "empathy-accounts-dialog.h"
 #include "empathy-import-dialog.h"
@@ -85,6 +86,7 @@ typedef struct {
   GtkWidget *label_status;
   GtkWidget *image_status;
   GtkWidget *throbber;
+  GtkWidget *enabled_switch;
   GtkWidget *frame_no_protocol;
 
   GtkWidget *treeview;
@@ -216,6 +218,49 @@ accounts_dialog_status_infobar_set_message (EmpathyAccountsDialog *dialog,
 }
 
 static void
+accounts_dialog_enable_account_cb (GObject *account,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  GError *error = NULL;
+
+  tp_account_set_enabled_finish (TP_ACCOUNT (account), result, &error);
+
+  if (error != NULL)
+    {
+      DEBUG ("Could not enable the account: %s", error->message);
+      g_error_free (error);
+    }
+  else
+    {
+      TpAccountManager *am = tp_account_manager_dup ();
+
+      empathy_connect_new_account (TP_ACCOUNT (account), am);
+      g_object_unref (am);
+    }
+}
+
+static void
+accounts_dialog_enable_switch_flipped (MxGtkLightSwitch *sw,
+    gboolean state,
+    EmpathyAccountsDialog *dialog)
+{
+  EmpathyAccountSettings *settings;
+  TpAccount *account;
+
+  settings = accounts_dialog_model_get_selected_settings (dialog);
+  if (settings == NULL)
+    return;
+
+  account = empathy_account_settings_get_account (settings);
+  if (account == NULL)
+    return;
+
+  tp_account_set_enabled_async (account, state,
+      accounts_dialog_enable_account_cb, NULL);
+}
+
+static void
 accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
     TpAccount *account)
 {
@@ -276,6 +321,14 @@ accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
 
   gtk_image_set_from_icon_name (GTK_IMAGE (priv->image_status),
       empathy_icon_name_for_presence (presence), GTK_ICON_SIZE_SMALL_TOOLBAR);
+
+  /* update the enabled switch */
+  g_signal_handlers_block_by_func (priv->enabled_switch,
+      accounts_dialog_enable_switch_flipped, dialog);
+  mx_gtk_light_switch_set_active (MX_GTK_LIGHT_SWITCH (priv->enabled_switch),
+      account_enabled);
+  g_signal_handlers_unblock_by_func (priv->enabled_switch,
+      accounts_dialog_enable_switch_flipped, dialog);
 
   if (account_enabled)
     {
@@ -2266,6 +2319,16 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   gtk_box_pack_start (GTK_BOX (hbox), priv->throbber, FALSE, FALSE, 0);
   gtk_box_pack_start (GTK_BOX (hbox), priv->image_status, FALSE, FALSE, 3);
   gtk_box_pack_start (GTK_BOX (hbox), priv->label_status, TRUE, TRUE, 0);
+
+  /* enabled switch */
+  align = gtk_alignment_new (0.5, 0.5, 1., 0.);
+  gtk_box_pack_start (GTK_BOX (content_area), align, FALSE, TRUE, 0);
+
+  priv->enabled_switch = mx_gtk_light_switch_new ();
+  gtk_container_add (GTK_CONTAINER (align), priv->enabled_switch);
+  g_signal_connect (priv->enabled_switch, "switch-flipped",
+      G_CALLBACK (accounts_dialog_enable_switch_flipped), dialog);
+  gtk_widget_show_all (align);
 
   /* Tweak the dialog */
   gtk_window_set_title (GTK_WINDOW (dialog), _("Messaging and VoIP Accounts"));
