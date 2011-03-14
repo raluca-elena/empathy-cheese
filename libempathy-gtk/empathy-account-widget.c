@@ -1786,6 +1786,7 @@ empathy_account_widget_enabled_cb (TpAccount *account,
     }
 }
 
+#if 0
 static void
 #ifdef HAVE_MEEGO
 account_widget_switch_flipped_cb (MxGtkLightSwitch *sw,
@@ -1812,6 +1813,7 @@ account_widget_enabled_toggled_cb (GtkToggleButton *toggle_button,
   tp_account_set_enabled_async (account, state,
       account_widget_account_enabled_cb, user_data);
 }
+#endif
 
 void
 empathy_account_widget_set_other_accounts_exist (EmpathyAccountWidget *self,
@@ -1974,6 +1976,7 @@ static void
 add_enable_checkbox (EmpathyAccountWidget *self,
     TpAccount *account)
 {
+#if 0
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
 #ifdef HAVE_MEEGO
   GtkWidget *w;
@@ -2038,6 +2041,7 @@ add_enable_checkbox (EmpathyAccountWidget *self,
   g_signal_connect (G_OBJECT (priv->enabled_checkbox), "toggled",
       G_CALLBACK (account_widget_enabled_toggled_cb), self);
 #endif /* HAVE_MEEGO */
+#endif
 }
 
 #ifndef HAVE_MEEGO
