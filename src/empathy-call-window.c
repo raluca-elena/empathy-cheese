@@ -1877,7 +1877,8 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
       /* destroy the video output; it will be recreated when we'll redial */
       disconnect_video_output_motion_handler (self);
-      gtk_widget_destroy (priv->video_output);
+      if (priv->video_output != NULL)
+        gtk_widget_destroy (priv->video_output);
       priv->video_output = NULL;
 
       gtk_widget_show (priv->remote_user_avatar_widget);
