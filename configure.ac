@@ -35,6 +35,7 @@ FOLKS_REQUIRED=0.5.1
 GLIB_REQUIRED=2.28.0
 GNUTLS_REQUIRED=2.8.5
 GTK_REQUIRED=3.0.2
+GSTREAMER_REQUIRED=0.10.32
 KEYRING_REQUIRED=2.26.0
 GCR_REQUIRED=2.91.4
 LIBCANBERRA_GTK_REQUIRED=0.25
@@ -160,7 +161,7 @@ PKG_CHECK_MODULES(EMPATHY,
    gmodule-export-2.0
    gobject-2.0
    gsettings-desktop-schemas
-   gstreamer-0.10
+   gstreamer-0.10 >= $GSTREAMER_REQUIRED
    gstreamer-interfaces-0.10
    libxml-2.0
    telepathy-glib >= $TELEPATHY_GLIB_REQUIRED
