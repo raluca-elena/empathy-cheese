@@ -2283,8 +2283,19 @@ individual_view_remove_dialog_show (GtkWindow *parent,
       GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE, "%s", message);
 
   if (block_button)
-    gtk_dialog_add_button (GTK_DIALOG (dialog),
-        _("Delete and Block"), GTK_RESPONSE_REJECT);
+    {
+      GtkWidget *button;
+
+      /* gtk_dialog_add_button() doesn't allow us to pass a string with a
+       * mnemonic so we have to create the button manually. */
+      button = gtk_button_new_with_mnemonic (
+          _("Delete and _Block"));
+
+      gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
+          GTK_RESPONSE_REJECT);
+
+      gtk_widget_show (button);
+    }
 
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
       GTK_STOCK_CANCEL, GTK_RESPONSE_NO,
