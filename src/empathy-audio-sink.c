@@ -91,6 +91,9 @@ struct _EmpathyGstAudioSinkPrivate
 
   /* Pad -> *owned* subbin hash */
   GHashTable *audio_bins;
+
+  /* Mutex to hold while change the hash table */
+  GMutex *audio_bins_lock;
 };
 
 #define EMPATHY_GST_AUDIO_SINK_GET_PRIVATE(o) \
@@ -111,6 +114,7 @@ empathy_audio_sink_element_added_cb (FsElementAddedNotifier *notifier,
       AudioBin *audio_bin = NULL;
       gpointer value;
 
+      g_mutex_lock (self->priv->audio_bins_lock);
       g_hash_table_iter_init (&iter, priv->audio_bins);
 
       while (g_hash_table_iter_next (&iter, NULL, &value))
@@ -137,6 +141,7 @@ empathy_audio_sink_element_added_cb (FsElementAddedNotifier *notifier,
 
       audio_bin->volume = gst_object_ref (element);
       g_object_set (audio_bin->volume, "volume", self->priv->volume, NULL);
+      g_mutex_unlock (self->priv->audio_bins_lock);
     }
 }
 
@@ -151,6 +156,8 @@ empathy_audio_sink_init (EmpathyGstAudioSink *self)
 
   priv->audio_bins = g_hash_table_new_full (g_direct_hash, g_direct_equal,
     NULL, (GDestroyNotify) audio_bin_free);
+
+  priv->audio_bins_lock = g_mutex_new ();
 
   priv->notifier = fs_element_added_notifier_new ();
   g_signal_connect (priv->notifier, "element-added",
@@ -246,6 +253,10 @@ empathy_audio_sink_dispose (GObject *object)
     g_hash_table_unref (priv->audio_bins);
   priv->audio_bins = NULL;
 
+  if (priv->audio_bins_lock != NULL)
+    g_mutex_free (priv->audio_bins_lock);
+  priv->audio_bins_lock = NULL;
+
   if (G_OBJECT_CLASS (empathy_audio_sink_parent_class)->dispose)
     G_OBJECT_CLASS (empathy_audio_sink_parent_class)->dispose (object);
 }
@@ -284,13 +295,17 @@ empathy_audio_sink_set_volume (EmpathyGstAudioSink *sink, gdouble volume)
   gpointer value;
 
   priv->volume = volume;
-  g_hash_table_iter_init (&iter, priv->audio_bins);
 
+  g_mutex_lock (priv->audio_bins_lock);
+
+  g_hash_table_iter_init (&iter, priv->audio_bins);
   while (g_hash_table_iter_next (&iter, NULL, &value))
     {
       AudioBin *b = value;
       g_object_set (b->volume, "volume", volume, NULL);
     }
+
+  g_mutex_unlock (priv->audio_bins_lock);
 }
 
 gdouble
@@ -370,7 +385,9 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   audiobin = audio_bin_new (pad, bin, volume, sink);
 
+  g_mutex_lock (self->priv->audio_bins_lock);
   g_hash_table_insert (self->priv->audio_bins, pad, audiobin);
+  g_mutex_unlock (self->priv->audio_bins_lock);
 
   gst_element_set_locked_state (GST_ELEMENT (bin), FALSE);
 
@@ -389,7 +406,10 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 error:
   if (pad != NULL)
     {
+      g_mutex_lock (self->priv->audio_bins_lock);
       g_hash_table_remove (self->priv->audio_bins, pad);
+      g_mutex_unlock (self->priv->audio_bins_lock);
+
       gst_object_unref (pad);
     }
 
@@ -405,8 +425,10 @@ empathy_audio_sink_release_pad (GstElement *element,
   EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (element);
   AudioBin *abin;
 
+  g_mutex_lock (self->priv->audio_bins_lock);
   abin = g_hash_table_lookup (self->priv->audio_bins, pad);
   g_hash_table_steal (self->priv->audio_bins, pad);
+  g_mutex_unlock (self->priv->audio_bins_lock);
 
   if (abin == NULL)
     {
