@@ -245,7 +245,7 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 		/* confirm the user really wishes to block the contact */
 		GtkWidget *parent;
 
-		/* gtk_menu_get_attach_widget() doesn't behave properly here
+		/* gtk_menu_get_attach_widget () doesn't behave properly here
 		 * for some reason */
 		parent = g_object_get_data (
 			G_OBJECT (gtk_widget_get_parent (GTK_WIDGET (item))),
