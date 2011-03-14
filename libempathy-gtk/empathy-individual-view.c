@@ -2273,6 +2273,13 @@ empathy_individual_view_dup_selected_group (EmpathyIndividualView *view,
   return name;
 }
 
+enum
+{
+  REMOVE_DIALOG_RESPONSE_CANCEL = 0,
+  REMOVE_DIALOG_RESPONSE_DELETE,
+  REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK,
+};
+
 static int
 individual_view_remove_dialog_show (GtkWindow *parent,
     const gchar *message,
@@ -2295,14 +2302,14 @@ individual_view_remove_dialog_show (GtkWindow *parent,
           _("Delete and _Block"));
 
       gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
-          GTK_RESPONSE_REJECT);
+          REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK);
 
       gtk_widget_show (button);
     }
 
   gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-      GTK_STOCK_CANCEL, GTK_RESPONSE_NO,
-      GTK_STOCK_DELETE, GTK_RESPONSE_YES, NULL);
+      GTK_STOCK_CANCEL, REMOVE_DIALOG_RESPONSE_CANCEL,
+      GTK_STOCK_DELETE, REMOVE_DIALOG_RESPONSE_DELETE, NULL);
   gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
       "%s", secondary_text);
 
@@ -2331,7 +2338,7 @@ individual_view_group_remove_activate_cb (GtkMenuItem *menuitem,
           group);
       parent = empathy_get_toplevel_window (GTK_WIDGET (view));
       if (individual_view_remove_dialog_show (parent, _("Removing group"),
-              text, FALSE) == GTK_RESPONSE_YES)
+              text, FALSE) == REMOVE_DIALOG_RESPONSE_DELETE)
         {
           EmpathyIndividualManager *manager =
               empathy_individual_manager_dup_singleton ();
@@ -2462,11 +2469,12 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
       res = individual_view_remove_dialog_show (parent, _("Removing contact"),
               text, can_block);
 
-      if (res == GTK_RESPONSE_YES || res == GTK_RESPONSE_REJECT)
+      if (res == REMOVE_DIALOG_RESPONSE_DELETE ||
+          res == REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK)
         {
           gboolean abusive;
 
-          if (res == GTK_RESPONSE_REJECT &&
+          if (res == REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK &&
               empathy_block_individual_dialog_show (parent, individual,
                 &abusive))
             {
