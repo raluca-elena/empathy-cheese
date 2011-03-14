@@ -31,6 +31,8 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/interfaces.h>
 
+#include <extensions/extensions.h>
+
 #include "empathy-tp-contact-list.h"
 #include "empathy-tp-contact-factory.h"
 #include "empathy-contact-list.h"
@@ -46,6 +48,7 @@ typedef struct {
 	TpChannel      *publish;
 	TpChannel      *subscribe;
 	TpChannel      *stored;
+	TpChannel      *deny;
 	/* contact handle (TpHandle) => reffed (EmpathyContact *)
 	 *
 	 * Union of:
@@ -722,6 +725,10 @@ tp_contact_list_finalize (GObject *object)
 		g_object_unref (priv->stored);
 	}
 
+	if (priv->deny) {
+		g_object_unref (priv->deny);
+	}
+
 	if (priv->connection) {
 		g_object_unref (priv->connection);
 	}
@@ -773,6 +780,11 @@ got_list_channel (EmpathyTpContactList *list,
 		g_signal_connect (priv->subscribe, "group-members-changed",
 				  G_CALLBACK (tp_contact_list_subscribe_group_members_changed_cb),
 				  list);
+	} else if (!tp_strdiff (id, "deny")) {
+		if (priv->deny != NULL)
+			return;
+		DEBUG ("Got 'deny' channel");
+		priv->deny = g_object_ref (channel);
 	}
 }
 
@@ -796,6 +808,27 @@ list_ensure_channel_cb (TpConnection *conn,
 	channel = tp_channel_new_from_properties (conn, path, properties, NULL);
 	got_list_channel (list, channel);
 	g_object_unref (channel);
+}
+
+static void
+list_get_contact_blocking_capabilities_cb (TpProxy *conn,
+					   const GValue *value,
+					   const GError *in_error,
+					   gpointer user_data,
+					   GObject *weak_object)
+{
+	EmpathyTpContactList *list = EMPATHY_TP_CONTACT_LIST (weak_object);
+	EmpathyTpContactListPriv *priv = GET_PRIV (list);
+	EmpContactBlockingCapabilities caps;
+
+	g_return_if_fail (G_VALUE_HOLDS_UINT (value));
+
+	caps = g_value_get_uint (value);
+
+	if (caps & EMP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE) {
+		DEBUG ("Connection can report abusive contacts");
+		priv->flags |= EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE;
+	}
 }
 
 static void
@@ -881,8 +914,8 @@ conn_ready_cb (TpConnection *connection,
 		NULL, NULL, G_OBJECT (list));
 
 	request = tp_asv_new (
-		TP_IFACE_CHANNEL ".ChannelType", G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_CONTACT_LIST,
-		TP_IFACE_CHANNEL ".TargetHandleType", G_TYPE_UINT, TP_HANDLE_TYPE_LIST,
+		TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING, TP_IFACE_CHANNEL_TYPE_CONTACT_LIST,
+		TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_LIST,
 		NULL);
 
 	/* Watch the NewChannels signal so if ensuring list channels fails (for
@@ -892,21 +925,39 @@ conn_ready_cb (TpConnection *connection,
 		priv->connection, new_channels_cb, NULL, NULL, G_OBJECT (list), NULL);
 
 	/* Request the 'stored' list. */
-	tp_asv_set_static_string (request, TP_IFACE_CHANNEL ".TargetID", "stored");
+	tp_asv_set_static_string (request, TP_PROP_CHANNEL_TARGET_ID, "stored");
 	tp_cli_connection_interface_requests_call_ensure_channel (priv->connection,
 		G_MAXINT, request, list_ensure_channel_cb, list, NULL, G_OBJECT (list));
 
 	/* Request the 'publish' list. */
-	tp_asv_set_static_string (request, TP_IFACE_CHANNEL ".TargetID", "publish");
+	tp_asv_set_static_string (request, TP_PROP_CHANNEL_TARGET_ID, "publish");
 	tp_cli_connection_interface_requests_call_ensure_channel (priv->connection,
 		G_MAXINT, request, list_ensure_channel_cb, list, NULL, G_OBJECT (list));
 
 	/* Request the 'subscribe' list. */
-	tp_asv_set_static_string (request, TP_IFACE_CHANNEL ".TargetID", "subscribe");
+	tp_asv_set_static_string (request, TP_PROP_CHANNEL_TARGET_ID, "subscribe");
+	tp_cli_connection_interface_requests_call_ensure_channel (priv->connection,
+		G_MAXINT, request, list_ensure_channel_cb, list, NULL, G_OBJECT (list));
+
+	/* Request the 'deny' list */
+	tp_asv_set_static_string (request, TP_PROP_CHANNEL_TARGET_ID, "deny");
 	tp_cli_connection_interface_requests_call_ensure_channel (priv->connection,
 		G_MAXINT, request, list_ensure_channel_cb, list, NULL, G_OBJECT (list));
 
 	g_hash_table_unref (request);
+
+	/* Find out if we support reporting abusive contacts --
+	 * this is done via the new Conn.I.ContactBlocking interface */
+	if (tp_proxy_has_interface_by_id (priv->connection,
+	    EMP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING)) {
+		DEBUG ("Have Conn.I.ContactBlocking");
+
+		tp_cli_dbus_properties_call_get (priv->connection, -1,
+			EMP_IFACE_CONNECTION_INTERFACE_CONTACT_BLOCKING,
+			"ContactBlockingCapabilities",
+			list_get_contact_blocking_capabilities_cb,
+			NULL, NULL, G_OBJECT (list));
+	}
 out:
 	g_object_unref (list);
 }
@@ -1289,7 +1340,53 @@ tp_contact_list_get_flags (EmpathyContactList *list)
 		}
 	}
 
+	if (priv->deny != NULL)
+		flags |= EMPATHY_CONTACT_LIST_CAN_BLOCK;
+
 	return flags;
+}
+
+static void
+tp_contact_list_set_blocked (EmpathyContactList *list,
+			     EmpathyContact     *contact,
+			     gboolean            blocked,
+			     gboolean            abusive)
+{
+	EmpathyTpContactListPriv *priv = GET_PRIV (list);
+	TpHandle handle = empathy_contact_get_handle (contact);
+	GArray handles = { (char *) &handle, 1 };
+
+	g_return_if_fail (TP_IS_CHANNEL (priv->deny));
+
+	if (blocked && abusive) {
+		/* we have to do this via the new interface */
+		g_return_if_fail (priv->flags &
+				EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE);
+
+		emp_cli_connection_interface_contact_blocking_call_block_contacts (
+			TP_PROXY (priv->connection), -1,
+			&handles, TRUE, NULL, NULL, NULL, NULL);
+	} else if (blocked) {
+		tp_cli_channel_interface_group_call_add_members (
+			priv->deny, -1,
+			&handles, NULL, NULL, NULL, NULL, NULL);
+	} else {
+		tp_cli_channel_interface_group_call_remove_members (
+			priv->deny, -1,
+			&handles, NULL, NULL, NULL, NULL, NULL);
+	}
+}
+
+static gboolean
+tp_contact_list_get_blocked (EmpathyContactList *list,
+			     EmpathyContact     *contact)
+{
+	EmpathyTpContactListPriv *priv = GET_PRIV (list);
+
+	g_return_val_if_fail (TP_IS_CHANNEL (priv->deny), FALSE);
+
+	return tp_intset_is_member (tp_channel_group_get_members (priv->deny),
+				    empathy_contact_get_handle (contact));
 }
 
 static void
@@ -1306,6 +1403,8 @@ tp_contact_list_iface_init (EmpathyContactListIface *iface)
 	iface->rename_group      = tp_contact_list_rename_group;
 	iface->remove_group	 = tp_contact_list_remove_group;
 	iface->get_flags	 = tp_contact_list_get_flags;
+	iface->set_blocked	 = tp_contact_list_set_blocked;
+	iface->get_blocked	 = tp_contact_list_get_blocked;
 }
 
 void
@@ -1334,4 +1433,3 @@ empathy_tp_contact_list_remove_all (EmpathyTpContactList *list)
 	}
 	g_hash_table_remove_all (priv->pendings);
 }
-

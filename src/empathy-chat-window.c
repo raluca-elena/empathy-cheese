@@ -417,12 +417,15 @@ chat_window_contact_menu_update (EmpathyChatWindowPriv *priv,
 
 	if (orig_submenu == NULL || !gtk_widget_get_visible (orig_submenu)) {
 		submenu = empathy_chat_get_contact_menu (priv->current_chat);
+
 		if (submenu != NULL) {
+			/* gtk_menu_attach_to_widget() doesn't behave nicely here */
+			g_object_set_data (G_OBJECT (submenu), "window", priv->dialog);
+
 			gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu), submenu);
 			gtk_widget_show (menu);
 			gtk_widget_set_sensitive (menu, TRUE);
-		}
-		else {
+		} else {
 			gtk_widget_set_sensitive (menu, FALSE);
 		}
 	} else {

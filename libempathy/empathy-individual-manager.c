@@ -30,12 +30,14 @@
 #include <telepathy-glib/util.h>
 
 #include <folks/folks.h>
+#include <folks/folks-telepathy.h>
 
 #include <extensions/extensions.h>
 
 #include "empathy-individual-manager.h"
 #include "empathy-marshal.h"
 #include "empathy-utils.h"
+#include "empathy-contact-manager.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include "empathy-debug.h"
@@ -481,6 +483,89 @@ empathy_individual_manager_remove (EmpathyIndividualManager *self,
 
   folks_individual_aggregator_remove_individual (priv->aggregator, individual,
       aggregator_remove_individual_cb, self);
+}
+
+/* FIXME: The parameter @self is not required and the method can be placed in
+ * utilities. I left it as it is to stay coherent with empathy-2.34 */
+/**
+ * empathy_individual_manager_supports_blocking
+ * @self: the #EmpathyIndividualManager
+ * @individual: an individual to check
+ *
+ * Indicates whether any personas of an @individual can be blocked.
+ *
+ * Returns: %TRUE if any persona supports contact blocking
+ */
+gboolean
+empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
+    FolksIndividual *individual)
+{
+  EmpathyIndividualManagerPriv *priv;
+  GList *personas, *l;
+
+  g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_MANAGER (self), FALSE);
+
+  priv = GET_PRIV (self);
+
+  personas = folks_individual_get_personas (individual);
+
+  for (l = personas; l != NULL; l = l->next)
+    {
+      TpfPersona *persona = l->data;
+      TpConnection *conn;
+      EmpathyContactManager *manager;
+
+      if (!TPF_IS_PERSONA (persona))
+        continue;
+
+      conn = tp_contact_get_connection (tpf_persona_get_contact (persona));
+      manager = empathy_contact_manager_dup_singleton ();
+
+      if (empathy_contact_manager_get_flags_for_connection (manager, conn) &
+          EMPATHY_CONTACT_LIST_CAN_BLOCK)
+        return TRUE;
+
+      g_object_unref (manager);
+    }
+
+  return FALSE;
+}
+
+void
+empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
+    FolksIndividual *individual,
+    gboolean blocked,
+    gboolean abusive)
+{
+  EmpathyIndividualManagerPriv *priv;
+  GList *personas, *l;
+
+  g_return_if_fail (EMPATHY_IS_INDIVIDUAL_MANAGER (self));
+
+  priv = GET_PRIV (self);
+
+  personas = folks_individual_get_personas (individual);
+
+  for (l = personas; l != NULL; l = l->next)
+    {
+      TpfPersona *persona = l->data;
+      EmpathyContact *contact;
+      EmpathyContactManager *manager;
+
+      if (!TPF_IS_PERSONA (persona))
+        continue;
+
+      contact = empathy_contact_dup_from_tp_contact (
+          tpf_persona_get_contact (persona));
+      empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+      manager = empathy_contact_manager_dup_singleton ();
+      empathy_contact_list_set_blocked (
+          EMPATHY_CONTACT_LIST (manager),
+          contact, blocked, abusive);
+
+      g_object_unref (manager);
+      g_object_unref (contact);
+    }
 }
 
 static void

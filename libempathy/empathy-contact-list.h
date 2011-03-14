@@ -39,6 +39,8 @@ typedef enum {
 	EMPATHY_CONTACT_LIST_CAN_REMOVE		= 1 << 1,
 	EMPATHY_CONTACT_LIST_CAN_ALIAS		= 1 << 2,
 	EMPATHY_CONTACT_LIST_CAN_GROUP		= 1 << 3,
+	EMPATHY_CONTACT_LIST_CAN_BLOCK		= 1 << 4,
+	EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE = 1 << 5,
 } EmpathyContactListFlags;
 
 typedef struct _EmpathyContactListIface EmpathyContactListIface;
@@ -77,6 +79,12 @@ struct _EmpathyContactListIface {
 					       EmpathyContact     *contact);
 	void             (*remove_favourite)  (EmpathyContactList *list,
 					       EmpathyContact     *contact);
+	void             (*set_blocked)       (EmpathyContactList *list,
+			                       EmpathyContact     *contact,
+					       gboolean            blocked,
+					       gboolean            abusive);
+	gboolean         (*get_blocked)       (EmpathyContactList *list,
+			                       EmpathyContact     *contact);
 };
 
 GType    empathy_contact_list_get_type          (void) G_GNUC_CONST;
@@ -114,6 +122,13 @@ void     empathy_contact_list_add_to_favourites (EmpathyContactList *list,
 
 void     empathy_contact_list_remove_from_favourites
                                                 (EmpathyContactList *list,
+						 EmpathyContact     *contact);
+
+void     empathy_contact_list_set_blocked       (EmpathyContactList *list,
+		                                 EmpathyContact     *contact,
+						 gboolean            blocked,
+						 gboolean            abusive);
+gboolean empathy_contact_list_get_blocked       (EmpathyContactList *list,
 						 EmpathyContact     *contact);
 
 

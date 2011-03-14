@@ -39,6 +39,7 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-chat-text-view.c		\
 	empathy-chat-view.c			\
 	empathy-chat.c				\
+	empathy-contact-blocking-dialog.c	\
 	empathy-contact-dialogs.c		\
 	empathy-contact-list-store.c		\
 	empathy-contact-list-view.c		\
@@ -98,6 +99,7 @@ libempathy_gtk_headers =			\
 	empathy-chat-text-view.h		\
 	empathy-chat-view.h			\
 	empathy-chat.h				\
+	empathy-contact-blocking-dialog.h	\
 	empathy-contact-dialogs.h		\
 	empathy-contact-list-store.h		\
 	empathy-contact-list-view.h		\
@@ -177,6 +179,7 @@ uidir = $(datadir)/empathy
 ui_DATA = 					\
 	empathy-contact-widget.ui		\
 	empathy-contact-dialogs.ui		\
+	empathy-contact-blocking-dialog.ui	\
 	empathy-account-widget-generic.ui	\
 	empathy-account-widget-jabber.ui	\
 	empathy-account-widget-msn.ui		\

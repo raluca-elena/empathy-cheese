@@ -81,5 +81,14 @@ void empathy_individual_manager_unlink_individual (
     EmpathyIndividualManager *self,
     FolksIndividual *individual);
 
+gboolean empathy_individual_manager_supports_blocking (
+    EmpathyIndividualManager *self,
+    FolksIndividual *individual);
+
+void empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
+    FolksIndividual *individual,
+    gboolean blocked,
+    gboolean abusive);
+
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_MANAGER_H__ */

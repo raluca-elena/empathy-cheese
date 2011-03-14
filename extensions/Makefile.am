@@ -18,6 +18,7 @@ EXTRA_DIST = \
     Authentication_TLS_Certificate.xml \
     Channel_Interface_Credentials_Storage.xml \
     Channel_Type_Server_TLS_Connection.xml \
+    Connection_Interface_Contact_Blocking.xml \
     $(NULL)
 
 noinst_LTLIBRARIES = libemp-extensions.la

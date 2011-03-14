@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Authors: Xavier Claessens <xclaesse@gmail.com>
+ *          Danielle Madeley <danielle.madeley@collabora.co.uk>
  */
 
 #include <config.h>
@@ -83,9 +84,29 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
 					     contact, "");
 	}
+	else if (response == GTK_RESPONSE_REJECT) {
+		gboolean abusive;
+
+		/* confirm the blocking */
+		if (empathy_block_contact_dialog_show (GTK_WINDOW (dialog),
+						       contact, &abusive)) {
+			empathy_contact_list_remove (
+					EMPATHY_CONTACT_LIST (manager),
+					contact, "");
+			empathy_contact_list_set_blocked (
+					EMPATHY_CONTACT_LIST (manager),
+					contact, TRUE, abusive);
+		} else {
+			/* if they don't confirm, return back to the
+			 * first dialog */
+			goto finally;
+		}
+	}
 
 	subscription_dialogs = g_list_remove (subscription_dialogs, dialog);
 	gtk_widget_destroy (GTK_WIDGET (dialog));
+
+finally:
 	g_object_unref (manager);
 }
 
@@ -99,8 +120,13 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	GtkWidget *hbox_subscription;
 	GtkWidget *vbox;
 	GtkWidget *contact_widget;
+	GtkWidget *block_user_button;
 	GList     *l;
 	gchar     *filename;
+	EmpathyContactManager *manager;
+	EmpathyContactListFlags flags;
+
+	manager = empathy_contact_manager_dup_singleton ();
 
 	g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
@@ -117,6 +143,7 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	gui = empathy_builder_get_file (filename,
 				      "subscription_request_dialog", &dialog,
 				      "hbox_subscription", &hbox_subscription,
+				      "block-user-button", &block_user_button,
 				      NULL);
 	g_free (filename);
 	g_object_unref (gui);
@@ -161,10 +188,17 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 			  G_CALLBACK (subscription_dialog_response_cb),
 			  contact_widget);
 
+	flags = empathy_contact_manager_get_flags_for_connection (manager,
+				empathy_contact_get_connection (contact));
+
+	if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+		gtk_widget_show (block_user_button);
+
 	if (parent) {
 		gtk_window_set_transient_for (GTK_WINDOW (dialog), parent);
 	}
 
+	g_object_unref (manager);
 	gtk_widget_show (dialog);
 }
 
@@ -468,3 +502,72 @@ empathy_new_contact_dialog_show_with_contact (GtkWindow *parent,
 	gtk_widget_show (dialog);
 }
 
+/**
+ * empathy_block_contact_dialog_show:
+ * @parent: the parent of this dialog (or %NULL)
+ * @contact: the contact for this dialog
+ * @abusive: a pointer to store the value of the abusive contact check box
+ *  (or %NULL)
+ *
+ * Returns: %TRUE if the user wishes to block the contact
+ */
+gboolean
+empathy_block_contact_dialog_show (GtkWindow      *parent,
+				   EmpathyContact *contact,
+				   gboolean       *abusive)
+{
+	EmpathyContactManager *manager;
+	EmpathyContactListFlags flags;
+	GtkWidget *dialog;
+	GtkWidget *abusive_check = NULL;
+	int res;
+
+	manager = empathy_contact_manager_dup_singleton ();
+	flags = empathy_contact_manager_get_flags_for_connection (manager,
+			empathy_contact_get_connection (contact));
+
+	dialog = gtk_message_dialog_new (parent,
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+			_("Block %s?"),
+			empathy_contact_get_alias (contact));
+
+	gtk_message_dialog_format_secondary_text (
+			GTK_MESSAGE_DIALOG (dialog),
+			_("Are you sure you want to block '%s' from "
+			  "contacting you again?"),
+			empathy_contact_get_alias (contact));
+	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			_("_Block"), GTK_RESPONSE_REJECT,
+			NULL);
+
+	/* ask the user if they want to also report the contact as abusive */
+	if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE) {
+		GtkWidget *vbox;
+
+		vbox = gtk_message_dialog_get_message_area (
+				GTK_MESSAGE_DIALOG (dialog));
+		abusive_check = gtk_check_button_new_with_mnemonic (
+				_("_Report this contact as abusive"));
+
+		gtk_box_pack_start (GTK_BOX (vbox), abusive_check,
+				    FALSE, TRUE, 0);
+		gtk_widget_show (abusive_check);
+	}
+
+	res = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (abusive != NULL) {
+		if (abusive_check != NULL) {
+			*abusive = gtk_toggle_button_get_active (
+					GTK_TOGGLE_BUTTON (abusive_check));
+		} else {
+			*abusive = FALSE;
+		}
+	}
+
+	gtk_widget_destroy (dialog);
+	g_object_unref (manager);
+
+	return res == GTK_RESPONSE_REJECT;
+}

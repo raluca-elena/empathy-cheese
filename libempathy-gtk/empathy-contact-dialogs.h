@@ -39,6 +39,9 @@ void empathy_contact_personal_dialog_show    (GtkWindow      *parent);
 void empathy_new_contact_dialog_show         (GtkWindow     *parent);
 void empathy_new_contact_dialog_show_with_contact (GtkWindow     *parent,
                                                    EmpathyContact *contact);
+gboolean empathy_block_contact_dialog_show (GtkWindow      *parent,
+					    EmpathyContact *contact,
+					    gboolean       *abusive);
 
 G_END_DECLS
 

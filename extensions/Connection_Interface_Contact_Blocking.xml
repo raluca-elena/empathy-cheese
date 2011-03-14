@@ -1,0 +1,172 @@
+<?xml version="1.0" ?>
+<node name="/Connection_Interface_Contact_Blocking" xmlns:tp="http://telepathy.freedesktop.org/wiki/DbusSpec#extensions-v0">
+  <tp:copyright>Copyright © 2009-2010 Collabora Ltd.</tp:copyright>
+  <tp:copyright>Copyright © 2009 Nokia Corporation</tp:copyright>
+  <tp:license xmlns="http://www.w3.org/1999/xhtml">
+    <p>This library is free software; you can redistribute it and/or
+      modify it under the terms of the GNU Lesser General Public
+      License as published by the Free Software Foundation; either
+      version 2.1 of the License, or (at your option) any later version.</p>
+
+    <p>This library is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+      Lesser General Public License for more details.</p>
+
+    <p>You should have received a copy of the GNU Lesser General Public
+      License along with this library; if not, write to the Free Software
+      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+      USA.</p>
+  </tp:license>
+  <interface name="org.freedesktop.Telepathy.Connection.Interface.ContactBlocking.DRAFT"
+    tp:causes-havoc="experimental">
+    <tp:requires interface="org.freedesktop.Telepathy.Connection"/>
+
+    <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+      <p>An interface for connections where contacts can be blocked from
+        communicating with this user and receiving this user's presence.</p>
+
+      <p>When this interface becomes stable, it will replace the <tp:dbus-ref
+          namespace="org.freedesktop.Telepathy.Channel.Type"
+          >ContactList</tp:dbus-ref> channel with TargetHandleType
+        Handle_Type_List and TargetID 'deny'.</p>
+    </tp:docstring>
+
+    <method name="BlockContacts" tp:name-for-bindings="Block_Contacts">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>Direct the server to block some contacts. The precise effect is
+          protocol-dependent, but SHOULD include ignoring all current and
+          subsequent communications from the given contacts, avoiding sending
+          presence to them in future, and if they were already receiving the
+          local user's presence, behaving as if the local user went
+          offline.</p>
+
+        <p><em>FIXME: do we need to allow this on protocols where it won't
+            persist, or where we can't edit the block lists?</em></p>
+      </tp:docstring>
+
+      <arg name="Contacts" type="au" direction="in" tp:type="Contact_Handle[]">
+        <tp:docstring>Some contacts to block.</tp:docstring>
+      </arg>
+
+      <arg name="Report_Abusive" type="b" direction="in">
+        <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+          <p>In addition to blocking, report these contacts as abusive to the
+            server administrators.</p>
+
+          <p>Clients can determine whether this capability is available by
+            checking the
+            <tp:member-ref>ContactBlockingCapabilities</tp:member-ref>
+            property. If the capability is not present and this argument is
+            true, the error <tp:error-ref>NotCapable</tp:error-ref> SHOULD
+            be raised.</p>
+
+          <tp:rationale>
+            Some protocol libraries, in their conformance requirements,
+            require the ability to report blocked contacts as abusive.
+          </tp:rationale>
+        </tp:docstring>
+      </arg>
+
+      <tp:possible-errors>
+        <tp:error name="org.freedesktop.Telepathy.Error.Disconnected"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.InvalidHandle"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.NetworkError"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.NotCapable"/>
+      </tp:possible-errors>
+    </method>
+
+    <method name="UnblockContacts" tp:name-for-bindings="Unblock_Contacts">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>Reverse the effects of a previous call to
+          <tp:member-ref>BlockContacts</tp:member-ref>.</p>
+      </tp:docstring>
+
+      <arg name="Contacts" type="au" direction="in" tp:type="Contact_Handle[]">
+        <tp:docstring>Some contacts to unblock.</tp:docstring>
+      </arg>
+
+      <tp:possible-errors>
+        <tp:error name="org.freedesktop.Telepathy.Error.Disconnected"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.InvalidHandle"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.NetworkError"/>
+      </tp:possible-errors>
+    </method>
+
+    <method name="RequestBlockedContacts"
+      tp:name-for-bindings="Request_Blocked_Contacts">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>List the contacts that are blocked.</p>
+
+        <p>Clients SHOULD allow a relatively long timeout for calls to this
+          method, since on some protocols contact blocking is part of the
+          contact list, which can take a significant time to retrieve.</p>
+      </tp:docstring>
+
+      <arg name="Contacts" type="au" direction="out" tp:type="Contact_Handle[]">
+        <tp:docstring>The list of blocked contacts.</tp:docstring>
+      </arg>
+
+      <tp:possible-errors>
+        <tp:error name="org.freedesktop.Telepathy.Error.Disconnected"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.InvalidHandle"/>
+        <tp:error name="org.freedesktop.Telepathy.Error.NetworkError"/>
+      </tp:possible-errors>
+    </method>
+
+    <signal name="BlockedContactsChanged"
+      tp:name-for-bindings="Blocked_Contacts_Changed">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>Emitted when the list of blocked contacts is first retrieved
+          (before returning from any pending calls to
+          <tp:member-ref>RequestBlockedContacts</tp:member-ref>), and
+          whenever the list of blocked contacts subsequently changes.</p>
+      </tp:docstring>
+
+      <arg name="BlockedContacts" type="au" tp:type="Contact_Handle[]">
+        <tp:docstring>Contacts added to the result of
+          <tp:member-ref>RequestBlockedContacts</tp:member-ref>.</tp:docstring>
+      </arg>
+
+      <arg name="UnblockedContacts" type="au" tp:type="Contact_Handle[]">
+        <tp:docstring>Contacts removed from the result of
+          <tp:member-ref>RequestBlockedContacts</tp:member-ref>.</tp:docstring>
+      </arg>
+    </signal>
+
+    <tp:contact-attribute name="blocked" type="b">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>True if the contact would be in the result of
+          <tp:member-ref>RequestBlockedContacts</tp:member-ref>;
+          False or omitted if the contact is not blocked, or if it is
+          unknown whether the contact is blocked.</p>
+      </tp:docstring>
+    </tp:contact-attribute>
+
+    <property name="ContactBlockingCapabilities"
+              tp:name-for-bindings="Contact_Blocking_Capabilities"
+              tp:type="Contact_Blocking_Capabilities" type="u" access="read"
+              tp:immutable="yes">
+      <tp:docstring xmlns="http://www.w3.org/1999/xhtml">
+        <p>Additional capabilities for contact blocking (i.e. whether we can
+          report abusive contacts).</p>
+
+        <p><b>Note:</b> there is no capability for supporting blocking itself,
+          the presence of this interface indicates that contact blocking is
+          supported.</p>
+      </tp:docstring>
+    </property>
+
+    <tp:flags name="Contact_Blocking_Capabilities" type="u"
+              value-prefix="Contact_Blocking_Capability">
+      <tp:flag suffix="Can_Report_Abusive" value="1">
+        <tp:docstring>
+          This protocol is capable of reporting abusive contacts to the server
+          administrators.
+        </tp:docstring>
+      </tp:flag>
+    </tp:flags>
+
+  </interface>
+</node>
+<!-- vim:set sw=2 sts=2 et ft=xml: -->
