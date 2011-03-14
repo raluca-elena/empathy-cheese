@@ -674,6 +674,21 @@ cdo_invalidated_cb (TpProxy *cdo,
 }
 
 static void
+event_manager_call_state_changed_cb (TpyCallChannel *call,
+  TpyCallState state,
+  TpyCallFlags flags,
+   const GValueArray *call_state_reason,
+  GHashTable *call_state_details,
+  EventManagerApproval *approval)
+{
+  if (state == TPY_CALL_STATE_ENDED)
+    {
+      DEBUG ("Call ended, seems we missed it :/");
+      reject_approval (approval);
+    }
+}
+
+static void
 event_manager_call_channel_got_contact_cb (TpConnection *connection,
                                  EmpathyContact *contact,
                                  const GError *error,
@@ -687,6 +702,8 @@ event_manager_call_channel_got_contact_cb (TpConnection *connection,
   gchar *header;
   gboolean video;
 
+  call = TPY_CALL_CHANNEL (approval->handler_instance);
+
   if (error != NULL)
     {
       DEBUG ("Can't get the contact for the call.. Rejecting?");
@@ -694,10 +711,18 @@ event_manager_call_channel_got_contact_cb (TpConnection *connection,
       return;
     }
 
+  if (tpy_call_channel_get_state (call, NULL, NULL) == TPY_CALL_STATE_ENDED)
+    {
+      DEBUG ("Call already ended, seems we missed it :/");
+      reject_approval (approval);
+      return;
+    }
+
+  approval->handler = g_signal_connect (call, "state-changed",
+    G_CALLBACK (event_manager_call_state_changed_cb), approval);
+
   window = empathy_main_window_dup ();
   approval->contact = g_object_ref (contact);
-
-  call = TPY_CALL_CHANNEL (approval->handler_instance);
 
   g_object_get (G_OBJECT (call), "initial-video", &video, NULL);
 
