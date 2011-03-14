@@ -167,6 +167,18 @@ on_get_contacts_cb (TpConnection *connection,
 }
 
 static void
+on_call_state_changed_cb (TpyCallChannel *call,
+  TpyCallState state,
+  TpyCallFlags flags,
+   const GValueArray *call_state_reason,
+  GHashTable *call_state_details,
+  EmpathyCallHandler *handler)
+{
+  if (state == TPY_CALL_STATE_ENDED)
+    tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
+}
+
+static void
 on_members_changed_cb (TpyCallChannel *call,
     GHashTable *members,
     EmpathyCallHandler *self)
@@ -233,7 +245,12 @@ empathy_call_handler_set_property (GObject *object,
         priv->members = g_value_get_boxed (value);
         break;
       case PROP_CALL_CHANNEL:
+        g_return_if_fail (priv->call == NULL);
+
         priv->call = g_value_dup_object (value);
+
+        tp_g_signal_connect_object (priv->call, "state-changed",
+          G_CALLBACK (on_call_state_changed_cb), object, 0);
         break;
       case PROP_INITIAL_AUDIO:
         priv->initial_audio = g_value_get_boolean (value);
