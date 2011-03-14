@@ -2474,16 +2474,14 @@ individual_view_remove_activate_cb (GtkMenuItem *menuitem,
         {
           gboolean abusive;
 
-          if (res == REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK &&
-              empathy_block_individual_dialog_show (parent, individual,
-                &abusive))
+          if (res == REMOVE_DIALOG_RESPONSE_DELETE_AND_BLOCK)
             {
+              if (!empathy_block_individual_dialog_show (parent, individual,
+                    &abusive))
+                goto finally;
+
               empathy_individual_manager_set_blocked (manager, individual,
                   TRUE, abusive);
-            }
-          else
-            {
-              goto finally;
             }
 
           empathy_individual_manager_remove (manager, individual, "");
