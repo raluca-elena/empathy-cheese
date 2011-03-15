@@ -51,6 +51,7 @@ enum {
   SINK_PAD_REMOVED,
   CLOSED,
   CANDIDATES_CHANGED,
+  STATE_CHANGED,
   LAST_SIGNAL
 };
 
@@ -176,6 +177,8 @@ on_call_state_changed_cb (TpyCallChannel *call,
 {
   if (state == TPY_CALL_STATE_ENDED)
     tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
+
+  g_signal_emit (handler, signals[STATE_CHANGED], 0, state);
 }
 
 static void
@@ -466,6 +469,12 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
 
   signals[CANDIDATES_CHANGED] =
     g_signal_new ("candidates-changed", G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0, NULL, NULL,
+      g_cclosure_marshal_VOID__UINT,
+      G_TYPE_NONE, 1, G_TYPE_UINT);
+
+  signals[STATE_CHANGED] =
+    g_signal_new ("state-changed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_VOID__UINT,
       G_TYPE_NONE, 1, G_TYPE_UINT);

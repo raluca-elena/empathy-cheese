@@ -2302,16 +2302,25 @@ empathy_call_window_video_stream_error (TpyCallChannel *call,
 }
 #endif
 
-static gboolean
-empathy_call_window_connected (gpointer user_data)
+static void
+empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
+    TpyCallState state,
+    EmpathyCallWindow *self)
 {
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
   gboolean can_send_video;
 
-  empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
+  if (state != TPY_CALL_STATE_ACCEPTED)
+    return;
 
+  if (priv->call_state == CONNECTED)
+    return;
+
+  g_timer_start (priv->timer);
+  priv->call_state = CONNECTED;
+
+  empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
   can_send_video = priv->video_input != NULL &&
     empathy_contact_can_voip_video (priv->contact);
@@ -2353,8 +2362,6 @@ empathy_call_window_connected (gpointer user_data)
   empathy_call_window_update_timer (self);
 
   gtk_action_set_sensitive (priv->menu_fullscreen, TRUE);
-
-  return FALSE;
 }
 
 static gboolean
@@ -2380,13 +2387,6 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
   GstPad *pad;
 
   g_mutex_lock (priv->lock);
-
-  if (priv->call_state != CONNECTED)
-    {
-      g_timer_start (priv->timer);
-      priv->timer_id = g_idle_add  (empathy_call_window_connected, self);
-      priv->call_state = CONNECTED;
-    }
 
   switch (media_type)
     {
@@ -2676,6 +2676,8 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
   TpyCallChannel *call;
 
+  g_signal_connect (priv->handler, "state-changed",
+    G_CALLBACK (empathy_call_window_state_changed_cb), window);
   g_signal_connect (priv->handler, "conference-added",
     G_CALLBACK (empathy_call_window_conference_added_cb), window);
   g_signal_connect (priv->handler, "conference-removed",
