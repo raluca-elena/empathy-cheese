@@ -512,7 +512,7 @@ empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
 
 		gtk_list_store_prepend (store, &iter);
 		gtk_list_store_set (store, &iter,
-				    COL_ACCOUNT_TEXT, _("All"),
+				    COL_ACCOUNT_TEXT, _("All accounts"),
 				    COL_ACCOUNT_ENABLED, TRUE,
 				    COL_ACCOUNT_POINTER, NULL,
 				    COL_ACCOUNT_ROW_TYPE, ROW_ALL,
