@@ -312,6 +312,30 @@ empathy_account_chooser_new (void)
 	return chooser;
 }
 
+gboolean
+empathy_account_chooser_has_all_selected (EmpathyAccountChooser *chooser)
+{
+	EmpathyAccountChooserPriv *priv;
+	GtkTreeModel              *model;
+	GtkTreeIter                iter;
+	RowType                    type;
+
+	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), FALSE);
+
+	priv = GET_PRIV (chooser);
+
+	g_return_val_if_fail (priv->has_all_option == TRUE, FALSE);
+
+	model = gtk_combo_box_get_model (GTK_COMBO_BOX (chooser));
+	if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (chooser), &iter)) {
+		return FALSE;
+	}
+
+	gtk_tree_model_get (model, &iter, COL_ACCOUNT_ROW_TYPE, &type, -1);
+
+	return type == ROW_ALL;
+}
+
 /**
  * empathy_account_chooser_dup_account:
  * @chooser: an #EmpathyAccountChooser

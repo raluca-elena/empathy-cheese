@@ -84,6 +84,7 @@ gboolean       empathy_account_chooser_set_account        (EmpathyAccountChooser
 gboolean       empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *chooser);
 void           empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
 							   gboolean               has_all_option);
+gboolean       empathy_account_chooser_has_all_selected   (EmpathyAccountChooser *chooser);
 void           empathy_account_chooser_set_filter         (EmpathyAccountChooser *chooser,
 							   EmpathyAccountChooserFilterFunc filter,
 							   gpointer               user_data);
