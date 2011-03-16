@@ -387,12 +387,14 @@ supports_contact_search_cb (GObject *conn,
     gpointer user_data)
 {
   FilterCallbackData *data = user_data;
-  GError *myerr = NULL;
+  GError *error = NULL;
   TpCapabilities *caps;
 
-  if (!tp_proxy_prepare_finish (conn, result, &myerr))
+  if (!tp_proxy_prepare_finish (conn, result, &error))
     {
+      DEBUG ("Error preparing the connection: %s", error->message);
       data->callback (FALSE, data->user_data);
+      g_error_free (error);
       g_slice_free (FilterCallbackData, data);
       return;
     }
