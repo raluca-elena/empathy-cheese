@@ -409,15 +409,12 @@ individual_view_persona_drag_received (GtkWidget *self,
     GtkTreePath *path,
     GtkSelectionData *selection)
 {
-  EmpathyIndividualViewPriv *priv;
   EmpathyIndividualManager *manager = NULL;
   FolksIndividual *individual = NULL;
   FolksPersona *persona = NULL;
   const gchar *persona_uid;
   GList *individuals, *l;
   gboolean retval = FALSE;
-
-  priv = GET_PRIV (self);
 
   persona_uid = (const gchar *) gtk_selection_data_get_data (selection);
 
@@ -2216,15 +2213,12 @@ empathy_individual_view_new (EmpathyIndividualStore *store,
 FolksIndividual *
 empathy_individual_view_dup_selected (EmpathyIndividualView *view)
 {
-  EmpathyIndividualViewPriv *priv;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
   GtkTreeModel *model;
   FolksIndividual *individual;
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), NULL);
-
-  priv = GET_PRIV (view);
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
   if (!gtk_tree_selection_get_selected (selection, &model, &iter))
@@ -2240,7 +2234,6 @@ static gchar *
 empathy_individual_view_dup_selected_group (EmpathyIndividualView *view,
     gboolean *is_fake_group)
 {
-  EmpathyIndividualViewPriv *priv;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
   GtkTreeModel *model;
@@ -2249,8 +2242,6 @@ empathy_individual_view_dup_selected_group (EmpathyIndividualView *view,
   gboolean fake;
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), NULL);
-
-  priv = GET_PRIV (view);
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
   if (!gtk_tree_selection_get_selected (selection, &model, &iter))

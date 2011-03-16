@@ -526,10 +526,6 @@ set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyIndividualLinkerPriv *priv;
-
-  priv = GET_PRIV (object);
-
   switch (param_id)
     {
       case PROP_START_INDIVIDUAL:

@@ -354,13 +354,10 @@ individual_drag_received (EmpathyPersonaView *self,
     GdkDragContext *context,
     GtkSelectionData *selection)
 {
-  EmpathyPersonaViewPriv *priv;
   EmpathyIndividualManager *manager = NULL;
   FolksIndividual *individual;
   const gchar *individual_id;
   gboolean success = FALSE;
-
-  priv = GET_PRIV (self);
 
   individual_id = (const gchar *) gtk_selection_data_get_data (selection);
   manager = empathy_individual_manager_dup_singleton ();
@@ -410,10 +407,7 @@ drag_motion (GtkWidget *widget,
     guint time_)
 {
   EmpathyPersonaView *self = EMPATHY_PERSONA_VIEW (widget);
-  EmpathyPersonaViewPriv *priv;
   GdkAtom target;
-
-  priv = GET_PRIV (self);
 
   target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
 
@@ -452,14 +446,11 @@ drag_data_get (GtkWidget *widget,
     guint time_)
 {
   EmpathyPersonaView *self = EMPATHY_PERSONA_VIEW (widget);
-  EmpathyPersonaViewPriv *priv;
   FolksPersona *persona;
   const gchar *persona_uid;
 
   if (info != DND_DRAG_TYPE_PERSONA_ID)
     return;
-
-  priv = GET_PRIV (self);
 
   persona = empathy_persona_view_dup_selected (self);
   if (persona == NULL)
@@ -779,15 +770,12 @@ empathy_persona_view_new (EmpathyPersonaStore *store,
 FolksPersona *
 empathy_persona_view_dup_selected (EmpathyPersonaView *self)
 {
-  EmpathyPersonaViewPriv *priv;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
   GtkTreeModel *model;
   FolksPersona *persona;
 
   g_return_val_if_fail (EMPATHY_IS_PERSONA_VIEW (self), NULL);
-
-  priv = GET_PRIV (self);
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (self));
   if (!gtk_tree_selection_get_selected (selection, &model, &iter))

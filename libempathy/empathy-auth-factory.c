@@ -92,10 +92,8 @@ server_tls_handler_ready_cb (GObject *source,
 {
   EmpathyServerTLSHandler *handler;
   GError *error = NULL;
-  EmpathyAuthFactoryPriv *priv;
   HandlerContextData *data = user_data;
 
-  priv = GET_PRIV (data->self);
   handler = empathy_server_tls_handler_new_finish (res, &error);
 
   if (error != NULL)

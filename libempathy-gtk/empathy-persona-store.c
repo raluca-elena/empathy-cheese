@@ -186,11 +186,8 @@ persona_set_active (EmpathyPersonaStore *self,
     gboolean active,
     gboolean set_changed)
 {
-  EmpathyPersonaStorePriv *priv;
   GtkTreePath *path;
   GtkTreeIter iter;
-
-  priv = GET_PRIV (self);
 
   path = find_persona (self, persona);
   if (path == NULL)
@@ -588,14 +585,14 @@ sort_personas (FolksPersona *persona_a,
 
   /* protocol */
   ret_val = strcmp (tp_account_get_protocol (account_a),
-        tp_account_get_protocol (account_a));
+        tp_account_get_protocol (account_b));
 
   if (ret_val != 0)
     goto out;
 
   /* account ID */
   ret_val = strcmp (tp_proxy_get_object_path (account_a),
-        tp_proxy_get_object_path (account_a));
+        tp_proxy_get_object_path (account_b));
 
 out:
   return ret_val;

@@ -277,12 +277,9 @@ chat_new_connection_cb (TpAccount   *account,
 			EmpathyChat *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	TpConnection *connection;
 
 	if (new_status != TP_CONNECTION_STATUS_CONNECTED)
 		return;
-
-	connection = tp_account_get_connection (account);
 
 	if (priv->tp_chat != NULL || account != priv->account ||
 	    priv->handle_type == TP_HANDLE_TYPE_NONE ||
@@ -961,10 +958,7 @@ static void
 chat_command_help (EmpathyChat *chat,
 		   GStrv        strv)
 {
-	EmpathyChatPriv *priv;
 	guint i;
-
-	priv = GET_PRIV (chat);
 
 	/* If <command> part is not defined,
 	 * strv[1] will be the terminal NULL */
@@ -1134,12 +1128,9 @@ chat_send (EmpathyChat  *chat,
 static void
 chat_input_text_view_send (EmpathyChat *chat)
 {
-	EmpathyChatPriv *priv;
 	GtkTextBuffer  *buffer;
 	GtkTextIter     start, end;
 	gchar	       *msg;
-
-	priv = GET_PRIV (chat);
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (chat->input_text_view));
 
@@ -1995,7 +1986,6 @@ chat_input_populate_popup_cb (GtkTextView *view,
 			      GtkMenu     *menu,
 			      EmpathyChat *chat)
 {
-	EmpathyChatPriv      *priv;
 	GtkTextBuffer        *buffer;
 	GtkTextTagTable      *table;
 	GtkTextTag           *tag;
@@ -2010,7 +2000,6 @@ chat_input_populate_popup_cb (GtkTextView *view,
 	GtkWidget            *smiley_menu;
 	GtkWidget            *image;
 
-	priv = GET_PRIV (chat);
 	buffer = gtk_text_view_get_buffer (view);
 
 	/* Add the emoticon menu. */

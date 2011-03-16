@@ -59,9 +59,6 @@ account_widget_irc_setup (EmpathyAccountWidgetIrc *settings)
 {
   const gchar *nick = NULL;
   const gchar *fullname = NULL;
-  gint port = 6667;
-  const gchar *charset;
-  gboolean ssl = FALSE;
   EmpathyAccountSettings *ac_settings;
 
   g_object_get (settings->self, "settings", &ac_settings, NULL);
@@ -69,9 +66,6 @@ account_widget_irc_setup (EmpathyAccountWidgetIrc *settings)
   nick = empathy_account_settings_get_string (ac_settings, "account");
   fullname = empathy_account_settings_get_string (ac_settings,
       "fullname");
-  charset = empathy_account_settings_get_string (ac_settings, "charset");
-  port = empathy_account_settings_get_uint32 (ac_settings, "port");
-  ssl = empathy_account_settings_get_boolean (ac_settings, "use-ssl");
 
   if (!nick)
     {

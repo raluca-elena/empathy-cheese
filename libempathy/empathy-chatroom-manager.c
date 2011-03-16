@@ -669,12 +669,8 @@ gboolean
 empathy_chatroom_manager_add (EmpathyChatroomManager *manager,
     EmpathyChatroom *chatroom)
 {
-  EmpathyChatroomManagerPriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_CHATROOM_MANAGER (manager), FALSE);
   g_return_val_if_fail (EMPATHY_IS_CHATROOM (chatroom), FALSE);
-
-  priv = GET_PRIV (manager);
 
   /* don't add more than once */
   if (!empathy_chatroom_manager_find (manager,

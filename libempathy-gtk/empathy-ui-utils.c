@@ -405,11 +405,10 @@ empathy_avatar_pixbuf_roundify (GdkPixbuf *pixbuf)
 static gboolean
 empathy_gdk_pixbuf_is_opaque (GdkPixbuf *pixbuf)
 {
-	gint width, height, rowstride, i;
+	gint height, rowstride, i;
 	guchar *pixels;
 	guchar *row;
 
-	width = gdk_pixbuf_get_width (pixbuf);
 	height = gdk_pixbuf_get_height (pixbuf);
 	rowstride = gdk_pixbuf_get_rowstride (pixbuf);
 	pixels = gdk_pixbuf_get_pixels (pixbuf);

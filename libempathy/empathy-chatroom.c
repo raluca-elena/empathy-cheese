@@ -273,10 +273,6 @@ chatroom_set_property (GObject      *object,
 		       const GValue *value,
 		       GParamSpec   *pspec)
 {
-	EmpathyChatroomPriv *priv;
-
-	priv = GET_PRIV (object);
-
 	switch (param_id) {
 	case PROP_ACCOUNT:
 		empathy_chatroom_set_account (EMPATHY_CHATROOM (object),

@@ -881,10 +881,7 @@ do_hash_job (GIOSchedulerJob *job,
 {
   HashingData *hash_data = user_data;
   gssize bytes_read;
-  EmpathyFTHandlerPriv *priv;
   GError *error = NULL;
-
-  priv = GET_PRIV (hash_data->handler);
 
 again:
   if (hash_data->buffer == NULL)

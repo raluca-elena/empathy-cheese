@@ -396,7 +396,6 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 	const gchar   *contact_id = NULL;
 	gchar         *new_group = NULL;
 	gchar         *old_group = NULL;
-	gboolean       success = TRUE;
 	gboolean       new_group_is_fake, old_group_is_fake = TRUE;
 
 	priv = GET_PRIV (view);
@@ -440,7 +439,6 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 
 	if (!connection) {
 		DEBUG ("Failed to get connection for account '%s'", account_id);
-		success = FALSE;
 		g_free (new_group);
 		g_free (old_group);
 		g_object_unref (account_manager);
@@ -1886,15 +1884,12 @@ empathy_contact_list_view_new (EmpathyContactListStore        *store,
 EmpathyContact *
 empathy_contact_list_view_dup_selected (EmpathyContactListView *view)
 {
-	EmpathyContactListViewPriv *priv;
 	GtkTreeSelection          *selection;
 	GtkTreeIter                iter;
 	GtkTreeModel              *model;
 	EmpathyContact             *contact;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT_LIST_VIEW (view), NULL);
-
-	priv = GET_PRIV (view);
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {
@@ -1911,15 +1906,12 @@ empathy_contact_list_view_dup_selected (EmpathyContactListView *view)
 EmpathyContactListFlags
 empathy_contact_list_view_get_flags (EmpathyContactListView *view)
 {
-	EmpathyContactListViewPriv *priv;
 	GtkTreeSelection          *selection;
 	GtkTreeIter                iter;
 	GtkTreeModel              *model;
 	EmpathyContactListFlags    flags;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT_LIST_VIEW (view), 0);
-
-	priv = GET_PRIV (view);
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {
@@ -1937,7 +1929,6 @@ gchar *
 empathy_contact_list_view_get_selected_group (EmpathyContactListView *view,
 					      gboolean *is_fake_group)
 {
-	EmpathyContactListViewPriv *priv;
 	GtkTreeSelection          *selection;
 	GtkTreeIter                iter;
 	GtkTreeModel              *model;
@@ -1946,8 +1937,6 @@ empathy_contact_list_view_get_selected_group (EmpathyContactListView *view,
 	gboolean                   fake;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT_LIST_VIEW (view), NULL);
-
-	priv = GET_PRIV (view);
 
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {

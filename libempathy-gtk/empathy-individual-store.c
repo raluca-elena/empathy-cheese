@@ -250,13 +250,10 @@ individual_store_get_group (EmpathyIndividualStore *self,
     gboolean *created,
     gboolean is_fake_group)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
   GtkTreeIter iter_group;
   GtkTreeIter iter_separator;
   FindGroup fg;
-
-  priv = GET_PRIV (self);
 
   memset (&fg, 0, sizeof (fg));
 
@@ -341,12 +338,9 @@ static GList *
 individual_store_find_contact (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
   GList *l = NULL;
   FindContact fc;
-
-  priv = GET_PRIV (self);
 
   memset (&fc, 0, sizeof (fc));
 
@@ -373,11 +367,8 @@ static void
 individual_store_remove_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
   GList *iters, *l;
-
-  priv = GET_PRIV (self);
 
   iters = individual_store_find_contact (self, individual);
   if (iters == NULL)
@@ -504,11 +495,9 @@ individual_store_contact_set_active (EmpathyIndividualStore *self,
     gboolean active,
     gboolean set_changed)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
   GList *iters, *l;
 
-  priv = GET_PRIV (self);
   model = GTK_TREE_MODEL (self);
 
   iters = individual_store_find_contact (self, individual);
@@ -995,10 +984,6 @@ individual_store_favourites_changed_cb (EmpathyIndividualManager *manager,
     gboolean is_favourite,
     EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
-  priv = GET_PRIV (self);
-
   DEBUG ("Individual %s is %s a favourite",
       folks_individual_get_id (individual),
       is_favourite ? "now" : "no longer");
@@ -1090,10 +1075,6 @@ individual_store_member_renamed_cb (EmpathyIndividualManager *manager,
     const gchar *message,
     EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
-  priv = GET_PRIV (self);
-
   DEBUG ("Individual %s renamed to %s",
       folks_individual_get_id (old_individual),
       folks_individual_get_id (new_individual));
@@ -1197,10 +1178,6 @@ individual_store_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyIndividualStorePriv *priv;
-
-  priv = GET_PRIV (object);
-
   switch (param_id)
     {
     case PROP_INDIVIDUAL_MANAGER:

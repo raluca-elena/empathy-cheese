@@ -617,13 +617,10 @@ irc_network_manager_file_parse (EmpathyIrcNetworkManager *self,
                                 const gchar *filename,
                                 gboolean user_defined)
 {
-  EmpathyIrcNetworkManagerPriv *priv;
   xmlParserCtxtPtr ctxt;
   xmlDocPtr doc;
   xmlNodePtr networks;
   xmlNodePtr node;
-
-  priv = GET_PRIV (self);
 
   DEBUG ("Attempting to parse file:'%s'...", filename);
 

@@ -204,10 +204,6 @@ empathy_cell_renderer_expander_set_property (GObject      *object,
 static void
 empathy_cell_renderer_expander_finalize (GObject *object)
 {
-	EmpathyCellRendererExpanderPriv *priv;
-
-	priv = GET_PRIV (object);
-
 	(* G_OBJECT_CLASS (empathy_cell_renderer_expander_parent_class)->finalize) (object);
 }
 
@@ -321,11 +317,9 @@ empathy_cell_renderer_expander_activate (GtkCellRenderer      *cell,
 					const GdkRectangle   *cell_area,
 					GtkCellRendererState  flags)
 {
-	EmpathyCellRendererExpander     *expander;
 	EmpathyCellRendererExpanderPriv *priv;
 	GtkTreePath                    *path;
 
-	expander = EMPATHY_CELL_RENDERER_EXPANDER (cell);
 	priv = GET_PRIV (cell);
 
 	if (!GTK_IS_TREE_VIEW (widget) || !priv->activatable)

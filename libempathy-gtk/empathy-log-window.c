@@ -215,7 +215,6 @@ empathy_log_window_show (TpAccount  *account,
 			gboolean     is_chatroom,
 			GtkWindow   *parent)
 {
-	EmpathyAccountChooser   *account_chooser;
 	TpAccountManager        *account_manager;
 	GtkBuilder             *gui;
 	gchar                  *filename;
@@ -299,7 +298,6 @@ empathy_log_window_show (TpAccount  *account,
 
 	/* Account chooser for chats */
 	window->account_chooser_chats = empathy_account_chooser_new ();
-	account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser_chats);
 
 	gtk_box_pack_start (GTK_BOX (window->vbox_chats),
 			    window->account_chooser_chats,
@@ -577,12 +575,10 @@ log_window_find_populate (EmpathyLogWindow *window,
 {
 	GtkTreeView        *view;
 	GtkTreeModel       *model;
-	GtkTreeSelection   *selection;
 	GtkListStore       *store;
 
 	view = GTK_TREE_VIEW (window->treeview_find);
 	model = gtk_tree_view_get_model (view);
-	selection = gtk_tree_view_get_selection (view);
 	store = GTK_LIST_STORE (model);
 
 	empathy_chat_view_clear (window->chatview_find);

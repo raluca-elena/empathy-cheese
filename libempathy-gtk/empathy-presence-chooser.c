@@ -482,11 +482,9 @@ presence_chooser_entry_icon_release_cb (EmpathyPresenceChooser *self,
 		mc_set_custom_state (self);
 	}
 	else {
-		PresenceChooserEntryType type;
 		TpConnectionPresenceType state;
 		char *status;
 
-		type = presence_chooser_get_entry_type (self);
 		state = get_state_and_status (self, &status);
 
 		if (!empathy_status_presets_is_valid (state)) {
