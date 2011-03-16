@@ -150,7 +150,8 @@ static const GtkTargetEntry drag_types_dest_file[] = {
 	{ "text/uri-list", 0, DND_DRAG_TYPE_URI_LIST },
 };
 
-static void chat_window_update (EmpathyChatWindow *window);
+static void chat_window_update (EmpathyChatWindow *window,
+		gboolean update_contact_menu);
 
 static void empathy_chat_window_add_chat (EmpathyChatWindow *window,
 			      EmpathyChat	*chat);
@@ -350,7 +351,7 @@ _submenu_notify_visible_changed_cb (GObject    *object,
 	g_signal_handlers_disconnect_by_func (object,
 					      _submenu_notify_visible_changed_cb,
 					      userdata);
-	chat_window_update (EMPATHY_CHAT_WINDOW (userdata));
+	chat_window_update (EMPATHY_CHAT_WINDOW (userdata), TRUE);
 }
 
 static void
@@ -581,7 +582,8 @@ chat_window_close_button_update (EmpathyChatWindowPriv *priv,
 }
 
 static void
-chat_window_update (EmpathyChatWindow *window)
+chat_window_update (EmpathyChatWindow *window,
+		    gboolean update_contact_menu)
 {
 	EmpathyChatWindowPriv *priv = GET_PRIV (window);
 	gint                   num_pages;
@@ -594,8 +596,14 @@ chat_window_update (EmpathyChatWindow *window)
 
 	chat_window_conversation_menu_update (priv, window);
 
-	chat_window_contact_menu_update (priv,
-					 window);
+	/* If this update is due to a focus-in event, we know the menu will be
+	   the same as when we last left it, so no work to do.  Besides, if we
+	   swap out the menu on a focus-in, we may confuse any external global
+	   menu watching. */
+	if (update_contact_menu) {
+		chat_window_contact_menu_update (priv,
+						 window);
+	}
 
 	chat_window_title_update (priv);
 
@@ -623,7 +631,8 @@ append_markup_printf (GString    *string,
 }
 
 static void
-chat_window_update_chat_tab (EmpathyChat *chat)
+chat_window_update_chat_tab_full (EmpathyChat *chat,
+				  gboolean update_contact_menu)
 {
 	EmpathyChatWindow     *window;
 	EmpathyChatWindowPriv *priv;
@@ -727,8 +736,14 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 
 	/* Update the window if it's the current chat */
 	if (priv->current_chat == chat) {
-		chat_window_update (window);
+		chat_window_update (window, update_contact_menu);
 	}
+}
+
+static void
+chat_window_update_chat_tab (EmpathyChat *chat)
+{
+	chat_window_update_chat_tab_full (chat, TRUE);
 }
 
 static void
@@ -1619,7 +1634,7 @@ chat_window_page_removed_cb (GtkNotebook      *notebook,
 	if (priv->chats == NULL) {
 		g_object_unref (window);
 	} else {
-		chat_window_update (window);
+		chat_window_update (window, TRUE);
 	}
 }
 
@@ -1637,7 +1652,7 @@ chat_window_focus_in_event_cb (GtkWidget        *widget,
 	chat_window_set_urgency_hint (window, FALSE);
 
 	/* Update the title, since we now mark all unread messages as read. */
-	chat_window_update_chat_tab (priv->current_chat);
+	chat_window_update_chat_tab_full (priv->current_chat, FALSE);
 
 	return FALSE;
 }
