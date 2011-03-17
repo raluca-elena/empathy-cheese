@@ -169,8 +169,11 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 /* UIN is digital according to the unofficial specification:
  * http://iserverd.khstu.ru/docum_ext/icqv5.html#CTS
- * 5 digits minimun according to http://en.wikipedia.org/wiki/ICQ#UIN */
-#define ICQ_USER_NAME     "(["DIGIT"]{5,})"
+ * 5 digits minimum according to http://en.wikipedia.org/wiki/ICQ#UIN
+ * According to an user, we can also provide an email address instead of the
+ * ICQ UIN. */
+#define ICQ_USER_NAME     "((["DIGIT"]{5,})|"EMAIL_LOCALPART"@"HOST")"
+
 /* Based on http://www.ietf.org/rfc/rfc2812.txt (section 2.3.1) */
 #define IRC_SPECIAL       "_\\[\\]{}\\\\|`^"
 #define IRC_USER_NAME     "(["ALPHA IRC_SPECIAL"]["ALPHADIGITDASH IRC_SPECIAL"]*)"
