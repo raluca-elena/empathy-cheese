@@ -168,6 +168,24 @@ on_get_contacts_cb (TpConnection *connection,
 }
 
 static void
+on_call_invalidated_cb (TpyCallChannel *call,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyCallHandler *self)
+{
+  EmpathyCallHandlerPriv *priv = self->priv;
+
+  if (priv->call == call)
+    {
+      /* Invalidated unexpectedly? Fake call ending */
+      g_signal_emit (self, signals[STATE_CHANGED], 0, TPY_CALL_STATE_ENDED);
+      tp_clear_object (&priv->call);
+      tp_clear_object (&priv->tfchannel);
+    }
+}
+
+static void
 on_call_state_changed_cb (TpyCallChannel *call,
   TpyCallState state,
   TpyCallFlags flags,
@@ -254,6 +272,8 @@ empathy_call_handler_set_property (GObject *object,
 
         tp_g_signal_connect_object (priv->call, "state-changed",
           G_CALLBACK (on_call_state_changed_cb), object, 0);
+        tp_g_signal_connect_object (priv->call, "invalidated",
+          G_CALLBACK (on_call_invalidated_cb), object, 0);
         break;
       case PROP_INITIAL_AUDIO:
         priv->initial_audio = g_value_get_boolean (value);
