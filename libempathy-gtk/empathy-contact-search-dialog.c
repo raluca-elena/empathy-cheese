@@ -172,6 +172,9 @@ add_selected_contact (EmpathyContactSearchDialog *self)
   empathy_tp_contact_factory_get_from_id (conn, id,
       on_get_contact_factory_get_from_id_cb, NULL,
       NULL, NULL);
+
+  /* Close the dialog */
+  gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_CANCEL);
 }
 
 static void
