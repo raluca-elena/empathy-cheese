@@ -1,3 +1,58 @@
+NEW in 2.91.91.1 (17/03/2011)
+================
+
+The "Happy Guinness Day!" release.
+
+Empathy has a new icon! See [1] to learn more about it.
+
+You can now block annoying contacts.
+
+[1] http://blog.desmottes.be/post/2011/03/16/New-Empathy-icon%21
+
+Dependencies:
+ • folks ≥ 0.4.0
+
+Bugs fixed:
+ - Fixed #644296, Contact Info should respect Overwritten_By_Nickname (Guillaume Desmottes)
+ - Fixed #614640, new app icon for empathy (Jakub Steiner)
+ - Fixed #618787, Allow to block specific contacts (Danielle Madeley)
+ - Fixed #639417, SSL server validation should follow override server CancelOk (Stef Walter)
+ - Fixed #643690, Have to enter password even if provided during account creation (Guillaume Desmottes)
+ - Fixed #643863, Should set EmpathyChat as PreferredHandler when requesting a text channel (Guillaume Desmottes)
+ - Fixed #644295, Don't set your contact info if nothing's changed (Guillaume Desmottes)
+ - Fixed #644298, Don't clobber alias updates through using both Aliasing and ContactInfo (Guillaume Desmottes)
+ - Fixed #644359, Support Error.EmergencyCallsNotSupported (Emilio Pozuelo Monfort)
+ - Fixed #644360, Support Error.SoftwareUpgradeRequired (Emilio Pozuelo Monfort)
+ - Fixed #644406, Should set password-prompt on IRC accounts when needed (Guillaume Desmottes)
+ - Fixed #644475, Empathy.Auth.client doesn't have DelayApprovers (Guillaume Desmottes)
+ - Fixed #644500, Install .service and .client files for empathy-call (Emilio Pozuelo Monfort)
+ - Fixed #644726, Remove contact doesn't work (Guillaume Desmottes)
+ - Fixed #644830, Sidebar is very wide (Guillaume Desmottes)
+ - Fixed #644844, Clear logs improvements (Emilio Pozuelo Monfort)
+ - Fixed #644914, History window: filter accounts without logs (Emilio Pozuelo Monfort)
+ - Fixed #644936, Don't update Contact menu on a focus-in (Michael Terry)
+ - Fixed #644944, Patch for warnings from GCC 4.6 about variables that are set but not used (Kjartan Maraas)
+ - Fixed #645008, empathy-auth-client should implement the Debug interface (Guillaume Desmottes)
+ - Fixed #645014, ICQ widget: should be able to enter an email address (Guillaume Desmottes)
+
+Translations:
+ - Updated ar Translation (Khaled Hosny)
+ - Updated ca Translation (Gil Forcada)
+ - Updated cs Translation (Marek Černocký)
+ - Updated el Translation (Michael Kotsarinis)
+ - Updated en_GB Translation (Bruce Cowan)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated et Translation (Mattias Põldaru, Ivar Smolin)
+ - Updated fr Translation (Bruno Brouard)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated hu Translation (Gabor Kelemen)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated ro Translation (Lucian Adrian Grijincu)
+ - Updated sl Translation (Andrej Žnidaršič, Matej Urbančič)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated uk Translation (Daniel Korostil)
+
 NEW in 2.91.91 (08/03/2011)
 ==============
 
