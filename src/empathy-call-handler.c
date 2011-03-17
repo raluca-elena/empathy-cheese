@@ -76,7 +76,7 @@ enum {
 
 /* private structure */
 
-typedef struct {
+struct _EmpathyCallHandlerPriv {
   TpyCallChannel *call;
 
   EmpathyContact *contact;
@@ -94,7 +94,7 @@ typedef struct {
   FsCandidate *video_remote_candidate;
   FsCandidate *audio_local_candidate;
   FsCandidate *video_local_candidate;
-} EmpathyCallHandlerPriv;
+};
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyCallHandler)
 

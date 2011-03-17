@@ -34,6 +34,7 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyCallHandler EmpathyCallHandler;
 typedef struct _EmpathyCallHandlerClass EmpathyCallHandlerClass;
+typedef struct _EmpathyCallHandlerPriv EmpathyCallHandlerPriv;
 
 struct _EmpathyCallHandlerClass {
     GObjectClass parent_class;
@@ -41,7 +42,7 @@ struct _EmpathyCallHandlerClass {
 
 struct _EmpathyCallHandler {
     GObject parent;
-    gpointer priv;
+    EmpathyCallHandlerPriv *priv;
 };
 
 GType empathy_call_handler_get_type (void);
