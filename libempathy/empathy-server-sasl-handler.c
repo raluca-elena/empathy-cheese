@@ -448,6 +448,12 @@ empathy_server_sasl_handler_provide_password (
         }
     }
 
+  if (!may_save_response)
+    {
+      /* delete any password present, it shouldn't be there */
+      empathy_keyring_delete_account_password_async (priv->account, NULL, NULL);
+    }
+
   /* Additionally, if we implement Ch.I.CredentialsStorage, inform that
    * whether we want to remember the password */
   if (tp_proxy_has_interface_by_id (priv->channel,
