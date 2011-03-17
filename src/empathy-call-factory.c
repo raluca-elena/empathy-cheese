@@ -274,7 +274,7 @@ call_channel_got_contact (TpConnection *connection,
     {
       /* FIXME use hangup with an appropriate error */
       tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
-      goto out;
+      return;
     }
 
   handler = empathy_call_handler_new_for_channel (call, contact);
@@ -283,9 +283,6 @@ call_channel_got_contact (TpConnection *connection,
     handler, FALSE);
 
   g_object_unref (handler);
-
-out:
-  g_object_unref (call);
 }
 
 
