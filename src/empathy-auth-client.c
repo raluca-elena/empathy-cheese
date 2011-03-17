@@ -26,6 +26,8 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include <telepathy-glib/debug-sender.h>
+
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-auth-factory.h>
@@ -237,6 +239,7 @@ main (int argc,
   GOptionContext *context;
   GError *error = NULL;
   EmpathyAuthFactory *factory;
+  TpDebugSender *debug_sender;
 
   g_thread_init (NULL);
 
@@ -263,6 +266,12 @@ main (int argc,
   gdk_set_program_class ("Empathy");
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
+
+#ifdef ENABLE_DEBUG
+  /* Set up debug sender */
+  debug_sender = tp_debug_sender_dup ();
+  g_log_set_default_handler (tp_debug_sender_log_handler, G_LOG_DOMAIN);
+#endif
 
   factory = empathy_auth_factory_dup_singleton ();
 
@@ -295,6 +304,7 @@ main (int argc,
   gtk_main ();
 
   g_object_unref (factory);
+  g_object_unref (debug_sender);
 
   return EXIT_SUCCESS;
 }
