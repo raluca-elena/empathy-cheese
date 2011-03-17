@@ -193,10 +193,17 @@ on_call_state_changed_cb (TpyCallChannel *call,
   GHashTable *call_state_details,
   EmpathyCallHandler *handler)
 {
-  if (state == TPY_CALL_STATE_ENDED)
-    tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
+  EmpathyCallHandlerPriv *priv = handler->priv;
 
   g_signal_emit (handler, signals[STATE_CHANGED], 0, state);
+
+  if (state == TPY_CALL_STATE_ENDED)
+    {
+      tp_channel_close_async (TP_CHANNEL (call), NULL, NULL);
+
+      tp_clear_object (&priv->call);
+      tp_clear_object (&priv->tfchannel);
+    }
 }
 
 static void
