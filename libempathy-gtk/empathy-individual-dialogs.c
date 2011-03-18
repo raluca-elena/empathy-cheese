@@ -179,6 +179,7 @@ contact_pretty_name (TpContact *contact)
 gboolean
 empathy_block_individual_dialog_show (GtkWindow *parent,
     FolksIndividual *individual,
+    GdkPixbuf *avatar,
     gboolean *abusive)
 {
   EmpathyContactManager *contact_manager =
@@ -197,6 +198,13 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
       _("Block %s?"),
       folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
+
+  if (avatar != NULL)
+    {
+      GtkWidget *image = gtk_image_new_from_pixbuf (avatar);
+      gtk_message_dialog_set_image (GTK_MESSAGE_DIALOG (dialog), image);
+      gtk_widget_show (image);
+    }
 
   /* build a list of personas that support blocking */
   personas = folks_individual_get_personas (individual);
