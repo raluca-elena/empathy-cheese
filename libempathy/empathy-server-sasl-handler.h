@@ -74,6 +74,9 @@ void empathy_server_sasl_handler_cancel (EmpathyServerSASLHandler *handler);
 TpAccount * empathy_server_sasl_handler_get_account (
     EmpathyServerSASLHandler *handler);
 
+TpChannel * empathy_server_sasl_handler_get_channel (
+    EmpathyServerSASLHandler *handler);
+
 gboolean empathy_server_sasl_handler_has_password (
     EmpathyServerSASLHandler *handler);
 

@@ -493,6 +493,18 @@ empathy_server_sasl_handler_get_account (EmpathyServerSASLHandler *handler)
   return priv->account;
 }
 
+TpChannel *
+empathy_server_sasl_handler_get_channel (EmpathyServerSASLHandler *handler)
+{
+  EmpathyServerSASLHandlerPriv *priv;
+
+  g_return_val_if_fail (EMPATHY_IS_SERVER_SASL_HANDLER (handler), NULL);
+
+  priv = handler->priv;
+
+  return priv->channel;
+}
+
 gboolean
 empathy_server_sasl_handler_has_password (EmpathyServerSASLHandler *handler)
 {
