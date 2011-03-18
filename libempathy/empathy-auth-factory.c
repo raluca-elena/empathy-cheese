@@ -168,7 +168,7 @@ server_sasl_handler_ready_cb (GObject *source,
 static gboolean
 common_checks (EmpathyAuthFactory *self,
     GList *channels,
-    gboolean must_be_sasl,
+    gboolean observe,
     GError **error)
 {
   EmpathyAuthFactoryPriv *priv = GET_PRIV (self);
@@ -195,7 +195,10 @@ common_checks (EmpathyAuthFactory *self,
   if (tp_channel_get_channel_type_id (channel) !=
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      if (must_be_sasl
+      /* If we are observing we care only about ServerAuthentication channels.
+       * If we are handling we care about ServerAuthentication and
+       * ServerTLSConnection channels. */
+      if (observe
           || tp_channel_get_channel_type_id (channel) !=
           EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION)
         {
@@ -456,6 +459,7 @@ empathy_auth_factory_constructed (GObject *obj)
 
   tp_base_client_set_handler_bypass_approval (client, FALSE);
 
+  /* Handle ServerTLSConnection and ServerAuthentication channels */
   tp_base_client_take_handler_filter (client, tp_asv_new (
           /* ChannelType */
           TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
@@ -479,6 +483,7 @@ empathy_auth_factory_constructed (GObject *obj)
    * Claim() on the CDO so the approver won't get it, which makes
    * sense. */
 
+  /* Observe ServerAuthentication channels */
   tp_base_client_take_observer_filter (client, tp_asv_new (
           /* ChannelType */
           TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
