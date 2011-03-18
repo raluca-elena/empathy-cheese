@@ -257,7 +257,7 @@ perform_verification (EmpathyTLSVerifier *self,
   guint n_list, n_anchors;
   guint verify_output;
   gint res;
-  gchar **i;
+  gint i;
   gboolean matched;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
@@ -300,13 +300,16 @@ perform_verification (EmpathyTLSVerifier *self,
   }
 
   /* now check if the certificate matches one of the reference identities. */
-  for (i = priv->reference_identities, matched = FALSE; i && *i; ++i)
+  if (priv->reference_identities != NULL)
     {
-      const gchar *identity = *i;
-      if (gnutls_x509_crt_check_hostname (list[0], identity) == 1)
+      for (i = 0, matched = FALSE; priv->reference_identities[i] != NULL; ++i)
         {
-          matched = TRUE;
-          break;
+          if (gnutls_x509_crt_check_hostname (list[0],
+                  priv->reference_identities[i]) == 1)
+            {
+              matched = TRUE;
+              break;
+            }
         }
     }
 

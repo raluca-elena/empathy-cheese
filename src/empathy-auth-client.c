@@ -209,7 +209,7 @@ auth_factory_new_tls_handler_cb (EmpathyAuthFactory *factory,
       NULL);
 
   verifier = empathy_tls_verifier_new (certificate, hostname,
-      (const gchar**)reference_identities);
+      (const gchar **) reference_identities);
   empathy_tls_verifier_verify_async (verifier,
       verifier_verify_cb, NULL);
 

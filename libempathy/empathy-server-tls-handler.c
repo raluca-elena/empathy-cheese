@@ -105,6 +105,10 @@ tls_handler_init_async (GAsyncInitable *initable,
   const gchar *bus_name;
   TpDBusDaemon *dbus;
   GError *error = NULL;
+  /*
+   * Used when channel doesn't implement ReferenceIdentities. A GStrv
+   * with [0] the hostname, and [1] a NULL terminator.
+   */
   gchar *default_identities[2];
   EmpathyServerTLSHandler *self = EMPATHY_SERVER_TLS_HANDLER (initable);
   EmpathyServerTLSHandlerPriv *priv = GET_PRIV (self);
@@ -128,22 +132,22 @@ tls_handler_init_async (GAsyncInitable *initable,
    * If the channel doesn't implement the ReferenceIdentities parameter
    * then fallback to the hostname.
    */
-  if (!identities)
+  if (identities == NULL)
     {
-      default_identities[0] = (gchar*)hostname;
+      default_identities[0] = (gchar *) hostname;
       default_identities[1] = NULL;
-      identities = (const gchar**)default_identities;
+      identities = (const gchar **) default_identities;
     }
   else
     {
 #ifdef ENABLE_DEBUG
-      gchar *output = g_strjoinv (", ", (gchar**)identities);
+      gchar *output = g_strjoinv (", ", (gchar **) identities);
       DEBUG ("Received reference identities: %s", output);
       g_free (output);
 #endif /* ENABLE_DEBUG */
   }
 
-  priv->reference_identities = g_strdupv ((gchar**)identities);
+  priv->reference_identities = g_strdupv ((gchar **) identities);
 
   cert_object_path = tp_asv_get_object_path (properties,
       EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION ".ServerCertificate");
