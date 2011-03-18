@@ -594,11 +594,18 @@ empathy_protocol_chooser_create_account_settings (EmpathyProtocolChooser *self)
           "talkx.l.google.com:80",
           NULL};
 
+      gchar *extra_certificate_identities[] = {
+          "talk.google.com",
+          NULL};
+
       empathy_account_settings_set_icon_name_async (settings, "im-google-talk",
           NULL, NULL);
 
       empathy_account_settings_set_strv (settings, "fallback-servers",
           fallback_servers);
+
+      empathy_account_settings_set_strv (settings,
+          "extra-certificate-identities", extra_certificate_identities);
     }
   else if (!tp_strdiff (service, "facebook"))
     {
