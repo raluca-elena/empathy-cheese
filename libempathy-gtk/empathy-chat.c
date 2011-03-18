@@ -43,7 +43,6 @@
 #include <libempathy/empathy-keyring.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-request-util.h>
-#include <libempathy/empathy-marshal.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <src/empathy-chat-window.h>
 
@@ -52,6 +51,7 @@
 #include "empathy-contact-list-store.h"
 #include "empathy-contact-list-view.h"
 #include "empathy-contact-menu.h"
+#include "empathy-gtk-marshal.h"
 #include "empathy-input-text-view.h"
 #include "empathy-search-bar.h"
 #include "empathy-theme-manager.h"
@@ -2937,7 +2937,7 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_BOOLEAN,
+			      _empathy_gtk_marshal_VOID__OBJECT_BOOLEAN,
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_MESSAGE, G_TYPE_BOOLEAN);
 
