@@ -42,6 +42,7 @@ G_DEFINE_TYPE (EmpathyTLSVerifier, empathy_tls_verifier,
 enum {
   PROP_TLS_CERTIFICATE = 1,
   PROP_HOSTNAME,
+  PROP_REFERENCE_IDENTITIES,
 
   LAST_PROPERTY,
 };
@@ -49,6 +50,7 @@ enum {
 typedef struct {
   EmpathyTLSCertificate *certificate;
   gchar *hostname;
+  gchar **reference_identities;
 
   GSimpleAsyncResult *verify_result;
   GHashTable *details;
@@ -255,6 +257,8 @@ perform_verification (EmpathyTLSVerifier *self,
   guint n_list, n_anchors;
   guint verify_output;
   gint res;
+  gchar **i;
+  gboolean matched;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
   DEBUG ("Performing verification");
@@ -295,8 +299,18 @@ perform_verification (EmpathyTLSVerifier *self,
       goto out;
   }
 
-  /* now check if the certificate matches the hostname. */
-  if (gnutls_x509_crt_check_hostname (list[0], priv->hostname) == 0)
+  /* now check if the certificate matches one of the reference identities. */
+  for (i = priv->reference_identities, matched = FALSE; i && *i; ++i)
+    {
+      const gchar *identity = *i;
+      if (gnutls_x509_crt_check_hostname (list[0], identity) == 1)
+        {
+          matched = TRUE;
+          break;
+        }
+    }
+
+  if (!matched)
     {
       gchar *certified_hostname;
 
@@ -362,6 +376,9 @@ empathy_tls_verifier_get_property (GObject *object,
     case PROP_HOSTNAME:
       g_value_set_string (value, priv->hostname);
       break;
+    case PROP_REFERENCE_IDENTITIES:
+      g_value_set_boxed (value, priv->reference_identities);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
@@ -383,6 +400,9 @@ empathy_tls_verifier_set_property (GObject *object,
       break;
     case PROP_HOSTNAME:
       priv->hostname = g_value_dup_string (value);
+      break;
+    case PROP_REFERENCE_IDENTITIES:
+      priv->reference_identities = g_value_dup_boxed (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -414,6 +434,7 @@ empathy_tls_verifier_finalize (GObject *object)
 
   tp_clear_boxed (G_TYPE_HASH_TABLE, &priv->details);
   g_free (priv->hostname);
+  g_strfreev (priv->reference_identities);
 
   G_OBJECT_CLASS (empathy_tls_verifier_parent_class)->finalize (object);
 }
@@ -448,22 +469,31 @@ empathy_tls_verifier_class_init (EmpathyTLSVerifierClass *klass)
   g_object_class_install_property (oclass, PROP_TLS_CERTIFICATE, pspec);
 
   pspec = g_param_spec_string ("hostname", "The hostname",
-      "The hostname which should be certified by the certificate.",
+      "The hostname which is certified by the certificate.",
       NULL,
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (oclass, PROP_HOSTNAME, pspec);
+
+  pspec = g_param_spec_boxed ("reference-identities",
+      "The reference identities",
+      "The certificate should certify one of these identities.",
+      G_TYPE_STRV,
+      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (oclass, PROP_REFERENCE_IDENTITIES, pspec);
 }
 
 EmpathyTLSVerifier *
 empathy_tls_verifier_new (EmpathyTLSCertificate *certificate,
-    const gchar *hostname)
+    const gchar *hostname, const gchar **reference_identities)
 {
   g_assert (EMPATHY_IS_TLS_CERTIFICATE (certificate));
   g_assert (hostname != NULL);
+  g_assert (reference_identities != NULL);
 
   return g_object_new (EMPATHY_TYPE_TLS_VERIFIER,
       "certificate", certificate,
       "hostname", hostname,
+      "reference-identities", reference_identities,
       NULL);
 }
 
