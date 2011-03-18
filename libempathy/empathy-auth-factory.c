@@ -183,9 +183,9 @@ common_checks (EmpathyAuthFactory *self,
    */
   if (g_list_length (channels) != 1)
     {
-      g_set_error_literal (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Can't handle more than one ServerTLSConnection or ServerAuthentication "
-          "channel for the same connection.");
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Can't %s more than one ServerTLSConnection or ServerAuthentication "
+          "channel for the same connection.", observe ? "observe" : "handle");
 
       return FALSE;
     }
@@ -203,8 +203,9 @@ common_checks (EmpathyAuthFactory *self,
           EMP_IFACE_QUARK_CHANNEL_TYPE_SERVER_TLS_CONNECTION)
         {
           g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-              "Can only handle ServerTLSConnection or ServerAuthentication channels, "
-              "this was a %s channel", tp_channel_get_channel_type (channel));
+              "Can only %s ServerTLSConnection or ServerAuthentication channels, "
+              "this was a %s channel", observe ? "observe" : "handle",
+              tp_channel_get_channel_type (channel));
 
           return FALSE;
         }
@@ -214,8 +215,9 @@ common_checks (EmpathyAuthFactory *self,
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
       && priv->sasl_handler != NULL)
     {
-      g_set_error_literal (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Can't handle more than one ServerAuthentication channel at one time");
+      g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Can't %s more than one ServerAuthentication channel at one time",
+          observe ? "observe" : "handle");
 
       return FALSE;
     }
