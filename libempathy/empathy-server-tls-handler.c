@@ -162,6 +162,7 @@ empathy_server_tls_handler_finalize (GObject *object)
 
   tp_clear_object (&priv->channel);
   tp_clear_object (&priv->certificate);
+  g_free (priv->hostname);
 
   G_OBJECT_CLASS (empathy_server_tls_handler_parent_class)->finalize (object);
 }
