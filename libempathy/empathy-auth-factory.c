@@ -213,7 +213,8 @@ common_checks (EmpathyAuthFactory *self,
 
   if (tp_channel_get_channel_type_id (channel) ==
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
-      && priv->sasl_handler != NULL)
+      && priv->sasl_handler != NULL &&
+      !observe)
     {
       g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
           "Can't %s more than one ServerAuthentication channel at one time",
