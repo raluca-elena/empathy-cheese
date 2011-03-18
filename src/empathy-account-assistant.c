@@ -771,9 +771,12 @@ account_assistant_build_enter_or_create_page (EmpathyAccountAssistant *self)
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
   gtk_widget_show (main_vbox);
 
+  hbox = gtk_hbox_new (FALSE, 6);
+  gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
+  gtk_widget_show (hbox);
+
   w = gtk_label_new (NULL);
-  gtk_misc_set_alignment (GTK_MISC (w), 0, 0);
-  gtk_box_pack_start (GTK_BOX (main_vbox), w, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), w, FALSE, FALSE, 0);
   gtk_widget_show (w);
   priv->first_label = w;
 
@@ -783,7 +786,7 @@ account_assistant_build_enter_or_create_page (EmpathyAccountAssistant *self)
   gtk_widget_show (w);
 
   chooser = empathy_protocol_chooser_new ();
-  gtk_container_add (GTK_CONTAINER (w), chooser);
+  gtk_box_pack_start (GTK_BOX (hbox), chooser, FALSE, FALSE, 0);
   gtk_widget_show (chooser);
   priv->chooser = chooser;
 
