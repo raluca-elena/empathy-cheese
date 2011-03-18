@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyAuthFactory EmpathyAuthFactory;
 typedef struct _EmpathyAuthFactoryClass EmpathyAuthFactoryClass;
+typedef struct _EmpathyAuthFactoryPriv EmpathyAuthFactoryPriv;
 
 struct _EmpathyAuthFactoryClass {
     TpBaseClientClass parent_class;
@@ -36,7 +37,7 @@ struct _EmpathyAuthFactoryClass {
 
 struct _EmpathyAuthFactory {
     TpBaseClient parent;
-    gpointer priv;
+    EmpathyAuthFactoryPriv *priv;
 };
 
 GType empathy_auth_factory_get_type (void);

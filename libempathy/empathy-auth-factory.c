@@ -35,14 +35,14 @@
 
 G_DEFINE_TYPE (EmpathyAuthFactory, empathy_auth_factory, TP_TYPE_BASE_CLIENT);
 
-typedef struct {
+struct _EmpathyAuthFactoryPriv {
   /* Keep a ref here so the auth client doesn't have to mess with
    * refs. It will be cleared when the channel (and so the handler)
    * gets invalidated. */
   EmpathyServerSASLHandler *sasl_handler;
 
   gboolean dispose_run;
-} EmpathyAuthFactoryPriv;
+};
 
 enum {
   NEW_SERVER_TLS_HANDLER,
