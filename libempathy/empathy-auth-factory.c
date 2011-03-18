@@ -38,8 +38,12 @@ G_DEFINE_TYPE (EmpathyAuthFactory, empathy_auth_factory, TP_TYPE_BASE_CLIENT);
 struct _EmpathyAuthFactoryPriv {
   /* Keep a ref here so the auth client doesn't have to mess with
    * refs. It will be cleared when the channel (and so the handler)
-   * gets invalidated. */
-  EmpathyServerSASLHandler *sasl_handler;
+   * gets invalidated.
+   *
+   * The channel path of the handler's channel (borrowed gchar *) ->
+   * reffed (EmpathyServerSASLHandler *)
+   * */
+  GHashTable *sasl_handlers;
 
   gboolean dispose_run;
 };
@@ -122,10 +126,15 @@ sasl_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
 {
   EmpathyAuthFactory *self = user_data;
   EmpathyAuthFactoryPriv *priv = GET_PRIV (self);
+  TpChannel * channel;
 
-  DEBUG ("SASL handler is invalidated, unref it");
+  channel = empathy_server_sasl_handler_get_channel (handler);
+  g_assert (channel != NULL);
 
-  tp_clear_object (&priv->sasl_handler);
+  DEBUG ("SASL handler for channel %s is invalidated, unref it",
+      tp_proxy_get_object_path (channel));
+
+  g_hash_table_remove (priv->sasl_handlers, tp_proxy_get_object_path (channel));
 }
 
 static void
@@ -136,9 +145,10 @@ server_sasl_handler_ready_cb (GObject *source,
   EmpathyAuthFactoryPriv *priv;
   GError *error = NULL;
   HandlerContextData *data = user_data;
+  EmpathyServerSASLHandler *handler;
 
   priv = GET_PRIV (data->self);
-  priv->sasl_handler = empathy_server_sasl_handler_new_finish (res, &error);
+  handler = empathy_server_sasl_handler_new_finish (res, &error);
 
   if (error != NULL)
     {
@@ -152,14 +162,23 @@ server_sasl_handler_ready_cb (GObject *source,
     }
   else
     {
+      TpChannel *channel;
+
       if (data->context != NULL)
         tp_handle_channels_context_accept (data->context);
 
-      g_signal_connect (priv->sasl_handler, "invalidated",
-          G_CALLBACK (sasl_handler_invalidated_cb), data->self);
+      channel = empathy_server_sasl_handler_get_channel (handler);
+      g_assert (channel != NULL);
+
+      /* Pass the ref to the hash table */
+      g_hash_table_insert (priv->sasl_handlers,
+          (gpointer) tp_proxy_get_object_path (channel), handler);
+
+      tp_g_signal_connect_object (handler, "invalidated",
+          G_CALLBACK (sasl_handler_invalidated_cb), data->self, 0);
 
       g_signal_emit (data->self, signals[NEW_SERVER_SASL_HANDLER], 0,
-          priv->sasl_handler);
+          handler);
     }
 
   handler_context_data_free (data);
@@ -176,6 +195,7 @@ common_checks (EmpathyAuthFactory *self,
   GHashTable *props;
   const gchar * const *available_mechanisms;
   const GError *dbus_error;
+  EmpathyServerSASLHandler *handler;
 
   /* there can't be more than one ServerTLSConnection or
    * ServerAuthentication channels at the same time, for the same
@@ -211,14 +231,17 @@ common_checks (EmpathyAuthFactory *self,
         }
     }
 
+  handler = g_hash_table_lookup (priv->sasl_handlers,
+          tp_proxy_get_object_path (channel));
+
   if (tp_channel_get_channel_type_id (channel) ==
       TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
-      && priv->sasl_handler != NULL &&
+      && handler != NULL &&
       !observe)
     {
       g_set_error (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Can't %s more than one ServerAuthentication channel at one time",
-          observe ? "observe" : "handle");
+          "We are already handling this channel: %s",
+          tp_proxy_get_object_path (channel));
 
       return FALSE;
     }
@@ -441,6 +464,9 @@ empathy_auth_factory_init (EmpathyAuthFactory *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_AUTH_FACTORY, EmpathyAuthFactoryPriv);
+
+  self->priv->sasl_handlers = g_hash_table_new_full (g_str_hash, g_str_equal,
+      NULL, g_object_unref);
 }
 
 static void
@@ -509,7 +535,7 @@ empathy_auth_factory_dispose (GObject *object)
 
   priv->dispose_run = TRUE;
 
-  tp_clear_object (&priv->sasl_handler);
+  g_hash_table_unref (priv->sasl_handlers);
 
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->dispose (object);
 }
