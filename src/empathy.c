@@ -528,19 +528,46 @@ account_manager_ready_cb (GObject *source_object,
 }
 
 static void
+account_join_chatrooms (TpAccount *account,
+  EmpathyChatroomManager *chatroom_manager)
+{
+  TpConnection *conn;
+  GList *chatrooms, *p;
+
+  if (tp_account_get_connection_status (account, NULL) !=
+      TP_CONNECTION_STATUS_CONNECTED)
+    return;
+
+  /* If we're connected we should have a connection */
+  conn = tp_account_get_connection (account);
+  g_return_if_fail (conn != NULL);
+
+  chatrooms = empathy_chatroom_manager_get_chatrooms (
+          chatroom_manager, account);
+
+  for (p = chatrooms; p != NULL; p = p->next)
+    {
+      EmpathyChatroom *room = EMPATHY_CHATROOM (p->data);
+
+      if (!empathy_chatroom_get_auto_connect (room))
+        continue;
+
+      empathy_join_muc (account, empathy_chatroom_get_room (room),
+        TP_USER_ACTION_TIME_NOT_USER_ACTION);
+    }
+  g_list_free (chatrooms);
+}
+
+static void
 account_status_changed_cb (TpAccount *account,
     guint old_status,
     guint new_status,
     guint reason,
     gchar *dbus_error_name,
     GHashTable *details,
-    EmpathyChatroom *room)
+    EmpathyChatroomManager *manager)
 {
-  if (new_status != TP_CONNECTION_STATUS_CONNECTED)
-    return;
-
-  empathy_join_muc (account,
-      empathy_chatroom_get_room (room), TP_USER_ACTION_TIME_NOT_USER_ACTION);
+  account_join_chatrooms (account, manager);
 }
 
 static void
@@ -565,37 +592,14 @@ account_manager_chatroom_ready_cb (GObject *source_object,
   for (l = accounts; l != NULL; l = g_list_next (l))
     {
       TpAccount *account = TP_ACCOUNT (l->data);
-      TpConnection *conn;
-      GList *chatrooms, *p;
 
-      conn = tp_account_get_connection (account);
+      /* Try to join all rooms if we're connected */
+      account_join_chatrooms (account, chatroom_manager);
 
-      chatrooms = empathy_chatroom_manager_get_chatrooms (
-          chatroom_manager, account);
-
-      for (p = chatrooms; p != NULL; p = p->next)
-        {
-          EmpathyChatroom *room = EMPATHY_CHATROOM (p->data);
-
-          if (!empathy_chatroom_get_auto_connect (room))
-            continue;
-
-          if (conn == NULL)
-            {
-              g_signal_connect (G_OBJECT (account), "status-changed",
-                  G_CALLBACK (account_status_changed_cb), room);
-            }
-          else
-            {
-              empathy_join_muc (account,
-                  empathy_chatroom_get_room (room),
-                  TP_USER_ACTION_TIME_NOT_USER_ACTION);
-            }
-        }
-
-      g_list_free (chatrooms);
+      /* And/or join them on (re)connection */
+      tp_g_signal_connect_object (account, "status-changed",
+        G_CALLBACK (account_status_changed_cb), chatroom_manager, 0);
     }
-
   g_list_free (accounts);
 }
 
