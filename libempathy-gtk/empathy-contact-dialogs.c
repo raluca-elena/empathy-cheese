@@ -88,8 +88,8 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		gboolean abusive;
 
 		/* confirm the blocking */
-		if (empathy_block_contact_dialog_show (GTK_WINDOW (dialog),
-						       contact, &abusive)) {
+		if (empathy_block_contact_dialog_show (GTK_WINDOW (dialog), contact,
+						       NULL, &abusive)) {
 			empathy_contact_list_remove (
 					EMPATHY_CONTACT_LIST (manager),
 					contact, "");
@@ -514,6 +514,7 @@ empathy_new_contact_dialog_show_with_contact (GtkWindow *parent,
 gboolean
 empathy_block_contact_dialog_show (GtkWindow      *parent,
 				   EmpathyContact *contact,
+				   GdkPixbuf      *avatar,
 				   gboolean       *abusive)
 {
 	EmpathyContactManager *manager;
@@ -541,6 +542,12 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 			_("_Block"), GTK_RESPONSE_REJECT,
 			NULL);
+
+	if (avatar != NULL) {
+		GtkWidget *image = gtk_image_new_from_pixbuf (avatar);
+		gtk_message_dialog_set_image (GTK_MESSAGE_DIALOG (dialog), image);
+		gtk_widget_show (image);
+	}
 
 	/* ask the user if they want to also report the contact as abusive */
 	if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE) {

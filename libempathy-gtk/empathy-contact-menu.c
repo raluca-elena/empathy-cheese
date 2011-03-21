@@ -244,6 +244,7 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 	if (blocked) {
 		/* confirm the user really wishes to block the contact */
 		GtkWidget *parent;
+		GdkPixbuf *avatar;
 
 		/* gtk_menu_get_attach_widget () doesn't behave properly here
 		 * for some reason */
@@ -251,8 +252,10 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 			G_OBJECT (gtk_widget_get_parent (GTK_WIDGET (item))),
 			"window");
 
+		avatar = empathy_pixbuf_avatar_from_contact_scaled (contact, 48, 48);
+
 		if (!empathy_block_contact_dialog_show (GTK_WINDOW (parent),
-					contact, &abusive))
+					contact, avatar, &abusive))
 			return;
 	}
 
