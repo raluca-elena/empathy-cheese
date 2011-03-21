@@ -820,6 +820,8 @@ account_chooser_update_iter (EmpathyAccountChooser *chooser,
 			      (gpointer) data, priv->filter_data);
 	else
 		account_chooser_filter_ready_cb (TRUE, (gpointer) data);
+
+	g_object_unref (account);
 }
 
 static void
