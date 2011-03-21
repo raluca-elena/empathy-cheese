@@ -604,8 +604,12 @@ empathy_protocol_chooser_create_account_settings (EmpathyProtocolChooser *self)
       empathy_account_settings_set_strv (settings, "fallback-servers",
           fallback_servers);
 
-      empathy_account_settings_set_strv (settings,
-          "extra-certificate-identities", extra_certificate_identities);
+      if (empathy_account_settings_have_tp_param (settings,
+              "extra-certificate-identities"))
+        {
+          empathy_account_settings_set_strv (settings,
+              "extra-certificate-identities", extra_certificate_identities);
+        }
     }
   else if (!tp_strdiff (service, "facebook"))
     {

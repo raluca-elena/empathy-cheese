@@ -798,6 +798,13 @@ empathy_account_settings_get_tp_param (EmpathyAccountSettings *settings,
   return NULL;
 }
 
+gboolean
+empathy_account_settings_have_tp_param (EmpathyAccountSettings *settings,
+    const gchar *param)
+{
+  return (empathy_account_settings_get_tp_param (settings, param) != NULL);
+}
+
 static void
 account_settings_remove_from_unset (EmpathyAccountSettings *settings,
     const gchar *param)

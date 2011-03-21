@@ -87,6 +87,10 @@ gboolean empathy_account_settings_has_account (
 TpConnectionManagerParam *empathy_account_settings_get_tp_params (
     EmpathyAccountSettings *settings);
 
+gboolean empathy_account_settings_have_tp_param (
+    EmpathyAccountSettings *settings,
+    const gchar *param);
+
 void empathy_account_settings_unset (EmpathyAccountSettings *settings,
     const gchar *param);
 
