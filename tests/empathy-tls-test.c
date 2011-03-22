@@ -430,6 +430,10 @@ test_certificate_verify_success_with_pkcs11_lookup (Test *test,
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
   EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "www.collabora.co.uk",
+    NULL
+  };
 
   /*
    * In this test the mock TLS connection only has one certificate
@@ -440,13 +444,14 @@ test_certificate_verify_success_with_pkcs11_lookup (Test *test,
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
           "dhansak-collabora.cer", NULL);
 
-  /* We add teh collabora directory with the collabora root */
+  /* We add the collabora directory with the collabora root */
   add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
           "collabora-ca");
 
   ensure_certificate_proxy (test);
 
-  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk",
+      reference_identities);
   empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
   if (!empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
@@ -466,6 +471,10 @@ test_certificate_verify_success_with_full_chain (Test *test,
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
   EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "www.collabora.co.uk",
+    NULL
+  };
 
   /*
    * In this test the mock TLS connection has a full certificate
@@ -475,13 +484,14 @@ test_certificate_verify_success_with_full_chain (Test *test,
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
           "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
 
-  /* We add teh collabora directory with the collabora root */
+  /* We add the collabora directory with the collabora root */
   add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
           "collabora-ca");
 
   ensure_certificate_proxy (test);
 
-  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk",
+      reference_identities);
   empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
   if (!empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
@@ -501,6 +511,10 @@ test_certificate_verify_root_not_found (Test *test,
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
   EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "www.collabora.co.uk",
+    NULL
+  };
 
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
           "dhansak-collabora.cer", NULL);
@@ -509,7 +523,8 @@ test_certificate_verify_root_not_found (Test *test,
 
   ensure_certificate_proxy (test);
 
-  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk",
+      reference_identities);
   empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
 
@@ -531,6 +546,10 @@ test_certificate_verify_root_not_anchored (Test *test,
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
   EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "www.collabora.co.uk",
+    NULL
+  };
 
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
           "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
@@ -539,7 +558,8 @@ test_certificate_verify_root_not_anchored (Test *test,
 
   ensure_certificate_proxy (test);
 
-  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk");
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk",
+      reference_identities);
   empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
 
@@ -555,23 +575,66 @@ test_certificate_verify_root_not_anchored (Test *test,
 }
 
 static void
-test_certificate_verify_hostname_invalid (Test *test,
+test_certificate_verify_identities_invalid (Test *test,
         gconstpointer data G_GNUC_UNUSED)
 {
   EmpTLSCertificateRejectReason reason = 0;
   GError *error = NULL;
   EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "invalid.host.name",
+    NULL
+  };
 
   test->mock = mock_tls_certificate_new_and_register (test->dbus,
           "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
 
-  /* We add teh collabora directory with the collabora root */
+  /* We add the collabora directory with the collabora root */
   add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
           "collabora-ca");
 
   ensure_certificate_proxy (test);
 
-  verifier = empathy_tls_verifier_new (test->cert, "invalid.host.name");
+  verifier = empathy_tls_verifier_new (test->cert, "invalid.host.name",
+      reference_identities);
+  empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
+  g_main_loop_run (test->loop);
+
+  if (empathy_tls_verifier_verify_finish (verifier, test->result, &reason,
+          NULL, &error))
+    g_assert_not_reached ();
+
+  /* And it should say we're self-signed (oddly enough) */
+  g_assert_cmpuint (reason, ==, EMP_TLS_CERTIFICATE_REJECT_REASON_HOSTNAME_MISMATCH);
+
+  g_clear_error (&error);
+  g_object_unref (verifier);
+}
+
+static void
+test_certificate_verify_uses_reference_identities (Test *test,
+        gconstpointer data G_GNUC_UNUSED)
+{
+  EmpTLSCertificateRejectReason reason = 0;
+  GError *error = NULL;
+  EmpathyTLSVerifier *verifier;
+  const gchar *reference_identities[] = {
+    "invalid.host.name",
+    NULL
+  };
+
+  test->mock = mock_tls_certificate_new_and_register (test->dbus,
+          "dhansak-collabora.cer", "collabora-ca/collabora-ca.cer", NULL);
+
+  /* We add the collabora directory with the collabora root */
+  add_pkcs11_module_for_testing (test, "gkm-roots-store-standalone.so",
+          "collabora-ca");
+
+  ensure_certificate_proxy (test);
+
+  /* Should be using the reference_identities and not host name for checks */
+  verifier = empathy_tls_verifier_new (test->cert, "www.collabora.co.uk",
+      reference_identities);
   empathy_tls_verifier_verify_async (verifier, fetch_callback_result, test);
   g_main_loop_run (test->loop);
 
@@ -605,8 +668,10 @@ main (int argc,
           setup, test_certificate_verify_root_not_found, teardown);
   g_test_add ("/tls/certificate_verify_root_not_anchored", Test, NULL,
           setup, test_certificate_verify_root_not_anchored, teardown);
-  g_test_add ("/tls/certificate_verify_hostname_invalid", Test, NULL,
-          setup, test_certificate_verify_hostname_invalid, teardown);
+  g_test_add ("/tls/certificate_verify_identities_invalid", Test, NULL,
+          setup, test_certificate_verify_identities_invalid, teardown);
+  g_test_add ("/tls/certificate_verify_uses_reference_identities", Test, NULL,
+          setup, test_certificate_verify_uses_reference_identities, teardown);
 
   result = g_test_run ();
   test_deinit ();
