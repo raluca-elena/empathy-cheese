@@ -58,6 +58,8 @@
 
 #define NOTIFICATION_TIMEOUT 2 /* seconds */
 
+#define ACCEPT_WITHOUT_VIDEO 1
+
 /* The time interval in milliseconds between 2 incoming rings */
 #define MS_BETWEEN_RING 500
 
@@ -484,13 +486,19 @@ event_manager_call_window_confirmation_dialog_response_cb (GtkDialog *dialog,
   gtk_widget_destroy (approval->dialog);
   approval->dialog = NULL;
 
-  if (response != GTK_RESPONSE_ACCEPT)
+  if (response == GTK_RESPONSE_ACCEPT)
     {
-      reject_approval (approval);
+      event_manager_approval_approve (approval);
+    }
+  else if (response == ACCEPT_WITHOUT_VIDEO)
+    {
+      tpy_call_channel_send_video (TPY_CALL_CHANNEL (approval->main_channel),
+        FALSE);
+      event_manager_approval_approve (approval);
     }
   else
     {
-      event_manager_approval_approve (approval);
+      reject_approval (approval);
     }
 }
 
@@ -502,6 +510,7 @@ event_channel_process_voip_func (EventPriv *event)
   GtkWidget *image;
   gboolean video;
   gchar *title;
+  EmpathyEventType etype = event->public.type;
 
   if (event->approval->dialog != NULL)
     {
@@ -509,13 +518,13 @@ event_channel_process_voip_func (EventPriv *event)
       return;
     }
 
-  if (event->public.type == EMPATHY_EVENT_TYPE_VOIP)
+  if (etype == EMPATHY_EVENT_TYPE_VOIP)
     {
       EmpathyTpStreamedMedia *call;
       call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
       video = empathy_tp_streamed_media_has_initial_video (call);
     }
-  else if (event->public.type == EMPATHY_EVENT_TYPE_CALL)
+  else if (etype == EMPATHY_EVENT_TYPE_CALL)
     {
       TpyCallChannel *call;
       call = TPY_CALL_CHANNEL (event->approval->handler_instance);
@@ -567,15 +576,26 @@ event_channel_process_voip_func (EventPriv *event)
     GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
 
-  button = gtk_dialog_add_button (GTK_DIALOG (dialog),
-      _("_Answer"), GTK_RESPONSE_ACCEPT);
+  if (video && etype == EMPATHY_EVENT_TYPE_CALL)
+    {
+      button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+        _("_Answer"), ACCEPT_WITHOUT_VIDEO);
 
-  image = gtk_image_new_from_icon_name ("call-start", GTK_ICON_SIZE_BUTTON);
+      image = gtk_image_new_from_icon_name ("call-start",
+        GTK_ICON_SIZE_BUTTON);
+      gtk_button_set_image (GTK_BUTTON (button), image);
+    }
+
+  button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+    video ? _("_Answer with video") : _("_Answer"), GTK_RESPONSE_ACCEPT);
+
+  image = gtk_image_new_from_icon_name ("call-start",
+        GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
 
   g_signal_connect (dialog, "response",
-      G_CALLBACK (event_manager_call_window_confirmation_dialog_response_cb),
-      event->approval);
+    G_CALLBACK (event_manager_call_window_confirmation_dialog_response_cb),
+    event->approval);
 
   gtk_widget_show (dialog);
 
