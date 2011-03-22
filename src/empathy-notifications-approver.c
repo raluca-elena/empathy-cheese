@@ -219,7 +219,7 @@ add_notification_actions (EmpathyNotificationsApprover *self,
 
       if (video && self->priv->event->type == EMPATHY_EVENT_TYPE_CALL)
           notify_notification_add_action (notification,
-          "answer", _("Answer"),
+          "answer-no-video", _("Answer"),
           (NotifyActionCallback) notification_approve_no_video_cb,
           self, NULL);
 
