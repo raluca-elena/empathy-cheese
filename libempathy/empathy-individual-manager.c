@@ -545,6 +545,7 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
       TpfPersona *persona = l->data;
       EmpathyContact *contact;
       EmpathyContactManager *manager;
+      EmpathyContactListFlags flags;
 
       if (!TPF_IS_PERSONA (persona))
         continue;
@@ -553,9 +554,13 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
           tpf_persona_get_contact (persona));
       empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
       manager = empathy_contact_manager_dup_singleton ();
-      empathy_contact_list_set_blocked (
-          EMPATHY_CONTACT_LIST (manager),
-          contact, blocked, abusive);
+      flags = empathy_contact_manager_get_flags_for_connection (manager,
+          empathy_contact_get_connection (contact));
+
+      if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+        empathy_contact_list_set_blocked (
+            EMPATHY_CONTACT_LIST (manager),
+            contact, blocked, abusive);
 
       g_object_unref (manager);
       g_object_unref (contact);
