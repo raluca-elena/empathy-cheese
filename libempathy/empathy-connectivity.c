@@ -87,6 +87,11 @@ connectivity_change_state (EmpathyConnectivity *connectivity,
 }
 
 #ifdef HAVE_NM
+
+#if !defined(NM_CHECK_VERSION)
+#define NM_CHECK_VERSION(x,y,z) 0
+#endif
+
 static void
 connectivity_nm_state_change_cb (NMClient *client,
     const GParamSpec *pspec,
@@ -103,6 +108,9 @@ connectivity_nm_state_change_cb (NMClient *client,
 
   state = nm_client_get_state (priv->nm_client);
   new_nm_connected = !(state == NM_STATE_CONNECTING
+#if NM_CHECK_VERSION(0,8,992)
+      || state == NM_STATE_DISCONNECTING
+#endif
       || state == NM_STATE_DISCONNECTED);
 
   DEBUG ("New NetworkManager network state %d (connected: %s)", state,
