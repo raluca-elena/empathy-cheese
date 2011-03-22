@@ -2333,12 +2333,6 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
   if (priv->video_input == NULL)
     empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
 
-  priv->sending_video = can_send_video &&
-    empathy_call_handler_has_initial_video (priv->handler);
-
-  gtk_toggle_tool_button_set_active (
-      GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on),
-      priv->sending_video && priv->video_input != NULL);
   gtk_widget_set_sensitive (priv->tool_button_camera_on, can_send_video);
   gtk_action_set_sensitive (priv->action_camera_on, can_send_video);
 
@@ -2551,6 +2545,9 @@ static void
 start_call (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  TpyCallChannel *call;
+
+  g_object_get (priv->handler, "call-channel", &call, NULL);
 
   priv->call_started = TRUE;
   empathy_call_handler_start_call (priv->handler,
@@ -2558,10 +2555,19 @@ start_call (EmpathyCallWindow *self)
 
   if (empathy_call_handler_has_initial_video (priv->handler))
     {
-      /* Enable 'send video' buttons and display the preview */
-      gtk_toggle_tool_button_set_active (
+      TpySendingState s = tpy_call_channel_get_video_state (call);
+
+      if (s == TPY_SENDING_STATE_PENDING_SEND ||
+          s == TPY_SENDING_STATE_SENDING)
+        /* Enable 'send video' buttons and display the preview */
+        gtk_toggle_tool_button_set_active (
           GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on), TRUE);
+      else
+        gtk_toggle_tool_button_set_active (
+          GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_off), TRUE);
     }
+
+  g_object_unref (call);
 }
 
 static gboolean
