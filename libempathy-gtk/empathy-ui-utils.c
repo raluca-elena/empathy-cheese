@@ -947,6 +947,9 @@ empathy_filename_from_icon_name (const gchar *icon_name,
 	}
 
 	icon_info = gtk_icon_theme_lookup_icon (icon_theme, icon_name, size, 0);
+	if (icon_info == NULL)
+		return NULL;
+
 	ret = g_strdup (gtk_icon_info_get_filename (icon_info));
 	gtk_icon_info_free (icon_info);
 
