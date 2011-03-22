@@ -1,3 +1,47 @@
+NEW in 2.91.92 (22/03/2011)
+==============
+
+The "A Dream of Spring" release.
+
+With this release, Empathy enters the final phase of the GNOME 3.0 cycle and
+hard code freeze. Please test it extensively and report any issue
+you may experience so we'll make the best 3.0 release possible.
+
+Dependencies:
+
+ • telepathy-glib ≥ 0.14.1
+
+Bugs fixed:
+ - Fixed #645112, Can't handle more than one ServerAuthentication at the same time (Guillaume Desmottes)
+ - Fixed #641664, Empathy from git fails to build in jhbuild (Emilio Pozuelo Monfort)
+ - Fixed #643860, Should scroll to the right row when adding a new account (Guillaume Desmottes)
+ - Fixed #644412, [PATCH] update for NetworkManager 0.9 (Dan Williams)
+ - Fixed #645069, Show an avatar on the block contact dialog (Emilio Pozuelo Monfort)
+ - Fixed #645108, Empathy is asking for password but I told him to remember it (Guillaume Desmottes)
+ - Fixed #645115, Free priv->hostname in EmpathyServerTlsHandler (Stef Walter)
+ - Fixed #645119, Use ServerTLSConnection.ReferenceIdentities to check cert identity. (Stef Walter)
+ - Fixed #645121, Contact Search uses Ctrl-F, leaving Find in Contact List (Will Thompson)
+ - Fixed #645133, Set 'extra-identities' for Google Talk accounts (Stef Walter)
+ - Fixed #645487, Adding a user who is on the block list doesn't remove them from the block list (Danielle Madeley)
+ - Fixed #645504, Use stable ContactBlocking API (Guillaume Desmottes)
+
+Translations:
+ - Updated ar Translation (Khaled Hosny)
+ - Updated ca Translation (Gil Forcada)
+ - Updated id Translation (Dirgita)
+ - Updated it Translation (Milo Casagrande)
+ - Updated kn Translation (Shankar Prasad)
+ - Updated ko Translation (Changwoo Ryu)
+ - Updated lv Translation (Rudolfs Mazurs)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated pt Translation (Duarte Loreto)
+ - Updated ru Translation (Yuri Myasoedov)
+ - Updated uk Translation (Daniel Korostil)
+ - Updated zh_CN Translation (Aron Xu)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+
 NEW in 2.91.91.1 (17/03/2011)
 ================
 
