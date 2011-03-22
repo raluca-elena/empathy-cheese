@@ -197,6 +197,7 @@ auth_factory_new_tls_handler_cb (EmpathyAuthFactory *factory,
 {
   EmpathyTLSCertificate *certificate = NULL;
   gchar *hostname = NULL;
+  gchar **reference_identities = NULL;
   EmpathyTLSVerifier *verifier;
 
   DEBUG ("New TLS server handler received from the factory");
@@ -204,15 +205,18 @@ auth_factory_new_tls_handler_cb (EmpathyAuthFactory *factory,
   g_object_get (handler,
       "certificate", &certificate,
       "hostname", &hostname,
+      "reference-identities", &reference_identities,
       NULL);
 
-  verifier = empathy_tls_verifier_new (certificate, hostname);
+  verifier = empathy_tls_verifier_new (certificate, hostname,
+      (const gchar **) reference_identities);
   empathy_tls_verifier_verify_async (verifier,
       verifier_verify_cb, NULL);
 
   g_object_unref (verifier);
   g_object_unref (certificate);
   g_free (hostname);
+  g_strfreev (reference_identities);
 }
 
 static void

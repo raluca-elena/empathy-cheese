@@ -20,6 +20,7 @@
 
 #include "empathy-server-tls-handler.h"
 
+#include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
@@ -35,6 +36,7 @@ enum {
   PROP_CHANNEL = 1,
   PROP_TLS_CERTIFICATE,
   PROP_HOSTNAME,
+  PROP_REFERENCE_IDENTITIES,
   LAST_PROPERTY,
 };
 
@@ -43,6 +45,7 @@ typedef struct {
 
   EmpathyTLSCertificate *certificate;
   gchar *hostname;
+  gchar **reference_identities;
 
   GSimpleAsyncResult *async_init_res;
 } EmpathyServerTLSHandlerPriv;
@@ -99,9 +102,15 @@ tls_handler_init_async (GAsyncInitable *initable,
   GHashTable *properties;
   const gchar *cert_object_path;
   const gchar *hostname;
+  const gchar * const *identities;
   const gchar *bus_name;
   TpDBusDaemon *dbus;
   GError *error = NULL;
+  /*
+   * Used when channel doesn't implement ReferenceIdentities. A GStrv
+   * with [0] the hostname, and [1] a NULL terminator.
+   */
+  gchar *default_identities[2];
   EmpathyServerTLSHandler *self = EMPATHY_SERVER_TLS_HANDLER (initable);
   EmpathyServerTLSHandlerPriv *priv = GET_PRIV (self);
 
@@ -112,10 +121,34 @@ tls_handler_init_async (GAsyncInitable *initable,
   properties = tp_channel_borrow_immutable_properties (priv->channel);
 
   hostname = tp_asv_get_string (properties,
-      EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION ".Hostname");
+     TP_PROP_CHANNEL_TYPE_SERVER_TLS_CONNECTION_HOSTNAME);
   priv->hostname = g_strdup (hostname);
 
   DEBUG ("Received hostname: %s", hostname);
+
+  identities = tp_asv_get_strv (properties,
+      TP_PROP_CHANNEL_TYPE_SERVER_TLS_CONNECTION_REFERENCE_IDENTITIES);
+
+  /*
+   * If the channel doesn't implement the ReferenceIdentities parameter
+   * then fallback to the hostname.
+   */
+  if (identities == NULL)
+    {
+      default_identities[0] = (gchar *) hostname;
+      default_identities[1] = NULL;
+      identities = (const gchar **) default_identities;
+    }
+  else
+    {
+#ifdef ENABLE_DEBUG
+      gchar *output = g_strjoinv (", ", (gchar **) identities);
+      DEBUG ("Received reference identities: %s", output);
+      g_free (output);
+#endif /* ENABLE_DEBUG */
+  }
+
+  priv->reference_identities = g_strdupv ((gchar **) identities);
 
   cert_object_path = tp_asv_get_object_path (properties,
       EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION ".ServerCertificate");
@@ -162,6 +195,7 @@ empathy_server_tls_handler_finalize (GObject *object)
 
   tp_clear_object (&priv->channel);
   tp_clear_object (&priv->certificate);
+  g_strfreev (priv->reference_identities);
   g_free (priv->hostname);
 
   G_OBJECT_CLASS (empathy_server_tls_handler_parent_class)->finalize (object);
@@ -185,6 +219,9 @@ empathy_server_tls_handler_get_property (GObject *object,
       break;
     case PROP_HOSTNAME:
       g_value_set_string (value, priv->hostname);
+      break;
+    case PROP_REFERENCE_IDENTITIES:
+      g_value_set_boxed (value, priv->reference_identities);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -236,10 +273,16 @@ empathy_server_tls_handler_class_init (EmpathyServerTLSHandlerClass *klass)
   g_object_class_install_property (oclass, PROP_TLS_CERTIFICATE, pspec);
 
   pspec = g_param_spec_string ("hostname", "The hostname",
-      "The hostname which should be certified by the server certificate.",
+      "The hostname the user is expecting to connect to.",
       NULL,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (oclass, PROP_HOSTNAME, pspec);
+
+  pspec = g_param_spec_boxed ("reference-identities", "Reference Identities",
+      "The server certificate should certify one of these identities",
+      G_TYPE_STRV, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (oclass, PROP_REFERENCE_IDENTITIES, pspec);
+
 }
 
 static void

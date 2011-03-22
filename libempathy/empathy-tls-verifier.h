@@ -62,7 +62,8 @@ GType empathy_tls_verifier_get_type (void);
 
 EmpathyTLSVerifier * empathy_tls_verifier_new (
     EmpathyTLSCertificate *certificate,
-    const gchar *hostname);
+    const gchar *hostname,
+    const gchar **reference_identities);
 
 void empathy_tls_verifier_verify_async (EmpathyTLSVerifier *self,
     GAsyncReadyCallback callback,
