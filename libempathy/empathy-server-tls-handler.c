@@ -20,6 +20,7 @@
 
 #include "empathy-server-tls-handler.h"
 
+#include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/util.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
@@ -120,13 +121,13 @@ tls_handler_init_async (GAsyncInitable *initable,
   properties = tp_channel_borrow_immutable_properties (priv->channel);
 
   hostname = tp_asv_get_string (properties,
-      EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION ".Hostname");
+     TP_PROP_CHANNEL_TYPE_SERVER_TLS_CONNECTION_HOSTNAME);
   priv->hostname = g_strdup (hostname);
 
   DEBUG ("Received hostname: %s", hostname);
 
   identities = tp_asv_get_strv (properties,
-      EMP_IFACE_CHANNEL_TYPE_SERVER_TLS_CONNECTION ".ReferenceIdentities");
+      TP_PROP_CHANNEL_TYPE_SERVER_TLS_CONNECTION_REFERENCE_IDENTITIES);
 
   /*
    * If the channel doesn't implement the ReferenceIdentities parameter
@@ -279,8 +280,7 @@ empathy_server_tls_handler_class_init (EmpathyServerTLSHandlerClass *klass)
 
   pspec = g_param_spec_boxed ("reference-identities", "Reference Identities",
       "The server certificate should certify one of these identities",
-      G_TYPE_STRV,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+      G_TYPE_STRV, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (oclass, PROP_REFERENCE_IDENTITIES, pspec);
 
 }
