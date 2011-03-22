@@ -819,13 +819,13 @@ list_get_contact_blocking_capabilities_cb (TpProxy *conn,
 {
 	EmpathyTpContactList *list = EMPATHY_TP_CONTACT_LIST (weak_object);
 	EmpathyTpContactListPriv *priv = GET_PRIV (list);
-	EmpContactBlockingCapabilities caps;
+	TpContactBlockingCapabilities caps;
 
 	g_return_if_fail (G_VALUE_HOLDS_UINT (value));
 
 	caps = g_value_get_uint (value);
 
-	if (caps & EMP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE) {
+	if (caps & TP_CONTACT_BLOCKING_CAPABILITY_CAN_REPORT_ABUSIVE) {
 		DEBUG ("Connection can report abusive contacts");
 		priv->flags |= EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE;
 	}
@@ -949,11 +949,11 @@ conn_ready_cb (TpConnection *connection,
 	/* Find out if we support reporting abusive contacts --
 	 * this is done via the new Conn.I.ContactBlocking interface */
 	if (tp_proxy_has_interface_by_id (priv->connection,
-	    EMP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING)) {
+	    TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING)) {
 		DEBUG ("Have Conn.I.ContactBlocking");
 
 		tp_cli_dbus_properties_call_get (priv->connection, -1,
-			EMP_IFACE_CONNECTION_INTERFACE_CONTACT_BLOCKING,
+			TP_IFACE_CONNECTION_INTERFACE_CONTACT_BLOCKING,
 			"ContactBlockingCapabilities",
 			list_get_contact_blocking_capabilities_cb,
 			NULL, NULL, G_OBJECT (list));
@@ -1371,8 +1371,8 @@ tp_contact_list_set_blocked (EmpathyContactList *list,
 		g_return_if_fail (priv->flags &
 				EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE);
 
-		emp_cli_connection_interface_contact_blocking_call_block_contacts (
-			TP_PROXY (priv->connection), -1,
+		tp_cli_connection_interface_contact_blocking_call_block_contacts (
+			priv->connection, -1,
 			&handles, TRUE, NULL, NULL, NULL, NULL);
 	} else if (blocked) {
 		tp_cli_channel_interface_group_call_add_members (
