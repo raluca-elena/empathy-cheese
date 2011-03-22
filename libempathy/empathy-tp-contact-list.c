@@ -1121,10 +1121,12 @@ tp_contact_list_add (EmpathyContactList *list,
 	GArray handles = {(gchar *) &handle, 1};
 
 	handle = empathy_contact_get_handle (contact);
+
 	if (priv->subscribe) {
 		tp_cli_channel_interface_group_call_add_members (priv->subscribe,
 			-1, &handles, message, NULL, NULL, NULL, NULL);
 	}
+
 	if (priv->publish) {
 		TpChannelGroupFlags flags = tp_channel_group_get_flags (priv->subscribe);
 		if (flags & TP_CHANNEL_GROUP_FLAG_CAN_ADD ||
@@ -1132,6 +1134,12 @@ tp_contact_list_add (EmpathyContactList *list,
 			tp_cli_channel_interface_group_call_add_members (priv->publish,
 				-1, &handles, message, NULL, NULL, NULL, NULL);
 		}
+	}
+
+	if (priv->deny) {
+		tp_cli_channel_interface_group_call_remove_members (
+			priv->deny, -1, &handles, message,
+			NULL, NULL, NULL, NULL);
 	}
 }
 
