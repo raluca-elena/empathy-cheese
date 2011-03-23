@@ -2545,9 +2545,6 @@ static void
 start_call (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  TpyCallChannel *call;
-
-  g_object_get (priv->handler, "call-channel", &call, NULL);
 
   priv->call_started = TRUE;
   empathy_call_handler_start_call (priv->handler,
@@ -2555,7 +2552,11 @@ start_call (EmpathyCallWindow *self)
 
   if (empathy_call_handler_has_initial_video (priv->handler))
     {
-      TpySendingState s = tpy_call_channel_get_video_state (call);
+      TpyCallChannel *call;
+      TpySendingState s;
+
+      g_object_get (priv->handler, "call-channel", &call, NULL);
+      s = tpy_call_channel_get_video_state (call);
 
       if (s == TPY_SENDING_STATE_PENDING_SEND ||
           s == TPY_SENDING_STATE_SENDING)
@@ -2577,9 +2578,9 @@ start_call (EmpathyCallWindow *self)
               add_video_preview_to_pipeline (self);
             }
         }
-    }
 
-  g_object_unref (call);
+      g_object_unref (call);
+    }
 }
 
 static gboolean
