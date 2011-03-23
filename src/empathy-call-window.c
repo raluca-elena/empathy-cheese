@@ -2559,12 +2559,24 @@ start_call (EmpathyCallWindow *self)
 
       if (s == TPY_SENDING_STATE_PENDING_SEND ||
           s == TPY_SENDING_STATE_SENDING)
-        /* Enable 'send video' buttons and display the preview */
-        gtk_toggle_tool_button_set_active (
-          GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on), TRUE);
+        {
+          /* Enable 'send video' buttons and display the preview */
+          gtk_toggle_tool_button_set_active (
+            GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_on),
+            TRUE);
+        }
       else
-        gtk_toggle_tool_button_set_active (
-          GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_off), TRUE);
+        {
+          gtk_toggle_tool_button_set_active (
+            GTK_TOGGLE_TOOL_BUTTON (priv->tool_button_camera_off),
+            TRUE);
+
+          if (priv->video_preview == NULL)
+            {
+              create_video_preview (self);
+              add_video_preview_to_pipeline (self);
+            }
+        }
     }
 
   g_object_unref (call);
