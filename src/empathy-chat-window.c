@@ -1451,7 +1451,7 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 		chatroom = empathy_chatroom_manager_find (priv->chatroom_manager,
 							  account, room);
 
-		if (empathy_chatroom_is_always_urgent (chatroom)) {
+		if (chatroom != NULL && empathy_chatroom_is_always_urgent (chatroom)) {
 			needs_urgency = TRUE;
 		} else {
 			needs_urgency = empathy_message_should_highlight (message);
