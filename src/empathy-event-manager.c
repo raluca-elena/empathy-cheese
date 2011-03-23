@@ -562,7 +562,7 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
   EmpathyMessage *message,
   EventManagerApproval *approval)
 {
-  GtkWidget       *window = empathy_main_window_dup ();
+  GtkWidget       *window;
   EmpathyContact  *sender;
   const gchar     *header;
   const gchar     *msg;
@@ -575,6 +575,11 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
   event = event_lookup_by_approval (approval->manager, approval);
 
   sender = empathy_message_get_sender (message);
+
+  /* We only want to show incoming messages */
+  if (empathy_contact_is_user (sender))
+    return;
+
   header = empathy_contact_get_alias (sender);
   msg = empathy_message_get_body (message);
 
@@ -587,6 +592,8 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
     event_manager_add (approval->manager, NULL, sender,
         EMPATHY_EVENT_TYPE_CHAT, EMPATHY_IMAGE_NEW_MESSAGE, header, msg,
         approval, event_text_channel_process_func, NULL);
+
+  window = empathy_main_window_dup ();
 
   empathy_sound_manager_play (priv->sound_mgr, window,
       EMPATHY_SOUND_CONVERSATION_NEW);
