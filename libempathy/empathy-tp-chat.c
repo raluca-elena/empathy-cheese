@@ -1090,7 +1090,7 @@ tp_chat_got_renamed_contacts_cb (TpConnection            *connection,
 
 	if (priv->user == old) {
 		/* We change our nick */
-		g_object_unref (priv->user);
+		tp_clear_object (&priv->user);
 		priv->user = g_object_ref (new);
 	}
 
