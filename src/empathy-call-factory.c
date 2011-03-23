@@ -285,6 +285,39 @@ call_channel_got_contact (TpConnection *connection,
   g_object_unref (handler);
 }
 
+static void
+call_channel_ready (EmpathyCallFactory *factory,
+  TpyCallChannel *call)
+{
+  TpChannel *channel = TP_CHANNEL (call);
+  const gchar *id;
+
+  id = tp_channel_get_identifier (channel);
+
+  /* The ready callback has a reference, so pass that on */
+  empathy_tp_contact_factory_get_from_id (
+    tp_channel_borrow_connection (channel),
+    id,
+    call_channel_got_contact,
+    channel,
+    g_object_unref,
+    (GObject *) factory);
+}
+
+static void
+call_channel_ready_cb (TpyCallChannel *call,
+  GParamSpec *spec,
+  EmpathyCallFactory *factory)
+{
+  gboolean ready;
+
+  g_object_get (call, "ready", &ready, NULL);
+  if (!ready)
+    return;
+
+  call_channel_ready (factory, call);
+}
+
 
 static void
 handle_channels_cb (TpSimpleHandler *handler,
@@ -303,7 +336,7 @@ handle_channels_cb (TpSimpleHandler *handler,
     {
       TpChannel *channel = l->data;
       TpyCallChannel *call;
-      const gchar *id;
+      gboolean ready;
 
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
@@ -317,13 +350,15 @@ handle_channels_cb (TpSimpleHandler *handler,
 
       call = TPY_CALL_CHANNEL (channel);
 
-      id = tp_channel_get_identifier (channel);
-      empathy_tp_contact_factory_get_from_id (connection,
-        id,
-        call_channel_got_contact,
-        g_object_ref (channel),
-        g_object_unref,
-        (GObject *) self);
+      /* Take a ref to keep while hopping through the async callbacks */
+      g_object_ref (call);
+      g_object_get (call, "ready", &ready, NULL);
+
+      if (!ready)
+        tp_g_signal_connect_object (call, "notify::ready",
+          G_CALLBACK (call_channel_ready_cb), self, 0);
+      else
+        call_channel_ready (self, call);
     }
 
   tp_handle_channels_context_accept (context);
