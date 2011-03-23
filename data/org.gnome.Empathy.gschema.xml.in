@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.Empathy" path="/apps/empathy/">
+  <schema id="org.gnome.Empathy" path="/org/gnome/empathy/">
     <key name="use-conn" type="b">
       <default>true</default>
       <_summary>Connection managers should be used</_summary>
@@ -33,7 +33,7 @@
     <child name="hints" schema="org.gnome.Empathy.hints"/>
     <child name="location" schema="org.gnome.Empathy.location"/>
   </schema>
-  <schema id="org.gnome.Empathy.ui" path="/apps/empathy/ui/">
+  <schema id="org.gnome.Empathy.ui" path="/org/gnome/empathy/ui/">
     <key name="show-offline" type="b">
       <default>true</default>
       <_summary>Show offline contacts</_summary>
@@ -81,14 +81,14 @@ present them to the user immediately.</_description>
       <_description>The stored position (in pixels) of the chat window side pane.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.contacts" path="/apps/empathy/contacts/">
+  <schema id="org.gnome.Empathy.contacts" path="/org/gnome/empathy/contacts/">
     <key name="sort-criterium" type="s">
       <default>'state'</default>
       <_summary>Contact list sort criterion</_summary>
       <_description>Which criterion to use when sorting the contact list. Default is to sort by the contact's name with the value "name". A value of "state" will sort the contact list by state.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.sounds" path="/apps/empathy/sounds/">
+  <schema id="org.gnome.Empathy.sounds" path="/org/gnome/empathy/sounds/">
     <key name="sounds-enabled" type="b">
       <default>true</default>
       <_summary>Use notification sounds</_summary>
@@ -135,7 +135,7 @@ present them to the user immediately.</_description>
       <_description>Whether to play a sound when logging out of a network.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.notifications" path="/apps/empathy/notifications/">
+  <schema id="org.gnome.Empathy.notifications" path="/org/gnome/empathy/notifications/">
     <key name="notifications-enabled" type="b">
       <default>true</default>
       <_summary>Enable popup notifications for new messages</_summary>
@@ -162,7 +162,7 @@ present them to the user immediately.</_description>
       <_description>Whether to show a popup notification when a contact goes offline.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.conversation" path="/apps/empathy/conversation/">
+  <schema id="org.gnome.Empathy.conversation" path="/org/gnome/empathy/conversation/">
     <key name="graphical-smileys" type="b">
       <default>true</default>
       <_summary>Use graphical smileys</_summary>
@@ -214,14 +214,14 @@ present them to the user immediately.</_description>
       <_description>Whether Empathy should use the avatar of the contact as the chat window icon.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.hints" path="/apps/empathy/hints/">
+  <schema id="org.gnome.Empathy.hints" path="/org/gnome/empathy/hints/">
     <key name="close-main-window" type="b">
       <default>true</default>
       <_summary>Show hint about closing the main window</_summary>
       <_description>Whether to show the message dialog about closing the main window with the 'x' button in the title bar.</_description>
     </key>
   </schema>
-  <schema id="org.gnome.Empathy.location" path="/apps/empathy/location/">
+  <schema id="org.gnome.Empathy.location" path="/org/gnome/empathy/location/">
     <key name="publish" type="b">
       <default>false</default>
       <_summary>Empathy can publish the user's location</_summary>
