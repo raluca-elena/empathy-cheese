@@ -788,9 +788,6 @@ log_manager_got_entities_cb (GObject *manager,
 			     GAsyncResult *result,
 			     gpointer user_data)
 {
-	EmpathyLogWindow      *window = user_data;
-	EmpathyAccountChooser *account_chooser;
-	TpAccount             *account;
 	GList                 *entities;
 	GList                 *l;
 	GtkTreeView           *view;
@@ -800,23 +797,19 @@ log_manager_got_entities_cb (GObject *manager,
 	GtkTreeIter            iter;
 	GError                *error = NULL;
 	gboolean               select_account = FALSE;
-
-	account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser_chats);
-	account = empathy_account_chooser_get_account (account_chooser);
-
-	view = GTK_TREE_VIEW (window->treeview_chats);
+	TpAccount             *account = user_data;
 
 	if (log_window == NULL)
-		return;
+		goto out;
 
 	if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
 		result, &entities, &error)) {
 			DEBUG ("%s. Aborting", error->message);
 			g_error_free (error);
-			return;
+			goto out;
 	}
 
-	view = GTK_TREE_VIEW (window->treeview_chats);
+	view = GTK_TREE_VIEW (log_window->treeview_chats);
 	model = gtk_tree_view_get_model (view);
 	selection = gtk_tree_view_get_selection (view);
 	store = GTK_LIST_STORE (model);
@@ -834,9 +827,9 @@ log_manager_got_entities_cb (GObject *manager,
 				COL_CHAT_TARGET, entity,
 				-1);
 
-		if (window->selected_account != NULL &&
+		if (log_window->selected_account != NULL &&
 		    !tp_strdiff (tp_proxy_get_object_path (account),
-		    tp_proxy_get_object_path (window->selected_account)))
+		    tp_proxy_get_object_path (log_window->selected_account)))
 			select_account = TRUE;
 
 		/* FIXME: Update COL_CHAT_ICON/NAME */
@@ -849,12 +842,15 @@ log_manager_got_entities_cb (GObject *manager,
 	/* Unblock signals */
 	g_signal_handlers_unblock_by_func (selection,
 			log_window_chats_changed_cb,
-			window);
+			log_window);
 
 	/* We display the selected account if we populate the model with chats from
 	 * this account. */
 	if (select_account)
-		log_window_chats_set_selected (window);
+		log_window_chats_set_selected (log_window);
+
+out:
+	g_object_unref (account);
 }
 
 static void
@@ -888,8 +884,9 @@ log_window_chats_populate (EmpathyLogWindow *window)
 
 	gtk_list_store_clear (store);
 
+	/* Pass the account reference to the callback */
 	tpl_log_manager_get_entities_async (window->log_manager, account,
-			log_manager_got_entities_cb, (gpointer) window);
+			log_manager_got_entities_cb, account);
 }
 
 static void
