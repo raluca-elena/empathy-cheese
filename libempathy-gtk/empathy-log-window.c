@@ -771,6 +771,12 @@ static void
 log_window_chats_changed_cb (GtkTreeSelection *selection,
 			     EmpathyLogWindow  *window)
 {
+	gboolean selected;
+
+	/* The calendar has to be sensitive only if there is something selected */
+	selected = log_window_chats_get_selected (window, NULL, NULL);
+	gtk_widget_set_sensitive (window->calendar_chats, selected);
+
 	/* Use last date by default */
 	gtk_calendar_clear_marks (GTK_CALENDAR (window->calendar_chats));
 
@@ -952,6 +958,9 @@ log_window_chats_accounts_changed_cb (GtkWidget       *combobox,
 	empathy_chat_view_clear (window->chatview_chats);
 
 	log_window_chats_populate (window);
+
+	/* No chat is selected as we just changed the account */
+	gtk_widget_set_sensitive (window->calendar_chats, FALSE);
 }
 
 static void
