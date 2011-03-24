@@ -786,7 +786,6 @@ account_chooser_filter_ready_cb (gboolean is_enabled,
 		gtk_combo_box_set_active_iter (combobox, iter);
 	}
 
-	g_object_unref (account);
 	filter_result_callback_data_free (fr_data);
 }
 
