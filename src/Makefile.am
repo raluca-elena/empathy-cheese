@@ -1,8 +1,8 @@
 include $(top_srcdir)/tools/flymake.mk
 
 CPPFLAGS_COMMON =					\
-	$(EMPATHY_CFLAGS)				\
 	$(YELL_CFLAGS)					\
+	$(EMPATHY_CFLAGS)				\
 	$(EDS_CFLAGS)					\
 	$(ERROR_CFLAGS)					\
 	-I$(top_srcdir)                          	\
