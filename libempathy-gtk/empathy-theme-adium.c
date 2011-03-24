@@ -58,7 +58,7 @@ typedef struct {
 	EmpathyContact       *last_contact;
 	time_t                last_timestamp;
 	gboolean              last_is_backlog;
-	gboolean              page_loaded;
+	guint                 pages_loading;
 	GList                *message_queue;
 	GtkWidget            *inspector_window;
 	GSettings            *gsettings_chat;
@@ -454,7 +454,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	gboolean               is_backlog;
 	gboolean               consecutive;
 
-	if (!priv->page_loaded) {
+	if (priv->pages_loading != 0) {
 		priv->message_queue = g_list_prepend (priv->message_queue,
 						      g_object_ref (msg));
 		return;
@@ -659,7 +659,7 @@ theme_adium_clear (EmpathyChatView *view)
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 	gchar *basedir_uri;
 
-	priv->page_loaded = FALSE;
+	priv->pages_loading++;
 	basedir_uri = g_strconcat ("file://", priv->data->basedir, NULL);
 	webkit_web_view_load_html_string (WEBKIT_WEB_VIEW (view),
 					  priv->data->template_html,
@@ -861,7 +861,10 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 	EmpathyChatView       *chat_view = EMPATHY_CHAT_VIEW (view);
 
 	DEBUG ("Page loaded");
-	priv->page_loaded = TRUE;
+	priv->pages_loading--;
+
+	if (priv->pages_loading != 0)
+		return;
 
 	/* Display queued messages */
 	priv->message_queue = g_list_reverse (priv->message_queue);
@@ -1066,6 +1069,8 @@ theme_adium_constructed (GObject *object)
 			  object);
 
 	/* Load template */
+	priv->pages_loading = 1;
+
 	basedir_uri = g_strconcat ("file://", priv->data->basedir, NULL);
 	webkit_web_view_load_html_string (WEBKIT_WEB_VIEW (object),
 					  priv->data->template_html,
