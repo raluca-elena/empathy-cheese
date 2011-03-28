@@ -474,17 +474,9 @@ empathy_auth_factory_constructed (GObject *obj)
 {
   EmpathyAuthFactory *self = EMPATHY_AUTH_FACTORY (obj);
   TpBaseClient *client = TP_BASE_CLIENT (self);
-  GError *error = NULL;
 
   /* chain up to TpBaseClient first */
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->constructed (obj);
-
-  if (error != NULL)
-    {
-      g_critical ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
 
   tp_base_client_set_handler_bypass_approval (client, FALSE);
 
