@@ -222,6 +222,28 @@ add_notification_actions (EmpathyNotificationsApprover *self,
   }
 }
 
+static gboolean
+notification_is_urgent (EmpathyNotificationsApprover *self,
+    NotifyNotification *notification)
+{
+  /* Mark as urgent all the notifications with which user should
+   * interact ASAP */
+  switch (self->priv->event->type) {
+    case EMPATHY_EVENT_TYPE_CHAT:
+    case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_TRANSFER:
+    case EMPATHY_EVENT_TYPE_INVITATION:
+    case EMPATHY_EVENT_TYPE_AUTH:
+      return TRUE;
+
+    case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
+    case EMPATHY_EVENT_TYPE_PRESENCE:
+      return FALSE;
+  }
+
+  return FALSE;
+}
+
 static void
 update_notification (EmpathyNotificationsApprover *self)
 {
@@ -288,6 +310,9 @@ update_notification (EmpathyNotificationsApprover *self)
       if (empathy_notify_manager_has_capability (self->priv->notify_mgr,
             EMPATHY_NOTIFY_MANAGER_CAP_ACTIONS))
         add_notification_actions (self, notification);
+
+      if (notification_is_urgent (self, notification))
+        notify_notification_set_urgency (notification, NOTIFY_URGENCY_CRITICAL);
     }
 
   pixbuf = empathy_notify_manager_get_pixbuf_for_notification (
