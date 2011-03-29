@@ -18,9 +18,11 @@
  * Authors: Xavier Claessens <xclaesse@gmail.com>
  */
 
-#include "empathy-presence-manager.h"
-
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#include "empathy-presence-manager.h"
 
 #include <string.h>
 

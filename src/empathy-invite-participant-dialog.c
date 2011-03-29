@@ -9,6 +9,10 @@
  *    Danielle Madeley <danielle.madeley@collabora.co.uk>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib/gi18n.h>
 
 #include "empathy-invite-participant-dialog.h"

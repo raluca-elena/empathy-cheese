@@ -23,6 +23,10 @@
  *     Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <glib/gi18n.h>
 
 #include <telepathy-glib/telepathy-glib.h>
