@@ -244,6 +244,24 @@ notification_is_urgent (EmpathyNotificationsApprover *self,
   return FALSE;
 }
 
+static const gchar *
+get_category_for_event_type (EmpathyEventType type)
+{
+  switch (type) {
+    case EMPATHY_EVENT_TYPE_CHAT:
+      return "im.received";
+    case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_TRANSFER:
+    case EMPATHY_EVENT_TYPE_INVITATION:
+    case EMPATHY_EVENT_TYPE_AUTH:
+    case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
+    case EMPATHY_EVENT_TYPE_PRESENCE:
+      return NULL;
+  }
+
+  return NULL;
+}
+
 static void
 update_notification (EmpathyNotificationsApprover *self)
 {
@@ -283,6 +301,8 @@ update_notification (EmpathyNotificationsApprover *self)
     }
   else
     {
+      const gchar *category;
+
       /* if the notification server supports x-canonical-append,
        * the hint will be added, so that the message from the
        * just created notification will be automatically appended
@@ -313,6 +333,11 @@ update_notification (EmpathyNotificationsApprover *self)
 
       if (notification_is_urgent (self, notification))
         notify_notification_set_urgency (notification, NOTIFY_URGENCY_CRITICAL);
+
+      category = get_category_for_event_type (self->priv->event->type);
+      if (category != NULL)
+        notify_notification_set_hint_string (notification,
+            EMPATHY_NOTIFY_MANAGER_CAP_CATEGORY, category);
     }
 
   pixbuf = empathy_notify_manager_get_pixbuf_for_notification (

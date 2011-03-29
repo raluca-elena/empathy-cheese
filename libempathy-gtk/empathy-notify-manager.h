@@ -32,6 +32,7 @@ G_BEGIN_DECLS
 #define EMPATHY_NOTIFY_MANAGER_CAP_BODY_HYPERLINKS     "body-hyperlinks"
 #define EMPATHY_NOTIFY_MANAGER_CAP_BODY_IMAGES         "body-images"
 #define EMPATHY_NOTIFY_MANAGER_CAP_BODY_MARKUP         "body-markup"
+#define EMPATHY_NOTIFY_MANAGER_CAP_CATEGORY            "category"
 #define EMPATHY_NOTIFY_MANAGER_CAP_ICON_MULTI          "icon-multi"
 #define EMPATHY_NOTIFY_MANAGER_CAP_ICON_STATIC         "icon-static"
 #define EMPATHY_NOTIFY_MANAGER_CAP_IMAGE_SVG_XML       "image/svg+xml"
