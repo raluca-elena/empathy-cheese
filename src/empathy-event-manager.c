@@ -1097,7 +1097,6 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
 {
   EmpathyEventManagerPriv *priv = GET_PRIV (manager);
   TpAccount *account;
-  gchar *header = NULL;
   EmpathyPresenceManager *presence_mgr;
   GtkWidget *window = empathy_main_window_dup ();
 
@@ -1121,12 +1120,10 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNOUT))
             {
-              header = g_strdup_printf ("<b>%s</b>",
-                  empathy_contact_get_alias (contact));
-
               event_manager_add (manager, NULL, contact,
                   EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
-                  header, _("Disconnected"), NULL, NULL, NULL);
+                  empathy_contact_get_alias (contact), _("Disconnected"),
+                  NULL, NULL, NULL);
             }
         }
     }
@@ -1143,16 +1140,13 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
           if (g_settings_get_boolean (priv->gsettings_notif,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNIN))
             {
-              header = g_strdup_printf ("<b>%s</b>",
-                  empathy_contact_get_alias (contact));
-
               event_manager_add (manager, NULL, contact,
                   EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
-                  header, _("Connected"), NULL, NULL, NULL);
+                  empathy_contact_get_alias (contact), _("Connected"),
+                  NULL, NULL, NULL);
             }
         }
     }
-  g_free (header);
 
 out:
   g_object_unref (presence_mgr);
