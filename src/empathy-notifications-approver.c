@@ -237,7 +237,8 @@ notification_is_urgent (EmpathyNotificationsApprover *self,
       return TRUE;
 
     case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
-    case EMPATHY_EVENT_TYPE_PRESENCE:
+    case EMPATHY_EVENT_TYPE_PRESENCE_ONLINE:
+    case EMPATHY_EVENT_TYPE_PRESENCE_OFFLINE:
       return FALSE;
   }
 
@@ -250,12 +251,15 @@ get_category_for_event_type (EmpathyEventType type)
   switch (type) {
     case EMPATHY_EVENT_TYPE_CHAT:
       return "im.received";
+    case EMPATHY_EVENT_TYPE_PRESENCE_ONLINE:
+      return "presence.online";
+    case EMPATHY_EVENT_TYPE_PRESENCE_OFFLINE:
+      return "presence.offline";
     case EMPATHY_EVENT_TYPE_VOIP:
     case EMPATHY_EVENT_TYPE_TRANSFER:
     case EMPATHY_EVENT_TYPE_INVITATION:
     case EMPATHY_EVENT_TYPE_AUTH:
     case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
-    case EMPATHY_EVENT_TYPE_PRESENCE:
       return NULL;
   }
 

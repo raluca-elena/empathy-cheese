@@ -1121,7 +1121,8 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNOUT))
             {
               event_manager_add (manager, NULL, contact,
-                  EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
+                  EMPATHY_EVENT_TYPE_PRESENCE_OFFLINE,
+                  EMPATHY_IMAGE_AVATAR_DEFAULT,
                   empathy_contact_get_alias (contact), _("Disconnected"),
                   NULL, NULL, NULL);
             }
@@ -1141,7 +1142,8 @@ event_manager_presence_changed_cb (EmpathyContact *contact,
                 EMPATHY_PREFS_NOTIFICATIONS_CONTACT_SIGNIN))
             {
               event_manager_add (manager, NULL, contact,
-                  EMPATHY_EVENT_TYPE_PRESENCE, EMPATHY_IMAGE_AVATAR_DEFAULT,
+                  EMPATHY_EVENT_TYPE_PRESENCE_ONLINE,
+                  EMPATHY_IMAGE_AVATAR_DEFAULT,
                   empathy_contact_get_alias (contact), _("Connected"),
                   NULL, NULL, NULL);
             }
