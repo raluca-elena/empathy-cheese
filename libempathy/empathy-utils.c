@@ -312,6 +312,7 @@ empathy_presence_get_default_message (TpConnectionPresenceType presence)
 	case TP_CONNECTION_PRESENCE_TYPE_OFFLINE:
 		return _("Offline");
 	case TP_CONNECTION_PRESENCE_TYPE_UNKNOWN:
+		/* translators: presence type is unknown */
 		return _("Unknown");
 	case TP_CONNECTION_PRESENCE_TYPE_UNSET:
 	case TP_CONNECTION_PRESENCE_TYPE_ERROR:

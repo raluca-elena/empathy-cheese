@@ -1901,9 +1901,13 @@ reset_details_pane (EmpathyStreamedMediaWindow *self)
 {
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
+  /* translators: encoding video codec is unknown */
   gtk_label_set_text (GTK_LABEL (priv->vcodec_encoding_label), _("Unknown"));
+  /* translators: encoding audio codec is unknown */
   gtk_label_set_text (GTK_LABEL (priv->acodec_encoding_label), _("Unknown"));
+  /* translators: decoding video codec is unknown */
   gtk_label_set_text (GTK_LABEL (priv->vcodec_decoding_label), _("Unknown"));
+  /* translators: decoding audio codec is unknown */
   gtk_label_set_text (GTK_LABEL (priv->acodec_decoding_label), _("Unknown"));
 }
 
