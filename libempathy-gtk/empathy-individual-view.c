@@ -116,13 +116,14 @@ enum
 
 /* TODO: re-add DRAG_TYPE_CONTACT_ID, for the case that we're dragging around
  * specific EmpathyContacts (between/in/out of Individuals) */
-enum DndDragType
+typedef enum
 {
-  DND_DRAG_TYPE_INDIVIDUAL_ID,
+  DND_DRAG_TYPE_UNKNOWN = -1,
+  DND_DRAG_TYPE_INDIVIDUAL_ID = 0,
   DND_DRAG_TYPE_PERSONA_ID,
   DND_DRAG_TYPE_URI_LIST,
   DND_DRAG_TYPE_STRING,
-};
+} DndDragType;
 
 #define DRAG_TYPE(T,I) \
   { (gchar *) T, 0, I }
@@ -143,7 +144,6 @@ static const GtkTargetEntry drag_types_source[] = {
 #undef DRAG_TYPE
 
 static GdkAtom drag_atoms_dest[G_N_ELEMENTS (drag_types_dest)];
-static GdkAtom drag_atoms_source[G_N_ELEMENTS (drag_types_source)];
 
 enum
 {
@@ -598,6 +598,8 @@ individual_view_drag_motion (GtkWidget *widget,
   gboolean cleanup = TRUE;
   gboolean retval = TRUE;
   GtkAllocation allocation;
+  guint i;
+  DndDragType drag_type = DND_DRAG_TYPE_UNKNOWN;
 
   priv = GET_PRIV (EMPATHY_INDIVIDUAL_VIEW (widget));
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (widget));
@@ -649,8 +651,18 @@ individual_view_drag_motion (GtkWidget *widget,
   target = gtk_drag_dest_find_target (widget, context, NULL);
   gtk_tree_model_get_iter (model, &iter, path);
 
-  if (target == drag_atoms_dest[DND_DRAG_TYPE_URI_LIST] ||
-      target == drag_atoms_dest[DND_DRAG_TYPE_STRING])
+  /* Determine the DndDragType of the data */
+  for (i = 0; i < G_N_ELEMENTS (drag_atoms_dest); i++)
+    {
+      if (target == drag_atoms_dest[i])
+        {
+          drag_type = drag_types_dest[i].info;
+          break;
+        }
+    }
+
+  if (drag_type == DND_DRAG_TYPE_URI_LIST ||
+      drag_type == DND_DRAG_TYPE_STRING)
     {
       /* This is a file drag, and it can only be dropped on contacts,
        * not groups.
@@ -695,10 +707,10 @@ individual_view_drag_motion (GtkWidget *widget,
       if (individual != NULL)
         g_object_unref (individual);
     }
-  else if ((target == drag_atoms_dest[DND_DRAG_TYPE_INDIVIDUAL_ID] &&
+  else if ((drag_type == DND_DRAG_TYPE_INDIVIDUAL_ID &&
       (priv->view_features & EMPATHY_INDIVIDUAL_VIEW_FEATURE_GROUPS_CHANGE ||
        priv->drag_row == NULL)) ||
-      (target == drag_atoms_dest[DND_DRAG_TYPE_PERSONA_ID] &&
+      (drag_type == DND_DRAG_TYPE_PERSONA_ID &&
        priv->view_features & EMPATHY_INDIVIDUAL_VIEW_FEATURE_PERSONA_DROP))
     {
       /* If target != GDK_NONE, then we have a contact (individual or persona)
@@ -843,7 +855,8 @@ individual_view_drag_data_get (GtkWidget *widget,
 
   if (info == DND_DRAG_TYPE_INDIVIDUAL_ID)
     {
-      gtk_selection_data_set (selection, drag_atoms_source[info], 8,
+      gtk_selection_data_set (selection,
+          gdk_atom_intern ("text/individual-id", FALSE), 8,
           (guchar *) individual_id, strlen (individual_id) + 1);
     }
 
@@ -1922,12 +1935,6 @@ individual_view_constructed (GObject *object)
   for (i = 0; i < G_N_ELEMENTS (drag_types_dest); ++i)
     {
       drag_atoms_dest[i] = gdk_atom_intern (drag_types_dest[i].target, FALSE);
-    }
-
-  for (i = 0; i < G_N_ELEMENTS (drag_types_source); ++i)
-    {
-      drag_atoms_source[i] = gdk_atom_intern (drag_types_source[i].target,
-          FALSE);
     }
 }
 

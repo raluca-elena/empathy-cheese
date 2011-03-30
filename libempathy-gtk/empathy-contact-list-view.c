@@ -112,9 +112,6 @@ static const GtkTargetEntry drag_types_source[] = {
 	{ "text/contact-id", 0, DND_DRAG_TYPE_CONTACT_ID },
 };
 
-static GdkAtom drag_atoms_dest[G_N_ELEMENTS (drag_types_dest)];
-static GdkAtom drag_atoms_source[G_N_ELEMENTS (drag_types_source)];
-
 enum {
 	DRAG_CONTACT_RECEIVED,
 	LAST_SIGNAL
@@ -761,7 +758,8 @@ contact_list_view_drag_data_get (GtkWidget        *widget,
 	str = g_strconcat (account_id, ":", contact_id, NULL);
 
 	if (info == DND_DRAG_TYPE_CONTACT_ID) {
-		gtk_selection_data_set (selection, drag_atoms_source[info], 8,
+		gtk_selection_data_set (selection,
+					gdk_atom_intern ("text/contact-id", FALSE), 8,
 					(guchar *) str, strlen (str) + 1);
 	}
 
@@ -1506,7 +1504,6 @@ contact_list_view_constructed (GObject *object)
 	EmpathyContactListViewPriv *priv = GET_PRIV (view);
 	GtkCellRenderer            *cell;
 	GtkTreeViewColumn          *col;
-	guint                       i;
 
 	priv->filter = GTK_TREE_MODEL_FILTER (gtk_tree_model_filter_new (
 			GTK_TREE_MODEL (priv->store), NULL));
@@ -1638,17 +1635,6 @@ contact_list_view_constructed (GObject *object)
 
 	/* Actually add the column now we have added all cell renderers */
 	gtk_tree_view_append_column (GTK_TREE_VIEW (view), col);
-
-	/* Drag & Drop. */
-	for (i = 0; i < G_N_ELEMENTS (drag_types_dest); ++i) {
-		drag_atoms_dest[i] = gdk_atom_intern (drag_types_dest[i].target,
-						      FALSE);
-	}
-
-	for (i = 0; i < G_N_ELEMENTS (drag_types_source); ++i) {
-		drag_atoms_source[i] = gdk_atom_intern (drag_types_source[i].target,
-							FALSE);
-	}
 }
 
 static void
