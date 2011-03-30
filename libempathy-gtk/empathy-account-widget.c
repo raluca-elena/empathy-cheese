@@ -2000,6 +2000,8 @@ add_enable_checkbox (EmpathyAccountWidget *self,
 
   gtk_widget_show (w);
 #else
+  /* translators: this is the label of a checkbox used to enable/disable IM
+   * accounts */
   priv->enabled_checkbox =
       gtk_check_button_new_with_mnemonic (_("_Enabled"));
 
