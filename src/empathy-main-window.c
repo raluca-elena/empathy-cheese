@@ -1277,14 +1277,20 @@ main_window_favorite_chatroom_menu_add (EmpathyMainWindow *window,
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	GtkWidget   *menu_item;
-	const gchar *name;
+	const gchar *name, *account_name;
+	gchar *label;
+
 
 	if (g_object_get_data (G_OBJECT (chatroom), "menu_item")) {
 		return;
 	}
 
 	name = empathy_chatroom_get_name (chatroom);
-	menu_item = gtk_menu_item_new_with_label (name);
+	account_name = tp_account_get_display_name (
+			empathy_chatroom_get_account (chatroom));
+	label = g_strdup_printf ("%s (%s)", name, account_name);
+	menu_item = gtk_menu_item_new_with_label (label);
+	g_free (label);
 	g_object_set_data (G_OBJECT (menu_item), "is_favorite",
 			GUINT_TO_POINTER (TRUE));
 
