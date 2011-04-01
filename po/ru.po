@@ -6,14 +6,16 @@
 # Il'ya Mertsalov <a567765@yandex.ru>, 2008.
 # Alexander Saprykin <xelfium@gmail.com>, 2010.
 # Yuri Kozlov <yuray@komyakino.ru>, 2010.
+# Mikhail Zabaluev <mikhail.zabaluev@gmail.com>, 2011.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy trunk\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2011-03-14 13:26+0000\n"
-"PO-Revision-Date: 2011-03-21 23:07+0400\n"
-"Last-Translator: Yuri Myaseodov <omerta13@yandex.ru>\n"
-"Language-Team:  <gnome-cyr@gnome.org>\n"
+"PO-Revision-Date: 2011-03-27 23:40+0300\n"
+"Last-Translator: Mikhail Zabaluev <mikhail.zabaluev@gmail.com>\n"
+"Language-Team: Russian <gnome-cyr@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -72,11 +74,11 @@ msgstr "Каталог, используемый для выбора изобр�
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:9
 msgid "Disable popup notifications when away"
-msgstr "Выключить всплывающие уведомления в состоянии «отошёл»"
+msgstr "Выключить всплывающие уведомления в состоянии «отсутствует»"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:10
 msgid "Disable sounds when away"
-msgstr "Выключить звуки в состоянии «отошёл»"
+msgstr "Выключить звуки в состоянии «отсутствует»"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:11
 msgid "Display incoming events in the status area"
@@ -112,7 +114,7 @@ msgstr "Empathy перенёс журнал сообщений MSN"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:19
 msgid "Empathy should auto-away when idle"
-msgstr "Устанавливать статус «отошёл» во время простоя"
+msgstr "Устанавливать статус «отсутствует» при бездействии"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:20
 msgid "Empathy should auto-connect on startup"
@@ -283,8 +285,11 @@ msgid "Whether Empathy should automatically log into your accounts on startup."
 msgstr "Должен ли Empathy автоматически входить в ваши учётные записи при запуске."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:62
-msgid "Whether Empathy should go into away mode automatically if the user is idle."
-msgstr "Должен ли Empathy автоматически устанавливать статус «отошёл», когда компьютер простаивает."
+msgid ""
+"Whether Empathy should go into away mode automatically if the user is idle."
+msgstr ""
+"Должен ли Empathy автоматически устанавливать статус «отсутствует» при "
+"бездействии пользователя."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:63
 msgid "Whether Empathy should reduce the location's accuracy for privacy reasons."
@@ -344,7 +349,9 @@ msgstr "Воспроизводить ли звук при выходе из се
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:77
 msgid "Whether to play sound notifications when away or busy."
-msgstr "Воспроизводить ли звуковые уведомления в состояниях «отошёл» или «занят»."
+msgstr ""
+"Воспроизводить ли звуковые уведомления в состояниях «отсутствует» или «не "
+"беспокоить»."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:78
 msgid "Whether to show a popup notification when a contact goes offline."
@@ -372,7 +379,9 @@ msgstr "Показывать ли собеседников не в сети."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:84
 msgid "Whether to show popup notifications when away or busy."
-msgstr "Показывать ли всплывающие уведомления «отошёл» или «занят»."
+msgstr ""
+"Показывать ли всплывающие уведомления в состояниях «отсутствует» или «не "
+"беспокоить»."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:85
 msgid "Whether to show protocols for contacts in the contact list."
@@ -452,26 +461,25 @@ msgstr "Во время передачи файла возникла ошибк�
 msgid "The other participant is unable to transfer the file"
 msgstr "Собеседник не может передавать файлы"
 
-#: ../libempathy/empathy-tp-file.c:405
-#: ../libempathy/empathy-utils.c:383
+#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:383
 msgid "Unknown reason"
 msgstr "Неизвестная причина"
 
 #: ../libempathy/empathy-utils.c:305
 msgid "Available"
-msgstr "Доступен"
+msgstr "В сети"
 
 #: ../libempathy/empathy-utils.c:307
 msgid "Busy"
-msgstr "Занят"
+msgstr "Не беспокоить"
 
 #: ../libempathy/empathy-utils.c:310
 msgid "Away"
-msgstr "Отошёл"
+msgstr "Отсутствует"
 
 #: ../libempathy/empathy-utils.c:312
 msgid "Invisible"
-msgstr "Невидимый"
+msgstr "Невидимость"
 
 #: ../libempathy/empathy-utils.c:314
 msgid "Offline"
@@ -3658,11 +3666,11 @@ msgstr "_Тема оформления беседы:"
 
 #: ../src/empathy-preferences.ui.h:4
 msgid "Disable notifications when _away or busy"
-msgstr "Выключить уведомления, когда пользователь отошёл или занят"
+msgstr "В_ыключить уведомления в состоянии «отсутствует» или «не беспокоить»"
 
 #: ../src/empathy-preferences.ui.h:5
 msgid "Disable sounds when _away or busy"
-msgstr "В_ыключить звуки в состоянии «отошёл» или «занят»"
+msgstr "В_ыключить звуки в состоянии «отсутствует» или «не беспокоить»"
 
 #: ../src/empathy-preferences.ui.h:6
 msgid "Display incoming events in the notification area"
