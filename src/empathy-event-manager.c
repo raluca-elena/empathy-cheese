@@ -237,7 +237,8 @@ event_manager_add (EmpathyEventManager *manager,
   event->public.header = g_strdup (header);
   event->public.message = g_strdup (message);
   event->public.must_ack = (func != NULL);
-  event->public.handler_instance = approval->handler_instance;
+  if (approval != NULL)
+    event->public.handler_instance = approval->handler_instance;
   event->inhibit = FALSE;
   event->func = func;
   event->user_data = user_data;
