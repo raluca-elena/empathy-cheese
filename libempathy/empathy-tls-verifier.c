@@ -258,7 +258,7 @@ perform_verification (EmpathyTLSVerifier *self,
   guint verify_output;
   gint res;
   gint i;
-  gboolean matched;
+  gboolean matched = FALSE;
   EmpathyTLSVerifierPriv *priv = GET_PRIV (self);
 
   DEBUG ("Performing verification");
