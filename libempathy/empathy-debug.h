@@ -21,6 +21,9 @@
 #ifndef __EMPATHY_DEBUG_H__
 #define __EMPATHY_DEBUG_H__
 
+#include "config.h"
+
+
 #include <glib.h>
 #include <telepathy-glib/debug.h>
 
