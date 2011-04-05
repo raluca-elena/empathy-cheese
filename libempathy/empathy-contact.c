@@ -1721,6 +1721,13 @@ tp_caps_to_capabilities (TpCapabilities *caps)
                     TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO))
                 capabilities |= EMPATHY_CAPABILITIES_VIDEO;
             }
+
+          if (tp_asv_get_boolean (fixed_prop,
+                    TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_AUDIO, NULL))
+            capabilities |= EMPATHY_CAPABILITIES_AUDIO;
+          if (tp_asv_get_boolean (fixed_prop,
+                    TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO, NULL))
+            capabilities |= EMPATHY_CAPABILITIES_VIDEO;
         }
     }
 
