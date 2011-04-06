@@ -1940,3 +1940,13 @@ empathy_tp_chat_get_chat_state (EmpathyTpChat *chat,
 	return tp_channel_get_chat_state (priv->channel,
 		empathy_contact_get_handle (contact));
 }
+
+EmpathyContact *
+empathy_tp_chat_get_self_contact (EmpathyTpChat *self)
+{
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+
+	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), NULL);
+
+	return priv->user;
+}
