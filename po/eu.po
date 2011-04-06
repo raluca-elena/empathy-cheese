@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: eu\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2011-03-29 08:16+0000\n"
-"PO-Revision-Date: 2011-03-30 19:49+0200\n"
+"PO-Revision-Date: 2011-04-05 19:36+0200\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@euskalgnu.org>\n"
 "Language-Team: Basque <itzulpena@euskalgnu.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,6 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n\n"
+"\n"
 "\n"
 
 #: ../data/empathy.desktop.in.in.h:1
@@ -178,7 +179,7 @@ msgstr "Jo soinua mezuak iristean"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:33
 msgid "Play a sound for new conversations"
-msgstr "Jo soinua berriketa berrietan"
+msgstr "Jo soinua solasaldi berrietan"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:34
 msgid "Play a sound for outgoing messages"
@@ -254,7 +255,7 @@ msgstr "Berriketako leihoaren alboko panelaren gordetako posizioa (pixeletan)."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:52
 msgid "The theme that is used to display the conversation in chat windows."
-msgstr "Gaia berriketan bistaratzeko (berriketako leihoan)."
+msgstr "Gaia solasaldian bistaratzeko (berriketako leihoan)."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:53
 msgid "Use graphical smileys"
@@ -333,7 +334,7 @@ msgstr ""
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:68
 msgid "Whether to convert smileys into graphical images in conversations."
 msgstr ""
-"Elkarrizketetan aurpegierak irudi grafikoetara bihurtuko diren ala ez "
+"Solasaldietan aurpegierak irudi grafikoetara bihurtuko diren ala ez "
 "adierazten du."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:69
@@ -358,7 +359,7 @@ msgstr "Sarrerako mezuak jakinarazteko soinua joko duen ala ez adierazten du."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:73
 msgid "Whether to play a sound to notify of new conversations."
-msgstr "Berriketa berriak jakinarazteko soinua joko duen ala ez adierazten du."
+msgstr "Solasaldi berriak jakinarazteko soinua joko duen ala ez adierazten du."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:74
 msgid "Whether to play a sound to notify of outgoing messages."
@@ -1253,7 +1254,7 @@ msgstr "Huts egin du berriketa pribatua irekitzean"
 
 #: ../libempathy-gtk/empathy-chat.c:717
 msgid "Topic not supported on this conversation"
-msgstr "Gaia ez dago onartuta berriketa honetan"
+msgstr "Gaia ez dago onartuta solasaldi honetan"
 
 #: ../libempathy-gtk/empathy-chat.c:723
 msgid "You are not allowed to change the topic"
@@ -1261,11 +1262,11 @@ msgstr "Ez duzu baimenik gaia aldatzeko"
 
 #: ../libempathy-gtk/empathy-chat.c:906
 msgid "/clear: clear all messages from the current conversation"
-msgstr "/clear: mezu guztiak garbitzen ditu uneko berriketan"
+msgstr "/clear: mezu guztiak garbitzen ditu uneko solasaldian"
 
 #: ../libempathy-gtk/empathy-chat.c:909
 msgid "/topic <topic>: set the topic of the current conversation"
-msgstr "/topic <gaia>: ezarri uneko berriketaren gaia"
+msgstr "/topic <gaia>: ezarri uneko solasaldiaren gaia"
 
 #: ../libempathy-gtk/empathy-chat.c:912
 msgid "/join <chat room ID>: join a new chat room"
@@ -1297,7 +1298,7 @@ msgstr "/nick <goitizena>: aldatu zure goitizena uneko zerbitzarian"
 
 #: ../libempathy-gtk/empathy-chat.c:934
 msgid "/me <message>: send an ACTION message to the current conversation"
-msgstr "/me <mezua>: bidali ekintzaren mezua uneko berriketara"
+msgstr "/me <mezua>: bidali ekintzaren mezua uneko solasaldira"
 
 #: ../libempathy-gtk/empathy-chat.c:937
 msgid ""
@@ -1305,7 +1306,7 @@ msgid ""
 "send a message starting with a '/'. For example: \"/say /join is used to "
 "join a new chat room\""
 msgstr ""
-"/say <mezua>: bidali <mezua> uneko berriketara. Normalean '/' "
+"/say <mezua>: bidali <mezua> uneko solasaldira. Normalean '/' "
 "karakterearekin hasten diren mezuak bidaltzeko erabiltzen da. Adibidez, \"/"
 "say /join berriketa-gela berri batekin elkartzeko erabiltzen da\""
 
@@ -1507,7 +1508,7 @@ msgstr "Konektatuta"
 #: ../libempathy-gtk/empathy-chat.c:3547
 #: ../libempathy-gtk/empathy-log-window.c:650
 msgid "Conversation"
-msgstr "Berriketa"
+msgstr "Solasaldia"
 
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.c:422
 msgid "Unknown or invalid identifier"
@@ -1673,7 +1674,7 @@ msgstr "_Bideo-deia"
 #: ../libempathy-gtk/empathy-individual-menu.c:645
 #: ../src/empathy-main-window.ui.h:26
 msgid "_Previous Conversations"
-msgstr "_Aurreko berriketak"
+msgstr "_Aurreko solasaldiak"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:458
 #: ../libempathy-gtk/empathy-individual-menu.c:686
@@ -2133,7 +2134,7 @@ msgstr "Data"
 #. Tab Label
 #: ../libempathy-gtk/empathy-log-window.ui.h:2
 msgid "Conversations"
-msgstr "Berriketak"
+msgstr "Solasaldiak"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:3
 #: ../libempathy-gtk/empathy-search-bar.ui.h:1
@@ -2147,7 +2148,7 @@ msgstr "Bilatu aurrekoa"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:5
 msgid "Previous Conversations"
-msgstr "Aurreko berriketak"
+msgstr "Aurreko solasaldiak"
 
 #. Tab Label
 #: ../libempathy-gtk/empathy-log-window.ui.h:7
@@ -2171,7 +2172,7 @@ msgstr "_Berriketa"
 #. Tweak the dialog
 #: ../libempathy-gtk/empathy-new-message-dialog.c:181
 msgid "New Conversation"
-msgstr "Berriketa berria"
+msgstr "Solasaldi berria"
 
 #. add video toggle
 #: ../libempathy-gtk/empathy-new-call-dialog.c:253
@@ -3283,7 +3284,7 @@ msgstr "_Edukia"
 
 #: ../src/empathy-chat-window.ui.h:10
 msgid "_Conversation"
-msgstr "_Berriketa"
+msgstr "_Solasaldia"
 
 #: ../src/empathy-chat-window.ui.h:11
 msgid "_Detach Tab"
@@ -3673,7 +3674,7 @@ msgstr "_Elkartu..."
 
 #: ../src/empathy-main-window.ui.h:23 ../src/empathy-status-icon.ui.h:3
 msgid "_New Conversation…"
-msgstr "_Berriketa berria..."
+msgstr "_Solasaldi berria..."
 
 #: ../src/empathy-main-window.ui.h:24
 msgid "_Offline Contacts"
@@ -3767,7 +3768,7 @@ msgstr "Mezua bidalita"
 
 #: ../src/empathy-preferences.c:141
 msgid "New conversation"
-msgstr "Berriketa berria"
+msgstr "Solasaldi berria"
 
 #: ../src/empathy-preferences.c:142
 msgid "Contact goes online"
@@ -3843,7 +3844,7 @@ msgstr "Kokalekuaren iturburuak:"
 
 #: ../src/empathy-preferences.ui.h:14
 msgid "Log conversations"
-msgstr "Erregistratu berriketak"
+msgstr "Erregistratu solasaldiak"
 
 #: ../src/empathy-preferences.ui.h:15
 msgid "Notifications"
@@ -4011,7 +4012,7 @@ msgstr "Gonbidatu partaidea"
 
 #: ../src/empathy-invite-participant-dialog.c:35
 msgid "Choose a contact to invite into the conversation:"
-msgstr "Aukeratu kontaktua berriketara gonbidatzeko:"
+msgstr "Aukeratu kontaktua solasaldira gonbidatzeko:"
 
 #: ../src/empathy-invite-participant-dialog.c:45
 msgid "Invite"
