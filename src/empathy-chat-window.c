@@ -706,6 +706,10 @@ chat_window_update_chat_tab_full (EmpathyChat *chat,
 		id = name;
 	}
 
+	if (empathy_chat_is_sms_channel (chat)) {
+		append_markup_printf (tooltip, "%s ", _("SMS:"));
+	}
+
 	append_markup_printf (tooltip,
 			      "<b>%s</b><small> (%s)</small>",
 			      id,
