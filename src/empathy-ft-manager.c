@@ -868,6 +868,27 @@ ft_manager_stop (EmpathyFTManager *manager)
   g_object_unref (handler);
 }
 
+static gboolean
+close_window (EmpathyFTManager *manager)
+{
+  EmpathyFTManagerPriv *priv = GET_PRIV (manager);
+
+  DEBUG ("%p", manager);
+
+  /* remove all the completed/cancelled/errored transfers */
+  ft_manager_clear (manager);
+
+  if (g_hash_table_size (priv->ft_handler_to_row_ref) > 0)
+    {
+      /* There is still FTs on flight, just hide the window */
+      DEBUG ("Hiding window");
+      gtk_widget_hide (priv->window);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 ft_manager_response_cb (GtkWidget *widget,
                         gint response,
@@ -898,22 +919,7 @@ ft_manager_delete_event_cb (GtkWidget *widget,
                             GdkEvent *event,
                             EmpathyFTManager *manager)
 {
-  EmpathyFTManagerPriv *priv = GET_PRIV (manager);
-
-  DEBUG ("%p", manager);
-
-  /* remove all the completed/cancelled/errored transfers */
-  ft_manager_clear (manager);
-
-  if (g_hash_table_size (priv->ft_handler_to_row_ref) > 0)
-    {
-      /* There is still FTs on flight, just hide the window */
-      DEBUG ("Hiding window");
-      gtk_widget_hide (widget);
-      return TRUE;
-    }
-
-  return FALSE;
+  return close_window (manager);
 }
 
 static void
