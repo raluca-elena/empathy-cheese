@@ -3611,6 +3611,7 @@ empathy_chat_dup_name (EmpathyChat *chat)
 	g_return_val_if_fail (EMPATHY_IS_CHAT (chat), NULL);
 
 	ret = priv->name;
+
 	if (!ret && priv->remote_contact) {
 		ret = empathy_contact_get_alias (priv->remote_contact);
 	}
@@ -3618,7 +3619,15 @@ empathy_chat_dup_name (EmpathyChat *chat)
 	if (!ret)
 		ret = priv->id;
 
-	return g_strdup (ret ? ret : _("Conversation"));
+	if (!ret)
+		ret = _("Conversation");
+
+	if (priv->sms_channel)
+		/* Translators: this string is a something like
+		 * "Escher Cat (SMS)" */
+		return g_strdup_printf (_("%s (SMS)"), ret);
+	else
+		return g_strdup (ret);
 }
 
 const gchar *
