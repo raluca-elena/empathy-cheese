@@ -197,7 +197,7 @@ chat_get_property (GObject    *object,
 		g_value_set_object (value, priv->account);
 		break;
 	case PROP_NAME:
-		g_value_set_string (value, empathy_chat_get_name (chat));
+		g_value_take_string (value, empathy_chat_dup_name (chat));
 		break;
 	case PROP_ID:
 		g_value_set_string (value, priv->id);
@@ -3602,8 +3602,8 @@ empathy_chat_get_id (EmpathyChat *chat)
 	return priv->id;
 }
 
-const gchar *
-empathy_chat_get_name (EmpathyChat *chat)
+gchar *
+empathy_chat_dup_name (EmpathyChat *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 	const gchar *ret;
@@ -3618,7 +3618,7 @@ empathy_chat_get_name (EmpathyChat *chat)
 	if (!ret)
 		ret = priv->id;
 
-	return ret ? ret : _("Conversation");
+	return g_strdup (ret ? ret : _("Conversation"));
 }
 
 const gchar *

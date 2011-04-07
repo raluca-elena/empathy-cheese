@@ -69,7 +69,7 @@ void               empathy_chat_set_tp_chat          (EmpathyChat   *chat,
 						      EmpathyTpChat *tp_chat);
 TpAccount *        empathy_chat_get_account          (EmpathyChat   *chat);
 const gchar *      empathy_chat_get_id               (EmpathyChat   *chat);
-const gchar *      empathy_chat_get_name             (EmpathyChat   *chat);
+gchar *            empathy_chat_dup_name             (EmpathyChat   *chat);
 const gchar *      empathy_chat_get_subject          (EmpathyChat   *chat);
 EmpathyContact *   empathy_chat_get_remote_contact   (EmpathyChat   *chat);
 GtkWidget *        empathy_chat_get_contact_menu     (EmpathyChat   *chat);
