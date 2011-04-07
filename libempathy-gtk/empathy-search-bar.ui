@@ -2,120 +2,122 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkHBox" id="search_widget">
+  <object class="GtkToolbar" id="search_widget">
     <property name="visible">True</property>
-    <property name="spacing">6</property>
+    <property name="icon_size">2</property>
+    <property name="toolbar_style">GTK_TOOLBAR_BOTH_HORIZ</property>
     <child>
-      <object class="GtkButton" id="search_close">
+      <object class="GtkToolButton" id="search_close">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
+        <property name="is_important">True</property>
         <property name="receives_default">True</property>
-        <property name="image">image1</property>
+        <property name="icon_name">gtk-close</property>
       </object>
       <packing>
         <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">0</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
-      <object class="GtkLabel" id="search_label">
+      <object class="GtkToolItem" id="search_entry_toolitem">
         <property name="visible">True</property>
-        <property name="label" translatable="yes">Find:</property>
+        <child>
+          <object class="GtkAlignment" id="alignment1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkHBox" id="hbox1">
+                <property name="visible">True</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="search_label">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Find:</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="search_entry">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">1</property>
-      </packing>
     </child>
     <child>
-      <object class="GtkEntry" id="search_entry">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButton" id="search_previous">
+      <object class="GtkToolButton" id="search_previous">
         <property name="label" translatable="yes">Find Previous</property>
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="image">image3</property>
+        <property name="is_important">True</property>
+        <property name="icon_name">gtk-go-back-ltr</property>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="position">3</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
-      <object class="GtkButton" id="search_next">
+      <object class="GtkToolButton" id="search_next">
         <property name="label" translatable="yes">Find Next</property>
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">True</property>
-        <property name="image">image4</property>
+        <property name="is_important">True</property>
+        <property name="icon_name">gtk-go-forward-ltr</property>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="position">4</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
-      <object class="GtkCheckButton" id="search_match_case">
-        <property name="label" translatable="yes">Match case</property>
+      <object class="GtkToolItem" id="search_match_case_toolitem">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="receives_default">False</property>
-        <property name="draw_indicator">True</property>
+        <property name="is_important">True</property>
+        <child>
+          <object class="GtkCheckButton" id="search_match_case">
+            <property name="label" translatable="yes">Match case</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+        </child>
       </object>
       <packing>
-        <property name="position">6</property>
+        <property name="homogeneous">True</property>
       </packing>
     </child>
     <child>
-      <object class="GtkHBox" id="search_not_found">
-        <property name="spacing">6</property>
+      <object class="GtkToolItem" id="search_not_found_toolitem">
+        <property name="visible">True</property>
         <child>
-          <object class="GtkImage" id="image2">
+          <object class="GtkAlignment" id="alignment2">
             <property name="visible">True</property>
-            <property name="stock">gtk-dialog-error</property>
+            <property name="left_padding">6</property>
+            <child>
+              <object class="GtkHBox" id="search_not_found">
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkImage" id="image1">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-dialog-error</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="not_found_label">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Phrase not found</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
           </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label1">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Phrase not found</property>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="pack_type">end</property>
-        <property name="position">5</property>
-      </packing>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="stock">gtk-close</property>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="stock">gtk-go-back</property>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="stock">gtk-go-forward</property>
   </object>
 </interface>

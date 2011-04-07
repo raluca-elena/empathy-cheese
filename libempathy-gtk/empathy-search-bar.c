@@ -17,8 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <glib-object.h>
+#include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -40,6 +43,8 @@ struct _EmpathySearchBarPriv
   GtkWidget *search_entry;
 
   GtkWidget *search_match_case;
+
+  GtkWidget *search_match_case_toolitem;
 
   GtkWidget *search_close;
   GtkWidget *search_previous;
@@ -254,6 +259,42 @@ empathy_search_bar_match_case_toggled (GtkButton *button,
 }
 
 static void
+empathy_search_bar_match_case_menu_toggled (GtkWidget *check,
+    gpointer user_data)
+{
+  EmpathySearchBarPriv* priv = GET_PRIV ( EMPATHY_SEARCH_BAR (user_data));
+  gboolean match_case;
+
+  match_case = gtk_check_menu_item_get_active (GTK_CHECK_MENU_ITEM (check));
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->search_match_case),
+      match_case);
+}
+
+static gboolean
+empathy_searchbar_create_menu_proxy_cb (GtkToolItem *toolitem,
+    gpointer user_data)
+{
+  EmpathySearchBarPriv* priv = GET_PRIV ( EMPATHY_SEARCH_BAR (user_data));
+  GtkWidget *checkbox_menu;
+  gboolean match_case;
+
+  checkbox_menu = gtk_check_menu_item_new_with_mnemonic (_("_Match case"));
+  match_case = gtk_toggle_button_get_active (
+      GTK_TOGGLE_BUTTON (priv->search_match_case));
+  gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (checkbox_menu),
+      match_case);
+
+  g_signal_connect (checkbox_menu, "toggled",
+      G_CALLBACK (empathy_search_bar_match_case_menu_toggled), user_data);
+
+  gtk_tool_item_set_proxy_menu_item (toolitem, "menu-proxy",
+      checkbox_menu);
+
+  return TRUE;
+}
+
+static void
 empathy_search_bar_init (EmpathySearchBar * self)
 {
   gchar *filename;
@@ -285,6 +326,7 @@ empathy_search_bar_init (EmpathySearchBar * self)
       "search_previous", "clicked", empathy_search_bar_previous_cb,
       "search_next", "clicked", empathy_search_bar_next_cb,
       "search_match_case", "toggled", empathy_search_bar_match_case_toggled,
+      "search_match_case_toolitem", "create-menu-proxy", empathy_searchbar_create_menu_proxy_cb,
       NULL);
 
   g_signal_connect (G_OBJECT (self), "key-press-event",
