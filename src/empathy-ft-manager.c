@@ -71,7 +71,8 @@ enum
 {
   RESPONSE_OPEN  = 1,
   RESPONSE_STOP  = 2,
-  RESPONSE_CLEAR = 3
+  RESPONSE_CLEAR = 3,
+  RESPONSE_CLOSE = 4
 };
 
 G_DEFINE_TYPE (EmpathyFTManager, empathy_ft_manager, G_TYPE_OBJECT);
@@ -894,6 +895,8 @@ ft_manager_response_cb (GtkWidget *widget,
                         gint response,
                         EmpathyFTManager *manager)
 {
+  EmpathyFTManagerPriv *priv = GET_PRIV (manager);
+
   switch (response)
     {
       case RESPONSE_CLEAR:
@@ -904,6 +907,10 @@ ft_manager_response_cb (GtkWidget *widget,
         break;
       case RESPONSE_STOP:
         ft_manager_stop (manager);
+        break;
+      case RESPONSE_CLOSE:
+        if (!close_window (manager))
+          gtk_widget_destroy (priv->window);
         break;
       case GTK_RESPONSE_NONE:
       case GTK_RESPONSE_DELETE_EVENT:

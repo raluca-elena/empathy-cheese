@@ -73,6 +73,18 @@
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkButton" id="close_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="label">gtk-close</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -85,6 +97,7 @@
       <action-widget response="3">clear_button</action-widget>
       <action-widget response="1">open_button</action-widget>
       <action-widget response="2">abort_button</action-widget>
+      <action-widget response="4">close_button</action-widget>
     </action-widgets>
   </object>
 </interface>
