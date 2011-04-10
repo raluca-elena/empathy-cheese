@@ -36,6 +36,11 @@
 #include "empathy-images.h"
 #include "empathy-ui-utils.h"
 
+#ifdef HAVE_CHEESE
+#include <cheese-avatar-chooser.h>
+#endif /* HAVE_CHEESE */
+
+
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
 
@@ -59,6 +64,18 @@
 #define AVATAR_SIZE_SAVE 96
 #define AVATAR_SIZE_VIEW 64
 #define DEFAULT_DIR DATADIR"/pixmaps/faces"
+
+#ifdef HAVE_CHEESE
+/*
+ * A custom GtkResponseType used when the user presses the
+ * "Camera Picture" button. Any positive value would be sufficient.
+ */
+#define EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM   10
+#endif
+#define EMPATHY_AVATAR_CHOOSER_RESPONSE_NO_IMAGE GTK_RESPONSE_NO
+#define EMPATHY_AVATAR_CHOOSER_RESPONSE_CANCEL   GTK_RESPONSE_CANCEL
+#define EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE     GTK_RESPONSE_OK
+
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyAvatarChooser)
 typedef struct {
@@ -717,6 +734,28 @@ avatar_chooser_set_image_from_file (EmpathyAvatarChooser *chooser,
 	avatar_chooser_set_image_from_data (chooser, image_data, image_size, TRUE);
 }
 
+static void
+avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *chooser,
+				       GdkPixbuf            *pb)
+{
+	/* dup the string as empathy_avatar_new steals ownership of the it */
+	gchar         *mime = g_strdup ("image/png");
+	gsize          size;
+	gchar         *buf;
+	EmpathyAvatar *avatar = NULL;
+	GError        *error = NULL;
+	if (!gdk_pixbuf_save_to_buffer (pb, &buf, &size, "png", &error, NULL)) {
+		avatar_chooser_error_show (chooser,
+			_("Couldn't save pixbuf to png"),
+			error ? error->message : NULL);
+		g_clear_error (&error);
+		return;
+	}
+	avatar = empathy_avatar_new ((guchar *) buf, size, mime, NULL);
+	avatar_chooser_set_image (chooser, avatar, pb, TRUE);
+}
+
+
 static gboolean
 avatar_chooser_drag_motion_cb (GtkWidget          *widget,
 			      GdkDragContext     *context,
@@ -875,6 +914,49 @@ avatar_chooser_update_preview_cb (GtkFileChooser       *file_chooser,
 	gtk_file_chooser_set_preview_widget_active (file_chooser, TRUE);
 }
 
+#ifdef HAVE_CHEESE
+static gboolean
+destroy_chooser (GtkWidget *chooser)
+{
+	gtk_widget_destroy (chooser);
+	return FALSE;
+}
+
+static void
+webcam_response_cb (GtkDialog            *dialog,
+		    int                   response,
+		    EmpathyAvatarChooser *chooser)
+{
+	if (response == GTK_RESPONSE_ACCEPT) {
+		GdkPixbuf           *pb;
+		CheeseAvatarChooser *cheese_chooser;
+
+		cheese_chooser = CHEESE_AVATAR_CHOOSER (dialog);
+		pb = cheese_avatar_chooser_get_picture (cheese_chooser);
+		avatar_chooser_set_avatar_from_pixbuf (chooser, pb);
+	}
+	if (response != GTK_RESPONSE_DELETE_EVENT &&
+	    response != GTK_RESPONSE_NONE)
+		g_idle_add ((GSourceFunc) destroy_chooser, dialog);
+}
+
+static void
+choose_avatar_from_webcam (GtkWidget            *widget,
+			   EmpathyAvatarChooser *chooser)
+{
+	GtkWidget *window;
+
+	window = cheese_avatar_chooser_new ();
+
+	gtk_window_set_transient_for (GTK_WINDOW (window),
+				      GTK_WINDOW (empathy_get_toplevel_window (GTK_WIDGET (chooser))));
+	gtk_window_set_modal (GTK_WINDOW (window), TRUE);
+	g_signal_connect (G_OBJECT (window), "response",
+			  G_CALLBACK (webcam_response_cb), chooser);
+	gtk_widget_show (window);
+}
+#endif /* HAVE_CHEESE */
+
 static void
 avatar_chooser_response_cb (GtkWidget            *widget,
 			    gint                  response,
@@ -884,7 +966,7 @@ avatar_chooser_response_cb (GtkWidget            *widget,
 
 	priv->chooser_dialog = NULL;
 
-	if (response == GTK_RESPONSE_OK) {
+	if (response == EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE) {
 		gchar *filename;
 		gchar *path;
 
@@ -901,11 +983,16 @@ avatar_chooser_response_cb (GtkWidget            *widget,
 			g_free (path);
 		}
 	}
-	else if (response == GTK_RESPONSE_NO) {
+	else if (response == EMPATHY_AVATAR_CHOOSER_RESPONSE_NO_IMAGE) {
 		/* This corresponds to "No Image", not to "Cancel" */
 		avatar_chooser_clear_image (chooser);
 	}
-
+	#ifdef HAVE_CHEESE
+	else if (response == EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM) {
+		/* This corresponds to "Camera Picture" */
+		choose_avatar_from_webcam (widget, chooser);
+	}
+	#endif
 	gtk_widget_destroy (widget);
 }
 
@@ -930,12 +1017,16 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 		gtk_file_chooser_dialog_new (_("Select Your Avatar Image"),
 					     empathy_get_toplevel_window (GTK_WIDGET (chooser)),
 					     GTK_FILE_CHOOSER_ACTION_OPEN,
+					     #ifdef HAVE_CHEESE
+					     _("Take a picture..."),
+					     EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM,
+					     #endif
 					     _("No Image"),
-					     GTK_RESPONSE_NO,
+					     EMPATHY_AVATAR_CHOOSER_RESPONSE_NO_IMAGE,
 					     GTK_STOCK_CANCEL,
-					     GTK_RESPONSE_CANCEL,
+					     EMPATHY_AVATAR_CHOOSER_RESPONSE_CANCEL,
 					     GTK_STOCK_OPEN,
-					     GTK_RESPONSE_OK,
+					     EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE,
 					     NULL));
 	chooser_dialog = priv->chooser_dialog;
 	gtk_window_set_destroy_with_parent (GTK_WINDOW (chooser_dialog), TRUE);
@@ -1001,7 +1092,7 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 	gtk_file_chooser_add_filter (chooser_dialog, filter);
 
 	/* Setup response */
-	gtk_dialog_set_default_response (GTK_DIALOG (chooser_dialog), GTK_RESPONSE_OK);
+	gtk_dialog_set_default_response (GTK_DIALOG (chooser_dialog), EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE);
 	g_signal_connect (chooser_dialog, "response",
 			  G_CALLBACK (avatar_chooser_response_cb),
 			  chooser);
