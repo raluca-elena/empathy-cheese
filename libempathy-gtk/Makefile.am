@@ -13,6 +13,7 @@ AM_CPPFLAGS =                                           \
 	$(GEOCLUE_CFLAGS)				\
 	$(MEEGO_CFLAGS)					\
 	$(WEBKIT_CFLAGS)				\
+	$(CHEESE_CFLAGS)				\
 	$(WARN_CFLAGS)					\
 	$(DISABLE_DEPRECATED)
 
@@ -167,6 +168,7 @@ libempathy_gtk_la_LIBADD =			\
 	$(GCR_LIBS)				\
 	$(MEEGO_LIBS)				\
 	$(WEBKIT_LIBS)				\
+	$(CHEESE_LIBS)				\
 	$(top_builddir)/libempathy/libempathy.la
 
 check_c_sources = \

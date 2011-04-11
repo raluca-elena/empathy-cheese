@@ -464,6 +464,25 @@ AM_CONDITIONAL(HAVE_CONTROL_CENTER_EMBEDDING, test "x$have_control_center_embedd
 AC_SUBST(CONTROL_CENTER_EMBEDDING_CFLAGS)
 AC_SUBST(CONTROL_CENTER_EMBEDDING_LIBS)
 
+# Optional dependency for avatar selection
+AC_ARG_WITH([cheese],
+            AS_HELP_STRING([--with-cheese], [enable cheese webcam support]),,
+            with_cheese=auto)
+
+if test x"$with_cheese" != x"no" ; then
+   PKG_CHECK_MODULES(CHEESE, gstreamer-0.10 cheese-gtk >= 2.91.91.1, [have_cheese=yes], [have_cheese=no])
+   if test x${have_cheese} = xyes; then
+     AC_DEFINE(HAVE_CHEESE, 1, [Define to 1 to enable cheese webcam support])
+   fi
+   if test x${with_cheese} = xyes && test x${have_cheese} = xno; then
+     AC_MSG_ERROR([Cheese configured but not found])
+   fi
+else
+   have_cheese=no
+fi
+AM_CONDITIONAL(BUILD_CHEESE, test x${have_cheese} = xyes)
+
+
 # -----------------------------------------------------------
 # Coding style checks
 # -----------------------------------------------------------
@@ -509,6 +528,7 @@ Configure summary:
 	Adium themes (Webkit).......:  ${have_webkit}
 	Meego widgets ..............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
+	Cheese webcam support ......:  ${have_cheese}
 
     Connectivity:
 	NetworkManager integration..:  ${have_nm}
