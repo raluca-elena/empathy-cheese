@@ -1379,6 +1379,9 @@ tp_chat_constructor (GType                  type,
 		tp_cli_dbus_properties_call_get (priv->channel, -1,
 			TP_IFACE_CHANNEL_INTERFACE_SMS, "SMSChannel",
 			get_sms_channel_cb, chat, NULL, G_OBJECT (chat));
+	} else {
+		/* if there's no SMS support, then we're not waiting for it */
+		priv->got_sms_channel = TRUE;
 	}
 
 	return chat;
