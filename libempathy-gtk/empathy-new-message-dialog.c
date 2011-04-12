@@ -62,21 +62,40 @@ G_DEFINE_TYPE(EmpathyNewMessageDialog, empathy_new_message_dialog,
  * to be started with any contact on any enabled account.
  */
 
+enum
+{
+  EMP_NEW_MESSAGE_TEXT,
+  EMP_NEW_MESSAGE_SMS,
+};
+
 static void
 empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
 {
   TpAccount *account;
   const gchar *contact_id;
 
-  if (response_id != GTK_RESPONSE_ACCEPT) goto out;
+  if (response_id < EMP_NEW_MESSAGE_TEXT) goto out;
 
   contact_id = empathy_contact_selector_dialog_get_selected (
       EMPATHY_CONTACT_SELECTOR_DIALOG (dialog), NULL, &account);
 
   if (EMP_STR_EMPTY (contact_id) || account == NULL) goto out;
 
-  empathy_chat_with_contact_id (account, contact_id,
-      gtk_get_current_event_time ());
+  switch (response_id)
+    {
+      case EMP_NEW_MESSAGE_TEXT:
+        empathy_chat_with_contact_id (account, contact_id,
+            gtk_get_current_event_time ());
+        break;
+
+      case EMP_NEW_MESSAGE_SMS:
+        empathy_sms_contact_id (account, contact_id,
+            gtk_get_current_event_time ());
+        break;
+
+      default:
+        g_warn_if_reached ();
+    }
 
 out:
   gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -165,7 +184,18 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *dialog)
 {
   EmpathyContactSelectorDialog *parent = EMPATHY_CONTACT_SELECTOR_DIALOG (
         dialog);
+  GtkWidget *button;
   GtkWidget *image;
+
+  /* add an SMS button */
+  button = gtk_button_new_with_mnemonic (_("_SMS"));
+  image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_SMS,
+      GTK_ICON_SIZE_BUTTON);
+  gtk_button_set_image (GTK_BUTTON (button), image);
+
+  gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
+      EMP_NEW_MESSAGE_SMS);
+  gtk_widget_show (button);
 
   /* add chat button */
   parent->button_action = gtk_button_new_with_mnemonic (_("C_hat"));
@@ -174,8 +204,13 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *dialog)
   gtk_button_set_image (GTK_BUTTON (parent->button_action), image);
 
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), parent->button_action,
-      GTK_RESPONSE_ACCEPT);
+      EMP_NEW_MESSAGE_TEXT);
   gtk_widget_show (parent->button_action);
+
+  /* the parent class will update the sensitivity of button_action, propagate
+   * it */
+  g_object_bind_property (parent->button_action, "sensitive",
+      button, "sensitive", G_BINDING_SYNC_CREATE);
 
   /* Tweak the dialog */
   gtk_window_set_title (GTK_WINDOW (dialog), _("New Conversation"));
