@@ -2021,7 +2021,9 @@ accounts_dialog_cms_prepare_cb (GObject *source,
   if (!empathy_connection_managers_prepare_finish (cms, result, NULL))
     goto out;
 
-  accounts_dialog_update_settings (dialog, NULL);
+  /* No need to update the settings if we are already preparing one */
+  if (priv->settings_ready == NULL)
+    accounts_dialog_update_settings (dialog, NULL);
 
   if (priv->initial_selection != NULL)
     {
