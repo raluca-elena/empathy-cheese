@@ -66,7 +66,8 @@ struct _EmpathyContactSelectorDialogPriv {
 enum {
   PROP_0,
   PROP_SHOW_ACCOUNT_CHOOSER,
-  PROP_FILTER_ACCOUNT
+  PROP_FILTER_ACCOUNT,
+  PROP_SELECTED_ACCOUNT
 };
 
 enum {
@@ -151,6 +152,8 @@ contact_selector_dialog_account_changed_cb (GtkWidget *widget,
       g_object_unref (contact);
       members = g_list_delete_link (members, members);
   }
+
+  g_object_notify (G_OBJECT (dialog), "selected-account");
 }
 
 static gboolean
@@ -375,6 +378,7 @@ empathy_contact_selector_dialog_get_property (GObject *self,
     GParamSpec *pspec)
 {
   EmpathyContactSelectorDialog *dialog = EMPATHY_CONTACT_SELECTOR_DIALOG (self);
+  EmpathyContactSelectorDialogPriv *priv = GET_PRIV (dialog);
 
   switch (prop_id)
     {
@@ -386,6 +390,11 @@ empathy_contact_selector_dialog_get_property (GObject *self,
       case PROP_FILTER_ACCOUNT:
         g_value_set_object (value,
             empathy_contact_selector_dialog_get_filter_account (dialog));
+        break;
+
+      case PROP_SELECTED_ACCOUNT:
+        g_value_set_object (value, empathy_account_chooser_get_account (
+              EMPATHY_ACCOUNT_CHOOSER (priv->account_chooser)));
         break;
 
       default:
@@ -401,6 +410,7 @@ empathy_contact_selector_dialog_set_property (GObject *self,
     GParamSpec *pspec)
 {
   EmpathyContactSelectorDialog *dialog = EMPATHY_CONTACT_SELECTOR_DIALOG (self);
+  EmpathyContactSelectorDialogPriv *priv = GET_PRIV (dialog);
 
   switch (prop_id)
     {
@@ -411,6 +421,12 @@ empathy_contact_selector_dialog_set_property (GObject *self,
 
       case PROP_FILTER_ACCOUNT:
         empathy_contact_selector_dialog_set_filter_account (dialog,
+            g_value_get_object (value));
+        break;
+
+      case PROP_SELECTED_ACCOUNT:
+        empathy_account_chooser_set_account (
+            EMPATHY_ACCOUNT_CHOOSER (priv->account_chooser),
             g_value_get_object (value));
         break;
 
@@ -488,6 +504,13 @@ empathy_contact_selector_dialog_class_init (
         "Account to filter contacts",
         "if 'show-account-chooser' is unset, only the contacts from this "
         "account are displayed",
+        TP_TYPE_ACCOUNT,
+        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (object_class, PROP_SELECTED_ACCOUNT,
+      g_param_spec_object ("selected-account",
+        "Selected Account",
+        "Current account selected in the account-chooser",
         TP_TYPE_ACCOUNT,
         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
