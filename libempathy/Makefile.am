@@ -39,6 +39,7 @@ libempathy_headers =				\
 	empathy-contact-list.h			\
 	empathy-contact-manager.h		\
 	empathy-contact.h			\
+	empathy-contactinfo-utils.h		\
 	empathy-debug.h				\
 	empathy-ft-factory.h			\
 	empathy-ft-handler.h			\
@@ -82,6 +83,7 @@ libempathy_handwritten_source =				\
 	empathy-contact-list.c				\
 	empathy-contact-manager.c			\
 	empathy-contact.c				\
+	empathy-contactinfo-utils.c			\
 	empathy-debug.c					\
 	empathy-ft-factory.c				\
 	empathy-ft-handler.c				\
