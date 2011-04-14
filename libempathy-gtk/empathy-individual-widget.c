@@ -37,6 +37,7 @@
 #include <champlain-gtk/champlain-gtk.h>
 #endif
 
+#include <libempathy/empathy-contactinfo-utils.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-location.h>
 #include <libempathy/empathy-time.h>
@@ -141,64 +142,6 @@ details_set_up (EmpathyIndividualWidget *self)
   gtk_widget_show (priv->details_spinner);
 }
 
-typedef struct
-{
-  const gchar *field_name;
-  const gchar *title;
-  gboolean linkify;
-} InfoFieldData;
-
-static InfoFieldData info_field_data[] =
-{
-  { "fn",    N_("Full name:"),      FALSE },
-  { "tel",   N_("Phone number:"),   FALSE },
-  { "email", N_("E-mail address:"), TRUE },
-  { "url",   N_("Website:"),        TRUE },
-  { "bday",  N_("Birthday:"),       FALSE },
-  { NULL, NULL }
-};
-
-static InfoFieldData *
-find_info_field_data (const gchar *field_name)
-{
-  guint i;
-
-  for (i = 0; info_field_data[i].field_name != NULL; i++)
-    {
-      if (tp_strdiff (info_field_data[i].field_name, field_name) == FALSE)
-        return info_field_data + i;
-    }
-  return NULL;
-}
-
-static gint
-contact_info_field_name_cmp (const gchar *name1,
-    const gchar *name2)
-{
-  guint i;
-
-  if (tp_strdiff (name1, name2) == FALSE)
-    return 0;
-
-  /* We use the order of info_field_data */
-  for (i = 0; info_field_data[i].field_name != NULL; i++)
-    {
-      if (tp_strdiff (info_field_data[i].field_name, name1) == FALSE)
-        return -1;
-      if (tp_strdiff (info_field_data[i].field_name, name2) == FALSE)
-        return +1;
-    }
-
-  return g_strcmp0 (name1, name2);
-}
-
-static gint
-contact_info_field_cmp (TpContactInfoField *field1,
-    TpContactInfoField *field2)
-{
-  return contact_info_field_name_cmp (field1->field_name, field2->field_name);
-}
-
 static void
 client_types_notify_cb (TpContact *contact,
     GParamSpec *pspec,
@@ -206,6 +149,11 @@ client_types_notify_cb (TpContact *contact,
 {
   client_types_update (self);
 }
+
+typedef struct {
+  EmpathyIndividualWidget *widget; /* weak */
+  TpContact *contact; /* owned */
+} DetailsData;
 
 static void
 update_weak_contact (EmpathyIndividualWidget *self)
@@ -275,12 +223,13 @@ details_update_show (EmpathyIndividualWidget *self,
   guint n_rows = 0;
 
   info = tp_contact_get_contact_info (contact);
-  info = g_list_sort (info, (GCompareFunc) contact_info_field_cmp);
+  info = g_list_sort (info, (GCompareFunc) empathy_contact_info_field_cmp);
   for (l = info; l != NULL; l = l->next)
     {
       TpContactInfoField *field = l->data;
-      InfoFieldData *field_data;
+      gchar *title;
       const gchar *value;
+      gboolean linkify;
       GtkWidget *w;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
@@ -288,15 +237,18 @@ details_update_show (EmpathyIndividualWidget *self,
 
       value = field->field_value[0];
 
-      field_data = find_info_field_data (field->field_name);
-      if (field_data == NULL)
+      if (!empathy_contact_info_lookup_field (field->field_name,
+          NULL, &linkify))
         {
           DEBUG ("Unhandled ContactInfo field: %s", field->field_name);
           continue;
         }
 
       /* Add Title */
-      w = gtk_label_new (_(field_data->title));
+      title = empathy_contact_info_field_label (field->field_name,
+          field->parameters);
+      w = gtk_label_new (title);
+      g_free (title);
       gtk_grid_attach (GTK_GRID (priv->grid_details),
           w, 0, n_rows, 1, 1);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
@@ -304,7 +256,8 @@ details_update_show (EmpathyIndividualWidget *self,
 
       /* Add Value */
       w = gtk_label_new (value);
-      if (field_data->linkify == TRUE)
+
+      if (linkify == TRUE)
         {
           gchar *markup;
 
