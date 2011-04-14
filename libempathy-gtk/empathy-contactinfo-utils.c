@@ -72,16 +72,32 @@ presence_hack (GStrv values)
   return g_markup_escape_text (values[0], -1);
 }
 
-typedef gchar * (* FieldFormatFunc) (GStrv);
-
 typedef struct
 {
   const gchar *field_name;
   const gchar *title;
-  FieldFormatFunc format;
+  EmpathyContactInfoFormatFunc format;
 } InfoFieldData;
 
-static InfoFieldData info_field_data[] =
+/* keep this syncronised with info_field_data below */
+static const char *info_field_names[] =
+{
+  "fn",
+  "tel",
+  "email",
+  "url",
+  "bday",
+
+  "x-idle-time",
+  "x-irc-server",
+  "x-host",
+
+  "x-presence-status-message",
+
+  NULL
+};
+
+static InfoFieldData info_field_data[G_N_ELEMENTS (info_field_names)] =
 {
   { "fn",    N_("Full name"),      NULL },
   { "tel",   N_("Phone number"),   NULL },
@@ -120,6 +136,15 @@ static InfoParameterData info_parameter_data[] =
   { "parcel", N_("parcel") },
   { NULL, NULL }
 };
+
+const char **
+empathy_contact_info_get_field_names (guint *nnames)
+{
+  if (nnames != NULL)
+    *nnames = G_N_ELEMENTS (info_field_names) - 1;
+
+  return info_field_names;
+}
 
 gboolean
 empathy_contact_info_lookup_field (const gchar *field_name,

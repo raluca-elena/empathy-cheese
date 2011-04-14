@@ -45,6 +45,7 @@
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-contact-widget.h"
+#include "empathy-contactinfo-utils.h"
 #include "empathy-account-chooser.h"
 #include "empathy-avatar-chooser.h"
 #include "empathy-avatar-image.h"
@@ -284,118 +285,6 @@ contact_widget_bday_changed_cb (GtkCalendar *calendar,
 
 static void contact_widget_details_notify_cb (EmpathyContactWidget *information);
 
-typedef gchar * (* FieldFormatFunc) (GStrv);
-
-typedef struct
-{
-  const gchar *field_name;
-  const gchar *title;
-  FieldFormatFunc format;
-} InfoFieldData;
-
-static gchar *
-linkify_first_value (GStrv values)
-{
-  return empathy_add_link_markup (values[0]);
-}
-
-static gchar *
-format_idle_time (GStrv values)
-{
-  const gchar *value = values[0];
-  int duration = strtol (value, NULL, 10);
-
-  if (duration <= 0)
-    return NULL;
-
-  return empathy_duration_to_string (duration);
-}
-
-static gchar *
-format_server (GStrv values)
-{
-  g_assert (values[0] != NULL);
-
-  if (values[1] == NULL)
-    return g_markup_escape_text (values[0], -1);
-  else
-    return g_markup_printf_escaped ("%s (%s)", values[0], values[1]);
-}
-
-static gchar *
-presence_hack (GStrv values)
-{
-  if (tp_str_empty (values[0]))
-    return NULL;
-
-  return g_markup_escape_text (values[0], -1);
-}
-
-static InfoFieldData info_field_datas[] =
-{
-  { "fn",    N_("Full name:"),      NULL },
-  { "tel",   N_("Phone number:"),   NULL },
-  { "email", N_("E-mail address:"), linkify_first_value },
-  { "url",   N_("Website:"),        linkify_first_value },
-  { "bday",  N_("Birthday:"),       NULL },
-
-  /* Note to translators: this is the caption for a string of the form "5
-   * minutes ago", and refers to the time since the contact last interacted
-   * with their IM client.
-   */
-  { "x-idle-time", N_("Last seen:"), format_idle_time },
-  { "x-irc-server", N_("Server:"), format_server },
-  { "x-host", N_("Connected from:"), format_server },
-
-  /* FIXME: once Idle implements SimplePresence using this information, we can
-   * and should bin this.
-   */
-  { "x-presence-status-message", N_("Away message:"), presence_hack },
-
-  { NULL, NULL }
-};
-
-static InfoFieldData *
-find_info_field_data (const gchar *field_name)
-{
-  guint i;
-
-  for (i = 0; info_field_datas[i].field_name != NULL; i++)
-    {
-      if (!tp_strdiff (info_field_datas[i].field_name, field_name))
-        return info_field_datas + i;
-    }
-  return NULL;
-}
-
-static gint
-contact_info_field_name_cmp (const gchar *name1,
-    const gchar *name2)
-{
-  guint i;
-
-  if (!tp_strdiff (name1, name2))
-    return 0;
-
-  /* We use the order of info_field_datas */
-  for (i = 0; info_field_datas[i].field_name != NULL; i++)
-    {
-      if (!tp_strdiff (info_field_datas[i].field_name, name1))
-        return -1;
-      if (!tp_strdiff (info_field_datas[i].field_name, name2))
-        return +1;
-    }
-
-  return g_strcmp0 (name1, name2);
-}
-
-static gint
-contact_info_field_cmp (TpContactInfoField *field1,
-    TpContactInfoField *field2)
-{
-  return contact_info_field_name_cmp (field1->field_name, field2->field_name);
-}
-
 static gboolean
 field_name_in_field_list (GList *list,
     const gchar *name)
@@ -438,6 +327,7 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
   GList *specs, *l;
   guint n_rows = 0;
   GList *info;
+  const char **field_names = empathy_contact_info_get_field_names (NULL);
   guint i;
 
   g_assert (information->details_to_set == NULL);
@@ -465,18 +355,18 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
     }
 
   /* Add fields which are supported but not in the vCard */
-  for (i = 0; info_field_datas[i].field_name != NULL; i++)
+  for (i = 0; field_names[i] != NULL; i++)
     {
       TpContactInfoFieldSpec *spec;
       TpContactInfoField *field;
 
       /* Check if the field was in the vCard */
       if (field_name_in_field_list (information->details_to_set,
-            info_field_datas[i].field_name))
+            field_names[i]))
         continue;
 
       /* Check if the CM supports the field */
-      spec = get_spec_from_list (specs, info_field_datas[i].field_name);
+      spec = get_spec_from_list (specs, field_names[i]);
       if (spec == NULL)
         continue;
 
@@ -489,17 +379,19 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
 
   /* Add widgets for supported fields */
   information->details_to_set = g_list_sort (information->details_to_set,
-      (GCompareFunc) contact_info_field_cmp);
+      (GCompareFunc) empathy_contact_info_field_spec_cmp);
 
   for (l = information->details_to_set; l != NULL; l= g_list_next (l))
     {
       TpContactInfoField *field = l->data;
-      InfoFieldData *field_data;
       GtkWidget *w;
       TpContactInfoFieldSpec *spec;
+      gboolean has_field;
+      char *title;
 
-      field_data = find_info_field_data (field->field_name);
-      if (field_data == NULL)
+      has_field = empathy_contact_info_lookup_field (field->field_name,
+          NULL, NULL);
+      if (!has_field)
         {
           /* Empathy doesn't display this field so we can't change it.
            * But we put it in the details_to_set list so it won't be erased
@@ -521,7 +413,11 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
         }
 
       /* Add Title */
-      w = gtk_label_new (_(field_data->title));
+      title = empathy_contact_info_field_label (field->field_name,
+          field->parameters);
+      w = gtk_label_new (title);
+      g_free (title);
+
       gtk_table_attach (GTK_TABLE (information->table_details),
           w, 0, 1, n_rows, n_rows + 1, GTK_FILL, 0, 0, 0);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
@@ -651,14 +547,14 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
   contact = empathy_contact_get_tp_contact (information->contact);
   info = tp_contact_get_contact_info (contact);
-  info = g_list_sort (info, (GCompareFunc) contact_info_field_cmp);
+  info = g_list_sort (info, (GCompareFunc) empathy_contact_info_field_cmp);
   for (l = info; l != NULL; l = l->next)
     {
       TpContactInfoField *field = l->data;
-      InfoFieldData *field_data;
       const gchar *value;
-      gchar *markup = NULL;
+      gchar *markup = NULL, *title;
       GtkWidget *w;
+      EmpathyContactInfoFormatFunc format;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
         continue;
@@ -671,16 +567,15 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
           continue;
         }
 
-      field_data = find_info_field_data (field->field_name);
-      if (field_data == NULL)
+      if (!empathy_contact_info_lookup_field (field->field_name, NULL, &format))
         {
           DEBUG ("Unhandled ContactInfo field: %s", field->field_name);
           continue;
         }
 
-      if (field_data->format != NULL)
+      if (format != NULL)
         {
-          markup = field_data->format (field->field_value);
+          markup = format (field->field_value);
 
           if (markup == NULL)
             {
@@ -691,7 +586,11 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
         }
 
       /* Add Title */
-      w = gtk_label_new (_(field_data->title));
+      title = empathy_contact_info_field_label (field->field_name,
+          field->parameters);
+      w = gtk_label_new (title);
+      g_free (title);
+
       gtk_table_attach (GTK_TABLE (information->table_details),
           w, 0, 1, n_rows, n_rows + 1, GTK_FILL, 0, 0, 0);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
@@ -715,6 +614,7 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
       n_rows++;
     }
+
   g_list_free (info);
 
   if (channels->len > 0)
