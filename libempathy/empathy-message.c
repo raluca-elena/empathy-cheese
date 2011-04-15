@@ -269,14 +269,6 @@ message_set_property (GObject      *object,
 }
 
 EmpathyMessage *
-empathy_message_new (const gchar *body)
-{
-	return g_object_new (EMPATHY_TYPE_MESSAGE,
-			     "body", body,
-			     NULL);
-}
-
-EmpathyMessage *
 empathy_message_from_tpl_log_event (TplEvent *logevent)
 {
 	EmpathyMessage *retval = NULL;
@@ -321,7 +313,13 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	receiver = tpl_event_get_receiver (logevent);
 	sender = tpl_event_get_sender (logevent);
 
-	retval = empathy_message_new (body);
+	retval = g_object_new (EMPATHY_TYPE_MESSAGE,
+		"type", tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)),
+		"body", body,
+		"is-backlog", TRUE,
+		"timestamp", tpl_event_get_timestamp (logevent),
+		NULL);
+
 	if (receiver != NULL) {
 		contact = empathy_contact_from_tpl_contact (account, receiver);
 		empathy_message_set_receiver (retval, contact);
@@ -333,12 +331,6 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		empathy_message_set_sender (retval, contact);
 		g_object_unref (contact);
 	}
-
-	empathy_message_set_timestamp (retval,
-			tpl_event_get_timestamp (logevent));
-        empathy_message_set_tptype (retval,
-            tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)));
-	empathy_message_set_is_backlog (retval, TRUE);
 
 	g_free (body);
 

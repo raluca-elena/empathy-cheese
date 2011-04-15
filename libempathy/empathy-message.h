@@ -55,7 +55,6 @@ struct _EmpathyMessageClass {
 
 GType                    empathy_message_get_type          (void) G_GNUC_CONST;
 
-EmpathyMessage *         empathy_message_new               (const gchar              *body);
 EmpathyMessage *         empathy_message_from_tpl_log_event (TplEvent                *logevent);
 EmpathyMessage *         empathy_message_new_from_tp_message (TpMessage *tp_msg,
 							      gboolean incoming);
