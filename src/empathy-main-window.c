@@ -950,6 +950,50 @@ main_window_setup_balance_create_action (EmpathyMainWindow *window,
 	return action;
 }
 
+static GtkWidget *
+main_window_setup_balance_create_widget (EmpathyMainWindow *window,
+					 GtkAction         *action)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GtkWidget *hbox, *image, *label, *button;
+
+	if (action == NULL)
+		return NULL;
+
+	hbox = gtk_hbox_new (FALSE, 6);
+
+	image = gtk_image_new ();
+	gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, TRUE, 0);
+	gtk_widget_show (image);
+
+	label = gtk_label_new ("");
+	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
+	gtk_widget_show (label);
+
+	button = gtk_button_new_with_label (_("Top Up..."));
+	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+	gtk_widget_show (button);
+
+	gtk_box_pack_start (GTK_BOX (priv->balance_vbox), hbox, FALSE, TRUE, 0);
+	gtk_widget_show_all (hbox);
+
+	/* bind the properties from the action to the widgets -- I could have
+	 * written a widget that implemented GtkActivatable, but effort */
+	g_object_bind_property (action, "label", label, "label",
+		G_BINDING_SYNC_CREATE);
+	g_object_bind_property (action, "icon-name", image, "icon-name",
+		G_BINDING_SYNC_CREATE);
+	g_signal_connect_swapped (button, "clicked",
+		G_CALLBACK (gtk_action_activate), action);
+
+	/* tie the lifetime of the widget to the lifetime of the action */
+	g_object_weak_ref (G_OBJECT (action),
+		(GWeakNotify) gtk_widget_destroy, hbox);
+
+	return hbox;
+}
+
 static void
 main_window_setup_balance_conn_ready (GObject      *conn,
 				      GAsyncResult *result,
@@ -958,6 +1002,7 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 	EmpathyMainWindow *window = user_data;
 	TpAccount *account = g_object_get_data (conn, "account");
 	GtkAction *action;
+	GtkWidget *widget;
 	GError *error = NULL;
 
 	if (!tp_proxy_prepare_finish (conn, result, &error)) {
@@ -977,6 +1022,9 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 
 	/* create the action */
 	action = main_window_setup_balance_create_action (window, account);
+
+	/* create the display widget */
+	widget = main_window_setup_balance_create_widget (window, action);
 
 	/* request the current balance and monitor for any changes */
 	tp_cli_dbus_properties_call_get_all (conn, -1,
@@ -2026,7 +2074,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	filename = empathy_file_lookup ("empathy-main-window.ui", "src");
 	gui = empathy_builder_get_file (filename,
 				       "main_vbox", &priv->main_vbox,
-				       "balance_box", &priv->balance_vbox,
+				       "balance_vbox", &priv->balance_vbox,
 				       "errors_vbox", &priv->errors_vbox,
 				       "auth_vbox", &priv->auth_vbox,
 				       "ui_manager", &priv->ui_manager,
@@ -2203,6 +2251,9 @@ empathy_main_window_init (EmpathyMainWindow *window)
 
 	/* Set window size. */
 	empathy_geometry_bind (GTK_WINDOW (window), GEOMETRY_NAME);
+
+	/* FIXME: bind balance_vbox to action */
+	gtk_widget_show (priv->balance_vbox);
 
 	/* Enable event handling */
 	priv->call_observer = empathy_call_observer_dup_singleton ();
