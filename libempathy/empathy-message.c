@@ -93,28 +93,30 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							    TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
 							    TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY,
 							    TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
-							    G_PARAM_READWRITE));
+							    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							    G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_SENDER,
 					 g_param_spec_object ("sender",
 							      "Message Sender",
 							      "The sender of the message",
 							      EMPATHY_TYPE_CONTACT,
-							      G_PARAM_READWRITE));
+							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 					 PROP_RECEIVER,
 					 g_param_spec_object ("receiver",
 							      "Message Receiver",
 							      "The receiver of the message",
 							      EMPATHY_TYPE_CONTACT,
-							      G_PARAM_READWRITE));
+							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 					 PROP_BODY,
 					 g_param_spec_string ("body",
 							      "Message Body",
 							      "The content of the message",
 							      NULL,
-							      G_PARAM_READWRITE));
+							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							      G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_TIMESTAMP,
 					 g_param_spec_long ("timestamp",
@@ -123,14 +125,16 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							    -1,
 							    G_MAXLONG,
 							    -1,
-							    G_PARAM_READWRITE));
+							    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							    G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_IS_BACKLOG,
 					 g_param_spec_boolean ("is-backlog",
 							       "History message",
 							       "If the message belongs to history",
 							       FALSE,
-							       G_PARAM_READWRITE));
+							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							       G_PARAM_CONSTRUCT_ONLY));
 
 
 	g_object_class_install_property (object_class,
@@ -139,7 +143,8 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							       "Incoming",
 							       "If this is an incoming (as opposed to sent) message",
 							       FALSE,
-							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							       G_PARAM_CONSTRUCT_ONLY));
 
 	g_object_class_install_property (object_class,
 					 PROP_FLAGS,
@@ -147,7 +152,8 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							       "Flags",
 							       "The TpChannelTextMessageFlags of this message",
 							       0, G_MAXUINT, 0,
-							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							       G_PARAM_CONSTRUCT_ONLY));
 
 	g_type_class_add_private (object_class, sizeof (EmpathyMessagePriv));
 
@@ -235,8 +241,7 @@ message_set_property (GObject      *object,
 
 	switch (param_id) {
 	case PROP_TYPE:
-		empathy_message_set_tptype (EMPATHY_MESSAGE (object),
-					    g_value_get_uint (value));
+		priv->type = g_value_get_uint (value);
 		break;
 	case PROP_SENDER:
 		empathy_message_set_sender (EMPATHY_MESSAGE (object),
@@ -247,11 +252,13 @@ message_set_property (GObject      *object,
 					     EMPATHY_CONTACT (g_value_get_object (value)));
 		break;
 	case PROP_BODY:
-		empathy_message_set_body (EMPATHY_MESSAGE (object),
-					 g_value_get_string (value));
+		g_assert (priv->body == NULL); /* construct only */
+		priv->body = g_value_dup_string (value);
 		break;
 	case PROP_TIMESTAMP:
 		priv->timestamp = g_value_get_long (value);
+		if (priv->timestamp <= 0)
+			priv->timestamp = empathy_time_get_current ();
 		break;
 	case PROP_IS_BACKLOG:
 		priv->is_backlog = g_value_get_boolean (value);
@@ -350,21 +357,6 @@ empathy_message_get_tptype (EmpathyMessage *message)
 	return priv->type;
 }
 
-void
-empathy_message_set_tptype (EmpathyMessage           *message,
-			    TpChannelTextMessageType  type)
-{
-	EmpathyMessagePriv *priv;
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
-
-	priv = GET_PRIV (message);
-
-	priv->type = type;
-
-	g_object_notify (G_OBJECT (message), "type");
-}
-
 EmpathyContact *
 empathy_message_get_sender (EmpathyMessage *message)
 {
@@ -443,25 +435,6 @@ empathy_message_get_body (EmpathyMessage *message)
 	return priv->body;
 }
 
-void
-empathy_message_set_body (EmpathyMessage *message,
-			  const gchar    *body)
-{
-	EmpathyMessagePriv       *priv = GET_PRIV (message);
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
-
-	g_free (priv->body);
-
-	if (body) {
-		priv->body = g_strdup (body);
-	} else {
-		priv->body = NULL;
-	}
-
-	g_object_notify (G_OBJECT (message), "body");
-}
-
 time_t
 empathy_message_get_timestamp (EmpathyMessage *message)
 {
@@ -474,26 +447,6 @@ empathy_message_get_timestamp (EmpathyMessage *message)
 	return priv->timestamp;
 }
 
-void
-empathy_message_set_timestamp (EmpathyMessage *message,
-			       time_t          timestamp)
-{
-	EmpathyMessagePriv *priv;
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
-	g_return_if_fail (timestamp >= -1);
-
-	priv = GET_PRIV (message);
-
-	if (timestamp <= 0) {
-		priv->timestamp = empathy_time_get_current ();
-	} else {
-		priv->timestamp = timestamp;
-	}
-
-	g_object_notify (G_OBJECT (message), "timestamp");
-}
-
 gboolean
 empathy_message_is_backlog (EmpathyMessage *message)
 {
@@ -504,21 +457,6 @@ empathy_message_is_backlog (EmpathyMessage *message)
 	priv = GET_PRIV (message);
 
 	return priv->is_backlog;
-}
-
-void
-empathy_message_set_is_backlog (EmpathyMessage *message,
-				gboolean is_backlog)
-{
-	EmpathyMessagePriv *priv;
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
-
-	priv = GET_PRIV (message);
-
-	priv->is_backlog = is_backlog;
-
-	g_object_notify (G_OBJECT (message), "is-backlog");
 }
 
 #define IS_SEPARATOR(ch) (ch == ' ' || ch == ',' || ch == '.' || ch == ':')
@@ -637,28 +575,6 @@ empathy_message_get_id (EmpathyMessage *message)
 	return priv->id;
 }
 
-void
-empathy_message_set_id (EmpathyMessage *message, guint id)
-{
-	EmpathyMessagePriv *priv = GET_PRIV (message);
-
-	priv->id = id;
-}
-
-void
-empathy_message_set_incoming (EmpathyMessage *message, gboolean incoming)
-{
-	EmpathyMessagePriv *priv;
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
-
-	priv = GET_PRIV (message);
-
-	priv->incoming = incoming;
-
-	g_object_notify (G_OBJECT (message), "incoming");
-}
-
 gboolean
 empathy_message_is_incoming (EmpathyMessage *message)
 {
@@ -699,26 +615,12 @@ empathy_message_get_flags (EmpathyMessage *self)
 	return priv->flags;
 }
 
-void
-empathy_message_set_flags        (EmpathyMessage           *self,
-				TpChannelTextMessageFlags flags)
-{
-	EmpathyMessagePriv *priv;
-
-	g_return_if_fail (EMPATHY_IS_MESSAGE (self));
-
-	priv = GET_PRIV (self);
-
-	priv->flags = flags;
-
-	g_object_notify (G_OBJECT (self), "flags");
-}
-
 EmpathyMessage *
 empathy_message_new_from_tp_message (TpMessage *tp_msg,
 				     gboolean incoming)
 {
 	EmpathyMessage *message;
+	EmpathyMessagePriv *priv;
 	gchar *body;
 	TpChannelTextMessageFlags flags;
 	guint id;
@@ -741,7 +643,8 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	id = tp_asv_get_uint32 (tp_message_peek (tp_msg, 0),
 		"pending-message-id", NULL);
 
-	empathy_message_set_id (message, id);
+	priv = GET_PRIV (message);
+	priv->id = id;
 
 	g_free (body);
 	return message;
