@@ -205,8 +205,17 @@ message_get_property (GObject    *object,
 	case PROP_BODY:
 		g_value_set_string (value, priv->body);
 		break;
+	case PROP_TIMESTAMP:
+		g_value_set_long (value, priv->timestamp);
+		break;
+	case PROP_IS_BACKLOG:
+		g_value_set_boolean (value, priv->is_backlog);
+		break;
 	case PROP_INCOMING:
 		g_value_set_boolean (value, priv->incoming);
+		break;
+	case PROP_FLAGS:
+		g_value_set_uint (value, priv->flags);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -241,8 +250,17 @@ message_set_property (GObject      *object,
 		empathy_message_set_body (EMPATHY_MESSAGE (object),
 					 g_value_get_string (value));
 		break;
+	case PROP_TIMESTAMP:
+		priv->timestamp = g_value_get_long (value);
+		break;
+	case PROP_IS_BACKLOG:
+		priv->is_backlog = g_value_get_boolean (value);
+		break;
 	case PROP_INCOMING:
 		priv->incoming = g_value_get_boolean (value);
+		break;
+	case PROP_FLAGS:
+		priv->flags = g_value_get_uint (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
