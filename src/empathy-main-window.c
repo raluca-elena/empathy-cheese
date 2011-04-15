@@ -146,6 +146,7 @@ struct _EmpathyMainWindowPriv {
 	GtkWidget              *edit_context_separator;
 
 	GtkActionGroup         *balance_action_group;
+	GtkAction              *view_balance_show_in_roster;
 	GtkWidget              *balance_vbox;
 
 	guint                   size_timeout_id;
@@ -957,9 +958,6 @@ main_window_setup_balance_create_widget (EmpathyMainWindow *window,
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	GtkWidget *hbox, *image, *label, *button;
 
-	if (action == NULL)
-		return NULL;
-
 	hbox = gtk_hbox_new (FALSE, 6);
 
 	image = gtk_image_new ();
@@ -1000,6 +998,7 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 				      gpointer      user_data)
 {
 	EmpathyMainWindow *window = user_data;
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	TpAccount *account = g_object_get_data (conn, "account");
 	GtkAction *action;
 	GtkWidget *widget;
@@ -1022,6 +1021,11 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 
 	/* create the action */
 	action = main_window_setup_balance_create_action (window, account);
+
+	if (action == NULL)
+		return;
+
+	gtk_action_set_visible (priv->view_balance_show_in_roster, TRUE);
 
 	/* create the display widget */
 	widget = main_window_setup_balance_create_widget (window, action);
@@ -1079,6 +1083,7 @@ main_window_connection_changed_cb (TpAccount  *account,
 		if (priv->balance_action_group != NULL) {
 			GtkAction *action;
 			char *name;
+			GList *a;
 
 			name = main_window_account_to_action_name (account);
 
@@ -1101,6 +1106,15 @@ main_window_connection_changed_cb (TpAccount  *account,
 			}
 
 			g_free (name);
+
+			a = gtk_action_group_list_actions (
+				priv->balance_action_group);
+
+			gtk_action_set_visible (
+				priv->view_balance_show_in_roster,
+				g_list_length (a) > 0);
+
+			g_list_free (a);
 		}
 	}
 
@@ -2092,6 +2106,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 				       "notebook", &priv->notebook,
 				       "no_entry_label", &priv->no_entry_label,
 				       "roster_scrolledwindow", &sw,
+				       "view_balance_show_in_roster", &priv->view_balance_show_in_roster,
 				       NULL);
 	g_free (filename);
 
@@ -2252,8 +2267,13 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	/* Set window size. */
 	empathy_geometry_bind (GTK_WINDOW (window), GEOMETRY_NAME);
 
-	/* FIXME: bind balance_vbox to action */
-	gtk_widget_show (priv->balance_vbox);
+	/* bind view_balance_show_in_roster */
+	g_settings_bind (priv->gsettings_ui, "show-balance-in-roster",
+		priv->view_balance_show_in_roster, "active",
+		G_SETTINGS_BIND_DEFAULT);
+	g_object_bind_property (priv->view_balance_show_in_roster, "active",
+		priv->balance_vbox, "visible",
+		G_BINDING_SYNC_CREATE);
 
 	/* Enable event handling */
 	priv->call_observer = empathy_call_observer_dup_singleton ();
