@@ -934,7 +934,7 @@ approve_channels (TpSimpleApprover *approver,
 
   channel_type = tp_channel_get_channel_type_id (channel);
 
-  if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_TEXT)
+  if (TP_IS_TEXT_CHANNEL (channel))
     {
       EmpathyTpChat *tp_chat;
 
