@@ -317,47 +317,47 @@ tp_chat_build_message (EmpathyTpChat *chat,
 }
 
 static void
-tp_chat_received_cb (TpChannel   *channel,
-		     guint        message_id,
-		     guint        timestamp,
-		     guint        from_handle,
-		     guint        message_type,
-		     guint        message_flags,
-		     const gchar *message_body,
-		     gpointer     user_data,
-		     GObject     *chat_)
+message_received_cb (TpTextChannel   *channel,
+		     TpMessage *message,
+		     EmpathyTpChat *chat)
 {
-	EmpathyTpChat *chat = EMPATHY_TP_CHAT (chat_);
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	guint message_id;
+	gchar *message_body;
+	TpContact *sender;
+	TpHandle from_handle;
+	TpChannelTextMessageFlags message_flags;
 
-	if (priv->channel == NULL)
-		return;
+	message_id = tp_asv_get_uint32 (tp_message_peek (message, 0),
+		"pending-message-id", NULL);
+
+	sender = tp_signalled_message_get_sender (message);
+	g_assert (sender != NULL);
+	from_handle = tp_contact_get_handle (sender);
+
+	message_body = tp_message_to_text (message, &message_flags);
 
 	DEBUG ("Message received from channel %s: %s",
 		tp_proxy_get_object_path (channel), message_body);
 
-	if (message_flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT &&
-	    !tp_strdiff (message_body, "")) {
-		GArray *ids;
-
+	if (message_body == NULL) {
 		DEBUG ("Empty message with NonTextContent, ignoring and acking.");
 
-		ids = g_array_sized_new (FALSE, FALSE, sizeof (guint), 1);
-		g_array_append_val (ids, message_id);
-		acknowledge_messages (chat, ids);
-		g_array_free (ids, TRUE);
-
+		tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+			message, NULL, NULL);
 		return;
 	}
 
 	tp_chat_build_message (chat,
 			       TRUE,
 			       message_id,
-			       message_type,
-			       timestamp,
+			       tp_message_get_message_type (message),
+			       tp_message_get_received_timestamp (message),
 			       from_handle,
 			       message_body,
 			       message_flags);
+
+	g_free (message_body);
 }
 
 static void
@@ -843,10 +843,8 @@ check_almost_ready (EmpathyTpChat *chat)
 	g_assert (tp_proxy_is_prepared (priv->channel,
 		TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES));
 
-	tp_cli_channel_type_text_connect_to_received (priv->channel,
-						      tp_chat_received_cb,
-						      NULL, NULL,
-						      G_OBJECT (chat), NULL);
+	tp_g_signal_connect_object (priv->channel, "message-received",
+		G_CALLBACK (message_received_cb), chat, 0);
 
 	list_pending_messages (chat);
 
