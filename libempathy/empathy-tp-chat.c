@@ -361,29 +361,28 @@ message_received_cb (TpTextChannel   *channel,
 }
 
 static void
-tp_chat_sent_cb (TpChannel   *channel,
-		 guint        timestamp,
-		 guint        message_type,
-		 const gchar *message_body,
-		 gpointer     user_data,
-		 GObject     *chat_)
+message_sent_cb (TpTextChannel   *channel,
+		 TpMessage *message,
+		 TpMessageSendingFlags flags,
+		 gchar              *token,
+		 EmpathyTpChat      *chat)
 {
-	EmpathyTpChat *chat = EMPATHY_TP_CHAT (chat_);
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	gchar *message_body;
 
-	if (priv->channel == NULL)
-		return;
+	message_body = tp_message_to_text (message, NULL);
 
 	DEBUG ("Message sent: %s", message_body);
 
 	tp_chat_build_message (chat,
 			       FALSE,
 			       0,
-			       message_type,
-			       timestamp,
+			       tp_message_get_message_type (message),
+			       tp_message_get_received_timestamp (message),
 			       0,
 			       message_body,
 			       0);
+
+	g_free (message_body);
 }
 
 static void
@@ -848,10 +847,9 @@ check_almost_ready (EmpathyTpChat *chat)
 
 	list_pending_messages (chat);
 
-	tp_cli_channel_type_text_connect_to_sent (priv->channel,
-						  tp_chat_sent_cb,
-						  NULL, NULL,
-						  G_OBJECT (chat), NULL);
+	tp_g_signal_connect_object (priv->channel, "message-sent",
+		G_CALLBACK (message_sent_cb), chat, 0);
+
 	tp_cli_channel_type_text_connect_to_send_error (priv->channel,
 							tp_chat_send_error_cb,
 							NULL, NULL,
