@@ -194,16 +194,14 @@ contact_list_store_chat_state_changed_cb (TpChannel *self,
 
 	contacts = empathy_contact_list_get_members (priv->list);
 
-	/* Find the contact in the list. After that l is the list elem or NULL */
 	for (l = contacts; l != NULL; l = l->next) {
-		if (empathy_contact_get_handle (EMPATHY_CONTACT (l->data)) ==
-		    contact_handle) {
+		EmpathyContact *contact = EMPATHY_CONTACT (l->data);
+
+		if (empathy_contact_get_handle (contact) == contact_handle) {
+			contact_list_store_contact_update (store, contact);
 			break;
 		}
 	}
-
-	if (l != NULL)
-		contact_list_store_contact_update (store, l->data);
 
 	g_list_foreach (contacts, (GFunc) g_object_unref, NULL);
 	g_list_free (contacts);
