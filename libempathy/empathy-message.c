@@ -721,3 +721,36 @@ empathy_message_set_flags        (EmpathyMessage           *self,
 
 	g_object_notify (G_OBJECT (self), "flags");
 }
+
+EmpathyMessage *
+empathy_message_new_from_tp_message (TpMessage *tp_msg,
+				     gboolean incoming)
+{
+	EmpathyMessage *message;
+	gchar *body;
+	TpChannelTextMessageFlags flags;
+	guint id;
+
+	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
+
+	body = tp_message_to_text (tp_msg, &flags);
+
+	message = g_object_new (EMPATHY_TYPE_MESSAGE,
+		"body", body,
+		"type", tp_message_get_message_type (tp_msg),
+		"timestamp", tp_message_get_received_timestamp (tp_msg),
+		"flags", flags,
+		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
+		"incoming", incoming,
+		NULL);
+
+	/* FIXME: this is pretty low level, ideally we shouldn't have to use the
+	 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
+	id = tp_asv_get_uint32 (tp_message_peek (tp_msg, 0),
+		"pending-message-id", NULL);
+
+	empathy_message_set_id (message, id);
+
+	g_free (body);
+	return message;
+}

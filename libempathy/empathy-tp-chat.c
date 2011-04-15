@@ -279,38 +279,30 @@ tp_chat_got_sender_cb (TpConnection            *connection,
 
 static void
 tp_chat_build_message (EmpathyTpChat *chat,
-		       gboolean       incoming,
-		       guint          id,
-		       guint          type,
-		       guint          timestamp,
-		       guint          from_handle,
-		       const gchar   *message_body,
-		       TpChannelTextMessageFlags flags)
+		       TpMessage     *msg,
+		       gboolean       incoming)
 {
 	EmpathyTpChatPriv *priv;
 	EmpathyMessage    *message;
+	TpContact *sender;
 
 	priv = GET_PRIV (chat);
 
-	message = empathy_message_new (message_body);
-	empathy_message_set_tptype (message, type);
+	message = empathy_message_new_from_tp_message (msg, incoming);
+	/* FIXME: this is actually a lie for incoming messages. */
 	empathy_message_set_receiver (message, priv->user);
-	empathy_message_set_timestamp (message, timestamp);
-	empathy_message_set_id (message, id);
-	empathy_message_set_incoming (message, incoming);
-	empathy_message_set_flags (message, flags);
-
-	if (flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK)
-		empathy_message_set_is_backlog (message, TRUE);
 
 	g_queue_push_tail (priv->messages_queue, message);
 
-	if (from_handle == 0) {
+	sender = tp_signalled_message_get_sender (msg);
+	g_assert (sender != NULL);
+
+	if (tp_contact_get_handle (sender) == 0) {
 		empathy_message_set_sender (message, priv->user);
 		tp_chat_emit_queued_messages (chat);
 	} else {
 		empathy_tp_contact_factory_get_from_handle (priv->connection,
-			from_handle,
+			tp_contact_get_handle (sender),
 			tp_chat_got_sender_cb,
 			message, NULL, G_OBJECT (chat));
 	}
@@ -322,20 +314,9 @@ message_received_cb (TpTextChannel   *channel,
 		     EmpathyTpChat *chat)
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-	guint message_id;
 	gchar *message_body;
-	TpContact *sender;
-	TpHandle from_handle;
-	TpChannelTextMessageFlags message_flags;
 
-	message_id = tp_asv_get_uint32 (tp_message_peek (message, 0),
-		"pending-message-id", NULL);
-
-	sender = tp_signalled_message_get_sender (message);
-	g_assert (sender != NULL);
-	from_handle = tp_contact_get_handle (sender);
-
-	message_body = tp_message_to_text (message, &message_flags);
+	message_body = tp_message_to_text (message, NULL);
 
 	DEBUG ("Message received from channel %s: %s",
 		tp_proxy_get_object_path (channel), message_body);
@@ -348,14 +329,7 @@ message_received_cb (TpTextChannel   *channel,
 		return;
 	}
 
-	tp_chat_build_message (chat,
-			       TRUE,
-			       message_id,
-			       tp_message_get_message_type (message),
-			       tp_message_get_received_timestamp (message),
-			       from_handle,
-			       message_body,
-			       message_flags);
+	tp_chat_build_message (chat, message, TRUE);
 
 	g_free (message_body);
 }
@@ -373,14 +347,7 @@ message_sent_cb (TpTextChannel   *channel,
 
 	DEBUG ("Message sent: %s", message_body);
 
-	tp_chat_build_message (chat,
-			       FALSE,
-			       0,
-			       tp_message_get_message_type (message),
-			       tp_message_get_received_timestamp (message),
-			       0,
-			       message_body,
-			       0);
+	tp_chat_build_message (chat, message, FALSE);
 
 	g_free (message_body);
 }
@@ -475,21 +442,8 @@ list_pending_messages (EmpathyTpChat *self)
 	for (l = messages; l != NULL; l = g_list_next (l)) {
 		TpMessage *message = l->data;
 		gchar          *message_body;
-		guint           message_id;
-		guint           from_handle;
-		guint           message_flags;
-		TpContact      *sender;
 
-		/* FIXME: this is pretty low level, ideally we shouldn't have to use the
-		 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
-		message_id = tp_asv_get_uint32 (tp_message_peek (message, 0),
-			"pending-message-id", NULL);
-
-		sender = tp_signalled_message_get_sender (message);
-		g_assert (sender != NULL);
-		from_handle = tp_contact_get_handle (sender);
-
-		message_body = tp_message_to_text (message, &message_flags);
+		message_body = tp_message_to_text (message, NULL);
 
 		DEBUG ("Message pending: %s", message_body);
 
@@ -501,14 +455,7 @@ list_pending_messages (EmpathyTpChat *self)
 			continue;
 		}
 
-		tp_chat_build_message (self,
-				       TRUE,
-				       message_id,
-				       tp_message_get_message_type (message),
-				       tp_message_get_received_timestamp (message),
-				       from_handle,
-				       message_body,
-				       message_flags);
+		tp_chat_build_message (self, message, TRUE);
 
 		g_free (message_body);
 	}
