@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include <string.h>
+#include <math.h>
 #include <time.h>
 #include <sys/types.h>
 
@@ -957,3 +958,76 @@ empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert)
 
   return NULL;
 }
+
+char *
+empathy_format_currency (int         amount,
+			 guint       scale,
+			 const char *currency)
+{
+#define MINUS "\342\210\222"
+#define EURO "\342\202\254"
+#define YEN "\302\245"
+#define POUND "\302\243"
+
+	/* localised representations of currency */
+	/* FIXME: check these */
+	static const struct {
+		const char *currency;
+		const char *positive;
+		const char *negative;
+		const char *decimal;
+	} currencies[] = {
+		{ "EUR", EURO "%s",  MINUS EURO "%s",  "." },
+		{ "USD", "$%s",      MINUS "$%s",      "." },
+		{ "JPY", YEN "%s"    MINUS YEN "%s",   "." },
+		{ "GBP", POUND "%s", MINUS POUND "%s", "." },
+		// { "PLN", "" },
+		// { "BRL", "" },
+		// { "SEK", "" },
+		// { "DKK", "" },
+		// { "HKD", "" },
+		// { "CHF", "" },
+		{ "NOK", "%s kr",    MINUS "%s kr",    "." },
+		{ "CAD", "$%s",      MINUS "$%s",      "." },
+		// { "TWD", "" },
+		{ "AUD", "$%s",      MINUS "$%s",      "." },
+	};
+
+	const char *positive = "%s";
+	const char *negative = MINUS "%s";
+	const char *decimal = ".";
+	char *fmt_amount, *money;
+	guint i;
+
+	/* get the localised currency format */
+	for (i = 0; i < G_N_ELEMENTS (currencies); i++) {
+		if (!tp_strdiff (currency, currencies[i].currency)) {
+			positive = currencies[i].positive;
+			negative = currencies[i].negative;
+			decimal = currencies[i].decimal;
+			break;
+		}
+	}
+
+	/* format the amount using the scale */
+	if (scale == 0) {
+		/* no decimal point required */
+		fmt_amount = g_strdup_printf ("%d", amount);
+	} else {
+		/* don't use floating point arithmatic, it's noisy;
+		 * we take the absolute values, because we want the minus
+		 * sign to appear before the $ */
+		int divisor = pow (10, scale);
+		int dollars = abs (amount / divisor);
+		int cents = abs (amount % divisor);
+
+		fmt_amount = g_strdup_printf ("%d%s%0*d",
+			dollars, decimal, scale, cents);
+	}
+
+	money = g_strdup_printf (amount < 0 ? negative : positive, fmt_amount);
+	g_free (fmt_amount);
+
+	return money;
+}
+

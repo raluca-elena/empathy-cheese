@@ -117,6 +117,8 @@ gboolean empathy_folks_persona_is_interesting (FolksPersona *persona);
 
 gchar * empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert);
 
+char *empathy_format_currency (int amount, guint scale, const char *currency);
+
 /* Copied from wocky/wocky-utils.h */
 
 #define empathy_implement_finish_void(source, tag) \
