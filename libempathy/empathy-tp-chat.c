@@ -47,7 +47,6 @@ typedef struct {
 	EmpathyContact        *remote_contact;
 	GList                 *members;
 	TpChannel             *channel;
-	gboolean               listing_pending_messages;
 	/* Queue of messages not signalled yet */
 	GQueue                *messages_queue;
 	/* Queue of messages signalled but not acked yet */
@@ -334,10 +333,6 @@ tp_chat_received_cb (TpChannel   *channel,
 	if (priv->channel == NULL)
 		return;
 
-	if (priv->listing_pending_messages) {
-		return;
-	}
-
 	DEBUG ("Message received from channel %s: %s",
 		tp_proxy_get_object_path (channel), message_body);
 
@@ -468,75 +463,58 @@ tp_chat_state_changed_cb (TpChannel *channel,
 }
 
 static void
-tp_chat_list_pending_messages_cb (TpChannel       *channel,
-				  const GPtrArray *messages_list,
-				  const GError    *error,
-				  gpointer         user_data,
-				  GObject         *chat_)
+list_pending_messages (EmpathyTpChat *self)
 {
-	EmpathyTpChat     *chat = EMPATHY_TP_CHAT (chat_);
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-	guint              i;
-	GArray            *empty_non_text_content_ids = NULL;
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+	GList *messages, *l;
 
-	priv->listing_pending_messages = FALSE;
+	g_assert (priv->channel != NULL);
 
-	if (priv->channel == NULL)
-		return;
+	messages = tp_text_channel_get_pending_messages (
+		TP_TEXT_CHANNEL (priv->channel));
 
-	if (error) {
-		DEBUG ("Error listing pending messages: %s", error->message);
-		return;
-	}
-
-	for (i = 0; i < messages_list->len; i++) {
-		GValueArray    *message_struct;
-		const gchar    *message_body;
+	for (l = messages; l != NULL; l = g_list_next (l)) {
+		TpMessage *message = l->data;
+		gchar          *message_body;
 		guint           message_id;
-		guint           timestamp;
 		guint           from_handle;
-		guint           message_type;
 		guint           message_flags;
+		TpContact      *sender;
 
-		message_struct = g_ptr_array_index (messages_list, i);
+		/* FIXME: this is pretty low level, ideally we shouldn't have to use the
+		 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
+		message_id = tp_asv_get_uint32 (tp_message_peek (message, 0),
+			"pending-message-id", NULL);
 
-		message_id = g_value_get_uint (g_value_array_get_nth (message_struct, 0));
-		timestamp = g_value_get_uint (g_value_array_get_nth (message_struct, 1));
-		from_handle = g_value_get_uint (g_value_array_get_nth (message_struct, 2));
-		message_type = g_value_get_uint (g_value_array_get_nth (message_struct, 3));
-		message_flags = g_value_get_uint (g_value_array_get_nth (message_struct, 4));
-		message_body = g_value_get_string (g_value_array_get_nth (message_struct, 5));
+		sender = tp_signalled_message_get_sender (message);
+		g_assert (sender != NULL);
+		from_handle = tp_contact_get_handle (sender);
+
+		message_body = tp_message_to_text (message, &message_flags);
 
 		DEBUG ("Message pending: %s", message_body);
 
-		if (message_flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT &&
-		    !tp_strdiff (message_body, "")) {
+		if (message_body == NULL) {
 			DEBUG ("Empty message with NonTextContent, ignoring and acking.");
 
-			if (empty_non_text_content_ids == NULL) {
-				empty_non_text_content_ids = g_array_new (FALSE, FALSE, sizeof (guint));
-			}
-
-			g_array_append_val (empty_non_text_content_ids, message_id);
+			tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+				message, NULL, NULL);
 			continue;
 		}
 
-		tp_chat_build_message (chat,
+		tp_chat_build_message (self,
 				       TRUE,
 				       message_id,
-				       message_type,
-				       timestamp,
+				       tp_message_get_message_type (message),
+				       tp_message_get_received_timestamp (message),
 				       from_handle,
 				       message_body,
 				       message_flags);
+
+		g_free (message_body);
 	}
 
-	if (empty_non_text_content_ids != NULL) {
-		acknowledge_messages (chat, empty_non_text_content_ids);
-		g_array_free (empty_non_text_content_ids, TRUE);
-	}
-
-	check_ready (chat);
+	g_list_free (messages);
 }
 
 static void
@@ -861,19 +839,16 @@ check_almost_ready (EmpathyTpChat *chat)
 	    priv->remote_contact == NULL)
 		return;
 
+	/* We use the default factory so this feature should have been prepared */
+	g_assert (tp_proxy_is_prepared (priv->channel,
+		TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES));
+
 	tp_cli_channel_type_text_connect_to_received (priv->channel,
 						      tp_chat_received_cb,
 						      NULL, NULL,
 						      G_OBJECT (chat), NULL);
-	priv->listing_pending_messages = TRUE;
 
-	/* TpChat will be ready once ListPendingMessages returned and all the messages
-	 * have been added to the pending messages queue. */
-	tp_cli_channel_type_text_call_list_pending_messages (priv->channel, -1,
-							     FALSE,
-							     tp_chat_list_pending_messages_cb,
-							     NULL, NULL,
-							     G_OBJECT (chat));
+	list_pending_messages (chat);
 
 	tp_cli_channel_type_text_connect_to_sent (priv->channel,
 						  tp_chat_sent_cb,
@@ -887,6 +862,8 @@ check_almost_ready (EmpathyTpChat *chat)
 									   tp_chat_state_changed_cb,
 									   NULL, NULL,
 									   G_OBJECT (chat), NULL);
+
+	check_ready (chat);
 }
 
 static void
