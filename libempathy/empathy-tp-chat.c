@@ -371,19 +371,46 @@ tp_chat_send_error_cb (TpChannel   *channel,
 	g_signal_emit (chat, signals[SEND_ERROR], 0, message_body, error_code);
 }
 
-static void
-tp_chat_send_cb (TpChannel    *proxy,
-		 const GError *error,
-		 gpointer      user_data,
-		 GObject      *chat)
+static TpChannelTextSendError
+error_to_text_send_error (GError *error)
 {
-	EmpathyMessage *message = EMPATHY_MESSAGE (user_data);
+	if (error->domain != TP_ERRORS)
+		return TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
 
-	if (error) {
+	switch (error->code) {
+		case TP_ERROR_OFFLINE:
+			return TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE;
+		case TP_ERROR_INVALID_HANDLE:
+			return TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT;
+		case TP_ERROR_PERMISSION_DENIED:
+			return TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED;
+		case TP_ERROR_NOT_IMPLEMENTED:
+			return TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED;
+	}
+
+	return TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
+}
+
+static void
+message_send_cb (GObject *source,
+		 GAsyncResult *result,
+		 gpointer      user_data)
+{
+	EmpathyTpChat *chat = user_data;
+	TpTextChannel *channel = (TpTextChannel *) source;
+	GError *error = NULL;
+
+	if (!tp_text_channel_send_message_finish (channel, result, NULL, &error)) {
 		DEBUG ("Error: %s", error->message);
+
+		/* FIXME: we should use the body of the message as first argument of the
+		 * signal but can't easily get it as we just get a user_data pointer. Once
+		 * we'll have rebased EmpathyTpChat on top of TpTextChannel we'll be able
+		 * to use the user_data pointer to pass the message and fix this. */
 		g_signal_emit (chat, signals[SEND_ERROR], 0,
-			       empathy_message_get_body (message),
-			       TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN);
+			       NULL, error_to_text_send_error (error));
+
+		g_error_free (error);
 	}
 }
 
@@ -1550,27 +1577,23 @@ empathy_tp_chat_is_ready (EmpathyTpChat *chat)
 
 void
 empathy_tp_chat_send (EmpathyTpChat *chat,
-		      EmpathyMessage *message)
+		      TpMessage *message)
 {
 	EmpathyTpChatPriv        *priv = GET_PRIV (chat);
-	const gchar              *message_body;
-	TpChannelTextMessageType  message_type;
+	gchar *message_body;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (chat));
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
+	g_return_if_fail (TP_IS_CLIENT_MESSAGE (message));
 	g_return_if_fail (priv->ready);
 
-	message_body = empathy_message_get_body (message);
-	message_type = empathy_message_get_tptype (message);
+	message_body = tp_message_to_text (message, NULL);
 
 	DEBUG ("Sending message: %s", message_body);
-	tp_cli_channel_type_text_call_send (priv->channel, -1,
-					    message_type,
-					    message_body,
-					    tp_chat_send_cb,
-					    g_object_ref (message),
-					    (GDestroyNotify) g_object_unref,
-					    G_OBJECT (chat));
+
+	tp_text_channel_send_message_async (TP_TEXT_CHANNEL (priv->channel),
+		message, 0, message_send_cb, chat);
+
+	g_free (message_body);
 }
 
 void
