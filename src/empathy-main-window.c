@@ -880,6 +880,7 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 	TpAccount *account = g_object_get_data (conn, "account");
 	GtkAction *action;
 	char *name, *ui;
+	guint merge_id;
 	GError *error = NULL;
 
 	if (!tp_proxy_prepare_finish (conn, result, &error)) {
@@ -932,9 +933,10 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 		"</ui>",
 		name);
 
-	/* FIXME: do we want the merge id, can use it to unmerge the UI */
-	gtk_ui_manager_add_ui_from_string (priv->ui_manager, ui, -1,
-		&error);
+	merge_id = gtk_ui_manager_add_ui_from_string (priv->ui_manager,
+		ui, -1, &error);
+	g_object_set_data (G_OBJECT (action),
+		"merge-id", GUINT_TO_POINTER (merge_id));
 
 	g_free (name);
 	g_free (ui);
@@ -997,7 +999,33 @@ main_window_connection_changed_cb (TpAccount  *account,
 		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (window),
 				    EMPATHY_SOUND_ACCOUNT_DISCONNECTED);
 
-		/* FIXME: remove balance */
+		/* remove balance action if required */
+		if (priv->balance_action_group != NULL) {
+			GtkAction *action;
+			char *name;
+
+			name = main_window_account_to_action_name (account);
+
+			action = gtk_action_group_get_action (
+				priv->balance_action_group, name);
+
+			if (action != NULL) {
+				guint merge_id;
+
+				DEBUG ("Removing action");
+
+				merge_id = GPOINTER_TO_UINT (g_object_get_data (
+					G_OBJECT (action),
+					"merge-id"));
+
+				gtk_ui_manager_remove_ui (priv->ui_manager,
+					merge_id);
+				gtk_action_group_remove_action (
+					priv->balance_action_group, action);
+			}
+
+			g_free (name);
+		}
 	}
 
 	if (current == TP_CONNECTION_STATUS_CONNECTED) {
