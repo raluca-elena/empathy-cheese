@@ -146,6 +146,7 @@ struct _EmpathyMainWindowPriv {
 	GtkWidget              *edit_context_separator;
 
 	GtkActionGroup         *balance_action_group;
+	GtkWidget              *balance_vbox;
 
 	guint                   size_timeout_id;
 
@@ -886,36 +887,18 @@ main_window_balance_changed_cb (TpConnection      *conn,
 		(GValueArray *) balance);
 }
 
-static void
-main_window_setup_balance_conn_ready (GObject      *conn,
-				      GAsyncResult *result,
-				      gpointer      user_data)
+static GtkAction *
+main_window_setup_balance_create_action (EmpathyMainWindow *window,
+					 TpAccount *account)
 {
-	EmpathyMainWindow *window = user_data;
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-	TpAccount *account = g_object_get_data (conn, "account");
 	GtkAction *action;
 	char *name, *ui;
 	guint merge_id;
 	GError *error = NULL;
 
-	if (!tp_proxy_prepare_finish (conn, result, &error)) {
-		DEBUG ("Failed to prepare connection: %s", error->message);
-
-		g_error_free (error);
-		return;
-	}
-
-	if (!tp_proxy_has_interface_by_id (conn,
-			TP_IFACE_QUARK_CONNECTION_INTERFACE_BALANCE)) {
-		return;
-	}
-
-	DEBUG ("Setting up balance for acct: %s",
-		tp_account_get_display_name (account));
-
+	/* create the action group if required */
 	if (priv->balance_action_group == NULL) {
-		/* create the action group */
 		priv->balance_action_group =
 			gtk_action_group_new ("balance-action-group");
 
@@ -951,19 +934,49 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 
 	merge_id = gtk_ui_manager_add_ui_from_string (priv->ui_manager,
 		ui, -1, &error);
+	if (error != NULL) {
+		DEBUG ("Failed to add balance UI for %s: %s",
+			tp_account_get_display_name (account),
+			error->message);
+		g_error_free (error);
+	}
+
 	g_object_set_data (G_OBJECT (action),
 		"merge-id", GUINT_TO_POINTER (merge_id));
 
 	g_free (name);
 	g_free (ui);
 
-	if (error != NULL) {
-		DEBUG ("Failed to add balance UI for %s: %s",
-			tp_account_get_display_name (account),
-			error->message);
+	return action;
+}
+
+static void
+main_window_setup_balance_conn_ready (GObject      *conn,
+				      GAsyncResult *result,
+				      gpointer      user_data)
+{
+	EmpathyMainWindow *window = user_data;
+	TpAccount *account = g_object_get_data (conn, "account");
+	GtkAction *action;
+	GError *error = NULL;
+
+	if (!tp_proxy_prepare_finish (conn, result, &error)) {
+		DEBUG ("Failed to prepare connection: %s", error->message);
+
 		g_error_free (error);
 		return;
 	}
+
+	if (!tp_proxy_has_interface_by_id (conn,
+			TP_IFACE_QUARK_CONNECTION_INTERFACE_BALANCE)) {
+		return;
+	}
+
+	DEBUG ("Setting up balance for acct: %s",
+		tp_account_get_display_name (account));
+
+	/* create the action */
+	action = main_window_setup_balance_create_action (window, account);
 
 	/* request the current balance and monitor for any changes */
 	tp_cli_dbus_properties_call_get_all (conn, -1,
@@ -2013,6 +2026,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	filename = empathy_file_lookup ("empathy-main-window.ui", "src");
 	gui = empathy_builder_get_file (filename,
 				       "main_vbox", &priv->main_vbox,
+				       "balance_box", &priv->balance_vbox,
 				       "errors_vbox", &priv->errors_vbox,
 				       "auth_vbox", &priv->auth_vbox,
 				       "ui_manager", &priv->ui_manager,
