@@ -1902,13 +1902,17 @@ reset_details_pane (EmpathyStreamedMediaWindow *self)
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
 
   /* translators: encoding video codec is unknown */
-  gtk_label_set_text (GTK_LABEL (priv->vcodec_encoding_label), _("Unknown"));
+  gtk_label_set_text (GTK_LABEL (priv->vcodec_encoding_label),
+      C_("encoding video codec", "Unknown"));
   /* translators: encoding audio codec is unknown */
-  gtk_label_set_text (GTK_LABEL (priv->acodec_encoding_label), _("Unknown"));
+  gtk_label_set_text (GTK_LABEL (priv->acodec_encoding_label),
+      C_("encoding audio codec", "Unknown"));
   /* translators: decoding video codec is unknown */
-  gtk_label_set_text (GTK_LABEL (priv->vcodec_decoding_label), _("Unknown"));
+  gtk_label_set_text (GTK_LABEL (priv->vcodec_decoding_label),
+      C_("decoding video codec", "Unknown"));
   /* translators: decoding audio codec is unknown */
-  gtk_label_set_text (GTK_LABEL (priv->acodec_decoding_label), _("Unknown"));
+  gtk_label_set_text (GTK_LABEL (priv->acodec_decoding_label),
+      C_("decoding audio codec", "Unknown"));
 }
 
 static gboolean

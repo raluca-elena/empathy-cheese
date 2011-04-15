@@ -2003,7 +2003,7 @@ add_enable_checkbox (EmpathyAccountWidget *self,
   priv->enabled_checkbox =
       /* translators: this is the label of a checkbox used to enable/disable IM
        * accounts */
-      gtk_check_button_new_with_mnemonic (_("_Enabled"));
+      gtk_check_button_new_with_mnemonic (C_("account", "_Enabled"));
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->enabled_checkbox),
       is_enabled);
