@@ -111,6 +111,7 @@ connectivity_nm_state_change_cb (NMClient *client,
 #if NM_CHECK_VERSION(0,8,992)
       || state == NM_STATE_DISCONNECTING
 #endif
+      || state == NM_STATE_ASLEEP
       || state == NM_STATE_DISCONNECTED);
 
   DEBUG ("New NetworkManager network state %d (connected: %s)", state,
