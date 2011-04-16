@@ -2506,7 +2506,6 @@ got_avatar (GObject *source_object,
 
  finally:
   g_free (text);
-  g_object_unref (individual);
   g_object_unref (manager);
 }
 
