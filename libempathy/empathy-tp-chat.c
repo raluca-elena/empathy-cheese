@@ -483,14 +483,13 @@ static void
 tp_chat_state_changed_cb (TpChannel *channel,
 			  TpHandle   handle,
 			  TpChannelChatState state,
-			  gpointer   user_data,
-			  GObject   *chat)
+			  EmpathyTpChat *chat)
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
 
 	empathy_tp_contact_factory_get_from_handle (priv->connection, handle,
 		tp_chat_state_changed_got_contact_cb, GUINT_TO_POINTER (state),
-		NULL, chat);
+		NULL, G_OBJECT (chat));
 }
 
 static void
@@ -847,10 +846,8 @@ check_almost_ready (EmpathyTpChat *chat)
 	tp_g_signal_connect_object (priv->channel, "message-sent",
 		G_CALLBACK (message_sent_cb), chat, 0);
 
-	tp_cli_channel_interface_chat_state_connect_to_chat_state_changed (priv->channel,
-									   tp_chat_state_changed_cb,
-									   NULL, NULL,
-									   G_OBJECT (chat), NULL);
+	tp_g_signal_connect_object (priv->channel, "chat-state-changed",
+		G_CALLBACK (tp_chat_state_changed_cb), chat, 0);
 
 	check_ready (chat);
 }
