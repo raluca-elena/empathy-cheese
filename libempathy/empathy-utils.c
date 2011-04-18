@@ -970,26 +970,27 @@ empathy_format_currency (gint         amount,
 #define POUND "\302\243"
 
 	/* localised representations of currency */
-	/* FIXME: check these */
+	/* FIXME: check these, especially negatives and decimals */
 	static const struct {
 		const char *currency;
 		const char *positive;
 		const char *negative;
 		const char *decimal;
 	} currencies[] = {
+		/* sym   positive    negative          decimal */
 		{ "EUR", EURO "%s",  MINUS EURO "%s",  "." },
 		{ "USD", "$%s",      MINUS "$%s",      "." },
 		{ "JPY", YEN "%s"    MINUS YEN "%s",   "." },
 		{ "GBP", POUND "%s", MINUS POUND "%s", "." },
-		// { "PLN", "" },
-		// { "BRL", "" },
-		// { "SEK", "" },
-		// { "DKK", "" },
-		// { "HKD", "" },
-		// { "CHF", "" },
+		{ "PLN", "%s zl",    MINUS "%s zl",    "." },
+		{ "BRL", "R$%s",     MINUS "R$%s",     "." },
+		{ "SEK", "%s kr",    MINUS "%s kr",    "." },
+		{ "DKK", "kr %s",    "kr " MINUS "%s", "." },
+		{ "HKD", "$%s",      MINUS "$%s",      "." },
+		{ "CHF", "%s Fr.",   MINUS "%s Fr.",   "." },
 		{ "NOK", "%s kr",    MINUS "%s kr",    "." },
 		{ "CAD", "$%s",      MINUS "$%s",      "." },
-		// { "TWD", "" },
+		{ "TWD", "$%s",      MINUS "$%s",      "." },
 		{ "AUD", "$%s",      MINUS "$%s",      "." },
 	};
 
