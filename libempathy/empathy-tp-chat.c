@@ -309,12 +309,60 @@ tp_chat_build_message (EmpathyTpChat *chat,
 }
 
 static void
+handle_delivery_report (EmpathyTpChat *self,
+		TpMessage *message)
+{
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+	TpDeliveryStatus delivery_status;
+	const GHashTable *header;
+	TpChannelTextSendError delivery_error;
+	gboolean valid;
+	GPtrArray *echo;
+	const gchar *message_body = NULL;
+
+	header = tp_message_peek (message, 0);
+	if (header == NULL)
+		goto out;
+
+	delivery_status = tp_asv_get_uint32 (header, "delivery-status", &valid);
+	if (!valid || delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED)
+		goto out;
+
+	delivery_error = tp_asv_get_uint32 (header, "delivery-error", &valid);
+	if (!valid)
+		delivery_error = TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
+
+	/* TODO: ideally we should use tp-glib API giving us the echoed message as a
+	 * TpMessage. (fdo #35884) */
+	echo = tp_asv_get_boxed (header, "delivery-echo",
+		TP_ARRAY_TYPE_MESSAGE_PART_LIST);
+	if (echo != NULL && echo->len >= 1) {
+		const GHashTable *echo_body;
+
+		echo_body = g_ptr_array_index (echo, 1);
+		if (echo_body != NULL)
+			message_body = tp_asv_get_string (echo_body, "content");
+	}
+
+	g_signal_emit (self, signals[SEND_ERROR], 0, message_body, delivery_error);
+
+out:
+	tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+		message, NULL, NULL);
+}
+
+static void
 handle_incoming_message (EmpathyTpChat *self,
-	TpMessage *message,
-	gboolean pending)
+			 TpMessage *message,
+			 gboolean pending)
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (self);
 	gchar *message_body;
+
+	if (tp_message_is_delivery_report (message)) {
+		handle_delivery_report (self, message);
+		return;
+	}
 
 	message_body = tp_message_to_text (message, NULL);
 
@@ -359,25 +407,6 @@ message_sent_cb (TpTextChannel   *channel,
 	tp_chat_build_message (chat, message, FALSE);
 
 	g_free (message_body);
-}
-
-static void
-tp_chat_send_error_cb (TpChannel   *channel,
-		       guint        error_code,
-		       guint        timestamp,
-		       guint        message_type,
-		       const gchar *message_body,
-		       gpointer     user_data,
-		       GObject     *chat)
-{
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-
-	if (priv->channel == NULL)
-		return;
-
-	DEBUG ("Error sending '%s' (%d)", message_body, error_code);
-
-	g_signal_emit (chat, signals[SEND_ERROR], 0, message_body, error_code);
 }
 
 static TpChannelTextSendError
@@ -818,10 +847,6 @@ check_almost_ready (EmpathyTpChat *chat)
 	tp_g_signal_connect_object (priv->channel, "message-sent",
 		G_CALLBACK (message_sent_cb), chat, 0);
 
-	tp_cli_channel_type_text_connect_to_send_error (priv->channel,
-							tp_chat_send_error_cb,
-							NULL, NULL,
-							G_OBJECT (chat), NULL);
 	tp_cli_channel_interface_chat_state_connect_to_chat_state_changed (priv->channel,
 									   tp_chat_state_changed_cb,
 									   NULL, NULL,
