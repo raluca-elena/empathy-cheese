@@ -309,17 +309,18 @@ tp_chat_build_message (EmpathyTpChat *chat,
 }
 
 static void
-message_received_cb (TpTextChannel   *channel,
-		     TpMessage *message,
-		     EmpathyTpChat *chat)
+handle_incoming_message (EmpathyTpChat *self,
+	TpMessage *message,
+	gboolean pending)
 {
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
 	gchar *message_body;
 
 	message_body = tp_message_to_text (message, NULL);
 
-	DEBUG ("Message received from channel %s: %s",
-		tp_proxy_get_object_path (channel), message_body);
+	DEBUG ("Message %s (channel %s): %s",
+		pending ? "pending" : "received",
+		tp_proxy_get_object_path (priv->channel), message_body);
 
 	if (message_body == NULL) {
 		DEBUG ("Empty message with NonTextContent, ignoring and acking.");
@@ -329,9 +330,17 @@ message_received_cb (TpTextChannel   *channel,
 		return;
 	}
 
-	tp_chat_build_message (chat, message, TRUE);
+	tp_chat_build_message (self, message, TRUE);
 
 	g_free (message_body);
+}
+
+static void
+message_received_cb (TpTextChannel   *channel,
+		     TpMessage *message,
+		     EmpathyTpChat *chat)
+{
+	handle_incoming_message (chat, message, FALSE);
 }
 
 static void
@@ -468,23 +477,8 @@ list_pending_messages (EmpathyTpChat *self)
 
 	for (l = messages; l != NULL; l = g_list_next (l)) {
 		TpMessage *message = l->data;
-		gchar          *message_body;
 
-		message_body = tp_message_to_text (message, NULL);
-
-		DEBUG ("Message pending: %s", message_body);
-
-		if (message_body == NULL) {
-			DEBUG ("Empty message with NonTextContent, ignoring and acking.");
-
-			tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
-				message, NULL, NULL);
-			continue;
-		}
-
-		tp_chat_build_message (self, message, TRUE);
-
-		g_free (message_body);
+		handle_incoming_message (self, message, FALSE);
 	}
 
 	g_list_free (messages);
