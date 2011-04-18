@@ -1295,9 +1295,14 @@ chat_send_error_cb (EmpathyTpChat          *tp_chat,
 		break;
 	}
 
-	str = g_strdup_printf (_("Error sending message '%s': %s"),
-			       message_body,
-			       error);
+	if (message_body != NULL) {
+			str = g_strdup_printf (_("Error sending message '%s': %s"),
+				message_body, error);
+	}
+	else {
+			str = g_strdup_printf (_("Error sending message: %s"), error);
+	}
+
 	empathy_chat_view_append_event (chat->view, str);
 	g_free (str);
 }
