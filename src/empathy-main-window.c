@@ -912,7 +912,9 @@ main_window_setup_balance_create_action (EmpathyMainWindow *window,
 	action = gtk_action_new (name,
 		tp_account_get_display_name (account),
 		_("Top up account credit"),
-		tp_account_get_icon_name (account));
+		NULL);
+	g_object_bind_property (account, "icon-name", action, "icon-name",
+		G_BINDING_SYNC_CREATE);
 
 	g_object_set_data (G_OBJECT (action), "account", account);
 	g_signal_connect (action, "activate",
