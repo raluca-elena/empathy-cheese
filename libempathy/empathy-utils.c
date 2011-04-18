@@ -959,10 +959,10 @@ empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert)
   return NULL;
 }
 
-char *
-empathy_format_currency (int         amount,
-			 guint       scale,
-			 const char *currency)
+gchar *
+empathy_format_currency (gint         amount,
+			 guint        scale,
+			 const gchar *currency)
 {
 #define MINUS "\342\210\222"
 #define EURO "\342\202\254"
