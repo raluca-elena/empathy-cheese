@@ -410,15 +410,11 @@ chat_text_view_append_timestamp (EmpathyChatTextView *view,
 
 	/* Append date if needed */
 	if (show_date) {
-		GDateTime *date;
-
-		date = g_date_time_new_from_unix_utc (timestamp);
 		/* Translators: timestamp displayed between conversations in
 		 * chat windows (strftime format string) */
-		tmp = g_date_time_format (date, _("%A %B %d %Y"));
+		tmp = empathy_time_to_string_utc (timestamp, _("%A %B %d %Y"));
 		g_string_append (str, tmp);
 		g_string_append (str, ", ");
-		g_date_time_unref (date);
 		g_free (tmp);
 	}
 
