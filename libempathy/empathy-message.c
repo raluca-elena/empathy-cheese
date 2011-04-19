@@ -324,7 +324,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		"type", tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)),
 		"body", body,
 		"is-backlog", TRUE,
-		"timestamp", tpl_event_get_timestamp (logevent),
+		"timestamp", (glong) tpl_event_get_timestamp (logevent),
 		NULL);
 
 	if (receiver != NULL) {
@@ -632,7 +632,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
 		"type", tp_message_get_message_type (tp_msg),
-		"timestamp", tp_message_get_received_timestamp (tp_msg),
+		"timestamp", (glong) tp_message_get_received_timestamp (tp_msg),
 		"flags", flags,
 		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
 		"incoming", incoming,
