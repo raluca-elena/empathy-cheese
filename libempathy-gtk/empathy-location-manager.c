@@ -115,38 +115,6 @@ location_manager_dispose (GObject *object)
 }
 
 static void
-location_manager_get_property (GObject *object,
-                      guint param_id,
-                      GValue *value,
-                      GParamSpec *pspec)
-{
-  /*EmpathyLocationManagerPriv *priv = GET_PRIV (object); */
-
-  switch (param_id)
-    {
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    };
-}
-
-static void
-location_manager_set_property (GObject *object,
-                      guint param_id,
-                      const GValue *value,
-                      GParamSpec *pspec)
-{
-  /* EmpathyLocationManagerPriv *priv = GET_PRIV (object); */
-
-  switch (param_id)
-    {
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    };
-}
-
-static void
 empathy_location_manager_class_init (EmpathyLocationManagerClass *class)
 {
   GObjectClass *object_class;
@@ -155,8 +123,6 @@ empathy_location_manager_class_init (EmpathyLocationManagerClass *class)
 
   object_class->constructor = location_manager_constructor;
   object_class->dispose = location_manager_dispose;
-  object_class->get_property = location_manager_get_property;
-  object_class->set_property = location_manager_set_property;
 
   g_type_class_add_private (object_class, sizeof (EmpathyLocationManagerPriv));
 }
