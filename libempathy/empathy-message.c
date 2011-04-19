@@ -638,12 +638,13 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"incoming", incoming,
 		NULL);
 
+	priv = GET_PRIV (message);
+
 	/* FIXME: this is pretty low level, ideally we shouldn't have to use the
 	 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
 	id = tp_asv_get_uint32 (tp_message_peek (tp_msg, 0),
 		"pending-message-id", NULL);
 
-	priv = GET_PRIV (message);
 	priv->id = id;
 
 	g_free (body);
