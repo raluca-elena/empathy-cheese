@@ -296,14 +296,12 @@ address_changed_cb (GeoclueAddress *address,
   g_hash_table_iter_init (&iter, details);
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
-      GValue *new_value;
       /* Discard street information if reduced accuracy is on */
       if (self->priv->reduce_accuracy &&
           !tp_strdiff (key, EMPATHY_LOCATION_STREET))
         continue;
 
-      new_value = tp_g_value_slice_new_string (value);
-      g_hash_table_insert (self->priv->location, g_strdup (key), new_value);
+      tp_asv_set_string (self->priv->location, key, value);
 
       DEBUG ("\t - %s: %s", (gchar *) key, (gchar *) value);
     }
@@ -346,8 +344,6 @@ position_changed_cb (GeocluePosition *position,
   EmpathyLocationManager *self = user_data;
   GeoclueAccuracyLevel level;
   gdouble mean, horizontal, vertical;
-  GValue *new_value;
-
 
   geoclue_accuracy_get_details (accuracy, &level, &horizontal, &vertical);
   DEBUG ("New position (accuracy level %d)", level);
@@ -361,9 +357,8 @@ position_changed_cb (GeocluePosition *position,
         /* Truncate at 1 decimal place */
         longitude = ((int) (longitude * 10)) / 10.0;
 
-      new_value = tp_g_value_slice_new_double (longitude);
-      g_hash_table_insert (self->priv->location,
-          g_strdup (EMPATHY_LOCATION_LON), new_value);
+      tp_asv_set_double (self->priv->location, EMPATHY_LOCATION_LON, longitude);
+
       DEBUG ("\t - Longitude: %f", longitude);
     }
   else
@@ -377,9 +372,8 @@ position_changed_cb (GeocluePosition *position,
         /* Truncate at 1 decimal place */
         latitude = ((int) (latitude * 10)) / 10.0;
 
-      new_value = tp_g_value_slice_new_double (latitude);
-      g_hash_table_replace (self->priv->location,
-          g_strdup (EMPATHY_LOCATION_LAT), new_value);
+      tp_asv_set_double (self->priv->location, EMPATHY_LOCATION_LAT, latitude);
+
       DEBUG ("\t - Latitude: %f", latitude);
     }
   else
@@ -389,9 +383,8 @@ position_changed_cb (GeocluePosition *position,
 
   if (fields & GEOCLUE_POSITION_FIELDS_ALTITUDE)
     {
-      new_value = tp_g_value_slice_new_double (altitude);
-      g_hash_table_replace (self->priv->location,
-          g_strdup (EMPATHY_LOCATION_ALT), new_value);
+      tp_asv_set_double (self->priv->location, EMPATHY_LOCATION_ALT, altitude);
+
       DEBUG ("\t - Altitude: %f", altitude);
     }
   else
@@ -402,9 +395,8 @@ position_changed_cb (GeocluePosition *position,
   if (level == GEOCLUE_ACCURACY_LEVEL_DETAILED)
     {
       mean = (horizontal + vertical) / 2.0;
-      new_value = tp_g_value_slice_new_double (mean);
-      g_hash_table_replace (self->priv->location,
-          g_strdup (EMPATHY_LOCATION_ACCURACY), new_value);
+      tp_asv_set_double (self->priv->location, EMPATHY_LOCATION_ACCURACY, mean);
+
       DEBUG ("\t - Accuracy: %f", mean);
     }
   else
@@ -643,8 +635,7 @@ empathy_location_manager_init (EmpathyLocationManager *self)
 
   self->priv = priv;
   priv->geoclue_is_setup = FALSE;
-  priv->location = g_hash_table_new_full (g_direct_hash, g_direct_equal,
-      g_free, (GDestroyNotify) tp_g_value_slice_free);
+  priv->location = tp_asv_new (NULL, NULL);
   priv->gsettings_loc = g_settings_new (EMPATHY_PREFS_LOCATION_SCHEMA);
 
   /* Setup account status callbacks */
