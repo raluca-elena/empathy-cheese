@@ -40,8 +40,6 @@ G_BEGIN_DECLS
 #define EMPATHY_TIME_DATE_FORMAT_DISPLAY_SHORT _("%a %d %b %Y, %H:%M")
 
 time_t  empathy_time_get_current     (void);
-time_t  empathy_time_get_local_time  (struct tm   *tm);
-time_t  empathy_time_parse           (const gchar *str);
 gchar  *empathy_time_to_string_utc   (time_t       t,
 				      const gchar *format);
 gchar  *empathy_time_to_string_local (time_t       t,

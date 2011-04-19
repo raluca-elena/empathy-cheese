@@ -37,56 +37,6 @@ empathy_time_get_current (void)
 	return time (NULL);
 }
 
-time_t
-empathy_time_get_local_time (struct tm *tm)
-{
-	const gchar *tz;
-	time_t       t;
-
-	tz = g_getenv ("TZ");
-	g_setenv ("TZ", "", TRUE);
-
-	tzset ();
-
-	t = mktime (tm);
-
-	if (tz) {
-		g_setenv ("TZ", tz, TRUE);
-	} else {
-		g_unsetenv ("TZ");
-	}
-
-	tzset ();
-
-	return t;
-}
-
-/* The format is: "20021209T23:51:30" and is in UTC. 0 is returned on
- * failure. The alternative format "20021209" is also accepted.
- */
-time_t
-empathy_time_parse (const gchar *str)
-{
-	struct tm tm;
-	gint      year, month;
-	gint      n_parsed;
-
-	memset (&tm, 0, sizeof (struct tm));
-
-	n_parsed = sscanf (str, "%4d%2d%2dT%2d:%2d:%2d",
-		    &year, &month, &tm.tm_mday, &tm.tm_hour,
-			   &tm.tm_min, &tm.tm_sec);
-	if (n_parsed != 3 && n_parsed != 6) {
-		return 0;
-	}
-
-	tm.tm_year = year - 1900;
-	tm.tm_mon = month - 1;
-	tm.tm_isdst = -1;
-
-	return empathy_time_get_local_time (&tm);
-}
-
 /* Converts the UTC timestamp to a string, also in UTC. Returns NULL on failure. */
 gchar *
 empathy_time_to_string_utc (time_t       t,
