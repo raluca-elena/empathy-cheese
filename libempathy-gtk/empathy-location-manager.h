@@ -37,11 +37,12 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyLocationManager      EmpathyLocationManager;
 typedef struct _EmpathyLocationManagerClass EmpathyLocationManagerClass;
+typedef struct _EmpathyLocationManagerPrivate EmpathyLocationManagerPrivate;
 
 struct _EmpathyLocationManager
 {
   GObject parent;
-  gpointer priv;
+  EmpathyLocationManagerPrivate *priv;
 };
 
 struct _EmpathyLocationManagerClass
