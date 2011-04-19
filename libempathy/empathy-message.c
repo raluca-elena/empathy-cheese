@@ -44,7 +44,7 @@ typedef struct {
 	EmpathyContact           *sender;
 	EmpathyContact           *receiver;
 	gchar                    *body;
-	time_t                    timestamp;
+	gint64                    timestamp;
 	gboolean                  is_backlog;
 	guint                     id;
 	gboolean                  incoming;
@@ -119,12 +119,10 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							      G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_TIMESTAMP,
-					 g_param_spec_long ("timestamp",
+					 g_param_spec_int64 ("timestamp",
 							    "timestamp",
 							    "timestamp",
-							    -1,
-							    G_MAXLONG,
-							    -1,
+							    G_MININT64, G_MAXINT64, 0,
 							    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
 							    G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
@@ -212,7 +210,7 @@ message_get_property (GObject    *object,
 		g_value_set_string (value, priv->body);
 		break;
 	case PROP_TIMESTAMP:
-		g_value_set_long (value, priv->timestamp);
+		g_value_set_int64 (value, priv->timestamp);
 		break;
 	case PROP_IS_BACKLOG:
 		g_value_set_boolean (value, priv->is_backlog);
@@ -256,7 +254,7 @@ message_set_property (GObject      *object,
 		priv->body = g_value_dup_string (value);
 		break;
 	case PROP_TIMESTAMP:
-		priv->timestamp = g_value_get_long (value);
+		priv->timestamp = g_value_get_int64 (value);
 		if (priv->timestamp <= 0)
 			priv->timestamp = empathy_time_get_current ();
 		break;
@@ -324,7 +322,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		"type", tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)),
 		"body", body,
 		"is-backlog", TRUE,
-		"timestamp", (glong) tpl_event_get_timestamp (logevent),
+		"timestamp", tpl_event_get_timestamp (logevent),
 		NULL);
 
 	if (receiver != NULL) {
@@ -435,7 +433,7 @@ empathy_message_get_body (EmpathyMessage *message)
 	return priv->body;
 }
 
-time_t
+gint64
 empathy_message_get_timestamp (EmpathyMessage *message)
 {
 	EmpathyMessagePriv *priv;
@@ -632,7 +630,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
 		"type", tp_message_get_message_type (tp_msg),
-		"timestamp", (glong) tp_message_get_received_timestamp (tp_msg),
+		"timestamp", tp_message_get_received_timestamp (tp_msg),
 		"flags", flags,
 		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
 		"incoming", incoming,

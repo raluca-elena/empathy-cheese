@@ -141,7 +141,7 @@ typedef struct {
   /* time and speed */
   gdouble speed;
   guint remaining_time;
-  time_t last_update_time;
+  gint64 last_update_time;
 
   gboolean is_completed;
 } EmpathyFTHandlerPriv;
@@ -652,7 +652,7 @@ update_remaining_time_and_speed (EmpathyFTHandler *handler,
     guint64 transferred_bytes)
 {
   EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
-  time_t elapsed_time, current_time;
+  gint64 elapsed_time, current_time;
   guint64 transferred, last_transferred_bytes;
   gdouble speed;
   gint remaining_time;

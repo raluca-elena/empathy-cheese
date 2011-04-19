@@ -39,12 +39,12 @@ G_BEGIN_DECLS
 #define EMPATHY_DATE_FORMAT_DISPLAY_SHORT  _("%a %d %b %Y")
 #define EMPATHY_TIME_DATE_FORMAT_DISPLAY_SHORT _("%a %d %b %Y, %H:%M")
 
-time_t  empathy_time_get_current     (void);
-gchar  *empathy_time_to_string_utc   (time_t       t,
+gint64  empathy_time_get_current     (void);
+gchar  *empathy_time_to_string_utc   (gint64       t,
 				      const gchar *format);
-gchar  *empathy_time_to_string_local (time_t       t,
+gchar  *empathy_time_to_string_local (gint64       t,
 				      const gchar *format);
-gchar  *empathy_time_to_string_relative (time_t t);
+gchar  *empathy_time_to_string_relative (gint64 t);
 
 G_END_DECLS
 

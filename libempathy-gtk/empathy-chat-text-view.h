@@ -70,7 +70,7 @@ struct _EmpathyChatTextViewClass {
 
 GType                empathy_chat_text_view_get_type           (void) G_GNUC_CONST;
 EmpathyContact *     empathy_chat_text_view_get_last_contact   (EmpathyChatTextView *view);
-time_t               empathy_chat_text_view_get_last_timestamp (EmpathyChatTextView *view);
+gint64               empathy_chat_text_view_get_last_timestamp (EmpathyChatTextView *view);
 void                 empathy_chat_text_view_set_only_if_date   (EmpathyChatTextView *view,
 							        gboolean             only_if_date);
 void                 empathy_chat_text_view_append_body        (EmpathyChatTextView *view,

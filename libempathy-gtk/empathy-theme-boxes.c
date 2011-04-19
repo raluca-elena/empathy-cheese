@@ -196,7 +196,7 @@ theme_boxes_maybe_append_header (EmpathyThemeBoxes *theme,
 	GtkTextChildAnchor   *anchor;
 	GtkWidget            *box;
 	gchar                *str;
-	time_t                time_;
+	gint64                time_;
 	gchar                *tmp;
 	GtkTextIter           start;
 	gboolean              color_set;

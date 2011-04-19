@@ -31,89 +31,107 @@
 
 /* Note: EmpathyTime is always in UTC. */
 
-time_t
+gint64
 empathy_time_get_current (void)
 {
-	return time (NULL);
+	GDateTime *now;
+	gint64 result;
+
+	now = g_date_time_new_now_utc ();
+	result = g_date_time_to_unix (now);
+	g_date_time_unref (now);
+
+	return result;
 }
 
 /* Converts the UTC timestamp to a string, also in UTC. Returns NULL on failure. */
 gchar *
-empathy_time_to_string_utc (time_t       t,
+empathy_time_to_string_utc (gint64       t,
 			    const gchar *format)
 {
-	gchar      stamp[128];
-	struct tm *tm;
+	GDateTime *d;
+	char *result;
 
 	g_return_val_if_fail (format != NULL, NULL);
 
-	tm = gmtime (&t);
-	if (strftime (stamp, sizeof (stamp), format, tm) == 0) {
-		return NULL;
-	}
+	d = g_date_time_new_from_unix_utc (t);
+	result = g_date_time_format (d, format);
+	g_date_time_unref (d);
 
-	return g_strdup (stamp);
+	return result;
 }
 
 /* Converts the UTC timestamp to a string, in local time. Returns NULL on failure. */
 gchar *
-empathy_time_to_string_local (time_t       t,
+empathy_time_to_string_local (gint64 t,
 			      const gchar *format)
 {
-	gchar      stamp[128];
-	struct tm *tm;
+	GDateTime *d, *local;
+	gchar *result;
 
 	g_return_val_if_fail (format != NULL, NULL);
 
-	tm = localtime (&t);
-	if (strftime (stamp, sizeof (stamp), format, tm) == 0) {
-		return NULL;
-	}
+	d = g_date_time_new_from_unix_utc (t);
+	local = g_date_time_to_local (d);
+	g_date_time_unref (d);
 
-	return g_strdup (stamp);
+	result = g_date_time_format (local, format);
+	g_date_time_unref (local);
+
+	return result;
 }
 
 gchar  *
-empathy_time_to_string_relative (time_t then)
+empathy_time_to_string_relative (gint64 t)
 {
-	time_t now;
+	GDateTime *now, *then;
 	gint   seconds;
+	GTimeSpan delta;
+	gchar *result;
 
-	now = time (NULL);
-	seconds = now - then;
+	now = g_date_time_new_now_utc ();
+	then = g_date_time_new_from_unix_utc (t);
+
+	delta = g_date_time_difference (now, then);
+	seconds = delta / G_TIME_SPAN_SECOND;
 
 	if (seconds > 0) {
 		if (seconds < 60) {
-			return g_strdup_printf (ngettext ("%d second ago",
+			result = g_strdup_printf (ngettext ("%d second ago",
 				"%d seconds ago", seconds), seconds);
 		}
 		else if (seconds < (60 * 60)) {
 			seconds /= 60;
-			return g_strdup_printf (ngettext ("%d minute ago",
+			result = g_strdup_printf (ngettext ("%d minute ago",
 				"%d minutes ago", seconds), seconds);
 		}
 		else if (seconds < (60 * 60 * 24)) {
 			seconds /= 60 * 60;
-			return g_strdup_printf (ngettext ("%d hour ago",
+			result = g_strdup_printf (ngettext ("%d hour ago",
 				"%d hours ago", seconds), seconds);
 		}
 		else if (seconds < (60 * 60 * 24 * 7)) {
 			seconds /= 60 * 60 * 24;
-			return g_strdup_printf (ngettext ("%d day ago",
+			result = g_strdup_printf (ngettext ("%d day ago",
 				"%d days ago", seconds), seconds);
 		}
 		else if (seconds < (60 * 60 * 24 * 30)) {
 			seconds /= 60 * 60 * 24 * 7;
-			return g_strdup_printf (ngettext ("%d week ago",
+			result = g_strdup_printf (ngettext ("%d week ago",
 				"%d weeks ago", seconds), seconds);
 		}
 		else {
 			seconds /= 60 * 60 * 24 * 30;
-			return g_strdup_printf (ngettext ("%d month ago",
+			result = g_strdup_printf (ngettext ("%d month ago",
 				"%d months ago", seconds), seconds);
 		}
 	}
 	else {
-		return g_strdup (_("in the future"));
+		result = g_strdup (_("in the future"));
 	}
+
+	g_date_time_unref (now);
+	g_date_time_unref (then);
+
+	return result;
 }
