@@ -103,41 +103,12 @@ location_manager_dispose (GObject *object)
   void (*dispose) (GObject *) =
     G_OBJECT_CLASS (empathy_location_manager_parent_class)->dispose;
 
-  if (priv->account_manager != NULL)
-  {
-    g_object_unref (priv->account_manager);
-    priv->account_manager = NULL;
-  }
-
-  if (priv->gsettings_loc != NULL)
-  {
-    g_object_unref (priv->gsettings_loc);
-    priv->gsettings_loc = NULL;
-  }
-
-  if (priv->gc_client != NULL)
-  {
-    g_object_unref (priv->gc_client);
-    priv->gc_client = NULL;
-  }
-
-  if (priv->gc_position != NULL)
-  {
-    g_object_unref (priv->gc_position);
-    priv->gc_position = NULL;
-  }
-
-  if (priv->gc_address != NULL)
-  {
-    g_object_unref (priv->gc_address);
-    priv->gc_address = NULL;
-  }
-
-  if (priv->location != NULL)
-  {
-    g_hash_table_unref (priv->location);
-    priv->location = NULL;
-  }
+  tp_clear_object (&priv->account_manager);
+  tp_clear_object (&priv->gsettings_loc);
+  tp_clear_object (&priv->gc_client);
+  tp_clear_object (&priv->gc_position);
+  tp_clear_object (&priv->gc_address);
+  tp_clear_pointer (&priv->location, g_hash_table_unref);
 
   if (dispose != NULL)
     dispose (object);
