@@ -30,9 +30,6 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n-lib.h>
 
-#ifdef HAVE_MEEGO
-#include <mx-gtk/mx-gtk.h>
-#endif /* HAVE_MEEGO */
 #include <gio/gdesktopappinfo.h>
 
 #include <libempathy/empathy-utils.h>
@@ -82,7 +79,6 @@ typedef struct {
   GtkWidget *cancel_button;
   GtkWidget *entry_password;
   GtkWidget *spinbutton_port;
-  GtkWidget *enabled_checkbox;
   GtkWidget *radiobutton_reuse;
 
   gboolean simple;
@@ -953,19 +949,8 @@ account_widget_applied_cb (GObject *source_object,
               account_widget_account_enabled_cb, widget);
           g_signal_emit (widget, signals[ACCOUNT_CREATED], 0, account);
         }
-      else if (priv->enabled_checkbox != NULL)
+      else
         {
-          gboolean enabled_checked;
-
-          enabled_checked =
-#ifdef HAVE_MEEGO
-            mx_gtk_light_switch_get_active (
-                MX_GTK_LIGHT_SWITCH (priv->enabled_checkbox));
-#else
-            gtk_toggle_button_get_active (
-                GTK_TOGGLE_BUTTON (priv->enabled_checkbox));
-#endif /* HAVE_MEEGO */
-
           /* If the account was offline, we always want to try reconnecting,
            * to give it a chance to connect if the previous params were wrong.
            * tp_account_reconnect_async() won't do anything if the requested
@@ -975,7 +960,7 @@ account_widget_applied_cb (GObject *source_object,
             reconnect_required = TRUE;
 
           if (reconnect_required && tp_account_is_enabled (account)
-              && enabled_checked)
+              && tp_account_is_enabled (account))
             {
               /* After having applied changes to a user account, we
                * reconnect it if needed. This is done so the new
@@ -1764,57 +1749,6 @@ account_widget_destroy_cb (GtkWidget *widget,
   g_object_unref (self);
 }
 
-static void
-empathy_account_widget_enabled_cb (TpAccount *account,
-      GParamSpec *spec,
-      gpointer user_data)
-{
-  EmpathyAccountWidget *widget = EMPATHY_ACCOUNT_WIDGET (user_data);
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (widget);
-  gboolean enabled = tp_account_is_enabled (account);
-
-  if (priv->enabled_checkbox != NULL)
-    {
-#ifdef HAVE_MEEGO
-      mx_gtk_light_switch_set_active (
-          MX_GTK_LIGHT_SWITCH (priv->enabled_checkbox),
-          enabled);
-#else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->enabled_checkbox),
-          enabled);
-#endif /* HAVE_MEEGO */
-    }
-}
-
-#if 0
-static void
-#ifdef HAVE_MEEGO
-account_widget_switch_flipped_cb (MxGtkLightSwitch *sw,
-    gboolean state,
-    gpointer user_data)
-#else
-account_widget_enabled_toggled_cb (GtkToggleButton *toggle_button,
-    gpointer user_data)
-#endif /* HAVE_MEEGO */
-{
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (user_data);
-  TpAccount *account;
-#ifndef HAVE_MEEGO
-  gboolean state;
-
-  state = gtk_toggle_button_get_active (toggle_button);
-#endif /* HAVE_MEEGO */
-
-  account = empathy_account_settings_get_account (priv->settings);
-
-  /* Enable the account according to the value of the "Enabled" checkbox */
-  /* workaround to keep widget alive during async call */
-  g_object_ref (user_data);
-  tp_account_set_enabled_async (account, state,
-      account_widget_account_enabled_cb, user_data);
-}
-#endif
-
 void
 empathy_account_widget_set_other_accounts_exist (EmpathyAccountWidget *self,
     gboolean others_exist)
@@ -1971,78 +1905,6 @@ out:
 #define WIDGET(cm, proto) \
   { #cm, #proto, "empathy-account-widget-"#proto".ui", \
     account_widget_build_##proto }
-
-static void
-add_enable_checkbox (EmpathyAccountWidget *self,
-    TpAccount *account)
-{
-#if 0
-  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
-#ifdef HAVE_MEEGO
-  GtkWidget *w;
-#else
-  GtkWidget *vbox = self->ui_details->widget;
-#endif /* HAVE_MEEGO */
-  guint nb_rows, nb_columns;
-  gboolean is_enabled;
-
-  /* handle the "Enabled" checkbox. We only add it when modifying an account */
-  if (priv->creating_account || priv->table_common_settings == NULL)
-    return;
-
-  is_enabled = tp_account_is_enabled (account);
-
-#ifdef HAVE_MEEGO
-  w = gtk_label_new (_("Account:"));
-  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-
-  priv->enabled_checkbox = mx_gtk_light_switch_new ();
-
-  mx_gtk_light_switch_set_active (
-      MX_GTK_LIGHT_SWITCH (priv->enabled_checkbox), is_enabled);
-
-  gtk_widget_show (w);
-#else
-  priv->enabled_checkbox =
-      /* translators: this is the label of a checkbox used to enable/disable IM
-       * accounts */
-      gtk_check_button_new_with_mnemonic (C_("account", "_Enabled"));
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->enabled_checkbox),
-      is_enabled);
-#endif /* HAVE_MEEGO */
-
-  g_object_get (priv->table_common_settings, "n-rows", &nb_rows,
-      "n-columns", &nb_columns, NULL);
-
-  gtk_table_resize (GTK_TABLE (priv->table_common_settings), ++nb_rows,
-      nb_columns);
-
-#ifdef HAVE_MEEGO
-  gtk_table_attach (GTK_TABLE (priv->table_common_settings),
-      w,
-      0, 1, nb_rows - 1, nb_rows,
-      GTK_FILL, 0, 0, 0);
-  gtk_table_attach (GTK_TABLE (priv->table_common_settings),
-      priv->enabled_checkbox,
-      1, nb_columns, nb_rows - 1, nb_rows,
-      GTK_EXPAND | GTK_FILL, 0, 0, 0);
-#else
-  gtk_box_pack_start (GTK_BOX (vbox), priv->enabled_checkbox, FALSE, FALSE, 0);
-  gtk_box_reorder_child (GTK_BOX (vbox), priv->enabled_checkbox, 0);
-#endif /* HAVE_MEEGO */
-
-  gtk_widget_show (priv->enabled_checkbox);
-
-#ifdef HAVE_MEEGO
-  g_signal_connect (G_OBJECT (priv->enabled_checkbox), "switch-flipped",
-      G_CALLBACK (account_widget_switch_flipped_cb), self);
-#else
-  g_signal_connect (G_OBJECT (priv->enabled_checkbox), "toggled",
-      G_CALLBACK (account_widget_enabled_toggled_cb), self);
-#endif /* HAVE_MEEGO */
-#endif
-}
 
 #ifndef HAVE_MEEGO
 /* Meego doesn't support registration */
@@ -2308,19 +2170,9 @@ do_constructed (GObject *obj)
         account_widget_set_control_buttons_sensitivity (self, FALSE);
     }
 
-  if (account != NULL)
-    {
-      g_signal_connect (account, "notify::enabled",
-          G_CALLBACK (empathy_account_widget_enabled_cb), self);
-    }
-
 #ifndef HAVE_MEEGO
   add_register_buttons (self, account);
 #endif /* HAVE_MEEGO */
-
-  /* add the Enable checkbox to accounts that support it */
-  if (!(storage_restrictions & TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED))
-    add_enable_checkbox (self, account);
 
   /* hook up to widget destruction to unref ourselves */
   g_signal_connect (self->ui_details->widget, "destroy",
@@ -2360,12 +2212,6 @@ do_dispose (GObject *obj)
     {
       TpAccount *account;
       account = empathy_account_settings_get_account (priv->settings);
-
-      if (account != NULL)
-        {
-          g_signal_handlers_disconnect_by_func (account,
-              empathy_account_widget_enabled_cb, self);
-        }
 
       g_object_unref (priv->settings);
       priv->settings = NULL;
