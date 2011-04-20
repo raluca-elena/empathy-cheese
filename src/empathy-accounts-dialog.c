@@ -47,7 +47,6 @@
 #include <libempathy-gtk/empathy-account-widget-sip.h>
 #include <libempathy-gtk/empathy-cell-renderer-activatable.h>
 #include <libempathy-gtk/empathy-images.h>
-#include <libempathy-gtk/mx-gtk-light-switch.h>
 
 #include "empathy-accounts-dialog.h"
 #include "empathy-import-dialog.h"
@@ -241,8 +240,8 @@ accounts_dialog_enable_account_cb (GObject *account,
 }
 
 static void
-accounts_dialog_enable_switch_flipped (MxGtkLightSwitch *sw,
-    gboolean state,
+accounts_dialog_enable_switch_active_cb (GtkSwitch *sw,
+    GParamSpec *spec,
     EmpathyAccountsDialog *dialog)
 {
   EmpathyAccountSettings *settings;
@@ -256,7 +255,7 @@ accounts_dialog_enable_switch_flipped (MxGtkLightSwitch *sw,
   if (account == NULL)
     return;
 
-  tp_account_set_enabled_async (account, state,
+  tp_account_set_enabled_async (account, gtk_switch_get_active (sw),
       accounts_dialog_enable_account_cb, NULL);
 }
 
@@ -324,11 +323,11 @@ accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
 
   /* update the enabled switch */
   g_signal_handlers_block_by_func (priv->enabled_switch,
-      accounts_dialog_enable_switch_flipped, dialog);
-  mx_gtk_light_switch_set_active (MX_GTK_LIGHT_SWITCH (priv->enabled_switch),
+      accounts_dialog_enable_switch_active_cb, dialog);
+  gtk_switch_set_active (GTK_SWITCH (priv->enabled_switch),
       account_enabled);
   g_signal_handlers_unblock_by_func (priv->enabled_switch,
-      accounts_dialog_enable_switch_flipped, dialog);
+      accounts_dialog_enable_switch_active_cb, dialog);
 
   if (account_enabled)
     {
@@ -2324,10 +2323,10 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   align = gtk_alignment_new (0.5, 0.5, 1., 0.);
   gtk_box_pack_start (GTK_BOX (content_area), align, FALSE, TRUE, 0);
 
-  priv->enabled_switch = mx_gtk_light_switch_new ();
+  priv->enabled_switch = gtk_switch_new ();
   gtk_container_add (GTK_CONTAINER (align), priv->enabled_switch);
-  g_signal_connect (priv->enabled_switch, "switch-flipped",
-      G_CALLBACK (accounts_dialog_enable_switch_flipped), dialog);
+  g_signal_connect (priv->enabled_switch, "notify::active",
+      G_CALLBACK (accounts_dialog_enable_switch_active_cb), dialog);
   gtk_widget_show_all (align);
 
   /* Tweak the dialog */
