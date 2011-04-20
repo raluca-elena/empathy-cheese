@@ -275,6 +275,7 @@ accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
   TpAccount                 *selected_account;
   gboolean                  account_enabled;
   gboolean                  creating_account;
+  TpStorageRestrictionFlags storage_restrictions = 0;
 
   view = GTK_TREE_VIEW (priv->treeview);
   selection = gtk_tree_view_get_selection (view);
@@ -309,6 +310,8 @@ accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
        * (else no icon is shown in infobar)*/
       if (!account_enabled)
         presence = TP_CONNECTION_PRESENCE_TYPE_OFFLINE;
+
+      storage_restrictions = tp_account_get_storage_restrictions (account);
     }
   else
     {
@@ -328,6 +331,10 @@ accounts_dialog_update_status_infobar (EmpathyAccountsDialog *dialog,
       account_enabled);
   g_signal_handlers_unblock_by_func (priv->enabled_switch,
       accounts_dialog_enable_switch_active_cb, dialog);
+
+  /* Display the Enable switch if account supports it */
+  gtk_widget_set_visible (priv->enabled_switch,
+      !(storage_restrictions & TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED));
 
   if (account_enabled)
     {
