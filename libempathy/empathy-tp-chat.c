@@ -47,7 +47,6 @@ typedef struct {
 	EmpathyContact        *remote_contact;
 	GList                 *members;
 	TpChannel             *channel;
-	gboolean               listing_pending_messages;
 	/* Queue of messages not signalled yet */
 	GQueue                *messages_queue;
 	/* Queue of messages signalled but not acked yet */
@@ -280,149 +279,176 @@ tp_chat_got_sender_cb (TpConnection            *connection,
 
 static void
 tp_chat_build_message (EmpathyTpChat *chat,
-		       gboolean       incoming,
-		       guint          id,
-		       guint          type,
-		       guint          timestamp,
-		       guint          from_handle,
-		       const gchar   *message_body,
-		       TpChannelTextMessageFlags flags)
+		       TpMessage     *msg,
+		       gboolean       incoming)
 {
 	EmpathyTpChatPriv *priv;
 	EmpathyMessage    *message;
+	TpContact *sender;
 
 	priv = GET_PRIV (chat);
 
-	message = empathy_message_new (message_body);
-	empathy_message_set_tptype (message, type);
+	message = empathy_message_new_from_tp_message (msg, incoming);
+	/* FIXME: this is actually a lie for incoming messages. */
 	empathy_message_set_receiver (message, priv->user);
-	empathy_message_set_timestamp (message, timestamp);
-	empathy_message_set_id (message, id);
-	empathy_message_set_incoming (message, incoming);
-	empathy_message_set_flags (message, flags);
-
-	if (flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK)
-		empathy_message_set_is_backlog (message, TRUE);
 
 	g_queue_push_tail (priv->messages_queue, message);
 
-	if (from_handle == 0) {
+	sender = tp_signalled_message_get_sender (msg);
+	g_assert (sender != NULL);
+
+	if (tp_contact_get_handle (sender) == 0) {
 		empathy_message_set_sender (message, priv->user);
 		tp_chat_emit_queued_messages (chat);
 	} else {
 		empathy_tp_contact_factory_get_from_handle (priv->connection,
-			from_handle,
+			tp_contact_get_handle (sender),
 			tp_chat_got_sender_cb,
 			message, NULL, G_OBJECT (chat));
 	}
 }
 
 static void
-tp_chat_received_cb (TpChannel   *channel,
-		     guint        message_id,
-		     guint        timestamp,
-		     guint        from_handle,
-		     guint        message_type,
-		     guint        message_flags,
-		     const gchar *message_body,
-		     gpointer     user_data,
-		     GObject     *chat_)
+handle_delivery_report (EmpathyTpChat *self,
+		TpMessage *message)
 {
-	EmpathyTpChat *chat = EMPATHY_TP_CHAT (chat_);
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+	TpDeliveryStatus delivery_status;
+	const GHashTable *header;
+	TpChannelTextSendError delivery_error;
+	gboolean valid;
+	GPtrArray *echo;
+	const gchar *message_body = NULL;
 
-	if (priv->channel == NULL)
-		return;
+	header = tp_message_peek (message, 0);
+	if (header == NULL)
+		goto out;
 
-	if (priv->listing_pending_messages) {
-		return;
+	delivery_status = tp_asv_get_uint32 (header, "delivery-status", &valid);
+	if (!valid || delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED)
+		goto out;
+
+	delivery_error = tp_asv_get_uint32 (header, "delivery-error", &valid);
+	if (!valid)
+		delivery_error = TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
+
+	/* TODO: ideally we should use tp-glib API giving us the echoed message as a
+	 * TpMessage. (fdo #35884) */
+	echo = tp_asv_get_boxed (header, "delivery-echo",
+		TP_ARRAY_TYPE_MESSAGE_PART_LIST);
+	if (echo != NULL && echo->len >= 1) {
+		const GHashTable *echo_body;
+
+		echo_body = g_ptr_array_index (echo, 1);
+		if (echo_body != NULL)
+			message_body = tp_asv_get_string (echo_body, "content");
 	}
 
-	DEBUG ("Message received from channel %s: %s",
-		tp_proxy_get_object_path (channel), message_body);
+	g_signal_emit (self, signals[SEND_ERROR], 0, message_body, delivery_error);
 
-	if (message_flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT &&
-	    !tp_strdiff (message_body, "")) {
-		GArray *ids;
-
-		DEBUG ("Empty message with NonTextContent, ignoring and acking.");
-
-		ids = g_array_sized_new (FALSE, FALSE, sizeof (guint), 1);
-		g_array_append_val (ids, message_id);
-		acknowledge_messages (chat, ids);
-		g_array_free (ids, TRUE);
-
-		return;
-	}
-
-	tp_chat_build_message (chat,
-			       TRUE,
-			       message_id,
-			       message_type,
-			       timestamp,
-			       from_handle,
-			       message_body,
-			       message_flags);
+out:
+	tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+		message, NULL, NULL);
 }
 
 static void
-tp_chat_sent_cb (TpChannel   *channel,
-		 guint        timestamp,
-		 guint        message_type,
-		 const gchar *message_body,
-		 gpointer     user_data,
-		 GObject     *chat_)
+handle_incoming_message (EmpathyTpChat *self,
+			 TpMessage *message,
+			 gboolean pending)
 {
-	EmpathyTpChat *chat = EMPATHY_TP_CHAT (chat_);
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+	gchar *message_body;
 
-	if (priv->channel == NULL)
+	if (tp_message_is_delivery_report (message)) {
+		handle_delivery_report (self, message);
 		return;
+	}
+
+	message_body = tp_message_to_text (message, NULL);
+
+	DEBUG ("Message %s (channel %s): %s",
+		pending ? "pending" : "received",
+		tp_proxy_get_object_path (priv->channel), message_body);
+
+	if (message_body == NULL) {
+		DEBUG ("Empty message with NonTextContent, ignoring and acking.");
+
+		tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+			message, NULL, NULL);
+		return;
+	}
+
+	tp_chat_build_message (self, message, TRUE);
+
+	g_free (message_body);
+}
+
+static void
+message_received_cb (TpTextChannel   *channel,
+		     TpMessage *message,
+		     EmpathyTpChat *chat)
+{
+	handle_incoming_message (chat, message, FALSE);
+}
+
+static void
+message_sent_cb (TpTextChannel   *channel,
+		 TpMessage *message,
+		 TpMessageSendingFlags flags,
+		 gchar              *token,
+		 EmpathyTpChat      *chat)
+{
+	gchar *message_body;
+
+	message_body = tp_message_to_text (message, NULL);
 
 	DEBUG ("Message sent: %s", message_body);
 
-	tp_chat_build_message (chat,
-			       FALSE,
-			       0,
-			       message_type,
-			       timestamp,
-			       0,
-			       message_body,
-			       0);
+	tp_chat_build_message (chat, message, FALSE);
+
+	g_free (message_body);
+}
+
+static TpChannelTextSendError
+error_to_text_send_error (GError *error)
+{
+	if (error->domain != TP_ERRORS)
+		return TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
+
+	switch (error->code) {
+		case TP_ERROR_OFFLINE:
+			return TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE;
+		case TP_ERROR_INVALID_HANDLE:
+			return TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT;
+		case TP_ERROR_PERMISSION_DENIED:
+			return TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED;
+		case TP_ERROR_NOT_IMPLEMENTED:
+			return TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED;
+	}
+
+	return TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
 }
 
 static void
-tp_chat_send_error_cb (TpChannel   *channel,
-		       guint        error_code,
-		       guint        timestamp,
-		       guint        message_type,
-		       const gchar *message_body,
-		       gpointer     user_data,
-		       GObject     *chat)
+message_send_cb (GObject *source,
+		 GAsyncResult *result,
+		 gpointer      user_data)
 {
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	EmpathyTpChat *chat = user_data;
+	TpTextChannel *channel = (TpTextChannel *) source;
+	GError *error = NULL;
 
-	if (priv->channel == NULL)
-		return;
-
-	DEBUG ("Error sending '%s' (%d)", message_body, error_code);
-
-	g_signal_emit (chat, signals[SEND_ERROR], 0, message_body, error_code);
-}
-
-static void
-tp_chat_send_cb (TpChannel    *proxy,
-		 const GError *error,
-		 gpointer      user_data,
-		 GObject      *chat)
-{
-	EmpathyMessage *message = EMPATHY_MESSAGE (user_data);
-
-	if (error) {
+	if (!tp_text_channel_send_message_finish (channel, result, NULL, &error)) {
 		DEBUG ("Error: %s", error->message);
+
+		/* FIXME: we should use the body of the message as first argument of the
+		 * signal but can't easily get it as we just get a user_data pointer. Once
+		 * we'll have rebased EmpathyTpChat on top of TpTextChannel we'll be able
+		 * to use the user_data pointer to pass the message and fix this. */
 		g_signal_emit (chat, signals[SEND_ERROR], 0,
-			       empathy_message_get_body (message),
-			       TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN);
+			       NULL, error_to_text_send_error (error));
+
+		g_error_free (error);
 	}
 }
 
@@ -457,86 +483,33 @@ static void
 tp_chat_state_changed_cb (TpChannel *channel,
 			  TpHandle   handle,
 			  TpChannelChatState state,
-			  gpointer   user_data,
-			  GObject   *chat)
+			  EmpathyTpChat *chat)
 {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
 
 	empathy_tp_contact_factory_get_from_handle (priv->connection, handle,
 		tp_chat_state_changed_got_contact_cb, GUINT_TO_POINTER (state),
-		NULL, chat);
+		NULL, G_OBJECT (chat));
 }
 
 static void
-tp_chat_list_pending_messages_cb (TpChannel       *channel,
-				  const GPtrArray *messages_list,
-				  const GError    *error,
-				  gpointer         user_data,
-				  GObject         *chat_)
+list_pending_messages (EmpathyTpChat *self)
 {
-	EmpathyTpChat     *chat = EMPATHY_TP_CHAT (chat_);
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-	guint              i;
-	GArray            *empty_non_text_content_ids = NULL;
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+	GList *messages, *l;
 
-	priv->listing_pending_messages = FALSE;
+	g_assert (priv->channel != NULL);
 
-	if (priv->channel == NULL)
-		return;
+	messages = tp_text_channel_get_pending_messages (
+		TP_TEXT_CHANNEL (priv->channel));
 
-	if (error) {
-		DEBUG ("Error listing pending messages: %s", error->message);
-		return;
+	for (l = messages; l != NULL; l = g_list_next (l)) {
+		TpMessage *message = l->data;
+
+		handle_incoming_message (self, message, FALSE);
 	}
 
-	for (i = 0; i < messages_list->len; i++) {
-		GValueArray    *message_struct;
-		const gchar    *message_body;
-		guint           message_id;
-		guint           timestamp;
-		guint           from_handle;
-		guint           message_type;
-		guint           message_flags;
-
-		message_struct = g_ptr_array_index (messages_list, i);
-
-		message_id = g_value_get_uint (g_value_array_get_nth (message_struct, 0));
-		timestamp = g_value_get_uint (g_value_array_get_nth (message_struct, 1));
-		from_handle = g_value_get_uint (g_value_array_get_nth (message_struct, 2));
-		message_type = g_value_get_uint (g_value_array_get_nth (message_struct, 3));
-		message_flags = g_value_get_uint (g_value_array_get_nth (message_struct, 4));
-		message_body = g_value_get_string (g_value_array_get_nth (message_struct, 5));
-
-		DEBUG ("Message pending: %s", message_body);
-
-		if (message_flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_NON_TEXT_CONTENT &&
-		    !tp_strdiff (message_body, "")) {
-			DEBUG ("Empty message with NonTextContent, ignoring and acking.");
-
-			if (empty_non_text_content_ids == NULL) {
-				empty_non_text_content_ids = g_array_new (FALSE, FALSE, sizeof (guint));
-			}
-
-			g_array_append_val (empty_non_text_content_ids, message_id);
-			continue;
-		}
-
-		tp_chat_build_message (chat,
-				       TRUE,
-				       message_id,
-				       message_type,
-				       timestamp,
-				       from_handle,
-				       message_body,
-				       message_flags);
-	}
-
-	if (empty_non_text_content_ids != NULL) {
-		acknowledge_messages (chat, empty_non_text_content_ids);
-		g_array_free (empty_non_text_content_ids, TRUE);
-	}
-
-	check_ready (chat);
+	g_list_free (messages);
 }
 
 static void
@@ -861,32 +834,22 @@ check_almost_ready (EmpathyTpChat *chat)
 	    priv->remote_contact == NULL)
 		return;
 
-	tp_cli_channel_type_text_connect_to_received (priv->channel,
-						      tp_chat_received_cb,
-						      NULL, NULL,
-						      G_OBJECT (chat), NULL);
-	priv->listing_pending_messages = TRUE;
+	/* We use the default factory so this feature should have been prepared */
+	g_assert (tp_proxy_is_prepared (priv->channel,
+		TP_TEXT_CHANNEL_FEATURE_INCOMING_MESSAGES));
 
-	/* TpChat will be ready once ListPendingMessages returned and all the messages
-	 * have been added to the pending messages queue. */
-	tp_cli_channel_type_text_call_list_pending_messages (priv->channel, -1,
-							     FALSE,
-							     tp_chat_list_pending_messages_cb,
-							     NULL, NULL,
-							     G_OBJECT (chat));
+	tp_g_signal_connect_object (priv->channel, "message-received",
+		G_CALLBACK (message_received_cb), chat, 0);
 
-	tp_cli_channel_type_text_connect_to_sent (priv->channel,
-						  tp_chat_sent_cb,
-						  NULL, NULL,
-						  G_OBJECT (chat), NULL);
-	tp_cli_channel_type_text_connect_to_send_error (priv->channel,
-							tp_chat_send_error_cb,
-							NULL, NULL,
-							G_OBJECT (chat), NULL);
-	tp_cli_channel_interface_chat_state_connect_to_chat_state_changed (priv->channel,
-									   tp_chat_state_changed_cb,
-									   NULL, NULL,
-									   G_OBJECT (chat), NULL);
+	list_pending_messages (chat);
+
+	tp_g_signal_connect_object (priv->channel, "message-sent",
+		G_CALLBACK (message_sent_cb), chat, 0);
+
+	tp_g_signal_connect_object (priv->channel, "chat-state-changed",
+		G_CALLBACK (tp_chat_state_changed_cb), chat, 0);
+
+	check_ready (chat);
 }
 
 static void
@@ -1551,7 +1514,7 @@ empathy_tp_chat_new (TpAccount *account,
 		     TpChannel *channel)
 {
 	g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
-	g_return_val_if_fail (TP_IS_CHANNEL (channel), NULL);
+	g_return_val_if_fail (TP_IS_TEXT_CHANNEL (channel), NULL);
 
 	return g_object_new (EMPATHY_TYPE_TP_CHAT,
 			     "account", account,
@@ -1630,27 +1593,23 @@ empathy_tp_chat_is_ready (EmpathyTpChat *chat)
 
 void
 empathy_tp_chat_send (EmpathyTpChat *chat,
-		      EmpathyMessage *message)
+		      TpMessage *message)
 {
 	EmpathyTpChatPriv        *priv = GET_PRIV (chat);
-	const gchar              *message_body;
-	TpChannelTextMessageType  message_type;
+	gchar *message_body;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (chat));
-	g_return_if_fail (EMPATHY_IS_MESSAGE (message));
+	g_return_if_fail (TP_IS_CLIENT_MESSAGE (message));
 	g_return_if_fail (priv->ready);
 
-	message_body = empathy_message_get_body (message);
-	message_type = empathy_message_get_tptype (message);
+	message_body = tp_message_to_text (message, NULL);
 
 	DEBUG ("Sending message: %s", message_body);
-	tp_cli_channel_type_text_call_send (priv->channel, -1,
-					    message_type,
-					    message_body,
-					    tp_chat_send_cb,
-					    g_object_ref (message),
-					    (GDestroyNotify) g_object_unref,
-					    G_OBJECT (chat));
+
+	tp_text_channel_send_message_async (TP_TEXT_CHANNEL (priv->channel),
+		message, 0, message_send_cb, chat);
+
+	g_free (message_body);
 }
 
 void

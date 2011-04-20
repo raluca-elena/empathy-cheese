@@ -26,6 +26,7 @@
 #define __EMPATHY_MESSAGE_H__
 
 #include <glib-object.h>
+#include <telepathy-glib/message.h>
 #include <telepathy-logger/event.h>
 
 #include "empathy-contact.h"
@@ -53,11 +54,12 @@ struct _EmpathyMessageClass {
 };
 
 GType                    empathy_message_get_type          (void) G_GNUC_CONST;
-EmpathyMessage *         empathy_message_new               (const gchar              *body);
+
 EmpathyMessage *         empathy_message_from_tpl_log_event (TplEvent                *logevent);
+EmpathyMessage *         empathy_message_new_from_tp_message (TpMessage *tp_msg,
+							      gboolean incoming);
+
 TpChannelTextMessageType empathy_message_get_tptype        (EmpathyMessage           *message);
-void                     empathy_message_set_tptype        (EmpathyMessage           *message,
-							    TpChannelTextMessageType  type);
 EmpathyContact *         empathy_message_get_sender        (EmpathyMessage           *message);
 void                     empathy_message_set_sender        (EmpathyMessage           *message,
 							    EmpathyContact           *contact);
@@ -65,30 +67,19 @@ EmpathyContact *         empathy_message_get_receiver      (EmpathyMessage      
 void                     empathy_message_set_receiver      (EmpathyMessage           *message,
 							    EmpathyContact           *contact);
 const gchar *            empathy_message_get_body          (EmpathyMessage           *message);
-void                     empathy_message_set_body          (EmpathyMessage           *message,
-							    const gchar              *body);
-time_t                   empathy_message_get_timestamp     (EmpathyMessage           *message);
-void                     empathy_message_set_timestamp     (EmpathyMessage           *message,
-							    time_t                    timestamp);
+gint64                   empathy_message_get_timestamp     (EmpathyMessage           *message);
 gboolean                 empathy_message_is_backlog        (EmpathyMessage           *message);
-void                     empathy_message_set_is_backlog    (EmpathyMessage           *message,
-							    gboolean                 is_backlog);
 gboolean                 empathy_message_is_incoming       (EmpathyMessage           *message);
-void                     empathy_message_set_incoming      (EmpathyMessage           *message,
-							    gboolean                 incoming);
 
 gboolean                 empathy_message_should_highlight  (EmpathyMessage           *message);
 TpChannelTextMessageType empathy_message_type_from_str     (const gchar              *type_str);
 const gchar *            empathy_message_type_to_str       (TpChannelTextMessageType  type);
 
 guint                    empathy_message_get_id (EmpathyMessage *message);
-void                     empathy_message_set_id (EmpathyMessage *message, guint id);
 
 gboolean                 empathy_message_equal (EmpathyMessage *message1, EmpathyMessage *message2);
 
 TpChannelTextMessageFlags empathy_message_get_flags        (EmpathyMessage           *message);
-void                      empathy_message_set_flags        (EmpathyMessage           *message,
-							    TpChannelTextMessageFlags flags);
 
 G_END_DECLS
 

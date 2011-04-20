@@ -868,7 +868,7 @@ chat_command_me (EmpathyChat *chat,
 		  GStrv        strv)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	EmpathyMessage *message;
+	TpMessage *message;
 	TpChannel *channel;
 
 	channel = empathy_tp_chat_get_channel (priv->tp_chat);
@@ -888,12 +888,13 @@ chat_command_me (EmpathyChat *chat,
 
 		tmp = g_strdup_printf ("%s %s", empathy_contact_get_alias (self_contact),
 			strv[1]);
-		message = empathy_message_new (tmp);
+		message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+			tmp);
 		g_free (tmp);
 	}
 	else {
-		message = empathy_message_new (strv[1]);
-		empathy_message_set_tptype (message, TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION);
+		message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION,
+			strv[1]);
 	}
 
 	empathy_tp_chat_send (priv->tp_chat, message);
@@ -905,9 +906,10 @@ chat_command_say (EmpathyChat *chat,
 		  GStrv        strv)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	EmpathyMessage *message;
+	TpMessage *message;
 
-	message = empathy_message_new (strv[1]);
+	message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+		strv[1]);
 	empathy_tp_chat_send (priv->tp_chat, message);
 	g_object_unref (message);
 }
@@ -1074,7 +1076,7 @@ chat_send (EmpathyChat  *chat,
 	   const gchar *msg)
 {
 	EmpathyChatPriv *priv;
-	EmpathyMessage  *message;
+	TpMessage  *message;
 	guint            i;
 
 	if (EMP_STR_EMPTY (msg)) {
@@ -1144,7 +1146,8 @@ chat_send (EmpathyChat  *chat,
 		}
 	}
 
-	message = empathy_message_new (msg);
+	message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+		msg);
 	empathy_tp_chat_send (priv->tp_chat, message);
 	g_object_unref (message);
 }
@@ -1295,9 +1298,14 @@ chat_send_error_cb (EmpathyTpChat          *tp_chat,
 		break;
 	}
 
-	str = g_strdup_printf (_("Error sending message '%s': %s"),
-			       message_body,
-			       error);
+	if (message_body != NULL) {
+			str = g_strdup_printf (_("Error sending message '%s': %s"),
+				message_body, error);
+	}
+	else {
+			str = g_strdup_printf (_("Error sending message: %s"), error);
+	}
+
 	empathy_chat_view_append_event (chat->view, str);
 	g_free (str);
 }

@@ -221,7 +221,7 @@ map_view_contacts_update_label (ClutterActor *marker)
   gchar *date;
   gchar *label;
   GValue *gtime;
-  time_t loctime;
+  gint64 loctime;
   GHashTable *location;
   EmpathyContact *contact;
 
@@ -232,18 +232,24 @@ map_view_contacts_update_label (ClutterActor *marker)
 
   if (gtime != NULL)
     {
-      time_t now;
+      GDateTime *now, *d;
+      GTimeSpan delta;
 
       loctime = g_value_get_int64 (gtime);
       date = empathy_time_to_string_relative (loctime);
       label = g_strconcat ("<b>", name, "</b>\n<small>", date, "</small>", NULL);
       g_free (date);
 
-      now = time (NULL);
+      now = g_date_time_new_now_utc ();
+      d = g_date_time_new_from_unix_utc (loctime);
+      delta = g_date_time_difference (now, d);
 
       /* if location is older than a week */
-      if (now - loctime > (60 * 60 * 24 * 7))
+      if (delta > G_TIME_SPAN_DAY * 7)
         clutter_actor_set_opacity (marker, 0.75 * 255);
+
+      g_date_time_unref (now);
+      g_date_time_unref (d);
     }
   else
     {

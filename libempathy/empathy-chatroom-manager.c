@@ -873,6 +873,9 @@ observe_channels_cb (TpSimpleObserver *observer,
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
 
+      if (!TP_IS_TEXT_CHANNEL (channel))
+        continue;
+
       tp_chat = empathy_tp_chat_new (account, channel);
       roomname = empathy_tp_chat_get_id (tp_chat);
       chatroom = empathy_chatroom_manager_find (self, account, roomname);

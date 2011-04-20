@@ -622,13 +622,11 @@ location_update (EmpathyIndividualWidget *self)
       gchar *user_date;
       gchar *text;
       gint64 stamp;
-      time_t time_;
       gchar *tmp;
 
       stamp = g_value_get_int64 (value);
-      time_ = stamp;
 
-      user_date = empathy_time_to_string_relative (time_);
+      user_date = empathy_time_to_string_relative (stamp);
 
       tmp = g_strdup_printf ("<b>%s</b>", _("Location"));
       /* translators: format is "Location, $date" */
@@ -678,7 +676,7 @@ location_update (EmpathyIndividualWidget *self)
         }
       else if (G_VALUE_TYPE (gvalue) == G_TYPE_INT64)
         {
-          time_t time_;
+          gint64 time_;
 
           time_ = g_value_get_int64 (value);
           svalue = empathy_time_to_string_utc (time_, _("%B %e, %Y at %R UTC"));

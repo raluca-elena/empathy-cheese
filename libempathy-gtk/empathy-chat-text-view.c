@@ -48,7 +48,7 @@
 #include <libempathy/empathy-debug.h>
 
 /* Number of seconds between timestamps when using normal mode, 5 minutes. */
-#define TIMESTAMP_INTERVAL 300
+#define TIMESTAMP_INTERVAL (5 * G_TIME_SPAN_MINUTE)
 
 #define MAX_LINES 800
 #define MAX_SCROLL_TIME 0.4 /* seconds */
@@ -65,7 +65,7 @@ typedef struct {
 	gboolean              find_wrapped;
 	gboolean              find_last_direction;
 	EmpathyContact       *last_contact;
-	time_t                last_timestamp;
+	gint64                last_timestamp;
 	gboolean              allow_scrolling;
 	guint                 notify_system_fonts_id;
 	GSettings            *gsettings_desktop;
@@ -398,7 +398,7 @@ chat_text_view_maybe_trim_buffer (EmpathyChatTextView *view)
 
 static void
 chat_text_view_append_timestamp (EmpathyChatTextView *view,
-				 time_t               timestamp,
+				 gint64               timestamp,
 				 gboolean             show_date)
 {
 	EmpathyChatTextViewPriv *priv = GET_PRIV (view);
@@ -410,17 +410,12 @@ chat_text_view_append_timestamp (EmpathyChatTextView *view,
 
 	/* Append date if needed */
 	if (show_date) {
-		GDate *date;
-		gchar  buf[256];
-
-		date = g_date_new ();
-		g_date_set_time_t (date, timestamp);
 		/* Translators: timestamp displayed between conversations in
 		 * chat windows (strftime format string) */
-		g_date_strftime (buf, 256, _("%A %B %d %Y"), date);
-		g_string_append (str, buf);
+		tmp = empathy_time_to_string_utc (timestamp, _("%A %B %d %Y"));
+		g_string_append (str, tmp);
 		g_string_append (str, ", ");
-		g_date_free (date);
+		g_free (tmp);
 	}
 
 	/* Append time */
@@ -444,32 +439,32 @@ chat_text_view_append_timestamp (EmpathyChatTextView *view,
 
 static void
 chat_text_maybe_append_date_and_time (EmpathyChatTextView *view,
-				      time_t               timestamp)
+				      gint64               timestamp)
 {
 	EmpathyChatTextViewPriv *priv = GET_PRIV (view);
-	GDate                   *date, *last_date;
+	GDateTime               *date, *last_date;
 	gboolean                 append_date = FALSE;
 	gboolean                 append_time = FALSE;
+	GTimeSpan                delta;
 
 	/* Get the date from last message */
-	last_date = g_date_new ();
-	g_date_set_time_t (last_date, priv->last_timestamp);
+	last_date = g_date_time_new_from_unix_utc (priv->last_timestamp);
 
 	/* Get the date of the message we are appending */
-	date = g_date_new ();
-	g_date_set_time_t (date, timestamp);
+	date = g_date_time_new_from_unix_utc (timestamp);
 
+	delta = g_date_time_difference (last_date, date);
 	/* If last message was from another day we append date and time */
-	if (g_date_compare (date, last_date) > 0) {
+	if (delta >= G_TIME_SPAN_DAY) {
 		append_date = TRUE;
 		append_time = TRUE;
 	}
 
-	g_date_free (last_date);
-	g_date_free (date);
+	g_date_time_unref (last_date);
+	g_date_time_unref (date);
 
 	/* If last message is 'old' append the time */
-	if (timestamp - priv->last_timestamp >= TIMESTAMP_INTERVAL) {
+	if (delta >= TIMESTAMP_INTERVAL) {
 		append_time = TRUE;
 	}
 
@@ -725,7 +720,7 @@ chat_text_view_append_message (EmpathyChatView *view,
 	EmpathyChatTextView     *text_view = EMPATHY_CHAT_TEXT_VIEW (view);
 	EmpathyChatTextViewPriv *priv = GET_PRIV (text_view);
 	gboolean                 bottom;
-	time_t                   timestamp;
+	gint64                   timestamp;
 
 	g_return_if_fail (EMPATHY_IS_CHAT_TEXT_VIEW (view));
 	g_return_if_fail (EMPATHY_IS_MESSAGE (msg));
@@ -1320,7 +1315,7 @@ empathy_chat_text_view_get_last_contact (EmpathyChatTextView *view)
 	return priv->last_contact;
 }
 
-time_t
+gint64
 empathy_chat_text_view_get_last_timestamp (EmpathyChatTextView *view)
 {
 	EmpathyChatTextViewPriv *priv = GET_PRIV (view);

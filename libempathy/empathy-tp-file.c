@@ -79,7 +79,7 @@ struct _EmpathyTpFilePrivate {
 
   /* transfer properties */
   gboolean incoming;
-  time_t start_time;
+  gint64 start_time;
   GArray *socket_address;
   guint port;
   guint64 offset;
