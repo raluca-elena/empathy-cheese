@@ -1077,3 +1077,11 @@ empathy_account_chooser_get_account (EmpathyAccountChooser *chooser)
 
 	return account;
 }
+
+TpAccountManager *
+empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self)
+{
+	EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+
+	return priv->manager;
+}
