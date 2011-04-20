@@ -27,6 +27,7 @@
 typedef struct {
     GQueue *chain;
     GSimpleAsyncResult *simple;
+    gboolean running;
 } TplActionChain;
 
 TplActionChain *_tpl_action_chain_new_async (GObject *obj,
@@ -38,8 +39,10 @@ void _tpl_action_chain_append (TplActionChain *self, TplPendingAction func,
     gpointer user_data);
 void _tpl_action_chain_prepend (TplActionChain *self, TplPendingAction func,
     gpointer user_data);
+void _tpl_action_chain_start (TplActionChain *self);
 void _tpl_action_chain_continue (TplActionChain *self);
 void _tpl_action_chain_terminate (TplActionChain *self, const GError *error);
+
 gpointer _tpl_action_chain_get_object (TplActionChain *self);
 gboolean _tpl_action_chain_new_finish (GObject *source,
     GAsyncResult *result, GError **error);

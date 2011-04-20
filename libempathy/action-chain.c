@@ -104,18 +104,34 @@ _tpl_action_chain_append (TplActionChain *self,
   g_queue_push_tail (self->chain, l);
 }
 
+void
+_tpl_action_chain_start (TplActionChain *self)
+{
+  g_return_if_fail (!g_queue_is_empty (self->chain));
+
+  if (self->running)
+    return;
+
+  _tpl_action_chain_continue (self);
+}
 
 void
 _tpl_action_chain_continue (TplActionChain *self)
 {
   if (g_queue_is_empty (self->chain))
-    g_simple_async_result_complete (self->simple);
+    {
+      self->running = FALSE;
+      g_simple_async_result_complete (self->simple);
+    }
   else
     {
       TplActionLink *l = g_queue_pop_head (self->chain);
 
+      self->running = TRUE;
       l->action (self, l->user_data);
       link_free (l);
+      if (g_queue_is_empty (self->chain))
+        self->running = FALSE;
     }
 }
 
