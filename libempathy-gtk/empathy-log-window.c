@@ -1,7 +1,6 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2006-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,6 +19,7 @@
  *
  * Authors: Martyn Russell <martyn@imendio.com>
  *          Xavier Claessens <xclaesse@gmail.com>
+ *          Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
  */
 
 #include "config.h"
@@ -30,9 +30,15 @@
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
 
-#include <telepathy-glib/account-manager.h>
-#include <telepathy-logger/log-manager.h>
+#include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/proxy-subclass.h>
 
+#include <telepathy-logger/telepathy-logger.h>
+#include <telepathy-logger/call-event.h>
+
+#include <extensions/extensions.h>
+
+#include <libempathy/action-chain-internal.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-message.h>
@@ -41,148 +47,181 @@
 
 #include "empathy-log-window.h"
 #include "empathy-account-chooser.h"
+#include "empathy-call-utils.h"
 #include "empathy-chat-view.h"
+#include "empathy-contact-dialogs.h"
+#include "empathy-images.h"
 #include "empathy-theme-manager.h"
 #include "empathy-ui-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
 
-typedef struct {
-	GtkWidget         *window;
+typedef struct
+{
+  GtkWidget *window;
 
-	GtkWidget         *notebook;
+  GtkWidget *button_profile;
+  GtkWidget *button_chat;
+  GtkWidget *button_call;
+  GtkWidget *button_video;
 
-	GtkWidget         *entry_find;
-	GtkWidget         *button_find;
-	GtkWidget         *treeview_find;
-	GtkWidget         *scrolledwindow_find;
-	EmpathyChatView    *chatview_find;
-	GtkWidget         *button_previous;
-	GtkWidget         *button_next;
+  GtkWidget *search_entry;
 
-	GtkWidget         *vbox_chats;
-	GtkWidget         *account_chooser_chats;
-	GtkWidget         *entry_chats;
-	GtkWidget         *calendar_chats;
-	GtkWidget         *treeview_chats;
-	GtkWidget         *scrolledwindow_chats;
-	EmpathyChatView    *chatview_chats;
+  GtkWidget *treeview_who;
+  GtkWidget *treeview_what;
+  GtkWidget *treeview_when;
 
-	gchar             *last_find;
+  GtkWidget *scrolledwindow_events;
+  EmpathyChatView *chatview_events;
 
-	TplLogManager     *log_manager;
+  GtkWidget *account_chooser;
 
-	/* Those are only used while waiting for the account chooser to be ready */
-	TpAccount         *selected_account;
-	gchar             *selected_chat_id;
-	gboolean          selected_is_chatroom;
+  gchar *last_find;
+
+  TplActionChain *chain;
+  TplLogManager *log_manager;
+
+  /* List of owned TplLogSearchHits, free with tpl_log_search_hit_free */
+  GList *hits;
+
+  /* Only used while waiting for the account chooser to be ready */
+  TpAccount *selected_account;
+  gchar *selected_chat_id;
+  gboolean selected_is_chatroom;
 } EmpathyLogWindow;
 
 static void     log_window_destroy_cb                      (GtkWidget        *widget,
 							    EmpathyLogWindow *window);
-static void     log_window_entry_find_changed_cb           (GtkWidget        *entry,
+static void     log_window_search_entry_changed_cb         (GtkWidget        *entry,
 							    EmpathyLogWindow *window);
-static void     log_window_find_changed_cb                 (GtkTreeSelection *selection,
+static void     log_window_search_entry_activate_cb        (GtkWidget        *widget,
 							    EmpathyLogWindow *window);
-static void     log_window_find_populate                   (EmpathyLogWindow *window,
-							    const gchar      *search_criteria);
-static void     log_window_find_setup                      (EmpathyLogWindow *window);
-static void     log_window_button_find_clicked_cb          (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_entry_find_activate_cb          (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_button_next_clicked_cb          (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_button_previous_clicked_cb      (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_button_close_clicked_cb         (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_chats_changed_cb                (GtkTreeSelection *selection,
-							    EmpathyLogWindow *window);
-static void     log_window_chats_populate                  (EmpathyLogWindow *window);
-static void     log_window_chats_setup                     (EmpathyLogWindow *window);
+static void     log_window_who_populate                    (EmpathyLogWindow *window);
+static void     log_window_who_setup                       (EmpathyLogWindow *window);
+static void     log_window_when_setup                      (EmpathyLogWindow *window);
+static void     log_window_what_setup                      (EmpathyLogWindow *window);
 static void     log_window_chats_accounts_changed_cb       (GtkWidget        *combobox,
 							    EmpathyLogWindow *window);
 static void     log_window_chats_set_selected              (EmpathyLogWindow *window);
-static gboolean log_window_chats_get_selected              (EmpathyLogWindow *window,
-							    TpAccount       **account,
-							    TplEntity        **target);
 static void     log_window_chats_get_messages              (EmpathyLogWindow *window,
-							    GDate      *date_to_show);
-static void     log_window_calendar_chats_day_selected_cb  (GtkWidget        *calendar,
+                                                            gboolean force_get_dates);
+static void     log_window_when_changed_cb                 (GtkTreeSelection *selection,
 							    EmpathyLogWindow *window);
-static void     log_window_calendar_chats_month_changed_cb (GtkWidget        *calendar,
-							    EmpathyLogWindow *window);
-static void     log_window_entry_chats_changed_cb          (GtkWidget        *entry,
-							    EmpathyLogWindow *window);
-static void     log_window_entry_chats_activate_cb         (GtkWidget        *entry,
+static void     log_window_delete_menu_clicked_cb          (GtkMenuItem      *menuitem,
 							    EmpathyLogWindow *window);
 
-enum {
-	COL_FIND_ACCOUNT_ICON,
-	COL_FIND_ACCOUNT_NAME,
-	COL_FIND_ACCOUNT,
-	COL_FIND_CHAT_NAME,
-	COL_FIND_TARGET,
-	COL_FIND_DATE,
-	COL_FIND_DATE_READABLE,
-	COL_FIND_COUNT
+static void
+empathy_account_chooser_filter_has_logs (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    gpointer user_data);
+
+enum
+{
+  COL_TYPE_ANY,
+  COL_TYPE_SEPARATOR,
+  COL_TYPE_NORMAL
 };
 
-enum {
-	COL_CHAT_ICON,
-	COL_CHAT_NAME,
-	COL_CHAT_ACCOUNT,
-	COL_CHAT_TARGET,
-	COL_CHAT_COUNT
+enum
+{
+  COL_WHO_TYPE,
+  COL_WHO_ICON,
+  COL_WHO_NAME,
+  COL_WHO_ACCOUNT,
+  COL_WHO_TARGET,
+  COL_WHO_COUNT
 };
+
+enum
+{
+  COL_WHAT_TYPE,
+  COL_WHAT_SUBTYPE,
+  COL_WHAT_TEXT,
+  COL_WHAT_ICON,
+  COL_WHAT_EXPANDER,
+  COL_WHAT_COUNT
+};
+
+enum
+{
+  COL_WHEN_DATE,
+  COL_WHEN_TEXT,
+  COL_WHEN_ICON,
+  COL_WHEN_COUNT
+};
+
+#define CALENDAR_ICON "stock_calendar"
+
+typedef enum
+{
+  EVENT_CALL_INCOMING = 1 << 0,
+  EVENT_CALL_OUTGOING = 1 << 1,
+  EVENT_CALL_MISSED   = 1 << 2,
+  EVENT_CALL_ALL      = 1 << 3,
+} EventSubtype;
 
 static EmpathyLogWindow *log_window = NULL;
 
-static void
-account_manager_prepared_cb (GObject *source_object,
-			     GAsyncResult *result,
-			     gpointer user_data)
+static gboolean has_element;
+
+#ifndef _date_copy
+#define _date_copy(d) g_date_new_julian (g_date_get_julian (d))
+#endif
+
+typedef struct
 {
-	TpAccountManager *account_manager = TP_ACCOUNT_MANAGER (source_object);
-	EmpathyLogWindow *window = user_data;
-	guint account_num;
-	GList *accounts;
-	GError *error = NULL;
+  EmpathyLogWindow *window;
+  TpAccount *account;
+  TplEntity *entity;
+  GDate *date;
+  TplEventTypeMask event_mask;
+  EventSubtype subtype;
+} Ctx;
 
-	if (log_window == NULL)
-		return;
+static Ctx *
+ctx_new (EmpathyLogWindow *window,
+    TpAccount *account,
+    TplEntity *entity,
+    GDate *date,
+    TplEventTypeMask event_mask,
+    EventSubtype subtype)
+{
+  Ctx *ctx = g_slice_new0 (Ctx);
 
-	if (!tp_account_manager_prepare_finish (account_manager, result, &error)) {
-		DEBUG ("Failed to prepare account manager: %s", error->message);
-		g_error_free (error);
-		return;
-	}
+  ctx->window = window;
+  if (account != NULL)
+    ctx->account = g_object_ref (account);
+  if (entity != NULL)
+    ctx->entity = g_object_ref (entity);
+  if (date != NULL)
+    ctx->date = _date_copy (date);
+  ctx->event_mask = event_mask;
+  ctx->subtype = subtype;
 
-	accounts = tp_account_manager_get_valid_accounts (account_manager);
-	account_num = g_list_length (accounts);
-	g_list_free (accounts);
+  return ctx;
+}
 
-	if (account_num > 1) {
-		gtk_widget_show (window->vbox_chats);
-		gtk_widget_show (window->account_chooser_chats);
-	} else {
-		gtk_widget_hide (window->vbox_chats);
-		gtk_widget_hide (window->account_chooser_chats);
-	}
+static void
+ctx_free (Ctx *ctx)
+{
+  tp_clear_object (&ctx->account);
+  tp_clear_object (&ctx->entity);
+  if (ctx->date != NULL)
+    g_date_free (ctx->date);
+
+  g_slice_free (Ctx, ctx);
 }
 
 static void
 account_chooser_ready_cb (EmpathyAccountChooser *chooser,
 			EmpathyLogWindow *window)
 {
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->notebook), 1);
-
 	/* We'll display the account once the model has been populate with the chats
 	 * of this account. */
 	empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
-		window->account_chooser_chats), window->selected_account);
+		window->account_chooser), window->selected_account);
 }
 
 static void
@@ -191,7 +230,7 @@ select_account_once_ready (EmpathyLogWindow *self,
 			   const gchar *chat_id,
 			   gboolean is_chatroom)
 {
-	EmpathyAccountChooser *account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->account_chooser_chats);
+	EmpathyAccountChooser *account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->account_chooser);
 
 	tp_clear_object (&self->selected_account);
 	self->selected_account = g_object_ref (account);
@@ -209,558 +248,733 @@ select_account_once_ready (EmpathyLogWindow *self,
 				  G_CALLBACK (account_chooser_ready_cb), self);
 }
 
+static void
+toolbutton_profile_clicked (GtkToolButton *toolbutton,
+    EmpathyLogWindow *window)
+{
+  GtkTreeView *view;
+  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  TpAccount *account;
+  TplEntity *target;
+  EmpathyContact *contact;
+  gint type;
+
+  g_return_if_fail (window != NULL);
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_get_selected (selection, &model, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &account,
+          COL_WHO_TARGET, &target,
+          COL_WHO_TYPE, &type,
+          -1);
+    }
+
+  g_return_if_fail (type == COL_TYPE_NORMAL);
+
+  contact = empathy_contact_from_tpl_contact (account, target);
+  empathy_contact_information_dialog_show (contact,
+      GTK_WINDOW (window->window));
+
+  g_object_unref (contact);
+  g_object_unref (account);
+  g_object_unref (target);
+}
+
+static void
+toolbutton_chat_clicked (GtkToolButton *toolbutton,
+    EmpathyLogWindow *window)
+{
+  GtkTreeView *view;
+  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  TpAccount *account;
+  TplEntity *target;
+  EmpathyContact *contact;
+  gint type;
+
+  g_return_if_fail (window != NULL);
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_get_selected (selection, &model, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &account,
+          COL_WHO_TARGET, &target,
+          COL_WHO_TYPE, &type,
+          -1);
+    }
+
+  g_return_if_fail (type == COL_TYPE_NORMAL);
+
+  contact = empathy_contact_from_tpl_contact (account, target);
+  empathy_dispatcher_chat_with_contact (contact,
+      gtk_get_current_event_time ());
+
+  g_object_unref (contact);
+  g_object_unref (account);
+  g_object_unref (target);
+}
+
+static void
+toolbutton_av_clicked (GtkToolButton *toolbutton,
+    EmpathyLogWindow *window)
+{
+  GtkTreeView *view;
+  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  TpAccount *account;
+  gchar *contact;
+  gint type;
+  gboolean video;
+
+  g_return_if_fail (window != NULL);
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_get_selected (selection, &model, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &account,
+          COL_WHO_NAME, &contact,
+          COL_WHO_TYPE, &type,
+          -1);
+    }
+
+  g_return_if_fail (type == COL_TYPE_NORMAL);
+
+  video = (GTK_WIDGET (toolbutton) == window->button_video);
+
+  empathy_call_new_with_streams (contact, account,
+      TRUE, video, gtk_get_current_event_time ());
+
+  g_free (contact);
+  g_object_unref (account);
+}
+
 GtkWidget *
 empathy_log_window_show (TpAccount  *account,
-			const gchar *chat_id,
-			gboolean     is_chatroom,
-			GtkWindow   *parent)
+    const gchar *chat_id,
+    gboolean     is_chatroom,
+    GtkWindow   *parent)
 {
-	TpAccountManager        *account_manager;
-	GtkBuilder             *gui;
-	gchar                  *filename;
-	EmpathyLogWindow       *window;
-	EmpathyThemeManager    *theme_mgr;
+  EmpathyAccountChooser   *account_chooser;
+  GtkBuilder             *gui;
+  gchar                  *filename;
+  EmpathyLogWindow       *window;
+  EmpathyThemeManager    *theme_mgr;
+  GtkWidget *vbox, *accounts, *search, *label, *quit;
 
-	if (log_window != NULL) {
-		gtk_window_present (GTK_WINDOW (log_window->window));
+  if (log_window != NULL)
+    {
+      gtk_window_present (GTK_WINDOW (log_window->window));
 
-		if (account != NULL && chat_id != NULL) {
-			gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook), 1);
-			select_account_once_ready (log_window, account, chat_id, is_chatroom);
-		}
+      if (account != NULL && chat_id != NULL)
+        select_account_once_ready (log_window, account, chat_id, is_chatroom);
 
-		return log_window->window;
-	}
+      return log_window->window;
+    }
 
-	log_window = g_new0 (EmpathyLogWindow, 1);
-	log_window->log_manager = tpl_log_manager_dup_singleton ();
+  log_window = g_new0 (EmpathyLogWindow, 1);
+  log_window->chain = _tpl_action_chain_new_async (NULL, NULL, NULL);
 
-	window = log_window;
+  log_window->log_manager = tpl_log_manager_dup_singleton ();
 
-	filename = empathy_file_lookup ("empathy-log-window.ui",
-					"libempathy-gtk");
-	gui = empathy_builder_get_file (filename,
-				       "log_window", &window->window,
-				       "notebook", &window->notebook,
-				       "entry_find", &window->entry_find,
-				       "button_find", &window->button_find,
-				       "treeview_find", &window->treeview_find,
-				       "scrolledwindow_find", &window->scrolledwindow_find,
-				       "button_previous", &window->button_previous,
-				       "button_next", &window->button_next,
-				       "entry_chats", &window->entry_chats,
-				       "calendar_chats", &window->calendar_chats,
-				       "vbox_chats", &window->vbox_chats,
-				       "treeview_chats", &window->treeview_chats,
-				       "scrolledwindow_chats", &window->scrolledwindow_chats,
-				       NULL);
-	g_free (filename);
+  window = log_window;
 
-	empathy_builder_connect (gui, window,
-			      "log_window", "destroy", log_window_destroy_cb,
-			      "entry_find", "changed", log_window_entry_find_changed_cb,
-			      "entry_find", "activate", log_window_entry_find_activate_cb,
-			      "button_previous", "clicked", log_window_button_previous_clicked_cb,
-			      "button_next", "clicked", log_window_button_next_clicked_cb,
-			      "button_close", "clicked", log_window_button_close_clicked_cb,
-			      "button_close2", "clicked", log_window_button_close_clicked_cb,
-			      "button_find", "clicked", log_window_button_find_clicked_cb,
-			      "entry_chats", "changed", log_window_entry_chats_changed_cb,
-			      "entry_chats", "activate", log_window_entry_chats_activate_cb,
-			      NULL);
+  filename = empathy_file_lookup ("empathy-log-window.ui", "libempathy-gtk");
+  gui = empathy_builder_get_file (filename,
+      "log_window", &window->window,
+      "toolbutton_profile", &window->button_profile,
+      "toolbutton_chat", &window->button_chat,
+      "toolbutton_call", &window->button_call,
+      "toolbutton_video", &window->button_video,
+      "toolbutton_accounts", &accounts,
+      "toolbutton_search", &search,
+      "imagemenuitem_quit", &quit,
+      "treeview_who", &window->treeview_who,
+      "treeview_what", &window->treeview_what,
+      "treeview_when", &window->treeview_when,
+      "scrolledwindow_events", &window->scrolledwindow_events,
+      NULL);
+  g_free (filename);
 
-	g_object_unref (gui);
+  empathy_builder_connect (gui, window,
+      "log_window", "destroy", log_window_destroy_cb,
+      "toolbutton_profile", "clicked", toolbutton_profile_clicked,
+      "toolbutton_chat", "clicked", toolbutton_chat_clicked,
+      "toolbutton_call", "clicked", toolbutton_av_clicked,
+      "toolbutton_video", "clicked", toolbutton_av_clicked,
+      "imagemenuitem_delete", "activate", log_window_delete_menu_clicked_cb,
+      NULL);
 
-	g_object_add_weak_pointer (G_OBJECT (window->window),
-				   (gpointer) &log_window);
+  g_object_unref (gui);
 
-	/* We set this up here so we can block it when needed. */
-	g_signal_connect (window->calendar_chats, "day-selected",
-			  G_CALLBACK (log_window_calendar_chats_day_selected_cb),
-			  window);
-	g_signal_connect (window->calendar_chats, "month-changed",
-			  G_CALLBACK (log_window_calendar_chats_month_changed_cb),
-			  window);
+  g_object_add_weak_pointer (G_OBJECT (window->window),
+      (gpointer) &log_window);
 
-	/* Configure Search EmpathyChatView */
-	theme_mgr = empathy_theme_manager_dup_singleton ();
-	window->chatview_find = empathy_theme_manager_create_view (theme_mgr);
-	gtk_container_add (GTK_CONTAINER (window->scrolledwindow_find),
-			   GTK_WIDGET (window->chatview_find));
-	gtk_widget_show (GTK_WIDGET (window->chatview_find));
+  g_signal_connect_swapped (quit, "activate",
+      G_CALLBACK (gtk_widget_destroy), window->window);
 
-	/* Configure Contacts EmpathyChatView */
-	window->chatview_chats = empathy_theme_manager_create_view (theme_mgr);
-	gtk_container_add (GTK_CONTAINER (window->scrolledwindow_chats),
-			   GTK_WIDGET (window->chatview_chats));
-	gtk_widget_show (GTK_WIDGET (window->chatview_chats));
-	g_object_unref (theme_mgr);
+  /* Configure Contacts EmpathyChatView */
+  theme_mgr = empathy_theme_manager_dup_singleton ();
+  window->chatview_events = empathy_theme_manager_create_view (theme_mgr);
+  gtk_container_add (GTK_CONTAINER (window->scrolledwindow_events),
+      GTK_WIDGET (window->chatview_events));
+  gtk_widget_show (GTK_WIDGET (window->chatview_events));
+  g_object_unref (theme_mgr);
 
-	/* Account chooser for chats */
-	window->account_chooser_chats = empathy_account_chooser_new ();
+  /* Account chooser for chats */
+  vbox = gtk_vbox_new (FALSE, 3);
 
-	gtk_box_pack_start (GTK_BOX (window->vbox_chats),
-			    window->account_chooser_chats,
-			    FALSE, TRUE, 0);
+  window->account_chooser = empathy_account_chooser_new ();
+  account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser);
+  empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
+  empathy_account_chooser_set_filter (account_chooser,
+      empathy_account_chooser_filter_has_logs, NULL);
 
-	g_signal_connect (window->account_chooser_chats, "changed",
-			  G_CALLBACK (log_window_chats_accounts_changed_cb),
-			  window);
+  g_signal_connect (window->account_chooser, "changed",
+      G_CALLBACK (log_window_chats_accounts_changed_cb),
+      window);
 
-	/* Populate */
-	account_manager = tp_account_manager_dup ();
-	tp_account_manager_prepare_async (account_manager, NULL,
-					  account_manager_prepared_cb, window);
-	g_object_unref (account_manager);
+  label = gtk_label_new (_("Show"));
 
-	/* Search List */
-	log_window_find_setup (window);
+  gtk_box_pack_start (GTK_BOX (vbox),
+      window->account_chooser,
+      FALSE, FALSE, 0);
 
-	/* Contacts */
-	log_window_chats_setup (window);
-	log_window_chats_populate (window);
+  gtk_box_pack_start (GTK_BOX (vbox),
+      label,
+      FALSE, FALSE, 0);
 
-	if (account != NULL && chat_id != NULL)
-		select_account_once_ready (window, account, chat_id, is_chatroom);
+  gtk_widget_show_all (vbox);
+  gtk_container_add (GTK_CONTAINER (accounts), vbox);
 
-	if (parent != NULL) {
-		gtk_window_set_transient_for (GTK_WINDOW (window->window),
-					      GTK_WINDOW (parent));
-	}
+  /* Search entry */
+  vbox = gtk_vbox_new (FALSE, 3);
 
-	gtk_widget_show (window->window);
+  window->search_entry = gtk_entry_new ();
+  gtk_entry_set_icon_from_stock (GTK_ENTRY (window->search_entry),
+      GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
 
-	return window->window;
+  label = gtk_label_new (_("Search"));
+
+  gtk_box_pack_start (GTK_BOX (vbox),
+      window->search_entry,
+      FALSE, FALSE, 0);
+
+  gtk_box_pack_start (GTK_BOX (vbox),
+      label,
+      FALSE, FALSE, 0);
+
+  gtk_widget_show_all (vbox);
+  gtk_container_add (GTK_CONTAINER (search), vbox);
+
+  g_signal_connect (window->search_entry, "changed",
+      G_CALLBACK (log_window_search_entry_changed_cb),
+      window);
+
+  g_signal_connect (window->search_entry, "activate",
+      G_CALLBACK (log_window_search_entry_activate_cb),
+      window);
+
+  /* Contacts */
+  log_window_who_setup (window);
+  log_window_what_setup (window);
+  log_window_when_setup (window);
+
+  log_window_who_populate (window);
+
+  if (account != NULL && chat_id != NULL)
+    select_account_once_ready (window, account, chat_id, is_chatroom);
+
+  if (parent != NULL)
+    gtk_window_set_transient_for (GTK_WINDOW (window->window),
+        GTK_WINDOW (parent));
+
+  gtk_widget_show (window->window);
+
+  return window->window;
 }
 
 static void
-log_window_destroy_cb (GtkWidget       *widget,
-		       EmpathyLogWindow *window)
+log_window_destroy_cb (GtkWidget *widget,
+    EmpathyLogWindow *window)
 {
-	g_free (window->last_find);
-	g_object_unref (window->log_manager);
-	tp_clear_object (&window->selected_account);
-	g_free (window->selected_chat_id);
+  g_free (window->last_find);
+  _tpl_action_chain_free (window->chain);
+  g_object_unref (window->log_manager);
+  tp_clear_object (&window->selected_account);
+  g_free (window->selected_chat_id);
 
-	g_free (window);
+  g_free (window);
 }
 
-/*
- * Search code.
- */
+static gboolean
+log_window_chats_get_selected (EmpathyLogWindow *window,
+    TpAccount **account,
+    TplEntity **target,
+    GDate **date,
+    TplEventTypeMask *event_mask,
+    EventSubtype *subtype)
+{
+  GtkTreeView      *view;
+  GtkTreeModel     *model;
+  GtkTreeSelection *selection;
+  GtkTreeIter       iter;
+  TplEntity        *targ;
+  TpAccount        *acc = NULL;
+  TplEventTypeMask  ev = 0;
+  EventSubtype      st = 0;
+  GDate            *d = NULL;
+
+  view = GTK_TREE_VIEW (window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
+    return FALSE;
+
+  gtk_tree_model_get (model, &iter,
+      COL_WHO_ACCOUNT, &acc,
+      COL_WHO_TARGET, &targ,
+      -1);
+
+  view = GTK_TREE_VIEW (window->treeview_what);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHAT_TYPE, &ev,
+          COL_WHAT_SUBTYPE, &st,
+          -1);
+    }
+
+  view = GTK_TREE_VIEW (window->treeview_when);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHEN_DATE, &d,
+          -1);
+    }
+
+  if (account != NULL)
+    *account = acc ? g_object_ref (acc) : NULL;
+
+  if (target != NULL)
+    *target = targ ? g_object_ref (targ) : NULL;
+
+  if (date != NULL)
+    *date = d;
+
+  if (event_mask != NULL)
+    *event_mask = ev;
+
+  if (subtype != NULL)
+    *subtype = st;
+
+  tp_clear_object (&acc);
+  tp_clear_object (&targ);
+
+  return TRUE;
+}
+
+static gboolean
+account_equal (TpAccount *a,
+    TpAccount *b)
+{
+  return g_str_equal (tp_proxy_get_object_path (a),
+      tp_proxy_get_object_path (b));
+}
+
+static gboolean
+entity_equal (TplEntity *a,
+    TplEntity *b)
+{
+  return g_str_equal (tpl_entity_get_identifier (a),
+      tpl_entity_get_identifier (b));
+}
+
+static gboolean
+model_has_entity (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    gpointer data)
+{
+  TplLogSearchHit *hit = data;
+  TplEntity *e;
+  TpAccount *a;
+
+  gtk_tree_model_get (model, iter,
+      COL_WHO_TARGET, &e,
+      COL_WHO_ACCOUNT, &a,
+      -1);
+
+  if (e != NULL && entity_equal (hit->target, e) &&
+      a != NULL && account_equal (hit->account, a))
+    {
+      has_element = TRUE;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+model_has_date (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    gpointer data)
+{
+  GDate *date = data;
+  GDate *d;
+
+  gtk_tree_model_get (model, iter,
+      COL_WHEN_DATE, &d,
+      -1);
+
+  if (!g_date_compare (date, d))
+    {
+      has_element = TRUE;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
-log_window_entry_find_changed_cb (GtkWidget       *entry,
-				  EmpathyLogWindow *window)
+get_events_for_date (TplActionChain *chain, gpointer user_data);
+
+static void
+populate_events_from_search_hits (TpAccount *account,
+    TplEntity *target,
+    GDate *date)
 {
-	const gchar *str;
-	gboolean     is_sensitive = TRUE;
+  TplEventTypeMask event_mask;
+  EventSubtype subtype;
+  GDate *anytime;
+  GList *l;
 
-	str = gtk_entry_get_text (GTK_ENTRY (window->entry_find));
+  if (!log_window_chats_get_selected (log_window,
+      NULL, NULL, NULL, &event_mask, &subtype))
+    return;
 
-	is_sensitive &= !EMP_STR_EMPTY (str);
-	is_sensitive &=
-		!window->last_find ||
-		(window->last_find && tp_strdiff (window->last_find, str));
+  anytime = g_date_new_dmy (2, 1, -1);
 
-	gtk_widget_set_sensitive (window->button_find, is_sensitive);
+  for (l = log_window->hits; l != NULL; l = l->next)
+    {
+      TplLogSearchHit *hit = l->data;
+
+      /* Protect against invalid data (corrupt or old log files). */
+      if (hit->account == NULL || hit->target == NULL)
+        continue;
+
+      if (!account_equal (hit->account, account) ||
+          !entity_equal (hit->target, target))
+        continue;
+
+      if (g_date_compare (date, anytime) == 0 ||
+          g_date_compare (date, hit->date) == 0)
+        {
+          Ctx *ctx;
+
+          ctx = ctx_new (log_window, hit->account, hit->target, hit->date,
+              event_mask, subtype);
+          _tpl_action_chain_append (log_window->chain,
+              get_events_for_date, ctx);
+        }
+    }
+
+  _tpl_action_chain_start (log_window->chain);
+
+  g_date_free (anytime);
 }
 
 static void
-got_events_for_date_cb (GObject *manager,
-                       GAsyncResult *result,
-                       gpointer user_data)
+populate_dates_from_search_hits (TpAccount *account,
+    TplEntity *target)
 {
-	EmpathyLogWindow *window = user_data;
-	GList         *messages;
-	GList         *l;
-	gboolean       can_do_previous;
-	gboolean       can_do_next;
-	GError        *error = NULL;
+  GList *l;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeIter iter;
 
-	if (log_window == NULL)
-		return;
+  if (log_window == NULL)
+    return;
 
-	if (!tpl_log_manager_get_events_for_date_finish (TPL_LOG_MANAGER (manager),
-		result, &messages, &error)) {
-			DEBUG ("Unable to retrieve messages for the selected date: %s. Aborting",
-					error->message);
-			empathy_chat_view_append_event (window->chatview_find,
-					"Unable to retrieve messages for the selected date");
-			g_error_free (error);
-			return;
-	}
+  view = GTK_TREE_VIEW (log_window->treeview_when);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
 
-	for (l = messages; l; l = l->next) {
-			EmpathyMessage *message;
+  for (l = log_window->hits; l != NULL; l = l->next)
+    {
+      TplLogSearchHit *hit = l->data;
 
-			g_assert (TPL_IS_EVENT (l->data));
+      /* Protect against invalid data (corrupt or old log files). */
+      if (hit->account == NULL || hit->target == NULL)
+        continue;
 
-			message = empathy_message_from_tpl_log_event (l->data);
-			g_object_unref (l->data);
-			empathy_chat_view_append_message (window->chatview_find, message);
-			g_object_unref (message);
-	}
-	g_list_free (messages);
+      if (!account_equal (hit->account, account) ||
+          !entity_equal (hit->target, target))
+        continue;
 
-	/* Scroll to the most recent messages */
-	empathy_chat_view_scroll (window->chatview_find, TRUE);
+      /* Add the date if it's not already there */
+      has_element = FALSE;
+      gtk_tree_model_foreach (model, model_has_date, hit->date);
+      if (!has_element)
+        {
+          gchar *text = g_strdup_printf ("%02d/%02d/%d",
+              g_date_get_day (hit->date),
+              g_date_get_month (hit->date),
+              g_date_get_year (hit->date));
 
-	/* Highlight and find messages */
-	empathy_chat_view_highlight (window->chatview_find,
-			window->last_find,
-			FALSE);
-	empathy_chat_view_find_next (window->chatview_find,
-			window->last_find,
-			TRUE,
-			FALSE);
-	empathy_chat_view_find_abilities (window->chatview_find,
-			window->last_find,
-			FALSE,
-			&can_do_previous,
-			&can_do_next);
-	gtk_widget_set_sensitive (window->button_previous, can_do_previous);
-	gtk_widget_set_sensitive (window->button_next, can_do_next);
-	gtk_widget_set_sensitive (window->button_find, FALSE);
-}
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHEN_DATE, hit->date,
+              COL_WHEN_TEXT, text,
+              COL_WHEN_ICON, CALENDAR_ICON,
+              -1);
+        }
+    }
 
-static GDate *
-gdate_from_str (const gchar *str)
-{
-	guint u;
-	guint day, month, year;
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
+          COL_WHEN_TEXT, "separator",
+          -1);
 
-	if (sscanf (str, "%u", &u) != 1)
-		return NULL;
-
-	day = (u % 100);
-	month = ((u / 100) % 100);
-	year = (u / 10000);
-
-	if (!g_date_valid_dmy (day, month, year))
-		return NULL;
-
-	return g_date_new_dmy (day, month, year);
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
+          COL_WHEN_TEXT, _("Anytime"),
+          -1);
+    }
 }
 
 static void
-log_window_find_changed_cb (GtkTreeSelection *selection,
-			    EmpathyLogWindow  *window)
+populate_entities_from_search_hits (void)
 {
-	GtkTreeView   *view;
-	GtkTreeModel  *model;
-	GtkTreeIter    iter;
-	TpAccount     *account;
-	TplEntity     *target;
-	gchar         *date;
-	GDate         *gdate;
+  EmpathyAccountChooser *account_chooser;
+  TpAccount *account;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  GtkListStore *store;
+  GList *l;
 
-	/* Get selected information */
-	view = GTK_TREE_VIEW (window->treeview_find);
-	model = gtk_tree_view_get_model (view);
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
 
-	if (!gtk_tree_selection_get_selected (selection, NULL, &iter)) {
-		gtk_widget_set_sensitive (window->button_previous, FALSE);
-		gtk_widget_set_sensitive (window->button_next, FALSE);
+  gtk_list_store_clear (store);
 
-		empathy_chat_view_clear (window->chatview_find);
+  account_chooser = EMPATHY_ACCOUNT_CHOOSER (log_window->account_chooser);
+  account = empathy_account_chooser_get_account (account_chooser);
 
-		return;
-	}
+  for (l = log_window->hits; l; l = l->next)
+    {
+      TplLogSearchHit *hit = l->data;
 
-	gtk_widget_set_sensitive (window->button_previous, TRUE);
-	gtk_widget_set_sensitive (window->button_next, TRUE);
+      /* Protect against invalid data (corrupt or old log files). */
+      if (hit->account == NULL || hit->target == NULL)
+        continue;
 
-	gtk_tree_model_get (model, &iter,
-			    COL_FIND_ACCOUNT, &account,
-			    COL_FIND_TARGET, &target,
-			    COL_FIND_DATE, &date,
-			    -1);
+      /* Filter based on the selected account */
+      if (account != NULL && !account_equal (account, hit->account))
+        continue;
 
-	/* Clear all current messages shown in the textview */
-	empathy_chat_view_clear (window->chatview_find);
+      /* Add the entity if it's not already there */
+      has_element = FALSE;
+      gtk_tree_model_foreach (model, model_has_entity, hit);
+      if (!has_element)
+        {
+          TplEntityType type = tpl_entity_get_entity_type (hit->target);
+          gboolean room = type == TPL_ENTITY_ROOM;
 
-	/* Turn off scrolling temporarily */
-	empathy_chat_view_scroll (window->chatview_find, FALSE);
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHO_TYPE, COL_TYPE_NORMAL,
+              COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
+                                 : EMPATHY_IMAGE_AVATAR_DEFAULT,
+              COL_WHO_NAME, tpl_entity_get_alias (hit->target),
+              COL_WHO_ACCOUNT, hit->account,
+              COL_WHO_TARGET, hit->target,
+              -1);
+        }
+    }
 
-	/* Get messages */
-	gdate = gdate_from_str (date);
+#if 0
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+              COL_WHO_TYPE, COL_TYPE_SEPARATOR,
+          COL_WHO_NAME, "separator",
+          -1);
 
-	if (gdate != NULL) {
-		tpl_log_manager_get_events_for_date_async (window->log_manager,
-							   account,
-							   target,
-							   TPL_EVENT_MASK_TEXT,
-							   gdate,
-							   got_events_for_date_cb,
-							   window);
-
-		g_date_free (gdate);
-	}
-
-	g_object_unref (account);
-	g_object_unref (target);
-	g_free (date);
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHO_TYPE, COL_TYPE_ANY,
+          COL_WHO_NAME, _("Anyone"),
+          -1);
+    }
+#endif
 }
-
 
 static void
 log_manager_searched_new_cb (GObject *manager,
-                             GAsyncResult *result,
-                             gpointer user_data)
+    GAsyncResult *result,
+    gpointer user_data)
 {
-	GList               *hits;
-	GList               *l;
-	GtkTreeIter          iter;
-	GtkListStore        *store = user_data;
-	GError              *error = NULL;
+  GList *hits;
+  GtkTreeView *view;
+  GtkTreeSelection *selection;
+  GError *error = NULL;
 
-	if (log_window == NULL)
-		return;
+  if (log_window == NULL)
+    return;
 
-	if (!tpl_log_manager_search_finish (TPL_LOG_MANAGER (manager), result,
-		&hits, &error)) {
-			DEBUG ("%s. Aborting", error->message);
-			g_error_free (error);
-			return;
-	}
+  if (!tpl_log_manager_search_finish (TPL_LOG_MANAGER (manager),
+      result, &hits, &error))
+    {
+      DEBUG ("%s. Aborting", error->message);
+      g_error_free (error);
+      return;
+    }
 
-	for (l = hits; l; l = l->next) {
-			TplLogSearchHit *hit;
-			const gchar         *account_name;
-			const gchar         *account_icon;
-			gchar               date_readable[255];
-			gchar               tmp[255];
+  tp_clear_pointer (&log_window->hits, tpl_log_manager_search_free);
+  log_window->hits = hits;
 
-			hit = l->data;
+  populate_entities_from_search_hits ();
 
-			/* Protect against invalid data (corrupt or old log files. */
-			if (hit->account == NULL || hit->target == NULL) {
-					continue;
-			}
+  /* FIXME: select old entity if still available, and populate the dates */
+  //populate_dates_from_search_hits (NULL, NULL);
 
-			g_date_strftime (date_readable, sizeof (date_readable),
-				EMPATHY_DATE_FORMAT_DISPLAY_SHORT, hit->date);
+  view = GTK_TREE_VIEW (log_window->treeview_when);
+  selection = gtk_tree_view_get_selection (view);
 
-			g_date_strftime (tmp, sizeof (tmp),
-				"%Y%m%d", hit->date);
-
-			account_name = tp_account_get_display_name (hit->account);
-			account_icon = tp_account_get_icon_name (hit->account);
-
-			gtk_list_store_append (store, &iter);
-			gtk_list_store_set (store, &iter,
-					COL_FIND_ACCOUNT_ICON, account_icon,
-					COL_FIND_ACCOUNT_NAME, account_name,
-					COL_FIND_ACCOUNT, hit->account,
-					COL_FIND_CHAT_NAME, tpl_entity_get_alias (hit->target),
-					COL_FIND_TARGET, hit->target,
-					COL_FIND_DATE, tmp,
-					COL_FIND_DATE_READABLE, date_readable,
-					-1);
-
-			/* FIXME: Update COL_FIND_CHAT_NAME */
-			if (tpl_entity_get_entity_type (hit->target) == TPL_ENTITY_ROOM) {
-			} else {
-			}
-	}
-
-	if (hits != NULL) {
-			tpl_log_manager_search_free (hits);
-	}
+  g_signal_handlers_unblock_by_func (selection,
+      log_window_when_changed_cb,
+      log_window);
 }
+
+#if 0
+static gboolean
+search_results_filter_entities (GtkTreeModel *model,
+    GtkTreeIter  *iter,
+    gpointer      data)
+{
+  TpAccount *account, *selected_account;
+  gboolean visible = FALSE;
+
+  if (log_window->hits == NULL)
+    return TRUE;
+
+  if (!log_window_chats_get_selected (log_window, &selected_account,
+      NULL, NULL, NULL, NULL))
+
+  gtk_tree_model_get (model, iter,
+      COL_WHO_ACCOUNT, &account,
+      -1);
+
+  if (selected_account == NULL ||
+      account_equal (account, selected_account))
+    visible = TRUE;
+
+  g_object_unref (account);
+  g_object_unref (selected_account);
+
+  return visible;
+}
+#endif
 
 static void
 log_window_find_populate (EmpathyLogWindow *window,
-			  const gchar     *search_criteria)
+    const gchar *search_criteria)
 {
-	GtkTreeView        *view;
-	GtkTreeModel       *model;
-	GtkListStore       *store;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
 
-	view = GTK_TREE_VIEW (window->treeview_find);
-	model = gtk_tree_view_get_model (view);
-	store = GTK_LIST_STORE (model);
+  empathy_chat_view_clear (window->chatview_events);
 
-	empathy_chat_view_clear (window->chatview_find);
+  view = GTK_TREE_VIEW (window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
 
-	gtk_list_store_clear (store);
+  gtk_list_store_clear (store);
 
-	if (EMP_STR_EMPTY (search_criteria)) {
-		/* Just clear the search. */
-		return;
-	}
+  view = GTK_TREE_VIEW (window->treeview_when);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
+  selection = gtk_tree_view_get_selection (view);
 
-	tpl_log_manager_search_async (window->log_manager,
-			search_criteria, TPL_EVENT_MASK_TEXT,
-			log_manager_searched_new_cb, (gpointer) store);
-}
+  gtk_list_store_clear (store);
 
-static void
-log_window_find_setup (EmpathyLogWindow *window)
-{
-	GtkTreeView       *view;
-	GtkTreeModel      *model;
-	GtkTreeSelection  *selection;
-	GtkTreeSortable   *sortable;
-	GtkTreeViewColumn *column;
-	GtkListStore      *store;
-	GtkCellRenderer   *cell;
-	gint               offset;
+  if (EMP_STR_EMPTY (search_criteria))
+    {
+      tp_clear_pointer (&window->hits, tpl_log_manager_search_free);
+      log_window_who_populate (window);
+      return;
+    }
 
-	view = GTK_TREE_VIEW (window->treeview_find);
-	selection = gtk_tree_view_get_selection (view);
+  g_signal_handlers_block_by_func (selection,
+      log_window_when_changed_cb,
+      window);
 
-	/* New store */
-	store = gtk_list_store_new (COL_FIND_COUNT,
-				    G_TYPE_STRING,          /* account icon name */
-				    G_TYPE_STRING,          /* account name */
-				    TP_TYPE_ACCOUNT,        /* account */
-				    G_TYPE_STRING,          /* chat name */
-				    TPL_TYPE_ENTITY,        /* target */
-				    G_TYPE_STRING,          /* date */
-				    G_TYPE_STRING);         /* date_readable */
-
-	model = GTK_TREE_MODEL (store);
-	sortable = GTK_TREE_SORTABLE (store);
-
-	gtk_tree_view_set_model (view, model);
-
-	/* New column */
-	column = gtk_tree_view_column_new ();
-
-	cell = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, cell, FALSE);
-	gtk_tree_view_column_add_attribute (column, cell,
-					    "icon-name",
-					    COL_FIND_ACCOUNT_ICON);
-
-	cell = gtk_cell_renderer_text_new ();
-	gtk_tree_view_column_pack_start (column, cell, TRUE);
-	gtk_tree_view_column_add_attribute (column, cell,
-					    "text",
-					    COL_FIND_ACCOUNT_NAME);
-
-	gtk_tree_view_column_set_title (column, _("Account"));
-	gtk_tree_view_append_column (view, column);
-
-	gtk_tree_view_column_set_resizable (column, TRUE);
-	gtk_tree_view_column_set_clickable (column, TRUE);
-
-	cell = gtk_cell_renderer_text_new ();
-	offset = gtk_tree_view_insert_column_with_attributes (view, -1, _("Conversation"),
-							      cell, "text", COL_FIND_CHAT_NAME,
-							      NULL);
-
-	column = gtk_tree_view_get_column (view, offset - 1);
-	gtk_tree_view_column_set_sort_column_id (column, COL_FIND_CHAT_NAME);
-	gtk_tree_view_column_set_resizable (column, TRUE);
-	gtk_tree_view_column_set_clickable (column, TRUE);
-
-	cell = gtk_cell_renderer_text_new ();
-	offset = gtk_tree_view_insert_column_with_attributes (view, -1, _("Date"),
-							      cell, "text", COL_FIND_DATE_READABLE,
-							      NULL);
-
-	column = gtk_tree_view_get_column (view, offset - 1);
-	gtk_tree_view_column_set_sort_column_id (column, COL_FIND_DATE);
-	gtk_tree_view_column_set_resizable (column, TRUE);
-	gtk_tree_view_column_set_clickable (column, TRUE);
-
-	/* Set up treeview properties */
-	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-	gtk_tree_sortable_set_sort_column_id (sortable,
-					      COL_FIND_DATE,
-					      GTK_SORT_ASCENDING);
-
-	/* Set up signals */
-	g_signal_connect (selection, "changed",
-			  G_CALLBACK (log_window_find_changed_cb),
-			  window);
-
-	g_object_unref (store);
+  tpl_log_manager_search_async (window->log_manager,
+      search_criteria, TPL_EVENT_MASK_ANY,
+      log_manager_searched_new_cb, NULL);
 }
 
 static void
 start_find_search (EmpathyLogWindow *window)
 {
-	const gchar *str;
+  const gchar *str;
 
-	str = gtk_entry_get_text (GTK_ENTRY (window->entry_find));
+  str = gtk_entry_get_text (GTK_ENTRY (window->search_entry));
 
-	/* Don't find the same crap again */
-	if (window->last_find && !tp_strdiff (window->last_find, str)) {
-		return;
-	}
+  /* Don't find the same crap again */
+  if (window->last_find && !tp_strdiff (window->last_find, str))
+    return;
 
-	g_free (window->last_find);
-	window->last_find = g_strdup (str);
+  g_free (window->last_find);
+  window->last_find = g_strdup (str);
 
-	log_window_find_populate (window, str);
+  log_window_find_populate (window, str);
 }
 
 static void
-log_window_button_find_clicked_cb (GtkWidget       *widget,
-				   EmpathyLogWindow *window)
+log_window_search_entry_changed_cb (GtkWidget *entry,
+    EmpathyLogWindow *window)
 {
-	start_find_search (window);
+  /* FIXME: live search ? */
 }
 
 static void
-log_window_entry_find_activate_cb (GtkWidget *entry,
-				   EmpathyLogWindow *self)
+log_window_search_entry_activate_cb (GtkWidget *entry,
+    EmpathyLogWindow *self)
 {
-	start_find_search (self);
-}
-
-static void
-log_window_button_next_clicked_cb (GtkWidget       *widget,
-				   EmpathyLogWindow *window)
-{
-	if (window->last_find) {
-		gboolean can_do_previous;
-		gboolean can_do_next;
-
-		empathy_chat_view_find_next (window->chatview_find,
-					    window->last_find,
-					    FALSE,
-					    FALSE);
-		empathy_chat_view_find_abilities (window->chatview_find,
-						 window->last_find,
-						 FALSE,
-						 &can_do_previous,
-						 &can_do_next);
-		gtk_widget_set_sensitive (window->button_previous, can_do_previous);
-		gtk_widget_set_sensitive (window->button_next, can_do_next);
-	}
-}
-
-static void
-log_window_button_previous_clicked_cb (GtkWidget       *widget,
-				       EmpathyLogWindow *window)
-{
-	if (window->last_find) {
-		gboolean can_do_previous;
-		gboolean can_do_next;
-
-		empathy_chat_view_find_previous (window->chatview_find,
-						window->last_find,
-						FALSE,
-						FALSE);
-		empathy_chat_view_find_abilities (window->chatview_find,
-						 window->last_find,
-						 FALSE,
-						 &can_do_previous,
-						 &can_do_next);
-		gtk_widget_set_sensitive (window->button_previous, can_do_previous);
-		gtk_widget_set_sensitive (window->button_next, can_do_next);
-	}
-}
-
-static void
-log_window_button_close_clicked_cb (GtkWidget *widget,
-				    EmpathyLogWindow *window)
-{
-	gtk_widget_destroy (window->window);
+  start_find_search (self);
 }
 
 /*
@@ -768,183 +982,329 @@ log_window_button_close_clicked_cb (GtkWidget *widget,
  */
 
 static void
-log_window_chats_changed_cb (GtkTreeSelection *selection,
-			     EmpathyLogWindow  *window)
+log_window_who_changed_cb (GtkTreeSelection *selection,
+    EmpathyLogWindow  *window)
 {
-	gboolean selected;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  gint type;
+  gboolean someone = FALSE;
 
-	/* The calendar has to be sensitive only if there is something selected */
-	selected = log_window_chats_get_selected (window, NULL, NULL);
-	gtk_widget_set_sensitive (window->calendar_chats, selected);
+g_print ("log_window_who_changed_cb\n");
+  if (gtk_tree_selection_get_selected (selection, &model, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_TYPE, &type,
+          -1);
 
-	/* Use last date by default */
-	gtk_calendar_clear_marks (GTK_CALENDAR (window->calendar_chats));
+      someone = (type == COL_TYPE_NORMAL);
+    }
 
-	log_window_chats_get_messages (window, NULL);
+  gtk_widget_set_sensitive (window->button_profile, someone);
+  gtk_widget_set_sensitive (window->button_chat, someone);
+  gtk_widget_set_sensitive (window->button_call, someone);
+  gtk_widget_set_sensitive (window->button_video, someone);
+
+  /* The contact changed, so the dates need to be updated */
+  log_window_chats_get_messages (window, TRUE);
 }
 
 static void
 log_manager_got_entities_cb (GObject *manager,
-			     GAsyncResult *result,
-			     gpointer user_data)
+    GAsyncResult *result,
+    gpointer user_data)
 {
-	GList                 *entities;
-	GList                 *l;
-	GtkTreeView           *view;
-	GtkTreeModel          *model;
-	GtkTreeSelection      *selection;
-	GtkListStore          *store;
-	GtkTreeIter            iter;
-	GError                *error = NULL;
-	gboolean               select_account = FALSE;
-	TpAccount             *account = user_data;
+  Ctx                   *ctx = user_data;
+  GList                 *entities;
+  GList                 *l;
+  GtkTreeView           *view;
+  GtkTreeModel          *model;
+  GtkTreeSelection      *selection;
+  GtkListStore          *store;
+  GtkTreeIter            iter;
+  GError                *error = NULL;
+  gboolean               select_account = FALSE;
 
-	if (log_window == NULL)
-		goto out;
+  if (log_window == NULL)
+    goto out;
 
-	if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
-		result, &entities, &error)) {
-			DEBUG ("%s. Aborting", error->message);
-			g_error_free (error);
-			goto out;
-	}
+  if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
+      result, &entities, &error))
+    {
+      DEBUG ("%s. Aborting", error->message);
+      g_error_free (error);
+      goto out;
+    }
 
-	view = GTK_TREE_VIEW (log_window->treeview_chats);
-	model = gtk_tree_view_get_model (view);
-	selection = gtk_tree_view_get_selection (view);
-	store = GTK_LIST_STORE (model);
+  view = GTK_TREE_VIEW (ctx->window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+  store = GTK_LIST_STORE (model);
 
-	for (l = entities; l; l = l->next) {
-		TplEntity *entity;
+  /* Block signals to stop the logs being retrieved prematurely  */
+  g_signal_handlers_block_by_func (selection,
+      log_window_who_changed_cb, ctx->window);
 
-		entity = TPL_ENTITY (l->data);
+  for (l = entities; l; l = l->next)
+    {
+      TplEntity *entity = TPL_ENTITY (l->data);
+      TplEntityType type = tpl_entity_get_entity_type (entity);
+      gboolean room = type == TPL_ENTITY_ROOM;
 
-		gtk_list_store_append (store, &iter);
-		gtk_list_store_set (store, &iter,
-				COL_CHAT_ICON, "empathy-available", /* FIXME */
-				COL_CHAT_NAME, tpl_entity_get_alias (entity),
-				COL_CHAT_ACCOUNT, account,
-				COL_CHAT_TARGET, entity,
-				-1);
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHO_TYPE, COL_TYPE_NORMAL,
+          COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
+                             : EMPATHY_IMAGE_AVATAR_DEFAULT,
+          COL_WHO_NAME, tpl_entity_get_alias (entity),
+          COL_WHO_ACCOUNT, ctx->account,
+          COL_WHO_TARGET, entity,
+          -1);
 
-		if (log_window->selected_account != NULL &&
-		    !tp_strdiff (tp_proxy_get_object_path (account),
-		    tp_proxy_get_object_path (log_window->selected_account)))
-			select_account = TRUE;
+      if (ctx->window->selected_account != NULL &&
+          !tp_strdiff (tp_proxy_get_object_path (ctx->account),
+          tp_proxy_get_object_path (ctx->window->selected_account)))
+        select_account = TRUE;
+    }
+  g_list_free_full (entities, g_object_unref);
 
-		/* FIXME: Update COL_CHAT_ICON/NAME */
-		if (tpl_entity_get_entity_type (entity) == TPL_ENTITY_ROOM) {
-		} else {
-		}
-	}
-	g_list_free_full (entities, g_object_unref);
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      gint type;
 
-	/* Unblock signals */
-	g_signal_handlers_unblock_by_func (selection,
-			log_window_chats_changed_cb,
-			log_window);
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_TYPE, &type,
+          -1);
 
-	/* We display the selected account if we populate the model with chats from
-	 * this account. */
-	if (select_account)
-		log_window_chats_set_selected (log_window);
+      if (type != COL_TYPE_ANY)
+        {
+          gtk_list_store_prepend (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHO_TYPE, COL_TYPE_SEPARATOR,
+              COL_WHO_NAME, "separator",
+              -1);
+
+          gtk_list_store_prepend (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHO_TYPE, COL_TYPE_ANY,
+              COL_WHO_NAME, _("Anyone"),
+              -1);
+        }
+    }
+
+  /* Select 'Anyone' by default */
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    gtk_tree_selection_select_iter (selection, &iter);
+
+  /* Unblock signals */
+  g_signal_handlers_unblock_by_func (selection,
+      log_window_who_changed_cb,
+      ctx->window);
+
+  /* We display the selected account if we populate the model with chats from
+   * this account. */
+  if (select_account)
+    log_window_chats_set_selected (ctx->window);
 
 out:
-	g_object_unref (account);
+  _tpl_action_chain_continue (log_window->chain);
+  ctx_free (ctx);
 }
 
 static void
-log_window_chats_populate (EmpathyLogWindow *window)
+get_entities_for_account (TplActionChain *chain, gpointer user_data)
 {
-	EmpathyAccountChooser *account_chooser;
-	TpAccount             *account;
+  Ctx *ctx = user_data;
 
-	GtkTreeView          *view;
-	GtkTreeModel         *model;
-	GtkTreeSelection     *selection;
-	GtkListStore         *store;
-
-	account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser_chats);
-	account = empathy_account_chooser_dup_account (account_chooser);
-
-	view = GTK_TREE_VIEW (window->treeview_chats);
-	model = gtk_tree_view_get_model (view);
-	selection = gtk_tree_view_get_selection (view);
-	store = GTK_LIST_STORE (model);
-
-	if (account == NULL) {
-		gtk_list_store_clear (store);
-		return;
-	}
-
-	/* Block signals to stop the logs being retrieved prematurely */
-	g_signal_handlers_block_by_func (selection,
-					 log_window_chats_changed_cb,
-					 window);
-
-	gtk_list_store_clear (store);
-
-	/* Pass the account reference to the callback */
-	tpl_log_manager_get_entities_async (window->log_manager, account,
-			log_manager_got_entities_cb, account);
+g_print ("get_entities_for_account\n");
+  tpl_log_manager_get_entities_async (ctx->window->log_manager, ctx->account,
+      log_manager_got_entities_cb, ctx);
 }
 
 static void
-log_window_chats_setup (EmpathyLogWindow *window)
+log_window_who_populate (EmpathyLogWindow *window)
 {
-	GtkTreeView       *view;
-	GtkTreeModel      *model;
-	GtkTreeSelection  *selection;
-	GtkTreeSortable   *sortable;
-	GtkTreeViewColumn *column;
-	GtkListStore      *store;
-	GtkCellRenderer   *cell;
+  EmpathyAccountChooser *account_chooser;
+  TpAccount *account;
+  gboolean all_accounts;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  Ctx *ctx;
 
-	view = GTK_TREE_VIEW (window->treeview_chats);
-	selection = gtk_tree_view_get_selection (view);
+  if (window->hits != NULL)
+    {
+      populate_entities_from_search_hits ();
+      return;
+    }
 
-	/* new store */
-	store = gtk_list_store_new (COL_CHAT_COUNT,
-				    G_TYPE_STRING,        /* icon */
-				    G_TYPE_STRING,        /* name */
-				    TP_TYPE_ACCOUNT,      /* account */
-				    TPL_TYPE_ENTITY);     /* target */
+  account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser);
+  account = empathy_account_chooser_dup_account (account_chooser);
+  all_accounts = empathy_account_chooser_has_all_selected (account_chooser);
 
-	model = GTK_TREE_MODEL (store);
-	sortable = GTK_TREE_SORTABLE (store);
+  view = GTK_TREE_VIEW (window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+  store = GTK_LIST_STORE (model);
 
-	gtk_tree_view_set_model (view, model);
+  /* Block signals to stop the logs being retrieved prematurely  */
+  g_signal_handlers_block_by_func (selection,
+      log_window_who_changed_cb,
+      window);
 
-	/* new column */
-	column = gtk_tree_view_column_new ();
+  gtk_list_store_clear (store);
 
-	cell = gtk_cell_renderer_pixbuf_new ();
-	gtk_tree_view_column_pack_start (column, cell, FALSE);
-	gtk_tree_view_column_add_attribute (column, cell,
-					    "icon-name",
-					    COL_CHAT_ICON);
+  /* Unblock signals */
+  g_signal_handlers_unblock_by_func (selection,
+      log_window_who_changed_cb,
+      window);
 
-	cell = gtk_cell_renderer_text_new ();
-	g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
-	gtk_tree_view_column_pack_start (column, cell, TRUE);
-	gtk_tree_view_column_add_attribute (column, cell,
-					    "text",
-					    COL_CHAT_NAME);
+  if (!all_accounts && account == NULL)
+    {
+      return;
+    }
+  else if (!all_accounts)
+    {
+      ctx = ctx_new (window, account, NULL, NULL, 0, 0);
+      _tpl_action_chain_append (window->chain, get_entities_for_account, ctx);
+    }
+  else
+    {
+      TpAccountManager *manager;
+      GList *accounts, *l;
 
-	gtk_tree_view_append_column (view, column);
+      manager = empathy_account_chooser_get_account_manager (account_chooser);
+      accounts = tp_account_manager_get_valid_accounts (manager);
 
-	/* set up treeview properties */
-	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-	gtk_tree_sortable_set_sort_column_id (sortable,
-					      COL_CHAT_NAME,
-					      GTK_SORT_ASCENDING);
+      for (l = accounts; l != NULL; l = l->next)
+        {
+          account = l->data;
 
-	/* set up signals */
-	g_signal_connect (selection, "changed",
-			  G_CALLBACK (log_window_chats_changed_cb),
-			  window);
+          ctx = ctx_new (window, account, NULL, NULL, 0, 0);
+          _tpl_action_chain_append (window->chain,
+              get_entities_for_account, ctx);
+        }
 
-	g_object_unref (store);
+      g_list_free (accounts);
+    }
+  _tpl_action_chain_start (window->chain);
+}
+
+static gint
+sort_by_name (GtkTreeModel *model,
+    GtkTreeIter *a,
+    GtkTreeIter *b,
+    gpointer user_data)
+{
+  gchar *name1, *name2;
+  gint type1, type2;
+  gint ret;
+
+  gtk_tree_model_get (model, a,
+      COL_WHO_TYPE, &type1,
+      COL_WHO_NAME, &name1,
+      -1);
+
+  gtk_tree_model_get (model, b,
+      COL_WHO_TYPE, &type2,
+      COL_WHO_NAME, &name2,
+      -1);
+
+  if (type1 == COL_TYPE_ANY)
+    ret = -1;
+  else if (type2 == COL_TYPE_ANY)
+    ret = 1;
+  else if (type1 == COL_TYPE_SEPARATOR)
+    ret = -1;
+  else if (type2 == COL_TYPE_SEPARATOR)
+    ret = 1;
+  else
+    ret = g_strcmp0 (name1, name2);
+
+  g_free (name1);
+  g_free (name2);
+
+  return ret;
+}
+
+static gboolean
+who_row_is_separator (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gpointer data)
+{
+  gint type;
+
+  gtk_tree_model_get (model, iter,
+      COL_WHO_TYPE, &type,
+      -1);
+
+  return (type == COL_TYPE_SEPARATOR);
+}
+
+static void
+log_window_who_setup (EmpathyLogWindow *window)
+{
+  GtkTreeView       *view;
+  GtkTreeModel      *model;
+  GtkTreeSelection  *selection;
+  GtkTreeSortable   *sortable;
+  GtkTreeViewColumn *column;
+  GtkListStore      *store;
+  GtkCellRenderer   *cell;
+
+  view = GTK_TREE_VIEW (window->treeview_who);
+  selection = gtk_tree_view_get_selection (view);
+
+  /* new store */
+  store = gtk_list_store_new (COL_WHO_COUNT,
+      G_TYPE_INT,           /* type */
+      G_TYPE_STRING,        /* icon */
+      G_TYPE_STRING,        /* name */
+      TP_TYPE_ACCOUNT,      /* account */
+      TPL_TYPE_ENTITY);     /* target */
+
+  model = GTK_TREE_MODEL (store);
+  sortable = GTK_TREE_SORTABLE (store);
+
+  gtk_tree_view_set_model (view, model);
+
+  /* new column */
+  column = gtk_tree_view_column_new ();
+  gtk_tree_view_column_set_title (column, _("Who"));
+
+  cell = gtk_cell_renderer_pixbuf_new ();
+  gtk_tree_view_column_pack_start (column, cell, FALSE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "icon-name",
+      COL_WHO_ICON);
+
+  cell = gtk_cell_renderer_text_new ();
+  g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+  gtk_tree_view_column_pack_start (column, cell, TRUE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "text",
+      COL_WHO_NAME);
+
+  gtk_tree_view_append_column (view, column);
+
+  /* set up treeview properties */
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_view_set_row_separator_func (view, who_row_is_separator,
+      NULL, NULL);
+
+  gtk_tree_sortable_set_sort_column_id (sortable,
+      COL_WHO_NAME,
+      GTK_SORT_ASCENDING);
+  gtk_tree_sortable_set_sort_func (sortable,
+      COL_WHO_NAME, sort_by_name,
+      NULL, NULL);
+
+  /* set up signals */
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (log_window_who_changed_cb), window);
+
+  g_object_unref (store);
 }
 
 static void
@@ -952,12 +1312,9 @@ log_window_chats_accounts_changed_cb (GtkWidget       *combobox,
 				      EmpathyLogWindow *window)
 {
 	/* Clear all current messages shown in the textview */
-	empathy_chat_view_clear (window->chatview_chats);
+	empathy_chat_view_clear (window->chatview_events);
 
-	log_window_chats_populate (window);
-
-	/* No chat is selected as we just changed the account */
-	gtk_widget_set_sensitive (window->calendar_chats, FALSE);
+	log_window_who_populate (window);
 }
 
 static void
@@ -970,7 +1327,7 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
 	GtkTreePath          *path;
 	gboolean              ok;
 
-	view = GTK_TREE_VIEW (window->treeview_chats);
+	view = GTK_TREE_VIEW (window->treeview_who);
 	model = gtk_tree_view_get_model (view);
 	selection = gtk_tree_view_get_selection (view);
 
@@ -985,8 +1342,8 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
 		gboolean     this_is_chatroom;
 
 		gtk_tree_model_get (model, &iter,
-				    COL_CHAT_ACCOUNT, &this_account,
-				    COL_CHAT_TARGET, &this_target,
+				    COL_WHO_ACCOUNT, &this_account,
+				    COL_WHO_TARGET, &this_target,
 				    -1);
 
 		this_chat_id = tpl_entity_get_identifier (this_target);
@@ -1012,43 +1369,257 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
 	tp_clear_pointer (&window->selected_chat_id, g_free);
 }
 
-static gboolean
-log_window_chats_get_selected (EmpathyLogWindow  *window,
-			       TpAccount       **account,
-			       TplEntity       **target)
+static gint
+sort_by_date (GtkTreeModel *model,
+    GtkTreeIter *a,
+    GtkTreeIter *b,
+    gpointer user_data)
 {
-	GtkTreeView      *view;
-	GtkTreeModel     *model;
-	GtkTreeSelection *selection;
-	GtkTreeIter       iter;
-	TplEntity        *targ;
-	TpAccount        *acc = NULL;
+  GDate *date1, *date2;
 
-	view = GTK_TREE_VIEW (window->treeview_chats);
-	model = gtk_tree_view_get_model (view);
-	selection = gtk_tree_view_get_selection (view);
+  gtk_tree_model_get (model, a,
+      COL_WHEN_DATE, &date1,
+      -1);
 
-	if (!gtk_tree_selection_get_selected (selection, NULL, &iter)) {
-		return FALSE;
-	}
+  gtk_tree_model_get (model, b,
+      COL_WHEN_DATE, &date2,
+      -1);
 
-	gtk_tree_model_get (model, &iter,
-			    COL_CHAT_ACCOUNT, &acc,
-			    COL_CHAT_TARGET, &targ,
-			    -1);
+  return g_date_compare (date1, date2);
+}
 
-	if (account != NULL) {
-		*account = g_object_ref (acc);
-	}
+static gboolean
+when_row_is_separator (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gpointer data)
+{
+  gchar *when;
+  gboolean ret;
 
-	if (target != NULL) {
-		*target = g_object_ref (targ);
-	}
+  gtk_tree_model_get (model, iter,
+      COL_WHEN_TEXT, &when,
+      -1);
 
-	g_object_unref (acc);
-	g_object_unref (targ);
+  ret = g_str_equal (when, "separator");
+  g_free (when);
+  return ret;
+}
 
-	return TRUE;
+static void
+log_window_when_changed_cb (GtkTreeSelection *selection,
+    EmpathyLogWindow *window)
+{
+g_print ("log_window_when_changed_cb\n");
+  log_window_chats_get_messages (window, FALSE);
+}
+
+static void
+log_window_when_setup (EmpathyLogWindow *window)
+{
+  GtkTreeView       *view;
+  GtkTreeModel      *model;
+  GtkTreeSelection  *selection;
+  GtkTreeSortable   *sortable;
+  GtkTreeViewColumn *column;
+  GtkListStore      *store;
+  GtkCellRenderer   *cell;
+
+  view = GTK_TREE_VIEW (window->treeview_when);
+  selection = gtk_tree_view_get_selection (view);
+
+  /* new store */
+  store = gtk_list_store_new (COL_WHEN_COUNT,
+      G_TYPE_DATE,        /* date */
+      G_TYPE_STRING,      /* stringified date */
+      G_TYPE_STRING);     /* icon */
+
+  model = GTK_TREE_MODEL (store);
+  sortable = GTK_TREE_SORTABLE (store);
+
+  gtk_tree_view_set_model (view, model);
+
+  /* new column */
+  column = gtk_tree_view_column_new ();
+  gtk_tree_view_column_set_title (column, _("When"));
+
+  cell = gtk_cell_renderer_pixbuf_new ();
+  gtk_tree_view_column_pack_start (column, cell, FALSE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "icon-name", COL_WHEN_ICON);
+
+  cell = gtk_cell_renderer_text_new ();
+  g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+  gtk_tree_view_column_pack_start (column, cell, TRUE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "text",
+      COL_WHEN_TEXT);
+
+  gtk_tree_view_append_column (view, column);
+
+  /* set up treeview properties */
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_view_set_row_separator_func (view, when_row_is_separator,
+      NULL, NULL);
+  gtk_tree_sortable_set_sort_column_id (sortable,
+      COL_WHEN_DATE,
+      GTK_SORT_DESCENDING);
+  gtk_tree_sortable_set_sort_func (sortable,
+      COL_WHEN_DATE, sort_by_date,
+      NULL, NULL);
+
+  /* set up signals */
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (log_window_when_changed_cb),
+      window);
+
+  g_object_unref (store);
+}
+
+static gboolean
+what_row_is_separator (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gpointer data)
+{
+  gint type;
+
+  gtk_tree_model_get (model, iter,
+      COL_WHAT_TYPE, &type,
+      -1);
+
+  return (type == -1);
+}
+
+static void
+log_window_what_changed_cb (GtkTreeSelection *selection,
+    EmpathyLogWindow *window)
+{
+g_print ("log_window_what_changed_cb\n");
+  /* The dates need to be updated if we're not searching */
+  log_window_chats_get_messages (window, window->hits == NULL);
+}
+
+static gboolean
+log_window_what_collapse_row_cb (GtkTreeView *tree_view,
+    GtkTreeIter *iter,
+    GtkTreePath *path,
+    gpointer user_data)
+{
+  /* Reject collapsing */
+  return TRUE;
+}
+
+struct event
+{
+  gint type;
+  EventSubtype subtype;
+  const gchar *icon;
+  const gchar *text;
+};
+
+static void
+log_window_what_setup (EmpathyLogWindow *window)
+{
+  GtkTreeView       *view;
+  GtkTreeModel      *model;
+  GtkTreeSelection  *selection;
+  GtkTreeSortable   *sortable;
+  GtkTreeViewColumn *column;
+  GtkTreeIter        iter, parent;
+  GtkTreeStore      *store;
+  GtkCellRenderer   *cell;
+  guint i;
+  struct event events [] = {
+    { TPL_EVENT_MASK_ANY, 0, NULL, _("Anything") },
+    { -1, 0, NULL, "separator" },
+    { TPL_EVENT_MASK_TEXT, 0, "stock_text_justify", _("Text chats") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, "call-start", _("Calls") }
+  };
+  struct event call_events [] = {
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_INCOMING, "call-start", _("Incoming calls") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_OUTGOING, "call-start", _("Outgoing calls") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_MISSED, "call-stop", _("Missed calls") }
+  };
+
+  view = GTK_TREE_VIEW (window->treeview_what);
+  selection = gtk_tree_view_get_selection (view);
+
+  /* new store */
+  store = gtk_tree_store_new (COL_WHAT_COUNT,
+      G_TYPE_INT,         /* history type */
+      G_TYPE_INT,         /* history subtype */
+      G_TYPE_STRING,      /* stringified history type */
+      G_TYPE_STRING,      /* icon */
+      G_TYPE_BOOLEAN);    /* expander (hidden) */
+
+  model = GTK_TREE_MODEL (store);
+  sortable = GTK_TREE_SORTABLE (store);
+
+  gtk_tree_view_set_model (view, model);
+
+  /* new column */
+  column = gtk_tree_view_column_new ();
+  gtk_tree_view_column_set_title (column, _("What"));
+
+  cell = gtk_cell_renderer_pixbuf_new ();
+  gtk_tree_view_column_pack_start (column, cell, FALSE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "icon-name", COL_WHAT_ICON);
+
+  cell = gtk_cell_renderer_text_new ();
+  g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+  gtk_tree_view_column_pack_start (column, cell, TRUE);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "text", COL_WHAT_TEXT);
+
+  gtk_tree_view_append_column (view, column);
+
+  /* set up treeview properties */
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_view_set_show_expanders (view, FALSE);
+  gtk_tree_view_set_level_indentation (view, 12);
+  gtk_tree_view_expand_all (view);
+  gtk_tree_view_set_row_separator_func (view, what_row_is_separator,
+      NULL, NULL);
+
+  /* populate */
+  for (i = 0; i < G_N_ELEMENTS (events); i++)
+    {
+      gtk_tree_store_append (store, &iter, NULL);
+      gtk_tree_store_set (store, &iter,
+          COL_WHAT_TYPE, events[i].type,
+          COL_WHAT_SUBTYPE, events[i].subtype,
+          COL_WHAT_TEXT, events[i].text,
+          COL_WHAT_ICON, events[i].icon,
+          -1);
+    }
+
+  gtk_tree_model_iter_nth_child (model, &parent, NULL, 3);
+  for (i = 0; i < G_N_ELEMENTS (call_events); i++)
+    {
+      gtk_tree_store_append (store, &iter, &parent);
+      gtk_tree_store_set (store, &iter,
+          COL_WHAT_TYPE, call_events[i].type,
+          COL_WHAT_SUBTYPE, call_events[i].subtype,
+          COL_WHAT_TEXT, call_events[i].text,
+          COL_WHAT_ICON, call_events[i].icon,
+          -1);
+    }
+
+  gtk_tree_view_expand_all (view);
+
+  /* select 'Anything' */
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    gtk_tree_selection_select_iter (selection, &iter);
+
+  /* set up signals */
+  g_signal_connect (view, "test-collapse-row",
+      G_CALLBACK (log_window_what_collapse_row_cb),
+      NULL);
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (log_window_what_changed_cb),
+      window);
+
+  g_object_unref (store);
 }
 
 static void
@@ -1056,335 +1627,465 @@ log_window_got_messages_for_date_cb (GObject *manager,
     GAsyncResult *result,
     gpointer user_data)
 {
-  EmpathyLogWindow *window = user_data;
+  Ctx *ctx = user_data;
   GList *events;
   GList *l;
   GError *error = NULL;
 
   if (log_window == NULL)
-    return;
+    goto out;
 
   if (!tpl_log_manager_get_events_for_date_finish (TPL_LOG_MANAGER (manager),
-        result, &events, &error)) {
+      result, &events, &error))
+    {
       DEBUG ("Unable to retrieve messages for the selected date: %s. Aborting",
           error->message);
-      empathy_chat_view_append_event (window->chatview_find,
+      empathy_chat_view_append_event (log_window->chatview_events,
           "Unable to retrieve messages for the selected date");
       g_error_free (error);
-      return;
-  }
+      goto out;
+    }
 
-  for (l = events; l; l = l->next) {
-      EmpathyMessage *message = empathy_message_from_tpl_log_event (l->data);
-      g_object_unref (l->data);
-      empathy_chat_view_append_message (window->chatview_chats,
-          message);
+  for (l = events; l; l = l->next)
+    {
+      TplEvent *event = l->data;
+      EmpathyMessage *message = empathy_message_from_tpl_log_event (event);
+      gboolean append = TRUE;
+
+      if (TPL_IS_CALL_EVENT (l->data)
+          && ctx->event_mask & TPL_EVENT_MASK_CALL)
+        {
+          TplCallEvent *call = l->data;
+
+          append = FALSE;
+
+          if (ctx->subtype & EVENT_CALL_ALL)
+            append = TRUE;
+          else
+            {
+              TplCallEndReason reason = tpl_call_event_get_end_reason (call);
+              TplEntity *sender = tpl_event_get_sender (event);
+              TplEntity *receiver = tpl_event_get_receiver (event);
+
+              if (reason == TPL_CALL_END_REASON_NO_ANSWER)
+                {
+                  if (ctx->subtype & EVENT_CALL_MISSED)
+                    append = TRUE;
+                }
+              else if (ctx->subtype & EVENT_CALL_OUTGOING
+                  && tpl_entity_get_entity_type (sender) == TPL_ENTITY_SELF)
+                append = TRUE;
+              else if (ctx->subtype & EVENT_CALL_INCOMING
+                  && tpl_entity_get_entity_type (receiver) == TPL_ENTITY_SELF)
+                append = TRUE;
+            }
+        }
+
+      if (append)
+        empathy_chat_view_append_message (log_window->chatview_events,
+            message);
+
+      g_object_unref (event);
       g_object_unref (message);
-  }
+    }
   g_list_free (events);
 
-  /* Turn back on scrolling */
-  empathy_chat_view_scroll (window->chatview_find, TRUE);
+ out:
+  ctx_free (ctx);
 
-  /* Give the search entry main focus */
-  gtk_widget_grab_focus (window->entry_chats);
+  _tpl_action_chain_continue (log_window->chain);
 }
 
+static void
+get_events_for_date (TplActionChain *chain, gpointer user_data)
+{
+  Ctx *ctx = user_data;
+
+g_print ("get_events_for_date\n");
+  tpl_log_manager_get_events_for_date_async (ctx->window->log_manager,
+      ctx->account, ctx->entity, ctx->event_mask,
+      ctx->date,
+      log_window_got_messages_for_date_cb,
+      ctx);
+}
 
 static void
 log_window_get_messages_for_date (EmpathyLogWindow *window,
-				  GDate *date)
+    GDate *date)
 {
   TpAccount *account;
   TplEntity *target;
+  TplEventTypeMask event_mask;
+  EventSubtype subtype;
+  GDate *anytime, *separator;
 
-  if (!log_window_chats_get_selected (window, &account, &target)) {
-      return;
-  }
+  if (!log_window_chats_get_selected (window,
+      &account, &target, NULL, &event_mask, &subtype))
+    return;
 
-  /* Clear all current messages shown in the textview */
-  empathy_chat_view_clear (window->chatview_chats);
-
-  /* Turn off scrolling temporarily */
-  empathy_chat_view_scroll (window->chatview_find, FALSE);
+  anytime = g_date_new_dmy (2, 1, -1);
+  separator = g_date_new_dmy (1, 1, -1);
 
   /* Get events */
-  tpl_log_manager_get_events_for_date_async (window->log_manager,
-      account, target, TPL_EVENT_MASK_TEXT,
-      date,
-      log_window_got_messages_for_date_cb,
-      (gpointer) window);
+  if (g_date_compare (date, anytime) != 0)
+    {
+      Ctx *ctx;
+
+      ctx = ctx_new (window, account, target, date, event_mask, subtype);
+      _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+    }
+  else
+    {
+      GtkTreeView *view = GTK_TREE_VIEW (window->treeview_when);
+      GtkTreeModel *model = gtk_tree_view_get_model (view);
+      GtkTreeIter iter;
+      gboolean next;
+      GDate *d;
+
+      for (next = gtk_tree_model_get_iter_first (model, &iter);
+           next;
+           next = gtk_tree_model_iter_next (model, &iter))
+        {
+          Ctx *ctx;
+
+          gtk_tree_model_get (model, &iter,
+              COL_WHEN_DATE, &d,
+              -1);
+
+          if (g_date_compare (d, anytime) == 0 ||
+              g_date_compare (d, separator) == 0)
+            continue;
+
+          ctx = ctx_new (window, account, target, d, event_mask, subtype);
+          _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+        }
+    }
+
+  _tpl_action_chain_start (window->chain);
 
   g_object_unref (account);
   g_object_unref (target);
+  g_date_free (separator);
+  g_date_free (anytime);
 }
 
 static void
 log_manager_got_dates_cb (GObject *manager,
-                          GAsyncResult *result,
-                          gpointer user_data)
+    GAsyncResult *result,
+    gpointer user_data)
 {
-  EmpathyLogWindow *window = user_data;
-  GList         *dates;
-  GList         *l;
-  guint          year_selected;
-  guint          month_selected;
-  gboolean       day_selected = FALSE;
-  GDate         *date = NULL;
-  GError        *error = NULL;
+  Ctx *ctx = user_data;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  GList *dates;
+  GList *l;
+  GDate *date = NULL;
+  GError *error = NULL;
 
-  if (log_window == NULL)
-    return;
+  g_return_if_fail (log_window != NULL);
 
   if (!tpl_log_manager_get_dates_finish (TPL_LOG_MANAGER (manager),
-        result, &dates, &error)) {
-    DEBUG ("Unable to retrieve messages' dates: %s. Aborting",
-        error->message);
-    empathy_chat_view_append_event (window->chatview_find,
-        "Unable to retrieve messages' dates");
-      return;
-  }
+       result, &dates, &error))
+    {
+      DEBUG ("Unable to retrieve messages' dates: %s. Aborting",
+          error->message);
+      empathy_chat_view_append_event (log_window->chatview_events,
+          _("Unable to retrieve messages' dates"));
+      goto out;
+    }
 
-  for (l = dates; l; l = l->next) {
-      GDate *d = l->data;
+  view = GTK_TREE_VIEW (log_window->treeview_when);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
+  selection = gtk_tree_view_get_selection (view);
 
-      gtk_calendar_get_date (GTK_CALENDAR (window->calendar_chats),
-          &year_selected,
-          &month_selected,
-          NULL);
+  for (l = dates; l != NULL; l = l->next)
+    {
+      gchar *text;
 
-      month_selected++;
+      date = l->data;
+      text = g_strdup_printf ("%02d/%02d/%d",
+          g_date_get_day (date),
+          g_date_get_month (date),
+          g_date_get_year (date));
 
-      if (!l->next) {
-          date = d;
-      }
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, date,
+          COL_WHEN_TEXT, text,
+          COL_WHEN_ICON, CALENDAR_ICON,
+          -1);
 
-      if (g_date_get_year (d) != year_selected ||
-          g_date_get_month (d) != month_selected) {
-          continue;
-      }
+      g_free (text);
+    }
 
-      DEBUG ("Marking date: %04u-%02u-%02u", g_date_get_year (d),
-          g_date_get_month (d), g_date_get_day (d));
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
+          COL_WHEN_TEXT, "separator",
+          -1);
 
-      gtk_calendar_mark_day (GTK_CALENDAR (window->calendar_chats),
-          g_date_get_day (d));
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
+          COL_WHEN_TEXT, _("Anytime"),
+          -1);
+    }
 
-      if (l->next) {
-          continue;
-      }
+  /* Show messages of the most recent date */
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    gtk_tree_selection_select_iter (selection, &iter);
 
-      day_selected = TRUE;
-
-      gtk_calendar_select_day (GTK_CALENDAR (window->calendar_chats),
-          g_date_get_day (d));
-  }
-
-  if (!day_selected) {
-      /* Unselect the day in the calendar */
-      gtk_calendar_select_day (GTK_CALENDAR (window->calendar_chats), 0);
-  }
-
-  g_signal_handlers_unblock_by_func (window->calendar_chats,
-      log_window_calendar_chats_day_selected_cb,
-      window);
-
-  if (date != NULL) {
-      /* Show messages of the most recent date */
-      log_window_get_messages_for_date (window, date);
-  }
-
-  g_list_foreach (dates, (GFunc) g_free, NULL);
-  g_list_free (dates);
+  g_list_free_full (dates, g_free);
+ out:
+  ctx_free (ctx);
+  _tpl_action_chain_continue (log_window->chain);
 }
 
+static void
+get_dates_for_entity (TplActionChain *chain, gpointer user_data)
+{
+  Ctx *ctx = user_data;
+g_print ("get_dates_for_entity\n");
+  tpl_log_manager_get_dates_async (ctx->window->log_manager,
+      ctx->account, ctx->entity, ctx->event_mask,
+      log_manager_got_dates_cb, ctx);
+}
 
 static void
 log_window_chats_get_messages (EmpathyLogWindow *window,
-			       GDate     *date)
+    gboolean force_get_dates)
 {
-	TpAccount     *account;
-	TplEntity     *target;
-	guint          year_selected;
-	guint          month_selected;
-	guint          day;
+  TpAccount *account;
+  TplEntity *target;
+  TplEventTypeMask event_mask;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GDate *date;
 
+  if (!log_window_chats_get_selected (window, &account, &target,
+      &date, &event_mask, NULL))
+    return;
 
-	if (!log_window_chats_get_selected (window, &account, &target)) {
-		return;
-	}
+  view = GTK_TREE_VIEW (window->treeview_when);
+  selection = gtk_tree_view_get_selection (view);
+  model = gtk_tree_view_get_model (view);
+  store = GTK_LIST_STORE (model);
 
-	g_signal_handlers_block_by_func (window->calendar_chats,
-					 log_window_calendar_chats_day_selected_cb,
-					 window);
+  /* Clear all current messages shown in the textview */
+  empathy_chat_view_clear (window->chatview_events);
 
-	/* Either use the supplied date or get the last */
-	if (date == NULL) {
-		/* Get a list of dates and show them on the calendar */
-		tpl_log_manager_get_dates_async (window->log_manager,
-						       account, target, TPL_EVENT_MASK_TEXT,
-						       log_manager_got_dates_cb, (gpointer) window);
-    /* signal unblocked at the end of the CB flow */
+  /* If there's a search use the returned hits */
+  if (window->hits != NULL)
+    {
+      if (force_get_dates)
+        {
+          gtk_list_store_clear (store);
+          populate_dates_from_search_hits (account, target);
+        }
+      else
+        populate_events_from_search_hits (account, target, date);
+    }
+  /* Either use the supplied date or get the last */
+  else if (force_get_dates || date == NULL)
+    {
+      g_signal_handlers_block_by_func (selection,
+          log_window_when_changed_cb,
+          window);
+
+      gtk_list_store_clear (store);
+
+      g_signal_handlers_unblock_by_func (selection,
+          log_window_when_changed_cb,
+          window);
+
+      /* Get a list of dates and show them on the treeview */
+      if (target != NULL)
+        {
+          Ctx *ctx = ctx_new (window, account, target, NULL, event_mask, 0);
+          _tpl_action_chain_append (window->chain, get_dates_for_entity, ctx);
+          _tpl_action_chain_start (window->chain);
+        }
+      else
+        {
+          /* FIXME: get dates for all entities ? */
+        }
+    }
+  else
+    {
+      /* Show messages of the selected date */
+      log_window_get_messages_for_date (window, date);
+    }
+
+  tp_clear_object (&account);
+  tp_clear_object (&target);
+}
+
+typedef struct {
+	EmpathyAccountChooserFilterResultCallback callback;
+	gpointer                                  user_data;
+} FilterCallbackData;
+
+static void
+got_entities (GObject      *manager,
+	      GAsyncResult *result,
+	      gpointer      user_data)
+{
+	FilterCallbackData *data = user_data;
+	GList *entities;
+	GError *error;
+
+	if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager), result, &entities, &error)) {
+		DEBUG ("Could not get entities: %s", error->message);
+		g_error_free (error);
+		data->callback (FALSE, data->user_data);
 	} else {
-		day = g_date_get_day (date);
-		gtk_calendar_get_date (GTK_CALENDAR (window->calendar_chats),
-				&year_selected,
-				&month_selected,
-				NULL);
+		data->callback (entities != NULL, data->user_data);
 
-		month_selected++;
-
-		if (g_date_get_year (date) != year_selected &&
-			g_date_get_month (date) != month_selected) {
-			day = 0;
-		}
-
-		gtk_calendar_select_day (GTK_CALENDAR (window->calendar_chats), day);
-
-    g_signal_handlers_unblock_by_func (window->calendar_chats,
-        log_window_calendar_chats_day_selected_cb,
-        window);
+		g_list_free_full (entities, g_object_unref);
 	}
 
-	if (date != NULL) {
-		/* Show messages of the selected date */
-		log_window_get_messages_for_date (window, date);
-	}
-
-	g_object_unref (account);
-	g_object_unref (target);
+	g_slice_free (FilterCallbackData, data);
 }
 
 static void
-log_window_calendar_chats_day_selected_cb (GtkWidget       *calendar,
-					   EmpathyLogWindow *window)
+empathy_account_chooser_filter_has_logs (TpAccount *account,
+					 EmpathyAccountChooserFilterResultCallback callback,
+					 gpointer callback_data,
+					 gpointer user_data)
 {
-	guint  year;
-	guint  month;
-	guint  day;
-	GDate *date;
+	TplLogManager *manager = tpl_log_manager_dup_singleton ();
+	FilterCallbackData *cb_data = g_slice_new0 (FilterCallbackData);
 
-	gtk_calendar_get_date (GTK_CALENDAR (calendar), &year, &month, &day);
-	if (day == 0)
-		/* No date selected */
-		return;
+	cb_data->callback = callback;
+	cb_data->user_data = callback_data;
 
-	/* We need this hear because it appears that the months start from 0 */
-	month++;
+	tpl_log_manager_get_entities_async (manager, account, got_entities, cb_data);
 
-	date = g_date_new_dmy (day, month, year);
-
-	DEBUG ("Currently selected date is: %04u-%02u-%02u", year, month, day);
-
-	log_window_chats_get_messages (window, date);
-
-	g_date_free (date);
+	g_object_unref (manager);
 }
 
 static void
-log_window_updating_calendar_month_cb (GObject *manager,
-		GAsyncResult *result, gpointer user_data)
+log_window_logger_clear_account_cb (TpProxy *proxy,
+				    const GError *error,
+				    gpointer user_data,
+				    GObject *weak_object)
 {
 	EmpathyLogWindow *window = user_data;
-	GList					*dates;
-	GList					*l;
-	guint					 year_selected;
-	guint					 month_selected;
-	GError				*error = NULL;
 
-	if (log_window == NULL)
-		return;
+	if (error != NULL)
+		g_warning ("Error when clearing logs: %s", error->message);
 
-	if (!tpl_log_manager_get_dates_finish (TPL_LOG_MANAGER (manager),
-		result, &dates, &error)) {
-			DEBUG ("Unable to retrieve messages' dates: %s. Aborting",
-					error->message);
-			empathy_chat_view_append_event (window->chatview_find,
-					"Unable to retrieve messages' dates");
-			g_error_free (error);
-			return;
-	}
+	/* Refresh the log viewer so the logs are cleared if the account
+	 * has been deleted */
+	empathy_chat_view_clear (window->chatview_events);
+	log_window_who_populate (window);
 
-	gtk_calendar_clear_marks (GTK_CALENDAR (window->calendar_chats));
-	g_object_get (window->calendar_chats,
-			"month", &month_selected,
-			"year", &year_selected,
-			NULL);
-
-	/* We need this here because it appears that the months start from 0 */
-	month_selected++;
-
-	for (l = dates; l; l = l->next) {
-			GDate *date = l->data;
-
-			if (g_date_get_year (date) == year_selected &&
-			    g_date_get_month (date) == month_selected) {
-					DEBUG ("Marking date: %04u-%02u-%02u", g_date_get_year (date),
-						g_date_get_month (date), g_date_get_day (date));
-					gtk_calendar_mark_day (GTK_CALENDAR (window->calendar_chats), g_date_get_day (date));
-			}
-	}
-
-	g_list_foreach (dates, (GFunc) g_free, NULL);
-	g_list_free (dates);
-
-	DEBUG ("Currently showing month %d and year %d", month_selected,
-			year_selected);
+	/* Re-filter the account chooser so the accounts without logs get greyed out */
+	empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (window->account_chooser),
+					    empathy_account_chooser_filter_has_logs, NULL);
 }
 
 static void
-log_window_calendar_chats_month_changed_cb (GtkWidget       *calendar,
-					    EmpathyLogWindow *window)
+log_window_clear_logs_chooser_select_account (EmpathyAccountChooser *chooser,
+					      EmpathyLogWindow *window)
 {
-	TpAccount     *account;
-	TplEntity     *target;
-
-	gtk_calendar_clear_marks (GTK_CALENDAR (calendar));
-
-	if (!log_window_chats_get_selected (window, &account, &target)) {
-		DEBUG ("No chat selected to get dates for...");
-		return;
-	}
-
-	/* Get the log object for this contact */
-	tpl_log_manager_get_dates_async (window->log_manager, account, target,
-					       TPL_EVENT_MASK_TEXT,
-					       log_window_updating_calendar_month_cb,
-					       (gpointer) window);
-
-	g_object_unref (account);
-	g_object_unref (target);
+	empathy_account_chooser_set_account (chooser,
+		empathy_account_chooser_get_account (EMPATHY_ACCOUNT_CHOOSER (window->account_chooser)));
 }
 
 static void
-log_window_entry_chats_changed_cb (GtkWidget       *entry,
+log_window_delete_menu_clicked_cb (GtkMenuItem      *menuitem,
 				   EmpathyLogWindow *window)
 {
-	const gchar *str;
+	GtkWidget *dialog, *content_area, *hbox, *label;
+	EmpathyAccountChooser *account_chooser;
+	gint response_id;
+	TpDBusDaemon *bus;
+	TpProxy *logger;
+	GError *error = NULL;
 
-	str = gtk_entry_get_text (GTK_ENTRY (window->entry_chats));
-	empathy_chat_view_highlight (window->chatview_chats, str, FALSE);
+	account_chooser = (EmpathyAccountChooser *) empathy_account_chooser_new ();
+	empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
+	empathy_account_chooser_set_filter (account_chooser, empathy_account_chooser_filter_has_logs, NULL);
 
-	if (str != NULL) {
-		empathy_chat_view_find_next (window->chatview_chats,
-					    str,
-					    TRUE,
-					    FALSE);
+	/* Select the same account as in the history window */
+	if (empathy_account_chooser_is_ready (account_chooser))
+		log_window_clear_logs_chooser_select_account (account_chooser, window);
+	else
+		g_signal_connect (account_chooser, "ready",
+				  G_CALLBACK (log_window_clear_logs_chooser_select_account), window);
+
+	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (window->window),
+		GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING,
+		GTK_BUTTONS_NONE,
+		_("Are you sure you want to delete all logs of previous conversations?"));
+
+	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		_("Clear All"), GTK_RESPONSE_APPLY,
+		NULL);
+
+	content_area = gtk_message_dialog_get_message_area (
+		GTK_MESSAGE_DIALOG (dialog));
+
+	hbox = gtk_hbox_new (FALSE, 6);
+	label = gtk_label_new (_("Delete from:"));
+	gtk_box_pack_start (GTK_BOX (hbox), label,
+		FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (account_chooser),
+		FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (content_area), hbox,
+		FALSE, FALSE, 0);
+
+	gtk_widget_show_all (hbox);
+
+	response_id = gtk_dialog_run (GTK_DIALOG (dialog));
+
+	if (response_id != GTK_RESPONSE_APPLY)
+		goto out;
+
+	bus = tp_dbus_daemon_dup (&error);
+	if (error != NULL) {
+		g_warning ("Could not delete logs: %s", error->message);
+		g_error_free (error);
+		goto out;
 	}
-}
 
-static void
-log_window_entry_chats_activate_cb (GtkWidget       *entry,
-				    EmpathyLogWindow *window)
-{
-	const gchar *str;
+	logger = g_object_new (TP_TYPE_PROXY,
+			       "bus-name", "org.freedesktop.Telepathy.Logger",
+			       "object-path", "/org/freedesktop/Telepathy/Logger",
+			       "dbus-daemon", bus,
+			       NULL);
+	g_object_unref (bus);
 
-	str = gtk_entry_get_text (GTK_ENTRY (window->entry_chats));
+	tp_proxy_add_interface_by_id (logger, EMP_IFACE_QUARK_LOGGER);
 
-	if (str != NULL) {
-		empathy_chat_view_find_next (window->chatview_chats,
-					    str,
-					    FALSE,
-					    FALSE);
+	if (empathy_account_chooser_has_all_selected (account_chooser)) {
+		DEBUG ("Deleting logs for all the accounts");
+
+		emp_cli_logger_call_clear (logger, -1,
+					   log_window_logger_clear_account_cb,
+					   window, NULL, G_OBJECT (window->window));
+	} else {
+		TpAccount *account = empathy_account_chooser_get_account (account_chooser);
+
+		DEBUG ("Deleting logs for %s", tp_proxy_get_object_path (account));
+
+		emp_cli_logger_call_clear_account (logger, -1,
+						   tp_proxy_get_object_path (account),
+						   log_window_logger_clear_account_cb,
+						   window, NULL, G_OBJECT (window->window));
 	}
+
+	g_object_unref (logger);
+ out:
+	gtk_widget_destroy (dialog);
 }

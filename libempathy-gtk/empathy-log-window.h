@@ -1,7 +1,6 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2006-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,6 +19,7 @@
  *
  * Authors: Martyn Russell <martyn@imendio.com>
  *          Xavier Claessens <xclaesse@gmail.com>
+ *          Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
  */
 
 #ifndef __EMPATHY_LOG_WINDOW_H__
@@ -29,10 +29,10 @@
 
 G_BEGIN_DECLS
 
-GtkWidget * empathy_log_window_show (TpAccount   *account,
-				     const gchar *chat_id,
-				     gboolean     chatroom,
-				     GtkWindow   *parent);
+GtkWidget * empathy_log_window_show (TpAccount *account,
+    const gchar *chat_id,
+    gboolean chatroom,
+    GtkWindow *parent);
 
 G_END_DECLS
 
