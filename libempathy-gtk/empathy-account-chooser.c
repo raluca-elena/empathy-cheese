@@ -721,8 +721,15 @@ account_chooser_find_account_foreach (GtkTreeModel *model,
 {
 	FindAccountData *data = user_data;
 	TpAccount  *account;
+	RowType type;
 
-	gtk_tree_model_get (model, iter, COL_ACCOUNT_POINTER, &account, -1);
+	gtk_tree_model_get (model, iter,
+		COL_ACCOUNT_POINTER, &account,
+		COL_ACCOUNT_ROW_TYPE, &type,
+		 -1);
+
+	if (type != ROW_ACCOUNT)
+		return FALSE;
 
 	if (account == data->account) {
 		data->found = TRUE;
