@@ -28,6 +28,7 @@ BUILT_SOURCES = 					\
 noinst_LTLIBRARIES = libempathy.la
 
 libempathy_headers =				\
+	action-chain-internal.h			\
 	empathy-account-settings.h		\
 	empathy-auth-factory.h			\
 	empathy-channel-factory.h \
@@ -69,6 +70,7 @@ libempathy_headers =				\
 
 libempathy_la_SOURCES =					\
 	$(libempathy_headers)				\
+	action-chain.c					\
 	empathy-account-settings.c			\
 	empathy-auth-factory.c				\
 	empathy-channel-factory.c \
