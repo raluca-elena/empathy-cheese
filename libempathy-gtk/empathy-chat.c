@@ -1282,31 +1282,41 @@ static void
 chat_send_error_cb (EmpathyTpChat          *tp_chat,
 		    const gchar            *message_body,
 		    TpChannelTextSendError  error_code,
+		    const gchar            *dbus_error,
 		    EmpathyChat            *chat)
 {
-	const gchar *error;
+	const gchar *error = NULL;
 	gchar       *str;
 
-	switch (error_code) {
-	case TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE:
-		error = _("offline");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT:
-		error = _("invalid contact");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED:
-		error = _("permission denied");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_TOO_LONG:
-		error = _("too long message");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED:
-		error = _("not implemented");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN:
-	default:
-		error = _("unknown");
-		break;
+	if (!tp_strdiff (dbus_error, TP_ERROR_STR_INSUFFICIENT_BALANCE)) {
+		error = _("insufficient balance to send message");
+	} else if (!tp_strdiff (dbus_error, TP_ERROR_STR_NOT_CAPABLE)) {
+		error = _("not capable");
+	}
+
+	if (error == NULL) {
+		/* if we didn't find a dbus-error, try the old error */
+		switch (error_code) {
+		case TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE:
+			error = _("offline");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT:
+			error = _("invalid contact");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED:
+			error = _("permission denied");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_TOO_LONG:
+			error = _("too long message");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED:
+			error = _("not implemented");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN:
+		default:
+			error = _("unknown");
+			break;
+		}
 	}
 
 	if (message_body != NULL) {

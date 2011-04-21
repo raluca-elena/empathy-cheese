@@ -322,6 +322,7 @@ handle_delivery_report (EmpathyTpChat *self,
 	gboolean valid;
 	GPtrArray *echo;
 	const gchar *message_body = NULL;
+	const gchar *delivery_dbus_error;
 
 	header = tp_message_peek (message, 0);
 	if (header == NULL)
@@ -335,6 +336,8 @@ handle_delivery_report (EmpathyTpChat *self,
 	if (!valid)
 		delivery_error = TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN;
 
+	delivery_dbus_error = tp_asv_get_string (header, "delivery-dbus-error");
+
 	/* TODO: ideally we should use tp-glib API giving us the echoed message as a
 	 * TpMessage. (fdo #35884) */
 	echo = tp_asv_get_boxed (header, "delivery-echo",
@@ -347,7 +350,8 @@ handle_delivery_report (EmpathyTpChat *self,
 			message_body = tp_asv_get_string (echo_body, "content");
 	}
 
-	g_signal_emit (self, signals[SEND_ERROR], 0, message_body, delivery_error);
+	g_signal_emit (self, signals[SEND_ERROR], 0, message_body,
+			delivery_error, delivery_dbus_error);
 
 out:
 	tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
@@ -449,7 +453,7 @@ message_send_cb (GObject *source,
 		 * we'll have rebased EmpathyTpChat on top of TpTextChannel we'll be able
 		 * to use the user_data pointer to pass the message and fix this. */
 		g_signal_emit (chat, signals[SEND_ERROR], 0,
-			       NULL, error_to_text_send_error (error));
+			       NULL, error_to_text_send_error (error), NULL);
 
 		g_error_free (error);
 	}
@@ -1521,9 +1525,9 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__STRING_UINT,
+			      _empathy_marshal_VOID__STRING_UINT_STRING,
 			      G_TYPE_NONE,
-			      2, G_TYPE_STRING, G_TYPE_UINT);
+			      3, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_STRING);
 
 	signals[CHAT_STATE_CHANGED] =
 		g_signal_new ("chat-state-changed",
