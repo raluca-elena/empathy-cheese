@@ -795,7 +795,7 @@ log_window_append_message (TplEvent *event,
 }
 
 static gboolean
-log_window_chats_get_selected (EmpathyLogWindow *window,
+log_window_get_selected (EmpathyLogWindow *window,
     TpAccount **account,
     TplEntity **target,
     GDate **date,
@@ -928,7 +928,7 @@ populate_events_from_search_hits (TpAccount *account,
   GDate *anytime;
   GList *l;
 
-  if (!log_window_chats_get_selected (log_window,
+  if (!log_window_get_selected (log_window,
       NULL, NULL, NULL, &event_mask, &subtype))
     return;
 
@@ -1146,7 +1146,7 @@ search_results_filter_entities (GtkTreeModel *model,
   if (log_window->hits == NULL)
     return TRUE;
 
-  if (!log_window_chats_get_selected (log_window, &selected_account,
+  if (!log_window_get_selected (log_window, &selected_account,
       NULL, NULL, NULL, NULL))
 
   gtk_tree_model_get (model, iter,
@@ -2045,7 +2045,7 @@ log_window_get_messages_for_date (EmpathyLogWindow *window,
   EventSubtype subtype;
   GDate *anytime, *separator;
 
-  if (!log_window_chats_get_selected (window,
+  if (!log_window_get_selected (window,
       &account, &target, NULL, &event_mask, &subtype))
     return;
 
@@ -2197,7 +2197,7 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
   GtkTreeSelection *selection;
   GDate *date;
 
-  if (!log_window_chats_get_selected (window, &account, &target,
+  if (!log_window_get_selected (window, &account, &target,
       &date, &event_mask, NULL))
     return;
 
