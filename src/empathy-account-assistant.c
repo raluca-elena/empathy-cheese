@@ -728,9 +728,9 @@ account_assistant_build_import_page (EmpathyAccountAssistant *self)
   gtk_widget_show (w);
   gtk_box_pack_start (GTK_BOX (main_vbox), w, FALSE, FALSE, 6);
 
-  w = gtk_alignment_new (0, 0, 0, 0);
+  w = gtk_alignment_new (0, 0, 1, 1);
   gtk_alignment_set_padding (GTK_ALIGNMENT (w), 0, 0, 12, 0);
-  gtk_box_pack_start (GTK_BOX (main_vbox), w, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (main_vbox), w, TRUE, TRUE, 0);
   gtk_widget_show (w);
 
   /* NOTE: this is hardcoded as we support pidgin only */
