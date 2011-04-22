@@ -811,6 +811,7 @@ log_window_get_selected (EmpathyLogWindow *window,
   TplEventTypeMask  ev = 0;
   EventSubtype      st = 0;
   GDate            *d = NULL;
+  GList            *paths, *l;
 
   view = GTK_TREE_VIEW (window->treeview_who);
   model = gtk_tree_view_get_model (view);
@@ -828,13 +829,23 @@ log_window_get_selected (EmpathyLogWindow *window,
   model = gtk_tree_view_get_model (view);
   selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+  paths = gtk_tree_selection_get_selected_rows (selection, NULL);
+  for (l = paths; l != NULL; l = l->next)
     {
+      GtkTreePath *path = l->data;
+      TplEventTypeMask mask;
+      EventSubtype submask;
+
+      gtk_tree_model_get_iter (model, &iter, path);
       gtk_tree_model_get (model, &iter,
-          COL_WHAT_TYPE, &ev,
-          COL_WHAT_SUBTYPE, &st,
+          COL_WHAT_TYPE, &mask,
+          COL_WHAT_SUBTYPE, &submask,
           -1);
+
+      ev |= mask;
+      st |= submask;
     }
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
   view = GTK_TREE_VIEW (window->treeview_when);
   model = gtk_tree_view_get_model (view);
@@ -1816,7 +1827,33 @@ static void
 log_window_what_changed_cb (GtkTreeSelection *selection,
     EmpathyLogWindow *window)
 {
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
 g_print ("log_window_what_changed_cb\n");
+
+  view = gtk_tree_selection_get_tree_view (selection);
+  model = gtk_tree_view_get_model (view);
+
+  /* If 'Anything' is selected, everything else should be deselected */
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      if (gtk_tree_selection_iter_is_selected (selection, &iter))
+        {
+          g_signal_handlers_block_by_func (selection,
+              log_window_what_changed_cb,
+              window);
+
+          gtk_tree_selection_unselect_all (selection);
+          gtk_tree_selection_select_iter (selection, &iter);
+
+          g_signal_handlers_unblock_by_func (selection,
+              log_window_what_changed_cb,
+              window);
+        }
+    }
+
   /* The dates need to be updated if we're not searching */
   log_window_chats_get_messages (window, window->hits == NULL);
 }
@@ -1897,7 +1934,7 @@ log_window_what_setup (EmpathyLogWindow *window)
   gtk_tree_view_append_column (view, column);
 
   /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
   gtk_tree_view_set_show_expanders (view, FALSE);
   gtk_tree_view_set_level_indentation (view, 12);
   gtk_tree_view_expand_all (view);
