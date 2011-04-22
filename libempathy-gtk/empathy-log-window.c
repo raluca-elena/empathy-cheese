@@ -582,10 +582,12 @@ model_is_parent (GtkTreeModel *model,
       account_equal (account, tpl_event_get_account (event)) &&
       entity_equal (target, event_get_target (event)))
     {
-      if (tpl_event_get_timestamp (event) - timestamp < 1800)
-        /* The gap is smaller than 30 min */
-        model_parent = *iter;
-        parent_found = found = TRUE;
+      if (ABS (tpl_event_get_timestamp (event) - timestamp) < 1800)
+        {
+          /* The gap is smaller than 30 min */
+          model_parent = *iter;
+          parent_found = found = TRUE;
+        }
     }
 
   g_object_unref (stored_event);
@@ -796,8 +798,8 @@ log_window_append_message (TplEvent *event,
 
 static gboolean
 log_window_get_selected (EmpathyLogWindow *window,
-    TpAccount **account,
-    TplEntity **target,
+    GList **accounts,
+    GList **entities,
     GDate **date,
     TplEventTypeMask *event_mask,
     EventSubtype *subtype)
@@ -806,24 +808,51 @@ log_window_get_selected (EmpathyLogWindow *window,
   GtkTreeModel     *model;
   GtkTreeSelection *selection;
   GtkTreeIter       iter;
-  TplEntity        *targ;
-  TpAccount        *acc = NULL;
   TplEventTypeMask  ev = 0;
   EventSubtype      st = 0;
   GDate            *d = NULL;
   GList            *paths, *l;
+  gint              type;
 
   view = GTK_TREE_VIEW (window->treeview_who);
   model = gtk_tree_view_get_model (view);
   selection = gtk_tree_view_get_selection (view);
 
-  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
+  paths = gtk_tree_selection_get_selected_rows (selection, NULL);
+  if (paths == NULL)
     return FALSE;
 
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &acc,
-      COL_WHO_TARGET, &targ,
-      -1);
+  if (accounts)
+    *accounts = NULL;
+  if (entities)
+    *entities = NULL;
+
+  for (l = paths; l != NULL; l = l->next)
+    {
+      GtkTreePath *path = l->data;
+      TpAccount *account;
+      TplEntity *entity;
+
+      gtk_tree_model_get_iter (model, &iter, path);
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &account,
+          COL_WHO_TARGET, &entity,
+          COL_WHO_TYPE, &type,
+          -1);
+
+      if (type != COL_TYPE_NORMAL)
+        continue;
+
+      if (accounts != NULL)
+        *accounts = g_list_append (*accounts, g_object_ref (account));
+
+      if (entities != NULL)
+        *entities = g_list_append (*entities, g_object_ref (entity));
+
+      g_object_unref (account);
+      g_object_unref (entity);
+    }
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
   view = GTK_TREE_VIEW (window->treeview_what);
   model = gtk_tree_view_get_model (view);
@@ -858,12 +887,6 @@ log_window_get_selected (EmpathyLogWindow *window,
           -1);
     }
 
-  if (account != NULL)
-    *account = acc ? g_object_ref (acc) : NULL;
-
-  if (target != NULL)
-    *target = targ ? g_object_ref (targ) : NULL;
-
   if (date != NULL)
     *date = d;
 
@@ -872,9 +895,6 @@ log_window_get_selected (EmpathyLogWindow *window,
 
   if (subtype != NULL)
     *subtype = st;
-
-  tp_clear_object (&acc);
-  tp_clear_object (&targ);
 
   return TRUE;
 }
@@ -930,8 +950,8 @@ static void
 get_events_for_date (TplActionChain *chain, gpointer user_data);
 
 static void
-populate_events_from_search_hits (TpAccount *account,
-    TplEntity *target,
+populate_events_from_search_hits (GList *accounts,
+    GList *targets,
     GDate *date)
 {
   TplEventTypeMask event_mask;
@@ -948,14 +968,27 @@ populate_events_from_search_hits (TpAccount *account,
   for (l = log_window->hits; l != NULL; l = l->next)
     {
       TplLogSearchHit *hit = l->data;
+      GList *acc, *targ;
+      gboolean found = FALSE;
 
       /* Protect against invalid data (corrupt or old log files). */
       if (hit->account == NULL || hit->target == NULL)
         continue;
 
-      if (!account_equal (hit->account, account) ||
-          !entity_equal (hit->target, target))
-        continue;
+      for (acc = accounts, targ = targets;
+           acc != NULL && targ != NULL && !found;
+           acc = acc->next, targ = targ->next)
+        {
+          TpAccount *account = acc->data;
+          TplEntity *target = targ->data;
+
+          if (account_equal (hit->account, account) &&
+              entity_equal (hit->target, target))
+            found = TRUE;
+        }
+
+        if (!found)
+          continue;
 
       if (g_date_compare (date, anytime) == 0 ||
           g_date_compare (date, hit->date) == 0)
@@ -975,8 +1008,8 @@ populate_events_from_search_hits (TpAccount *account,
 }
 
 static void
-populate_dates_from_search_hits (TpAccount *account,
-    TplEntity *target)
+populate_dates_from_search_hits (GList *accounts,
+    GList *targets)
 {
   GList *l;
   GtkTreeView *view;
@@ -994,14 +1027,27 @@ populate_dates_from_search_hits (TpAccount *account,
   for (l = log_window->hits; l != NULL; l = l->next)
     {
       TplLogSearchHit *hit = l->data;
+      GList *acc, *targ;
+      gboolean found = FALSE;
 
       /* Protect against invalid data (corrupt or old log files). */
       if (hit->account == NULL || hit->target == NULL)
         continue;
 
-      if (!account_equal (hit->account, account) ||
-          !entity_equal (hit->target, target))
-        continue;
+      for (acc = accounts, targ = targets;
+           acc != NULL && targ != NULL && !found;
+           acc = acc->next, targ = targ->next)
+        {
+          TpAccount *account = acc->data;
+          TplEntity *target = targ->data;
+
+          if (account_equal (hit->account, account) &&
+              entity_equal (hit->target, target))
+            found = TRUE;
+        }
+
+        if (!found)
+          continue;
 
       /* Add the date if it's not already there */
       has_element = FALSE;
@@ -1254,19 +1300,34 @@ static void
 log_window_who_changed_cb (GtkTreeSelection *selection,
     EmpathyLogWindow  *window)
 {
+  GtkTreeView *view;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  gint type;
   gboolean someone = FALSE;
 
 g_print ("log_window_who_changed_cb\n");
-  if (gtk_tree_selection_get_selected (selection, &model, &iter))
-    {
-      gtk_tree_model_get (model, &iter,
-          COL_WHO_TYPE, &type,
-          -1);
 
-      someone = (type == COL_TYPE_NORMAL);
+  view = gtk_tree_selection_get_tree_view (selection);
+  model = gtk_tree_view_get_model (view);
+
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      /* If 'Anyone' is selected, everything else should be deselected */
+      if (gtk_tree_selection_iter_is_selected (selection, &iter))
+        {
+          g_signal_handlers_block_by_func (selection,
+              log_window_who_changed_cb,
+              window);
+
+          gtk_tree_selection_unselect_all (selection);
+          gtk_tree_selection_select_iter (selection, &iter);
+
+          g_signal_handlers_unblock_by_func (selection,
+              log_window_who_changed_cb,
+              window);
+        }
+      else if (gtk_tree_selection_count_selected_rows (selection) == 1)
+        someone = TRUE;
     }
 
   gtk_widget_set_sensitive (window->button_profile, someone);
@@ -1623,7 +1684,7 @@ log_window_who_setup (EmpathyLogWindow *window)
   gtk_tree_view_append_column (view, column);
 
   /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
   gtk_tree_view_set_row_separator_func (view, who_row_is_separator,
       NULL, NULL);
 
@@ -2076,58 +2137,65 @@ static void
 log_window_get_messages_for_date (EmpathyLogWindow *window,
     GDate *date)
 {
-  TpAccount *account;
-  TplEntity *target;
+  GList *accounts, *targets, *acc, *targ;
   TplEventTypeMask event_mask;
   EventSubtype subtype;
   GDate *anytime, *separator;
 
   if (!log_window_get_selected (window,
-      &account, &target, NULL, &event_mask, &subtype))
+      &accounts, &targets, NULL, &event_mask, &subtype))
     return;
 
   anytime = g_date_new_dmy (2, 1, -1);
   separator = g_date_new_dmy (1, 1, -1);
 
-  /* Get events */
-  if (g_date_compare (date, anytime) != 0)
+  for (acc = accounts, targ = targets;
+       acc != NULL && targ != NULL;
+       acc = acc->next, targ = targ->next)
     {
-      Ctx *ctx;
+      TpAccount *account = acc->data;
+      TplEntity *target = targ->data;
 
-      ctx = ctx_new (window, account, target, date, event_mask, subtype);
-      _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
-    }
-  else
-    {
-      GtkTreeView *view = GTK_TREE_VIEW (window->treeview_when);
-      GtkTreeModel *model = gtk_tree_view_get_model (view);
-      GtkTreeIter iter;
-      gboolean next;
-      GDate *d;
-
-      for (next = gtk_tree_model_get_iter_first (model, &iter);
-           next;
-           next = gtk_tree_model_iter_next (model, &iter))
+      /* Get events */
+      if (g_date_compare (date, anytime) != 0)
         {
           Ctx *ctx;
 
-          gtk_tree_model_get (model, &iter,
-              COL_WHEN_DATE, &d,
-              -1);
-
-          if (g_date_compare (d, anytime) == 0 ||
-              g_date_compare (d, separator) == 0)
-            continue;
-
-          ctx = ctx_new (window, account, target, d, event_mask, subtype);
+          ctx = ctx_new (window, account, target, date, event_mask, subtype);
           _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+        }
+      else
+        {
+          GtkTreeView *view = GTK_TREE_VIEW (window->treeview_when);
+          GtkTreeModel *model = gtk_tree_view_get_model (view);
+          GtkTreeIter iter;
+          gboolean next;
+          GDate *d;
+
+          for (next = gtk_tree_model_get_iter_first (model, &iter);
+               next;
+               next = gtk_tree_model_iter_next (model, &iter))
+            {
+              Ctx *ctx;
+
+              gtk_tree_model_get (model, &iter,
+                  COL_WHEN_DATE, &d,
+                  -1);
+
+              if (g_date_compare (d, anytime) != 0 &&
+                  g_date_compare (d, separator) != 0)
+                {
+                  ctx = ctx_new (window, account, target, d, event_mask, subtype);
+                  _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+                }
+            }
         }
     }
 
   _tpl_action_chain_start (window->chain);
 
-  g_object_unref (account);
-  g_object_unref (target);
+  g_list_free_full (accounts, g_object_unref);
+  g_list_free_full (targets, g_object_unref);
   g_date_free (separator);
   g_date_free (anytime);
 }
@@ -2188,26 +2256,53 @@ log_manager_got_dates_cb (GObject *manager,
 
   if (gtk_tree_model_get_iter_first (model, &iter))
     {
-      gtk_list_store_prepend (store, &iter);
-      gtk_list_store_set (store, &iter,
-          COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
-          COL_WHEN_TEXT, "separator",
-          -1);
+      gchar *separator = NULL;
 
-      gtk_list_store_prepend (store, &iter);
-      gtk_list_store_set (store, &iter,
-          COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
-          COL_WHEN_TEXT, _("Anytime"),
-          -1);
+      if (gtk_tree_model_iter_next (model, &iter))
+        {
+          gtk_tree_model_get (model, &iter,
+              COL_WHEN_TEXT, &separator,
+              -1);
+        }
+
+      if (g_strcmp0 (separator, "separator") != 0)
+        {
+          gtk_list_store_prepend (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
+              COL_WHEN_TEXT, "separator",
+              -1);
+
+          gtk_list_store_prepend (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
+              COL_WHEN_TEXT, _("Anytime"),
+              -1);
+        }
     }
+
+  g_list_free_full (dates, g_free);
+ out:
+  ctx_free (ctx);
+  _tpl_action_chain_continue (log_window->chain);
+}
+
+static void
+select_first_date (TplActionChain *chain, gpointer user_data)
+{
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+
+  view = GTK_TREE_VIEW (log_window->treeview_when);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
 
   /* Show messages of the most recent date */
   if (gtk_tree_model_get_iter_first (model, &iter))
     gtk_tree_selection_select_iter (selection, &iter);
 
-  g_list_free_full (dates, g_free);
- out:
-  ctx_free (ctx);
   _tpl_action_chain_continue (log_window->chain);
 }
 
@@ -2225,8 +2320,7 @@ static void
 log_window_chats_get_messages (EmpathyLogWindow *window,
     gboolean force_get_dates)
 {
-  TpAccount *account;
-  TplEntity *target;
+  GList *accounts, *targets;
   TplEventTypeMask event_mask;
   GtkTreeView *view;
   GtkTreeModel *model;
@@ -2234,7 +2328,7 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
   GtkTreeSelection *selection;
   GDate *date;
 
-  if (!log_window_get_selected (window, &account, &target,
+  if (!log_window_get_selected (window, &accounts, &targets,
       &date, &event_mask, NULL))
     return;
 
@@ -2252,14 +2346,16 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
       if (force_get_dates)
         {
           gtk_list_store_clear (store);
-          populate_dates_from_search_hits (account, target);
+          populate_dates_from_search_hits (accounts, targets);
         }
       else
-        populate_events_from_search_hits (account, target, date);
+        populate_events_from_search_hits (accounts, targets, date);
     }
   /* Either use the supplied date or get the last */
   else if (force_get_dates || date == NULL)
     {
+      GList *acc, *targ;
+
       g_signal_handlers_block_by_func (selection,
           log_window_when_changed_cb,
           window);
@@ -2271,16 +2367,20 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
           window);
 
       /* Get a list of dates and show them on the treeview */
-      if (target != NULL)
+      for (targ = targets, acc = accounts;
+           targ != NULL && acc != NULL;
+           targ = targ->next, acc = acc->next)
         {
+          TpAccount *account = acc->data;
+          TplEntity *target = targ->data;
           Ctx *ctx = ctx_new (window, account, target, NULL, event_mask, 0);
+
           _tpl_action_chain_append (window->chain, get_dates_for_entity, ctx);
-          _tpl_action_chain_start (window->chain);
         }
-      else
-        {
-          /* FIXME: get dates for all entities ? */
-        }
+      _tpl_action_chain_append (window->chain, select_first_date, NULL);
+      _tpl_action_chain_start (window->chain);
+
+      /* FIXME: get dates for all entities when 'Anyone' ? */
     }
   else
     {
@@ -2288,8 +2388,8 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
       log_window_get_messages_for_date (window, date);
     }
 
-  tp_clear_object (&account);
-  tp_clear_object (&target);
+  g_list_free_full (accounts, g_object_unref);
+  g_list_free_full (targets, g_object_unref);
 }
 
 typedef struct {
