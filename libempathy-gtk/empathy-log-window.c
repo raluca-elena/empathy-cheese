@@ -2522,7 +2522,16 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
     {
       if (force_get_dates)
         {
+          g_signal_handlers_block_by_func (selection,
+              log_window_when_changed_cb,
+              window);
+
           gtk_list_store_clear (store);
+
+          g_signal_handlers_unblock_by_func (selection,
+              log_window_when_changed_cb,
+              window);
+
           populate_dates_from_search_hits (accounts, targets);
         }
       else
