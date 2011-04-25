@@ -796,6 +796,44 @@ log_window_append_message (TplEvent *event,
     DEBUG ("Message type not handled");
 }
 
+static void
+add_all_accounts_and_entities (GList **accounts,
+    GList **entities)
+{
+  GtkTreeView      *view;
+  GtkTreeModel     *model;
+  GtkTreeIter       iter;
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    return;
+
+  do
+    {
+      TpAccount *account;
+      TplEntity *entity;
+      gint type;
+
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &account,
+          COL_WHO_TARGET, &entity,
+          COL_WHO_TYPE, &type,
+          -1);
+
+      if (type != COL_TYPE_NORMAL)
+        continue;
+
+      if (accounts != NULL)
+        *accounts = g_list_append (*accounts, account);
+
+      if (entities != NULL)
+        *entities = g_list_append (*entities, entity);
+    }
+  while (gtk_tree_model_iter_next (model, &iter));
+}
+
 static gboolean
 log_window_get_selected (EmpathyLogWindow *window,
     GList **accounts,
@@ -840,8 +878,12 @@ log_window_get_selected (EmpathyLogWindow *window,
           COL_WHO_TYPE, &type,
           -1);
 
-      if (type != COL_TYPE_NORMAL)
-        continue;
+      if (type == COL_TYPE_ANY)
+        {
+          if (accounts != NULL || entities != NULL)
+            add_all_accounts_and_entities (accounts, entities);
+          break;
+        }
 
       if (accounts != NULL)
         *accounts = g_list_append (*accounts, g_object_ref (account));
@@ -2379,8 +2421,6 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
         }
       _tpl_action_chain_append (window->chain, select_first_date, NULL);
       _tpl_action_chain_start (window->chain);
-
-      /* FIXME: get dates for all entities when 'Anyone' ? */
     }
   else
     {
