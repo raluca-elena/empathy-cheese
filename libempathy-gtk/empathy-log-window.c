@@ -844,7 +844,7 @@ static gboolean
 log_window_get_selected (EmpathyLogWindow *window,
     GList **accounts,
     GList **entities,
-    GDate **date,
+    GList **dates,
     TplEventTypeMask *event_mask,
     EventSubtype *subtype)
 {
@@ -854,7 +854,6 @@ log_window_get_selected (EmpathyLogWindow *window,
   GtkTreeIter       iter;
   TplEventTypeMask  ev = 0;
   EventSubtype      st = 0;
-  GDate            *d = NULL;
   GList            *paths, *l;
   gint              type;
 
@@ -928,15 +927,24 @@ log_window_get_selected (EmpathyLogWindow *window,
   model = gtk_tree_view_get_model (view);
   selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+  if (dates != NULL)
     {
-      gtk_tree_model_get (model, &iter,
-          COL_WHEN_DATE, &d,
-          -1);
-    }
+      *dates = NULL;
 
-  if (date != NULL)
-    *date = d;
+      paths = gtk_tree_selection_get_selected_rows (selection, NULL);
+      for (l = paths; l != NULL; l = l->next)
+        {
+          GtkTreePath *path = l->data;
+          GDate *date;
+
+          gtk_tree_model_get_iter (model, &iter, path);
+          gtk_tree_model_get (model, &iter,
+              COL_WHEN_DATE, &date,
+              -1);
+
+          *dates = g_list_append (*dates, date);
+        }
+    }
 
   if (event_mask != NULL)
     *event_mask = ev;
@@ -1000,18 +1008,21 @@ get_events_for_date (TplActionChain *chain, gpointer user_data);
 static void
 populate_events_from_search_hits (GList *accounts,
     GList *targets,
-    GDate *date)
+    GList *dates)
 {
   TplEventTypeMask event_mask;
   EventSubtype subtype;
   GDate *anytime;
   GList *l;
+  gboolean is_anytime = FALSE;
 
   if (!log_window_get_selected (log_window,
       NULL, NULL, NULL, &event_mask, &subtype))
     return;
 
   anytime = g_date_new_dmy (2, 1, -1);
+  if (g_list_find_custom (dates, anytime, (GCompareFunc) g_date_compare))
+    is_anytime = TRUE;
 
   for (l = log_window->hits; l != NULL; l = l->next)
     {
@@ -1038,8 +1049,9 @@ populate_events_from_search_hits (GList *accounts,
         if (!found)
           continue;
 
-      if (g_date_compare (date, anytime) == 0 ||
-          g_date_compare (date, hit->date) == 0)
+      if (is_anytime ||
+          g_list_find_custom (dates, hit->date, (GCompareFunc) g_date_compare)
+              != NULL)
         {
           Ctx *ctx;
 
@@ -1873,7 +1885,33 @@ static void
 log_window_when_changed_cb (GtkTreeSelection *selection,
     EmpathyLogWindow *window)
 {
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
 g_print ("log_window_when_changed_cb\n");
+
+  view = gtk_tree_selection_get_tree_view (selection);
+  model = gtk_tree_view_get_model (view);
+
+  /* If 'Anytime' is selected, everything else should be deselected */
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      if (gtk_tree_selection_iter_is_selected (selection, &iter))
+        {
+          g_signal_handlers_block_by_func (selection,
+              log_window_when_changed_cb,
+              window);
+
+          gtk_tree_selection_unselect_all (selection);
+          gtk_tree_selection_select_iter (selection, &iter);
+
+          g_signal_handlers_unblock_by_func (selection,
+              log_window_when_changed_cb,
+              window);
+        }
+    }
+
   log_window_chats_get_messages (window, FALSE);
 }
 
@@ -1921,7 +1959,7 @@ log_window_when_setup (EmpathyLogWindow *window)
   gtk_tree_view_append_column (view, column);
 
   /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
   gtk_tree_view_set_row_separator_func (view, when_row_is_separator,
       NULL, NULL);
   gtk_tree_sortable_set_sort_column_id (sortable,
@@ -2206,13 +2244,13 @@ g_print ("get_events_for_date\n");
 }
 
 static void
-log_window_get_messages_for_date (EmpathyLogWindow *window,
-    GDate *date)
+log_window_get_messages_for_dates (EmpathyLogWindow *window,
+    GList *dates)
 {
-  GList *accounts, *targets, *acc, *targ;
+  GList *accounts, *targets, *acc, *targ, *l;
   TplEventTypeMask event_mask;
   EventSubtype subtype;
-  GDate *anytime, *separator;
+  GDate *date, *anytime, *separator;
 
   if (!log_window_get_selected (window,
       &accounts, &targets, NULL, &event_mask, &subtype))
@@ -2231,39 +2269,44 @@ log_window_get_messages_for_date (EmpathyLogWindow *window,
       TpAccount *account = acc->data;
       TplEntity *target = targ->data;
 
-      /* Get events */
-      if (g_date_compare (date, anytime) != 0)
+      for (l = dates; l != NULL; l = l->next)
         {
-          Ctx *ctx;
+          date = l->data;
 
-          ctx = ctx_new (window, account, target, date, event_mask, subtype,
-              window->count);
-          _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
-        }
-      else
-        {
-          GtkTreeView *view = GTK_TREE_VIEW (window->treeview_when);
-          GtkTreeModel *model = gtk_tree_view_get_model (view);
-          GtkTreeIter iter;
-          gboolean next;
-          GDate *d;
-
-          for (next = gtk_tree_model_get_iter_first (model, &iter);
-               next;
-               next = gtk_tree_model_iter_next (model, &iter))
+          /* Get events */
+          if (g_date_compare (date, anytime) != 0)
             {
               Ctx *ctx;
 
-              gtk_tree_model_get (model, &iter,
-                  COL_WHEN_DATE, &d,
-                  -1);
+              ctx = ctx_new (window, account, target, date, event_mask, subtype,
+                  window->count);
+              _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+            }
+          else
+            {
+              GtkTreeView *view = GTK_TREE_VIEW (window->treeview_when);
+              GtkTreeModel *model = gtk_tree_view_get_model (view);
+              GtkTreeIter iter;
+              gboolean next;
+              GDate *d;
 
-              if (g_date_compare (d, anytime) != 0 &&
-                  g_date_compare (d, separator) != 0)
+              for (next = gtk_tree_model_get_iter_first (model, &iter);
+                   next;
+                   next = gtk_tree_model_iter_next (model, &iter))
                 {
-                  ctx = ctx_new (window, account, target, d,
-                      event_mask, subtype, window->count);
-                  _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+                  Ctx *ctx;
+
+                  gtk_tree_model_get (model, &iter,
+                      COL_WHEN_DATE, &d,
+                      -1);
+
+                  if (g_date_compare (d, anytime) != 0 &&
+                      g_date_compare (d, separator) != 0)
+                    {
+                      ctx = ctx_new (window, account, target, d,
+                          event_mask, subtype, window->count);
+                      _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
+                    }
                 }
             }
         }
@@ -2401,16 +2444,15 @@ static void
 log_window_chats_get_messages (EmpathyLogWindow *window,
     gboolean force_get_dates)
 {
-  GList *accounts, *targets;
+  GList *accounts, *targets, *dates;
   TplEventTypeMask event_mask;
   GtkTreeView *view;
   GtkTreeModel *model;
   GtkListStore *store;
   GtkTreeSelection *selection;
-  GDate *date;
 
   if (!log_window_get_selected (window, &accounts, &targets,
-      &date, &event_mask, NULL))
+      &dates, &event_mask, NULL))
     return;
 
   view = GTK_TREE_VIEW (window->treeview_when);
@@ -2433,10 +2475,10 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
           populate_dates_from_search_hits (accounts, targets);
         }
       else
-        populate_events_from_search_hits (accounts, targets, date);
+        populate_events_from_search_hits (accounts, targets, dates);
     }
   /* Either use the supplied date or get the last */
-  else if (force_get_dates || date == NULL)
+  else if (force_get_dates || dates == NULL)
     {
       GList *acc, *targ;
 
@@ -2468,11 +2510,12 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
   else
     {
       /* Show messages of the selected date */
-      log_window_get_messages_for_date (window, date);
+      log_window_get_messages_for_dates (window, dates);
     }
 
   g_list_free_full (accounts, g_object_unref);
   g_list_free_full (targets, g_object_unref);
+  g_list_free_full (dates, (GFreeFunc) g_date_free);
 }
 
 typedef struct {
