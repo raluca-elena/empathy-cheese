@@ -96,26 +96,26 @@ typedef struct
   gboolean selected_is_chatroom;
 } EmpathyLogWindow;
 
-static void     log_window_destroy_cb                      (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_search_entry_changed_cb         (GtkWidget        *entry,
-							    EmpathyLogWindow *window);
-static void     log_window_search_entry_activate_cb        (GtkWidget        *widget,
-							    EmpathyLogWindow *window);
-static void     log_window_who_populate                    (EmpathyLogWindow *window);
-static void     log_window_who_setup                       (EmpathyLogWindow *window);
-static void     log_window_when_setup                      (EmpathyLogWindow *window);
-static void     log_window_what_setup                      (EmpathyLogWindow *window);
-static void     log_window_events_setup                    (EmpathyLogWindow *window);
-static void     log_window_chats_accounts_changed_cb       (GtkWidget        *combobox,
-							    EmpathyLogWindow *window);
-static void     log_window_chats_set_selected              (EmpathyLogWindow *window);
-static void     log_window_chats_get_messages              (EmpathyLogWindow *window,
-                                                            gboolean force_get_dates);
-static void     log_window_when_changed_cb                 (GtkTreeSelection *selection,
-							    EmpathyLogWindow *window);
-static void     log_window_delete_menu_clicked_cb          (GtkMenuItem      *menuitem,
-							    EmpathyLogWindow *window);
+static void log_window_destroy_cb                (GtkWidget        *widget,
+                                                  EmpathyLogWindow *window);
+static void log_window_search_entry_changed_cb   (GtkWidget        *entry,
+                                                  EmpathyLogWindow *window);
+static void log_window_search_entry_activate_cb  (GtkWidget        *widget,
+                                                  EmpathyLogWindow *window);
+static void log_window_who_populate              (EmpathyLogWindow *window);
+static void log_window_who_setup                 (EmpathyLogWindow *window);
+static void log_window_when_setup                (EmpathyLogWindow *window);
+static void log_window_what_setup                (EmpathyLogWindow *window);
+static void log_window_events_setup              (EmpathyLogWindow *window);
+static void log_window_chats_accounts_changed_cb (GtkWidget        *combobox,
+                                                  EmpathyLogWindow *window);
+static void log_window_chats_set_selected        (EmpathyLogWindow *window);
+static void log_window_chats_get_messages        (EmpathyLogWindow *window,
+                                                  gboolean force_get_dates);
+static void log_window_when_changed_cb           (GtkTreeSelection *selection,
+                                                  EmpathyLogWindow *window);
+static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
+                                                  EmpathyLogWindow *window);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -238,36 +238,38 @@ ctx_free (Ctx *ctx)
 
 static void
 account_chooser_ready_cb (EmpathyAccountChooser *chooser,
-			EmpathyLogWindow *window)
+    EmpathyLogWindow *window)
 {
-	/* We'll display the account once the model has been populate with the chats
-	 * of this account. */
-	empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
-		window->account_chooser), window->selected_account);
+  /* We'll display the account once the model has been populate with the chats
+   * of this account. */
+  empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
+      window->account_chooser), window->selected_account);
 }
 
 static void
 select_account_once_ready (EmpathyLogWindow *self,
-			   TpAccount *account,
-			   const gchar *chat_id,
-			   gboolean is_chatroom)
+    TpAccount *account,
+    const gchar *chat_id,
+    gboolean is_chatroom)
 {
-	EmpathyAccountChooser *account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->account_chooser);
+  EmpathyAccountChooser *account_chooser;
 
-	tp_clear_object (&self->selected_account);
-	self->selected_account = g_object_ref (account);
+  account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->account_chooser);
 
-	g_free (self->selected_chat_id);
-	self->selected_chat_id = g_strdup (chat_id);
+  tp_clear_object (&self->selected_account);
+  self->selected_account = g_object_ref (account);
 
-	self->selected_is_chatroom = is_chatroom;
+  g_free (self->selected_chat_id);
+  self->selected_chat_id = g_strdup (chat_id);
 
-	if (empathy_account_chooser_is_ready (account_chooser))
-		account_chooser_ready_cb (account_chooser, self);
-	else
-		/* Chat will be selected once the account chooser is ready */
-		g_signal_connect (account_chooser, "ready",
-				  G_CALLBACK (account_chooser_ready_cb), self);
+  self->selected_is_chatroom = is_chatroom;
+
+  if (empathy_account_chooser_is_ready (account_chooser))
+    account_chooser_ready_cb (account_chooser, self);
+  else
+    /* Chat will be selected once the account chooser is ready */
+    g_signal_connect (account_chooser, "ready",
+        G_CALLBACK (account_chooser_ready_cb), self);
 }
 
 static void
@@ -1835,64 +1837,66 @@ log_window_who_setup (EmpathyLogWindow *window)
 
 static void
 log_window_chats_accounts_changed_cb (GtkWidget       *combobox,
-				      EmpathyLogWindow *window)
+    EmpathyLogWindow *window)
 {
-	/* Clear all current messages shown in the textview */
-	gtk_tree_store_clear (window->store_events);
+  /* Clear all current messages shown in the textview */
+  gtk_tree_store_clear (window->store_events);
 
-	log_window_who_populate (window);
+  log_window_who_populate (window);
 }
 
 static void
 log_window_chats_set_selected (EmpathyLogWindow *window)
 {
-	GtkTreeView          *view;
-	GtkTreeModel         *model;
-	GtkTreeSelection     *selection;
-	GtkTreeIter           iter;
-	GtkTreePath          *path;
-	gboolean              ok;
+  GtkTreeView          *view;
+  GtkTreeModel         *model;
+  GtkTreeSelection     *selection;
+  GtkTreeIter           iter;
+  GtkTreePath          *path;
+  gboolean              ok;
 
-	view = GTK_TREE_VIEW (window->treeview_who);
-	model = gtk_tree_view_get_model (view);
-	selection = gtk_tree_view_get_selection (view);
+  view = GTK_TREE_VIEW (window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
 
-	if (!gtk_tree_model_get_iter_first (model, &iter)) {
-		return;
-	}
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    return;
 
-	for (ok = TRUE; ok; ok = gtk_tree_model_iter_next (model, &iter)) {
-		TpAccount   *this_account;
-		TplEntity   *this_target;
-		const gchar *this_chat_id;
-		gboolean     this_is_chatroom;
+  for (ok = TRUE; ok; ok = gtk_tree_model_iter_next (model, &iter))
+    {
+      TpAccount   *this_account;
+      TplEntity   *this_target;
+      const gchar *this_chat_id;
+      gboolean     this_is_chatroom;
 
-		gtk_tree_model_get (model, &iter,
-				    COL_WHO_ACCOUNT, &this_account,
-				    COL_WHO_TARGET, &this_target,
-				    -1);
+      gtk_tree_model_get (model, &iter,
+          COL_WHO_ACCOUNT, &this_account,
+          COL_WHO_TARGET, &this_target,
+          -1);
 
-		this_chat_id = tpl_entity_get_identifier (this_target);
-		this_is_chatroom = tpl_entity_get_entity_type (this_target) == TPL_ENTITY_ROOM;
+      this_chat_id = tpl_entity_get_identifier (this_target);
+      this_is_chatroom = tpl_entity_get_entity_type (this_target)
+          == TPL_ENTITY_ROOM;
 
-		if (this_account == window->selected_account &&
-		    !tp_strdiff (this_chat_id, window->selected_chat_id) &&
-		    this_is_chatroom == window->selected_is_chatroom) {
-			gtk_tree_selection_select_iter (selection, &iter);
-			path = gtk_tree_model_get_path (model, &iter);
-			gtk_tree_view_scroll_to_cell (view, path, NULL, TRUE, 0.5, 0.0);
-			gtk_tree_path_free (path);
-			g_object_unref (this_account);
-			g_object_unref (this_target);
-			break;
-		}
+      if (this_account == window->selected_account &&
+          !tp_strdiff (this_chat_id, window->selected_chat_id) &&
+          this_is_chatroom == window->selected_is_chatroom)
+        {
+          gtk_tree_selection_select_iter (selection, &iter);
+          path = gtk_tree_model_get_path (model, &iter);
+          gtk_tree_view_scroll_to_cell (view, path, NULL, TRUE, 0.5, 0.0);
+          gtk_tree_path_free (path);
+          g_object_unref (this_account);
+          g_object_unref (this_target);
+          break;
+        }
 
-		g_object_unref (this_account);
-		g_object_unref (this_target);
-	}
+      g_object_unref (this_account);
+      g_object_unref (this_target);
+    }
 
-	tp_clear_object (&window->selected_account);
-	tp_clear_pointer (&window->selected_chat_id, g_free);
+  tp_clear_object (&window->selected_account);
+  tp_clear_pointer (&window->selected_chat_id, g_free);
 }
 
 static gint
@@ -2566,163 +2570,179 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
 }
 
 typedef struct {
-	EmpathyAccountChooserFilterResultCallback callback;
-	gpointer                                  user_data;
+  EmpathyAccountChooserFilterResultCallback callback;
+  gpointer user_data;
 } FilterCallbackData;
 
 static void
-got_entities (GObject      *manager,
-	      GAsyncResult *result,
-	      gpointer      user_data)
+got_entities (GObject *manager,
+    GAsyncResult *result,
+    gpointer user_data)
 {
-	FilterCallbackData *data = user_data;
-	GList *entities;
-	GError *error;
+  FilterCallbackData *data = user_data;
+  GList *entities;
+  GError *error;
 
-	if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager), result, &entities, &error)) {
-		DEBUG ("Could not get entities: %s", error->message);
-		g_error_free (error);
-		data->callback (FALSE, data->user_data);
-	} else {
-		data->callback (entities != NULL, data->user_data);
+  if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
+      result, &entities, &error))
+    {
+      DEBUG ("Could not get entities: %s", error->message);
+      g_error_free (error);
+      data->callback (FALSE, data->user_data);
+    }
+  else
+    {
+      data->callback (entities != NULL, data->user_data);
 
-		g_list_free_full (entities, g_object_unref);
-	}
+      g_list_free_full (entities, g_object_unref);
+  }
 
-	g_slice_free (FilterCallbackData, data);
+  g_slice_free (FilterCallbackData, data);
 }
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
-					 EmpathyAccountChooserFilterResultCallback callback,
-					 gpointer callback_data,
-					 gpointer user_data)
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    gpointer user_data)
 {
-	TplLogManager *manager = tpl_log_manager_dup_singleton ();
-	FilterCallbackData *cb_data = g_slice_new0 (FilterCallbackData);
+  TplLogManager *manager = tpl_log_manager_dup_singleton ();
+  FilterCallbackData *cb_data = g_slice_new0 (FilterCallbackData);
 
-	cb_data->callback = callback;
-	cb_data->user_data = callback_data;
+  cb_data->callback = callback;
+  cb_data->user_data = callback_data;
 
-	tpl_log_manager_get_entities_async (manager, account, got_entities, cb_data);
+  tpl_log_manager_get_entities_async (manager, account, got_entities, cb_data);
 
-	g_object_unref (manager);
+  g_object_unref (manager);
 }
 
 static void
 log_window_logger_clear_account_cb (TpProxy *proxy,
-				    const GError *error,
-				    gpointer user_data,
-				    GObject *weak_object)
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
 {
-	EmpathyLogWindow *window = user_data;
+  EmpathyLogWindow *window = user_data;
 
-	if (error != NULL)
-		g_warning ("Error when clearing logs: %s", error->message);
+  if (error != NULL)
+    g_warning ("Error when clearing logs: %s", error->message);
 
-	/* Refresh the log viewer so the logs are cleared if the account
-	 * has been deleted */
-	gtk_tree_store_clear (window->store_events);
-	log_window_who_populate (window);
+  /* Refresh the log viewer so the logs are cleared if the account
+   * has been deleted */
+  gtk_tree_store_clear (window->store_events);
+  log_window_who_populate (window);
 
-	/* Re-filter the account chooser so the accounts without logs get greyed out */
-	empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (window->account_chooser),
-					    empathy_account_chooser_filter_has_logs, NULL);
+  /* Re-filter the account chooser so the accounts without logs get greyed out */
+  empathy_account_chooser_set_filter (
+      EMPATHY_ACCOUNT_CHOOSER (window->account_chooser),
+      empathy_account_chooser_filter_has_logs, NULL);
 }
 
 static void
 log_window_clear_logs_chooser_select_account (EmpathyAccountChooser *chooser,
-					      EmpathyLogWindow *window)
+    EmpathyLogWindow *window)
 {
-	empathy_account_chooser_set_account (chooser,
-		empathy_account_chooser_get_account (EMPATHY_ACCOUNT_CHOOSER (window->account_chooser)));
+  EmpathyAccountChooser *account_chooser;
+
+  account_chooser = EMPATHY_ACCOUNT_CHOOSER (window->account_chooser);
+
+  empathy_account_chooser_set_account (chooser,
+      empathy_account_chooser_get_account (account_chooser));
 }
 
 static void
-log_window_delete_menu_clicked_cb (GtkMenuItem      *menuitem,
-				   EmpathyLogWindow *window)
+log_window_delete_menu_clicked_cb (GtkMenuItem *menuitem,
+    EmpathyLogWindow *window)
 {
-	GtkWidget *dialog, *content_area, *hbox, *label;
-	EmpathyAccountChooser *account_chooser;
-	gint response_id;
-	TpDBusDaemon *bus;
-	TpProxy *logger;
-	GError *error = NULL;
+  GtkWidget *dialog, *content_area, *hbox, *label;
+  EmpathyAccountChooser *account_chooser;
+  gint response_id;
+  TpDBusDaemon *bus;
+  TpProxy *logger;
+  GError *error = NULL;
 
-	account_chooser = (EmpathyAccountChooser *) empathy_account_chooser_new ();
-	empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
-	empathy_account_chooser_set_filter (account_chooser, empathy_account_chooser_filter_has_logs, NULL);
+  account_chooser = (EmpathyAccountChooser *) empathy_account_chooser_new ();
+  empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
+  empathy_account_chooser_set_filter (account_chooser,
+      empathy_account_chooser_filter_has_logs, NULL);
 
-	/* Select the same account as in the history window */
-	if (empathy_account_chooser_is_ready (account_chooser))
-		log_window_clear_logs_chooser_select_account (account_chooser, window);
-	else
-		g_signal_connect (account_chooser, "ready",
-				  G_CALLBACK (log_window_clear_logs_chooser_select_account), window);
+  /* Select the same account as in the history window */
+  if (empathy_account_chooser_is_ready (account_chooser))
+    log_window_clear_logs_chooser_select_account (account_chooser, window);
+  else
+    g_signal_connect (account_chooser, "ready",
+        G_CALLBACK (log_window_clear_logs_chooser_select_account), window);
 
-	dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (window->window),
-		GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING,
-		GTK_BUTTONS_NONE,
-		_("Are you sure you want to delete all logs of previous conversations?"));
+  dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (window->window),
+      GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING,
+      GTK_BUTTONS_NONE,
+      _("Are you sure you want to delete all logs of previous conversations?"));
 
-	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-		GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		_("Clear All"), GTK_RESPONSE_APPLY,
-		NULL);
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+      _("Clear All"), GTK_RESPONSE_APPLY,
+      NULL);
 
-	content_area = gtk_message_dialog_get_message_area (
-		GTK_MESSAGE_DIALOG (dialog));
+  content_area = gtk_message_dialog_get_message_area (
+      GTK_MESSAGE_DIALOG (dialog));
 
-	hbox = gtk_hbox_new (FALSE, 6);
-	label = gtk_label_new (_("Delete from:"));
-	gtk_box_pack_start (GTK_BOX (hbox), label,
-		FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (account_chooser),
-		FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (content_area), hbox,
-		FALSE, FALSE, 0);
+  hbox = gtk_hbox_new (FALSE, 6);
+  label = gtk_label_new (_("Delete from:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label,
+      FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), GTK_WIDGET (account_chooser),
+      FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (content_area), hbox,
+      FALSE, FALSE, 0);
 
-	gtk_widget_show_all (hbox);
+  gtk_widget_show_all (hbox);
 
-	response_id = gtk_dialog_run (GTK_DIALOG (dialog));
+  response_id = gtk_dialog_run (GTK_DIALOG (dialog));
 
-	if (response_id != GTK_RESPONSE_APPLY)
-		goto out;
+  if (response_id != GTK_RESPONSE_APPLY)
+    goto out;
 
-	bus = tp_dbus_daemon_dup (&error);
-	if (error != NULL) {
-		g_warning ("Could not delete logs: %s", error->message);
-		g_error_free (error);
-		goto out;
-	}
+  bus = tp_dbus_daemon_dup (&error);
+  if (error != NULL)
+    {
+      g_warning ("Could not delete logs: %s", error->message);
+      g_error_free (error);
+      goto out;
+    }
 
-	logger = g_object_new (TP_TYPE_PROXY,
-			       "bus-name", "org.freedesktop.Telepathy.Logger",
-			       "object-path", "/org/freedesktop/Telepathy/Logger",
-			       "dbus-daemon", bus,
-			       NULL);
-	g_object_unref (bus);
+  logger = g_object_new (TP_TYPE_PROXY,
+      "bus-name", "org.freedesktop.Telepathy.Logger",
+      "object-path", "/org/freedesktop/Telepathy/Logger",
+      "dbus-daemon", bus,
+      NULL);
+  g_object_unref (bus);
 
-	tp_proxy_add_interface_by_id (logger, EMP_IFACE_QUARK_LOGGER);
+  tp_proxy_add_interface_by_id (logger, EMP_IFACE_QUARK_LOGGER);
 
-	if (empathy_account_chooser_has_all_selected (account_chooser)) {
-		DEBUG ("Deleting logs for all the accounts");
+  if (empathy_account_chooser_has_all_selected (account_chooser))
+    {
+      DEBUG ("Deleting logs for all the accounts");
 
-		emp_cli_logger_call_clear (logger, -1,
-					   log_window_logger_clear_account_cb,
-					   window, NULL, G_OBJECT (window->window));
-	} else {
-		TpAccount *account = empathy_account_chooser_get_account (account_chooser);
+      emp_cli_logger_call_clear (logger, -1,
+          log_window_logger_clear_account_cb,
+          window, NULL, G_OBJECT (window->window));
+    }
+  else
+    {
+      TpAccount *account;
 
-		DEBUG ("Deleting logs for %s", tp_proxy_get_object_path (account));
+      account = empathy_account_chooser_get_account (account_chooser);
 
-		emp_cli_logger_call_clear_account (logger, -1,
-						   tp_proxy_get_object_path (account),
-						   log_window_logger_clear_account_cb,
-						   window, NULL, G_OBJECT (window->window));
-	}
+      DEBUG ("Deleting logs for %s", tp_proxy_get_object_path (account));
 
-	g_object_unref (logger);
+      emp_cli_logger_call_clear_account (logger, -1,
+          tp_proxy_get_object_path (account),
+          log_window_logger_clear_account_cb,
+          window, NULL, G_OBJECT (window->window));
+    }
+
+  g_object_unref (logger);
  out:
-	gtk_widget_destroy (dialog);
+  gtk_widget_destroy (dialog);
 }
