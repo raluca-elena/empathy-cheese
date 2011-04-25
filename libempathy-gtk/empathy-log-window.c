@@ -1067,6 +1067,50 @@ populate_events_from_search_hits (GList *accounts,
   g_date_free (anytime);
 }
 
+static gchar *
+format_date_for_display (GDate *date)
+{
+  gchar *text;
+  GDate *now = NULL;
+  gint days_elapsed;
+
+  /* g_date_strftime sucks */
+
+  now = g_date_new ();
+  g_date_set_time_t (now, time (NULL));
+
+  days_elapsed = g_date_days_between (date, now);
+
+  if (days_elapsed < 0)
+    text = NULL;
+  else if (days_elapsed == 0)
+    text = g_strdup (_("Today"));
+  else if (days_elapsed == 1)
+    text = g_strdup (_("Yesterday"));
+  else
+    {
+      GDateTime *dt;
+
+      dt = g_date_time_new_utc (g_date_get_year (date),
+          g_date_get_month (date), g_date_get_day (date),
+          0, 0, 0);
+
+      if (days_elapsed <= 7)
+        text = g_date_time_format (dt, "%A");
+      else
+        text = g_date_time_format (dt,
+            C_("A date such as '23 May 2010', "
+               "%e is the day, %B the month and %Y the year",
+               "%e %B %Y"));
+
+      g_date_time_unref (dt);
+    }
+
+  g_date_free (now);
+
+  return text;
+}
+
 static void
 populate_dates_from_search_hits (GList *accounts,
     GList *targets)
@@ -1114,10 +1158,7 @@ populate_dates_from_search_hits (GList *accounts,
       gtk_tree_model_foreach (model, model_has_date, hit->date);
       if (!has_element)
         {
-          gchar *text = g_strdup_printf ("%02d/%02d/%d",
-              g_date_get_day (hit->date),
-              g_date_get_month (hit->date),
-              g_date_get_year (hit->date));
+          gchar *text = format_date_for_display (hit->date);
 
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
@@ -2363,10 +2404,7 @@ log_manager_got_dates_cb (GObject *manager,
       gchar *text;
 
       date = l->data;
-      text = g_strdup_printf ("%02d/%02d/%d",
-          g_date_get_day (date),
-          g_date_get_month (date),
-          g_date_get_year (date));
+      text = format_date_for_display (date);
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
