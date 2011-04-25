@@ -42,6 +42,7 @@ void _tpl_action_chain_prepend (TplActionChain *self, TplPendingAction func,
 void _tpl_action_chain_start (TplActionChain *self);
 void _tpl_action_chain_continue (TplActionChain *self);
 void _tpl_action_chain_terminate (TplActionChain *self, const GError *error);
+void _tpl_action_chain_clear (TplActionChain *self);
 
 gpointer _tpl_action_chain_get_object (TplActionChain *self);
 gboolean _tpl_action_chain_new_finish (GObject *source,

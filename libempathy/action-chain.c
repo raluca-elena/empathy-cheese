@@ -137,6 +137,13 @@ _tpl_action_chain_continue (TplActionChain *self)
 
 
 void
+_tpl_action_chain_clear (TplActionChain *self)
+{
+  g_queue_foreach (self->chain, (GFunc) link_free, NULL);
+  g_queue_clear (self->chain);
+}
+
+void
 _tpl_action_chain_terminate (TplActionChain *self,
     const GError *error)
 {
