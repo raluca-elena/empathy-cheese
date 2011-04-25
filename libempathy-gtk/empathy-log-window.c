@@ -1464,10 +1464,6 @@ log_manager_got_entities_cb (GObject *manager,
         }
     }
 
-  /* Select 'Anyone' by default */
-  if (gtk_tree_model_get_iter_first (model, &iter))
-    gtk_tree_selection_select_iter (selection, &iter);
-
   /* Unblock signals */
   g_signal_handlers_unblock_by_func (selection,
       log_window_who_changed_cb,
@@ -1491,6 +1487,24 @@ get_entities_for_account (TplActionChain *chain, gpointer user_data)
 g_print ("get_entities_for_account\n");
   tpl_log_manager_get_entities_async (ctx->window->log_manager, ctx->account,
       log_manager_got_entities_cb, ctx);
+}
+
+static void
+select_first_entity (TplActionChain *chain, gpointer user_data)
+{
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    gtk_tree_selection_select_iter (selection, &iter);
+
+  _tpl_action_chain_continue (log_window->chain);
 }
 
 static void
@@ -1560,6 +1574,7 @@ log_window_who_populate (EmpathyLogWindow *window)
 
       g_list_free (accounts);
     }
+  _tpl_action_chain_append (window->chain, select_first_entity, NULL);
   _tpl_action_chain_start (window->chain);
 }
 
