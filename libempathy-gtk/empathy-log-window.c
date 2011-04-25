@@ -88,6 +88,7 @@ typedef struct
 
   /* List of owned TplLogSearchHits, free with tpl_log_search_hit_free */
   GList *hits;
+  guint source;
 
   /* Only used while waiting for the account chooser to be ready */
   TpAccount *selected_account;
@@ -524,6 +525,9 @@ static void
 log_window_destroy_cb (GtkWidget *widget,
     EmpathyLogWindow *window)
 {
+  if (window->source != 0)
+    g_source_remove (window->source);
+
   g_free (window->last_find);
   _tpl_action_chain_free (window->chain);
   g_object_unref (window->log_manager);
@@ -1362,7 +1366,7 @@ log_window_find_populate (EmpathyLogWindow *window,
       log_manager_searched_new_cb, NULL);
 }
 
-static void
+static gboolean
 start_find_search (EmpathyLogWindow *window)
 {
   const gchar *str;
@@ -1371,19 +1375,24 @@ start_find_search (EmpathyLogWindow *window)
 
   /* Don't find the same crap again */
   if (window->last_find && !tp_strdiff (window->last_find, str))
-    return;
+    return FALSE;
 
   g_free (window->last_find);
   window->last_find = g_strdup (str);
 
   log_window_find_populate (window, str);
+
+  return FALSE;
 }
 
 static void
 log_window_search_entry_changed_cb (GtkWidget *entry,
     EmpathyLogWindow *window)
 {
-  /* FIXME: live search ? */
+  if (window->source != 0)
+    g_source_remove (window->source);
+  window->source = g_timeout_add (500, (GSourceFunc) start_find_search,
+      window);
 }
 
 static void
