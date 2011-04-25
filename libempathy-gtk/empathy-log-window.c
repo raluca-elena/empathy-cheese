@@ -83,6 +83,9 @@ typedef struct
   TplActionChain *chain;
   TplLogManager *log_manager;
 
+  /* Used to cancel logger calls when no longer needed */
+  guint count;
+
   /* List of owned TplLogSearchHits, free with tpl_log_search_hit_free */
   GList *hits;
 
@@ -193,6 +196,7 @@ typedef struct
   GDate *date;
   TplEventTypeMask event_mask;
   EventSubtype subtype;
+  guint count;
 } Ctx;
 
 static Ctx *
@@ -201,7 +205,8 @@ ctx_new (EmpathyLogWindow *window,
     TplEntity *entity,
     GDate *date,
     TplEventTypeMask event_mask,
-    EventSubtype subtype)
+    EventSubtype subtype,
+    guint count)
 {
   Ctx *ctx = g_slice_new0 (Ctx);
 
@@ -214,6 +219,7 @@ ctx_new (EmpathyLogWindow *window,
     ctx->date = _date_copy (date);
   ctx->event_mask = event_mask;
   ctx->subtype = subtype;
+  ctx->count = count;
 
   return ctx;
 }
@@ -1038,7 +1044,7 @@ populate_events_from_search_hits (GList *accounts,
           Ctx *ctx;
 
           ctx = ctx_new (log_window, hit->account, hit->target, hit->date,
-              event_mask, subtype);
+              event_mask, subtype, log_window->count);
           _tpl_action_chain_append (log_window->chain,
               get_events_for_date, ctx);
         }
@@ -1400,6 +1406,9 @@ log_manager_got_entities_cb (GObject *manager,
   if (log_window == NULL)
     goto out;
 
+  if (log_window->count != ctx->count)
+    goto out;
+
   if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
       result, &entities, &error))
     {
@@ -1546,13 +1555,16 @@ log_window_who_populate (EmpathyLogWindow *window)
       log_window_who_changed_cb,
       window);
 
+  _tpl_action_chain_clear (window->chain);
+  window->count++;
+
   if (!all_accounts && account == NULL)
     {
       return;
     }
   else if (!all_accounts)
     {
-      ctx = ctx_new (window, account, NULL, NULL, 0, 0);
+      ctx = ctx_new (window, account, NULL, NULL, 0, 0, window->count);
       _tpl_action_chain_append (window->chain, get_entities_for_account, ctx);
     }
   else
@@ -1567,7 +1579,7 @@ log_window_who_populate (EmpathyLogWindow *window)
         {
           account = l->data;
 
-          ctx = ctx_new (window, account, NULL, NULL, 0, 0);
+          ctx = ctx_new (window, account, NULL, NULL, 0, 0, window->count);
           _tpl_action_chain_append (window->chain,
               get_entities_for_account, ctx);
         }
@@ -2113,6 +2125,9 @@ log_window_got_messages_for_date_cb (GObject *manager,
   if (log_window == NULL)
     goto out;
 
+  if (log_window->count != ctx->count)
+    goto out;
+
   if (!tpl_log_manager_get_events_for_date_finish (TPL_LOG_MANAGER (manager),
       result, &events, &error))
     {
@@ -2206,6 +2221,9 @@ log_window_get_messages_for_date (EmpathyLogWindow *window,
   anytime = g_date_new_dmy (2, 1, -1);
   separator = g_date_new_dmy (1, 1, -1);
 
+  _tpl_action_chain_clear (window->chain);
+  window->count++;
+
   for (acc = accounts, targ = targets;
        acc != NULL && targ != NULL;
        acc = acc->next, targ = targ->next)
@@ -2218,7 +2236,8 @@ log_window_get_messages_for_date (EmpathyLogWindow *window,
         {
           Ctx *ctx;
 
-          ctx = ctx_new (window, account, target, date, event_mask, subtype);
+          ctx = ctx_new (window, account, target, date, event_mask, subtype,
+              window->count);
           _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
         }
       else
@@ -2242,7 +2261,8 @@ log_window_get_messages_for_date (EmpathyLogWindow *window,
               if (g_date_compare (d, anytime) != 0 &&
                   g_date_compare (d, separator) != 0)
                 {
-                  ctx = ctx_new (window, account, target, d, event_mask, subtype);
+                  ctx = ctx_new (window, account, target, d,
+                      event_mask, subtype, window->count);
                   _tpl_action_chain_append (window->chain, get_events_for_date, ctx);
                 }
             }
@@ -2273,7 +2293,11 @@ log_manager_got_dates_cb (GObject *manager,
   GDate *date = NULL;
   GError *error = NULL;
 
-  g_return_if_fail (log_window != NULL);
+  if (log_window == NULL)
+    goto out;
+
+  if (log_window->count != ctx->count)
+    goto out;
 
   if (!tpl_log_manager_get_dates_finish (TPL_LOG_MANAGER (manager),
        result, &dates, &error))
@@ -2397,6 +2421,9 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
   /* Clear all current messages shown in the textview */
   gtk_tree_store_clear (window->store_events);
 
+  _tpl_action_chain_clear (window->chain);
+  window->count++;
+
   /* If there's a search use the returned hits */
   if (window->hits != NULL)
     {
@@ -2430,7 +2457,8 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
         {
           TpAccount *account = acc->data;
           TplEntity *target = targ->data;
-          Ctx *ctx = ctx_new (window, account, target, NULL, event_mask, 0);
+          Ctx *ctx = ctx_new (window, account, target, NULL, event_mask, 0,
+              window->count);
 
           _tpl_action_chain_append (window->chain, get_dates_for_entity, ctx);
         }
