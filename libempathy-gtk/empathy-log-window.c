@@ -582,7 +582,7 @@ model_is_parent (GtkTreeModel *model,
   TpAccount *account;
   gint64 timestamp;
   gboolean found = FALSE;
-  GtkTreeIter parent;
+  GtkTreeIter parent, child;
   gboolean is_toplevel;
 
   is_toplevel = !gtk_tree_model_iter_parent (model, &parent, iter);
@@ -590,7 +590,6 @@ model_is_parent (GtkTreeModel *model,
   gtk_tree_model_get (model, iter,
       COL_EVENTS_ACCOUNT, &account,
       COL_EVENTS_TARGET, &target,
-      COL_EVENTS_TS, &timestamp,
       COL_EVENTS_EVENT, &stored_event,
       -1);
 
@@ -599,6 +598,13 @@ model_is_parent (GtkTreeModel *model,
       account_equal (account, tpl_event_get_account (event)) &&
       entity_equal (target, event_get_target (event)))
     {
+      gtk_tree_model_iter_nth_child (model, &child, iter,
+          gtk_tree_model_iter_n_children (model, iter) - 1);
+
+      gtk_tree_model_get (model, &child,
+          COL_EVENTS_TS, &timestamp,
+          -1);
+
       if (ABS (tpl_event_get_timestamp (event) - timestamp) < 1800)
         {
           /* The gap is smaller than 30 min */
