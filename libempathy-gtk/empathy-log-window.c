@@ -1733,9 +1733,6 @@ log_window_events_setup (EmpathyLogWindow *window)
   gtk_tree_sortable_set_sort_column_id (sortable,
       COL_EVENTS_TS,
       GTK_SORT_ASCENDING);
-/* FIXME  gtk_tree_sortable_set_sort_func (sortable,
-      COL_EVENTS_NAME, sort_by_event_date,
-      NULL, NULL);*/
 
   g_object_unref (store);
 }
