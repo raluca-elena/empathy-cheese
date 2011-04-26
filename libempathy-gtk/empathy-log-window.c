@@ -555,6 +555,34 @@ entity_equal (TplEntity *a,
       tpl_entity_get_identifier (b));
 }
 
+static gboolean
+is_same_confroom (TplEvent *e1,
+    TplEvent *e2)
+{
+  TplEntity *sender1 = tpl_event_get_sender (e1);
+  TplEntity *receiver1 = tpl_event_get_receiver (e1);
+  TplEntity *sender2 = tpl_event_get_sender (e2);
+  TplEntity *receiver2 = tpl_event_get_receiver (e2);
+  TplEntity *room1, *room2;
+
+  if (tpl_entity_get_entity_type (sender1) == TPL_ENTITY_ROOM)
+    room1 = sender1;
+  else if (tpl_entity_get_entity_type (receiver1) == TPL_ENTITY_ROOM)
+    room1 = receiver1;
+  else
+    return FALSE;
+
+  if (tpl_entity_get_entity_type (sender2) == TPL_ENTITY_ROOM)
+    room2 = sender2;
+  else if (tpl_entity_get_entity_type (receiver2) == TPL_ENTITY_ROOM)
+    room2 = receiver2;
+  else
+    return FALSE;
+
+  return g_str_equal (tpl_entity_get_identifier (room1),
+      tpl_entity_get_identifier (room1));
+}
+
 static TplEntity *
 event_get_target (TplEvent *event)
 {
@@ -596,7 +624,8 @@ model_is_parent (GtkTreeModel *model,
   if (is_toplevel &&
       G_OBJECT_TYPE (event) == G_OBJECT_TYPE (stored_event) &&
       account_equal (account, tpl_event_get_account (event)) &&
-      entity_equal (target, event_get_target (event)))
+      (entity_equal (target, event_get_target (event)) ||
+      is_same_confroom (event, stored_event)))
     {
       gtk_tree_model_iter_nth_child (model, &child, iter,
           gtk_tree_model_iter_n_children (model, iter) - 1);
