@@ -711,10 +711,20 @@ log_window_append_chat_message (TplEvent *event,
 
   get_parent_iter_for_message (event, message, &parent);
 
-  body = g_strdup_printf (
-      C_("First is a contact, second is what he said", "%s: %s"),
-      tpl_entity_get_alias (tpl_event_get_sender (event)),
-      empathy_message_get_body (message));
+  if (tpl_text_event_get_message_type (TPL_TEXT_EVENT (event))
+      == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)
+    {
+      body = g_strdup_printf ("* %s %s",
+          tpl_entity_get_alias (tpl_event_get_sender (event)),
+          empathy_message_get_body (message));
+    }
+  else
+    {
+      body = g_strdup_printf (
+          C_("First is a contact, second is what he said", "%s: %s"),
+          tpl_entity_get_alias (tpl_event_get_sender (event)),
+          empathy_message_get_body (message));
+    }
 
   gtk_tree_store_append (store, &iter, &parent);
   gtk_tree_store_set (store, &iter,
