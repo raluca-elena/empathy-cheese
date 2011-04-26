@@ -1125,6 +1125,7 @@ populate_dates_from_search_hits (GList *accounts,
   GtkTreeView *view;
   GtkTreeModel *model;
   GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkTreeIter iter;
 
   if (log_window == NULL)
@@ -1133,6 +1134,7 @@ populate_dates_from_search_hits (GList *accounts,
   view = GTK_TREE_VIEW (log_window->treeview_when);
   model = gtk_tree_view_get_model (view);
   store = GTK_LIST_STORE (model);
+  selection = gtk_tree_view_get_selection (view);
 
   for (l = log_window->hits; l != NULL; l = l->next)
     {
@@ -1188,6 +1190,8 @@ populate_dates_from_search_hits (GList *accounts,
           COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
           COL_WHEN_TEXT, _("Anytime"),
           -1);
+
+      gtk_tree_selection_select_iter (selection, &iter);
     }
 }
 
