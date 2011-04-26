@@ -317,6 +317,28 @@ theme_adium_match (const gchar **str, const gchar *match)
 	return FALSE;
 }
 
+static gboolean
+theme_adium_match_with_format (const gchar **str, const gchar *match,
+			       gchar **format)
+{
+	const gchar *cur = *str;
+	const gchar *end;
+
+	if (!theme_adium_match (&cur, match)) {
+		return FALSE;
+	}
+	cur++;
+
+	end = strstr (cur, "}%");
+	if (!end) {
+		return FALSE;
+	}
+
+	*format = g_strndup (cur , end - cur);
+	*str = end + 1;
+	return TRUE;
+}
+
 static void
 theme_adium_append_html (EmpathyThemeAdium *theme,
 			 const gchar       *func,
@@ -338,52 +360,55 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 	string = g_string_sized_new (len + strlen (message));
 	g_string_append_printf (string, "%s(\"", func);
 	for (cur = html; *cur != '\0'; cur++) {
-		const gchar *replace = NULL;
+		const gchar *replace = "";
 		gchar       *dup_replace = NULL;
+		gchar       *format = NULL;
 
-		if (theme_adium_match (&cur, "%message%")) {
-			replace = message;
-		} else if (theme_adium_match (&cur, "%messageClasses%")) {
-			replace = message_classes;
-		} else if (theme_adium_match (&cur, "%userIconPath%")) {
+		/* Those are all well known keywords that needs replacement in
+		 * html files. Please keep them in the same order than the adium
+		 * spec. See http://trac.adium.im/wiki/CreatingMessageStyles */
+		if (theme_adium_match (&cur, "%userIconPath%")) {
 			replace = avatar_filename;
-		} else if (theme_adium_match (&cur, "%sender%")) {
-			replace = name;
 		} else if (theme_adium_match (&cur, "%senderScreenName%")) {
 			replace = contact_id;
-		} else if (theme_adium_match (&cur, "%senderDisplayName%")) {
-			/* %senderDisplayName% -
-			 * "The serverside (remotely set) name of the sender,
-			 *  such as an MSN display name."
-			 *
-			 * We don't have access to that yet so we use local
-			 * alias instead.*/
+		} else if (theme_adium_match (&cur, "%sender%")) {
 			replace = name;
-		} else if (theme_adium_match (&cur, "%service%")) {
-			replace = service_name;
-		} else if (theme_adium_match (&cur, "%shortTime%")) {
-			dup_replace = empathy_time_to_string_local (timestamp,
-				EMPATHY_TIME_FORMAT_DISPLAY_SHORT);
-			replace = dup_replace;
-		} else if (theme_adium_match (&cur, "%time")) {
-			gchar *format = NULL;
-			gchar *end;
-			/* Time can be in 2 formats:
-			 * %time% or %time{strftime format}%
-			 * Extract the time format if provided. */
-			if (cur[1] == '{') {
-				cur += 2;
-				end = strstr (cur, "}%");
-				if (!end) {
-					/* Invalid string */
-					continue;
-				}
-				format = g_strndup (cur, end - cur);
-				cur = end + 1;
-			} else {
-				cur++;
-			}
-
+		} else if (theme_adium_match (&cur, "%senderColor%")) {
+			/* FIXME: A color derived from the user's name. If a
+			 * colon separated list of HTML colors is at
+			 * Incoming/SenderColors.txt it will be used instead of
+			 * the default colors.
+			 */
+		} else if (theme_adium_match (&cur, "%senderStatusIcon%")) {
+			/* FIXME: The path to the status icon of the sender
+			 * (available, away, etc...)
+			 */
+		} else if (theme_adium_match (&cur, "%messageDirection%")) {
+			/* FIXME: The text direction of the message
+			 * (either rtl or ltr)
+			 */
+		} else if (theme_adium_match (&cur, "%senderDisplayName%")) {
+			/* FIXME: The serverside (remotely set) name of the
+			 * sender, such as an MSN display name.
+			 *
+			 *  We don't have access to that yet so we use
+			 * local alias instead.
+			 */
+			replace = name;
+		} else if (theme_adium_match_with_format (&cur, "%textbackgroundcolor{", &format)) {
+			/* FIXME: This keyword is used to represent the
+			 * highlight background color. "X" is the opacity of the
+			 * background, ranges from 0 to 1 and can be any decimal
+			 * between.
+			 */
+		} else if (theme_adium_match (&cur, "%message%")) {
+			replace = message;
+		} else if (theme_adium_match (&cur, "%time%") ||
+			   theme_adium_match_with_format (&cur, "%time{", &format)) {
+			/* FIXME: format is not exactly strftime.
+			 * See NSDateFormatter spec:
+			 * http://www.stepcase.com/blog/2008/12/02/format-string-for-the-iphone-nsdateformatter/
+			 */
 			if (is_backlog) {
 				dup_replace = empathy_time_to_string_local (timestamp,
 					format ? format : EMPATHY_TIME_DATE_FORMAT_DISPLAY_SHORT);
@@ -392,7 +417,51 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 					format ? format : EMPATHY_TIME_FORMAT_DISPLAY_SHORT);
 			}
 			replace = dup_replace;
-			g_free (format);
+		} else if (theme_adium_match (&cur, "%shortTime%")) {
+			dup_replace = empathy_time_to_string_local (timestamp,
+				EMPATHY_TIME_FORMAT_DISPLAY_SHORT);
+			replace = dup_replace;
+		} else if (theme_adium_match (&cur, "%service%")) {
+			replace = service_name;
+		} else if (theme_adium_match (&cur, "%variant%")) {
+			/* FIXME: The name of the active message style variant,
+			 * with all spaces replaced with an underscore.
+			 * A variant named "Alternating Messages - Blue Red"
+			 * will become "Alternating_Messages_-_Blue_Red".
+			 */
+		} else if (theme_adium_match (&cur, "%userIcons%")) {
+			/* FIXME: mus t be "hideIcons" if use preference is set
+			 * to hide avatars */
+			replace = "showIcons";
+		} else if (theme_adium_match (&cur, "%messageClasses%")) {
+			replace = message_classes;
+		} else if (theme_adium_match (&cur, "%status%")) {
+			/* FIXME: A description of the status event. This is
+			 * neither in the user's local language nor expected to
+			 * be displayed; it may be useful to use a different div
+			 * class to present different types of status messages.
+			 * The following is a list of some of the more important
+			 * status messages; your message style should be able to
+			 * handle being shown a status message not in this list,
+			 * as even at present the list is incomplete and is
+			 * certain to become out of date in the future:
+			 * 	online
+			 *	offline
+			 *	away
+			 *	away_message
+			 *	return_away
+			 *	idle
+			 *	return_idle
+			 *	date_separator
+			 *	contact_joined (group chats)
+			 *	contact_left
+			 *	error
+			 *	timed_out
+			 *	encryption (all OTR messages use this status)
+			 *	purple (all IRC topic and join/part messages use this status)
+			 *	fileTransferStarted
+			 *	fileTransferCompleted
+			 */
 		} else {
 			escape_and_append_len (string, cur, 1);
 			continue;
@@ -400,7 +469,9 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 
 		/* Here we have a replacement to make */
 		escape_and_append_len (string, replace, -1);
+
 		g_free (dup_replace);
+		g_free (format);
 	}
 	g_string_append (string, "\")");
 
@@ -531,6 +602,19 @@ theme_adium_append_message (EmpathyChatView *view,
 	} else {
 		g_string_append (message_classes, " incoming");
 	}
+	/* FIXME: other classes:
+	 * autoreply - the message is an automatic response, generally due to an
+	 *             away status
+	 * mention - the incoming message (in groupchat) matches your username
+	 *           or one of the mention keywords specified in Adium's
+	 *           advanced prefs.
+	 * focus - the message was received while focus was lost
+	 * firstFocus - the first message received while focus was lost
+	 * status - the message is a status change
+	 * event - the message is a notification of something happening
+	 *         (for example, encryption being turned on)
+	 * %status% - See %status% in theme_adium_append_html()
+	 */
 
 	/* Define javascript function to use */
 	if (consecutive) {
