@@ -1247,12 +1247,11 @@ populate_entities_from_search_hits (void)
         }
     }
 
-#if 0
   if (gtk_tree_model_get_iter_first (model, &iter))
     {
       gtk_list_store_prepend (store, &iter);
       gtk_list_store_set (store, &iter,
-              COL_WHO_TYPE, COL_TYPE_SEPARATOR,
+          COL_WHO_TYPE, COL_TYPE_SEPARATOR,
           COL_WHO_NAME, "separator",
           -1);
 
@@ -1262,7 +1261,6 @@ populate_entities_from_search_hits (void)
           COL_WHO_NAME, _("Anyone"),
           -1);
     }
-#endif
 }
 
 static void
