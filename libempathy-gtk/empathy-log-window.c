@@ -2554,7 +2554,7 @@ got_entities (GObject *manager,
 {
   FilterCallbackData *data = user_data;
   GList *entities;
-  GError *error;
+  GError *error = NULL;
 
   if (!tpl_log_manager_get_entities_finish (TPL_LOG_MANAGER (manager),
       result, &entities, &error))
