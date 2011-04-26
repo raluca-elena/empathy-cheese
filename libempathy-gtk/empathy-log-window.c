@@ -1820,7 +1820,6 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
   GtkTreeSelection     *selection;
   GtkTreeIter           iter;
   GtkTreePath          *path;
-  gboolean              ok;
 
   view = GTK_TREE_VIEW (window->treeview_who);
   model = gtk_tree_view_get_model (view);
@@ -1829,7 +1828,7 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
   if (!gtk_tree_model_get_iter_first (model, &iter))
     return;
 
-  for (ok = TRUE; ok; ok = gtk_tree_model_iter_next (model, &iter))
+  do
     {
       TpAccount   *this_account;
       TplEntity   *this_target;
@@ -1861,6 +1860,7 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
       g_object_unref (this_account);
       g_object_unref (this_target);
     }
+  while (gtk_tree_model_iter_next (model, &iter));
 
   tp_clear_object (&window->selected_account);
   tp_clear_pointer (&window->selected_chat_id, g_free);
