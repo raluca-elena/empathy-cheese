@@ -1300,36 +1300,6 @@ log_manager_searched_new_cb (GObject *manager,
       log_window);
 }
 
-#if 0
-static gboolean
-search_results_filter_entities (GtkTreeModel *model,
-    GtkTreeIter  *iter,
-    gpointer      data)
-{
-  TpAccount *account, *selected_account;
-  gboolean visible = FALSE;
-
-  if (log_window->hits == NULL)
-    return TRUE;
-
-  if (!log_window_get_selected (log_window, &selected_account,
-      NULL, NULL, NULL, NULL))
-
-  gtk_tree_model_get (model, iter,
-      COL_WHO_ACCOUNT, &account,
-      -1);
-
-  if (selected_account == NULL ||
-      account_equal (account, selected_account))
-    visible = TRUE;
-
-  g_object_unref (account);
-  g_object_unref (selected_account);
-
-  return visible;
-}
-#endif
-
 static void
 log_window_find_populate (EmpathyLogWindow *window,
     const gchar *search_criteria)
