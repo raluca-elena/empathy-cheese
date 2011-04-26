@@ -2389,7 +2389,6 @@ log_manager_got_dates_cb (GObject *manager,
   GtkTreeIter iter;
   GList *dates;
   GList *l;
-  GDate *date = NULL;
   GError *error = NULL;
 
   if (log_window == NULL)
@@ -2416,19 +2415,24 @@ log_manager_got_dates_cb (GObject *manager,
 
   for (l = dates; l != NULL; l = l->next)
     {
-      gchar *text;
+      GDate *date = l->data;
 
-      date = l->data;
-      text = format_date_for_display (date);
+      /* Add the date if it's not already there */
+      has_element = FALSE;
+      gtk_tree_model_foreach (model, model_has_date, date);
+      if (!has_element)
+        {
+          gchar *text = format_date_for_display (date);
 
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter,
-          COL_WHEN_DATE, date,
-          COL_WHEN_TEXT, text,
-          COL_WHEN_ICON, CALENDAR_ICON,
-          -1);
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHEN_DATE, date,
+              COL_WHEN_TEXT, text,
+              COL_WHEN_ICON, CALENDAR_ICON,
+              -1);
 
-      g_free (text);
+          g_free (text);
+        }
     }
 
   if (gtk_tree_model_get_iter_first (model, &iter))
