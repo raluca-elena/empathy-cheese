@@ -62,6 +62,8 @@ typedef struct {
 	GList                *message_queue;
 	GtkWidget            *inspector_window;
 	GSettings            *gsettings_chat;
+	gboolean              has_focus;
+	gboolean              has_unread_message;
 } EmpathyThemeAdiumPriv;
 
 struct _EmpathyAdiumData {
@@ -303,8 +305,10 @@ escape_and_append_len (GString *string, const gchar *str, gint len)
 	}
 }
 
+/* If *str starts with match, returns TRUE and move pointer to the end */
 static gboolean
-theme_adium_match (const gchar **str, const gchar *match)
+theme_adium_match (const gchar **str,
+		   const gchar *match)
 {
 	gint len;
 
@@ -317,8 +321,10 @@ theme_adium_match (const gchar **str, const gchar *match)
 	return FALSE;
 }
 
+/* Like theme_adium_match() but also return the X part if match is like %foo{X}% */
 static gboolean
-theme_adium_match_with_format (const gchar **str, const gchar *match,
+theme_adium_match_with_format (const gchar **str,
+			       const gchar *match,
 			       gchar **format)
 {
 	const gchar *cur = *str;
@@ -503,6 +509,63 @@ theme_adium_append_event_escaped (EmpathyChatView *view,
 }
 
 static void
+theme_adium_remove_focus_marks (EmpathyThemeAdium *theme)
+{
+	WebKitDOMDocument *dom;
+	WebKitDOMNodeList *nodes;
+	guint i;
+	GError *error = NULL;
+
+	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (theme));
+	if (dom == NULL) {
+		return;
+	}
+
+	/* Get all nodes with focus class */
+	nodes = webkit_dom_document_query_selector_all (dom, ".focus", &error);
+	if (nodes == NULL) {
+		DEBUG ("Error getting focus nodes: %s",
+			error ? error->message : "No error");
+		g_clear_error (&error);
+		return;
+	}
+
+	/* Remove focus and firstFocus class */
+	for (i = 0; i < webkit_dom_node_list_get_length (nodes); i++) {
+		WebKitDOMNode *node = webkit_dom_node_list_item (nodes, i);
+		WebKitDOMHTMLElement *element = WEBKIT_DOM_HTML_ELEMENT (node);
+		gchar *class_name;
+		gchar **classes, **iter;
+		GString *new_class_name;
+		gboolean first = TRUE;
+
+		if (element == NULL) {
+			continue;
+		}
+
+		class_name = webkit_dom_html_element_get_class_name (element);
+		classes = g_strsplit (class_name, " ", -1);
+		new_class_name = g_string_sized_new (strlen (class_name));
+		for (iter = classes; *iter != NULL; iter++) {
+			if (tp_strdiff (*iter, "focus") &&
+			    tp_strdiff (*iter, "firstFocus")) {
+				if (!first) {
+					g_string_append_c (new_class_name, ' ');
+				}
+				g_string_append (new_class_name, *iter);
+				first = FALSE;
+			}
+		}
+
+		webkit_dom_html_element_set_class_name (element, new_class_name->str);
+
+		g_free (class_name);
+		g_strfreev (classes);
+		g_string_free (new_class_name, TRUE);
+	}
+}
+
+static void
 theme_adium_append_message (EmpathyChatView *view,
 			    EmpathyMessage  *msg)
 {
@@ -591,6 +654,17 @@ theme_adium_append_message (EmpathyChatView *view,
 
 	/* Define message classes */
 	message_classes = g_string_new ("message");
+	if (!priv->has_focus && !is_backlog) {
+		if (!priv->has_unread_message) {
+			/* This is the first message we receive since we lost
+			 * focus; remove previous unread marks. */
+			theme_adium_remove_focus_marks (theme);
+
+			g_string_append (message_classes, " firstFocus");
+			priv->has_unread_message = TRUE;
+		}
+		g_string_append (message_classes, " focus");
+	}
 	if (is_backlog) {
 		g_string_append (message_classes, " history");
 	}
@@ -608,8 +682,6 @@ theme_adium_append_message (EmpathyChatView *view,
 	 * mention - the incoming message (in groupchat) matches your username
 	 *           or one of the mention keywords specified in Adium's
 	 *           advanced prefs.
-	 * focus - the message was received while focus was lost
-	 * firstFocus - the first message received while focus was lost
 	 * status - the message is a status change
 	 * event - the message is a notification of something happening
 	 *         (for example, encryption being turned on)
@@ -816,6 +888,18 @@ theme_adium_copy_clipboard (EmpathyChatView *view)
 }
 
 static void
+theme_adium_focus_toggled (EmpathyChatView *view,
+			   gboolean         has_focus)
+{
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
+
+	priv->has_focus = has_focus;
+	if (priv->has_focus) {
+		priv->has_unread_message = FALSE;
+	}
+}
+
+static void
 theme_adium_context_menu_selection_done_cb (GtkMenuShell *menu, gpointer user_data)
 {
 	WebKitHitTestResult *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
@@ -934,6 +1018,7 @@ theme_adium_iface_init (EmpathyChatViewIface *iface)
 	iface->find_abilities = theme_adium_find_abilities;
 	iface->highlight = theme_adium_highlight;
 	iface->copy_clipboard = theme_adium_copy_clipboard;
+	iface->focus_toggled = theme_adium_focus_toggled;
 }
 
 static void

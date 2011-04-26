@@ -201,3 +201,14 @@ empathy_chat_view_copy_clipboard (EmpathyChatView *view)
 	}
 }
 
+void
+empathy_chat_view_focus_toggled (EmpathyChatView *view,
+				 gboolean         has_focus)
+{
+	g_return_if_fail (EMPATHY_IS_CHAT_VIEW (view));
+
+	if (EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->focus_toggled) {
+		EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->focus_toggled (view, has_focus);
+	}
+}
+

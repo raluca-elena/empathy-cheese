@@ -1753,6 +1753,14 @@ chat_input_realize_cb (GtkWidget   *widget,
 }
 
 static void
+chat_input_has_focus_notify_cb (GtkWidget   *widget,
+				GParamSpec  *pspec,
+				EmpathyChat *chat)
+{
+	empathy_chat_view_focus_toggled (chat->view, gtk_widget_has_focus (widget));
+}
+
+static void
 chat_insert_smiley_activate_cb (EmpathySmileyManager *manager,
 				EmpathySmiley        *smiley,
 				gpointer              user_data)
@@ -2710,7 +2718,9 @@ chat_create_ui (EmpathyChat *chat)
 
 	/* Add input GtkTextView */
 	chat->input_text_view = empathy_input_text_view_new ();
-
+	g_signal_connect (chat->input_text_view, "notify::has-focus",
+			  G_CALLBACK (chat_input_has_focus_notify_cb),
+			  chat);
 	g_signal_connect (chat->input_text_view, "key-press-event",
 			  G_CALLBACK (chat_input_key_press_event_cb),
 			  chat);
@@ -3789,9 +3799,11 @@ empathy_chat_messages_read (EmpathyChat *self)
 		return;
 
 	if (priv->tp_chat != NULL ) {
-			empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
+		empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
 	}
 	priv->unread_messages = 0;
+
+	empathy_chat_view_focus_toggled (self->view, TRUE);
 }
 
 /* Return TRUE if on of the contacts in this chat is composing */

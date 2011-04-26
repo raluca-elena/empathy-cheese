@@ -68,6 +68,8 @@ struct _EmpathyChatViewIface {
 						  const gchar     *text,
 						  gboolean         match_case);
 	void             (*copy_clipboard)       (EmpathyChatView *view);
+	void             (*focus_toggled)        (EmpathyChatView *view,
+						  gboolean         has_focus);
 };
 
 GType            empathy_chat_view_get_type             (void) G_GNUC_CONST;
@@ -97,6 +99,8 @@ void             empathy_chat_view_highlight            (EmpathyChatView *view,
 							 const gchar     *text,
 							 gboolean         match_case);
 void             empathy_chat_view_copy_clipboard       (EmpathyChatView *view);
+void             empathy_chat_view_focus_toggled        (EmpathyChatView *view,
+							 gboolean         has_focus);
 
 G_END_DECLS
 
