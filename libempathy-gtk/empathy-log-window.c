@@ -1261,6 +1261,8 @@ populate_entities_from_search_hits (void)
           COL_WHO_NAME, _("Anyone"),
           -1);
     }
+
+  /* FIXME: select old entity if still available */
 }
 
 static void
@@ -1288,9 +1290,6 @@ log_manager_searched_new_cb (GObject *manager,
   log_window->hits = hits;
 
   populate_entities_from_search_hits ();
-
-  /* FIXME: select old entity if still available, and populate the dates */
-  //populate_dates_from_search_hits (NULL, NULL);
 
   view = GTK_TREE_VIEW (log_window->treeview_when);
   selection = gtk_tree_view_get_selection (view);
