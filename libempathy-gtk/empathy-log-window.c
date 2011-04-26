@@ -582,6 +582,10 @@ model_is_parent (GtkTreeModel *model,
   TpAccount *account;
   gint64 timestamp;
   gboolean found = FALSE;
+  GtkTreeIter parent;
+  gboolean is_toplevel;
+
+  is_toplevel = !gtk_tree_model_iter_parent (model, &parent, iter);
 
   gtk_tree_model_get (model, iter,
       COL_EVENTS_ACCOUNT, &account,
@@ -590,7 +594,8 @@ model_is_parent (GtkTreeModel *model,
       COL_EVENTS_EVENT, &stored_event,
       -1);
 
-  if (G_OBJECT_TYPE (event) == G_OBJECT_TYPE (stored_event) &&
+  if (is_toplevel &&
+      G_OBJECT_TYPE (event) == G_OBJECT_TYPE (stored_event) &&
       account_equal (account, tpl_event_get_account (event)) &&
       entity_equal (target, event_get_target (event)))
     {
