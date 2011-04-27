@@ -931,9 +931,9 @@ log_window_get_selected (EmpathyLogWindow *window,
   if (paths == NULL)
     return FALSE;
 
-  if (accounts)
+  if (accounts != NULL)
     *accounts = NULL;
-  if (entities)
+  if (entities != NULL)
     *entities = NULL;
 
   for (l = paths; l != NULL; l = l->next)
