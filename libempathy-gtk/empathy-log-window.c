@@ -617,16 +617,11 @@ event_get_target (TplEvent *event)
   return sender;
 }
 
-static gboolean parent_found;
-static GtkTreeIter model_parent;
-
 static gboolean
 model_is_parent (GtkTreeModel *model,
-    GtkTreePath *path,
     GtkTreeIter *iter,
-    gpointer data)
+    TplEvent *event)
 {
-  TplEvent *event = data;
   TplEvent *stored_event;
   TplEntity *target;
   TpAccount *account;
@@ -660,8 +655,7 @@ model_is_parent (GtkTreeModel *model,
       if (ABS (tpl_event_get_timestamp (event) - timestamp) < MAX_GAP)
         {
           /* The gap is smaller than 30 min */
-          model_parent = *iter;
-          parent_found = found = TRUE;
+          found = TRUE;
         }
     }
 
@@ -693,20 +687,27 @@ get_parent_iter_for_message (TplEvent *event,
 {
   GtkTreeStore *store;
   GtkTreeModel *model;
+  GtkTreeIter iter;
+  gboolean parent_found = FALSE;
+  gboolean next;
 
   store = log_window->store_events;
   model = GTK_TREE_MODEL (store);
 
-  parent_found = FALSE;
-  gtk_tree_model_foreach (model, model_is_parent, event);
+  for (next = gtk_tree_model_get_iter_first (model, &iter);
+       next;
+       next = gtk_tree_model_iter_next (model, &iter))
+    {
+      if ((parent_found = model_is_parent (model, &iter, event)))
+        break;
+    }
 
   if (parent_found)
     {
-      *parent = model_parent;
+      *parent = iter;
     }
   else
     {
-      GtkTreeIter iter;
       GDateTime *date;
       gchar *body, *pretty_date;
 
