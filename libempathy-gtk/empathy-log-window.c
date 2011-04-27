@@ -102,6 +102,10 @@ static void log_window_search_entry_changed_cb   (GtkWidget        *entry,
                                                   EmpathyLogWindow *window);
 static void log_window_search_entry_activate_cb  (GtkWidget        *widget,
                                                   EmpathyLogWindow *window);
+static void log_window_search_entry_icon_pressed_cb (GtkEntry      *entry,
+                                                  GtkEntryIconPosition icon_pos,
+                                                  GdkEvent *event,
+                                                  gpointer user_data);
 static void log_window_who_populate              (EmpathyLogWindow *window);
 static void log_window_who_setup                 (EmpathyLogWindow *window);
 static void log_window_when_setup                (EmpathyLogWindow *window);
@@ -503,6 +507,8 @@ empathy_log_window_show (TpAccount  *account,
   window->search_entry = gtk_entry_new ();
   gtk_entry_set_icon_from_stock (GTK_ENTRY (window->search_entry),
       GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
+  gtk_entry_set_icon_from_stock (GTK_ENTRY (window->search_entry),
+      GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
 
   label = gtk_label_new (_("Search"));
 
@@ -523,6 +529,10 @@ empathy_log_window_show (TpAccount  *account,
 
   g_signal_connect (window->search_entry, "activate",
       G_CALLBACK (log_window_search_entry_activate_cb),
+      window);
+
+  g_signal_connect (window->search_entry, "icon-press",
+      G_CALLBACK (log_window_search_entry_icon_pressed_cb),
       window);
 
   /* Contacts */
@@ -1459,6 +1469,19 @@ log_window_search_entry_activate_cb (GtkWidget *entry,
     EmpathyLogWindow *self)
 {
   start_find_search (self);
+}
+
+static void
+log_window_search_entry_icon_pressed_cb (GtkEntry *entry,
+    GtkEntryIconPosition icon_pos,
+    GdkEvent *event,
+    gpointer user_data)
+{
+  if (icon_pos != GTK_ENTRY_ICON_SECONDARY)
+    return;
+
+  gtk_entry_buffer_set_text (gtk_entry_get_buffer (entry),
+    "", -1);
 }
 
 /*
