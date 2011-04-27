@@ -1511,23 +1511,14 @@ notebook_create_window_cb (GtkNotebook *source,
 
 static void
 chat_window_page_switched_cb (GtkNotebook      *notebook,
-			      gpointer          ignore, /* see note below */
+			      GtkWidget         *child,
 			      gint	        page_num,
 			      EmpathyChatWindow *window)
 {
-	EmpathyChatWindowPriv *priv;
-	EmpathyChat           *chat;
-	GtkWidget            *child;
+	EmpathyChatWindowPriv *priv = GET_PRIV (window);
+	EmpathyChat           *chat = EMPATHY_CHAT (child);
 
 	DEBUG ("Page switched");
-
-	priv = GET_PRIV (window);
-
-	/* N.B. in GTK+ 3 child is passed as the first argument to the signal,
-	 * but we can't use that while trying to retain GTK+ 2.x compatibility.
-	 */
-	child = gtk_notebook_get_nth_page (notebook, page_num);
-	chat = EMPATHY_CHAT (child);
 
 	if (priv->page_added) {
 		priv->page_added = FALSE;
