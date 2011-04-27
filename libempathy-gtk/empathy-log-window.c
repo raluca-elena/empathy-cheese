@@ -284,6 +284,8 @@ toolbutton_profile_clicked (GtkToolButton *toolbutton,
   GtkTreeSelection *selection;
   GtkTreeModel *model;
   GtkTreeIter iter;
+  GtkTreePath *path;
+  GList *paths;
   TpAccount *account;
   TplEntity *target;
   EmpathyContact *contact;
@@ -294,26 +296,25 @@ toolbutton_profile_clicked (GtkToolButton *toolbutton,
   view = GTK_TREE_VIEW (log_window->treeview_who);
   selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_get_selected (selection, &model, &iter))
-    {
-      gtk_tree_model_get (model, &iter,
-          COL_WHO_ACCOUNT, &account,
-          COL_WHO_TARGET, &target,
-          COL_WHO_TYPE, &type,
-          -1);
-    }
+  paths = gtk_tree_selection_get_selected_rows (selection, &model);
+  g_return_if_fail (paths != NULL);
 
-  if (type == COL_TYPE_NORMAL)
-    {
-      contact = empathy_contact_from_tpl_contact (account, target);
-      empathy_contact_information_dialog_show (contact,
-          GTK_WINDOW (window->window));
-      g_object_unref (contact);
-    }
-  else
-    {
-      g_warn_if_reached ();
-    }
+  path = paths->data;
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_model_get (model, &iter,
+      COL_WHO_ACCOUNT, &account,
+      COL_WHO_TARGET, &target,
+      COL_WHO_TYPE, &type,
+      -1);
+
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
+
+  g_return_if_fail (type == COL_TYPE_NORMAL);
+
+  contact = empathy_contact_from_tpl_contact (account, target);
+  empathy_contact_information_dialog_show (contact,
+      GTK_WINDOW (window->window));
+  g_object_unref (contact);
 
   g_object_unref (account);
   g_object_unref (target);
@@ -327,6 +328,8 @@ toolbutton_chat_clicked (GtkToolButton *toolbutton,
   GtkTreeSelection *selection;
   GtkTreeModel *model;
   GtkTreeIter iter;
+  GtkTreePath *path;
+  GList *paths;
   TpAccount *account;
   TplEntity *target;
   EmpathyContact *contact;
@@ -337,14 +340,18 @@ toolbutton_chat_clicked (GtkToolButton *toolbutton,
   view = GTK_TREE_VIEW (log_window->treeview_who);
   selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_get_selected (selection, &model, &iter))
-    {
-      gtk_tree_model_get (model, &iter,
-          COL_WHO_ACCOUNT, &account,
-          COL_WHO_TARGET, &target,
-          COL_WHO_TYPE, &type,
-          -1);
-    }
+  paths = gtk_tree_selection_get_selected_rows (selection, &model);
+  g_return_if_fail (paths != NULL);
+
+  path = paths->data;
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_model_get (model, &iter,
+      COL_WHO_ACCOUNT, &account,
+      COL_WHO_TARGET, &target,
+      COL_WHO_TYPE, &type,
+      -1);
+
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
   g_return_if_fail (type == COL_TYPE_NORMAL);
 
@@ -365,6 +372,8 @@ toolbutton_av_clicked (GtkToolButton *toolbutton,
   GtkTreeSelection *selection;
   GtkTreeModel *model;
   GtkTreeIter iter;
+  GtkTreePath *path;
+  GList *paths;
   TpAccount *account;
   gchar *contact;
   gint type;
@@ -375,14 +384,18 @@ toolbutton_av_clicked (GtkToolButton *toolbutton,
   view = GTK_TREE_VIEW (log_window->treeview_who);
   selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_get_selected (selection, &model, &iter))
-    {
-      gtk_tree_model_get (model, &iter,
-          COL_WHO_ACCOUNT, &account,
-          COL_WHO_NAME, &contact,
-          COL_WHO_TYPE, &type,
-          -1);
-    }
+  paths = gtk_tree_selection_get_selected_rows (selection, &model);
+  g_return_if_fail (paths != NULL);
+
+  path = paths->data;
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_model_get (model, &iter,
+      COL_WHO_ACCOUNT, &account,
+      COL_WHO_NAME, &contact,
+      COL_WHO_TYPE, &type,
+      -1);
+
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
   g_return_if_fail (type == COL_TYPE_NORMAL);
 
