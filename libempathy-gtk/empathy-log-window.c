@@ -1031,6 +1031,7 @@ model_has_entity (GtkTreeModel *model,
   TplLogSearchHit *hit = data;
   TplEntity *e;
   TpAccount *a;
+  gboolean ret = FALSE;
 
   gtk_tree_model_get (model, iter,
       COL_WHO_TARGET, &e,
@@ -1040,11 +1041,13 @@ model_has_entity (GtkTreeModel *model,
   if (e != NULL && entity_equal (hit->target, e) &&
       a != NULL && account_equal (hit->account, a))
     {
-      has_element = TRUE;
-      return TRUE;
+      ret = has_element = TRUE;
     }
 
-  return FALSE;
+  tp_clear_object (&e);
+  tp_clear_object (&a);
+
+  return ret;
 }
 
 static gboolean
