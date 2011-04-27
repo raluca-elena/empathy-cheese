@@ -1010,6 +1010,7 @@ log_window_get_selected (EmpathyLogWindow *window,
 
           *dates = g_list_append (*dates, date);
         }
+      g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
     }
 
   if (event_mask != NULL)
