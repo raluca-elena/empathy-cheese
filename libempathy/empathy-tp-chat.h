@@ -42,10 +42,11 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyTpChat      EmpathyTpChat;
 typedef struct _EmpathyTpChatClass EmpathyTpChatClass;
+typedef struct _EmpathyTpChatPrivate EmpathyTpChatPrivate;
 
 struct _EmpathyTpChat {
 	GObject parent;
-	gpointer priv;
+	EmpathyTpChatPrivate *priv;
 };
 
 struct _EmpathyTpChatClass {
