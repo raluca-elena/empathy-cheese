@@ -61,6 +61,8 @@ typedef struct {
 	gboolean               can_upgrade_to_muc;
 	gboolean               got_sms_channel;
 	gboolean               sms_channel;
+
+	GHashTable            *messages_being_sent;
 } EmpathyTpChatPriv;
 
 static void tp_chat_iface_init         (EmpathyContactListIface *iface);
@@ -73,6 +75,7 @@ enum {
 	PROP_PASSWORD_NEEDED,
 	PROP_READY,
 	PROP_SMS_CHANNEL,
+	PROP_N_MESSAGES_SENDING,
 };
 
 enum {
@@ -91,6 +94,39 @@ G_DEFINE_TYPE_WITH_CODE (EmpathyTpChat, empathy_tp_chat, G_TYPE_OBJECT,
 						tp_chat_iface_init));
 
 static void acknowledge_messages (EmpathyTpChat *chat, GArray *ids);
+
+static void
+tp_chat_set_delivery_status (EmpathyTpChat         *self,
+		             const gchar           *token,
+			     EmpathyDeliveryStatus  delivery_status)
+{
+	EmpathyTpChatPriv *priv = GET_PRIV (self);
+
+	/* channel must support receiving failures and successes */
+	if (!tp_str_empty (token) &&
+	    tp_text_channel_get_delivery_reporting_support (
+		TP_TEXT_CHANNEL (priv->channel)) &
+		(TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_FAILURES |
+		 TP_DELIVERY_REPORTING_SUPPORT_FLAG_RECEIVE_SUCCESSES)) {
+
+		DEBUG ("Delivery status (%s) = %u", token, delivery_status);
+
+		switch (delivery_status) {
+			case EMPATHY_DELIVERY_STATUS_NONE:
+				g_hash_table_remove (priv->messages_being_sent,
+					token);
+				break;
+
+			default:
+				g_hash_table_insert (priv->messages_being_sent,
+					g_strdup (token),
+					GUINT_TO_POINTER (delivery_status));
+				break;
+		}
+
+		g_object_notify (G_OBJECT (self), "n-messages-sending");
+	}
+}
 
 static void
 tp_chat_invalidated_cb (TpProxy       *proxy,
@@ -323,14 +359,30 @@ handle_delivery_report (EmpathyTpChat *self,
 	GPtrArray *echo;
 	const gchar *message_body = NULL;
 	const gchar *delivery_dbus_error;
+	const gchar *delivery_token = NULL;
 
 	header = tp_message_peek (message, 0);
 	if (header == NULL)
 		goto out;
 
+	delivery_token = tp_asv_get_string (header, "delivery-token");
 	delivery_status = tp_asv_get_uint32 (header, "delivery-status", &valid);
-	if (!valid || delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED)
+
+	if (!valid) {
 		goto out;
+	} else if (delivery_status == TP_DELIVERY_STATUS_ACCEPTED) {
+		DEBUG ("Accepted %s", delivery_token);
+		tp_chat_set_delivery_status (self, delivery_token,
+			EMPATHY_DELIVERY_STATUS_ACCEPTED);
+		goto out;
+	} else if (delivery_status == TP_DELIVERY_STATUS_DELIVERED) {
+		DEBUG ("Delivered %s", delivery_token);
+		tp_chat_set_delivery_status (self, delivery_token,
+			EMPATHY_DELIVERY_STATUS_NONE);
+		goto out;
+	} else if (delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED) {
+		goto out;
+	}
 
 	delivery_error = tp_asv_get_uint32 (header, "delivery-error", &valid);
 	if (!valid)
@@ -350,6 +402,8 @@ handle_delivery_report (EmpathyTpChat *self,
 			message_body = tp_asv_get_string (echo_body, "content");
 	}
 
+	tp_chat_set_delivery_status (self, delivery_token,
+			EMPATHY_DELIVERY_STATUS_NONE);
 	g_signal_emit (self, signals[SEND_ERROR], 0, message_body,
 			delivery_error, delivery_dbus_error);
 
@@ -443,9 +497,10 @@ message_send_cb (GObject *source,
 {
 	EmpathyTpChat *chat = user_data;
 	TpTextChannel *channel = (TpTextChannel *) source;
+	gchar *token = NULL;
 	GError *error = NULL;
 
-	if (!tp_text_channel_send_message_finish (channel, result, NULL, &error)) {
+	if (!tp_text_channel_send_message_finish (channel, result, &token, &error)) {
 		DEBUG ("Error: %s", error->message);
 
 		/* FIXME: we should use the body of the message as first argument of the
@@ -457,6 +512,10 @@ message_send_cb (GObject *source,
 
 		g_error_free (error);
 	}
+
+	tp_chat_set_delivery_status (chat, token,
+		EMPATHY_DELIVERY_STATUS_SENDING);
+	g_free (token);
 }
 
 typedef struct {
@@ -816,6 +875,7 @@ tp_chat_finalize (GObject *object)
 
 	g_queue_free (priv->messages_queue);
 	g_queue_free (priv->pending_messages_queue);
+	g_hash_table_destroy (priv->messages_being_sent);
 
 	G_OBJECT_CLASS (empathy_tp_chat_parent_class)->finalize (object);
 }
@@ -1419,6 +1479,10 @@ tp_chat_get_property (GObject    *object,
 	case PROP_SMS_CHANNEL:
 		g_value_set_boolean (value, priv->sms_channel);
 		break;
+	case PROP_N_MESSAGES_SENDING:
+		g_value_set_uint (value,
+			g_hash_table_size (priv->messages_being_sent));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
@@ -1508,6 +1572,14 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 							       FALSE,
 							       G_PARAM_READABLE));
 
+	g_object_class_install_property (object_class,
+					 PROP_N_MESSAGES_SENDING,
+					 g_param_spec_uint ("n-messages-sending",
+						 	    "Num Messages Sending",
+							    "The number of messages being sent",
+							    0, G_MAXUINT, 0,
+							    G_PARAM_READABLE));
+
 	/* Signals */
 	signals[MESSAGE_RECEIVED] =
 		g_signal_new ("message-received",
@@ -1571,6 +1643,8 @@ empathy_tp_chat_init (EmpathyTpChat *chat)
 	chat->priv = priv;
 	priv->messages_queue = g_queue_new ();
 	priv->pending_messages_queue = g_queue_new ();
+	priv->messages_being_sent = g_hash_table_new_full (
+		g_str_hash, g_str_equal, g_free, NULL);
 }
 
 static void
@@ -1679,7 +1753,8 @@ empathy_tp_chat_send (EmpathyTpChat *chat,
 	DEBUG ("Sending message: %s", message_body);
 
 	tp_text_channel_send_message_async (TP_TEXT_CHANNEL (priv->channel),
-		message, 0, message_send_cb, chat);
+		message, TP_MESSAGE_SENDING_FLAG_REPORT_DELIVERY,
+		message_send_cb, chat);
 
 	g_free (message_body);
 }

@@ -59,6 +59,12 @@ typedef struct {
 	GValue         *value;
 } EmpathyTpChatProperty;
 
+typedef enum {
+	EMPATHY_DELIVERY_STATUS_NONE,
+	EMPATHY_DELIVERY_STATUS_SENDING,
+	EMPATHY_DELIVERY_STATUS_ACCEPTED
+} EmpathyDeliveryStatus;
+
 GType          empathy_tp_chat_get_type             (void) G_GNUC_CONST;
 EmpathyTpChat *empathy_tp_chat_new                  (TpAccount *account,
 						     TpChannel *channel);
