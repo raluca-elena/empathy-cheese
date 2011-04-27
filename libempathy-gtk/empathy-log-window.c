@@ -724,7 +724,8 @@ get_parent_iter_for_message (TplEvent *event,
       date = g_date_time_new_from_unix_utc (
           tpl_event_get_timestamp (event));
 
-      pretty_date = g_date_time_format (date, "%x");
+      pretty_date = g_date_time_format (date,
+          C_("A date with the time", "%A, %e %B %Y %X"));
 
       body = g_strdup_printf (_("Chat with %s"),
           get_contact_alias_for_message (message));
@@ -783,7 +784,7 @@ log_window_append_chat_message (TplEvent *event,
   date = g_date_time_new_from_unix_utc (
       tpl_event_get_timestamp (event));
 
-  pretty_date = g_date_time_format (date, "%x");
+  pretty_date = g_date_time_format (date, "%X");
 
   get_parent_iter_for_message (event, message, &parent);
 
@@ -832,7 +833,8 @@ log_window_append_call (TplEvent *event,
   started_date = g_date_time_new_from_unix_utc (
       tpl_event_get_timestamp (event));
 
-  pretty_date = g_date_time_format (started_date, "%x");
+  pretty_date = g_date_time_format (started_date,
+      C_("A date with the time", "%A, %e %B %Y %X"));
 
   gtk_tree_store_append (store, &iter, NULL);
   gtk_tree_store_set (store, &iter,
@@ -1831,6 +1833,7 @@ log_window_events_setup (EmpathyLogWindow *window)
       "text", COL_EVENTS_TEXT);
 
   cell = gtk_cell_renderer_text_new ();
+  g_object_set (cell, "xalign", 1.0, NULL);
   gtk_tree_view_column_pack_end (column, cell, FALSE);
   gtk_tree_view_column_add_attribute (column, cell,
       "text", COL_EVENTS_PRETTY_DATE);
