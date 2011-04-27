@@ -65,8 +65,11 @@ GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 
 # telepathy-yell
 prev_top_build_prefix=$ac_top_build_prefix
+prev_ac_configure_args=$ac_configure_args
+ac_configure_args="$ac_configure_args --disable-shared-library"
 AX_CONFIG_DIR([telepathy-yell])
 ac_top_build_prefix=$prev_top_build_prefix
+ac_configure_args=$prev_ac_configure_args
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:"$ac_top_build_prefix"telepathy-yell/telepathy-yell
 
 AC_CONFIG_MACRO_DIR([m4])
