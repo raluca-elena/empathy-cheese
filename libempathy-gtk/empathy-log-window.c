@@ -173,6 +173,9 @@ enum
 
 #define CALENDAR_ICON "stock_calendar"
 
+/* Seconds between two messages to be considered one conversation */
+#define MAX_GAP 30*60
+
 typedef enum
 {
   EVENT_CALL_INCOMING = 1 << 0,
@@ -636,7 +639,7 @@ model_is_parent (GtkTreeModel *model,
           COL_EVENTS_TS, &timestamp,
           -1);
 
-      if (ABS (tpl_event_get_timestamp (event) - timestamp) < 1800)
+      if (ABS (tpl_event_get_timestamp (event) - timestamp) < MAX_GAP)
         {
           /* The gap is smaller than 30 min */
           model_parent = *iter;
