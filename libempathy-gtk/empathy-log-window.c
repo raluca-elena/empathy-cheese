@@ -176,6 +176,8 @@ enum
 /* Seconds between two messages to be considered one conversation */
 #define MAX_GAP 30*60
 
+#define WHAT_TYPE_SEPARATOR -1
+
 typedef enum
 {
   EVENT_CALL_INCOMING = 1 << 0,
@@ -2080,7 +2082,7 @@ what_row_is_separator (GtkTreeModel *model,
       COL_WHAT_TYPE, &type,
       -1);
 
-  return (type == -1);
+  return (type == WHAT_TYPE_SEPARATOR);
 }
 
 static void
@@ -2150,7 +2152,7 @@ log_window_what_setup (EmpathyLogWindow *window)
   guint i;
   struct event events [] = {
     { TPL_EVENT_MASK_ANY, 0, NULL, _("Anything") },
-    { -1, 0, NULL, "separator" },
+    { WHAT_TYPE_SEPARATOR, 0, NULL, "separator" },
     { TPL_EVENT_MASK_TEXT, 0, "stock_text_justify", _("Text chats") },
     { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, "call-start", _("Calls") }
   };
