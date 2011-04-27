@@ -230,8 +230,7 @@ ctx_free (Ctx *ctx)
 {
   tp_clear_object (&ctx->account);
   tp_clear_object (&ctx->entity);
-  if (ctx->date != NULL)
-    g_date_free (ctx->date);
+  tp_clear_pointer (&ctx->date, g_date_free);
 
   g_slice_free (Ctx, ctx);
 }
