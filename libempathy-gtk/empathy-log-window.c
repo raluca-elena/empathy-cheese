@@ -298,13 +298,16 @@ toolbutton_profile_clicked (GtkToolButton *toolbutton,
           -1);
     }
 
-  g_return_if_fail (type == COL_TYPE_NORMAL);
+  if (type == COL_TYPE_NORMAL)
+    {
+      contact = empathy_contact_from_tpl_contact (account, target);
+      empathy_contact_information_dialog_show (contact,
+          GTK_WINDOW (window->window));
+      g_object_unref (contact);
+    }
+  else
+    g_warn_if_reached ();
 
-  contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_contact_information_dialog_show (contact,
-      GTK_WINDOW (window->window));
-
-  g_object_unref (contact);
   g_object_unref (account);
   g_object_unref (target);
 }
