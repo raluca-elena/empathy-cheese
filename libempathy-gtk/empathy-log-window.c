@@ -309,7 +309,9 @@ toolbutton_profile_clicked (GtkToolButton *toolbutton,
       g_object_unref (contact);
     }
   else
-    g_warn_if_reached ();
+    {
+      g_warn_if_reached ();
+    }
 
   g_object_unref (account);
   g_object_unref (target);
@@ -684,7 +686,9 @@ get_parent_iter_for_message (TplEvent *event,
   gtk_tree_model_foreach (model, model_is_parent, event);
 
   if (parent_found)
-    *parent = model_parent;
+    {
+      *parent = model_parent;
+    }
   else
     {
       GtkTreeIter iter;
@@ -1144,11 +1148,17 @@ format_date_for_display (GDate *date)
   days_elapsed = g_date_days_between (date, now);
 
   if (days_elapsed < 0)
-    text = NULL;
+    {
+      text = NULL;
+    }
   else if (days_elapsed == 0)
-    text = g_strdup (_("Today"));
+    {
+      text = g_strdup (_("Today"));
+    }
   else if (days_elapsed == 1)
-    text = g_strdup (_("Yesterday"));
+    {
+      text = g_strdup (_("Yesterday"));
+    }
   else
     {
       GDateTime *dt;
@@ -1466,7 +1476,9 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
               window);
         }
       else if (gtk_tree_selection_count_selected_rows (selection) == 1)
-        someone = TRUE;
+        {
+          someone = TRUE;
+        }
     }
 
   gtk_widget_set_sensitive (window->button_profile, someone);
@@ -2266,7 +2278,9 @@ log_window_got_messages_for_date_cb (GObject *manager,
           append = FALSE;
 
           if (ctx->subtype & EVENT_CALL_ALL)
-            append = TRUE;
+            {
+              append = TRUE;
+            }
           else
             {
               TplCallEndReason reason = tpl_call_event_get_end_reason (call);
@@ -2280,10 +2294,14 @@ log_window_got_messages_for_date_cb (GObject *manager,
                 }
               else if (ctx->subtype & EVENT_CALL_OUTGOING
                   && tpl_entity_get_entity_type (sender) == TPL_ENTITY_SELF)
-                append = TRUE;
+                {
+                  append = TRUE;
+                }
               else if (ctx->subtype & EVENT_CALL_INCOMING
                   && tpl_entity_get_entity_type (receiver) == TPL_ENTITY_SELF)
-                append = TRUE;
+                {
+                  append = TRUE;
+                }
             }
         }
 
@@ -2555,7 +2573,9 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
           populate_dates_from_search_hits (accounts, targets);
         }
       else
-        populate_events_from_search_hits (accounts, targets, dates);
+        {
+          populate_events_from_search_hits (accounts, targets, dates);
+        }
     }
   /* Either use the supplied date or get the last */
   else if (force_get_dates || dates == NULL)
@@ -2624,7 +2644,7 @@ got_entities (GObject *manager,
       data->callback (entities != NULL, data->user_data);
 
       g_list_free_full (entities, g_object_unref);
-  }
+    }
 
   g_slice_free (FilterCallbackData, data);
 }
