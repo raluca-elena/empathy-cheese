@@ -771,7 +771,7 @@ log_window_append_chat_message (TplEvent *event,
   else
     {
       body = g_strdup_printf (
-          C_("First is a contact, second is what he said", "%s: %s"),
+          C_("First is a contact, second is what was said", "%s: %s"),
           tpl_entity_get_alias (tpl_event_get_sender (event)),
           empathy_message_get_body (message));
     }
