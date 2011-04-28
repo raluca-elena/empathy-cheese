@@ -210,6 +210,21 @@ if test "x$with_call" = "xyes" -a "x$have_farstream" != "xyes"; then
 fi
 AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
 
+
+# -----------------------------------------------------------
+# Call support in tp-logger
+# -----------------------------------------------------------
+SAVE_CFLAGS=$CFLAGS
+SAVE_CPPFLAGS=$CPPFLAGS
+CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
+CPPFLAGS="$CPPFLAGS $EMPATHY_CFLAGS"
+
+AC_CHECK_HEADER(telepathy-logger/call-event.h,,
+  AC_MSG_ERROR([tp-logger must be compiled with --enable-call]))
+
+CFLAGS=$SAVE_CFLAGS
+CPPFLAGS=$SAVE_CPPFLAGS
+
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
 # -----------------------------------------------------------
