@@ -3660,7 +3660,7 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect (tp_chat, "destroy",
 			  G_CALLBACK (chat_destroy_cb),
 			  chat);
-	g_signal_connect (tp_chat, "message-received",
+	g_signal_connect (tp_chat, "message-received-empathy",
 			  G_CALLBACK (chat_message_received_cb),
 			  chat);
 	g_signal_connect (tp_chat, "message_acknowledged",

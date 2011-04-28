@@ -966,7 +966,7 @@ approve_channels (TpSimpleApprover *approver,
         }
 
       /* 1-1 text channel, wait for the first message */
-      approval->handler = g_signal_connect (tp_chat, "message-received",
+      approval->handler = g_signal_connect (tp_chat, "message-received-empathy",
         G_CALLBACK (event_manager_chat_message_received_cb), approval);
     }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)

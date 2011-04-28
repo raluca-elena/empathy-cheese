@@ -1617,7 +1617,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 
 	/* Signals */
 	signals[MESSAGE_RECEIVED] =
-		g_signal_new ("message-received",
+		g_signal_new ("message-received-empathy",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
 			      0,
