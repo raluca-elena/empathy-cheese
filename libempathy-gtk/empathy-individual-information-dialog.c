@@ -129,19 +129,26 @@ static void
 set_label_visibility (EmpathyIndividualInformationDialog *dialog)
 {
   EmpathyIndividualInformationDialogPriv *priv = GET_PRIV (dialog);
-  GList *personas, *l;
   guint num_personas = 0;
 
   /* Count how many Telepathy personas we have, to see whether we can
    * unlink */
   if (priv->individual != NULL)
     {
+      GeeSet *personas;
+      GeeIterator *iter;
+
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+          FolksPersona *persona = gee_iterator_get (iter);
+          if (empathy_folks_persona_is_interesting (persona))
             num_personas++;
+
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
     }
 
   /* Only make the label visible if we have enough personas */

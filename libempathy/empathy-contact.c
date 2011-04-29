@@ -877,13 +877,16 @@ empathy_contact_get_persona (EmpathyContact *contact)
 
       for (l = individuals; l != NULL; l = l->next)
         {
-          GList *personas, *j;
           FolksIndividual *individual = FOLKS_INDIVIDUAL (l->data);
+          GeeSet *personas;
+          GeeIterator *iter;
+          gboolean persona_found = FALSE;
 
           personas = folks_individual_get_personas (individual);
-          for (j = personas; j != NULL; j = j->next)
+          iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+          while (!persona_found && gee_iterator_next (iter))
             {
-              TpfPersona *persona = j->data;
+              TpfPersona *persona = gee_iterator_get (iter);
 
               if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
                 {
@@ -894,13 +897,14 @@ empathy_contact_get_persona (EmpathyContact *contact)
                       /* Found the right persona */
                       empathy_contact_set_persona (contact,
                           (FolksPersona *) persona);
-                      goto finished;
+                      persona_found = TRUE;
                     }
+                  g_clear_object (&persona);
                 }
             }
+          g_clear_object (&iter);
         }
 
-finished:
       g_list_free (individuals);
       g_object_unref (manager);
     }
@@ -1983,35 +1987,39 @@ EmpathyContact *
 empathy_contact_dup_best_for_action (FolksIndividual *individual,
     EmpathyActionType action_type)
 {
-  GList *personas, *contacts, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
+  GList *contacts;
   EmpathyContact *best_contact = NULL;
 
   /* Build a list of EmpathyContacts that we can sort */
   personas = folks_individual_get_personas (individual);
   contacts = NULL;
 
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
+      FolksPersona *persona = gee_iterator_get (iter);
       TpContact *tp_contact;
-      EmpathyContact *contact;
+      EmpathyContact *contact = NULL;
 
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      if (!empathy_folks_persona_is_interesting (persona))
+        goto while_finish;
 
-      tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+      tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
       contact = empathy_contact_dup_from_tp_contact (tp_contact);
-      empathy_contact_set_persona (contact, FOLKS_PERSONA (l->data));
+      empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 
       /* Only choose the contact if they're actually capable of the specified
        * action. */
-      if (!empathy_contact_can_do_action (contact, action_type))
-        {
-          g_object_unref (contact);
-          continue;
-        }
+      if (empathy_contact_can_do_action (contact, action_type))
+        contacts = g_list_prepend (contacts, g_object_ref (contact));
 
-      contacts = g_list_prepend (contacts, contact);
+while_finish:
+      g_clear_object (&contact);
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   /* Sort the contacts by some heuristic based on the action type, then take
    * the top contact. */

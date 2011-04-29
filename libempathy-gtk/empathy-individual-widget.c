@@ -222,30 +222,37 @@ update_weak_contact (EmpathyIndividualWidget *self)
        * details for every TpContact in the Individual and merge them
        * all, but that requires vCard support in libfolks for it to
        * not be hideously complex.  (bgo#627399) */
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
       FolksPresenceType presence_type = FOLKS_PRESENCE_TYPE_UNSET;
 
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          FolksPresenceDetails *presence;
-          FolksPresenceType presence_type_cur;
+          FolksPersona *persona = gee_iterator_get (iter);
 
           /* We only want personas which have presence and a TpContact */
-          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (presence)))
-            continue;
-
-          presence = FOLKS_PRESENCE_DETAILS (l->data);
-          presence_type_cur = folks_presence_details_get_presence_type (
-              presence);
-
-          if (folks_presence_details_typecmp (
-                presence_type_cur, presence_type) > 0)
+          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
             {
-              presence_type = presence_type_cur;
-              tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+              FolksPresenceDetails *presence;
+              FolksPresenceType presence_type_cur;
+
+              presence = FOLKS_PRESENCE_DETAILS (persona);
+              presence_type_cur = folks_presence_details_get_presence_type (
+                  presence);
+
+              if (folks_presence_details_typecmp (
+                    presence_type_cur, presence_type) > 0)
+                {
+                  presence_type = presence_type_cur;
+                  tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+                }
             }
+
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
     }
 
   if (tp_contact != NULL)
@@ -565,7 +572,8 @@ location_update (EmpathyIndividualWidget *self)
   int i;
   const gchar *skey;
   gboolean display_map = FALSE;
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
 
   if (!(priv->flags & EMPATHY_INDIVIDUAL_WIDGET_SHOW_LOCATION) ||
       priv->individual == NULL)
@@ -577,10 +585,12 @@ location_update (EmpathyIndividualWidget *self)
   /* FIXME: For the moment, we just display the first location data we can
    * find amongst the Individual's Personas. Once libfolks grows a location
    * interface, we can use that. (bgo#627400) */
+
   personas = folks_individual_get_personas (priv->individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (location == NULL && gee_iterator_next (iter))
     {
-      FolksPersona *persona = FOLKS_PERSONA (l->data);
+      FolksPersona *persona = gee_iterator_get (iter);
 
       if (empathy_folks_persona_is_interesting (persona))
         {
@@ -595,13 +605,16 @@ location_update (EmpathyIndividualWidget *self)
 
           /* Try and get a location */
           location = empathy_contact_get_location (contact);
-          if (location != NULL && g_hash_table_size (location) > 0)
-            break;
-
-          location = NULL;
-          tp_clear_object (&contact);
+          /* if location isn't fully valid, treat the contact as insufficient */
+          if (location != NULL && g_hash_table_size (location) <= 0)
+            {
+              location = NULL;
+              g_clear_object (&contact);
+            }
         }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   if (contact == NULL || location == NULL)
     {
@@ -745,10 +758,12 @@ location_update (EmpathyIndividualWidget *self)
 
       /* FIXME: For now, we have to do this manually. Once libfolks grows a
        * location interface, we can use that. (bgo#627400) */
+
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          FolksPersona *persona = FOLKS_PERSONA (l->data);
+          FolksPersona *persona = gee_iterator_get (iter);
 
           if (empathy_folks_persona_is_interesting (persona))
             {
@@ -764,27 +779,18 @@ location_update (EmpathyIndividualWidget *self)
               /* Try and get a location */
               location = empathy_contact_get_location (contact);
               if (location == NULL || g_hash_table_size (location) == 0)
-                {
-                  g_object_unref (contact);
-                  continue;
-                }
+                goto while_finish;
 
               /* Get this persona's latitude and longitude */
               value = g_hash_table_lookup (location, EMPATHY_LOCATION_LAT);
               if (value == NULL)
-                {
-                  g_object_unref (contact);
-                  continue;
-                }
+                goto while_finish;
 
               lat = g_value_get_double (value);
 
               value = g_hash_table_lookup (location, EMPATHY_LOCATION_LON);
               if (value == NULL)
-                {
-                  g_object_unref (contact);
-                  continue;
-                }
+                goto while_finish;
 
               lon = g_value_get_double (value);
 
@@ -796,10 +802,13 @@ location_update (EmpathyIndividualWidget *self)
                   lat, lon);
               champlain_marker_layer_add_marker (layer,
                   CHAMPLAIN_MARKER (marker));
-
-              g_object_unref (contact);
             }
+
+while_finish:
+          g_clear_object (&persona);
+          g_clear_object (&contact);
         }
+      g_clear_object (&iter);
 
       /* Zoom to show all of the markers */
       champlain_view_ensure_layers_visible (priv->map_view, FALSE);
@@ -887,20 +896,25 @@ persona_dup_avatar (FolksPersona *persona)
 static EmpathyAvatar *
 individual_dup_avatar (FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   EmpathyAvatar *avatar = NULL;
 
   /* FIXME: We just choose the first Persona which has an avatar, and save that.
    * The avatar handling in EmpathyContact needs to be moved into libfolks as
    * much as possible, and this code rewritten to use FolksHasAvatar.
    * (bgo#627401) */
+
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (avatar == NULL && gee_iterator_next (iter))
     {
-      avatar = persona_dup_avatar (FOLKS_PERSONA (l->data));
-      if (avatar != NULL)
-        break;
+      FolksPersona *persona = gee_iterator_get (iter);
+      avatar = persona_dup_avatar (persona);
+
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   return avatar;
 }
@@ -1060,14 +1074,17 @@ avatar_widget_button_press_event_cb (GtkWidget *widget,
 static TpAccount *
 individual_is_user (FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
+  TpAccount *retval = NULL;
 
   /* FIXME: This should move into libfolks when libfolks grows a way of
    * determining "self". (bgo#627402) */
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
-      FolksPersona *persona = FOLKS_PERSONA (l->data);
+      FolksPersona *persona = gee_iterator_get (iter);
 
       if (TPF_IS_PERSONA (persona))
         {
@@ -1081,16 +1098,15 @@ individual_is_user (FolksIndividual *individual)
 
           /* Determine if the contact is the user */
           if (empathy_contact_is_user (contact))
-            {
-              g_object_unref (contact);
-              return g_object_ref (empathy_contact_get_account (contact));
-            }
+            retval = g_object_ref (empathy_contact_get_account (contact));
 
           g_object_unref (contact);
         }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
-  return NULL;
+  return retval;
 }
 
 static void
@@ -1633,16 +1649,22 @@ individual_table_set_up (EmpathyIndividualWidget *self)
     {
       gchar *message;
       GtkWidget *label;
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
       guint num_personas = 0;
 
       /* Meta-contacts message displaying how many Telepathy personas we have */
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+          FolksPersona *persona = gee_iterator_get (iter);
+          if (empathy_folks_persona_is_interesting (persona))
             num_personas++;
+
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
 
       /* Translators: the plurality applies to both instances of the word
        * "contact" */
@@ -1694,21 +1716,28 @@ personas_changed_cb (FolksIndividual *individual,
     EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GList *personas, *l, *children;
+  GList *l, *children;
+  GeeSet *personas;
+  GeeIterator *iter;
   gboolean show_personas, was_showing_personas, will_show_personas, is_last;
   guint old_num_personas, new_num_personas = 0;
 
   personas = folks_individual_get_personas (individual);
+  /* we'll re-use this iterator throughout */
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
 
   /* Note that old_num_personas is the number of persona tables we were
    * displaying, not the number of Personas which were in the Individual
    * before. */
   old_num_personas = g_hash_table_size (priv->persona_tables);
 
-  for (l = personas; l != NULL; l = l->next)
+  while (gee_iterator_next (iter))
     {
-      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+      FolksPersona *persona = gee_iterator_get (iter);
+      if (empathy_folks_persona_is_interesting (persona))
         new_num_personas++;
+
+      g_clear_object (&persona);
     }
 
   /*
@@ -1750,24 +1779,38 @@ personas_changed_cb (FolksIndividual *individual,
     }
   else if (!was_showing_personas && will_show_personas)
     {
+      gboolean c;
+
       /* Remove the old Individual table */
       individual_table_destroy (self);
 
       /* Set up all the Persona tables instead */
-      for (l = personas; l != NULL; l = l->next)
-        add_persona (self, FOLKS_PERSONA (l->data));
+      for (c = gee_iterator_first (iter); c; c = gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+          add_persona (self, persona);
+          g_clear_object (&persona);
+        }
     }
   else if (was_showing_personas && !will_show_personas)
     {
+      gboolean c;
+
       /* Remove all Personas */
-      for (l = personas; l != NULL; l = l->next)
-        remove_persona (self, FOLKS_PERSONA (l->data));
+      for (c = gee_iterator_first (iter); c; c = gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+          remove_persona (self, persona);
+          g_clear_object (&persona);
+        }
+
       for (l = removed; l != NULL; l = l->next)
         remove_persona (self, FOLKS_PERSONA (l->data));
 
       /* Set up the Individual table instead */
       individual_table_set_up (self);
     }
+  g_clear_object (&iter);
 
   /* Hide the last separator and show the others */
   children = gtk_container_get_children (GTK_CONTAINER (priv->vbox_individual));
@@ -1800,7 +1843,8 @@ remove_individual (EmpathyIndividualWidget *self)
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   if (priv->individual != NULL)
     {
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
 
       g_signal_handlers_disconnect_by_func (priv->individual,
           notify_alias_cb, self);
@@ -1820,8 +1864,14 @@ remove_individual (EmpathyIndividualWidget *self)
         }
 
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
-        remove_persona (self, FOLKS_PERSONA (l->data));
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+          remove_persona (self, persona);
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter);
       individual_table_destroy (self);
 
       if (priv->contact != NULL)
@@ -1878,16 +1928,21 @@ individual_update (EmpathyIndividualWidget *self)
   else
     {
       /* We need to update the details for every Persona in the Individual */
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
 
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-            continue;
+          FolksPersona *persona = gee_iterator_get (iter);
 
-          update_persona (self, FOLKS_PERSONA (l->data));
+          if (empathy_folks_persona_is_interesting (persona))
+            update_persona (self, persona);
+
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
 
       gtk_widget_show (priv->vbox_individual);
     }

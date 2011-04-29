@@ -75,7 +75,7 @@ void empathy_individual_manager_remove_group (EmpathyIndividualManager *manager,
     const gchar *group);
 
 void empathy_individual_manager_link_personas (EmpathyIndividualManager *self,
-    GList *personas);
+    GeeSet *personas);
 
 void empathy_individual_manager_unlink_individual (
     EmpathyIndividualManager *self,

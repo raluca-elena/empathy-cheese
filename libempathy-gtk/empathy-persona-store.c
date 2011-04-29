@@ -995,15 +995,22 @@ empathy_persona_store_set_individual (EmpathyPersonaStore *self,
   /* Remove the old individual */
   if (priv->individual != NULL)
     {
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
 
       g_signal_handlers_disconnect_by_func (priv->individual,
           (GCallback) individual_personas_changed_cb, self);
 
       /* Disconnect from and remove all personas belonging to this individual */
       personas = folks_individual_get_personas (priv->individual);
-      for (l = personas; l != NULL; l = l->next)
-        remove_persona_and_disconnect (self, FOLKS_PERSONA (l->data));
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+          remove_persona_and_disconnect (self, persona);
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter);
 
       g_object_unref (priv->individual);
     }
@@ -1013,7 +1020,8 @@ empathy_persona_store_set_individual (EmpathyPersonaStore *self,
   /* Add the new individual */
   if (individual != NULL)
     {
-      GList *personas, *l;
+      GeeSet *personas;
+      GeeIterator *iter;
 
       g_object_ref (individual);
 
@@ -1021,9 +1029,16 @@ empathy_persona_store_set_individual (EmpathyPersonaStore *self,
           (GCallback) individual_personas_changed_cb, self);
 
       /* Add pre-existing Personas */
+
       personas = folks_individual_get_personas (individual);
-      for (l = personas; l != NULL; l = l->next)
-        add_persona_and_connect (self, FOLKS_PERSONA (l->data));
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+          add_persona_and_connect (self, persona);
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter);
     }
 
   g_object_notify (G_OBJECT (self), "individual");

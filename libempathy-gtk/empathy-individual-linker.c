@@ -141,21 +141,34 @@ link_individual (EmpathyIndividualLinker *self,
     FolksIndividual *individual)
 {
   EmpathyIndividualLinkerPriv *priv = GET_PRIV (self);
-  GList *new_persona_list;
+  GeeSet *old_personas, *new_personas;
+  GeeHashSet *final_personas;
+  gboolean personas_changed;
 
   /* Add the individual to the link */
   g_hash_table_insert (priv->changed_individuals, individual,
       GUINT_TO_POINTER (TRUE));
 
-  /* Add personas which are in @individual to priv->new_individual, appending
-   * them to the list of personas.
-   * This is rather slow. */
-  new_persona_list = g_list_copy (folks_individual_get_personas (
-      priv->new_individual));
-  new_persona_list = g_list_concat (new_persona_list,
-      g_list_copy (folks_individual_get_personas (individual)));
-  folks_individual_set_personas (priv->new_individual, new_persona_list);
-  g_list_free (new_persona_list);
+  /* Add personas which are in @individual to priv->new_individual, adding them
+   * to the set of personas. */
+  old_personas = folks_individual_get_personas (individual);
+  new_personas = folks_individual_get_personas (priv->new_individual);
+  final_personas = gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref,
+      g_object_unref, g_direct_hash, g_direct_equal);
+  gee_collection_add_all (GEE_COLLECTION (final_personas),
+      GEE_COLLECTION (old_personas));
+  personas_changed = gee_collection_add_all (GEE_COLLECTION (final_personas),
+      GEE_COLLECTION (new_personas));
+
+  /* avoid updating all values in the Individual if the set of personas doesn't
+   * actually change */
+  if (personas_changed)
+    {
+      folks_individual_set_personas (priv->new_individual,
+          GEE_SET (final_personas));
+    }
+
+  g_clear_object (&final_personas);
 
   /* Update the toggle renderers, so that if this Individual is listed in
    * another group in the EmpathyIndividualView, the toggle button for that
@@ -170,28 +183,31 @@ unlink_individual (EmpathyIndividualLinker *self,
     FolksIndividual *individual)
 {
   EmpathyIndividualLinkerPriv *priv = GET_PRIV (self);
-  GList *new_persona_list, *old_persona_list, *removing_personas, *l;
+  GeeSet *removed_personas, *old_personas;
+  GeeHashSet *final_personas;
+  gboolean personas_changed;
 
   /* Remove the individual from the link */
   g_hash_table_remove (priv->changed_individuals, individual);
 
-  /* Remove personas which are in @individual from priv->new_individual.
-   * This is rather slow. */
-  old_persona_list = folks_individual_get_personas (priv->new_individual);
-  removing_personas = folks_individual_get_personas (individual);
-  new_persona_list = NULL;
+  /* Remove personas which are in @individual from priv->new_individual. */
+  old_personas = folks_individual_get_personas (priv->new_individual);
+  removed_personas = folks_individual_get_personas (individual);
 
-  for (l = old_persona_list; l != NULL; l = l->next)
+  final_personas = gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref,
+      g_object_unref, g_direct_hash, g_direct_equal);
+  gee_collection_add_all (GEE_COLLECTION (final_personas),
+      GEE_COLLECTION (old_personas));
+  personas_changed = gee_collection_remove_all (GEE_COLLECTION (final_personas),
+      GEE_COLLECTION (removed_personas));
+
+  if (personas_changed)
     {
-      GList *removing = g_list_find (removing_personas, l->data);
-
-      if (removing == NULL)
-        new_persona_list = g_list_prepend (new_persona_list, l->data);
+      folks_individual_set_personas (priv->new_individual,
+          GEE_SET (final_personas));
     }
 
-  new_persona_list = g_list_reverse (new_persona_list);
-  folks_individual_set_personas (priv->new_individual, new_persona_list);
-  g_list_free (new_persona_list);
+  g_clear_object (&final_personas);
 
   /* Update the toggle renderers, so that if this Individual is listed in
    * another group in the EmpathyIndividualView, the toggle button for that
@@ -732,14 +748,14 @@ empathy_individual_linker_set_start_individual (EmpathyIndividualLinker *self,
  *
  * The return value is guaranteed to contain at least one element.
  *
- * Return value: (transfer none) (element-type Folks.Persona): a list of
+ * Return value: (transfer none) (element-type Folks.Persona): a set of
  * #FolksPersona<!-- -->s to link together
  */
-GList *
+GeeSet *
 empathy_individual_linker_get_linked_personas (EmpathyIndividualLinker *self)
 {
   EmpathyIndividualLinkerPriv *priv;
-  GList *personas;
+  GeeSet *personas;
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_LINKER (self), NULL);
 

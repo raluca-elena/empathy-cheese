@@ -1959,7 +1959,9 @@ empathy_individual_match_string (FolksIndividual *individual,
     GPtrArray *words)
 {
   const gchar *str;
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
+  gboolean retval = FALSE;
 
   /* check alias name */
   str = folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual));
@@ -1970,33 +1972,42 @@ empathy_individual_match_string (FolksIndividual *individual,
   personas = folks_individual_get_personas (individual);
 
   /* check contact id, remove the @server.com part */
-  for (l = personas; l; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (retval == FALSE && gee_iterator_next (iter))
     {
+      FolksPersona *persona = gee_iterator_get (iter);
       const gchar *p;
-      gchar *dup_str = NULL;
-      gboolean visible;
 
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      if (empathy_folks_persona_is_interesting (persona))
+        {
+          str = folks_persona_get_display_id (persona);
 
-      str = folks_persona_get_display_id (l->data);
+          /* Accept the persona if @text is a full prefix of his ID; that allows
+           * user to find, say, a jabber contact by typing his JID. */
+          if (!g_str_has_prefix (str, text))
+            {
+              retval = TRUE;
+            }
+          else
+            {
+              gchar *dup_str = NULL;
+              gboolean visible;
 
-      /* Accept the persona if @text is a full prefix of his ID; that allows
-       * user to find, say, a jabber contact by typing his JID. */
-      if (g_str_has_prefix (str, text))
-        return TRUE;
+              p = strstr (str, "@");
+              if (p != NULL)
+                str = dup_str = g_strndup (str, p - str);
 
-      p = strstr (str, "@");
-      if (p != NULL)
-        str = dup_str = g_strndup (str, p - str);
-
-      visible = empathy_live_search_match_words (str, words);
-      g_free (dup_str);
-      if (visible)
-        return TRUE;
+              visible = empathy_live_search_match_words (str, words);
+              g_free (dup_str);
+              if (visible)
+                retval = TRUE;
+            }
+        }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   /* FIXME: Add more rules here, we could check phone numbers in
    * contact's vCard for example. */
-  return FALSE;
+  return retval;
 }

@@ -500,32 +500,36 @@ gboolean
 empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
     FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
+  gboolean retval = FALSE;
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_MANAGER (self), FALSE);
 
   personas = folks_individual_get_personas (individual);
-
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (!retval && gee_iterator_next (iter))
     {
-      TpfPersona *persona = l->data;
+      TpfPersona *persona = gee_iterator_get (iter);
       TpConnection *conn;
       EmpathyContactManager *manager;
 
-      if (!TPF_IS_PERSONA (persona))
-        continue;
+      if (TPF_IS_PERSONA (persona))
+        {
+          conn = tp_contact_get_connection (tpf_persona_get_contact (persona));
+          manager = empathy_contact_manager_dup_singleton ();
 
-      conn = tp_contact_get_connection (tpf_persona_get_contact (persona));
-      manager = empathy_contact_manager_dup_singleton ();
+          if (empathy_contact_manager_get_flags_for_connection (manager, conn) &
+              EMPATHY_CONTACT_LIST_CAN_BLOCK)
+            retval = TRUE;
 
-      if (empathy_contact_manager_get_flags_for_connection (manager, conn) &
-          EMPATHY_CONTACT_LIST_CAN_BLOCK)
-        return TRUE;
-
-      g_object_unref (manager);
+          g_object_unref (manager);
+        }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
-  return FALSE;
+  return retval;
 }
 
 void
@@ -534,37 +538,40 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
     gboolean blocked,
     gboolean abusive)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
 
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_MANAGER (self));
 
   personas = folks_individual_get_personas (individual);
-
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
-      TpfPersona *persona = l->data;
+      TpfPersona *persona = gee_iterator_get (iter);
       EmpathyContact *contact;
       EmpathyContactManager *manager;
       EmpathyContactListFlags flags;
 
-      if (!TPF_IS_PERSONA (persona))
-        continue;
+      if (TPF_IS_PERSONA (persona))
+        {
+          contact = empathy_contact_dup_from_tp_contact (
+              tpf_persona_get_contact (persona));
+          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+          manager = empathy_contact_manager_dup_singleton ();
+          flags = empathy_contact_manager_get_flags_for_connection (manager,
+              empathy_contact_get_connection (contact));
 
-      contact = empathy_contact_dup_from_tp_contact (
-          tpf_persona_get_contact (persona));
-      empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
-      manager = empathy_contact_manager_dup_singleton ();
-      flags = empathy_contact_manager_get_flags_for_connection (manager,
-          empathy_contact_get_connection (contact));
+          if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+            empathy_contact_list_set_blocked (
+                EMPATHY_CONTACT_LIST (manager),
+                contact, blocked, abusive);
 
-      if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
-        empathy_contact_list_set_blocked (
-            EMPATHY_CONTACT_LIST (manager),
-            contact, blocked, abusive);
-
-      g_object_unref (manager);
-      g_object_unref (contact);
+          g_object_unref (manager);
+          g_object_unref (contact);
+        }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 }
 
 static void
@@ -629,7 +636,7 @@ link_personas_cb (FolksIndividualAggregator *aggregator,
 
 void
 empathy_individual_manager_link_personas (EmpathyIndividualManager *self,
-    GList *personas)
+    GeeSet *personas)
 {
   EmpathyIndividualManagerPriv *priv;
 
@@ -638,7 +645,8 @@ empathy_individual_manager_link_personas (EmpathyIndividualManager *self,
 
   priv = GET_PRIV (self);
 
-  DEBUG ("Linking %u personas", g_list_length (personas));
+  DEBUG ("Linking %u personas",
+      gee_collection_get_size (GEE_COLLECTION (personas)));
 
   folks_individual_aggregator_link_personas (priv->aggregator, personas,
       (GAsyncReadyCallback) link_personas_cb, NULL);

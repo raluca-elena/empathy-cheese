@@ -186,7 +186,8 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
     empathy_contact_manager_dup_singleton ();
   GtkWidget *dialog;
   GtkWidget *abusive_check = NULL;
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   GString *text = g_string_new ("");
   GString *blocked_str = g_string_new ("");
   GString *notblocked_str = g_string_new ("");
@@ -208,17 +209,17 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
 
   /* build a list of personas that support blocking */
   personas = folks_individual_get_personas (individual);
-
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
-      TpfPersona *persona = l->data;
+      TpfPersona *persona = gee_iterator_get (iter);
       TpContact *contact;
       EmpathyContactListFlags flags;
       GString *s;
       char *str;
 
       if (!TPF_IS_PERSONA (persona))
-          continue;
+          goto while_finish;
 
       contact = tpf_persona_get_contact (persona);
       flags = empathy_contact_manager_get_flags_for_connection (
@@ -241,7 +242,11 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       str = contact_pretty_name (contact);
       g_string_append_printf (s, "\n " BULLET_POINT " %s", str);
       g_free (str);
+
+while_finish:
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   g_string_append_printf (text,
       _("Are you sure you want to block '%s' from contacting you again?"),

@@ -123,21 +123,24 @@ individual_can_audio_video_call (FolksIndividual *individual,
     gboolean *can_audio_call,
     gboolean *can_video_call)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   gboolean can_audio = FALSE, can_video = FALSE;
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
+      FolksPersona *persona = gee_iterator_get (iter);
       TpContact *tp_contact;
       EmpathyContact *contact;
 
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      if (!empathy_folks_persona_is_interesting (persona))
+        goto while_finish;
 
-      tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+      tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
       contact = empathy_contact_dup_from_tp_contact (tp_contact);
-      empathy_contact_set_persona (contact, FOLKS_PERSONA (l->data));
+      empathy_contact_set_persona (contact, persona);
 
       can_audio = can_audio || empathy_contact_get_capabilities (contact) &
           EMPATHY_CAPABILITIES_AUDIO;
@@ -145,10 +148,13 @@ individual_can_audio_video_call (FolksIndividual *individual,
           EMPATHY_CAPABILITIES_VIDEO;
 
       g_object_unref (contact);
+while_finish:
+      g_clear_object (&persona);
 
       if (can_audio && can_video)
         break;
     }
+  g_clear_object (&iter);
 
   *can_audio_call = can_audio;
   *can_video_call = can_video;
@@ -157,20 +163,23 @@ individual_can_audio_video_call (FolksIndividual *individual,
 static const gchar * const *
 individual_get_client_types (FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   const gchar * const *types = NULL;
   FolksPresenceType presence_type = FOLKS_PRESENCE_TYPE_UNSET;
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
       FolksPresenceDetails *presence;
+      FolksPersona *persona = gee_iterator_get (iter);
 
       /* We only want personas which have presence and a TpContact */
       if (!empathy_folks_persona_is_interesting (persona))
-        continue;
+        goto while_finish;
 
-      presence = FOLKS_PRESENCE_DETAILS (l->data);
+      presence = FOLKS_PRESENCE_DETAILS (persona);
 
       if (folks_presence_details_typecmp (
               folks_presence_details_get_presence_type (presence),
@@ -180,10 +189,14 @@ individual_get_client_types (FolksIndividual *individual)
 
           presence_type = folks_presence_details_get_presence_type (presence);
 
-          tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
+          tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
           types = tp_contact_get_client_types (tp_contact);
         }
+
+while_finish:
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   return types;
 }
@@ -858,62 +871,74 @@ individual_store_contact_updated_cb (EmpathyContact *contact,
 
 static void
 individual_personas_changed_cb (FolksIndividual *individual,
-    GList *added,
-    GList *removed,
+    GeeSet *added,
+    GeeSet *removed,
     EmpathyIndividualStore *self)
 {
-  GList *l;
+  GeeIterator *iter;
 
   DEBUG ("Individual '%s' personas-changed.",
       folks_individual_get_id (individual));
 
+  iter = gee_iterable_iterator (GEE_ITERABLE (removed));
   /* FIXME: libfolks hasn't grown capabilities support yet, so we have to go
    * through the EmpathyContacts for them. */
-  for (l = removed; l != NULL; l = l->next)
+  while (gee_iterator_next (iter))
     {
+      TpfPersona *persona = gee_iterator_get (iter);
       TpContact *tp_contact;
       EmpathyContact *contact;
 
-      if (!TPF_IS_PERSONA (l->data))
-        continue;
+      if (TPF_IS_PERSONA (persona))
+        {
+          tp_contact = tpf_persona_get_contact (persona);
+          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 
-      tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
-      contact = empathy_contact_dup_from_tp_contact (tp_contact);
-      empathy_contact_set_persona (contact, FOLKS_PERSONA (l->data));
+          g_object_set_data (G_OBJECT (contact), "individual", NULL);
+          g_signal_handlers_disconnect_by_func (contact,
+              (GCallback) individual_store_contact_updated_cb, self);
 
-      g_object_set_data (G_OBJECT (contact), "individual", NULL);
-      g_signal_handlers_disconnect_by_func (contact,
-          (GCallback) individual_store_contact_updated_cb, self);
+          g_object_unref (contact);
+        }
 
-      g_object_unref (contact);
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
-  for (l = added; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (added));
+  while (gee_iterator_next (iter))
     {
+      TpfPersona *persona = gee_iterator_get (iter);
       TpContact *tp_contact;
       EmpathyContact *contact;
 
-      if (!TPF_IS_PERSONA (l->data))
-        continue;
+      if (TPF_IS_PERSONA (persona))
+        {
+          tp_contact = tpf_persona_get_contact (persona);
+          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 
-      tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
-      contact = empathy_contact_dup_from_tp_contact (tp_contact);
-      empathy_contact_set_persona (contact, FOLKS_PERSONA (l->data));
+          g_object_set_data (G_OBJECT (contact), "individual", individual);
+          g_signal_connect (contact, "notify::capabilities",
+              (GCallback) individual_store_contact_updated_cb, self);
+          g_signal_connect (contact, "notify::client-types",
+              (GCallback) individual_store_contact_updated_cb, self);
 
-      g_object_set_data (G_OBJECT (contact), "individual", individual);
-      g_signal_connect (contact, "notify::capabilities",
-          (GCallback) individual_store_contact_updated_cb, self);
-      g_signal_connect (contact, "notify::client-types",
-          (GCallback) individual_store_contact_updated_cb, self);
+          g_object_unref (contact);
+        }
 
-      g_object_unref (contact);
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 }
 
 void
 individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
+  GeeSet *empty_set = gee_set_empty (G_TYPE_NONE, NULL, NULL);
+
   individual_store_add_individual (self, individual);
 
   g_signal_connect (individual, "notify::avatar",
@@ -927,16 +952,22 @@ individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
   g_signal_connect (individual, "personas-changed",
       (GCallback) individual_personas_changed_cb, self);
 
+  /* provide an empty set so the callback can assume non-NULL sets */
   individual_personas_changed_cb (individual,
-      folks_individual_get_personas (individual), NULL, self);
+      folks_individual_get_personas (individual), empty_set, self);
+  g_clear_object (&empty_set);
 }
 
 static void
 individual_store_disconnect_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  individual_personas_changed_cb (individual, NULL,
+  GeeSet *empty_set = gee_set_empty (G_TYPE_NONE, NULL, NULL);
+
+  /* provide an empty set so the callback can assume non-NULL sets */
+  individual_personas_changed_cb (individual, empty_set,
       folks_individual_get_personas (individual), self);
+  g_clear_object (&empty_set);
 
   g_signal_handlers_disconnect_by_func (individual,
       (GCallback) individual_store_individual_updated_cb, self);
@@ -1925,22 +1956,28 @@ individual_store_get_individual_status_icon_with_icon_name (
   EmpathyIndividualStorePriv *priv;
   const gchar *protocol_name = NULL;
   gchar *icon_name = NULL;
-  GList *personas, *l;
-  guint contact_count;
+  GeeSet *personas;
+  GeeIterator *iter;
+  guint contact_count = 0;
   EmpathyContact *contact = NULL;
   gboolean show_protocols_here;
 
   priv = GET_PRIV (self);
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas, contact_count = 0; l; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
-      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+      FolksPersona *persona = gee_iterator_get (iter);
+      if (empathy_folks_persona_is_interesting (persona))
         contact_count++;
+
+      g_clear_object (&persona);
 
       if (contact_count > 1)
         break;
     }
+  g_clear_object (&iter);
 
   show_protocols_here = (priv->show_protocols && (contact_count == 1));
   if (show_protocols_here)

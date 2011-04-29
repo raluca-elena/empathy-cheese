@@ -417,6 +417,7 @@ individual_view_persona_drag_received (GtkWidget *self,
   FolksPersona *persona = NULL;
   const gchar *persona_uid;
   GList *individuals, *l;
+  GeeIterator *iter = NULL;
   gboolean retval = FALSE;
 
   persona_uid = (const gchar *) gtk_selection_data_get_data (selection);
@@ -428,23 +429,28 @@ individual_view_persona_drag_received (GtkWidget *self,
 
   for (l = individuals; l != NULL; l = l->next)
     {
-      GList *personas, *p;
+      GeeSet *personas;
 
       personas = folks_individual_get_personas (FOLKS_INDIVIDUAL (l->data));
-
-      for (p = personas; p != NULL; p = p->next)
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          if (!tp_strdiff (folks_persona_get_uid (FOLKS_PERSONA (p->data)),
-              persona_uid))
+          FolksPersona *persona_cur = gee_iterator_get (iter);
+
+          if (!tp_strdiff (folks_persona_get_uid (persona), persona_uid))
             {
-              persona = g_object_ref (p->data);
+              /* takes ownership of the ref */
+              persona = persona_cur;
               individual = g_object_ref (l->data);
               goto got_persona;
             }
+          g_clear_object (&persona_cur);
         }
+      g_clear_object (&iter);
     }
 
 got_persona:
+  g_clear_object (&iter);
   g_list_free (individuals);
 
   if (persona == NULL || individual == NULL)
@@ -1692,7 +1698,8 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
 {
   EmpathyIndividualViewPriv *priv = GET_PRIV (self);
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   gboolean is_favorite, contains_interesting_persona = FALSE;
 
   /* We're only giving the visibility wrt filtering here, not things like
@@ -1705,14 +1712,17 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
 
   /* Hide all individuals which consist entirely of uninteresting personas */
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (!contains_interesting_persona && gee_iterator_next (iter))
     {
-      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        {
-          contains_interesting_persona = TRUE;
-          break;
-        }
+      FolksPersona *persona = gee_iterator_get (iter);
+
+      if (empathy_folks_persona_is_interesting (persona))
+        contains_interesting_persona = TRUE;
+
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   if (contains_interesting_persona == FALSE)
     return FALSE;
@@ -2438,7 +2448,8 @@ got_avatar (GObject *source_object,
   EmpathyIndividualManager *manager;
   gchar *text;
   GtkWindow *parent;
-  GList *l, *personas;
+  GeeSet *personas;
+  GeeIterator *iter;
   guint persona_count = 0;
   gboolean can_block;
   GError *error = NULL;
@@ -2457,19 +2468,21 @@ got_avatar (GObject *source_object,
    * so we still display the remove dialog. */
 
   personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
 
   /* If we have more than one TpfPersona, display a different message
    * ensuring the user knows that *all* of the meta-contacts' personas will
    * be removed. */
-  for (l = personas; l != NULL; l = l->next)
+  while (persona_count < 2 && gee_iterator_next (iter))
     {
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      FolksPersona *persona = gee_iterator_get (iter);
 
-      persona_count++;
-      if (persona_count >= 2)
-        break;
+      if (empathy_folks_persona_is_interesting (persona))
+        persona_count++;
+
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   if (persona_count < 2)
     {
@@ -2561,7 +2574,8 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
   GtkWidget *item;
   GtkWidget *image;
   gboolean can_remove = FALSE;
-  GList *l;
+  GeeSet *personas;
+  GeeIterator *iter;
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), NULL);
 
@@ -2577,19 +2591,21 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
    * remove. This will act as a best-effort option. If any Personas cannot be
    * removed from the server, then this option will just be inactive upon
    * subsequent menu openings */
-  for (l = folks_individual_get_personas (individual); l != NULL; l = l->next)
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (!can_remove && gee_iterator_next (iter))
     {
-      FolksPersona *persona = FOLKS_PERSONA (l->data);
+      FolksPersona *persona = gee_iterator_get (iter);
       FolksPersonaStore *store = folks_persona_get_store (persona);
       FolksMaybeBool maybe_can_remove =
           folks_persona_store_get_can_remove_personas (store);
 
       if (maybe_can_remove == FOLKS_MAYBE_BOOL_TRUE)
-        {
-          can_remove = TRUE;
-          break;
-        }
+        can_remove = TRUE;
+
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   menu = empathy_individual_menu_new (individual, priv->individual_features);
 

@@ -74,23 +74,28 @@ individual_menu_add_personas (GtkMenuShell *menu,
     EmpathyIndividualFeatureFlags features)
 {
   GtkWidget *item;
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   guint persona_count = 0;
+  gboolean c;
 
   g_return_if_fail (GTK_IS_MENU (menu));
   g_return_if_fail (FOLKS_IS_INDIVIDUAL (individual));
   g_return_if_fail (empathy_folks_individual_contains_contact (individual));
 
   personas = folks_individual_get_personas (individual);
+  /* we'll re-use this iterator throughout */
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
 
   /* Make sure we've got enough valid entries for these menu items to add
    * functionality */
-  for (l = personas; l != NULL; l = l->next)
+  while (gee_iterator_next (iter))
     {
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      FolksPersona *persona = gee_iterator_get (iter);
+      if (empathy_folks_persona_is_interesting (persona))
+        persona_count++;
 
-      persona_count++;
+      g_clear_object (&persona);
     }
 
   /* return early if these entries would add nothing beyond the "quick" items */
@@ -103,21 +108,21 @@ individual_menu_add_personas (GtkMenuShell *menu,
   gtk_widget_show (item);
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  for (c = gee_iterator_first (iter); c; c = gee_iterator_next (iter))
     {
       GtkWidget *image;
       GtkWidget *contact_item;
       GtkWidget *contact_submenu;
       TpContact *tp_contact;
       EmpathyContact *contact;
-      TpfPersona *persona = l->data;
+      TpfPersona *persona = gee_iterator_get (iter);
       gchar *label;
       FolksPersonaStore *store;
       const gchar *account;
       GtkWidget *action;
 
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
+        goto while_finish;
 
       tp_contact = tpf_persona_get_contact (persona);
       contact = empathy_contact_dup_from_tp_contact (tp_contact);
@@ -199,7 +204,12 @@ individual_menu_add_personas (GtkMenuShell *menu,
 
       g_free (label);
       g_object_unref (contact);
+
+while_finish:
+      g_clear_object (&persona);
     }
+
+  g_clear_object (&iter);
 }
 
 static void
@@ -981,7 +991,6 @@ room_sub_menu_activate_cb (GtkWidget *item,
   EmpathyTpChat *chat;
   EmpathyChatroomManager *mgr;
   EmpathyContact *contact = NULL;
-  GList *personas, *l;
 
   chat = empathy_chatroom_get_tp_chat (data->chatroom);
   if (chat == NULL)
@@ -996,30 +1005,37 @@ room_sub_menu_activate_cb (GtkWidget *item,
     contact = g_object_ref (data->contact);
   else
     {
+      GeeSet *personas;
+      GeeIterator *iter;
+
       /* find the first of this Individual's contacts who can join this room */
       personas = folks_individual_get_personas (data->individual);
-      for (l = personas; l != NULL && contact == NULL; l = g_list_next (l))
+
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter) && (contact == NULL))
         {
-          TpfPersona *persona = l->data;
+          TpfPersona *persona = gee_iterator_get (iter);
           TpContact *tp_contact;
           GList *rooms;
 
-          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-            continue;
+          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
+            {
+              tp_contact = tpf_persona_get_contact (persona);
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
 
-          tp_contact = tpf_persona_get_contact (persona);
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              rooms = empathy_chatroom_manager_get_chatrooms (mgr,
+                  empathy_contact_get_account (contact));
 
-          rooms = empathy_chatroom_manager_get_chatrooms (mgr,
-              empathy_contact_get_account (contact));
+              if (g_list_find (rooms, data->chatroom) == NULL)
+                g_clear_object (&contact);
 
-          if (g_list_find (rooms, data->chatroom) == NULL)
-            tp_clear_object (&contact);
+              /* if contact != NULL here, we've found our match */
 
-          /* if contact != NULL here, we've found our match */
-
-          g_list_free (rooms);
+              g_list_free (rooms);
+            }
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
     }
 
   g_object_unref (mgr);
@@ -1065,7 +1081,6 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
   GtkWidget *image;
   GtkWidget *room_item;
   EmpathyChatroomManager *mgr;
-  GList *personas;
   GList *rooms = NULL;
   GList *names = NULL;
   GList *l;
@@ -1095,27 +1110,33 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
     }
   else
     {
-      /* collect the rooms from amongst all accounts for this Individual */
+      GeeSet *personas;
+      GeeIterator *iter;
+
+      /* find the first of this Individual's contacts who can join this room */
       personas = folks_individual_get_personas (individual);
-      for (l = personas; l != NULL; l = g_list_next (l))
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (gee_iterator_next (iter))
         {
-          TpfPersona *persona = l->data;
+          TpfPersona *persona = gee_iterator_get (iter);
           GList *rooms_cur;
           TpContact *tp_contact;
           EmpathyContact *contact_cur;
 
-          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-            continue;
+          if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
+            {
+              tp_contact = tpf_persona_get_contact (persona);
+              contact_cur = empathy_contact_dup_from_tp_contact (tp_contact);
 
-          tp_contact = tpf_persona_get_contact (persona);
-          contact_cur = empathy_contact_dup_from_tp_contact (tp_contact);
+              rooms_cur = empathy_chatroom_manager_get_chatrooms (mgr,
+                  empathy_contact_get_account (contact_cur));
+              rooms = g_list_concat (rooms, rooms_cur);
 
-          rooms_cur = empathy_chatroom_manager_get_chatrooms (mgr,
-              empathy_contact_get_account (contact_cur));
-          rooms = g_list_concat (rooms, rooms_cur);
-
-          g_object_unref (contact_cur);
+              g_object_unref (contact_cur);
+            }
+          g_clear_object (&persona);
         }
+      g_clear_object (&iter);
     }
 
   /* alphabetize the rooms */

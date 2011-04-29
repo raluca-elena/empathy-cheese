@@ -159,7 +159,7 @@ linking_response_cb (EmpathyLinkingDialog *self,
   if (response == GTK_RESPONSE_OK)
     {
       EmpathyIndividualManager *manager;
-      GList *personas;
+      GeeSet *personas;
 
       manager = empathy_individual_manager_dup_singleton ();
 
@@ -223,7 +223,8 @@ empathy_linking_dialog_show (FolksIndividual *individual,
     GtkWindow *parent)
 {
   EmpathyLinkingDialogPriv *priv;
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   guint num_personas = 0;
 
   /* Create the dialogue if it doesn't exist */
@@ -246,11 +247,16 @@ empathy_linking_dialog_show (FolksIndividual *individual,
   /* Count how many Telepathy personas we have, to see whether we can
    * unlink */
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
     {
-      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+      FolksPersona *persona = gee_iterator_get (iter);
+      if (empathy_folks_persona_is_interesting (persona))
         num_personas++;
+
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   /* Only make the "Unlink" button sensitive if we have enough personas */
   gtk_dialog_set_response_sensitive (GTK_DIALOG (linking_dialog),

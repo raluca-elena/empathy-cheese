@@ -776,18 +776,30 @@ empathy_folks_presence_type_to_tp (FolksPresenceType type)
 gboolean
 empathy_folks_individual_contains_contact (FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
+  gboolean retval = FALSE;
 
   g_return_val_if_fail (FOLKS_IS_INDIVIDUAL (individual), FALSE);
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas; l != NULL; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (!retval && gee_iterator_next (iter))
     {
-      if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        return (tpf_persona_get_contact (TPF_PERSONA (l->data)) != NULL);
-    }
+      FolksPersona *persona = gee_iterator_get (iter);
+      TpContact *contact = NULL;
 
-  return FALSE;
+      if (empathy_folks_persona_is_interesting (persona))
+        contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+
+      g_clear_object (&persona);
+
+      if (contact != NULL)
+        retval = TRUE;
+    }
+  g_clear_object (&iter);
+
+  return retval;
 }
 
 /* TODO: this needs to be eliminated (and replaced in some cases with user
@@ -800,15 +812,17 @@ empathy_folks_individual_contains_contact (FolksIndividual *individual)
 EmpathyContact *
 empathy_contact_dup_from_folks_individual (FolksIndividual *individual)
 {
-  GList *personas, *l;
+  GeeSet *personas;
+  GeeIterator *iter;
   EmpathyContact *contact = NULL;
 
   g_return_val_if_fail (FOLKS_IS_INDIVIDUAL (individual), NULL);
 
   personas = folks_individual_get_personas (individual);
-  for (l = personas; (l != NULL) && (contact == NULL); l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter) && (contact == NULL))
     {
-      TpfPersona *persona = l->data;
+      TpfPersona *persona = gee_iterator_get (iter);
 
       if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
         {
@@ -818,7 +832,9 @@ empathy_contact_dup_from_folks_individual (FolksIndividual *individual)
           contact = empathy_contact_dup_from_tp_contact (tp_contact);
           empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
         }
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
   return contact;
 }
@@ -831,7 +847,7 @@ tp_channel_group_change_reason_from_folks_groups_change_reason (
 }
 
 TpfPersonaStore *
-empathy_get_persona_store_for_connection (TpConnection *connection)
+empathy_dup_persona_store_for_connection (TpConnection *connection)
 {
   FolksBackendStore *backend_store;
   FolksBackend *backend;
@@ -871,43 +887,58 @@ empathy_get_persona_store_for_connection (TpConnection *connection)
 gboolean
 empathy_connection_can_add_personas (TpConnection *connection)
 {
+  gboolean retval;
   FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
   persona_store = FOLKS_PERSONA_STORE (
-      empathy_get_persona_store_for_connection (connection));
+      empathy_dup_persona_store_for_connection (connection));
 
-  return (folks_persona_store_get_can_add_personas (persona_store) ==
+  retval = (folks_persona_store_get_can_add_personas (persona_store) ==
       FOLKS_MAYBE_BOOL_TRUE);
+
+  g_clear_object (&persona_store);
+
+  return retval;
 }
 
 gboolean
 empathy_connection_can_alias_personas (TpConnection *connection)
 {
+  gboolean retval;
   FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
   persona_store = FOLKS_PERSONA_STORE (
-      empathy_get_persona_store_for_connection (connection));
+      empathy_dup_persona_store_for_connection (connection));
 
-  return (folks_persona_store_get_can_alias_personas (persona_store) ==
+  retval = (folks_persona_store_get_can_alias_personas (persona_store) ==
       FOLKS_MAYBE_BOOL_TRUE);
+
+  g_clear_object (&persona_store);
+
+  return retval;
 }
 
 gboolean
 empathy_connection_can_group_personas (TpConnection *connection)
 {
+  gboolean retval;
   FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
   persona_store = FOLKS_PERSONA_STORE (
-      empathy_get_persona_store_for_connection (connection));
+      empathy_dup_persona_store_for_connection (connection));
 
-  return (folks_persona_store_get_can_group_personas (persona_store) ==
+  retval = (folks_persona_store_get_can_group_personas (persona_store) ==
       FOLKS_MAYBE_BOOL_TRUE);
+
+  g_clear_object (&persona_store);
+
+  return retval;
 }
 
 gboolean

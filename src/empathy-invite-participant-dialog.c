@@ -181,34 +181,39 @@ static TpContact *
 get_tp_contact_for_chat (EmpathyInviteParticipantDialog *self,
     FolksIndividual *individual)
 {
-  GList *personas, *l;
+  TpContact *contact = NULL;
   TpConnection *chat_conn;
+  GeeSet *personas;
+  GeeIterator *iter;
 
   chat_conn = tp_channel_borrow_connection ((TpChannel *) self->priv->tp_chat);
 
   personas = folks_individual_get_personas (individual);
-
-  for (l = personas; l != NULL; l = g_list_next (l))
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (contact == FALSE && gee_iterator_next (iter))
     {
-      TpfPersona *persona = l->data;
-      TpContact *contact;
+      TpfPersona *persona = gee_iterator_get (iter);
       TpConnection *contact_conn;
+      TpContact *contact_cur = NULL;
 
-      if (!TPF_IS_PERSONA (persona))
-        continue;
+      if (TPF_IS_PERSONA (persona))
+        {
+          contact_cur = tpf_persona_get_contact (persona);
+          if (contact_cur != NULL)
+            {
+              contact_conn = tp_contact_get_connection (contact_cur);
 
-      contact = tpf_persona_get_contact (persona);
-      if (contact == NULL)
-        continue;
+              if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
+                    tp_proxy_get_object_path (chat_conn)))
+                contact = contact_cur;
+            }
+        }
 
-      contact_conn = tp_contact_get_connection (contact);
-
-      if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
-            tp_proxy_get_object_path (chat_conn)))
-        return contact;
+      g_clear_object (&persona);
     }
+  g_clear_object (&iter);
 
-  return NULL;
+  return contact;
 }
 
 static gboolean

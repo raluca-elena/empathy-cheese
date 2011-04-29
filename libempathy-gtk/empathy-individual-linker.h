@@ -62,7 +62,7 @@ void empathy_individual_linker_set_start_individual (
     EmpathyIndividualLinker *self,
     FolksIndividual *individual);
 
-GList * empathy_individual_linker_get_linked_personas (
+GeeSet * empathy_individual_linker_get_linked_personas (
     EmpathyIndividualLinker *self);
 
 gboolean empathy_individual_linker_get_has_changed (
