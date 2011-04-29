@@ -2893,14 +2893,37 @@ empathy_call_window_update_timer (gpointer user_data)
   return TRUE;
 }
 
-#if 0
+enum
+{
+  EMP_RESPONSE_BALANCE
+};
+
+static void
+on_error_infobar_response_cb (GtkInfoBar *info_bar,
+    gint response_id,
+    gpointer user_data)
+{
+  switch (response_id)
+    {
+      case GTK_RESPONSE_CLOSE:
+        gtk_widget_destroy (GTK_WIDGET (info_bar));
+        break;
+      case EMP_RESPONSE_BALANCE:
+        empathy_url_show (GTK_WIDGET (info_bar),
+            g_object_get_data (G_OBJECT (info_bar), "uri"));
+        break;
+    }
+}
+
 static void
 display_error (EmpathyCallWindow *self,
-    TpyCallChannel *call,
     const gchar *img,
     const gchar *title,
     const gchar *desc,
-    const gchar *details)
+    const gchar *details,
+    const gchar *button_text,
+    const gchar *uri,
+    gint button_response)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GtkWidget *info_bar;
@@ -2914,6 +2937,14 @@ display_error (EmpathyCallWindow *self,
   /* Create info bar */
   info_bar = gtk_info_bar_new_with_buttons (GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
       NULL);
+
+  if (button_text != NULL)
+    {
+      gtk_info_bar_add_button (GTK_INFO_BAR (info_bar),
+          button_text, button_response);
+      g_object_set_data_full (G_OBJECT (info_bar),
+          "uri", g_strdup (uri), g_free);
+    }
 
   gtk_info_bar_set_message_type (GTK_INFO_BAR (info_bar), GTK_MESSAGE_WARNING);
 
@@ -2962,13 +2993,14 @@ display_error (EmpathyCallWindow *self,
     }
 
   g_signal_connect (info_bar, "response",
-      G_CALLBACK (gtk_widget_destroy), NULL);
+      G_CALLBACK (on_error_infobar_response_cb), NULL);
 
   gtk_box_pack_start (GTK_BOX (priv->errors_vbox), info_bar,
       FALSE, FALSE, CONTENT_HBOX_CHILDREN_PACKING_PADDING);
   gtk_widget_show_all (info_bar);
 }
 
+#if 0
 static gchar *
 media_stream_error_to_txt (EmpathyCallWindow *self,
     TpyCallChannel *call,
@@ -3088,13 +3120,76 @@ empathy_call_window_video_stream_error (TpyCallChannel *call,
 #endif
 
 static void
+show_balance_error (GObject *object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  EmpathyCallWindow *self = user_data;
+  TpConnection *conn = TP_CONNECTION (object);
+  GError *error = NULL;
+  gchar *balance, *tmp;
+  const gchar *uri, *currency;
+  gint amount;
+  guint scale;
+
+  if (!tp_proxy_prepare_finish (conn, res, &error))
+    {
+      DEBUG ("Failed to prepare Balance: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  uri = tp_connection_get_balance_uri (conn);
+
+  if (!tp_connection_get_balance (conn, &amount, &scale, &currency))
+    {
+      /* unknown balance */
+      balance = g_strdup ("(--)");
+    }
+  else
+    {
+      char *money = empathy_format_currency (amount, scale, currency);
+
+      balance = g_strdup_printf ("%s %s",
+          currency, money);
+      g_free (money);
+    }
+
+  display_error (self,
+      NULL,
+      _("Sorry, you don’t have enough credit for that call."),
+      tmp = g_strdup_printf (_("Your current balance is %s."),
+          balance),
+      NULL,
+      _("Get credit..."),
+      uri,
+      EMP_RESPONSE_BALANCE);
+  g_free (tmp);
+}
+
+static void
 empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
     TpyCallState state,
+    gchar *reason,
     EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
   gboolean can_send_video;
+
+  if (state == TPY_CALL_STATE_ENDED &&
+      !tp_strdiff (reason, TP_ERROR_STR_INSUFFICIENT_BALANCE))
+    {
+      TpConnection *conn;
+      GQuark features[] = { TP_CONNECTION_FEATURE_BALANCE, 0 };
+
+      g_object_get (self->priv->handler, "call-channel", &call, NULL);
+      conn = tp_channel_borrow_connection (TP_CHANNEL (call));
+      g_object_unref (call);
+
+      tp_proxy_prepare_async (conn, features, show_balance_error, self);
+      return;
+    }
 
   if (state != TPY_CALL_STATE_ACCEPTED)
     return;
