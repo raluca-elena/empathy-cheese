@@ -424,9 +424,17 @@ static void
 clear_chatrooms (EmpathyChatroomManager *self)
 {
   EmpathyChatroomManagerPriv *priv = GET_PRIV (self);
-  GList *l;
+  GList *l, *tmp;
 
-  for (l = priv->chatrooms; l != NULL; l = g_list_next (l))
+  tmp = priv->chatrooms;
+
+  /* Unreffing the chatroom may result in destroying the underlying
+   * EmpathyTpChat which will fire the invalidated signal and so make us
+   * re-call this function. We already set priv->chatrooms to NULL so we won't
+   * try to destroy twice the same objects. */
+  priv->chatrooms = NULL;
+
+  for (l = tmp; l != NULL; l = g_list_next (l))
     {
       EmpathyChatroom *chatroom = l->data;
 
@@ -437,8 +445,7 @@ clear_chatrooms (EmpathyChatroomManager *self)
       g_object_unref (chatroom);
     }
 
-  g_list_free (priv->chatrooms);
-  priv->chatrooms = NULL;
+  g_list_free (tmp);
 }
 
 static void
