@@ -1689,7 +1689,9 @@ static gboolean
 individual_view_is_visible_individual (EmpathyIndividualView *self,
     FolksIndividual *individual,
     gboolean is_online,
-    gboolean is_searching)
+    gboolean is_searching,
+    const gchar *group,
+    gboolean is_fake_group)
 {
   EmpathyIndividualViewPriv *priv = GET_PRIV (self);
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
@@ -1721,8 +1723,14 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
 
   is_favorite = folks_favourite_details_get_is_favourite (
       FOLKS_FAVOURITE_DETAILS (individual));
-  if (is_searching == FALSE)
-    return (priv->show_offline || is_online || is_favorite);
+  if (is_searching == FALSE) {
+    if (is_favorite && is_fake_group &&
+        !tp_strdiff (group, EMPATHY_INDIVIDUAL_STORE_FAVORITE))
+        /* Always display favorite contacts in the favorite group */
+        return TRUE;
+
+    return (priv->show_offline || is_online);
+  }
 
   /* check alias name */
   str = folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual));
@@ -1757,6 +1765,28 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
   return FALSE;
 }
 
+static gchar *
+get_group (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gboolean *is_fake)
+{
+  GtkTreeIter parent_iter;
+  gchar *name = NULL;
+
+  *is_fake = FALSE;
+
+  if (!gtk_tree_model_iter_parent (model, &parent_iter, iter))
+    return NULL;
+
+  gtk_tree_model_get (model, &parent_iter,
+      EMPATHY_INDIVIDUAL_STORE_COL_NAME, &name,
+      EMPATHY_INDIVIDUAL_STORE_COL_IS_FAKE_GROUP, is_fake,
+      -1);
+
+  return name;
+}
+
+
 static gboolean
 individual_view_filter_visible_func (GtkTreeModel *model,
     GtkTreeIter *iter,
@@ -1783,10 +1813,16 @@ individual_view_filter_visible_func (GtkTreeModel *model,
 
   if (individual != NULL)
     {
+      gchar *group;
+      gboolean is_fake_group;
+
+      group = get_group (model, iter, &is_fake_group);
+
       visible = individual_view_is_visible_individual (self, individual,
-          is_online, is_searching);
+          is_online, is_searching, group, is_fake_group);
 
       g_object_unref (individual);
+      g_free (group);
 
       /* FIXME: Work around bgo#626552/bgo#621076 */
       if (visible == TRUE)
@@ -1809,6 +1845,9 @@ individual_view_filter_visible_func (GtkTreeModel *model,
   for (valid = gtk_tree_model_iter_children (model, &child_iter, iter);
        valid; valid = gtk_tree_model_iter_next (model, &child_iter))
     {
+      gchar *group;
+      gboolean is_fake_group;
+
       gtk_tree_model_get (model, &child_iter,
         EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
         EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, &is_online,
@@ -1817,9 +1856,13 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       if (individual == NULL)
         continue;
 
+      group = get_group (model, &child_iter, &is_fake_group);
+
       visible = individual_view_is_visible_individual (self, individual,
-          is_online, is_searching);
+          is_online, is_searching, group, is_fake_group);
+
       g_object_unref (individual);
+      g_free (group);
 
       /* show group if it has at least one visible contact in it */
       if (visible == TRUE)
