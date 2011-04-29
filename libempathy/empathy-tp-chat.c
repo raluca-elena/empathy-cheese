@@ -80,7 +80,6 @@ enum {
 	SEND_ERROR,
 	CHAT_STATE_CHANGED,
 	PROPERTY_CHANGED,
-	DESTROY,
 	MESSAGE_ACKNOWLEDGED,
 	LAST_SIGNAL
 };
@@ -128,17 +127,6 @@ static void tp_chat_prepare_ready_async (TpProxy *proxy,
 	const TpProxyFeature *feature,
 	GAsyncReadyCallback callback,
 	gpointer user_data);
-
-static void
-tp_chat_invalidated_cb (TpProxy       *proxy,
-			guint          domain,
-			gint           code,
-			gchar         *message,
-			EmpathyTpChat *self)
-{
-	DEBUG ("Channel invalidated: %s", message);
-	g_signal_emit (self, signals[DESTROY], 0);
-}
 
 static void
 tp_chat_async_cb (TpChannel *proxy,
@@ -1323,21 +1311,6 @@ get_sms_channel_cb (TpProxy      *channel,
 	check_almost_ready (EMPATHY_TP_CHAT (chat));
 }
 
-static GObject *
-tp_chat_constructor (GType                  type,
-		     guint                  n_props,
-		     GObjectConstructParam *props)
-{
-	GObject           *object;
-
-	object = G_OBJECT_CLASS (empathy_tp_chat_parent_class)->constructor (type, n_props, props);
-
-	tp_g_signal_connect_object (object, "invalidated",
-			  G_CALLBACK (tp_chat_invalidated_cb), object, 0);
-
-	return object;
-}
-
 static void
 tp_chat_get_property (GObject    *object,
 		      guint       param_id,
@@ -1421,7 +1394,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 
 	object_class->dispose = tp_chat_dispose;
 	object_class->finalize = tp_chat_finalize;
-	object_class->constructor = tp_chat_constructor;
 	object_class->get_property = tp_chat_get_property;
 	object_class->set_property = tp_chat_set_property;
 
@@ -1509,17 +1481,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      _empathy_marshal_VOID__STRING_BOXED,
 			      G_TYPE_NONE,
 			      2, G_TYPE_STRING, G_TYPE_VALUE);
-
-	/* TODO: remove, should just use invalidated */
-	signals[DESTROY] =
-		g_signal_new ("destroy",
-			      G_TYPE_FROM_CLASS (klass),
-			      G_SIGNAL_RUN_LAST,
-			      0,
-			      NULL, NULL,
-			      g_cclosure_marshal_VOID__VOID,
-			      G_TYPE_NONE,
-			      0);
 
 	signals[MESSAGE_ACKNOWLEDGED] =
 		g_signal_new ("message-acknowledged",

@@ -840,7 +840,10 @@ empathy_chatroom_manager_get_chatrooms (EmpathyChatroomManager *manager,
 }
 
 static void
-chatroom_manager_chat_destroyed_cb (EmpathyTpChat *chat,
+chatroom_manager_chat_invalidated_cb (EmpathyTpChat *chat,
+  guint domain,
+  gint code,
+  gchar *message,
   gpointer manager)
 {
   EmpathyChatroomManagerPriv *priv = GET_PRIV (manager);
@@ -905,10 +908,8 @@ observe_channels_cb (TpSimpleObserver *observer,
 
       empathy_chatroom_set_tp_chat (chatroom, tp_chat);
 
-      /* A TpChat is always destroyed as it only gets unreffed after the channel
-       * has been invalidated in the dispatcher..  */
-      g_signal_connect (tp_chat, "destroy",
-        G_CALLBACK (chatroom_manager_chat_destroyed_cb),
+      g_signal_connect (tp_chat, "invalidated",
+        G_CALLBACK (chatroom_manager_chat_invalidated_cb),
         self);
     }
 

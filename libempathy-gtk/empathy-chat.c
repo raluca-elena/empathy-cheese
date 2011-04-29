@@ -2605,7 +2605,10 @@ chat_remote_contact_changed_cb (EmpathyChat *chat)
 }
 
 static void
-chat_destroy_cb (EmpathyTpChat *tp_chat,
+chat_invalidated_cb (EmpathyTpChat *tp_chat,
+		 guint domain,
+		 gint code,
+		 gchar *message,
 		 EmpathyChat   *chat)
 {
 	EmpathyChatPriv *priv;
@@ -2938,7 +2941,7 @@ chat_finalize (GObject *object)
 
 	if (priv->tp_chat) {
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
-			chat_destroy_cb, chat);
+			chat_invalidated_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_message_received_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
@@ -3439,7 +3442,7 @@ password_entry_changed_cb (GtkEditable *entry,
 }
 
 static void
-chat_invalidated_cb (TpProxy       *proxy,
+infobar_chat_invalidated_cb (TpProxy       *proxy,
 			   guint          domain,
 			   gint           code,
 			   gchar         *message,
@@ -3533,7 +3536,7 @@ display_password_info_bar (EmpathyChat *self)
 	gtk_widget_show_all (hbox);
 
 	tp_g_signal_connect_object (priv->tp_chat,
-				  "invalidated", G_CALLBACK (chat_invalidated_cb),
+				  "invalidated", G_CALLBACK (infobar_chat_invalidated_cb),
 				  info_bar, 0);
 
 	data->response_id = g_signal_connect (info_bar, "response",
@@ -3648,8 +3651,8 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	priv->tp_chat = g_object_ref (tp_chat);
 	priv->account = g_object_ref (empathy_tp_chat_get_account (priv->tp_chat));
 
-	g_signal_connect (tp_chat, "destroy",
-			  G_CALLBACK (chat_destroy_cb),
+	g_signal_connect (tp_chat, "invalidated",
+			  G_CALLBACK (chat_invalidated_cb),
 			  chat);
 	g_signal_connect (tp_chat, "message-received-empathy",
 			  G_CALLBACK (chat_message_received_cb),
