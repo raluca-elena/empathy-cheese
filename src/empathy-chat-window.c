@@ -1335,8 +1335,9 @@ chat_window_show_or_update_notification (EmpathyChatWindow *window,
 				  G_CALLBACK (chat_window_notification_closed_cb), window, 0);
 
 		if (has_x_canonical_append) {
+			/* We have to set a not empty string to keep libnotify happy */
 			notify_notification_set_hint_string (notification,
-				EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND, "");
+				EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND, "1");
 		}
 	}
 
