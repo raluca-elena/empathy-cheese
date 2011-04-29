@@ -388,7 +388,8 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
   FolksBackendStore *backend_store;
   FolksBackend *backend;
   FolksPersonaStore *persona_store;
-  GHashTable* details, *persona_stores;
+  GHashTable* details;
+  GeeMap *persona_stores;
   TpAccount *account;
   const gchar *store_id;
 
@@ -420,7 +421,7 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
     }
 
   persona_stores = folks_backend_get_persona_stores (backend);
-  persona_store = g_hash_table_lookup (persona_stores, store_id);
+  persona_store = gee_map_get (persona_stores, store_id);
 
   if (persona_store == NULL)
     {
@@ -438,6 +439,7 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
       aggregator_add_persona_from_details_cb, contact);
 
   g_hash_table_destroy (details);
+  g_object_unref (persona_store);
 
 finish:
   tp_clear_object (&backend);

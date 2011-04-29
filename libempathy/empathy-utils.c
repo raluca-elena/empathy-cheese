@@ -858,14 +858,14 @@ empathy_dup_persona_store_for_connection (TpConnection *connection)
       "telepathy");
   if (backend != NULL)
     {
-      GHashTable *stores_hash;
-      GList *stores, *l;
+      GeeMap *stores_map;
+      GeeMapIterator *iter;
 
-      stores_hash = folks_backend_get_persona_stores (backend);
-      stores = g_hash_table_get_values (stores_hash);
-      for (l = stores; l != NULL && result == NULL; l = l->next)
+      stores_map = folks_backend_get_persona_stores (backend);
+      iter = gee_map_map_iterator (stores_map);
+      while (gee_map_iterator_next (iter))
         {
-          TpfPersonaStore *persona_store = TPF_PERSONA_STORE (l->data);
+          TpfPersonaStore *persona_store = gee_map_iterator_get_value (iter);
           TpAccount *account;
           TpConnection *conn_cur;
 
@@ -874,8 +874,7 @@ empathy_dup_persona_store_for_connection (TpConnection *connection)
           if (conn_cur == connection)
             result = persona_store;
         }
-
-      g_list_free (stores);
+      g_clear_object (&iter);
     }
 
   g_object_unref (backend);
