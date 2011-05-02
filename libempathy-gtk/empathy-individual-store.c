@@ -1921,7 +1921,7 @@ individual_store_get_individual_status_icon_with_icon_name (
     FolksIndividual *individual,
     const gchar *status_icon_name)
 {
-  GdkPixbuf *pixbuf_status = NULL;
+  GdkPixbuf *pixbuf_status;
   EmpathyIndividualStorePriv *priv;
   const gchar *protocol_name = NULL;
   gchar *icon_name = NULL;
@@ -1953,13 +1953,18 @@ individual_store_get_individual_status_icon_with_icon_name (
     {
       icon_name = g_strdup_printf ("%s", status_icon_name);
     }
+
+  pixbuf_status = g_hash_table_lookup (priv->status_icons, icon_name);
+
   if (pixbuf_status == NULL)
     {
       pixbuf_status =
           empathy_pixbuf_contact_status_icon_with_icon_name (contact,
           status_icon_name, show_protocols_here);
+
       if (pixbuf_status != NULL)
         {
+          /* pass the reference to the hash table */
           g_hash_table_insert (priv->status_icons,
               g_strdup (icon_name), pixbuf_status);
         }
