@@ -723,12 +723,12 @@ theme_adium_append_message (EmpathyChatView *view,
 	} else {
 		g_string_append (message_classes, " incoming");
 	}
+	if (empathy_message_should_highlight (msg)) {
+		g_string_append (message_classes, " mention");
+	}
 	/* FIXME: other classes:
 	 * autoreply - the message is an automatic response, generally due to an
 	 *             away status
-	 * mention - the incoming message (in groupchat) matches your username
-	 *           or one of the mention keywords specified in Adium's
-	 *           advanced prefs.
 	 * status - the message is a status change
 	 * event - the message is a notification of something happening
 	 *         (for example, encryption being turned on)
