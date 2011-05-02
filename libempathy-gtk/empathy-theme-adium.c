@@ -283,7 +283,7 @@ theme_adium_parse_body (EmpathyThemeAdium *self,
 static void
 escape_and_append_len (GString *string, const gchar *str, gint len)
 {
-	while (*str != '\0' && len != 0) {
+	while (str != NULL && *str != '\0' && len != 0) {
 		switch (*str) {
 		case '\\':
 			/* \ becomes \\ */
@@ -366,7 +366,7 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 	string = g_string_sized_new (len + strlen (message));
 	g_string_append_printf (string, "%s(\"", func);
 	for (cur = html; *cur != '\0'; cur++) {
-		const gchar *replace = "";
+		const gchar *replace = NULL;
 		gchar       *dup_replace = NULL;
 		gchar       *format = NULL;
 
