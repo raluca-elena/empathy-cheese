@@ -730,7 +730,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	 * status - the message is a status change
 	 * event - the message is a notification of something happening
 	 *         (for example, encryption being turned on)
-	 * %status% - See %status% in theme_adium_append_html()
+	 * %status% - See %status% in theme_adium_append_html ()
 	 */
 
 	/* Define javascript function to use */
