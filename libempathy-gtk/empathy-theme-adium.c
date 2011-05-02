@@ -64,6 +64,7 @@ typedef struct {
 	GSettings            *gsettings_chat;
 	gboolean              has_focus;
 	gboolean              has_unread_message;
+	gboolean              allow_scrolling;
 } EmpathyThemeAdiumPriv;
 
 struct _EmpathyAdiumData {
@@ -735,9 +736,9 @@ theme_adium_append_message (EmpathyChatView *view,
 
 	/* Define javascript function to use */
 	if (consecutive) {
-		func = "appendNextMessage";
+		func = priv->allow_scrolling ? "appendNextMessage" : "appendNextMessageNoScroll";
 	} else {
-		func = "appendMessage";
+		func = priv->allow_scrolling ? "appendMessage" : "appendMessageNoScroll";
 	}
 
 	html = priv->data->content_html;
@@ -841,14 +842,18 @@ static void
 theme_adium_scroll (EmpathyChatView *view,
 		    gboolean         allow_scrolling)
 {
-	/* FIXME: Is it possible? I guess we need a js function, but I don't
-	 * see any... */
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
+
+	priv->allow_scrolling = allow_scrolling;
+	if (allow_scrolling) {
+		empathy_chat_view_scroll_down (view);
+	}
 }
 
 static void
 theme_adium_scroll_down (EmpathyChatView *view)
 {
-	webkit_web_view_execute_script (WEBKIT_WEB_VIEW (view), "scrollToBottom()");
+	webkit_web_view_execute_script (WEBKIT_WEB_VIEW (view), "alignChat(true);");
 }
 
 static gboolean
@@ -1367,6 +1372,7 @@ empathy_theme_adium_init (EmpathyThemeAdium *theme)
 
 	theme->priv = priv;
 
+	priv->allow_scrolling = TRUE;
 	priv->smiley_manager = empathy_smiley_manager_dup_singleton ();
 
 	g_signal_connect (theme, "load-finished",
