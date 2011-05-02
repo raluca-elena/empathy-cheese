@@ -220,6 +220,8 @@ main_window_flash_foreach (GtkTreeModel *model,
 		pixbuf = empathy_individual_store_get_individual_status_icon (
 						GET_PRIV (data->window)->individual_store,
 						individual);
+		if (pixbuf != NULL)
+			g_object_ref (pixbuf);
 	}
 
 	gtk_tree_store_set (GTK_TREE_STORE (model), iter,
@@ -240,6 +242,7 @@ main_window_flash_foreach (GtkTreeModel *model,
 
 	g_object_unref (individual);
 	tp_clear_object (&contact);
+	tp_clear_object (&pixbuf);
 
 	return FALSE;
 }
