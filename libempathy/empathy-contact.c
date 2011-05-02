@@ -69,7 +69,7 @@ typedef struct {
    * more fields by searching the address using geoclue.
    */
   GHashTable *location;
-  GHashTable *groups;
+  GeeHashSet *groups;
   gchar **client_types;
 } EmpathyContactPriv;
 
@@ -424,8 +424,7 @@ contact_finalize (GObject *object)
 
   DEBUG ("finalize: %p", object);
 
-  if (priv->groups != NULL)
-    g_hash_table_destroy (priv->groups);
+  g_clear_object (&priv->groups);
   g_free (priv->alias);
   g_free (priv->id);
   g_strfreev (priv->client_types);
@@ -789,12 +788,11 @@ empathy_contact_change_group (EmpathyContact *contact, const gchar *group,
    * does */
   if (priv->groups == NULL)
     {
-      priv->groups = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
-          NULL);
+      priv->groups = gee_hash_set_new (G_TYPE_STRING, (GBoxedCopyFunc) g_strdup,
+          g_free, g_str_hash, g_str_equal);
     }
 
-  g_hash_table_insert (priv->groups, g_strdup (group),
-      GUINT_TO_POINTER (is_member));
+  gee_collection_add (GEE_COLLECTION (priv->groups), group);
 }
 
 EmpathyAvatar *
@@ -949,8 +947,8 @@ empathy_contact_set_persona (EmpathyContact *contact,
   if (priv->groups != NULL)
     {
       folks_group_details_set_groups (FOLKS_GROUP_DETAILS (persona),
-          priv->groups);
-      g_hash_table_destroy (priv->groups);
+          GEE_SET (priv->groups));
+      g_object_unref (priv->groups);
       priv->groups = NULL;
     }
 }
