@@ -152,7 +152,7 @@ populate_data (EmpathyGroupsWidget *self)
   EmpathyGroupsWidgetPriv *priv = GET_PRIV (self);
   EmpathyContactManager *manager;
   GtkTreeIter iter;
-  GHashTable *my_groups;
+  GeeSet *member_groups;
   GList *all_groups, *l;
 
   /* Remove the old groups */
@@ -166,14 +166,15 @@ populate_data (EmpathyGroupsWidget *self)
   g_object_unref (manager);
 
   /* Get the list of groups that this #FolksGroupDetails is currently in */
-  my_groups = folks_group_details_get_groups (priv->group_details);
+  member_groups = folks_group_details_get_groups (priv->group_details);
 
   for (l = all_groups; l != NULL; l = l->next)
     {
       const gchar *group_str = l->data;
       gboolean enabled;
 
-      enabled = GPOINTER_TO_UINT (g_hash_table_lookup (my_groups, group_str));
+      enabled = gee_collection_contains (GEE_COLLECTION (member_groups),
+          group_str);
 
       gtk_list_store_append (priv->group_store, &iter);
       gtk_list_store_set (priv->group_store, &iter,
