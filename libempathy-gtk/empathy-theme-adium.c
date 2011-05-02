@@ -349,6 +349,32 @@ theme_adium_match_with_format (const gchar **str,
 	return TRUE;
 }
 
+/* List of colors used by %senderColor%. Copied from
+ * adium/Frameworks/AIUtilities\ Framework/Source/AIColorAdditions.m
+ */
+static gchar *colors[] = {
+	"aqua", "aquamarine", "blue", "blueviolet", "brown", "burlywood", "cadetblue",
+	"chartreuse", "chocolate", "coral", "cornflowerblue", "crimson", "cyan",
+	"darkblue", "darkcyan", "darkgoldenrod", "darkgreen", "darkgrey", "darkkhaki",
+	"darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred",
+	"darksalmon", "darkseagreen", "darkslateblue", "darkslategrey",
+	"darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgrey",
+	"dodgerblue", "firebrick", "forestgreen", "fuchsia", "gold", "goldenrod",
+	"green", "greenyellow", "grey", "hotpink", "indianred", "indigo", "lawngreen",
+	"lightblue", "lightcoral",
+	"lightgreen", "lightgrey", "lightpink", "lightsalmon", "lightseagreen",
+	"lightskyblue", "lightslategrey", "lightsteelblue", "lime", "limegreen",
+	"magenta", "maroon", "mediumaquamarine", "mediumblue", "mediumorchid",
+	"mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen",
+	"mediumturquoise", "mediumvioletred", "midnightblue", "navy", "olive",
+	"olivedrab", "orange", "orangered", "orchid", "palegreen", "paleturquoise",
+	"palevioletred", "peru", "pink", "plum", "powderblue", "purple", "red",
+	"rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen",
+	"sienna", "silver", "skyblue", "slateblue", "slategrey", "springgreen",
+	"steelblue", "tan", "teal", "thistle", "tomato", "turquoise", "violet",
+	"yellowgreen",
+};
+
 static void
 theme_adium_append_html (EmpathyThemeAdium *theme,
 			 const gchar       *func,
@@ -384,11 +410,14 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 		} else if (theme_adium_match (&cur, "%sender%")) {
 			replace = name;
 		} else if (theme_adium_match (&cur, "%senderColor%")) {
-			/* FIXME: A color derived from the user's name. If a
-			 * colon separated list of HTML colors is at
+			/* A color derived from the user's name.
+			 * FIXME: If a colon separated list of HTML colors is at
 			 * Incoming/SenderColors.txt it will be used instead of
 			 * the default colors.
 			 */
+			guint hash = g_str_hash (contact_id);
+
+			replace = colors[hash % G_N_ELEMENTS (colors)];
 		} else if (theme_adium_match (&cur, "%senderStatusIcon%")) {
 			/* FIXME: The path to the status icon of the sender
 			 * (available, away, etc...)
