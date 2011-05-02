@@ -726,9 +726,10 @@ theme_adium_append_message (EmpathyChatView *view,
 	if (empathy_message_should_highlight (msg)) {
 		g_string_append (message_classes, " mention");
 	}
+	if (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY) {
+		g_string_append (message_classes, " autoreply");
+	}
 	/* FIXME: other classes:
-	 * autoreply - the message is an automatic response, generally due to an
-	 *             away status
 	 * status - the message is a status change
 	 * event - the message is a notification of something happening
 	 *         (for example, encryption being turned on)
