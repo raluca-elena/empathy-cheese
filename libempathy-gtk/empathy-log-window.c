@@ -725,7 +725,7 @@ log_window_append_call (TplEvent *event,
   TplCallEvent *call = TPL_CALL_EVENT (event);
   GtkTreeStore *store = log_window->store_events;
   GtkTreeIter iter, child;
-  gchar *pretty_date, *body, *duration, *finished;
+  gchar *pretty_date, *duration, *finished;
   GDateTime *started_date, *finished_date;
   GTimeSpan span;
 
@@ -747,6 +747,8 @@ log_window_append_call (TplEvent *event,
 
   if (tpl_call_event_get_end_reason (call) != TPL_CALL_END_REASON_NO_ANSWER)
     {
+      gchar *body;
+
       span = tpl_call_event_get_duration (TPL_CALL_EVENT (event));
       if (span < 60)
         duration = g_strdup_printf (_("%" G_GINT64_FORMAT " seconds"), span);
@@ -772,9 +774,10 @@ log_window_append_call (TplEvent *event,
           COL_EVENTS_TARGET, event_get_target (event),
           COL_EVENTS_EVENT, event,
           -1);
+
+      g_free (body);
     }
 
-  g_free (body);
   g_free (pretty_date);
   g_date_time_unref (started_date);
 }
