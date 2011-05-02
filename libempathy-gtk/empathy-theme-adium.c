@@ -74,6 +74,11 @@ struct _EmpathyAdiumData {
 	gchar *default_incoming_avatar_filename;
 	gchar *default_outgoing_avatar_filename;
 	gchar *template_html;
+	gchar *content_html;
+	gsize  content_len;
+	GHashTable *info;
+
+	/* Legacy themes */
 	gchar *in_content_html;
 	gsize  in_content_len;
 	gchar *in_context_html;
@@ -92,7 +97,6 @@ struct _EmpathyAdiumData {
 	gsize  out_nextcontext_len;
 	gchar *status_html;
 	gsize  status_len;
-	GHashTable *info;
 };
 
 static void theme_adium_iface_init (EmpathyChatViewIface *iface);
@@ -492,13 +496,25 @@ theme_adium_append_event_escaped (EmpathyChatView *view,
 {
 	EmpathyThemeAdium     *theme = EMPATHY_THEME_ADIUM (view);
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
+	gchar                 *html;
+	gsize                  len;
 
-	if (priv->data->status_html) {
+	html = priv->data->content_html;
+	len = priv->data->content_len;
+
+	/* Fallback to legacy status_html */
+	if (html == NULL) {
+		html = priv->data->status_html;
+		len = priv->data->status_len;
+	}
+
+	if (html != NULL) {
 		theme_adium_append_html (theme, "appendMessage",
-					 priv->data->status_html,
-					 priv->data->status_len,
-					 escaped, NULL, NULL, NULL, NULL,
-					 "event", empathy_time_get_current (), FALSE);
+					 html, len, escaped, NULL, NULL, NULL,
+					 NULL, "event",
+					 empathy_time_get_current (), FALSE);
+	} else {
+		DEBUG ("Couldn't find HTML file for this event");
 	}
 
 	/* There is no last contact */
@@ -695,8 +711,11 @@ theme_adium_append_message (EmpathyChatView *view,
 		func = "appendMessage";
 	}
 
-	/* Outgoing */
-	if (empathy_contact_is_user (sender)) {
+	html = priv->data->content_html;
+	len = priv->data->content_len;
+
+	/* Fallback to legacy Outgoing */
+	if (html == NULL && empathy_contact_is_user (sender)) {
 		if (consecutive) {
 			if (is_backlog) {
 				html = priv->data->out_nextcontext_html;
@@ -1364,7 +1383,16 @@ empathy_adium_path_is_valid (const gchar *path)
 
 	/* We ship a default Template.html as fallback if there is any problem
 	 * with the one inside the theme. The only other required file is
-	 * Content.html for incoming messages (outgoing fallback to use
+	 * Content.html */
+	file = g_build_filename (path, "Contents", "Resources", "Content.html",
+				 NULL);
+	ret = g_file_test (file, G_FILE_TEST_EXISTS);
+	g_free (file);
+
+	if (ret)
+		return ret;
+
+	/* Legacy themes have Incoming/Content.html (outgoing fallback to use
 	 * incoming). */
 	file = g_build_filename (path, "Contents", "Resources", "Incoming",
 				 "Content.html", NULL);
@@ -1439,42 +1467,53 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 		G_DIR_SEPARATOR_S "Resources" G_DIR_SEPARATOR_S, NULL);
 	data->info = g_hash_table_ref (info);
 
+	DEBUG ("Loading theme at %s", path);
+
 	/* Load html files */
-	file = g_build_filename (data->basedir, "Incoming", "Content.html", NULL);
-	g_file_get_contents (file, &data->in_content_html, &data->in_content_len, NULL);
+	file = g_build_filename (data->basedir, "Content.html", NULL);
+	g_file_get_contents (file, &data->content_html, &data->content_len, NULL);
 	g_free (file);
 
-	file = g_build_filename (data->basedir, "Incoming", "NextContent.html", NULL);
-	g_file_get_contents (file, &data->in_nextcontent_html, &data->in_nextcontent_len, NULL);
-	g_free (file);
+	/* Fallback to legacy html files */
+	if (data->content_html == NULL) {
+		DEBUG ("  fallback to legacy theme");
 
-	file = g_build_filename (data->basedir, "Incoming", "Context.html", NULL);
-	g_file_get_contents (file, &data->in_context_html, &data->in_context_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Incoming", "Content.html", NULL);
+		g_file_get_contents (file, &data->in_content_html, &data->in_content_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Incoming", "NextContext.html", NULL);
-	g_file_get_contents (file, &data->in_nextcontext_html, &data->in_nextcontext_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Incoming", "NextContent.html", NULL);
+		g_file_get_contents (file, &data->in_nextcontent_html, &data->in_nextcontent_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Outgoing", "Content.html", NULL);
-	g_file_get_contents (file, &data->out_content_html, &data->out_content_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Incoming", "Context.html", NULL);
+		g_file_get_contents (file, &data->in_context_html, &data->in_context_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Outgoing", "NextContent.html", NULL);
-	g_file_get_contents (file, &data->out_nextcontent_html, &data->out_nextcontent_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Incoming", "NextContext.html", NULL);
+		g_file_get_contents (file, &data->in_nextcontext_html, &data->in_nextcontext_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Outgoing", "Context.html", NULL);
-	g_file_get_contents (file, &data->out_context_html, &data->out_context_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Outgoing", "Content.html", NULL);
+		g_file_get_contents (file, &data->out_content_html, &data->out_content_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Outgoing", "NextContext.html", NULL);
-	g_file_get_contents (file, &data->out_nextcontext_html, &data->out_nextcontext_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Outgoing", "NextContent.html", NULL);
+		g_file_get_contents (file, &data->out_nextcontent_html, &data->out_nextcontent_len, NULL);
+		g_free (file);
 
-	file = g_build_filename (data->basedir, "Status.html", NULL);
-	g_file_get_contents (file, &data->status_html, &data->status_len, NULL);
-	g_free (file);
+		file = g_build_filename (data->basedir, "Outgoing", "Context.html", NULL);
+		g_file_get_contents (file, &data->out_context_html, &data->out_context_len, NULL);
+		g_free (file);
+
+		file = g_build_filename (data->basedir, "Outgoing", "NextContext.html", NULL);
+		g_file_get_contents (file, &data->out_nextcontext_html, &data->out_nextcontext_len, NULL);
+		g_free (file);
+
+		file = g_build_filename (data->basedir, "Status.html", NULL);
+		g_file_get_contents (file, &data->status_html, &data->status_len, NULL);
+		g_free (file);
+	}
 
 	file = g_build_filename (data->basedir, "Footer.html", NULL);
 	g_file_get_contents (file, &footer_html, &footer_len, NULL);
@@ -1588,7 +1627,13 @@ empathy_adium_data_unref (EmpathyAdiumData *data)
 	if (g_atomic_int_dec_and_test (&data->ref_count)) {
 		g_free (data->path);
 		g_free (data->basedir);
+		g_free (data->default_avatar_filename);
+		g_free (data->default_incoming_avatar_filename);
+		g_free (data->default_outgoing_avatar_filename);
 		g_free (data->template_html);
+		g_free (data->content_html);
+		g_hash_table_unref (data->info);
+
 		g_free (data->in_content_html);
 		g_free (data->in_nextcontent_html);
 		g_free (data->in_context_html);
@@ -1597,11 +1642,8 @@ empathy_adium_data_unref (EmpathyAdiumData *data)
 		g_free (data->out_nextcontent_html);
 		g_free (data->out_context_html);
 		g_free (data->out_nextcontext_html);
-		g_free (data->default_avatar_filename);
-		g_free (data->default_incoming_avatar_filename);
-		g_free (data->default_outgoing_avatar_filename);
 		g_free (data->status_html);
-		g_hash_table_unref (data->info);
+
 		g_slice_free (EmpathyAdiumData, data);
 	}
 }
