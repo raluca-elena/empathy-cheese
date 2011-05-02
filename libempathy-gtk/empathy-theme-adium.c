@@ -416,9 +416,10 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 			 * Incoming/SenderColors.txt it will be used instead of
 			 * the default colors.
 			 */
-			guint hash = g_str_hash (contact_id);
-
-			replace = colors[hash % G_N_ELEMENTS (colors)];
+			if (contact_id != NULL) {
+				guint hash = g_str_hash (contact_id);
+				replace = colors[hash % G_N_ELEMENTS (colors)];
+			}
 		} else if (theme_adium_match (&cur, "%senderStatusIcon%")) {
 			/* FIXME: The path to the status icon of the sender
 			 * (available, away, etc...)
