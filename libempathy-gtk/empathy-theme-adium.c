@@ -79,6 +79,8 @@ struct _EmpathyAdiumData {
 	gchar *content_html;
 	gsize  content_len;
 	GHashTable *info;
+	guint version;
+	gboolean custom_template;
 
 	/* Legacy themes */
 	gchar *in_content_html;
@@ -195,6 +197,36 @@ theme_adium_open_address_cb (GtkMenuItem *menuitem,
 	empathy_url_show (GTK_WIDGET (menuitem), uri);
 
 	g_free (uri);
+}
+
+/* Replace each %@ in format with string passed in args */
+static gchar *
+string_with_format (const gchar *format,
+		    const gchar *first_string,
+		    ...)
+{
+	va_list args;
+	const gchar *str;
+	GString *result;
+
+	va_start (args, first_string);
+	result = g_string_sized_new (strlen (format));
+	for (str = first_string; str != NULL; str = va_arg (args, const gchar *)) {
+		const gchar *next;
+
+		next = strstr (format, "%@");
+		if (next == NULL) {
+			break;
+		}
+
+		g_string_append_len (result, format, next - format);
+		g_string_append (result, str);
+		format = next + 2;
+	}
+	g_string_append (result, format);
+	va_end (args);
+
+	return g_string_free (result, FALSE);
 }
 
 static void
@@ -1482,6 +1514,108 @@ empathy_adium_info_new (const gchar *path)
 	return info;
 }
 
+static guint
+adium_info_get_version (GHashTable *info)
+{
+	return tp_asv_get_int32 (info, "MessageViewVersion", NULL);
+}
+
+static const gchar *
+adium_info_get_no_variant_name (GHashTable *info)
+{
+	const gchar *name = tp_asv_get_string (info, "DisplayNameForNoVariant");
+	return name ? name : _("Normal");
+}
+
+static const gchar *
+adium_info_get_default_or_first_variant (GHashTable *info)
+{
+	const gchar *name;
+	GPtrArray *variants;
+
+	name = empathy_adium_info_get_default_variant (info);
+	if (name != NULL) {
+		return name;
+	}
+
+	variants = empathy_adium_info_get_available_variants (info);
+	g_assert (variants->len > 0);
+	return g_ptr_array_index (variants, 0);
+}
+
+static gchar *
+adium_info_dup_path_for_variant (GHashTable *info,
+				 const gchar *variant)
+{
+	guint version = adium_info_get_version (info);
+	const gchar *no_variant = adium_info_get_no_variant_name (info);
+
+	if (version <= 2 && !tp_strdiff (variant, no_variant)) {
+		return g_strdup ("main.css");
+	}
+
+	return g_strdup_printf ("Variants/%s.css", variant);
+
+}
+
+const gchar *
+empathy_adium_info_get_default_variant (GHashTable *info)
+{
+	if (adium_info_get_version (info) <= 2) {
+		return adium_info_get_no_variant_name (info);
+	}
+
+	return tp_asv_get_string (info, "DefaultVariant");
+}
+
+GPtrArray *
+empathy_adium_info_get_available_variants (GHashTable *info)
+{
+	GPtrArray *variants;
+	const gchar *path;
+	gchar *dirpath;
+	GDir *dir;
+
+	variants = tp_asv_get_boxed (info, "AvailableVariants", G_TYPE_PTR_ARRAY);
+	if (variants != NULL) {
+		return variants;
+	}
+
+	variants = g_ptr_array_new_with_free_func (g_free);
+	tp_asv_take_boxed (info, g_strdup ("AvailableVariants"),
+		G_TYPE_PTR_ARRAY, variants);
+
+	path = tp_asv_get_string (info, "path");
+	dirpath = g_build_filename (path, "Contents", "Resources", "Variants", NULL);
+	dir = g_dir_open (dirpath, 0, NULL);
+	if (dir != NULL) {
+		const gchar *name;
+
+		for (name = g_dir_read_name (dir);
+		     name != NULL;
+		     name = g_dir_read_name (dir)) {
+			gchar *display_name;
+
+			if (!g_str_has_suffix (name, ".css")) {
+				continue;
+			}
+
+			display_name = g_strdup (name);
+			strstr (display_name, ".css")[0] = '\0';
+			g_ptr_array_add (variants, display_name);
+		}
+		g_dir_close (dir);
+	}
+	g_free (dirpath);
+
+	if (adium_info_get_version (info) <= 2) {
+		g_ptr_array_add (variants,
+			g_strdup (adium_info_get_no_variant_name (info)));
+	}
+
+	return variants;
+}
+
 GType
 empathy_adium_data_get_type (void)
 {
@@ -1503,14 +1637,8 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 	EmpathyAdiumData *data;
 	gchar            *file;
 	gchar            *template_html = NULL;
-	gsize             template_len;
 	gchar            *footer_html = NULL;
-	gsize             footer_len;
-	GString          *string;
-	gchar           **strv = NULL;
-	gchar            *css_path;
-	guint             len = 0;
-	guint             i = 0;
+	gchar            *variant_path;
 
 	g_return_val_if_fail (empathy_adium_path_is_valid (path), NULL);
 
@@ -1520,6 +1648,7 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 	data->basedir = g_strconcat (path, G_DIR_SEPARATOR_S "Contents"
 		G_DIR_SEPARATOR_S "Resources" G_DIR_SEPARATOR_S, NULL);
 	data->info = g_hash_table_ref (info);
+	data->version = adium_info_get_version (info);
 
 	DEBUG ("Loading theme at %s", path);
 
@@ -1570,7 +1699,7 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 	}
 
 	file = g_build_filename (data->basedir, "Footer.html", NULL);
-	g_file_get_contents (file, &footer_html, &footer_len, NULL);
+	g_file_get_contents (file, &footer_html, NULL, NULL);
 	g_free (file);
 
 	file = g_build_filename (data->basedir, "Incoming", "buddy_icon.png", NULL);
@@ -1587,65 +1716,46 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 		g_free (file);
 	}
 
-	css_path = g_build_filename (data->basedir, "main.css", NULL);
-
-	/* There is 2 formats for Template.html: The old one has 4 parameters,
-	 * the new one has 5 parameters. */
 	file = g_build_filename (data->basedir, "Template.html", NULL);
-	if (g_file_get_contents (file, &template_html, &template_len, NULL)) {
-		strv = g_strsplit (template_html, "%@", -1);
-		len = g_strv_length (strv);
+	if (g_file_get_contents (file, &template_html, NULL, NULL)) {
+		data->custom_template = TRUE;
 	}
 	g_free (file);
 
-	if (len != 5 && len != 6) {
-		/* Either the theme has no template or it don't have the good
-		 * number of parameters. Fallback to use our own template. */
-		g_free (template_html);
-		g_strfreev (strv);
+	/* If there were no custom template, fallack to our own */
+	if (template_html == NULL) {
+		data->custom_template = FALSE;
 
 		file = empathy_file_lookup ("Template.html", "data");
-		g_file_get_contents (file, &template_html, &template_len, NULL);
+		g_file_get_contents (file, &template_html, NULL, NULL);
 		g_free (file);
-		strv = g_strsplit (template_html, "%@", -1);
-		len = g_strv_length (strv);
 	}
 
-	/* Replace %@ with the needed information in the template html. */
-	string = g_string_sized_new (template_len);
-	g_string_append (string, strv[i++]);
-	g_string_append (string, data->basedir);
-	g_string_append (string, strv[i++]);
-	if (len == 6) {
-		const gchar *variant;
+	variant_path = adium_info_dup_path_for_variant (info,
+		adium_info_get_default_or_first_variant (info));
 
-		/* We include main.css by default */
-		g_string_append_printf (string, "@import url(\"%s\");", css_path);
-		g_string_append (string, strv[i++]);
-		variant = tp_asv_get_string (data->info, "DefaultVariant");
-		if (variant) {
-			g_string_append (string, "Variants/");
-			g_string_append (string, variant);
-			g_string_append (string, ".css");
-		}
+	/* Old custom templates had only 4 parameters.
+	 * New templates have 5 parameters */
+	if (data->version <= 2 && data->custom_template) {
+		data->template_html = string_with_format (template_html,
+			data->basedir,
+			variant_path,
+			"", /* The header */
+			footer_html ? footer_html : "",
+			NULL);
 	} else {
-		/* FIXME: We should set main.css OR the variant css */
-		g_string_append (string, css_path);
+		data->template_html = string_with_format (template_html,
+			data->basedir,
+			data->version <= 2 ? "" : "@import url( \"main.css\" );",
+			variant_path,
+			"", /* The header */
+			footer_html ? footer_html : "",
+			NULL);
 	}
-	g_string_append (string, strv[i++]);
-	g_string_append (string, ""); /* We don't want header */
-	g_string_append (string, strv[i++]);
-	/* FIXME: We should replace adium %macros% in footer */
-	if (footer_html) {
-		g_string_append (string, footer_html);
-	}
-	g_string_append (string, strv[i++]);
-	data->template_html = g_string_free (string, FALSE);
 
+	g_free (variant_path);
 	g_free (footer_html);
 	g_free (template_html);
-	g_free (css_path);
-	g_strfreev (strv);
 
 	return data;
 }
