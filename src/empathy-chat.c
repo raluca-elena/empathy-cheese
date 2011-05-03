@@ -52,7 +52,7 @@ static gboolean use_timer = TRUE;
 static EmpathyChatManager *chat_mgr = NULL;
 
 static void
-handled_chats_changed_cb (EmpathyChatManager *mgr,
+displayed_chats_changed_cb (EmpathyChatManager *mgr,
     guint nb_chats,
     gpointer user_data)
 {
@@ -81,8 +81,8 @@ activate_cb (GApplication *application)
   g_assert (chat_mgr == NULL);
   chat_mgr = empathy_chat_manager_dup_singleton ();
 
-  g_signal_connect (chat_mgr, "handled-chats-changed",
-      G_CALLBACK (handled_chats_changed_cb), GUINT_TO_POINTER (1));
+  g_signal_connect (chat_mgr, "displayed-chats-changed",
+      G_CALLBACK (displayed_chats_changed_cb), GUINT_TO_POINTER (1));
 }
 
 int

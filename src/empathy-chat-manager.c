@@ -32,7 +32,7 @@
 
 enum {
   CLOSED_CHATS_CHANGED,
-  HANDLED_CHATS_CHANGED,
+  DISPLAYED_CHATS_CHANGED,
   LAST_SIGNAL
 };
 
@@ -49,7 +49,7 @@ struct _EmpathyChatManagerPriv
   /* Queue of (ChatData *) representing the closed chats */
   GQueue *closed_queue;
 
-  guint num_handled_channels;
+  guint num_displayed_chat;
 
   TpBaseClient *handler;
 };
@@ -100,11 +100,28 @@ chat_data_free (ChatData *data)
 }
 
 static void
+chat_destroyed_cb (gpointer data,
+    GObject *object)
+{
+  EmpathyChatManager *self = data;
+  EmpathyChatManagerPriv *priv = GET_PRIV (self);
+
+  priv->num_displayed_chat--;
+
+  DEBUG ("Chat destroyed; we are now displaying %u chats",
+      priv->num_displayed_chat);
+
+  g_signal_emit (self, signals[DISPLAYED_CHATS_CHANGED], 0,
+      priv->num_displayed_chat);
+}
+
+static void
 process_tp_chat (EmpathyChatManager *self,
     EmpathyTpChat *tp_chat,
     TpAccount *account,
     gint64 user_action_time)
 {
+  EmpathyChatManagerPriv *priv = GET_PRIV (self);
   EmpathyChat *chat = NULL;
   const gchar *id;
 
@@ -124,6 +141,16 @@ process_tp_chat (EmpathyChatManager *self,
       /* empathy_chat_new returns a floating reference as EmpathyChat is
        * a GtkWidget. This reference will be taken by a container
        * (a GtkNotebook) when we'll call empathy_chat_window_present_chat */
+
+      priv->num_displayed_chat++;
+
+      DEBUG ("Chat displayed; we are now displaying %u chat",
+          priv->num_displayed_chat);
+
+      g_signal_emit (self, signals[DISPLAYED_CHATS_CHANGED], 0,
+          priv->num_displayed_chat);
+
+      g_object_weak_ref ((GObject *) chat, chat_destroyed_cb, self);
     }
   empathy_chat_window_present_chat (chat, user_action_time);
 
@@ -191,24 +218,6 @@ tp_chat_ready_cb (GObject *object,
 }
 
 static void
-channel_invalidated (TpChannel *channel,
-    guint domain,
-    gint code,
-    gchar *message,
-    EmpathyChatManager *self)
-{
-  EmpathyChatManagerPriv *priv = GET_PRIV (self);
-
-  priv->num_handled_channels--;
-
-  DEBUG ("Channel closed; we are now handling %u text channels",
-      priv->num_handled_channels);
-
-  g_signal_emit (self, signals[HANDLED_CHATS_CHANGED], 0,
-      priv->num_handled_channels);
-}
-
-static void
 handle_channels (TpSimpleHandler *handler,
     TpAccount *account,
     TpConnection *connection,
@@ -219,9 +228,7 @@ handle_channels (TpSimpleHandler *handler,
     gpointer user_data)
 {
   EmpathyChatManager *self = (EmpathyChatManager *) user_data;
-  EmpathyChatManagerPriv *priv = GET_PRIV (self);
   GList *l;
-  gboolean handling = FALSE;
 
   for (l = channels; l != NULL; l = g_list_next (l))
     {
@@ -238,7 +245,7 @@ handle_channels (TpSimpleHandler *handler,
           continue;
         }
 
-      handling = TRUE;
+      DEBUG ("Now handling channel %s", tp_proxy_get_object_path (channel));
 
       tp_chat = empathy_tp_chat_new (account, channel);
 
@@ -254,23 +261,9 @@ handle_channels (TpSimpleHandler *handler,
           ctx->sig_id = g_signal_connect (tp_chat, "notify::ready",
               G_CALLBACK (tp_chat_ready_cb), ctx);
         }
-
-      priv->num_handled_channels++;
-
-      g_signal_connect (channel, "invalidated",
-          G_CALLBACK (channel_invalidated), self);
     }
 
   tp_handle_channels_context_accept (context);
-
-  if (handling)
-    {
-      DEBUG ("Channels handled; we are now handling %u text channels",
-          priv->num_handled_channels);
-
-      g_signal_emit (self, signals[HANDLED_CHATS_CHANGED], 0,
-          priv->num_handled_channels);
-    }
 }
 
 static void
@@ -387,8 +380,8 @@ empathy_chat_manager_class_init (
         G_TYPE_NONE,
         1, G_TYPE_UINT, NULL);
 
-  signals[HANDLED_CHATS_CHANGED] =
-    g_signal_new ("handled-chats-changed",
+  signals[DISPLAYED_CHATS_CHANGED] =
+    g_signal_new ("displayed-chats-changed",
         G_TYPE_FROM_CLASS (object_class),
         G_SIGNAL_RUN_LAST,
         0,
