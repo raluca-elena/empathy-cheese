@@ -2349,7 +2349,10 @@ log_window_got_messages_for_date_cb (GObject *manager,
   gint n;
 
   if (log_window == NULL)
-    goto out;
+    {
+      ctx_free (ctx);
+      return;
+    }
 
   if (log_window->count != ctx->count)
     goto out;
