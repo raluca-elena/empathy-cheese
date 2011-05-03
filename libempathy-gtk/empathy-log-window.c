@@ -69,6 +69,9 @@ typedef struct
 
   GtkWidget *search_entry;
 
+  GtkWidget *notebook;
+  GtkWidget *spinner;
+
   GtkWidget *treeview_who;
   GtkWidget *treeview_what;
   GtkWidget *treeview_when;
@@ -126,6 +129,13 @@ empathy_account_chooser_filter_has_logs (TpAccount *account,
     EmpathyAccountChooserFilterResultCallback callback,
     gpointer callback_data,
     gpointer user_data);
+
+enum
+{
+  PAGE_EVENTS,
+  PAGE_SPINNER,
+  PAGE_EMPTY
+};
 
 enum
 {
@@ -455,6 +465,8 @@ empathy_log_window_show (TpAccount  *account,
       "treeview_what", &window->treeview_what,
       "treeview_when", &window->treeview_when,
       "treeview_events", &window->treeview_events,
+      "notebook", &window->notebook,
+      "spinner", &window->spinner,
       NULL);
   g_free (filename);
 
@@ -2287,6 +2299,42 @@ log_window_what_setup (EmpathyLogWindow *window)
 }
 
 static void
+start_spinner (void)
+{
+  gtk_spinner_start (GTK_SPINNER (log_window->spinner));
+  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
+      PAGE_EMPTY);
+}
+
+static gboolean
+show_spinner (gpointer data)
+{
+  gboolean active;
+
+  if (log_window == NULL)
+    return FALSE;
+
+  g_object_get (log_window->spinner, "active", &active, NULL);
+
+  if (active)
+    gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
+        PAGE_SPINNER);
+
+  return FALSE;
+}
+
+static void
+show_events (TplActionChain *chain,
+    gpointer user_data)
+{
+  gtk_spinner_stop (GTK_SPINNER (log_window->spinner));
+  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
+      PAGE_EVENTS);
+
+  _tpl_action_chain_continue (chain);
+}
+
+static void
 log_window_got_messages_for_date_cb (GObject *manager,
     GAsyncResult *result,
     gpointer user_data)
@@ -2467,6 +2515,9 @@ log_window_get_messages_for_dates (EmpathyLogWindow *window,
         }
     }
 
+  start_spinner ();
+  g_timeout_add (1000, show_spinner, NULL);
+  _tpl_action_chain_append (window->chain, show_events, NULL);
   _tpl_action_chain_start (window->chain);
 
   g_list_free_full (accounts, g_object_unref);
