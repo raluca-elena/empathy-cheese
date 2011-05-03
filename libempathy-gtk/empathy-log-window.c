@@ -1290,7 +1290,8 @@ populate_dates_from_search_hits (GList *accounts,
           COL_WHEN_TEXT, _("Anytime"),
           -1);
 
-      gtk_tree_selection_select_iter (selection, &iter);
+      if (gtk_tree_model_iter_nth_child (model, &iter, NULL, 2))
+        gtk_tree_selection_select_iter (selection, &iter);
     }
 }
 
@@ -2559,7 +2560,7 @@ select_first_date (TplActionChain *chain, gpointer user_data)
   selection = gtk_tree_view_get_selection (view);
 
   /* Show messages of the most recent date */
-  if (gtk_tree_model_get_iter_first (model, &iter))
+  if (gtk_tree_model_iter_nth_child (model, &iter, NULL, 2))
     gtk_tree_selection_select_iter (selection, &iter);
 
   _tpl_action_chain_continue (log_window->chain);
