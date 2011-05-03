@@ -459,11 +459,3 @@ empathy_chat_manager_get_num_closed_chats (EmpathyChatManager *self)
 
   return g_queue_get_length (priv->closed_queue);
 }
-
-guint
-empathy_chat_manager_get_num_handled_chats (EmpathyChatManager *self)
-{
-  EmpathyChatManagerPriv *priv = GET_PRIV (self);
-
-  return priv->num_handled_channels;
-}

@@ -65,8 +65,6 @@ void empathy_chat_manager_closed_chat (EmpathyChatManager *self,
 void empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self);
 guint empathy_chat_manager_get_num_closed_chats (EmpathyChatManager *self);
 
-guint empathy_chat_manager_get_num_handled_chats (EmpathyChatManager *self);
-
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_CHAT_MANAGER_H__*/
