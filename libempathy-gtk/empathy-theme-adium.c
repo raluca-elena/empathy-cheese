@@ -833,7 +833,14 @@ static void
 theme_adium_append_event (EmpathyChatView *view,
 			  const gchar     *str)
 {
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 	gchar *str_escaped;
+
+	if (priv->pages_loading != 0) {
+		/* FIXME: events should be queued until page loaded */
+		DEBUG ("Error appending event (%s): Page not loaded", str);
+		return;
+	}
 
 	str_escaped = g_markup_escape_text (str, -1);
 	theme_adium_append_event_escaped (view, str_escaped);
