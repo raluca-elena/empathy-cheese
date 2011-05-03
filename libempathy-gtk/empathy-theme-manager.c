@@ -54,6 +54,7 @@ typedef struct {
 	gchar       *adium_path;
 	GtkSettings *settings;
 	GList       *boxes_views;
+	guint        emit_changed_idle;
 } EmpathyThemeManagerPriv;
 
 enum {
@@ -392,6 +393,51 @@ theme_manager_ensure_theme_exists (const gchar *name)
 	return FALSE;
 }
 
+typedef enum {
+	THEME_TYPE_UNSET,
+	THEME_TYPE_IRC,
+	THEME_TYPE_BOXED,
+	THEME_TYPE_ADIUM,
+} ThemeType;
+
+static ThemeType
+theme_type (const gchar *name)
+{
+	if (name == NULL) {
+		return THEME_TYPE_UNSET;
+	} else if (!tp_strdiff (name, "classic")) {
+		return THEME_TYPE_IRC;
+	} else if (!tp_strdiff (name, "adium")) {
+		return THEME_TYPE_ADIUM;
+	} else {
+		return THEME_TYPE_BOXED;
+	}
+}
+
+static gboolean
+theme_manager_emit_changed_idle_cb (gpointer manager)
+{
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+
+	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
+	priv->emit_changed_idle = 0;
+
+	return FALSE;
+}
+
+static void
+theme_manager_emit_changed (EmpathyThemeManager *manager)
+{
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+
+	/* We emit the signal in idle callback to be sure we emit it only once
+	 * in the case both the name and adium_path changed */
+	if (priv->emit_changed_idle == 0) {
+		priv->emit_changed_idle = g_idle_add (
+			theme_manager_emit_changed_idle_cb, manager);
+	}
+}
+
 static void
 theme_manager_notify_name_cb (GSettings   *gsettings_chat,
 			      const gchar *key,
@@ -400,25 +446,29 @@ theme_manager_notify_name_cb (GSettings   *gsettings_chat,
 	EmpathyThemeManager     *manager = EMPATHY_THEME_MANAGER (user_data);
 	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
 	gchar                   *name;
+	ThemeType                old_type;
+	ThemeType                new_type;
 
 	name = g_settings_get_string (gsettings_chat, key);
 
-	if (!theme_manager_ensure_theme_exists (name) ||
-	    !tp_strdiff (priv->name, name)) {
-		if (!priv->name) {
-			priv->name = g_strdup ("classic");
-		}
+	/* Fallback to classic theme if current setting does not exist */
+	if (!theme_manager_ensure_theme_exists (name)) {
+		g_free (name);
+		name = g_strdup ("classic");
+	}
 
+	/* If theme did not change, nothing to do */
+	if (!tp_strdiff (priv->name, name)) {
 		g_free (name);
 		return;
 	}
 
+	old_type = theme_type (priv->name);
 	g_free (priv->name);
 	priv->name = name;
+	new_type = theme_type (priv->name);
 
-	if (!tp_strdiff (priv->name, "simple") ||
-	    !tp_strdiff (priv->name, "clean") ||
-	    !tp_strdiff (priv->name, "blue")) {
+	if (new_type == THEME_TYPE_BOXED) {
 		GList *l;
 
 		/* The theme changes to a boxed one, we can update boxed views */
@@ -428,7 +478,15 @@ theme_manager_notify_name_cb (GSettings   *gsettings_chat,
 		}
 	}
 
-	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
+	/* Do not emit theme-changed if theme type didn't change, or if it was
+	 * unset (the manager is under construction). If theme changed from a
+	 * boxed to another boxed, all view are updated in place. If theme
+	 * changed from an adium to another adium, the signal will be emited
+	 * from theme_manager_notify_adium_path_cb ()
+	 */
+	if (old_type != new_type && old_type != THEME_TYPE_UNSET) {
+		theme_manager_emit_changed (manager);
+	}
 }
 
 static void
@@ -439,6 +497,7 @@ theme_manager_notify_adium_path_cb (GSettings   *gsettings_chat,
 	EmpathyThemeManager     *manager = EMPATHY_THEME_MANAGER (user_data);
 	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
 	gchar                   *adium_path = NULL;
+	gboolean                 was_set;
 
 	adium_path = g_settings_get_string (gsettings_chat, key);
 
@@ -447,10 +506,16 @@ theme_manager_notify_adium_path_cb (GSettings   *gsettings_chat,
 		return;
 	}
 
+	was_set = (priv->adium_path != NULL);
+
 	g_free (priv->adium_path);
 	priv->adium_path = adium_path;
 
-	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
+	/* Do not emit the signal if path was not set yet (the manager is under
+	 * construction) */
+	if (was_set) {
+		theme_manager_emit_changed (manager);
+	}
 }
 
 static void
@@ -469,6 +534,10 @@ theme_manager_finalize (GObject *object)
 				     object);
 	}
 	g_list_free (priv->boxes_views);
+
+	if (priv->emit_changed_idle != 0) {
+		g_source_remove (priv->emit_changed_idle);
+	}
 
 	G_OBJECT_CLASS (empathy_theme_manager_parent_class)->finalize (object);
 }
