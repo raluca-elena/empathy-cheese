@@ -59,7 +59,8 @@ typedef struct {
 	gint64                last_timestamp;
 	gboolean              last_is_backlog;
 	guint                 pages_loading;
-	GList                *message_queue;
+	/* Queue of GValue* containing an EmpathyMessage or string */
+	GQueue                message_queue;
 	GtkWidget            *inspector_window;
 	GSettings            *gsettings_chat;
 	gboolean              has_focus;
@@ -636,8 +637,9 @@ theme_adium_append_message (EmpathyChatView *view,
 	gboolean               consecutive;
 
 	if (priv->pages_loading != 0) {
-		priv->message_queue = g_list_prepend (priv->message_queue,
-						      g_object_ref (msg));
+		GValue *value = tp_g_value_slice_new (EMPATHY_TYPE_MESSAGE);
+		g_value_set_object (value, msg);
+		g_queue_push_tail (&priv->message_queue, value);
 		return;
 	}
 
@@ -837,8 +839,8 @@ theme_adium_append_event (EmpathyChatView *view,
 	gchar *str_escaped;
 
 	if (priv->pages_loading != 0) {
-		/* FIXME: events should be queued until page loaded */
-		DEBUG ("Error appending event (%s): Page not loaded", str);
+		g_queue_push_tail (&priv->message_queue,
+			tp_g_value_slice_new_string (str));
 		return;
 	}
 
@@ -1090,6 +1092,7 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 {
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 	EmpathyChatView       *chat_view = EMPATHY_CHAT_VIEW (view);
+	GList                 *l;
 
 	DEBUG ("Page loaded");
 	priv->pages_loading--;
@@ -1098,14 +1101,20 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 		return;
 
 	/* Display queued messages */
-	priv->message_queue = g_list_reverse (priv->message_queue);
-	while (priv->message_queue) {
-		EmpathyMessage *message = priv->message_queue->data;
+	for (l = priv->message_queue.head; l != NULL; l = l->next) {
+		GValue *value = l->data;
 
-		theme_adium_append_message (chat_view, message);
-		priv->message_queue = g_list_remove (priv->message_queue, message);
-		g_object_unref (message);
+		if (G_VALUE_HOLDS_OBJECT (value)) {
+			theme_adium_append_message (chat_view,
+				g_value_get_object (value));
+		} else {
+			theme_adium_append_event (chat_view,
+				g_value_get_string (value));
+		}
+
+		tp_g_value_slice_free (value);
 	}
+	g_queue_clear (&priv->message_queue);
 }
 
 static void
@@ -1381,6 +1390,7 @@ empathy_theme_adium_init (EmpathyThemeAdium *theme)
 
 	theme->priv = priv;
 
+	g_queue_init (&priv->message_queue);
 	priv->allow_scrolling = TRUE;
 	priv->smiley_manager = empathy_smiley_manager_dup_singleton ();
 
