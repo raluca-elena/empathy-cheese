@@ -2292,9 +2292,13 @@ log_window_got_messages_for_date_cb (GObject *manager,
     gpointer user_data)
 {
   Ctx *ctx = user_data;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
   GList *events;
   GList *l;
   GError *error = NULL;
+  gint n;
 
   if (log_window == NULL)
     goto out;
@@ -2362,6 +2366,19 @@ log_window_got_messages_for_date_cb (GObject *manager,
       g_object_unref (event);
     }
   g_list_free (events);
+
+  view = GTK_TREE_VIEW (log_window->treeview_events);
+  model = gtk_tree_view_get_model (view);
+  n = gtk_tree_model_iter_n_children (model, NULL) - 1;
+
+  if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
+    {
+      GtkTreePath *path;
+
+      path = gtk_tree_model_get_path (model, &iter);
+      gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
+      gtk_tree_path_free (path);
+    }
 
  out:
   ctx_free (ctx);
