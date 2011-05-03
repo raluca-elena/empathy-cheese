@@ -48,6 +48,9 @@
 
 #include "empathy-preferences.h"
 
+#define DEBUG_FLAG EMPATHY_DEBUG_OTHER
+#include <libempathy/empathy-debug.h>
+
 G_DEFINE_TYPE (EmpathyPreferences, empathy_preferences, GTK_TYPE_DIALOG);
 
 #define GET_PRIV(self) ((EmpathyPreferencesPriv *)((EmpathyPreferences *) self)->priv)
@@ -57,7 +60,6 @@ struct _EmpathyPreferencesPriv {
 
 	GtkWidget *checkbutton_show_smileys;
 	GtkWidget *checkbutton_show_contacts_in_rooms;
-	GtkWidget *combobox_chat_theme;
 	GtkWidget *checkbutton_separate_chat_windows;
 	GtkWidget *checkbutton_events_notif_area;
 	GtkWidget *checkbutton_autoconnect;
@@ -80,6 +82,12 @@ struct _EmpathyPreferencesPriv {
 	GtkWidget *checkbutton_location_resource_network;
 	GtkWidget *checkbutton_location_resource_cell;
 	GtkWidget *checkbutton_location_resource_gps;
+
+	GtkWidget *vbox_chat_theme;
+	GtkWidget *combobox_chat_theme;
+	GtkWidget *sw_chat_theme_preview;
+	EmpathyChatView *chat_theme_preview;
+	EmpathyThemeManager *theme_manager;
 
 	GSettings *gsettings;
 	GSettings *gsettings_chat;
@@ -115,11 +123,11 @@ enum {
 };
 
 enum {
-	COL_COMBO_IS_ADIUM,
-	COL_COMBO_VISIBLE_NAME,
-	COL_COMBO_NAME,
-	COL_COMBO_PATH,
-	COL_COMBO_COUNT
+	COL_THEME_VISIBLE_NAME,
+	COL_THEME_NAME,
+	COL_THEME_IS_ADIUM,
+	COL_THEME_ADIUM_PATH,
+	COL_THEME_COUNT
 };
 
 enum {
@@ -646,6 +654,124 @@ preferences_languages_cell_toggled_cb (GtkCellRendererToggle *cell,
 }
 
 static void
+preferences_preview_theme_append_message (EmpathyChatView *view,
+					  EmpathyContact *sender,
+					  EmpathyContact *receiver,
+					  const gchar *text)
+{
+	EmpathyMessage *message;
+
+	message = g_object_new (EMPATHY_TYPE_MESSAGE,
+		"sender", sender,
+		"receiver", receiver,
+		"body", text,
+		NULL);
+
+	empathy_chat_view_append_message (view, message);
+	g_object_unref (message);
+}
+
+static void
+preferences_preview_theme_changed_cb (EmpathyThemeManager *manager,
+				      EmpathyPreferences  *preferences)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	TpDBusDaemon *dbus;
+	TpAccount *account;
+	EmpathyContact *juliet;
+	EmpathyContact *romeo;
+
+	DEBUG ("Theme changed, update preview widget");
+
+	if (priv->chat_theme_preview != NULL) {
+		gtk_widget_destroy (GTK_WIDGET (priv->chat_theme_preview));
+	}
+	priv->chat_theme_preview = empathy_theme_manager_create_view (manager);
+	gtk_container_add (GTK_CONTAINER (priv->sw_chat_theme_preview),
+			   GTK_WIDGET (priv->chat_theme_preview));
+	gtk_widget_show (GTK_WIDGET (priv->chat_theme_preview));
+
+	/* FIXME: It is ugly to add a fake conversation like that.
+	 * Would be cool if we could request a TplLogManager for a fake
+	 * conversation */
+	dbus = tp_dbus_daemon_dup (NULL);
+	account = tp_account_new (dbus,
+		TP_ACCOUNT_OBJECT_PATH_BASE "cm/jabber/account", NULL);
+	juliet = g_object_new (EMPATHY_TYPE_CONTACT,
+		"account", account,
+		"id", "juliet",
+		/* translators: Contact name for the chat theme preview */
+		"alias", _("Juliet"),
+		"is-user", FALSE,
+		NULL);
+	romeo = g_object_new (EMPATHY_TYPE_CONTACT,
+		"account", account,
+		"id", "romeo",
+		/* translators: Contact name for the chat theme preview */
+		"alias", _("Romeo"),
+		"is-user", TRUE,
+		NULL);
+
+	preferences_preview_theme_append_message (priv->chat_theme_preview,
+		/* translators: Quote from Romeo & Julier, for chat theme preview */
+		juliet, romeo, _("O Romeo, Romeo, wherefore art thou Romeo?"));
+	preferences_preview_theme_append_message (priv->chat_theme_preview,
+		/* translators: Quote from Romeo & Julier, for chat theme preview */
+		juliet, romeo, _("Deny thy father and refuse thy name;"));
+	preferences_preview_theme_append_message (priv->chat_theme_preview,
+		/* translators: Quote from Romeo & Julier, for chat theme preview */
+		juliet, romeo, _("Or if thou wilt not, be but sworn my love"));
+	preferences_preview_theme_append_message (priv->chat_theme_preview,
+		/* translators: Quote from Romeo & Julier, for chat theme preview */
+		juliet, romeo, _("And I'll no longer be a Capulet."));
+	preferences_preview_theme_append_message (priv->chat_theme_preview,
+		/* translators: Quote from Romeo & Julier, for chat theme preview */
+		romeo, juliet, _("Shall I hear more, or shall I speak at this?"));
+
+	/* translators: Quote from Romeo & Julier, for chat theme preview */
+	empathy_chat_view_append_event (priv->chat_theme_preview, _("Juliet has disconnected"));
+
+	g_object_unref (juliet);
+	g_object_unref (romeo);
+	g_object_unref (account);
+	g_object_unref (dbus);
+}
+
+static void
+preferences_theme_changed_cb (GtkComboBox        *combo,
+			      EmpathyPreferences *preferences)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	GtkTreeIter   iter;
+
+	if (gtk_combo_box_get_active_iter (combo, &iter)) {
+		GtkTreeModel *model;
+		gboolean      is_adium;
+		gchar        *name;
+		gchar        *path;
+
+		model = gtk_combo_box_get_model (combo);
+		gtk_tree_model_get (model, &iter,
+				    COL_THEME_IS_ADIUM, &is_adium,
+				    COL_THEME_NAME, &name,
+				    COL_THEME_ADIUM_PATH, &path,
+				    -1);
+
+		g_settings_set_string (priv->gsettings_chat,
+				       EMPATHY_PREFS_CHAT_THEME,
+				       name);
+		if (is_adium) {
+			g_settings_set_string (priv->gsettings_chat,
+					       EMPATHY_PREFS_CHAT_ADIUM_PATH,
+					       path);
+		}
+
+		g_free (name);
+		g_free (path);
+	}
+}
+
+static void
 preferences_theme_notify_cb (GSettings   *gsettings,
 			     const gchar *key,
 			     gpointer     user_data)
@@ -658,38 +784,34 @@ preferences_theme_notify_cb (GSettings   *gsettings,
 	GtkTreeModel       *model;
 	GtkTreeIter         iter;
 	gboolean            found = FALSE;
+	gboolean            ok;
 
 	conf_name = g_settings_get_string (gsettings, EMPATHY_PREFS_CHAT_THEME);
 	conf_path = g_settings_get_string (gsettings, EMPATHY_PREFS_CHAT_ADIUM_PATH);
 
 	combo = GTK_COMBO_BOX (priv->combobox_chat_theme);
 	model = gtk_combo_box_get_model (combo);
-	if (gtk_tree_model_get_iter_first (model, &iter)) {
+	for (ok = gtk_tree_model_get_iter_first (model, &iter);
+	     ok && !found;
+	     ok = gtk_tree_model_iter_next (model, &iter)) {
 		gboolean is_adium;
 		gchar *name;
 		gchar *path;
 
-		do {
-			gtk_tree_model_get (model, &iter,
-					    COL_COMBO_IS_ADIUM, &is_adium,
-					    COL_COMBO_NAME, &name,
-					    COL_COMBO_PATH, &path,
-					    -1);
+		gtk_tree_model_get (model, &iter,
+				    COL_THEME_IS_ADIUM, &is_adium,
+				    COL_THEME_NAME, &name,
+				    COL_THEME_ADIUM_PATH, &path,
+				    -1);
 
-			if (!tp_strdiff (name, conf_name)) {
-				if (tp_strdiff (name, "adium") ||
-				    !tp_strdiff (path, conf_path)) {
-					found = TRUE;
-					gtk_combo_box_set_active_iter (combo, &iter);
-					g_free (name);
-					g_free (path);
-					break;
-				}
-			}
+		if (!tp_strdiff (name, conf_name) &&
+		    (!is_adium || !tp_strdiff (path, conf_path))) {
+			found = TRUE;
+			gtk_combo_box_set_active_iter (combo, &iter);
+		}
 
-			g_free (name);
-			g_free (path);
-		} while (gtk_tree_model_iter_next (model, &iter));
+		g_free (name);
+		g_free (path);
 	}
 
 	/* Fallback to the first one. */
@@ -701,38 +823,6 @@ preferences_theme_notify_cb (GSettings   *gsettings,
 
 	g_free (conf_name);
 	g_free (conf_path);
-}
-
-static void
-preferences_theme_changed_cb (GtkComboBox        *combo,
-			      EmpathyPreferences *preferences)
-{
-	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
-	GtkTreeModel *model;
-	GtkTreeIter   iter;
-	gboolean      is_adium;
-	gchar        *name;
-	gchar        *path;
-
-	if (gtk_combo_box_get_active_iter (combo, &iter)) {
-		model = gtk_combo_box_get_model (combo);
-
-		gtk_tree_model_get (model, &iter,
-				    COL_COMBO_IS_ADIUM, &is_adium,
-				    COL_COMBO_NAME, &name,
-				    COL_COMBO_PATH, &path,
-				    -1);
-
-		g_settings_set_string (priv->gsettings_chat,
-				       EMPATHY_PREFS_CHAT_THEME,
-				       name);
-		if (is_adium == TRUE)
-			g_settings_set_string (priv->gsettings_chat,
-					       EMPATHY_PREFS_CHAT_ADIUM_PATH,
-					       path);
-		g_free (name);
-		g_free (path);
-	}
 }
 
 static void
@@ -751,22 +841,21 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 	cell_layout = GTK_CELL_LAYOUT (combo);
 
 	/* Create the model */
-	store = gtk_list_store_new (COL_COMBO_COUNT,
-				    G_TYPE_BOOLEAN, /* Is an Adium theme */
-				    G_TYPE_STRING,  /* Display name */
-				    G_TYPE_STRING,  /* Theme name */
-				    G_TYPE_STRING); /* Theme path */
+	store = gtk_list_store_new (COL_THEME_COUNT,
+				    G_TYPE_STRING,      /* Display name */
+				    G_TYPE_STRING,      /* Theme name */
+				    G_TYPE_BOOLEAN,     /* Is an Adium theme */
+				    G_TYPE_STRING);     /* Adium theme path */
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
-		COL_COMBO_VISIBLE_NAME, GTK_SORT_ASCENDING);
+		COL_THEME_VISIBLE_NAME, GTK_SORT_ASCENDING);
 
 	/* Fill the model */
 	themes = empathy_theme_manager_get_themes ();
 	for (i = 0; themes[i]; i += 2) {
 		gtk_list_store_insert_with_values (store, NULL, -1,
-			COL_COMBO_IS_ADIUM, FALSE,
-			COL_COMBO_VISIBLE_NAME, _(themes[i + 1]),
-			COL_COMBO_NAME, themes[i],
-			COL_COMBO_PATH, NULL,
+			COL_THEME_VISIBLE_NAME, _(themes[i + 1]),
+			COL_THEME_NAME, themes[i],
+			COL_THEME_IS_ADIUM, FALSE,
 			-1);
 	}
 
@@ -782,10 +871,10 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 
 		if (name != NULL && path != NULL) {
 			gtk_list_store_insert_with_values (store, NULL, -1,
-				COL_COMBO_IS_ADIUM, TRUE,
-				COL_COMBO_VISIBLE_NAME, name,
-				COL_COMBO_NAME, "adium",
-				COL_COMBO_PATH, path,
+				COL_THEME_VISIBLE_NAME, name,
+				COL_THEME_NAME, "adium",
+				COL_THEME_IS_ADIUM, TRUE,
+				COL_THEME_ADIUM_PATH, path,
 				-1);
 		}
 		g_hash_table_unref (info);
@@ -796,7 +885,7 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (cell_layout, renderer, TRUE);
 	gtk_cell_layout_set_attributes (cell_layout, renderer,
-		"text", COL_COMBO_VISIBLE_NAME, NULL);
+		"text", COL_THEME_VISIBLE_NAME, NULL);
 
 	gtk_combo_box_set_model (combo, GTK_TREE_MODEL (store));
 	g_object_unref (store);
@@ -831,6 +920,8 @@ static void
 empathy_preferences_finalize (GObject *self)
 {
 	EmpathyPreferencesPriv *priv = GET_PRIV (self);
+
+	g_object_unref (priv->theme_manager);
 
 	g_object_unref (priv->gsettings);
 	g_object_unref (priv->gsettings_chat);
@@ -883,7 +974,9 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"notebook", &priv->notebook,
 		"checkbutton_show_smileys", &priv->checkbutton_show_smileys,
 		"checkbutton_show_contacts_in_rooms", &priv->checkbutton_show_contacts_in_rooms,
+		"vbox_chat_theme", &priv->vbox_chat_theme,
 		"combobox_chat_theme", &priv->combobox_chat_theme,
+		"sw_chat_theme_preview", &priv->sw_chat_theme_preview,
 		"checkbutton_separate_chat_windows", &priv->checkbutton_separate_chat_windows,
 		"checkbutton_events_notif_area", &priv->checkbutton_events_notif_area,
 		"checkbutton_autoconnect", &priv->checkbutton_autoconnect,
@@ -917,6 +1010,13 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	priv->gsettings_sound = g_settings_new (EMPATHY_PREFS_SOUNDS_SCHEMA);
 	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 	priv->gsettings_logger = g_settings_new (EMPATHY_PREFS_LOGGER_SCHEMA);
+
+	/* Create chat theme preview, and track changes */
+	priv->theme_manager = empathy_theme_manager_dup_singleton ();
+	tp_g_signal_connect_object (priv->theme_manager, "theme-changed",
+			  G_CALLBACK (preferences_preview_theme_changed_cb),
+			  preferences, 0);
+	preferences_preview_theme_changed_cb (priv->theme_manager, preferences);
 
 	preferences_themes_setup (preferences);
 
