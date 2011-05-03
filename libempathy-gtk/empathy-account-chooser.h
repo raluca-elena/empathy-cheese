@@ -81,6 +81,7 @@ TpAccount *    empathy_account_chooser_get_account        (EmpathyAccountChooser
 TpConnection * empathy_account_chooser_get_connection     (EmpathyAccountChooser *chooser);
 gboolean       empathy_account_chooser_set_account        (EmpathyAccountChooser *chooser,
 							   TpAccount             *account);
+void           empathy_account_chooser_set_all            (EmpathyAccountChooser *chooser);
 TpAccountManager * empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self);
 gboolean       empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *chooser);
 void           empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,

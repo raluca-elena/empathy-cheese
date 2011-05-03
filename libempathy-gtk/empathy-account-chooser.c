@@ -438,6 +438,30 @@ empathy_account_chooser_set_account (EmpathyAccountChooser *chooser,
 	return data.set;
 }
 
+void
+empathy_account_chooser_set_all (EmpathyAccountChooser *chooser)
+{
+	EmpathyAccountChooserPriv *priv;
+	GtkComboBox    *combobox;
+	GtkTreeModel   *model;
+	GtkTreeIter     iter;
+
+	g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser));
+
+	priv = GET_PRIV (chooser);
+
+	g_return_if_fail (priv->has_all_option);
+
+	combobox = GTK_COMBO_BOX (chooser);
+	model = gtk_combo_box_get_model (combobox);
+
+	if (gtk_tree_model_get_iter_first (model, &iter)) {
+		/* 'All accounts' is the first row */
+		gtk_combo_box_set_active_iter (combobox, &iter);
+		priv->account_manually_set = TRUE;
+	}
+}
+
 /**
  * empathy_account_chooser_get_has_all_option:
  * @chooser: an #EmpathyAccountChooser
