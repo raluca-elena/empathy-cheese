@@ -823,7 +823,7 @@ main_window_balance_update_balance (GtkAction   *action,
 	int amount = 0;
 	guint scale = G_MAXINT32;
 	const char *currency = "";
-	char *str;
+	char *money, *str;
 
 	if (balance != NULL)
 		tp_value_array_unpack (balance, 3,
@@ -835,19 +835,25 @@ main_window_balance_update_balance (GtkAction   *action,
 	    scale == G_MAXINT32 &&
 	    tp_str_empty (currency)) {
 		/* unknown balance */
-		str = g_strdup_printf ("%s (--)",
-			tp_account_get_display_name (account));
+		money = g_strdup ("--");
 	} else {
-		char *money = empathy_format_currency (amount, scale, currency);
+		char *tmp = empathy_format_currency (amount, scale, currency);
 
-		str = g_strdup_printf ("%s (%s %s)",
-			tp_account_get_display_name (account),
-			currency, money);
-		g_free (money);
+		money = g_strdup_printf ("%s %s", currency, tmp);
+		g_free (tmp);
 	}
+
+	/* Translators: this string will be something like:
+	 *   Top up My Account ($1.23)..." */
+	str = g_strdup_printf (_("Top up %s (%s)..."),
+		tp_account_get_display_name (account),
+		money);
 
 	gtk_action_set_label (action, str);
 	g_free (str);
+
+	/* pass ownership of @money to object data */
+	g_object_set_data_full (G_OBJECT (action), "money", money, g_free);
 }
 
 static void
