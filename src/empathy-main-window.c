@@ -820,6 +820,7 @@ main_window_balance_update_balance (GtkAction   *action,
 				    GValueArray *balance)
 {
 	TpAccount *account = g_object_get_data (G_OBJECT (action), "account");
+	GtkWidget *label;
 	int amount = 0;
 	guint scale = G_MAXINT32;
 	const char *currency = "";
@@ -852,8 +853,11 @@ main_window_balance_update_balance (GtkAction   *action,
 	gtk_action_set_label (action, str);
 	g_free (str);
 
-	/* pass ownership of @money to object data */
-	g_object_set_data_full (G_OBJECT (action), "money", money, g_free);
+	/* update the money label in the roster */
+	label = g_object_get_data (G_OBJECT (action), "money-label");
+
+	gtk_label_set_text (GTK_LABEL (label), money);
+	g_free (money);
 }
 
 static void
@@ -964,34 +968,41 @@ main_window_setup_balance_create_widget (EmpathyMainWindow *window,
 					 GtkAction         *action)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	TpAccount *account;
 	GtkWidget *hbox, *image, *label, *button;
+
+	account = g_object_get_data (G_OBJECT (action), "account");
+	g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
 
 	hbox = gtk_hbox_new (FALSE, 6);
 
+	/* protocol icon */
 	image = gtk_image_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, TRUE, 0);
-	gtk_widget_show (image);
+	g_object_bind_property (action, "icon-name", image, "icon-name",
+		G_BINDING_SYNC_CREATE);
 
+	/* account name label */
 	label = gtk_label_new ("");
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 	gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
-	gtk_widget_show (label);
+	g_object_bind_property (account, "display-name", label, "label",
+		G_BINDING_SYNC_CREATE);
 
+	/* balance label */
+	label = gtk_label_new ("");
+	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+	g_object_set_data (G_OBJECT (action), "money-label", label);
+
+	/* top up button */
 	button = gtk_button_new_with_label (_("Top Up..."));
 	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
-	gtk_widget_show (button);
+	g_signal_connect_swapped (button, "clicked",
+		G_CALLBACK (gtk_action_activate), action);
 
 	gtk_box_pack_start (GTK_BOX (priv->balance_vbox), hbox, FALSE, TRUE, 0);
 	gtk_widget_show_all (hbox);
-
-	/* bind the properties from the action to the widgets -- I could have
-	 * written a widget that implemented GtkActivatable, but effort */
-	g_object_bind_property (action, "label", label, "label",
-		G_BINDING_SYNC_CREATE);
-	g_object_bind_property (action, "icon-name", image, "icon-name",
-		G_BINDING_SYNC_CREATE);
-	g_signal_connect_swapped (button, "clicked",
-		G_CALLBACK (gtk_action_activate), action);
 
 	/* tie the lifetime of the widget to the lifetime of the action */
 	g_object_weak_ref (G_OBJECT (action),
