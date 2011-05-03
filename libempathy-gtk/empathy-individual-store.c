@@ -166,8 +166,8 @@ individual_get_client_types (FolksIndividual *individual)
     {
       FolksPresenceDetails *presence;
 
-      /* We only want personas which implement FolksPresenceDetails */
-      if (!FOLKS_IS_PRESENCE_DETAILS (l->data))
+      /* We only want personas which have presence and a TpContact */
+      if (!empathy_folks_persona_is_interesting (persona))
         continue;
 
       presence = FOLKS_PRESENCE_DETAILS (l->data);

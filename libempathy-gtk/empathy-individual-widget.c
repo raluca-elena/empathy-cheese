@@ -229,20 +229,20 @@ update_weak_contact (EmpathyIndividualWidget *self)
       for (l = personas; l != NULL; l = l->next)
         {
           FolksPresenceDetails *presence;
+          FolksPresenceType presence_type_cur;
 
-          /* We only want personas which implement FolksPresence */
-          if (!FOLKS_IS_PRESENCE_DETAILS (l->data))
+          /* We only want personas which have presence and a TpContact */
+          if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (presence)))
             continue;
 
           presence = FOLKS_PRESENCE_DETAILS (l->data);
+          presence_type_cur = folks_presence_details_get_presence_type (
+              presence);
 
           if (folks_presence_details_typecmp (
-                  folks_presence_details_get_presence_type (presence),
-                  presence_type) > 0 &&
-              empathy_folks_persona_is_interesting (FOLKS_PERSONA (presence)))
+                presence_type_cur, presence_type) > 0)
             {
-              presence_type = folks_presence_details_get_presence_type (
-                  presence);
+              presence_type = presence_type_cur;
               tp_contact = tpf_persona_get_contact (TPF_PERSONA (l->data));
             }
         }
