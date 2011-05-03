@@ -668,12 +668,6 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
       return;
     }
 
-  if (!gst_bin_add (GST_BIN (priv->pipeline), priv->video_tee))
-    {
-      g_warning ("Could not add video tee to pipeline");
-      return;
-    }
-
   if (!gst_bin_add (GST_BIN (priv->pipeline), preview))
     {
       g_warning ("Could not add video preview to pipeline");
@@ -700,7 +694,6 @@ create_video_preview (EmpathyCallWindow *self)
   GstBus *bus;
 
   g_assert (priv->video_preview == NULL);
-  g_assert (priv->video_tee == NULL);
 
   bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
 
@@ -710,10 +703,6 @@ create_video_preview (EmpathyCallWindow *self)
 
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->video_preview, TRUE, TRUE, 0);
-
-  priv->video_tee = gst_element_factory_make ("tee", NULL);
-  gst_object_ref (priv->video_tee);
-  gst_object_sink (priv->video_tee);
 
   g_object_unref (bus);
 }
@@ -990,6 +979,12 @@ create_pipeline (EmpathyCallWindow *self)
 
   priv->pipeline = gst_pipeline_new (NULL);
   priv->pipeline_playing = FALSE;
+
+  priv->video_tee = gst_element_factory_make ("tee", NULL);
+  gst_object_ref (priv->video_tee);
+  gst_object_sink (priv->video_tee);
+
+  gst_bin_add (GST_BIN (priv->pipeline), priv->video_tee);
 
   bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
   priv->bus_message_source_id = gst_bus_add_watch (bus,
@@ -2487,21 +2482,18 @@ empathy_call_window_sink_added_cb (EmpathyCallHandler *handler,
         retval = TRUE;
         break;
       case FS_MEDIA_TYPE_VIDEO:
-        if (priv->video_input != NULL)
+        if (priv->video_tee != NULL)
           {
-            if (priv->video_tee != NULL)
+            pad = gst_element_get_request_pad (priv->video_tee, "src%d");
+            if (GST_PAD_LINK_FAILED (gst_pad_link (pad, sink)))
               {
-                pad = gst_element_get_request_pad (priv->video_tee, "src%d");
-                if (GST_PAD_LINK_FAILED (gst_pad_link (pad, sink)))
-                  {
-                    g_warning ("Could not link video source input pipeline");
-                    break;
-                  }
-                gst_object_unref (pad);
+                g_warning ("Could not link video source input pipeline");
+                break;
               }
-
-            retval = TRUE;
+            gst_object_unref (pad);
           }
+
+        retval = TRUE;
         break;
       default:
         g_assert_not_reached ();
@@ -2527,7 +2519,7 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
   gst_element_set_state (preview, GST_STATE_NULL);
 
   gst_bin_remove_many (GST_BIN (priv->pipeline), priv->video_input,
-    priv->video_tee, preview, NULL);
+    preview, NULL);
 
   g_object_unref (priv->video_input);
   priv->video_input = NULL;
