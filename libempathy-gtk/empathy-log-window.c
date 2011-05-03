@@ -483,6 +483,7 @@ empathy_log_window_show (TpAccount  *account,
   empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
   empathy_account_chooser_set_filter (account_chooser,
       empathy_account_chooser_filter_has_logs, NULL);
+  empathy_account_chooser_set_all (account_chooser);
 
   g_signal_connect (window->account_chooser, "changed",
       G_CALLBACK (log_window_chats_accounts_changed_cb),
