@@ -2248,7 +2248,7 @@ chat_input_populate_popup_cb (GtkTextView *view,
 
 
 static gboolean
-chat_log_filter (TplEvent *log,
+chat_log_filter (TplEvent *event,
 		 gpointer user_data)
 {
 	EmpathyChat *chat = user_data;
@@ -2256,11 +2256,11 @@ chat_log_filter (TplEvent *log,
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 	const GList *pending;
 
-	g_return_val_if_fail (TPL_IS_EVENT (log), FALSE);
+	g_return_val_if_fail (TPL_IS_EVENT (event), FALSE);
 	g_return_val_if_fail (EMPATHY_IS_CHAT (chat), FALSE);
 
 	pending = empathy_tp_chat_get_pending_messages (priv->tp_chat);
-	message = empathy_message_from_tpl_log_event (log);
+	message = empathy_message_from_tpl_log_event (event);
 
 	for (; pending; pending = g_list_next (pending)) {
 		if (empathy_message_equal (message, pending->data)) {
