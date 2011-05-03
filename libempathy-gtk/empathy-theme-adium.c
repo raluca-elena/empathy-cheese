@@ -69,6 +69,8 @@ typedef struct {
 	gboolean              has_focus;
 	gboolean              has_unread_message;
 	gboolean              allow_scrolling;
+	gchar                *variant;
+	gboolean              in_construction;
 } EmpathyThemeAdiumPriv;
 
 struct _EmpathyAdiumData {
@@ -104,10 +106,12 @@ struct _EmpathyAdiumData {
 };
 
 static void theme_adium_iface_init (EmpathyChatViewIface *iface);
+static gchar * adium_info_dup_path_for_variant (GHashTable *info, const gchar *variant);
 
 enum {
 	PROP_0,
 	PROP_ADIUM_DATA,
+	PROP_VARIANT,
 };
 
 G_DEFINE_TYPE_WITH_CODE (EmpathyThemeAdium, empathy_theme_adium,
@@ -227,6 +231,27 @@ string_with_format (const gchar *format,
 	va_end (args);
 
 	return g_string_free (result, FALSE);
+}
+
+static void
+theme_adium_load_template (EmpathyThemeAdium *theme)
+{
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
+	gchar                 *basedir_uri;
+	gchar                 *variant_path;
+	gchar                 *template;
+
+	priv->pages_loading++;
+	basedir_uri = g_strconcat ("file://", priv->data->basedir, NULL);
+	variant_path = adium_info_dup_path_for_variant (priv->data->info,
+		priv->variant);
+	template = string_with_format (priv->data->template_html,
+		variant_path, NULL);
+	webkit_web_view_load_html_string (WEBKIT_WEB_VIEW (theme),
+					  template, basedir_uri);
+	g_free (basedir_uri);
+	g_free (variant_path);
+	g_free (template);
 }
 
 static void
@@ -1018,14 +1043,8 @@ static void
 theme_adium_clear (EmpathyChatView *view)
 {
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
-	gchar *basedir_uri;
 
-	priv->pages_loading++;
-	basedir_uri = g_strconcat ("file://", priv->data->basedir, NULL);
-	webkit_web_view_load_html_string (WEBKIT_WEB_VIEW (view),
-					  priv->data->template_html,
-					  basedir_uri);
-	g_free (basedir_uri);
+	theme_adium_load_template (EMPATHY_THEME_ADIUM (view));
 
 	/* Clear last contact to avoid trying to add a 'joined'
 	 * message when we don't have an insertion point. */
@@ -1503,7 +1522,6 @@ static void
 theme_adium_constructed (GObject *object)
 {
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (object);
-	gchar                 *basedir_uri;
 	const gchar           *font_family = NULL;
 	gint                   font_size = 0;
 	WebKitWebView         *webkit_view = WEBKIT_WEB_VIEW (object);
@@ -1534,13 +1552,9 @@ theme_adium_constructed (GObject *object)
 			  object);
 
 	/* Load template */
-	priv->pages_loading = 1;
+	theme_adium_load_template (EMPATHY_THEME_ADIUM (object));
 
-	basedir_uri = g_strconcat ("file://", priv->data->basedir, NULL);
-	webkit_web_view_load_html_string (WEBKIT_WEB_VIEW (object),
-					  priv->data->template_html,
-					  basedir_uri);
-	g_free (basedir_uri);
+	priv->in_construction = FALSE;
 }
 
 static void
@@ -1555,6 +1569,9 @@ theme_adium_get_property (GObject    *object,
 	case PROP_ADIUM_DATA:
 		g_value_set_boxed (value, priv->data);
 		break;
+	case PROP_VARIANT:
+		g_value_set_string (value, priv->variant);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
@@ -1567,12 +1584,16 @@ theme_adium_set_property (GObject      *object,
 			  const GValue *value,
 			  GParamSpec   *pspec)
 {
+	EmpathyThemeAdium *theme = EMPATHY_THEME_ADIUM (object);
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (object);
 
 	switch (param_id) {
 	case PROP_ADIUM_DATA:
 		g_assert (priv->data == NULL);
 		priv->data = g_value_dup_boxed (value);
+		break;
+	case PROP_VARIANT:
+		empathy_theme_adium_set_variant (theme, g_value_get_string (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -1603,6 +1624,15 @@ empathy_theme_adium_class_init (EmpathyThemeAdiumClass *klass)
 							      G_PARAM_CONSTRUCT_ONLY |
 							      G_PARAM_READWRITE |
 							      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+					 PROP_VARIANT,
+					 g_param_spec_string ("variant",
+							      "The theme variant",
+							      "Variant name for the theme",
+							      NULL,
+							      G_PARAM_CONSTRUCT |
+							      G_PARAM_READWRITE |
+							      G_PARAM_STATIC_STRINGS));
 
 	g_type_class_add_private (object_class, sizeof (EmpathyThemeAdiumPriv));
 }
@@ -1615,6 +1645,7 @@ empathy_theme_adium_init (EmpathyThemeAdium *theme)
 
 	theme->priv = priv;
 
+	priv->in_construction = TRUE;
 	g_queue_init (&priv->message_queue);
 	priv->allow_scrolling = TRUE;
 	priv->smiley_manager = empathy_smiley_manager_dup_singleton ();
@@ -1636,13 +1667,47 @@ empathy_theme_adium_init (EmpathyThemeAdium *theme)
 }
 
 EmpathyThemeAdium *
-empathy_theme_adium_new (EmpathyAdiumData *data)
+empathy_theme_adium_new (EmpathyAdiumData *data,
+			 const gchar *variant)
 {
 	g_return_val_if_fail (data != NULL, NULL);
 
 	return g_object_new (EMPATHY_TYPE_THEME_ADIUM,
 			     "adium-data", data,
+			     "variant", variant,
 			     NULL);
+}
+
+void
+empathy_theme_adium_set_variant (EmpathyThemeAdium *theme,
+				 const gchar *variant)
+{
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
+	gchar *variant_path;
+	gchar *script;
+
+	if (!tp_strdiff (priv->variant, variant)) {
+		return;
+	}
+
+	g_free (priv->variant);
+	priv->variant = g_strdup (variant);
+
+	if (priv->in_construction) {
+		return;
+	}
+
+	DEBUG ("Update view with variant: '%s'", variant);
+	variant_path = adium_info_dup_path_for_variant (priv->data->info,
+		priv->variant);
+	script = g_strdup_printf ("setStylesheet(\"mainStyle\",\"%s\");", variant_path);
+
+	webkit_web_view_execute_script (WEBKIT_WEB_VIEW (theme), script);
+
+	g_free (variant_path);
+	g_free (script);
+
+	g_object_notify (G_OBJECT (theme), "variant");
 }
 
 gboolean
@@ -1717,31 +1782,29 @@ adium_info_get_no_variant_name (GHashTable *info)
 	return name ? name : _("Normal");
 }
 
-static const gchar *
-adium_info_get_default_or_first_variant (GHashTable *info)
-{
-	const gchar *name;
-	GPtrArray *variants;
-
-	name = empathy_adium_info_get_default_variant (info);
-	if (name != NULL) {
-		return name;
-	}
-
-	variants = empathy_adium_info_get_available_variants (info);
-	g_assert (variants->len > 0);
-	return g_ptr_array_index (variants, 0);
-}
-
 static gchar *
 adium_info_dup_path_for_variant (GHashTable *info,
 				 const gchar *variant)
 {
 	guint version = adium_info_get_version (info);
 	const gchar *no_variant = adium_info_get_no_variant_name (info);
+	GPtrArray *variants;
+	guint i;
 
 	if (version <= 2 && !tp_strdiff (variant, no_variant)) {
 		return g_strdup ("main.css");
+	}
+
+	/* Verify the variant exists, fallback to the first one */
+	variants = empathy_adium_info_get_available_variants (info);
+	for (i = 0; i < variants->len; i++) {
+		if (!tp_strdiff (variant, g_ptr_array_index (variants, i))) {
+			break;
+		}
+	}
+	if (i == variants->len) {
+		DEBUG ("Variant %s does not exist", variant);
+		variant = g_ptr_array_index (variants, 0);
 	}
 
 	return g_strdup_printf ("Variants/%s.css", variant);
@@ -1827,7 +1890,6 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 	EmpathyAdiumData *data;
 	gchar            *template_html = NULL;
 	gchar            *footer_html = NULL;
-	gchar            *variant_path;
 	gchar            *tmp;
 
 	g_return_val_if_fail (empathy_adium_path_is_valid (path), NULL);
@@ -1928,15 +1990,12 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 		g_free (tmp);
 	}
 
-	variant_path = adium_info_dup_path_for_variant (info,
-		adium_info_get_default_or_first_variant (info));
-
 	/* Old custom templates had only 4 parameters.
 	 * New templates have 5 parameters */
 	if (data->version <= 2 && data->custom_template) {
 		tmp = string_with_format (template_html,
 			data->basedir,
-			variant_path,
+			"%@", /* Leave variant unset */
 			"", /* The header */
 			footer_html ? footer_html : "",
 			NULL);
@@ -1944,7 +2003,7 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 		tmp = string_with_format (template_html,
 			data->basedir,
 			data->version <= 2 ? "" : "@import url( \"main.css\" );",
-			variant_path,
+			"%@", /* Leave variant unset */
 			"", /* The header */
 			footer_html ? footer_html : "",
 			NULL);
@@ -1954,7 +2013,6 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 
 	g_free (template_html);
 	g_free (footer_html);
-	g_free (variant_path);
 
 	return data;
 }

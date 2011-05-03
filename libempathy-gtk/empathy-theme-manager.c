@@ -51,10 +51,17 @@
 typedef struct {
 	GSettings   *gsettings_chat;
 	gchar       *name;
-	gchar       *adium_path;
 	GtkSettings *settings;
 	GList       *boxes_views;
 	guint        emit_changed_idle;
+	gboolean     in_constructor;
+
+#ifdef HAVE_WEBKIT
+	EmpathyAdiumData *adium_data;
+	gchar *adium_variant;
+	/* list of weakref to EmpathyThemeAdium objects */
+	GList *adium_views;
+#endif
 } EmpathyThemeManagerPriv;
 
 enum {
@@ -73,6 +80,57 @@ static const gchar *themes[] = {
 };
 
 G_DEFINE_TYPE (EmpathyThemeManager, empathy_theme_manager, G_TYPE_OBJECT);
+
+static gboolean
+theme_manager_emit_changed_idle_cb (gpointer manager)
+{
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+	const gchar *adium_path = NULL;
+
+	if (priv->adium_data) {
+		adium_path = empathy_adium_data_get_path (priv->adium_data);
+	}
+	DEBUG ("Emit theme-changed with: name='%s' adium_path='%s' "
+	       "adium_variant='%s'", priv->name, adium_path,
+	       priv->adium_variant);
+
+	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
+	priv->emit_changed_idle = 0;
+
+	return FALSE;
+}
+
+static void
+theme_manager_emit_changed (EmpathyThemeManager *manager)
+{
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+
+	/* We emit the signal in idle callback to be sure we emit it only once
+	 * in the case both the name and adium_path changed */
+	if (priv->emit_changed_idle == 0 && !priv->in_constructor) {
+		priv->emit_changed_idle = g_idle_add (
+			theme_manager_emit_changed_idle_cb, manager);
+	}
+}
+
+static void
+theme_manager_view_weak_notify_cb (gpointer data,
+				    GObject *where_the_object_was)
+{
+	GList **list = data;
+	*list = g_list_remove (*list, where_the_object_was);
+}
+
+static void
+clear_list_of_views (GList **views)
+{
+	while (*views) {
+		g_object_weak_unref ((*views)->data,
+				     theme_manager_view_weak_notify_cb,
+				     views);
+		*views = g_list_delete_link (*views, *views);
+	}
+}
 
 static void
 theme_manager_gdk_color_to_hex (GdkColor *gdk_color, gchar *str_color)
@@ -135,15 +193,6 @@ theme_manager_create_irc_view (EmpathyThemeManager *manager)
 	return theme;
 }
 
-static void
-theme_manager_boxes_weak_notify_cb (gpointer data,
-				    GObject *where_the_object_was)
-{
-	EmpathyThemeManagerPriv *priv = GET_PRIV (data);
-
-	priv->boxes_views = g_list_remove (priv->boxes_views, where_the_object_was);
-}
-
 static EmpathyThemeBoxes *
 theme_manager_create_boxes_view (EmpathyThemeManager *manager)
 {
@@ -153,8 +202,8 @@ theme_manager_create_boxes_view (EmpathyThemeManager *manager)
 	theme = empathy_theme_boxes_new ();
 	priv->boxes_views = g_list_prepend (priv->boxes_views, theme);
 	g_object_weak_ref (G_OBJECT (theme),
-			   theme_manager_boxes_weak_notify_cb,
-			   manager);
+			   theme_manager_view_weak_notify_cb,
+			   &priv->boxes_views);
 
 	return theme;
 }
@@ -320,6 +369,88 @@ theme_manager_update_boxes_theme (EmpathyThemeManager *manager,
 	}
 }
 
+#ifdef HAVE_WEBKIT
+static EmpathyThemeAdium *
+theme_manager_create_adium_view (EmpathyThemeManager *manager)
+{
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+	EmpathyThemeAdium *theme;
+
+	theme = empathy_theme_adium_new (priv->adium_data, priv->adium_variant);
+	priv->adium_views = g_list_prepend (priv->adium_views, theme);
+	g_object_weak_ref (G_OBJECT (theme),
+			   theme_manager_view_weak_notify_cb,
+			   &priv->adium_views);
+
+	return theme;
+}
+
+static void
+theme_manager_notify_adium_path_cb (GSettings   *gsettings_chat,
+				    const gchar *key,
+				    gpointer     user_data)
+{
+	EmpathyThemeManager     *manager = EMPATHY_THEME_MANAGER (user_data);
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+	const gchar             *current_path = NULL;
+	gchar                   *new_path;
+
+	new_path = g_settings_get_string (gsettings_chat, key);
+
+	if (priv->adium_data != NULL) {
+		current_path = empathy_adium_data_get_path (priv->adium_data);
+	}
+
+	/* If path did not really changed, ignore */
+	if (!tp_strdiff (current_path, new_path)) {
+		g_free (new_path);
+		return;
+	}
+
+	/* If path does not really contains an adium path, ignore */
+	if (!empathy_adium_path_is_valid (new_path)) {
+		DEBUG ("Invalid theme path set: %s", new_path);
+		g_free (new_path);
+		return;
+	}
+
+	/* Load new theme data, we can stop tracking existing views since we
+	 * won't be able to change them live anymore */
+	clear_list_of_views (&priv->adium_views);
+	tp_clear_pointer (&priv->adium_data, empathy_adium_data_unref);
+	priv->adium_data = empathy_adium_data_new (new_path);
+
+	theme_manager_emit_changed (manager);
+
+	g_free (new_path);
+}
+
+static void
+theme_manager_notify_adium_variant_cb (GSettings   *gsettings_chat,
+				       const gchar *key,
+				       gpointer     user_data)
+{
+	EmpathyThemeManager     *manager = EMPATHY_THEME_MANAGER (user_data);
+	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+	gchar                   *new_variant;
+	GList                   *l;
+
+	new_variant = g_settings_get_string (gsettings_chat, key);
+	if (!tp_strdiff (priv->adium_variant, new_variant)) {
+		g_free (new_variant);
+		return;
+	}
+
+	g_free (priv->adium_variant);
+	priv->adium_variant = new_variant;
+
+	for (l = priv->adium_views; l; l = l->next) {
+		empathy_theme_adium_set_variant (EMPATHY_THEME_ADIUM (l->data),
+			priv->adium_variant);
+	}
+}
+#endif /* HAVE_WEBKIT */
+
 EmpathyChatView *
 empathy_theme_manager_create_view (EmpathyThemeManager *manager)
 {
@@ -331,33 +462,8 @@ empathy_theme_manager_create_view (EmpathyThemeManager *manager)
 	DEBUG ("Using theme %s", priv->name);
 
 #ifdef HAVE_WEBKIT
-	if (strcmp (priv->name, "adium") == 0)  {
-		if (empathy_adium_path_is_valid (priv->adium_path)) {
-			static EmpathyAdiumData *data = NULL;
-			EmpathyThemeAdium *theme_adium;
-
-			if (data &&
-			    !tp_strdiff (empathy_adium_data_get_path (data),
-					 priv->adium_path)) {
-				/* Theme did not change, reuse data */
-				theme_adium = empathy_theme_adium_new (data);
-				return EMPATHY_CHAT_VIEW (theme_adium);
-			}
-
-			/* Theme changed, drop old data if any and
-			 * load a new one */
-			if (data) {
-				empathy_adium_data_unref (data);
-				data = NULL;
-			}
-
-			data = empathy_adium_data_new (priv->adium_path);
-			theme_adium = empathy_theme_adium_new (data);
-			return EMPATHY_CHAT_VIEW (theme_adium);
-		} else {
-			/* The adium path is not valid, fallback to classic theme */
-			return EMPATHY_CHAT_VIEW (theme_manager_create_irc_view (manager));
-		}
+	if (strcmp (priv->name, "adium") == 0 && priv->adium_data != NULL)  {
+		return EMPATHY_CHAT_VIEW (theme_manager_create_adium_view (manager));
 	}
 #endif
 
@@ -394,7 +500,6 @@ theme_manager_ensure_theme_exists (const gchar *name)
 }
 
 typedef enum {
-	THEME_TYPE_UNSET,
 	THEME_TYPE_IRC,
 	THEME_TYPE_BOXED,
 	THEME_TYPE_ADIUM,
@@ -403,38 +508,12 @@ typedef enum {
 static ThemeType
 theme_type (const gchar *name)
 {
-	if (name == NULL) {
-		return THEME_TYPE_UNSET;
-	} else if (!tp_strdiff (name, "classic")) {
+	if (!tp_strdiff (name, "classic")) {
 		return THEME_TYPE_IRC;
 	} else if (!tp_strdiff (name, "adium")) {
 		return THEME_TYPE_ADIUM;
 	} else {
 		return THEME_TYPE_BOXED;
-	}
-}
-
-static gboolean
-theme_manager_emit_changed_idle_cb (gpointer manager)
-{
-	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
-
-	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
-	priv->emit_changed_idle = 0;
-
-	return FALSE;
-}
-
-static void
-theme_manager_emit_changed (EmpathyThemeManager *manager)
-{
-	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
-
-	/* We emit the signal in idle callback to be sure we emit it only once
-	 * in the case both the name and adium_path changed */
-	if (priv->emit_changed_idle == 0) {
-		priv->emit_changed_idle = g_idle_add (
-			theme_manager_emit_changed_idle_cb, manager);
 	}
 }
 
@@ -478,42 +557,12 @@ theme_manager_notify_name_cb (GSettings   *gsettings_chat,
 		}
 	}
 
-	/* Do not emit theme-changed if theme type didn't change, or if it was
-	 * unset (the manager is under construction). If theme changed from a
-	 * boxed to another boxed, all view are updated in place. If theme
-	 * changed from an adium to another adium, the signal will be emited
-	 * from theme_manager_notify_adium_path_cb ()
+	/* Do not emit theme-changed if theme type didn't change. If theme
+	 * changed from a boxed to another boxed, all view are updated in place.
+	 * If theme changed from an adium to another adium, the signal will be
+	 * emited from theme_manager_notify_adium_path_cb ()
 	 */
-	if (old_type != new_type && old_type != THEME_TYPE_UNSET) {
-		theme_manager_emit_changed (manager);
-	}
-}
-
-static void
-theme_manager_notify_adium_path_cb (GSettings   *gsettings_chat,
-				    const gchar *key,
-				    gpointer     user_data)
-{
-	EmpathyThemeManager     *manager = EMPATHY_THEME_MANAGER (user_data);
-	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
-	gchar                   *adium_path = NULL;
-	gboolean                 was_set;
-
-	adium_path = g_settings_get_string (gsettings_chat, key);
-
-	if (!tp_strdiff (priv->adium_path, adium_path)) {
-		g_free (adium_path);
-		return;
-	}
-
-	was_set = (priv->adium_path != NULL);
-
-	g_free (priv->adium_path);
-	priv->adium_path = adium_path;
-
-	/* Do not emit the signal if path was not set yet (the manager is under
-	 * construction) */
-	if (was_set) {
+	if (old_type != new_type) {
 		theme_manager_emit_changed (manager);
 	}
 }
@@ -522,22 +571,21 @@ static void
 theme_manager_finalize (GObject *object)
 {
 	EmpathyThemeManagerPriv *priv = GET_PRIV (object);
-	GList                   *l;
 
 	g_object_unref (priv->gsettings_chat);
 	g_free (priv->name);
-	g_free (priv->adium_path);
-
-	for (l = priv->boxes_views; l; l = l->next) {
-		g_object_weak_unref (G_OBJECT (l->data),
-				     theme_manager_boxes_weak_notify_cb,
-				     object);
-	}
-	g_list_free (priv->boxes_views);
 
 	if (priv->emit_changed_idle != 0) {
 		g_source_remove (priv->emit_changed_idle);
 	}
+
+	clear_list_of_views (&priv->boxes_views);
+
+#ifdef HAVE_WEBKIT
+	clear_list_of_views (&priv->adium_views);
+	g_free (priv->adium_variant);
+	tp_clear_pointer (&priv->adium_data, empathy_adium_data_unref);
+#endif
 
 	G_OBJECT_CLASS (empathy_theme_manager_parent_class)->finalize (object);
 }
@@ -569,6 +617,7 @@ empathy_theme_manager_init (EmpathyThemeManager *manager)
 		EMPATHY_TYPE_THEME_MANAGER, EmpathyThemeManagerPriv);
 
 	manager->priv = priv;
+	priv->in_constructor = TRUE;
 
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 
@@ -581,7 +630,8 @@ empathy_theme_manager_init (EmpathyThemeManager *manager)
 				      EMPATHY_PREFS_CHAT_THEME,
 				      manager);
 
-	/* Take the adium path and track changes */
+#ifdef HAVE_WEBKIT
+	/* Take the adium path/variant and track changes */
 	g_signal_connect (priv->gsettings_chat,
 			  "changed::" EMPATHY_PREFS_CHAT_ADIUM_PATH,
 			  G_CALLBACK (theme_manager_notify_adium_path_cb),
@@ -589,6 +639,16 @@ empathy_theme_manager_init (EmpathyThemeManager *manager)
 	theme_manager_notify_adium_path_cb (priv->gsettings_chat,
 					    EMPATHY_PREFS_CHAT_ADIUM_PATH,
 					    manager);
+
+	g_signal_connect (priv->gsettings_chat,
+			  "changed::" EMPATHY_PREFS_CHAT_THEME_VARIANT,
+			  G_CALLBACK (theme_manager_notify_adium_variant_cb),
+			  manager);
+	theme_manager_notify_adium_variant_cb (priv->gsettings_chat,
+					       EMPATHY_PREFS_CHAT_THEME_VARIANT,
+					       manager);
+#endif
+	priv->in_constructor = FALSE;
 }
 
 EmpathyThemeManager *

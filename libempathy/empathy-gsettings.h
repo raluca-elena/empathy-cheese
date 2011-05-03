@@ -55,6 +55,7 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_CHAT_SHOW_SMILEYS            "graphical-smileys"
 #define EMPATHY_PREFS_CHAT_SHOW_CONTACTS_IN_ROOMS  "show-contacts-in-rooms"
 #define EMPATHY_PREFS_CHAT_THEME                   "theme"
+#define EMPATHY_PREFS_CHAT_THEME_VARIANT           "theme-variant"
 #define EMPATHY_PREFS_CHAT_ADIUM_PATH              "adium-path"
 #define EMPATHY_PREFS_CHAT_SPELL_CHECKER_LANGUAGES "spell-checker-languages"
 #define EMPATHY_PREFS_CHAT_SPELL_CHECKER_ENABLED   "spell-checker-enabled"

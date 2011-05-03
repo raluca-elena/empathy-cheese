@@ -49,7 +49,10 @@ struct _EmpathyThemeAdiumClass {
 };
 
 GType              empathy_theme_adium_get_type (void) G_GNUC_CONST;
-EmpathyThemeAdium *empathy_theme_adium_new      (EmpathyAdiumData *data);
+EmpathyThemeAdium *empathy_theme_adium_new      (EmpathyAdiumData *data,
+						 const gchar *variant);
+void               empathy_theme_adium_set_variant (EmpathyThemeAdium *theme,
+						    const gchar *variant);
 
 gboolean           empathy_adium_path_is_valid (const gchar *path);
 

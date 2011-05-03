@@ -85,6 +85,8 @@ struct _EmpathyPreferencesPriv {
 
 	GtkWidget *vbox_chat_theme;
 	GtkWidget *combobox_chat_theme;
+	GtkWidget *combobox_chat_theme_variant;
+	GtkWidget *hbox_chat_theme_variant;
 	GtkWidget *sw_chat_theme_preview;
 	EmpathyChatView *chat_theme_preview;
 	EmpathyThemeManager *theme_manager;
@@ -127,7 +129,14 @@ enum {
 	COL_THEME_NAME,
 	COL_THEME_IS_ADIUM,
 	COL_THEME_ADIUM_PATH,
+	COL_THEME_ADIUM_INFO,
 	COL_THEME_COUNT
+};
+
+enum {
+	COL_VARIANT_NAME,
+	COL_VARIANT_DEFAULT,
+	COL_VARIANT_COUNT
 };
 
 enum {
@@ -734,6 +743,156 @@ preferences_preview_theme_changed_cb (EmpathyThemeManager *manager,
 }
 
 static void
+preferences_theme_variant_changed_cb (GtkComboBox        *combo,
+				      EmpathyPreferences *preferences)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	GtkTreeIter   iter;
+
+	if (gtk_combo_box_get_active_iter (combo, &iter)) {
+		GtkTreeModel *model;
+		gchar        *name;
+
+		model = gtk_combo_box_get_model (combo);
+		gtk_tree_model_get (model, &iter,
+				    COL_VARIANT_NAME, &name,
+				    -1);
+
+		g_settings_set_string (priv->gsettings_chat,
+				       EMPATHY_PREFS_CHAT_THEME_VARIANT,
+				       name);
+
+		g_free (name);
+	}
+}
+
+static void
+preferences_theme_variant_notify_cb (GSettings   *gsettings,
+				     const gchar *key,
+				     gpointer     user_data)
+{
+	EmpathyPreferences *preferences = user_data;
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	GtkComboBox        *combo;
+	gchar              *conf_name;
+	GtkTreeModel       *model;
+	GtkTreeIter         iter;
+	GtkTreeIter         default_iter;
+	gboolean            found_default = FALSE;
+	gboolean            found = FALSE;
+	gboolean            ok;
+
+	conf_name = g_settings_get_string (gsettings, EMPATHY_PREFS_CHAT_THEME_VARIANT);
+	combo = GTK_COMBO_BOX (priv->combobox_chat_theme_variant);
+	model = gtk_combo_box_get_model (combo);
+
+	for (ok = gtk_tree_model_get_iter_first (model, &iter);
+	     ok && !found;
+	     ok = gtk_tree_model_iter_next (model, &iter)) {
+		gchar *name;
+		gboolean is_default;
+
+		gtk_tree_model_get (model, &iter,
+				    COL_VARIANT_NAME, &name,
+				    COL_VARIANT_DEFAULT, &is_default,
+				    -1);
+
+		if (!tp_strdiff (name, conf_name)) {
+			found = TRUE;
+			gtk_combo_box_set_active_iter (combo, &iter);
+		}
+		if (is_default) {
+			found_default = TRUE;
+			default_iter = iter;
+		}
+
+		g_free (name);
+	}
+
+	/* Fallback to the first one. */
+	if (!found) {
+		if (found_default) {
+			gtk_combo_box_set_active_iter (combo, &default_iter);
+		} else if (gtk_tree_model_get_iter_first (model, &iter)) {
+			gtk_combo_box_set_active_iter (combo, &iter);
+		}
+	}
+
+	g_free (conf_name);
+}
+
+static void
+preferences_theme_variants_fill (EmpathyPreferences *preferences,
+				 GHashTable         *info)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	GtkTreeModel *model;
+	GtkListStore *store;
+	GPtrArray    *variants;
+	const gchar  *default_variant;
+	guint         i;
+
+	model = gtk_combo_box_get_model (GTK_COMBO_BOX (priv->combobox_chat_theme_variant));
+	store = GTK_LIST_STORE (model);
+	gtk_list_store_clear (store);
+
+	variants = empathy_adium_info_get_available_variants (info);
+	default_variant = empathy_adium_info_get_default_variant (info);
+	for (i = 0; i < variants->len; i++) {
+		gchar *name = g_ptr_array_index (variants, i);
+
+		gtk_list_store_insert_with_values (store, NULL, -1,
+			COL_VARIANT_NAME, name,
+			COL_VARIANT_DEFAULT, !tp_strdiff (name, default_variant),
+			-1);
+	}
+
+	/* Select the variant from the GSetting key */
+	preferences_theme_variant_notify_cb (priv->gsettings_chat,
+					     EMPATHY_PREFS_CHAT_THEME_VARIANT,
+					     preferences);
+}
+
+static void
+preferences_theme_variants_setup (EmpathyPreferences *preferences)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
+	GtkComboBox   *combo;
+	GtkCellLayout *cell_layout;
+	GtkCellRenderer *renderer;
+	GtkListStore  *store;
+
+	combo = GTK_COMBO_BOX (priv->combobox_chat_theme_variant);
+	cell_layout = GTK_CELL_LAYOUT (combo);
+
+	/* Create the model */
+	store = gtk_list_store_new (COL_VARIANT_COUNT,
+				    G_TYPE_STRING,      /* name */
+				    G_TYPE_BOOLEAN);    /* is default */
+	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
+		COL_VARIANT_NAME, GTK_SORT_ASCENDING);
+
+	/* Add cell renderer */
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (cell_layout, renderer, TRUE);
+	gtk_cell_layout_set_attributes (cell_layout, renderer,
+		"text", COL_VARIANT_NAME, NULL);
+
+	gtk_combo_box_set_model (combo, GTK_TREE_MODEL (store));
+	g_object_unref (store);
+
+	g_signal_connect (combo, "changed",
+			  G_CALLBACK (preferences_theme_variant_changed_cb),
+			  preferences);
+
+	/* Track changes of the GSetting key */
+	g_signal_connect (priv->gsettings_chat,
+			  "changed::" EMPATHY_PREFS_CHAT_THEME_VARIANT,
+			  G_CALLBACK (preferences_theme_variant_notify_cb),
+			  preferences);
+}
+
+static void
 preferences_theme_changed_cb (GtkComboBox        *combo,
 			      EmpathyPreferences *preferences)
 {
@@ -745,12 +904,14 @@ preferences_theme_changed_cb (GtkComboBox        *combo,
 		gboolean      is_adium;
 		gchar        *name;
 		gchar        *path;
+		GHashTable   *info;
 
 		model = gtk_combo_box_get_model (combo);
 		gtk_tree_model_get (model, &iter,
 				    COL_THEME_IS_ADIUM, &is_adium,
 				    COL_THEME_NAME, &name,
 				    COL_THEME_ADIUM_PATH, &path,
+				    COL_THEME_ADIUM_INFO, &info,
 				    -1);
 
 		g_settings_set_string (priv->gsettings_chat,
@@ -760,10 +921,14 @@ preferences_theme_changed_cb (GtkComboBox        *combo,
 			g_settings_set_string (priv->gsettings_chat,
 					       EMPATHY_PREFS_CHAT_ADIUM_PATH,
 					       path);
+			preferences_theme_variants_fill (preferences, info);
+			gtk_widget_show (priv->hbox_chat_theme_variant);
+		} else {
+			gtk_widget_hide (priv->hbox_chat_theme_variant);
 		}
-
 		g_free (name);
 		g_free (path);
+		tp_clear_pointer (&info, g_hash_table_unref);
 	}
 }
 
@@ -833,6 +998,8 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 	GList         *adium_themes;
 	gint           i;
 
+	preferences_theme_variants_setup (preferences);
+
 	combo = GTK_COMBO_BOX (priv->combobox_chat_theme);
 	cell_layout = GTK_CELL_LAYOUT (combo);
 
@@ -841,7 +1008,8 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 				    G_TYPE_STRING,      /* Display name */
 				    G_TYPE_STRING,      /* Theme name */
 				    G_TYPE_BOOLEAN,     /* Is an Adium theme */
-				    G_TYPE_STRING);     /* Adium theme path */
+				    G_TYPE_STRING,      /* Adium theme path */
+				    G_TYPE_HASH_TABLE); /* Adium theme info */
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
 		COL_THEME_VISIBLE_NAME, GTK_SORT_ASCENDING);
 
@@ -871,6 +1039,7 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 				COL_THEME_NAME, "adium",
 				COL_THEME_IS_ADIUM, TRUE,
 				COL_THEME_ADIUM_PATH, path,
+				COL_THEME_ADIUM_INFO, info,
 				-1);
 		}
 		g_hash_table_unref (info);
@@ -972,6 +1141,8 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_show_contacts_in_rooms", &priv->checkbutton_show_contacts_in_rooms,
 		"vbox_chat_theme", &priv->vbox_chat_theme,
 		"combobox_chat_theme", &priv->combobox_chat_theme,
+		"combobox_chat_theme_variant", &priv->combobox_chat_theme_variant,
+		"hbox_chat_theme_variant", &priv->hbox_chat_theme_variant,
 		"sw_chat_theme_preview", &priv->sw_chat_theme_preview,
 		"checkbutton_separate_chat_windows", &priv->checkbutton_separate_chat_windows,
 		"checkbutton_events_notif_area", &priv->checkbutton_events_notif_area,
