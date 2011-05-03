@@ -561,7 +561,7 @@ empathy_individual_sms_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_dispatcher_sms_contact_id (
+  empathy_sms_contact_id (
       empathy_contact_get_account (contact),
       empathy_contact_get_id (contact),
       gtk_get_current_event_time ());

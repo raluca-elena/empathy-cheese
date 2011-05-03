@@ -52,6 +52,11 @@ void empathy_join_muc (TpAccount *account,
   const gchar *roomname,
   gint64 timestamp);
 
+/* Request a sms channel */
+void empathy_sms_contact_id (TpAccount *account,
+  const gchar *contact_id,
+  gint64 timestamp);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_DISPATCHER_H__ */
