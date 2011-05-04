@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-05-03 08:23+0000\n"
-"PO-Revision-Date: 2011-05-03 17:53+0200\n"
+"POT-Creation-Date: 2011-05-03 21:12+0000\n"
+"PO-Revision-Date: 2011-05-04 15:40+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -1555,13 +1555,13 @@ msgstr "Cuenta:"
 
 #. Copy Link Address menu item
 #: ../libempathy-gtk/empathy-chat-text-view.c:320
-#: ../libempathy-gtk/empathy-theme-adium.c:1016
+#: ../libempathy-gtk/empathy-theme-adium.c:1026
 msgid "_Copy Link Address"
 msgstr "_Copiar la dirección del enlace"
 
 #. Open Link menu item
 #: ../libempathy-gtk/empathy-chat-text-view.c:327
-#: ../libempathy-gtk/empathy-theme-adium.c:1023
+#: ../libempathy-gtk/empathy-theme-adium.c:1033
 msgid "_Open Link"
 msgstr "_Abrir enlace"
 
@@ -2331,19 +2331,19 @@ msgstr "Guardar mensaje de estado _nuevo"
 msgid "Saved Status Messages"
 msgstr "Mensajes de estado guardados"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:67
+#: ../libempathy-gtk/empathy-theme-manager.c:68
 msgid "Classic"
 msgstr "Clásico"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:68
+#: ../libempathy-gtk/empathy-theme-manager.c:69
 msgid "Simple"
 msgstr "Simple"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:69
+#: ../libempathy-gtk/empathy-theme-manager.c:70
 msgid "Clean"
 msgstr "Limpio"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:70
+#: ../libempathy-gtk/empathy-theme-manager.c:71
 msgid "Blue"
 msgstr "Azul"
 
@@ -3807,39 +3807,82 @@ msgstr "Lista de salas"
 msgid "_Room:"
 msgstr "_Sala:"
 
-#: ../src/empathy-preferences.c:139
+#: ../src/empathy-preferences.c:147
 msgid "Message received"
 msgstr "Mensaje recibido"
 
-#: ../src/empathy-preferences.c:140
+#: ../src/empathy-preferences.c:148
 msgid "Message sent"
 msgstr "Mensaje enviado"
 
-#: ../src/empathy-preferences.c:141
+#: ../src/empathy-preferences.c:149
 msgid "New conversation"
 msgstr "Conversación nueva"
 
-#: ../src/empathy-preferences.c:142
+#: ../src/empathy-preferences.c:150
 msgid "Contact goes online"
 msgstr "El contacto se conecta"
 
-#: ../src/empathy-preferences.c:143
+#: ../src/empathy-preferences.c:151
 msgid "Contact goes offline"
 msgstr "El contacto se desconecta"
 
-#: ../src/empathy-preferences.c:144
+#: ../src/empathy-preferences.c:152
 msgid "Account connected"
 msgstr "Cuenta conectada"
 
-#: ../src/empathy-preferences.c:145
+#: ../src/empathy-preferences.c:153
 msgid "Account disconnected"
 msgstr "Cuenta desconectada"
 
-#: ../src/empathy-preferences.c:446
+#: ../src/empathy-preferences.c:454
 msgid "Language"
 msgstr "Idioma"
 
-#: ../src/empathy-preferences.c:875
+#. translators: Contact name for the chat theme preview
+#: ../src/empathy-preferences.c:704
+#| msgid "Client:"
+msgid "Juliet"
+msgstr "Julieta"
+
+#. translators: Contact name for the chat theme preview
+#: ../src/empathy-preferences.c:711
+#| msgid "Room"
+msgid "Romeo"
+msgstr "Romeo"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:717
+msgid "O Romeo, Romeo, wherefore art thou Romeo?"
+msgstr "Oh Romeo, Romeo! ¿Por qué eres tú Romeo?"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:720
+msgid "Deny thy father and refuse thy name;"
+msgstr "Niega a tu padre y rehúsa tu nombre;"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:723
+msgid "Or if thou wilt not, be but sworn my love"
+msgstr "O, si no quieres, júrame tan sólo que me amas"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:726
+msgid "And I'll no longer be a Capulet."
+msgstr "Y dejaré yo de ser una Capuleto"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:729
+msgid "Shall I hear more, or shall I speak at this?"
+msgstr "¿Debo oír más o contestar a lo dicho?"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:732
+#| msgid "%s has disconnected"
+msgid "Juliet has disconnected"
+msgstr "Julieta se ha desconectado"
+
+#: ../src/empathy-preferences.c:966
 msgid "Preferences"
 msgstr "Preferencias"
 
@@ -3942,43 +3985,47 @@ msgstr ""
 "diccionario instalado."
 
 #: ../src/empathy-preferences.ui.h:24
+msgid "Theme Variant:"
+msgstr "Variante del tema:"
+
+#: ../src/empathy-preferences.ui.h:25
 msgid "Themes"
 msgstr "Temas"
 
-#: ../src/empathy-preferences.ui.h:25
+#: ../src/empathy-preferences.ui.h:26
 msgid "_Automatically connect on startup"
 msgstr "C_onectarse automáticamente al inicio"
 
-#: ../src/empathy-preferences.ui.h:26
+#: ../src/empathy-preferences.ui.h:27
 msgid "_Cellphone"
 msgstr "Teléfono _móvil"
 
-#: ../src/empathy-preferences.ui.h:27
+#: ../src/empathy-preferences.ui.h:28
 msgid "_Enable bubble notifications"
 msgstr "_Activar notificaciones de burbuja"
 
-#: ../src/empathy-preferences.ui.h:28
+#: ../src/empathy-preferences.ui.h:29
 msgid "_Enable sound notifications"
 msgstr "_Activar notificaciones de sonido"
 
-#: ../src/empathy-preferences.ui.h:29
+#: ../src/empathy-preferences.ui.h:30
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:30
+#: ../src/empathy-preferences.ui.h:31
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Red (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Open new chats in separate windows"
 msgstr "_Abrir charlas nuevas en ventanas separadas"
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Publish location to my contacts"
 msgstr "_Publicar mi ubicación a mis contactos"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:35
 msgid "_Reduce location accuracy"
 msgstr "_Reducir la precisión de la ubicación"
 
@@ -4144,7 +4191,6 @@ msgid "%s just tried to call you, but you were in another call."
 msgstr "%s intentó llamarle, pero estaba en otra llamada."
 
 #: ../libempathy-gtk/empathy-search-bar.c:282
-#| msgid "Match case"
 msgid "_Match case"
 msgstr "_Coincidir con capitalización"
 
