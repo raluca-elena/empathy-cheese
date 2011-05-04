@@ -1209,12 +1209,10 @@ accounts_dialog_button_remove_clicked_cb (GtkWidget *button,
 {
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
   GtkTreeView  *view;
-  GtkTreeModel *model;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
 
   view = GTK_TREE_VIEW (priv->treeview);
-  model = gtk_tree_view_get_model (view);
   selection = gtk_tree_view_get_selection (view);
   if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
       return;
@@ -1491,14 +1489,12 @@ accounts_dialog_get_settings_iter (EmpathyAccountsDialog *dialog,
     GtkTreeIter *iter)
 {
   GtkTreeView      *view;
-  GtkTreeSelection *selection;
   GtkTreeModel     *model;
   gboolean          ok;
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
 
   /* Update the status in the model */
   view = GTK_TREE_VIEW (priv->treeview);
-  selection = gtk_tree_view_get_selection (view);
   model = gtk_tree_view_get_model (view);
 
   for (ok = gtk_tree_model_get_iter_first (model, iter);
@@ -1528,14 +1524,12 @@ accounts_dialog_get_account_iter (EmpathyAccountsDialog *dialog,
     GtkTreeIter *iter)
 {
   GtkTreeView      *view;
-  GtkTreeSelection *selection;
   GtkTreeModel     *model;
   gboolean          ok;
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
 
   /* Update the status in the model */
   view = GTK_TREE_VIEW (priv->treeview);
-  selection = gtk_tree_view_get_selection (view);
   model = gtk_tree_view_get_model (view);
 
   for (ok = gtk_tree_model_get_iter_first (model, iter);
@@ -1585,11 +1579,8 @@ static void
 accounts_dialog_model_set_selected (EmpathyAccountsDialog *dialog,
     EmpathyAccountSettings *settings)
 {
-  GtkTreeSelection *selection;
   GtkTreeIter       iter;
-  EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
 
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
   if (accounts_dialog_get_settings_iter (dialog, settings, &iter))
     select_and_scroll_to_iter (dialog, &iter);
 }
@@ -1831,14 +1822,12 @@ accounts_dialog_add_account (EmpathyAccountsDialog *dialog,
   GtkTreeIter         iter;
   TpConnectionStatus  status;
   const gchar        *name;
-  gboolean            enabled;
   EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
   gboolean selected = FALSE;
 
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->treeview));
   status = tp_account_get_connection_status (account, NULL);
   name = tp_account_get_display_name (account);
-  enabled = tp_account_is_enabled (account);
 
   settings = empathy_account_settings_new_for_account (account);
 
@@ -1968,12 +1957,6 @@ enable_or_disable_account (EmpathyAccountsDialog *dialog,
     TpAccount *account,
     gboolean enabled)
 {
-  GtkTreeModel *model;
-  EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
-
-  /* Update the status in the model */
-  model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->treeview));
-
   /* Update the status-infobar in the details view */
   accounts_dialog_update_status_infobar (dialog, account);
 
@@ -2036,11 +2019,8 @@ static void
 accounts_dialog_set_selected_account (EmpathyAccountsDialog *dialog,
     TpAccount *account)
 {
-  GtkTreeSelection *selection;
   GtkTreeIter       iter;
-  EmpathyAccountsDialogPriv *priv = GET_PRIV (dialog);
 
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->treeview));
   if (accounts_dialog_get_account_iter (dialog, account, &iter))
     select_and_scroll_to_iter (dialog, &iter);
 }

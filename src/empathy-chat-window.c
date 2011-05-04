@@ -259,7 +259,6 @@ chat_window_create_label (EmpathyChatWindow *window,
 			  EmpathyChat       *chat,
 			  gboolean           is_tab_label)
 {
-	EmpathyChatWindowPriv *priv;
 	GtkWidget            *hbox;
 	GtkWidget            *name_label;
 	GtkWidget            *status_image;
@@ -267,8 +266,6 @@ chat_window_create_label (EmpathyChatWindow *window,
 	GtkWidget            *event_box_hbox;
 	PangoAttrList        *attr_list;
 	PangoAttribute       *attr;
-
-	priv = GET_PRIV (window);
 
 	/* The spacing between the button and the label. */
 	hbox = gtk_hbox_new (FALSE, 0);
@@ -1105,7 +1102,6 @@ chat_window_tabs_next_activate_cb (GtkAction         *action,
 				   EmpathyChatWindow *window)
 {
 	EmpathyChatWindowPriv *priv;
-	EmpathyChat           *chat;
 	gint                  index_, numPages;
 	gboolean              wrap_around;
 
@@ -1114,7 +1110,6 @@ chat_window_tabs_next_activate_cb (GtkAction         *action,
 	g_object_get (gtk_settings_get_default (), "gtk-keynav-wrap-around",
                       &wrap_around, NULL);
 
-	chat = priv->current_chat;
 	index_ = gtk_notebook_get_current_page (GTK_NOTEBOOK (priv->notebook));
 	numPages = gtk_notebook_get_n_pages (GTK_NOTEBOOK (priv->notebook));
 
@@ -1131,7 +1126,6 @@ chat_window_tabs_previous_activate_cb (GtkAction         *action,
 				   EmpathyChatWindow *window)
 {
 	EmpathyChatWindowPriv *priv;
-	EmpathyChat           *chat;
 	gint                  index_, numPages;
 	gboolean              wrap_around;
 
@@ -1140,7 +1134,6 @@ chat_window_tabs_previous_activate_cb (GtkAction         *action,
 	g_object_get (gtk_settings_get_default (), "gtk-keynav-wrap-around",
                       &wrap_around, NULL);
 
-	chat = priv->current_chat;
 	index_ = gtk_notebook_get_current_page (GTK_NOTEBOOK (priv->notebook));
 	numPages = gtk_notebook_get_n_pages (GTK_NOTEBOOK (priv->notebook));
 
@@ -2153,13 +2146,11 @@ empathy_chat_window_get_default (gboolean room)
 	}
 
 	for (l = chat_windows; l; l = l->next) {
-		EmpathyChatWindowPriv *priv;
 		EmpathyChatWindow *chat_window;
 		GtkWidget         *dialog;
 		guint nb_rooms, nb_private;
 
 		chat_window = l->data;
-		priv = GET_PRIV (chat_window);
 
 		dialog = empathy_chat_window_get_dialog (chat_window);
 

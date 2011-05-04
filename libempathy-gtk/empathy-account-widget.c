@@ -2210,9 +2210,6 @@ do_dispose (GObject *obj)
 
   if (priv->settings != NULL)
     {
-      TpAccount *account;
-      account = empathy_account_settings_get_account (priv->settings);
-
       g_object_unref (priv->settings);
       priv->settings = NULL;
     }

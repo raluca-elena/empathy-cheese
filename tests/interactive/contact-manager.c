@@ -12,7 +12,6 @@ int
 main (int argc, char **argv)
 {
 	EmpathyContactManager *manager;
-	GMainLoop             *main_loop;
 	EmpathyContactListStore *store;
 	GtkWidget *combo;
 	GtkWidget *window;
@@ -22,7 +21,7 @@ main (int argc, char **argv)
 	empathy_gtk_init ();
 
 	empathy_debug_set_flags (g_getenv ("EMPATHY_DEBUG"));
-	main_loop = g_main_loop_new (NULL, FALSE);
+	g_main_loop_new (NULL, FALSE);
 	manager = empathy_contact_manager_dup_singleton ();
 	store = empathy_contact_list_store_new (EMPATHY_CONTACT_LIST (manager));
 	empathy_contact_list_store_set_is_compact (store, TRUE);

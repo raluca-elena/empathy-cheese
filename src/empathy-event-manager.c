@@ -335,9 +335,6 @@ static void
 event_text_channel_process_func (EventPriv *event)
 {
   EmpathyTpChat *tp_chat;
-  gint64 timestamp;
-
-  timestamp = tp_user_action_time_from_x11 (gtk_get_current_event_time ());
 
   if (event->approval->handler != 0)
     {
@@ -566,7 +563,6 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
   EmpathyContact  *sender;
   const gchar     *header;
   const gchar     *msg;
-  TpChannel       *channel;
   EventPriv       *event;
   EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
 
@@ -582,8 +578,6 @@ event_manager_chat_message_received_cb (EmpathyTpChat *tp_chat,
 
   header = empathy_contact_get_alias (sender);
   msg = empathy_message_get_body (message);
-
-  channel = empathy_tp_chat_get_channel (tp_chat);
 
   if (event != NULL)
     event_update (approval->manager, event, EMPATHY_IMAGE_NEW_MESSAGE, header,
@@ -703,12 +697,8 @@ invite_dialog_response_cb (GtkDialog *dialog,
                            gint response,
                            EventManagerApproval *approval)
 {
-  EmpathyTpChat *tp_chat;
-
   gtk_widget_destroy (GTK_WIDGET (approval->dialog));
   approval->dialog = NULL;
-
-  tp_chat = EMPATHY_TP_CHAT (approval->handler_instance);
 
   if (response != GTK_RESPONSE_OK)
     {

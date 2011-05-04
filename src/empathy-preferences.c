@@ -320,7 +320,7 @@ preferences_sound_cell_toggled_cb (GtkCellRendererToggle *toggle,
 {
 	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
 	GtkTreePath *path;
-	gboolean toggled, instore;
+	gboolean instore;
 	GtkTreeIter iter;
 	GtkTreeView *view;
 	GtkTreeModel *model;
@@ -330,7 +330,6 @@ preferences_sound_cell_toggled_cb (GtkCellRendererToggle *toggle,
 	model = gtk_tree_view_get_model (view);
 
 	path = gtk_tree_path_new_from_string (path_string);
-	toggled = gtk_cell_renderer_toggle_get_active (toggle);
 
 	gtk_tree_model_get_iter (model, &iter, path);
 	gtk_tree_model_get (model, &iter, COL_SOUND_KEY, &key,
@@ -419,7 +418,6 @@ preferences_languages_setup (EmpathyPreferences *preferences)
 	GtkTreeView       *view;
 	GtkListStore      *store;
 	GtkTreeSelection  *selection;
-	GtkTreeModel      *model;
 	GtkTreeViewColumn *column;
 	GtkCellRenderer   *renderer;
 	guint              col_offset;
@@ -435,8 +433,6 @@ preferences_languages_setup (EmpathyPreferences *preferences)
 
 	selection = gtk_tree_view_get_selection (view);
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-
-	model = GTK_TREE_MODEL (store);
 
 	renderer = gtk_cell_renderer_toggle_new ();
 	g_signal_connect (renderer, "toggled",

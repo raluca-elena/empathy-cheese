@@ -386,10 +386,7 @@ out:
 static void
 new_chatroom_dialog_update_widgets (EmpathyNewChatroomDialog *dialog)
 {
-	EmpathyAccountChooser *account_chooser;
 	const gchar           *protocol;
-
-	account_chooser = EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser);
 
 	if (dialog->account == NULL)
 		return;
@@ -535,8 +532,6 @@ new_chatroom_dialog_new_room_cb (EmpathyTpRoomlist        *room_list,
 				 EmpathyChatroom          *chatroom,
 				 EmpathyNewChatroomDialog *dialog)
 {
-	GtkTreeView      *view;
-	GtkTreeSelection *selection;
 	GtkListStore     *store;
 	GtkTreeIter       iter;
 	gchar            *members;
@@ -550,8 +545,6 @@ new_chatroom_dialog_new_room_cb (EmpathyTpRoomlist        *room_list,
 		empathy_chatroom_get_room (chatroom));
 
 	/* Add to model */
-	view = GTK_TREE_VIEW (dialog->treeview);
-	selection = gtk_tree_view_get_selection (view);
 	store = GTK_LIST_STORE (dialog->model);
 	members = g_strdup_printf ("%d", empathy_chatroom_get_members_count (chatroom));
 	tmp = g_strdup_printf ("<b>%s</b>", empathy_chatroom_get_name (chatroom));
