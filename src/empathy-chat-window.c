@@ -741,12 +741,17 @@ chat_window_update_chat_tab_full (EmpathyChat *chat,
 			      tp_account_get_display_name (account));
 
 	if (nb_sending > 0) {
-		append_markup_printf (tooltip, "\n");
-		append_markup_printf (tooltip,
-				      ngettext ("Sending %d message",
-					        "Sending %d messages",
-						nb_sending),
-				      nb_sending);
+		char *tmp = g_strdup_printf (
+			ngettext ("Sending %d message",
+				  "Sending %d messages",
+				  nb_sending),
+			nb_sending);
+
+		g_string_append (tooltip, "\n");
+		g_string_append (tooltip, tmp);
+
+		gtk_widget_set_tooltip_text (sending_spinner, tmp);
+		g_free (tmp);
 	}
 
 	if (!EMP_STR_EMPTY (status)) {
