@@ -162,34 +162,43 @@ individual_notify_personas_cb (FolksIndividual *individual,
 
 static void
 aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
-    GList *added,
-    GList *removed,
+    GeeSet *added,
+    GeeSet *removed,
     const char *message,
     FolksPersona *actor,
     guint reason,
     EmpathyIndividualManager *self)
 {
   EmpathyIndividualManagerPriv *priv = GET_PRIV (self);
-  GList *l, *added_filtered = NULL;
+  GeeIterator *iter;
+  GList *added_filtered = NULL, *removed_list = NULL;
 
   /* Handle the removals first, as one of the added Individuals might have the
    * same ID as one of the removed Individuals (due to linking). */
-  for (l = removed; l; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (removed));
+  while (gee_iterator_next (iter))
     {
-      FolksIndividual *ind = FOLKS_INDIVIDUAL (l->data);
+      FolksIndividual *ind = gee_iterator_get (iter);
 
       g_signal_handlers_disconnect_by_func (ind,
           individual_notify_personas_cb, self);
 
       if (g_hash_table_lookup (priv->individuals,
           folks_individual_get_id (ind)) != NULL)
-        remove_individual (self, ind);
+        {
+          remove_individual (self, ind);
+          removed_list = g_list_prepend (removed_list, ind);
+        }
+
+      g_clear_object (&ind);
     }
+  g_clear_object (&iter);
 
   /* Filter the individuals for ones which contain EmpathyContacts */
-  for (l = added; l; l = l->next)
+  iter = gee_iterable_iterator (GEE_ITERABLE (added));
+  while (gee_iterator_next (iter))
     {
-      FolksIndividual *ind = FOLKS_INDIVIDUAL (l->data);
+      FolksIndividual *ind = gee_iterator_get (iter);
 
       g_signal_connect (ind, "notify::personas",
           G_CALLBACK (individual_notify_personas_cb), self);
@@ -199,7 +208,10 @@ aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
           add_individual (self, ind);
           added_filtered = g_list_prepend (added_filtered, ind);
         }
+
+      g_clear_object (&ind);
     }
+  g_clear_object (&iter);
 
   /* Bail if we have no individuals left */
   if (added_filtered == NULL && removed == NULL)
@@ -208,11 +220,12 @@ aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
   added_filtered = g_list_reverse (added_filtered);
 
   g_signal_emit (self, signals[MEMBERS_CHANGED], 0, message,
-      added_filtered, removed,
+      added_filtered, removed_list,
       tp_channel_group_change_reason_from_folks_groups_change_reason (reason),
       TRUE);
 
   g_list_free (added_filtered);
+  g_list_free (removed_list);
 }
 
 static void
