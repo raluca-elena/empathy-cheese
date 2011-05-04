@@ -667,6 +667,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	GString               *message_classes = NULL;
 	gboolean               is_backlog;
 	gboolean               consecutive;
+	gboolean               action;
 
 	if (priv->pages_loading != 0) {
 		GValue *value = tp_g_value_slice_new (EMPATHY_TYPE_MESSAGE);
@@ -687,17 +688,21 @@ theme_adium_append_message (EmpathyChatView *view,
 	body_escaped = theme_adium_parse_body (theme, body);
 	name = empathy_contact_get_alias (sender);
 	contact_id = empathy_contact_get_id (sender);
+	action = (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION);
 
-	/* If this is a /me, append an event */
-	if (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION) {
+	/* If this is a /me probably */
+	if (action) {
 		gchar *str;
 
-		str = g_strdup_printf ("%s %s", name, body_escaped);
-		theme_adium_append_event_escaped (view, str);
-
-		g_free (str);
+		if (priv->data->version >= 4 || !priv->data->custom_template) {
+			str = g_strdup_printf ("<span class='actionMessageUserName'>%s</span>"
+					       "<span class='actionMessageBody'>%s</span>",
+					       name, body_escaped);
+		} else {
+			str = g_strdup_printf ("*%s*", body_escaped);
+		}
 		g_free (body_escaped);
-		return;
+		body_escaped = str;
 	}
 
 	/* Get the avatar filename, or a fallback */
@@ -762,6 +767,9 @@ theme_adium_append_message (EmpathyChatView *view,
 	}
 	if (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_AUTO_REPLY) {
 		g_string_append (message_classes, " autoreply");
+	}
+	if (action) {
+		g_string_append (message_classes, " action");
 	}
 	/* FIXME: other classes:
 	 * status - the message is a status change
