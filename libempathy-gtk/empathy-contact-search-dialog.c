@@ -22,8 +22,9 @@
  *     Danielle Madeley <danielle.madeley@collabora.co.uk>
  *     Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
  */
+#include "config.h"
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <telepathy-glib/telepathy-glib.h>
 

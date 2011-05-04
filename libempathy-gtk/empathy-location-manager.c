@@ -24,7 +24,7 @@
 #include <string.h>
 #include <time.h>
 
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/util.h>
