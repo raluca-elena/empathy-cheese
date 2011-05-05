@@ -311,6 +311,15 @@ chat_window_create_label (EmpathyChatWindow *window,
 
 	if (is_tab_label) {
 		GtkWidget            *close_button;
+		GtkWidget *sending_spinner;
+
+		sending_spinner = gtk_spinner_new ();
+
+		gtk_box_pack_start (GTK_BOX (hbox), sending_spinner,
+			FALSE, FALSE, 0);
+		g_object_set_data (G_OBJECT (chat),
+			"chat-window-tab-sending-spinner",
+			sending_spinner);
 
 		close_button = gedit_close_button_new ();
 		g_object_set_data (G_OBJECT (chat), "chat-window-tab-close-button", close_button);
@@ -649,6 +658,8 @@ chat_window_update_chat_tab_full (EmpathyChat *chat,
 	const gchar           *icon_name;
 	GtkWidget             *tab_image;
 	GtkWidget             *menu_image;
+	GtkWidget             *sending_spinner;
+	guint                  nb_sending;
 
 	window = chat_window_find_chat (chat);
 	if (!window) {
@@ -697,6 +708,16 @@ chat_window_update_chat_tab_full (EmpathyChat *chat,
 		gtk_widget_hide (menu_image);
 	}
 
+	/* Update the sending spinner */
+	nb_sending = empathy_chat_get_n_messages_sending (chat);
+	sending_spinner = g_object_get_data (G_OBJECT (chat),
+		"chat-window-tab-sending-spinner");
+
+	g_object_set (sending_spinner,
+		"active", nb_sending > 0,
+		"visible", nb_sending > 0,
+		NULL);
+
 	/* Update tab tooltip */
 	tooltip = g_string_new (NULL);
 
@@ -715,6 +736,20 @@ chat_window_update_chat_tab_full (EmpathyChat *chat,
 			      "<b>%s</b><small> (%s)</small>",
 			      id,
 			      tp_account_get_display_name (account));
+
+	if (nb_sending > 0) {
+		char *tmp = g_strdup_printf (
+			ngettext ("Sending %d message",
+				  "Sending %d messages",
+				  nb_sending),
+			nb_sending);
+
+		g_string_append (tooltip, "\n");
+		g_string_append (tooltip, tmp);
+
+		gtk_widget_set_tooltip_text (sending_spinner, tmp);
+		g_free (tmp);
+	}
 
 	if (!EMP_STR_EMPTY (status)) {
 		append_markup_printf (tooltip, "\n<i>%s</i>", status);
@@ -2241,6 +2276,9 @@ empathy_chat_window_add_chat (EmpathyChatWindow *window,
 			  G_CALLBACK (chat_window_chat_notify_cb),
 			  NULL);
 	g_signal_connect (chat, "notify::sms-channel",
+			  G_CALLBACK (chat_window_chat_notify_cb),
+			  NULL);
+	g_signal_connect (chat, "notify::n-messages-sending",
 			  G_CALLBACK (chat_window_chat_notify_cb),
 			  NULL);
 	chat_window_chat_notify_cb (chat);

@@ -172,6 +172,7 @@ enum {
 	PROP_REMOTE_CONTACT,
 	PROP_SHOW_CONTACTS,
 	PROP_SMS_CHANNEL,
+	PROP_N_MESSAGES_SENDING,
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -213,6 +214,10 @@ chat_get_property (GObject    *object,
 		break;
 	case PROP_SMS_CHANNEL:
 		g_value_set_boolean (value, priv->sms_channel);
+		break;
+	case PROP_N_MESSAGES_SENDING:
+		g_value_set_uint (value,
+			empathy_chat_get_n_messages_sending (chat));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -1282,31 +1287,41 @@ static void
 chat_send_error_cb (EmpathyTpChat          *tp_chat,
 		    const gchar            *message_body,
 		    TpChannelTextSendError  error_code,
+		    const gchar            *dbus_error,
 		    EmpathyChat            *chat)
 {
-	const gchar *error;
+	const gchar *error = NULL;
 	gchar       *str;
 
-	switch (error_code) {
-	case TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE:
-		error = _("offline");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT:
-		error = _("invalid contact");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED:
-		error = _("permission denied");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_TOO_LONG:
-		error = _("too long message");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED:
-		error = _("not implemented");
-		break;
-	case TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN:
-	default:
-		error = _("unknown");
-		break;
+	if (!tp_strdiff (dbus_error, TP_ERROR_STR_INSUFFICIENT_BALANCE)) {
+		error = _("insufficient balance to send message");
+	} else if (!tp_strdiff (dbus_error, TP_ERROR_STR_NOT_CAPABLE)) {
+		error = _("not capable");
+	}
+
+	if (error == NULL) {
+		/* if we didn't find a dbus-error, try the old error */
+		switch (error_code) {
+		case TP_CHANNEL_TEXT_SEND_ERROR_OFFLINE:
+			error = _("offline");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_INVALID_CONTACT:
+			error = _("invalid contact");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_PERMISSION_DENIED:
+			error = _("permission denied");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_TOO_LONG:
+			error = _("too long message");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_NOT_IMPLEMENTED:
+			error = _("not implemented");
+			break;
+		case TP_CHANNEL_TEXT_SEND_ERROR_UNKNOWN:
+		default:
+			error = _("unknown");
+			break;
+		}
 	}
 
 	if (message_body != NULL) {
@@ -2982,6 +2997,14 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 							       FALSE,
 							       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
+	g_object_class_install_property (object_class,
+					 PROP_N_MESSAGES_SENDING,
+					 g_param_spec_uint ("n-messages-sending",
+						 	    "Num Messages Sending",
+							    "The number of messages being sent",
+							    0, G_MAXUINT, 0,
+							    G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
 	signals[COMPOSING] =
 		g_signal_new ("composing",
 			      G_OBJECT_CLASS_TYPE (object_class),
@@ -3487,6 +3510,12 @@ chat_sms_channel_changed_cb (EmpathyChat *self)
 	g_object_notify (G_OBJECT (self), "sms-channel");
 }
 
+static void
+chat_n_messages_sending_changed_cb (EmpathyChat *self)
+{
+	g_object_notify (G_OBJECT (self), "n-messages-sending");
+}
+
 void
 empathy_chat_set_tp_chat (EmpathyChat   *chat,
 			  EmpathyTpChat *tp_chat)
@@ -3538,6 +3567,9 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 				  chat);
 	g_signal_connect_swapped (tp_chat, "notify::sms-channel",
 				  G_CALLBACK (chat_sms_channel_changed_cb),
+				  chat);
+	g_signal_connect_swapped (tp_chat, "notify::n-messages-sending",
+				  G_CALLBACK (chat_n_messages_sending_changed_cb),
 				  chat);
 
 	/* Get initial value of properties */
@@ -3862,4 +3894,26 @@ empathy_chat_is_sms_channel (EmpathyChat *self)
 	g_return_val_if_fail (EMPATHY_IS_CHAT (self), 0);
 
 	return priv->sms_channel;
+}
+
+guint
+empathy_chat_get_n_messages_sending (EmpathyChat *self)
+{
+	EmpathyChatPriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_CHAT (self), 0);
+
+	priv = GET_PRIV (self);
+
+	if (priv->tp_chat == NULL) {
+		return 0;
+	} else {
+		guint n_messages;
+
+		g_object_get (priv->tp_chat,
+			"n-messages-sending", &n_messages,
+			NULL);
+
+		return n_messages;
+	}
 }
