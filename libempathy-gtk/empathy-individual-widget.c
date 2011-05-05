@@ -1711,8 +1711,8 @@ individual_table_destroy (EmpathyIndividualWidget *self)
 
 static void
 personas_changed_cb (FolksIndividual *individual,
-    GList *added,
-    GList *removed,
+    GeeSet *added,
+    GeeSet *removed,
     EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
@@ -1769,13 +1769,27 @@ personas_changed_cb (FolksIndividual *individual,
 
   if (was_showing_personas && will_show_personas)
     {
+      GeeIterator *iter_changed;
+
       /* Remove outdated Personas */
-      for (l = removed; l != NULL; l = l->next)
-        remove_persona (self, FOLKS_PERSONA (l->data));
+      iter_changed = gee_iterable_iterator (GEE_ITERABLE (removed));
+      while (gee_iterator_next (iter_changed))
+        {
+          FolksPersona *persona = gee_iterator_get (iter_changed);
+          remove_persona (self, persona);
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter_changed);
 
       /* Add new Personas */
-      for (l = added; l != NULL; l = l->next)
-        add_persona (self, FOLKS_PERSONA (l->data));
+      iter_changed = gee_iterable_iterator (GEE_ITERABLE (added));
+      while (gee_iterator_next (iter_changed))
+        {
+          FolksPersona *persona = gee_iterator_get (iter_changed);
+          add_persona (self, persona);
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter_changed);
     }
   else if (!was_showing_personas && will_show_personas)
     {
@@ -1804,8 +1818,19 @@ personas_changed_cb (FolksIndividual *individual,
           g_clear_object (&persona);
         }
 
-      for (l = removed; l != NULL; l = l->next)
-        remove_persona (self, FOLKS_PERSONA (l->data));
+      if (removed != NULL)
+        {
+          GeeIterator *iter_changed;
+
+          iter_changed = gee_iterable_iterator (GEE_ITERABLE (removed));
+          while (gee_iterator_next (iter_changed))
+            {
+              FolksPersona *persona = gee_iterator_get (iter_changed);
+              remove_persona (self, persona);
+              g_clear_object (&persona);
+            }
+          g_clear_object (&iter_changed);
+        }
 
       /* Set up the Individual table instead */
       individual_table_set_up (self);

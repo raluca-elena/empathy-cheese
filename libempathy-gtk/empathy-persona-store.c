@@ -526,11 +526,11 @@ update_persona (EmpathyPersonaStore *self,
 
 static void
 individual_personas_changed_cb (GObject *object,
-    GList *added,
-    GList *removed,
+    GeeSet *added,
+    GeeSet *removed,
     EmpathyPersonaStore *self)
 {
-  GList *l;
+  GeeIterator *iter;
 
   /* One of the personas' row references might hold the last reference to the
    * PersonaStore, so we need to keep a reference ourselves so we don't get
@@ -538,12 +538,24 @@ individual_personas_changed_cb (GObject *object,
   g_object_ref (self);
 
   /* Remove the old personas. */
-  for (l = removed; l != NULL; l = l->next)
-    remove_persona_and_disconnect (self, FOLKS_PERSONA (l->data));
+  iter = gee_iterable_iterator (GEE_ITERABLE (removed));
+  while (gee_iterator_next (iter))
+    {
+      FolksPersona *persona = gee_iterator_get (iter);
+      remove_persona_and_disconnect (self, persona);
+      g_clear_object (&persona);
+    }
+  g_clear_object (&iter);
 
   /* Add each of the new personas to the tree model */
-  for (l = added; l != NULL; l = l->next)
-    add_persona_and_connect (self, FOLKS_PERSONA (l->data));
+  iter = gee_iterable_iterator (GEE_ITERABLE (added));
+  while (gee_iterator_next (iter))
+    {
+      FolksPersona *persona = gee_iterator_get (iter);
+      add_persona_and_connect (self, persona);
+      g_clear_object (&persona);
+    }
+  g_clear_object (&iter);
 
   g_object_unref (self);
 }
