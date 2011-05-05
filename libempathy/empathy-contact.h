@@ -67,6 +67,7 @@ typedef enum {
   EMPATHY_CAPABILITIES_VIDEO = 1 << 1,
   EMPATHY_CAPABILITIES_FT = 1 << 2,
   EMPATHY_CAPABILITIES_RFB_STREAM_TUBE = 1 << 3,
+  EMPATHY_CAPABILITIES_SMS = 1 << 4,
   EMPATHY_CAPABILITIES_UNKNOWN = 1 << 7
 } EmpathyCapabilities;
 
@@ -94,6 +95,7 @@ void empathy_contact_set_is_user (EmpathyContact *contact,
     gboolean is_user);
 gboolean empathy_contact_is_online (EmpathyContact *contact);
 const gchar * empathy_contact_get_status (EmpathyContact *contact);
+gboolean empathy_contact_can_sms (EmpathyContact *contact);
 gboolean empathy_contact_can_voip (EmpathyContact *contact);
 gboolean empathy_contact_can_voip_audio (EmpathyContact *contact);
 gboolean empathy_contact_can_voip_video (EmpathyContact *contact);
@@ -102,6 +104,7 @@ gboolean empathy_contact_can_use_rfb_stream_tube (EmpathyContact *contact);
 
 typedef enum {
   EMPATHY_ACTION_CHAT,
+  EMPATHY_ACTION_SMS,
   EMPATHY_ACTION_AUDIO_CALL,
   EMPATHY_ACTION_VIDEO_CALL,
   EMPATHY_ACTION_VIEW_LOGS,

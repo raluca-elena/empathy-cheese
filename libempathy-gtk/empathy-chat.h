@@ -69,7 +69,7 @@ void               empathy_chat_set_tp_chat          (EmpathyChat   *chat,
 						      EmpathyTpChat *tp_chat);
 TpAccount *        empathy_chat_get_account          (EmpathyChat   *chat);
 const gchar *      empathy_chat_get_id               (EmpathyChat   *chat);
-const gchar *      empathy_chat_get_name             (EmpathyChat   *chat);
+gchar *            empathy_chat_dup_name             (EmpathyChat   *chat);
 const gchar *      empathy_chat_get_subject          (EmpathyChat   *chat);
 EmpathyContact *   empathy_chat_get_remote_contact   (EmpathyChat   *chat);
 GtkWidget *        empathy_chat_get_contact_menu     (EmpathyChat   *chat);
@@ -94,6 +94,8 @@ guint              empathy_chat_get_nb_unread_messages (EmpathyChat   *chat);
 void               empathy_chat_messages_read        (EmpathyChat *self);
 
 gboolean           empathy_chat_is_composing (EmpathyChat *chat);
+
+gboolean           empathy_chat_is_sms_channel       (EmpathyChat *self);
 G_END_DECLS
 
 #endif /* __EMPATHY_CHAT_H__ */

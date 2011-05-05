@@ -62,21 +62,40 @@ G_DEFINE_TYPE(EmpathyNewMessageDialog, empathy_new_message_dialog,
  * to be started with any contact on any enabled account.
  */
 
+enum
+{
+  EMP_NEW_MESSAGE_TEXT,
+  EMP_NEW_MESSAGE_SMS,
+};
+
 static void
 empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
 {
   TpAccount *account;
   const gchar *contact_id;
 
-  if (response_id != GTK_RESPONSE_ACCEPT) goto out;
+  if (response_id < EMP_NEW_MESSAGE_TEXT) goto out;
 
   contact_id = empathy_contact_selector_dialog_get_selected (
       EMPATHY_CONTACT_SELECTOR_DIALOG (dialog), NULL, &account);
 
   if (EMP_STR_EMPTY (contact_id) || account == NULL) goto out;
 
-  empathy_chat_with_contact_id (account, contact_id,
-      gtk_get_current_event_time ());
+  switch (response_id)
+    {
+      case EMP_NEW_MESSAGE_TEXT:
+        empathy_chat_with_contact_id (account, contact_id,
+            gtk_get_current_event_time ());
+        break;
+
+      case EMP_NEW_MESSAGE_SMS:
+        empathy_sms_contact_id (account, contact_id,
+            gtk_get_current_event_time ());
+        break;
+
+      default:
+        g_warn_if_reached ();
+    }
 
 out:
   gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -135,6 +154,63 @@ empathy_new_message_account_filter (EmpathyContactSelectorDialog *dialog,
   tp_proxy_prepare_async (connection, features, conn_prepared_cb, cb_data);
 }
 
+static void
+empathy_new_message_dialog_update_sms_button_sensitivity (GtkWidget *widget,
+    GParamSpec *pspec,
+    GtkWidget *button)
+{
+  GtkWidget *self = gtk_widget_get_toplevel (widget);
+  EmpathyContactSelectorDialog *dialog;
+  TpConnection *conn;
+  GPtrArray *rccs;
+  gboolean sensitive = FALSE;
+  guint i;
+
+  g_return_if_fail (EMPATHY_IS_NEW_MESSAGE_DIALOG (self));
+
+  dialog = EMPATHY_CONTACT_SELECTOR_DIALOG (self);
+
+  /* if the Text widget isn't sensitive, don't bother checking the caps */
+  if (!gtk_widget_get_sensitive (dialog->button_action))
+    goto finally;
+
+  empathy_contact_selector_dialog_get_selected (dialog, &conn, NULL);
+
+  if (conn == NULL)
+    goto finally;
+
+  /* iterate the rccs to find if SMS channels are supported, this should
+   * be in tp-glib */
+  rccs = tp_capabilities_get_channel_classes (
+      tp_connection_get_capabilities (conn));
+
+  for (i = 0; i < rccs->len; i++)
+    {
+      GHashTable *fixed;
+      GStrv allowed;
+      const char *type;
+      gboolean sms_channel;
+
+      tp_value_array_unpack (g_ptr_array_index (rccs, i), 2,
+          &fixed,
+          &allowed);
+
+      /* SMS channels are type:Text and sms-channel:True */
+      type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
+      sms_channel = tp_asv_get_boolean (fixed,
+          TP_PROP_CHANNEL_INTERFACE_SMS_SMS_CHANNEL, NULL);
+
+      sensitive = sms_channel &&
+        !tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_TEXT);
+
+      if (sensitive)
+        break;
+    }
+
+finally:
+  gtk_widget_set_sensitive (button, sensitive);
+}
+
 static GObject *
 empathy_new_message_dialog_constructor (GType type,
     guint n_props,
@@ -165,7 +241,18 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *dialog)
 {
   EmpathyContactSelectorDialog *parent = EMPATHY_CONTACT_SELECTOR_DIALOG (
         dialog);
+  GtkWidget *button;
   GtkWidget *image;
+
+  /* add an SMS button */
+  button = gtk_button_new_with_mnemonic (_("_SMS"));
+  image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_SMS,
+      GTK_ICON_SIZE_BUTTON);
+  gtk_button_set_image (GTK_BUTTON (button), image);
+
+  gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
+      EMP_NEW_MESSAGE_SMS);
+  gtk_widget_show (button);
 
   /* add chat button */
   parent->button_action = gtk_button_new_with_mnemonic (_("C_hat"));
@@ -174,8 +261,17 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *dialog)
   gtk_button_set_image (GTK_BUTTON (parent->button_action), image);
 
   gtk_dialog_add_action_widget (GTK_DIALOG (dialog), parent->button_action,
-      GTK_RESPONSE_ACCEPT);
+      EMP_NEW_MESSAGE_TEXT);
   gtk_widget_show (parent->button_action);
+
+  /* the parent class will update the sensitivity of button_action, propagate
+   * it */
+  g_signal_connect (parent->button_action, "notify::sensitive",
+      G_CALLBACK (empathy_new_message_dialog_update_sms_button_sensitivity),
+      button);
+  g_signal_connect (dialog, "notify::selected-account",
+      G_CALLBACK (empathy_new_message_dialog_update_sms_button_sensitivity),
+      button);
 
   /* Tweak the dialog */
   gtk_window_set_title (GTK_WINDOW (dialog), _("New Conversation"));

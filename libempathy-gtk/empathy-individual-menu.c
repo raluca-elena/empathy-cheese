@@ -149,6 +149,14 @@ individual_menu_add_personas (GtkMenuShell *menu,
           gtk_widget_show (action);
         }
 
+      /* SMS */
+      if (features & EMPATHY_INDIVIDUAL_FEATURE_SMS)
+        {
+          action = empathy_individual_sms_menu_item_new (NULL, contact);
+          gtk_menu_shell_append (GTK_MENU_SHELL (contact_submenu), action);
+          gtk_widget_show (action);
+        }
+
       if (features & EMPATHY_INDIVIDUAL_FEATURE_CALL)
         {
           /* Audio Call */
@@ -231,6 +239,17 @@ constructed (GObject *object)
   if (features & EMPATHY_INDIVIDUAL_FEATURE_CHAT)
     {
       item = empathy_individual_chat_menu_item_new (individual, NULL);
+      if (item != NULL)
+        {
+          gtk_menu_shell_append (shell, item);
+          gtk_widget_show (item);
+        }
+    }
+
+  /* SMS */
+  if (features & EMPATHY_INDIVIDUAL_FEATURE_SMS)
+    {
+      item = empathy_individual_sms_menu_item_new (individual, NULL);
       if (item != NULL)
         {
           gtk_menu_shell_append (shell, item);
@@ -531,6 +550,52 @@ empathy_individual_chat_menu_item_new (FolksIndividual *individual,
       menu_item_set_first_contact (item, individual,
           G_CALLBACK (empathy_individual_chat_menu_item_activated),
           EMPATHY_ACTION_CHAT);
+    }
+
+  return item;
+}
+
+static void
+empathy_individual_sms_menu_item_activated (GtkMenuItem *item,
+  EmpathyContact *contact)
+{
+  g_return_if_fail (EMPATHY_IS_CONTACT (contact));
+
+  empathy_sms_contact_id (
+      empathy_contact_get_account (contact),
+      empathy_contact_get_id (contact),
+      gtk_get_current_event_time ());
+}
+
+GtkWidget *
+empathy_individual_sms_menu_item_new (FolksIndividual *individual,
+    EmpathyContact *contact)
+{
+  GtkWidget *item;
+  GtkWidget *image;
+
+  g_return_val_if_fail ((FOLKS_IS_INDIVIDUAL (individual) &&
+      empathy_folks_individual_contains_contact (individual)) ||
+      EMPATHY_IS_CONTACT (contact),
+      NULL);
+
+  item = gtk_image_menu_item_new_with_mnemonic (_("_SMS"));
+  image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_SMS,
+      GTK_ICON_SIZE_MENU);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), image);
+  gtk_widget_show (image);
+
+  if (contact != NULL)
+    {
+      menu_item_set_contact (item, contact,
+          G_CALLBACK (empathy_individual_sms_menu_item_activated),
+          EMPATHY_ACTION_SMS);
+    }
+  else
+    {
+      menu_item_set_first_contact (item, individual,
+          G_CALLBACK (empathy_individual_sms_menu_item_activated),
+          EMPATHY_ACTION_SMS);
     }
 
   return item;

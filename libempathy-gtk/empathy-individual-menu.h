@@ -36,7 +36,8 @@ typedef enum {
 	EMPATHY_INDIVIDUAL_FEATURE_INFO = 1 << 4,
 	EMPATHY_INDIVIDUAL_FEATURE_FAVOURITE = 1 << 5,
 	EMPATHY_INDIVIDUAL_FEATURE_LINK = 1 << 6,
-	EMPATHY_INDIVIDUAL_FEATURE_ALL = (1 << 7) - 1,
+	EMPATHY_INDIVIDUAL_FEATURE_SMS = 1 << 7,
+	EMPATHY_INDIVIDUAL_FEATURE_ALL = (1 << 8) - 1,
 } EmpathyIndividualFeatureFlags;
 
 #define EMPATHY_TYPE_INDIVIDUAL_MENU (empathy_individual_menu_get_type ())
@@ -68,6 +69,8 @@ GType empathy_individual_menu_get_type (void) G_GNUC_CONST;
 GtkWidget * empathy_individual_menu_new (FolksIndividual *individual,
     EmpathyIndividualFeatureFlags features);
 GtkWidget * empathy_individual_chat_menu_item_new (FolksIndividual *individual,
+    EmpathyContact *contact);
+GtkWidget * empathy_individual_sms_menu_item_new (FolksIndividual *individual,
     EmpathyContact *contact);
 GtkWidget * empathy_individual_audio_call_menu_item_new (
     FolksIndividual *individual,

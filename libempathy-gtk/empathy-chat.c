@@ -146,6 +146,7 @@ struct _EmpathyChatPriv {
 	 * notified again about the already notified pending messages when the
 	 * messages in tab will be properly shown */
 	gboolean           retrieving_backlogs;
+	gboolean           sms_channel;
 };
 
 typedef struct {
@@ -170,6 +171,7 @@ enum {
 	PROP_SUBJECT,
 	PROP_REMOTE_CONTACT,
 	PROP_SHOW_CONTACTS,
+	PROP_SMS_CHANNEL,
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -195,7 +197,7 @@ chat_get_property (GObject    *object,
 		g_value_set_object (value, priv->account);
 		break;
 	case PROP_NAME:
-		g_value_set_string (value, empathy_chat_get_name (chat));
+		g_value_take_string (value, empathy_chat_dup_name (chat));
 		break;
 	case PROP_ID:
 		g_value_set_string (value, priv->id);
@@ -208,6 +210,9 @@ chat_get_property (GObject    *object,
 		break;
 	case PROP_SHOW_CONTACTS:
 		g_value_set_boolean (value, priv->show_contacts);
+		break;
+	case PROP_SMS_CHANNEL:
+		g_value_set_boolean (value, priv->sms_channel);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -249,8 +254,14 @@ account_reconnected (EmpathyChat *chat,
 	* https://bugs.freedesktop.org/show_bug.cgi?id=13422 */
 	switch (priv->handle_type) {
 		case TP_HANDLE_TYPE_CONTACT:
-			empathy_chat_with_contact_id (
-				account, priv->id, TP_USER_ACTION_TIME_NOT_USER_ACTION);
+			if (priv->sms_channel)
+				empathy_sms_contact_id (
+					account, priv->id,
+					TP_USER_ACTION_TIME_NOT_USER_ACTION);
+			else
+				empathy_chat_with_contact_id (
+					account, priv->id,
+					TP_USER_ACTION_TIME_NOT_USER_ACTION);
 			break;
 		case TP_HANDLE_TYPE_ROOM:
 			empathy_join_muc (account, priv->id,
@@ -2963,6 +2974,14 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 							       G_PARAM_READWRITE |
 							       G_PARAM_STATIC_STRINGS));
 
+	g_object_class_install_property (object_class,
+					 PROP_SMS_CHANNEL,
+					 g_param_spec_boolean ("sms-channel",
+						 	       "SMS Channel",
+							       "TRUE if this channel is for sending SMSes",
+							       FALSE,
+							       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
 	signals[COMPOSING] =
 		g_signal_new ("composing",
 			      G_OBJECT_CLASS_TYPE (object_class),
@@ -3459,6 +3478,15 @@ chat_password_needed_changed_cb (EmpathyChat *self)
 	}
 }
 
+static void
+chat_sms_channel_changed_cb (EmpathyChat *self)
+{
+	EmpathyChatPriv *priv = GET_PRIV (self);
+
+	priv->sms_channel = empathy_tp_chat_is_sms_channel (priv->tp_chat);
+	g_object_notify (G_OBJECT (self), "sms-channel");
+}
+
 void
 empathy_chat_set_tp_chat (EmpathyChat   *chat,
 			  EmpathyTpChat *tp_chat)
@@ -3508,6 +3536,9 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect_swapped (tp_chat, "notify::password-needed",
 				  G_CALLBACK (chat_password_needed_changed_cb),
 				  chat);
+	g_signal_connect_swapped (tp_chat, "notify::sms-channel",
+				  G_CALLBACK (chat_sms_channel_changed_cb),
+				  chat);
 
 	/* Get initial value of properties */
 	properties = empathy_tp_chat_get_properties (priv->tp_chat);
@@ -3528,6 +3559,7 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 		}
 	}
 
+	chat_sms_channel_changed_cb (chat);
 	chat_remote_contact_changed_cb (chat);
 
 	if (chat->input_text_view) {
@@ -3570,8 +3602,8 @@ empathy_chat_get_id (EmpathyChat *chat)
 	return priv->id;
 }
 
-const gchar *
-empathy_chat_get_name (EmpathyChat *chat)
+gchar *
+empathy_chat_dup_name (EmpathyChat *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 	const gchar *ret;
@@ -3579,6 +3611,7 @@ empathy_chat_get_name (EmpathyChat *chat)
 	g_return_val_if_fail (EMPATHY_IS_CHAT (chat), NULL);
 
 	ret = priv->name;
+
 	if (!ret && priv->remote_contact) {
 		ret = empathy_contact_get_alias (priv->remote_contact);
 	}
@@ -3586,7 +3619,15 @@ empathy_chat_get_name (EmpathyChat *chat)
 	if (!ret)
 		ret = priv->id;
 
-	return ret ? ret : _("Conversation");
+	if (!ret)
+		ret = _("Conversation");
+
+	if (priv->sms_channel)
+		/* Translators: this string is a something like
+		 * "Escher Cat (SMS)" */
+		return g_strdup_printf (_("%s (SMS)"), ret);
+	else
+		return g_strdup (ret);
 }
 
 const gchar *
@@ -3811,4 +3852,14 @@ gboolean
 empathy_chat_is_composing (EmpathyChat *chat)
 {
   return chat->priv->compositors != NULL;
+}
+
+gboolean
+empathy_chat_is_sms_channel (EmpathyChat *self)
+{
+	EmpathyChatPriv *priv = GET_PRIV (self);
+
+	g_return_val_if_fail (EMPATHY_IS_CHAT (self), 0);
+
+	return priv->sms_channel;
 }
