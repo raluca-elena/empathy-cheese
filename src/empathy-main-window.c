@@ -1020,7 +1020,6 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	TpAccount *account = g_object_get_data (conn, "account");
 	GtkAction *action;
-	GtkWidget *widget;
 	GError *error = NULL;
 
 	if (!tp_proxy_prepare_finish (conn, result, &error)) {
@@ -1047,7 +1046,7 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 	gtk_action_set_visible (priv->view_balance_show_in_roster, TRUE);
 
 	/* create the display widget */
-	widget = main_window_setup_balance_create_widget (window, action);
+	main_window_setup_balance_create_widget (window, action);
 
 	/* request the current balance and monitor for any changes */
 	tp_cli_dbus_properties_call_get_all (conn, -1,
