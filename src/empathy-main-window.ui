@@ -70,6 +70,13 @@
           </object>
         </child>
         <child>
+          <object class="GtkToggleAction" id="view_balance_show_in_roster">
+            <property name="name">view_balance_show_in_roster</property>
+            <property name="label" translatable="yes">Credit Balance</property>
+            <property name="visible">False</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="view_show_map">
             <property name="name">view_show_map</property>
             <property name="label" translatable="yes">Contacts on a _Map</property>
@@ -265,6 +272,9 @@
           <menuitem action="view_show_offline"/>
           <menuitem action="view_show_protocols"/>
           <separator/>
+          <menuitem action="view_balance_show_in_roster"/>
+          <placeholder name="view_balance_placeholder"/>
+          <separator/>
           <menuitem action="view_sort_by_name"/>
           <menuitem action="view_sort_by_status"/>
           <separator/>
@@ -317,7 +327,8 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="errors_vbox">
+          <object class="GtkVBox" id="balance_vbox">
+            <property name="spacing">3</property>
             <child>
               <placeholder/>
             </child>
@@ -329,7 +340,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkVBox" id="auth_vbox">
+          <object class="GtkVBox" id="errors_vbox">
             <child>
               <placeholder/>
             </child>
@@ -338,6 +349,18 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="auth_vbox">
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -372,7 +395,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>

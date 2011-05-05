@@ -145,6 +145,10 @@ struct _EmpathyMainWindowPriv {
 	GtkWidget              *edit_context;
 	GtkWidget              *edit_context_separator;
 
+	GtkActionGroup         *balance_action_group;
+	GtkAction              *view_balance_show_in_roster;
+	GtkWidget              *balance_vbox;
+
 	guint                   size_timeout_id;
 
 	/* reffed TpAccount* => visible GtkInfoBar* */
@@ -783,6 +787,295 @@ main_window_update_status (EmpathyMainWindow *window)
 	g_list_free (children);
 }
 
+static char *
+main_window_account_to_action_name (TpAccount *account)
+{
+	char *r;
+
+	/* action names can't have '/' in them, replace it with '.' */
+	r = g_strdup (tp_account_get_path_suffix (account));
+	r = g_strdelimit (r, "/", '.');
+
+	return r;
+}
+
+static void
+main_window_balance_activate_cb (GtkAction         *action,
+				 EmpathyMainWindow *window)
+{
+	const char *uri;
+
+	uri = g_object_get_data (G_OBJECT (action), "manage-credit-uri");
+
+	if (!tp_str_empty (uri)) {
+		DEBUG ("Top-up credit URI: %s", uri);
+		empathy_url_show (GTK_WIDGET (window), uri);
+	} else {
+		DEBUG ("unknown protocol for top-up");
+	}
+}
+
+static void
+main_window_balance_update_balance (GtkAction   *action,
+				    GValueArray *balance)
+{
+	TpAccount *account = g_object_get_data (G_OBJECT (action), "account");
+	GtkWidget *label;
+	int amount = 0;
+	guint scale = G_MAXINT32;
+	const char *currency = "";
+	char *money, *str;
+
+	if (balance != NULL)
+		tp_value_array_unpack (balance, 3,
+			&amount,
+			&scale,
+			&currency);
+
+	if (amount == 0 &&
+	    scale == G_MAXINT32 &&
+	    tp_str_empty (currency)) {
+		/* unknown balance */
+		money = g_strdup ("--");
+	} else {
+		char *tmp = empathy_format_currency (amount, scale, currency);
+
+		money = g_strdup_printf ("%s %s", currency, tmp);
+		g_free (tmp);
+	}
+
+	/* Translators: this string will be something like:
+	 *   Top up My Account ($1.23)..." */
+	str = g_strdup_printf (_("Top up %s (%s)..."),
+		tp_account_get_display_name (account),
+		money);
+
+	gtk_action_set_label (action, str);
+	g_free (str);
+
+	/* update the money label in the roster */
+	label = g_object_get_data (G_OBJECT (action), "money-label");
+
+	gtk_label_set_text (GTK_LABEL (label), money);
+	g_free (money);
+}
+
+static void
+main_window_setup_balance_got_balance_props (TpProxy      *conn,
+					     GHashTable   *props,
+					     const GError *in_error,
+					     gpointer      user_data,
+					     GObject      *action)
+{
+	GValueArray *balance = NULL;
+	const char *uri;
+
+	if (in_error != NULL) {
+		DEBUG ("Failed to get account balance properties: %s",
+			in_error->message);
+		goto finally;
+	}
+
+	balance = tp_asv_get_boxed (props, "AccountBalance",
+		TP_STRUCT_TYPE_CURRENCY_AMOUNT);
+	uri = tp_asv_get_string (props, "ManageCreditURI");
+
+	g_object_set_data_full (action, "manage-credit-uri",
+		g_strdup (uri), g_free);
+	gtk_action_set_sensitive (GTK_ACTION (action), !tp_str_empty (uri));
+
+finally:
+	main_window_balance_update_balance (GTK_ACTION (action), balance);
+}
+
+static void
+main_window_balance_changed_cb (TpConnection      *conn,
+				const GValueArray *balance,
+				gpointer           user_data,
+				GObject           *action)
+{
+	main_window_balance_update_balance (GTK_ACTION (action),
+		(GValueArray *) balance);
+}
+
+static GtkAction *
+main_window_setup_balance_create_action (EmpathyMainWindow *window,
+					 TpAccount *account)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GtkAction *action;
+	char *name, *ui;
+	guint merge_id;
+	GError *error = NULL;
+
+	/* create the action group if required */
+	if (priv->balance_action_group == NULL) {
+		priv->balance_action_group =
+			gtk_action_group_new ("balance-action-group");
+
+		gtk_ui_manager_insert_action_group (priv->ui_manager,
+			priv->balance_action_group, -1);
+	}
+
+	/* create the action */
+	name = main_window_account_to_action_name (account);
+	action = gtk_action_new (name,
+		tp_account_get_display_name (account),
+		_("Top up account credit"),
+		NULL);
+	g_object_bind_property (account, "icon-name", action, "icon-name",
+		G_BINDING_SYNC_CREATE);
+
+	g_object_set_data (G_OBJECT (action), "account", account);
+	g_signal_connect (action, "activate",
+		G_CALLBACK (main_window_balance_activate_cb), window);
+
+	gtk_action_group_add_action (priv->balance_action_group, action);
+	g_object_unref (action);
+
+	ui = g_strdup_printf (
+		"<ui>"
+		" <menubar name='menubar'>"
+		"  <menu action='view'>"
+		"   <placeholder name='view_balance_placeholder'>"
+		"    <menuitem action='%s'/>"
+		"   </placeholder>"
+		"  </menu>"
+		" </menubar>"
+		"</ui>",
+		name);
+
+	merge_id = gtk_ui_manager_add_ui_from_string (priv->ui_manager,
+		ui, -1, &error);
+	if (error != NULL) {
+		DEBUG ("Failed to add balance UI for %s: %s",
+			tp_account_get_display_name (account),
+			error->message);
+		g_error_free (error);
+	}
+
+	g_object_set_data (G_OBJECT (action),
+		"merge-id", GUINT_TO_POINTER (merge_id));
+
+	g_free (name);
+	g_free (ui);
+
+	return action;
+}
+
+static GtkWidget *
+main_window_setup_balance_create_widget (EmpathyMainWindow *window,
+					 GtkAction         *action)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	TpAccount *account;
+	GtkWidget *hbox, *image, *label, *button;
+
+	account = g_object_get_data (G_OBJECT (action), "account");
+	g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
+
+	hbox = gtk_hbox_new (FALSE, 6);
+
+	/* protocol icon */
+	image = gtk_image_new ();
+	gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, TRUE, 0);
+	g_object_bind_property (action, "icon-name", image, "icon-name",
+		G_BINDING_SYNC_CREATE);
+
+	/* account name label */
+	label = gtk_label_new ("");
+	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
+	g_object_bind_property (account, "display-name", label, "label",
+		G_BINDING_SYNC_CREATE);
+
+	/* balance label */
+	label = gtk_label_new ("");
+	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
+	g_object_set_data (G_OBJECT (action), "money-label", label);
+
+	/* top up button */
+	button = gtk_button_new_with_label (_("Top Up..."));
+	gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+	g_signal_connect_swapped (button, "clicked",
+		G_CALLBACK (gtk_action_activate), action);
+
+	gtk_box_pack_start (GTK_BOX (priv->balance_vbox), hbox, FALSE, TRUE, 0);
+	gtk_widget_show_all (hbox);
+
+	/* tie the lifetime of the widget to the lifetime of the action */
+	g_object_weak_ref (G_OBJECT (action),
+		(GWeakNotify) gtk_widget_destroy, hbox);
+
+	return hbox;
+}
+
+static void
+main_window_setup_balance_conn_ready (GObject      *conn,
+				      GAsyncResult *result,
+				      gpointer      user_data)
+{
+	EmpathyMainWindow *window = user_data;
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	TpAccount *account = g_object_get_data (conn, "account");
+	GtkAction *action;
+	GtkWidget *widget;
+	GError *error = NULL;
+
+	if (!tp_proxy_prepare_finish (conn, result, &error)) {
+		DEBUG ("Failed to prepare connection: %s", error->message);
+
+		g_error_free (error);
+		return;
+	}
+
+	if (!tp_proxy_has_interface_by_id (conn,
+			TP_IFACE_QUARK_CONNECTION_INTERFACE_BALANCE)) {
+		return;
+	}
+
+	DEBUG ("Setting up balance for acct: %s",
+		tp_account_get_display_name (account));
+
+	/* create the action */
+	action = main_window_setup_balance_create_action (window, account);
+
+	if (action == NULL)
+		return;
+
+	gtk_action_set_visible (priv->view_balance_show_in_roster, TRUE);
+
+	/* create the display widget */
+	widget = main_window_setup_balance_create_widget (window, action);
+
+	/* request the current balance and monitor for any changes */
+	tp_cli_dbus_properties_call_get_all (conn, -1,
+		TP_IFACE_CONNECTION_INTERFACE_BALANCE,
+		main_window_setup_balance_got_balance_props,
+		window, NULL, G_OBJECT (action));
+
+	tp_cli_connection_interface_balance_connect_to_balance_changed (
+		TP_CONNECTION (conn), main_window_balance_changed_cb,
+		window, NULL, G_OBJECT (action), NULL);
+}
+
+static void
+main_window_setup_balance (EmpathyMainWindow *window,
+			   TpAccount         *account)
+{
+	TpConnection *conn = tp_account_get_connection (account);
+
+	if (conn == NULL)
+		return;
+
+	/* need to prepare the connection:
+	 * store the account on the connection */
+	g_object_set_data (G_OBJECT (conn), "account", account);
+	tp_proxy_prepare_async (conn, NULL,
+		main_window_setup_balance_conn_ready, window);
+}
+
 static void
 main_window_connection_changed_cb (TpAccount  *account,
 				   guint       old_status,
@@ -804,6 +1097,44 @@ main_window_connection_changed_cb (TpAccount  *account,
 	if (current == TP_CONNECTION_STATUS_DISCONNECTED) {
 		empathy_sound_manager_play (priv->sound_mgr, GTK_WIDGET (window),
 				    EMPATHY_SOUND_ACCOUNT_DISCONNECTED);
+
+		/* remove balance action if required */
+		if (priv->balance_action_group != NULL) {
+			GtkAction *action;
+			char *name;
+			GList *a;
+
+			name = main_window_account_to_action_name (account);
+
+			action = gtk_action_group_get_action (
+				priv->balance_action_group, name);
+
+			if (action != NULL) {
+				guint merge_id;
+
+				DEBUG ("Removing action");
+
+				merge_id = GPOINTER_TO_UINT (g_object_get_data (
+					G_OBJECT (action),
+					"merge-id"));
+
+				gtk_ui_manager_remove_ui (priv->ui_manager,
+					merge_id);
+				gtk_action_group_remove_action (
+					priv->balance_action_group, action);
+			}
+
+			g_free (name);
+
+			a = gtk_action_group_list_actions (
+				priv->balance_action_group);
+
+			gtk_action_set_visible (
+				priv->view_balance_show_in_roster,
+				g_list_length (a) > 0);
+
+			g_list_free (a);
+		}
 	}
 
 	if (current == TP_CONNECTION_STATUS_CONNECTED) {
@@ -812,6 +1143,7 @@ main_window_connection_changed_cb (TpAccount  *account,
 
 		/* Account connected without error, remove error message if any */
 		main_window_remove_error (window, account);
+		main_window_setup_balance (window, account);
 	}
 }
 
@@ -1677,6 +2009,8 @@ account_manager_prepared_cb (GObject      *source_object,
 				  window);
 		g_hash_table_insert (priv->status_changed_handlers,
 				     account, GUINT_TO_POINTER (handler_id));
+
+		main_window_setup_balance (window, account);
 	}
 
 	g_signal_connect (manager, "account-validity-changed",
@@ -1773,6 +2107,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	filename = empathy_file_lookup ("empathy-main-window.ui", "src");
 	gui = empathy_builder_get_file (filename,
 				       "main_vbox", &priv->main_vbox,
+				       "balance_vbox", &priv->balance_vbox,
 				       "errors_vbox", &priv->errors_vbox,
 				       "auth_vbox", &priv->auth_vbox,
 				       "ui_manager", &priv->ui_manager,
@@ -1790,6 +2125,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 				       "notebook", &priv->notebook,
 				       "no_entry_label", &priv->no_entry_label,
 				       "roster_scrolledwindow", &sw,
+				       "view_balance_show_in_roster", &priv->view_balance_show_in_roster,
 				       NULL);
 	g_free (filename);
 
@@ -1949,6 +2285,14 @@ empathy_main_window_init (EmpathyMainWindow *window)
 
 	/* Set window size. */
 	empathy_geometry_bind (GTK_WINDOW (window), GEOMETRY_NAME);
+
+	/* bind view_balance_show_in_roster */
+	g_settings_bind (priv->gsettings_ui, "show-balance-in-roster",
+		priv->view_balance_show_in_roster, "active",
+		G_SETTINGS_BIND_DEFAULT);
+	g_object_bind_property (priv->view_balance_show_in_roster, "active",
+		priv->balance_vbox, "visible",
+		G_BINDING_SYNC_CREATE);
 
 	/* Enable event handling */
 	priv->call_observer = empathy_call_observer_dup_singleton ();
