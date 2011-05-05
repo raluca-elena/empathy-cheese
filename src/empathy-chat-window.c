@@ -1786,7 +1786,7 @@ chat_window_drag_data_received (GtkWidget        *widget,
 			account =
 				tp_account_manager_ensure_account (account_manager, account_id);
 			if (account != NULL)
-				chat = empathy_chat_window_find_chat (account, contact_id);
+				chat = empathy_chat_window_find_chat (account, contact_id, FALSE);
 		}
 
 		if (account == NULL) {
@@ -2354,7 +2354,8 @@ empathy_chat_window_switch_to_chat (EmpathyChatWindow *window,
 
 EmpathyChat *
 empathy_chat_window_find_chat (TpAccount   *account,
-			       const gchar *id)
+			       const gchar *id,
+			       gboolean     sms_channel)
 {
 	GList *l;
 
@@ -2374,7 +2375,8 @@ empathy_chat_window_find_chat (TpAccount   *account,
 			chat = ll->data;
 
 			if (account == empathy_chat_get_account (chat) &&
-			    !tp_strdiff (id, empathy_chat_get_id (chat))) {
+			    !tp_strdiff (id, empathy_chat_get_id (chat)) &&
+			    sms_channel == empathy_chat_is_sms_channel (chat)) {
 				return chat;
 			}
 		}
