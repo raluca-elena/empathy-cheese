@@ -375,6 +375,35 @@ AC_SUBST(GEOCLUE_CFLAGS)
 AC_SUBST(GEOCLUE_LIBS)
 
 # -----------------------------------------------------------
+# location checks: geocode-glib
+# -----------------------------------------------------------
+AC_ARG_ENABLE(geocode,
+              AS_HELP_STRING([--enable-geocode=@<:@no/yes/auto@:>@],
+                             [Enable geocode support]), ,
+                             enable_geocode=auto)
+
+if test "x$enable_geocode" != "xno"; then
+   PKG_CHECK_MODULES(GEOCODE,
+   [
+      geocode-glib
+   ], have_geocode="yes", have_geocode="no")
+
+   if test "x$have_geoclue" = "xyes"; then
+      AC_DEFINE(HAVE_GEOCODE, 1, [Define if you have geocode])
+   fi
+else
+   have_geocode="no"
+fi
+
+if test "x$enable_geocode" = "xyes" -a "x$have_geocode" != "xyes"; then
+   AC_MSG_ERROR([Could not find geocode dependencies.])
+fi
+
+AM_CONDITIONAL(HAVE_GEOCODE, test "x$have_geocode" = "xyes")
+AC_SUBST(GEOCODE_CFLAGS)
+AC_SUBST(GEOCODE_LIBS)
+
+# -----------------------------------------------------------
 # meego widgets support
 # -----------------------------------------------------------
 AC_ARG_ENABLE(meego,
@@ -525,6 +554,7 @@ Configure summary:
 	Spell checking (enchant)....:  ${have_enchant}
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
+	Geocode support (Geoclue):     ${have_geocode}
 	Adium themes (Webkit).......:  ${have_webkit}
 	Meego widgets ..............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}

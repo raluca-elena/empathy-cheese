@@ -11,6 +11,7 @@ AM_CPPFLAGS =                                           \
 	$(ENCHANT_CFLAGS)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
 	$(GEOCLUE_CFLAGS)				\
+	$(GEOCODE_CFLAGS)				\
 	$(MEEGO_CFLAGS)					\
 	$(WEBKIT_CFLAGS)				\
 	$(CHEESE_CFLAGS)				\
@@ -165,6 +166,7 @@ libempathy_gtk_la_LIBADD =			\
 	$(ENCHANT_LIBS)				\
 	$(LIBCHAMPLAIN_LIBS)			\
 	$(GEOCLUE_LIBS)				\
+	$(GEOCODE_LIBS)				\
 	$(GCR_LIBS)				\
 	$(MEEGO_LIBS)				\
 	$(WEBKIT_LIBS)				\

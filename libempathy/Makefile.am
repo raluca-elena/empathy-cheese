@@ -11,6 +11,7 @@ AM_CPPFLAGS =                                           \
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
 	$(GEOCLUE_CFLAGS)				\
+	$(GEOCODE_CFLAGS)				\
 	$(NETWORK_MANAGER_CFLAGS)			\
 	$(CONNMAN_CFLAGS)				\
 	$(WARN_CFLAGS)					\
@@ -112,6 +113,7 @@ libempathy_la_LIBADD =		\
 	$(GCR_LIBS) \
 	$(EMPATHY_LIBS) \
 	$(GEOCLUE_LIBS) \
+	$(GEOCODE_LIBS) \
 	$(NETWORK_MANAGER_LIBS) \
 	$(CONNMAN_LIBS)
 
