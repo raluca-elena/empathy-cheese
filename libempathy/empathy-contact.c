@@ -34,8 +34,8 @@
 #include <folks/folks.h>
 #include <folks/folks-telepathy.h>
 
-#ifdef HAVE_GEOCLUE
-#include <geoclue/geoclue-geocode.h>
+#ifdef HAVE_GEOCODE
+#include <geocode-glib/geocode-glib.h>
 #endif
 
 #include "empathy-contact.h"
@@ -79,7 +79,7 @@ static void contact_get_property (GObject *object, guint param_id,
 static void contact_set_property (GObject *object, guint param_id,
     const GValue *value, GParamSpec *pspec);
 
-#ifdef HAVE_GEOCLUE
+#ifdef HAVE_GEOCODE
 static void update_geocode (EmpathyContact *contact);
 #endif
 
@@ -1440,7 +1440,7 @@ empathy_contact_set_location (EmpathyContact *contact,
     g_hash_table_unref (priv->location);
 
   priv->location = g_hash_table_ref (location);
-#ifdef HAVE_GEOCLUE
+#ifdef HAVE_GEOCODE
   update_geocode (contact);
 #endif
   g_object_notify (G_OBJECT (contact), "location");
@@ -1508,41 +1508,37 @@ empathy_contact_equal (gconstpointer contact1,
   return FALSE;
 }
 
-#ifdef HAVE_GEOCLUE
-#define GEOCODE_SERVICE "org.freedesktop.Geoclue.Providers.Yahoo"
-#define GEOCODE_PATH "/org/freedesktop/Geoclue/Providers/Yahoo"
-
-/* This callback is called by geoclue when it found a position
+#ifdef HAVE_GEOCODE
+/* This callback is called by geocode-glib when it found a position
  * for the given address.  A position is necessary for a contact
  * to show up on the map
  */
 static void
-geocode_cb (GeoclueGeocode *geocode,
-    GeocluePositionFields fields,
-    double latitude,
-    double longitude,
-    double altitude,
-    GeoclueAccuracy *accuracy,
-    GError *error,
-    gpointer contact)
+geocode_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
 {
+  EmpathyContact *contact = user_data;
   EmpathyContactPriv *priv = GET_PRIV (contact);
+  GError *error = NULL;
   GHashTable *new_location;
+  GHashTable *resolved;
+  gdouble latitude, longitude;
 
   if (priv->location == NULL)
     goto out;
 
-  if (error != NULL)
+  resolved = geocode_object_resolve_finish (GEOCODE_OBJECT (source), result,
+      &error);
+
+  if (resolved == NULL)
     {
-      DEBUG ("Error geocoding location : %s", error->message);
+      DEBUG ("Failed to resolve geocode: %s", error->message);
+      g_error_free (error);
       goto out;
     }
 
-  /* No need to change location if we didn't find the position */
-  if (!(fields & GEOCLUE_POSITION_FIELDS_LATITUDE))
-    goto out;
-
-  if (!(fields & GEOCLUE_POSITION_FIELDS_LONGITUDE))
+  if (!geocode_object_get_coords (resolved, &longitude, &latitude))
     goto out;
 
   new_location = tp_asv_new (
@@ -1558,43 +1554,20 @@ geocode_cb (GeoclueGeocode *geocode,
   tp_g_hash_table_update (new_location, priv->location,
       (GBoxedCopyFunc) g_strdup, (GBoxedCopyFunc) tp_g_value_slice_dup);
 
-  /* Set the altitude only if it wasn't defined before */
-  if (fields & GEOCLUE_POSITION_FIELDS_ALTITUDE &&
-      g_hash_table_lookup (new_location, EMPATHY_LOCATION_ALT) == NULL)
-    {
-      tp_asv_set_double (new_location, g_strdup (EMPATHY_LOCATION_ALT),
-          altitude);
-      DEBUG ("\t - Altitude: %f", altitude);
-    }
-
   /* Don't change the accuracy as we used an address to get this position */
   g_hash_table_unref (priv->location);
   priv->location = new_location;
-  g_object_notify (contact, "location");
+  g_object_notify ((GObject *) contact, "location");
+
 out:
-  g_object_unref (geocode);
+  tp_clear_pointer (&result, g_hash_table_unref);
   g_object_unref (contact);
-}
-
-static gchar *
-get_dup_string (GHashTable *location,
-    gchar *key)
-{
-  GValue *value;
-
-  value = g_hash_table_lookup (location, key);
-  if (value != NULL)
-    return g_value_dup_string (value);
-
-  return NULL;
 }
 
 static void
 update_geocode (EmpathyContact *contact)
 {
-  static GeoclueGeocode *geocode;
-  gchar *str;
-  GHashTable *address;
+  GeocodeObject *geocode;
   GHashTable *location;
 
   location = empathy_contact_get_location (contact);
@@ -1606,75 +1579,12 @@ update_geocode (EmpathyContact *contact)
       g_hash_table_lookup (location, EMPATHY_LOCATION_LON) != NULL)
     return;
 
-  if (geocode == NULL)
-    {
-      geocode = geoclue_geocode_new (GEOCODE_SERVICE, GEOCODE_PATH);
-      g_object_add_weak_pointer (G_OBJECT (geocode), (gpointer *) &geocode);
-    }
-  else
-    {
-      g_object_ref (geocode);
-    }
+  geocode = geocode_object_new_for_params (location);
 
-  address = geoclue_address_details_new ();
+  geocode_object_resolve_async (geocode, NULL, geocode_cb,
+      g_object_ref (contact));
 
-  str = get_dup_string (location, EMPATHY_LOCATION_COUNTRY_CODE);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE), str);
-      DEBUG ("\t - countrycode: %s", str);
-    }
-
-  str = get_dup_string (location, EMPATHY_LOCATION_COUNTRY);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRY), str);
-      DEBUG ("\t - country: %s", str);
-    }
-
-  str = get_dup_string (location, EMPATHY_LOCATION_POSTAL_CODE);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_POSTALCODE), str);
-      DEBUG ("\t - postalcode: %s", str);
-    }
-
-  str = get_dup_string (location, EMPATHY_LOCATION_REGION);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_REGION), str);
-      DEBUG ("\t - region: %s", str);
-    }
-
-  str = get_dup_string (location, EMPATHY_LOCATION_LOCALITY);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_LOCALITY), str);
-      DEBUG ("\t - locality: %s", str);
-    }
-
-  str = get_dup_string (location, EMPATHY_LOCATION_STREET);
-  if (str != NULL)
-    {
-      g_hash_table_insert (address,
-        g_strdup (GEOCLUE_ADDRESS_KEY_STREET), str);
-      DEBUG ("\t - street: %s", str);
-    }
-
-  if (g_hash_table_size (address) > 0)
-    {
-      g_object_ref (contact);
-
-      geoclue_geocode_address_to_position_async (geocode, address,
-          geocode_cb, contact);
-    }
-
-  g_hash_table_unref (address);
+  g_object_unref (geocode);
 }
 #endif
 
