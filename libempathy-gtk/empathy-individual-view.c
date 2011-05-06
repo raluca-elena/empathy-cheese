@@ -88,6 +88,9 @@ typedef struct
   /* Distance between mouse pointer and the nearby border. Negative when
      scrolling updards.*/
   gint distance;
+
+  GtkTreeModelFilterVisibleFunc custom_filter;
+  gpointer custom_filter_data;
 } EmpathyIndividualViewPriv;
 
 typedef struct
@@ -1800,6 +1803,9 @@ individual_view_filter_visible_func (GtkTreeModel *model,
   gboolean visible, is_online;
   gboolean is_searching = TRUE;
 
+  if (priv->custom_filter != NULL)
+    return priv->custom_filter (model, iter, priv->custom_filter_data);
+
   if (priv->search_widget == NULL ||
       !gtk_widget_get_visible (priv->search_widget))
      is_searching = FALSE;
@@ -2842,4 +2848,15 @@ empathy_individual_view_start_search (EmpathyIndividualView *self)
     gtk_widget_grab_focus (GTK_WIDGET (priv->search_widget));
   else
     gtk_widget_show (GTK_WIDGET (priv->search_widget));
+}
+
+void
+empathy_individual_view_set_custom_filter (EmpathyIndividualView *self,
+    GtkTreeModelFilterVisibleFunc filter,
+    gpointer data)
+{
+  EmpathyIndividualViewPriv *priv = GET_PRIV (self);
+
+  priv->custom_filter = filter;
+  priv->custom_filter_data = data;
 }

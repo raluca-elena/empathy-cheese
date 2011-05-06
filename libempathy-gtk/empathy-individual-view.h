@@ -129,5 +129,9 @@ void empathy_individual_view_set_store (EmpathyIndividualView *self,
 
 void empathy_individual_view_start_search (EmpathyIndividualView *self);
 
+void empathy_individual_view_set_custom_filter (EmpathyIndividualView *self,
+    GtkTreeModelFilterVisibleFunc filter,
+    gpointer data);
+
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_VIEW_H__ */
