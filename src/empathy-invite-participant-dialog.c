@@ -166,6 +166,9 @@ filter_func (GtkTreeModel *model,
   FolksIndividual *individual;
   TpContact *contact;
   gboolean is_online;
+  GList *members, *l;
+  gboolean display;
+  TpChannel *channel;
 
   gtk_tree_model_get (model, iter,
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
@@ -181,7 +184,35 @@ filter_func (GtkTreeModel *model,
   if (contact == NULL)
     return FALSE;
 
-  return TRUE;
+  /* Filter out contacts which are already in the chat */
+  members = empathy_contact_list_get_members (EMPATHY_CONTACT_LIST (
+        self->priv->tp_chat));
+
+  display = TRUE;
+  channel = empathy_tp_chat_get_channel (self->priv->tp_chat);
+
+  for (l = members; l != NULL; l = g_list_next (l))
+    {
+      EmpathyContact *member = l->data;
+      TpHandle handle;
+
+      /* Try to get the non-channel specific handle. */
+      handle = tp_channel_group_get_handle_owner (channel,
+          empathy_contact_get_handle (member));
+      if (handle == 0)
+        handle = empathy_contact_get_handle (member);
+
+      if (handle ==  tp_contact_get_handle (contact))
+        {
+          display = FALSE;
+          break;
+        }
+    }
+
+  g_list_foreach (members, (GFunc) g_object_unref, NULL);
+  g_list_free (members);
+
+  return display;
 }
 
 static void
