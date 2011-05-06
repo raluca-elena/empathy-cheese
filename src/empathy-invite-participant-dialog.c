@@ -278,6 +278,9 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 
   gtk_window_set_title (GTK_WINDOW (self), _("Invite Participant"));
   gtk_window_set_role (GTK_WINDOW (self), "invite_participant");
+
+  /* Set a default height so a few contacts are displayed */
+  gtk_window_set_default_size (GTK_WINDOW (self), -1, 400);
 }
 
 GtkWidget *
