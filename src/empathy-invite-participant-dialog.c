@@ -240,7 +240,7 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   gtk_label_set_markup (GTK_LABEL (label), str);
   g_free (str);
 
-  gtk_box_pack_start (GTK_BOX (content), label, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (content), label, FALSE, TRUE, 6);
   gtk_widget_show (label);
 
   gtk_dialog_add_button (dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
@@ -264,7 +264,7 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
       G_CALLBACK (view_selection_changed_cb), self);
 
   gtk_box_pack_start (GTK_BOX (content), GTK_WIDGET (self->priv->view),
-      TRUE, TRUE, 0);
+      TRUE, TRUE, 6);
   gtk_widget_show (GTK_WIDGET (self->priv->view));
 
   self->priv->invite_button = gtk_dialog_add_button (dialog, _("Invite"),
