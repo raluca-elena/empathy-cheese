@@ -121,6 +121,69 @@ view_selection_changed_cb (GtkWidget *treeview,
   g_object_unref (individual);
 }
 
+/* Return the TpContact of @individual which is on the same connection as the
+ * EmpathyTpChat */
+static TpContact *
+get_tp_contact_for_chat (EmpathyInviteParticipantDialog *self,
+    FolksIndividual *individual)
+{
+  GList *personas, *l;
+  TpConnection *chat_conn;
+
+  chat_conn = empathy_tp_chat_get_connection (self->priv->tp_chat);
+
+  personas = folks_individual_get_personas (individual);
+
+  for (l = personas; l != NULL; l = g_list_next (l))
+    {
+      TpfPersona *persona = l->data;
+      TpContact *contact;
+      TpConnection *contact_conn;
+
+      if (!TPF_IS_PERSONA (persona))
+        continue;
+
+      contact = tpf_persona_get_contact (persona);
+      if (contact == NULL)
+        continue;
+
+      contact_conn = tp_contact_get_connection (contact);
+
+      if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
+            tp_proxy_get_object_path (chat_conn)))
+        return contact;
+    }
+
+  return NULL;
+}
+
+static gboolean
+filter_func (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gpointer user_data)
+{
+  EmpathyInviteParticipantDialog *self = user_data;
+  FolksIndividual *individual;
+  TpContact *contact;
+  gboolean is_online;
+
+  gtk_tree_model_get (model, iter,
+      EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
+      EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, &is_online,
+      -1);
+
+  if (individual == NULL || !is_online)
+    return FALSE;
+
+  /* Filter out individuals not having a persona on the same connection as the
+   * EmpathyTpChat. */
+  contact = get_tp_contact_for_chat (self, individual);
+  if (contact == NULL)
+    return FALSE;
+
+  return TRUE;
+}
+
 static void
 empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 {
@@ -161,6 +224,9 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   self->priv->view =  empathy_individual_view_new (self->priv->store,
       EMPATHY_INDIVIDUAL_VIEW_FEATURE_NONE , EMPATHY_INDIVIDUAL_FEATURE_NONE);
 
+  empathy_individual_view_set_custom_filter (self->priv->view,
+      filter_func, self);
+
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view));
 
   g_signal_connect (selection, "changed",
@@ -199,34 +265,13 @@ empathy_invite_participant_dialog_get_selected (
     EmpathyInviteParticipantDialog *self)
 {
   FolksIndividual *individual;
-  GList *personas, *l;
-  TpContact *contact = NULL;
+  TpContact *contact;
 
   individual =  empathy_individual_view_dup_selected (self->priv->view);
   if (individual == NULL)
     return NULL;
 
-  personas = folks_individual_get_personas (individual);
-
-  for (l = personas; l != NULL; l = g_list_next (l))
-    {
-      TpfPersona *persona = l->data;
-      TpConnection *contact_conn, *chat_conn;
-
-      if (!TPF_IS_PERSONA (persona))
-        continue;
-
-      contact = tpf_persona_get_contact (persona);
-      if (contact == NULL)
-        continue;
-
-      contact_conn = tp_contact_get_connection (contact);
-      chat_conn = empathy_tp_chat_get_connection (self->priv->tp_chat);
-
-      if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
-            tp_proxy_get_object_path (chat_conn)))
-        break;
-    }
+  contact = get_tp_contact_for_chat (self, individual);
 
   g_object_unref (individual);
   return contact;
