@@ -219,6 +219,9 @@ add_notification_actions (EmpathyNotificationsApprover *self,
       break;
 
     case EMPATHY_EVENT_TYPE_AUTH:
+      /* translators: the 'Provide' button is displayed in a notification
+       * bubble when Empathy is asking for an account password; clicking on it
+       * brings the password popup. */
       notify_notification_add_action (notification,
         "provide", _("Provide"), (NotifyActionCallback) notification_approve_cb,
           self, NULL);
