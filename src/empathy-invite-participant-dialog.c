@@ -227,6 +227,7 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   GtkWidget *content;
   EmpathyIndividualManager *mgr;
   GtkTreeSelection *selection;
+  GtkWidget *scroll;
 
   self->priv = priv;
 
@@ -263,9 +264,13 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   g_signal_connect (selection, "changed",
       G_CALLBACK (view_selection_changed_cb), self);
 
-  gtk_box_pack_start (GTK_BOX (content), GTK_WIDGET (self->priv->view),
-      TRUE, TRUE, 6);
+  scroll = gtk_scrolled_window_new (NULL, NULL);
+
+  gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET (self->priv->view));
+
+  gtk_box_pack_start (GTK_BOX (content), scroll, TRUE, TRUE, 6);
   gtk_widget_show (GTK_WIDGET (self->priv->view));
+  gtk_widget_show (scroll);
 
   self->priv->invite_button = gtk_dialog_add_button (dialog, _("Invite"),
       GTK_RESPONSE_ACCEPT);
