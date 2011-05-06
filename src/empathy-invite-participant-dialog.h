@@ -14,7 +14,9 @@
 
 #include <gtk/gtk.h>
 
-#include <libempathy-gtk/empathy-contact-selector-dialog.h>
+#include <telepathy-glib/account.h>
+
+#include "libempathy/empathy-tp-chat.h"
 
 G_BEGIN_DECLS
 
@@ -27,20 +29,27 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyInviteParticipantDialog EmpathyInviteParticipantDialog;
 typedef struct _EmpathyInviteParticipantDialogClass EmpathyInviteParticipantDialogClass;
+typedef struct _EmpathyInviteParticipantDialogPrivate EmpathyInviteParticipantDialogPrivate;
 
 struct _EmpathyInviteParticipantDialog
 {
-  EmpathyContactSelectorDialog parent;
+  GtkDialog parent;
+
+  EmpathyInviteParticipantDialogPrivate *priv;
 };
 
 struct _EmpathyInviteParticipantDialogClass
 {
-  EmpathyContactSelectorDialogClass parent_class;
+  GtkDialogClass parent_class;
 };
 
 GType empathy_invite_participant_dialog_get_type (void);
-GtkWidget *empathy_invite_participant_dialog_new (GtkWindow *parent,
-    TpAccount *account);
+
+GtkWidget * empathy_invite_participant_dialog_new (GtkWindow *parent,
+    EmpathyTpChat *tp_chat);
+
+TpContact * empathy_invite_participant_dialog_get_selected (
+    EmpathyInviteParticipantDialog *self);
 
 G_END_DECLS
 

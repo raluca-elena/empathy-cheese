@@ -10,23 +10,133 @@
  */
 
 #include <glib/gi18n.h>
+#include <folks/folks-telepathy.h>
 
 #include "empathy-invite-participant-dialog.h"
 
+#include "libempathy-gtk/empathy-individual-view.h"
+
 G_DEFINE_TYPE (EmpathyInviteParticipantDialog,
-    empathy_invite_participant_dialog, EMPATHY_TYPE_CONTACT_SELECTOR_DIALOG);
+    empathy_invite_participant_dialog, GTK_TYPE_DIALOG);
+
+enum
+{
+  PROP_TP_CHAT = 1
+};
+
+struct _EmpathyInviteParticipantDialogPrivate
+{
+  EmpathyTpChat *tp_chat;
+
+  EmpathyIndividualStore *store;
+  EmpathyIndividualView *view;
+
+  GtkWidget *invite_button;
+};
 
 static void
-empathy_invite_participant_dialog_class_init (EmpathyInviteParticipantDialogClass *klass)
+invite_participant_dialog_get_property (GObject *object,
+    guint param_id,
+    GValue *value,
+    GParamSpec *pspec)
 {
+  EmpathyInviteParticipantDialog *self = (EmpathyInviteParticipantDialog *)
+    object;
+
+  switch (param_id)
+    {
+    case PROP_TP_CHAT:
+      g_value_set_object (value, self->priv->tp_chat);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+      break;
+    };
+}
+
+static void
+invite_participant_dialog_set_property (GObject *object,
+    guint param_id,
+    const GValue *value,
+    GParamSpec *pspec)
+{
+  EmpathyInviteParticipantDialog *self = (EmpathyInviteParticipantDialog *)
+    object;
+
+  switch (param_id)
+    {
+    case PROP_TP_CHAT:
+      g_assert (self->priv->tp_chat == NULL); /* construct-only */
+      self->priv->tp_chat = g_value_dup_object (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+      break;
+    };
+}
+
+static void
+invite_participant_dialog_dispose (GObject *object)
+{
+  EmpathyInviteParticipantDialog *self = (EmpathyInviteParticipantDialog *)
+    object;
+
+  tp_clear_object (&self->priv->tp_chat);
+  tp_clear_object (&self->priv->store);
+
+  G_OBJECT_CLASS (empathy_invite_participant_dialog_parent_class)->dispose (
+      object);
+}
+
+static void
+empathy_invite_participant_dialog_class_init (
+    EmpathyInviteParticipantDialogClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->get_property = invite_participant_dialog_get_property;
+  object_class->set_property = invite_participant_dialog_set_property;
+  object_class->dispose = invite_participant_dialog_dispose;
+
+  g_type_class_add_private (object_class,
+      sizeof (EmpathyInviteParticipantDialogPrivate));
+
+  g_object_class_install_property (object_class,
+      PROP_TP_CHAT,
+      g_param_spec_object ("tp-chat", "EmpathyTpChat", "EmpathyTpChat",
+          EMPATHY_TYPE_TP_CHAT,
+          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+}
+
+static void
+view_selection_changed_cb (GtkWidget *treeview,
+    EmpathyInviteParticipantDialog *self)
+{
+  FolksIndividual *individual;
+
+  individual = empathy_individual_view_dup_selected (self->priv->view);
+
+  gtk_widget_set_sensitive (self->priv->invite_button, individual != NULL);
+
+  g_object_unref (individual);
 }
 
 static void
 empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 {
-  EmpathyContactSelectorDialog *parent = EMPATHY_CONTACT_SELECTOR_DIALOG (self);
+  EmpathyInviteParticipantDialogPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (
+      self, EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
+      EmpathyInviteParticipantDialogPrivate);
+  GtkDialog *dialog = GTK_DIALOG (self);
   GtkWidget *label;
   char *str;
+  GtkWidget *content;
+  EmpathyIndividualManager *mgr;
+  GtkTreeSelection *selection;
+
+  self->priv = priv;
+
+  content = gtk_dialog_get_content_area (dialog);
 
   label = gtk_label_new (NULL);
   str = g_strdup_printf (
@@ -36,27 +146,44 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   gtk_label_set_markup (GTK_LABEL (label), str);
   g_free (str);
 
-  gtk_box_pack_start (GTK_BOX (parent->vbox), label, FALSE, TRUE, 0);
-  /* move to the top -- wish there was a better way to do this */
-  gtk_box_reorder_child (GTK_BOX (parent->vbox), label, 0);
+  gtk_box_pack_start (GTK_BOX (content), label, FALSE, TRUE, 0);
   gtk_widget_show (label);
 
-  parent->button_action = gtk_dialog_add_button (GTK_DIALOG (self),
-      _("Invite"), GTK_RESPONSE_ACCEPT);
-  gtk_widget_set_sensitive (parent->button_action, FALSE);
+  gtk_dialog_add_button (dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+
+  /* Add the treeview */
+  mgr = empathy_individual_manager_dup_singleton ();
+  self->priv->store = empathy_individual_store_new (mgr);
+  g_object_unref (mgr);
+
+  empathy_individual_store_set_show_groups (self->priv->store, FALSE);
+
+  self->priv->view =  empathy_individual_view_new (self->priv->store,
+      EMPATHY_INDIVIDUAL_VIEW_FEATURE_NONE , EMPATHY_INDIVIDUAL_FEATURE_NONE);
+
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view));
+
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (view_selection_changed_cb), self);
+
+  gtk_box_pack_start (GTK_BOX (content), GTK_WIDGET (self->priv->view),
+      TRUE, TRUE, 0);
+  gtk_widget_show (GTK_WIDGET (self->priv->view));
+
+  self->priv->invite_button = gtk_dialog_add_button (dialog, _("Invite"),
+      GTK_RESPONSE_ACCEPT);
+  gtk_widget_set_sensitive (self->priv->invite_button, FALSE);
 
   gtk_window_set_title (GTK_WINDOW (self), _("Invite Participant"));
   gtk_window_set_role (GTK_WINDOW (self), "invite_participant");
-  empathy_contact_selector_dialog_set_show_account_chooser (
-      EMPATHY_CONTACT_SELECTOR_DIALOG (self), FALSE);
 }
 
 GtkWidget *
 empathy_invite_participant_dialog_new (GtkWindow *parent,
-    TpAccount *account)
+    EmpathyTpChat *tp_chat)
 {
   GtkWidget *self = g_object_new (EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
-      "filter-account", account,
+      "tp-chat", tp_chat,
       NULL);
 
   if (parent != NULL)
@@ -65,4 +192,42 @@ empathy_invite_participant_dialog_new (GtkWindow *parent,
     }
 
   return self;
+}
+
+TpContact *
+empathy_invite_participant_dialog_get_selected (
+    EmpathyInviteParticipantDialog *self)
+{
+  FolksIndividual *individual;
+  GList *personas, *l;
+  TpContact *contact = NULL;
+
+  individual =  empathy_individual_view_dup_selected (self->priv->view);
+  if (individual == NULL)
+    return NULL;
+
+  personas = folks_individual_get_personas (individual);
+
+  for (l = personas; l != NULL; l = g_list_next (l))
+    {
+      TpfPersona *persona = l->data;
+      TpConnection *contact_conn, *chat_conn;
+
+      if (!TPF_IS_PERSONA (persona))
+        continue;
+
+      contact = tpf_persona_get_contact (persona);
+      if (contact == NULL)
+        continue;
+
+      contact_conn = tp_contact_get_connection (contact);
+      chat_conn = empathy_tp_chat_get_connection (self->priv->tp_chat);
+
+      if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
+            tp_proxy_get_object_path (chat_conn)))
+        break;
+    }
+
+  g_object_unref (individual);
+  return contact;
 }

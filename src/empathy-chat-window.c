@@ -976,24 +976,6 @@ chat_window_contacts_toggled_cb (GtkToggleAction   *toggle_action,
 }
 
 static void
-got_contact_cb (TpConnection            *connection,
-                EmpathyContact          *contact,
-                const GError            *error,
-                gpointer                 user_data,
-                GObject                 *object)
-{
-	EmpathyTpChat *tp_chat = EMPATHY_TP_CHAT (user_data);
-
-	if (error != NULL) {
-		DEBUG ("Failed: %s", error->message);
-		return;
-	} else {
-		empathy_contact_list_add (EMPATHY_CONTACT_LIST (tp_chat),
-				contact, _("Inviting you to this room"));
-	}
-}
-
-static void
 chat_window_invite_participant_activate_cb (GtkAction         *action,
 					    EmpathyChatWindow *window)
 {
@@ -1013,22 +995,25 @@ chat_window_invite_participant_activate_cb (GtkAction         *action,
 	account = empathy_chat_get_account (priv->current_chat);
 
 	dialog = empathy_invite_participant_dialog_new (
-			GTK_WINDOW (priv->dialog), account);
+			GTK_WINDOW (priv->dialog), tp_chat);
 	gtk_widget_show (dialog);
 
 	response = gtk_dialog_run (GTK_DIALOG (dialog));
 
 	if (response == GTK_RESPONSE_ACCEPT) {
-		TpConnection *connection;
-		const char *id;
+		TpContact *tp_contact;
+		EmpathyContact *contact;
 
-		id = empathy_contact_selector_dialog_get_selected (
-				EMPATHY_CONTACT_SELECTOR_DIALOG (dialog), NULL, NULL);
-		if (EMP_STR_EMPTY (id)) goto out;
+		tp_contact = empathy_invite_participant_dialog_get_selected (
+			EMPATHY_INVITE_PARTICIPANT_DIALOG (dialog));
+		if (tp_contact == NULL) goto out;
 
-		connection = tp_channel_borrow_connection (channel);
-		empathy_tp_contact_factory_get_from_id (connection, id,
-			got_contact_cb, tp_chat,  NULL, NULL);
+		contact = empathy_contact_dup_from_tp_contact (tp_contact);
+
+		empathy_contact_list_add (EMPATHY_CONTACT_LIST (tp_chat),
+				contact, _("Inviting you to this room"));
+
+		g_object_unref (contact);
 	}
 
 out:
