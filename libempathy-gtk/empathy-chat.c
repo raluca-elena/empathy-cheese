@@ -3288,6 +3288,18 @@ password_entry_changed_cb (GtkEditable *entry,
 }
 
 static void
+chat_invalidated_cb (TpProxy       *proxy,
+			   guint          domain,
+			   gint           code,
+			   gchar         *message,
+			   gpointer       password_infobar)
+{
+	/* Destroy the password infobar whenever a channel is invalidated
+	 * so we don't have multiple infobars when the MUC is rejoined */
+	gtk_widget_destroy (GTK_WIDGET (password_infobar));
+}
+
+static void
 display_password_info_bar (EmpathyChat *self)
 {
 	EmpathyChatPriv *priv = GET_PRIV (self);
@@ -3369,12 +3381,19 @@ display_password_info_bar (EmpathyChat *self)
 			    TRUE, TRUE, 3);
 	gtk_widget_show_all (hbox);
 
+	tp_g_signal_connect_object (empathy_tp_chat_get_channel (priv->tp_chat),
+				  "invalidated", G_CALLBACK (chat_invalidated_cb),
+				  info_bar, 0);
+
 	data->response_id = g_signal_connect (info_bar, "response",
 					      G_CALLBACK (password_infobar_response_cb), data);
 
 	gtk_widget_show_all (info_bar);
 	/* ... but hide the spinner */
 	gtk_widget_hide (spinner);
+
+	/* prevent the user from typing anything */
+	gtk_widget_set_sensitive (self->input_text_view, FALSE);
 }
 
 static void
