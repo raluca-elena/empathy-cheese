@@ -1487,17 +1487,23 @@ chat_window_command_part (EmpathyChat *chat,
 			   GStrv        strv)
 {
 	EmpathyChat *chat_to_be_parted;
+	EmpathyTpChat *tp_chat = NULL;
 
 	if (strv[1] == NULL) {
-		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat), "");
+		/* No chatroom ID specified  */
+		tp_chat = empathy_chat_get_tp_chat (chat);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, "");
 		return;
 	}
 	chat_to_be_parted = empathy_chat_window_find_chat (
 		empathy_chat_get_account (chat), strv[1]);
 
 	if (chat_to_be_parted != NULL) {
-		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat_to_be_parted),
-			strv[2]);
+		/* Found a chatroom matching the specified ID */
+		tp_chat = empathy_chat_get_tp_chat (chat_to_be_parted);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, strv[2]);
 	} else {
 		gchar *message;
 
@@ -1510,7 +1516,9 @@ chat_window_command_part (EmpathyChat *chat,
 		 * MUC then the current chatroom should be parted and srtv[1] should
 		 * be treated as part of the optional part-message. */
 		message = g_strconcat (strv[1], " ", strv[2], NULL);
-		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat), message);
+		tp_chat = empathy_chat_get_tp_chat (chat);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, message);
 
 		g_free (message);
 	}
