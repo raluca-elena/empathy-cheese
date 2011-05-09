@@ -1,3 +1,91 @@
+NEW in 3.1.1 (09/05/2011)
+============
+
+This first release in the 3.1 development cycle is the first step that will
+lead us to GNOME 3.2 in September.
+
+Adium theme support has been greatly improved: we can now mark unread
+messages, color the nick of participants and display a preview of themes in
+the preferences dialog!
+
+Empathy can now make the difference between normal messages and SMS ones.
+
+Bugs fixed:
+ - Fixed #443884, red-line indicating last time I saw the given MUC/IRC channel/etc. (Xavier Claessens)
+ - Fixed #541438, Preview of chat themes (Xavier Claessens)
+ - Fixed #541632, Nicks by color (Guillaume Desmottes)
+ - Fixed #614319, Search bar shouldn't resize the chat window (Vitaly Minko)
+ - Fixed #622118, Empathy should send actions verbatim if not supported by the network (Guillaume Desmottes)
+ - Fixed #627726, Should use Messages interface (Guillaume Desmottes)
+ - Fixed #636463, Display delivery reports (Danielle Madeley)
+ - Fixed #642087, The order of favorite rooms listed in menu items of Room menu change automatically sometimes (Chandni Verma)
+ - Fixed #643293, Use GtkSwitch instead of the Enabled check box (Guillaume Desmottes)
+ - Fixed #644085, ChatroomManager should find chats by channel not identifier (Danielle Madeley)
+ - Fixed #644086, Inform the user if a channel is for SMS (Danielle Madeley)
+ - Fixed #645586, Contact not selected when opening conversation log from conversation window (Guillaume Desmottes)
+ - Fixed #645930, Remove unnecessary code in empathy_auth_factory_constructed() (Stef Walter)
+ - Fixed #646061, Auth requiered event is not visible on the Shell (Guillaume Desmottes)
+ - Fixed #646084, FT dialog should have a Close button (Guillaume Desmottes)
+ - Fixed #646131, need translation context (Guillaume Desmottes)
+ - Fixed #646227, Possible overflow in persona-view:drag_data_get (Philip Withnall)
+ - Fixed #646681, Port send-error report to Messages interface (Danielle Madeley)
+ - Fixed #647056, Removing a contact causes a segfault (Philip Withnall)
+ - Fixed #647530, SMS support (Danielle Madeley)
+ - Fixed #647641, Does not display the first account when opening empathy-accounts (Guillaume Desmottes)
+ - Fixed #647793, Empathy doesn't disconnect when the network is disabled in network-manager (Guillaume Desmottes)
+ - Fixed #647904, preferences: use GtkBox instead of Gtk[V,H]Box (Cosimo Cecchi)
+ - Fixed #648188, Stop using time_t to store timestamps (Guillaume Desmottes)
+ - Fixed #648230, EmpathyLocationManager cleanup (Guillaume Desmottes)
+ - Fixed #648372, the select widget for importing accounts has wrong height (Guillaume Desmottes)
+ - Fixed #648737, Small cleanup possible in chat_window_page_switched_cb (Guillaume Desmottes)
+ - Fixed #648842, Notifications are delayed if contacts send messages too fast (Guillaume Desmottes)
+ - Fixed #648914, Favourite contacts appear in other contact list groups when offline (Guillaume Desmottes)
+ - Fixed #649161, Leak in main_window_flash_foreach (Guillaume Desmottes)
+ - Fixed #649166, New adium themes not supported (Xavier Claessens)
+ - Fixed #649273, empathy-chat exits even if there is disconnected chat (Guillaume Desmottes)
+ - Fixed #649367, Empathy is not handling /me the same way adium does (Xavier Claessens)
+ - Fixed #649379, Some files in libempathy-gtk use gi18n.h instead of gi18n-lib.h (Gabor Kelemen)
+ - Fixed #649436, HTML fallbacks for adium themes are wrong (Xavier Claessens)
+ - Fixed #649438, Support Conn.I.Balance (Danielle Madeley)
+ - Fixed #649492, Translator comment needed (Guillaume Desmottes)
+ - Fixed #649734, Roster instead of contact list (Guillaume Desmottes)
+ - Fixed #649735, Need context to translate Balance (Guillaume Desmottes)
+ - Fixed #647126, criticals in empathy-call
+
+Translations:
+ - Updated an Translation (Daniel Martinez)
+ - Updated ca Translation (Jordi Serratosa)
+ - Updated cs Translation (Marek Černocký)
+ - Updated da Translation (Kenneth Nielsen)
+ - Updated de Translation (Wolfgang Stöggl)
+ - Updated el Translation (George Stefanakis)
+ - Updated es Translation (Jorge González, Daniel Mustieles)
+ - Updated et Translation (Mattias Põldaru)
+ - Updated eu Translation (Inaki Larranaga Murgoitio)
+ - Updated fa Translation (Arash Mousavi)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated gu Translation (Sweta Kothari)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated ja Translation (OKANO Takayoshi)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Hannie Dumoleyn)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated pt_BR Translation (Rodrigo Padula de Oliveira)
+ - Updated ru Translation (Leonid Kanter)
+ - Updated sk Translation (Pavol Klačanský)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated sr@latin Translation (Branko Kokanović)
+ - Updated sr Translation (Branko Kokanović)
+ - Updated th Translation (Sira Nokyoongtong)
+ - Updated tr Translation (Muhammet Kara, Baris Cicek)
+ - Updated ug Translation (Abduxukur Abdurixit)
+ - Updated vi Translation (Nguyễn Thái Ngọc Duy)
+
+Documentation translations:
+ - Updated de Documentation translation (Wolfgang Stöggl, Hendrik Richter, Mario Blättermann)
+ - Updated es Documentation translation (Jorge González)
+ - Updated fr Documentation translation (Bruno Brouard)
+
 NEW in 3.0.0 (04/04/2011)
 ============
 
