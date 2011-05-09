@@ -1294,6 +1294,8 @@ chat_send_error_cb (EmpathyTpChat          *tp_chat,
 	gchar       *str;
 
 	if (!tp_strdiff (dbus_error, TP_ERROR_STR_INSUFFICIENT_BALANCE)) {
+		/* translators: error used when user doesn't have enough credit on his
+		 * account to send the message. */
 		error = _("insufficient balance to send message");
 	} else if (!tp_strdiff (dbus_error, TP_ERROR_STR_NOT_CAPABLE)) {
 		error = _("not capable");
