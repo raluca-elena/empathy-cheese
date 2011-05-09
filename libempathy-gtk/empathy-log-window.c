@@ -1500,9 +1500,60 @@ log_window_search_entry_icon_pressed_cb (GtkEntry *entry,
     "", -1);
 }
 
-/*
- * Chats Code
- */
+static void
+log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
+    GtkTreeModel *model,
+    GtkTreeSelection *selection)
+{
+  EmpathyContact *contact;
+  EmpathyCapabilities capabilities;
+  TpAccount *account;
+  TplEntity *target;
+  GtkTreeIter iter;
+  GList *paths;
+  GtkTreePath *path;
+  gboolean profile, chat, call, video;
+
+  profile = chat = call = video = FALSE;
+
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    goto out;
+
+  if (gtk_tree_selection_count_selected_rows (selection) != 1)
+    goto out;
+
+  if (gtk_tree_selection_iter_is_selected (selection, &iter))
+    goto out;
+
+  paths = gtk_tree_selection_get_selected_rows (selection, &model);
+  g_return_if_fail (paths != NULL);
+
+  path = paths->data;
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_model_get (model, &iter,
+      COL_WHO_ACCOUNT, &account,
+      COL_WHO_TARGET, &target,
+      -1);
+
+  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
+
+  contact = empathy_contact_from_tpl_contact (account, target);
+
+  g_object_unref (account);
+  g_object_unref (target);
+
+  capabilities = empathy_contact_get_capabilities (contact);
+
+  profile = chat = TRUE;
+  call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
+  video = capabilities & EMPATHY_CAPABILITIES_VIDEO;
+
+ out:
+  gtk_widget_set_sensitive (window->button_profile, profile);
+  gtk_widget_set_sensitive (window->button_chat, chat);
+  gtk_widget_set_sensitive (window->button_call, call);
+  gtk_widget_set_sensitive (window->button_video, video);
+}
 
 static void
 log_window_who_changed_cb (GtkTreeSelection *selection,
@@ -1511,7 +1562,6 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
   GtkTreeView *view;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  gboolean someone = FALSE;
 
   DEBUG ("log_window_who_changed_cb");
 
@@ -1534,16 +1584,9 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
               log_window_who_changed_cb,
               window);
         }
-      else if (gtk_tree_selection_count_selected_rows (selection) == 1)
-        {
-          someone = TRUE;
-        }
     }
 
-  gtk_widget_set_sensitive (window->button_profile, someone);
-  gtk_widget_set_sensitive (window->button_chat, someone);
-  gtk_widget_set_sensitive (window->button_call, someone);
-  gtk_widget_set_sensitive (window->button_video, someone);
+  log_window_update_buttons_sensitivity (window, model, selection);
 
   /* The contact changed, so the dates need to be updated */
   log_window_chats_get_messages (window, TRUE);
