@@ -192,7 +192,16 @@ add_chatroom (EmpathyChatroomManager *self,
 
   priv->chatrooms = g_list_prepend (priv->chatrooms, g_object_ref (chatroom));
 
-  g_signal_connect (chatroom, "notify",
+  /* Watch only those properties which are exported in the save file */
+  g_signal_connect (chatroom, "notify::name",
+      G_CALLBACK (chatroom_changed_cb), self);
+  g_signal_connect (chatroom, "notify::room",
+      G_CALLBACK (chatroom_changed_cb), self);
+  g_signal_connect (chatroom, "notify::account",
+      G_CALLBACK (chatroom_changed_cb), self);
+  g_signal_connect (chatroom, "notify::auto-connect",
+      G_CALLBACK (chatroom_changed_cb), self);
+  g_signal_connect (chatroom, "notify::always_urgent",
       G_CALLBACK (chatroom_changed_cb), self);
 }
 
