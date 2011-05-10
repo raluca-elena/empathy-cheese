@@ -31,6 +31,7 @@
 #include <telepathy-yell/telepathy-yell.h>
 
 #include <libempathy/empathy-tp-contact-factory.h>
+#include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-request-util.h>
@@ -59,6 +60,8 @@ typedef struct {
 
 struct _EmpathyNewCallDialogPriv {
   GtkWidget *check_video;
+
+  EmpathyCameraMonitor *monitor;
 };
 
 #define GET_PRIV(o) \
@@ -179,6 +182,16 @@ empathy_new_call_dialog_account_filter (EmpathyContactSelectorDialog *dialog,
   tp_proxy_prepare_async (connection, features, conn_prepared_cb, cb_data);
 }
 
+static void
+empathy_new_call_dialog_dispose (GObject *object)
+{
+  EmpathyNewCallDialogPriv *priv = GET_PRIV (object);
+
+  tp_clear_object (&priv->monitor);
+
+  G_OBJECT_CLASS (empathy_new_call_dialog_parent_class)->dispose (object);
+}
+
 static GObject *
 empathy_new_call_dialog_constructor (GType type,
     guint n_props,
@@ -212,8 +225,13 @@ empathy_new_call_dialog_init (EmpathyNewCallDialog *dialog)
   EmpathyNewCallDialogPriv *priv = GET_PRIV (dialog);
   GtkWidget *image;
 
+  priv->monitor = empathy_camera_monitor_dup_singleton ();
+
   /* add video toggle */
   priv->check_video = gtk_check_button_new_with_mnemonic (_("Send _Video"));
+  g_object_bind_property (priv->monitor, "available",
+      priv->check_video, "sensitive",
+      G_BINDING_SYNC_CREATE);
 
   gtk_box_pack_end (GTK_BOX (parent->vbox), priv->check_video,
       FALSE, TRUE, 0);
@@ -249,6 +267,7 @@ empathy_new_call_dialog_class_init (
   g_type_class_add_private (class, sizeof (EmpathyNewCallDialogPriv));
 
   object_class->constructor = empathy_new_call_dialog_constructor;
+  object_class->dispose = empathy_new_call_dialog_dispose;
 
   dialog_class->response = empathy_new_call_dialog_response;
 
