@@ -40,6 +40,7 @@
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-location.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-time.h>
 #include <libempathy/empathy-utils.h>
 
@@ -298,6 +299,18 @@ linkify_first_value (GStrv values)
   return empathy_add_link_markup (values[0]);
 }
 
+static gchar *
+format_idle_time (GStrv values)
+{
+  const gchar *value = values[0];
+  int duration = strtol (value, NULL, 10);
+
+  if (duration <= 0)
+    return NULL;
+
+  return empathy_duration_to_string (duration);
+}
+
 static InfoFieldData info_field_datas[] =
 {
   { "fn",    N_("Full name:"),      NULL },
@@ -305,6 +318,12 @@ static InfoFieldData info_field_datas[] =
   { "email", N_("E-mail address:"), linkify_first_value },
   { "url",   N_("Website:"),        linkify_first_value },
   { "bday",  N_("Birthday:"),       NULL },
+
+  /* Note to translators: this is the caption for a string of the form "5
+   * minutes ago", and refers to the time since the contact last interacted
+   * with their IM client.
+   */
+  { "x-idle-time", N_("Last seen:"), format_idle_time },
   { NULL, NULL }
 };
 
