@@ -283,20 +283,28 @@ contact_widget_bday_changed_cb (GtkCalendar *calendar,
 
 static void contact_widget_details_notify_cb (EmpathyContactWidget *information);
 
+typedef gchar * (* FieldFormatFunc) (GStrv);
+
 typedef struct
 {
   const gchar *field_name;
   const gchar *title;
-  gboolean linkify;
+  FieldFormatFunc format;
 } InfoFieldData;
+
+static gchar *
+linkify_first_value (GStrv values)
+{
+  return empathy_add_link_markup (values[0]);
+}
 
 static InfoFieldData info_field_datas[] =
 {
-  { "fn",    N_("Full name:"),      FALSE },
-  { "tel",   N_("Phone number:"),   FALSE },
-  { "email", N_("E-mail address:"), TRUE },
-  { "url",   N_("Website:"),        TRUE },
-  { "bday",  N_("Birthday:"),       FALSE },
+  { "fn",    N_("Full name:"),      NULL },
+  { "tel",   N_("Phone number:"),   NULL },
+  { "email", N_("E-mail address:"), linkify_first_value },
+  { "url",   N_("Website:"),        linkify_first_value },
+  { "bday",  N_("Birthday:"),       NULL },
   { NULL, NULL }
 };
 
@@ -602,6 +610,7 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       TpContactInfoField *field = l->data;
       InfoFieldData *field_data;
       const gchar *value;
+      gchar *markup = NULL;
       GtkWidget *w;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
@@ -611,7 +620,7 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
       if (!tp_strdiff (field->field_name, "x-irc-channel"))
         {
-          g_ptr_array_add (channels, (gpointer) value);
+          g_ptr_array_add (channels, (gpointer) field->field_value[0]);
           continue;
         }
 
@@ -620,6 +629,18 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
         {
           DEBUG ("Unhandled ContactInfo field: %s", field->field_name);
           continue;
+        }
+
+      if (field_data->format != NULL)
+        {
+          markup = field_data->format (field->field_value);
+
+          if (markup == NULL)
+            {
+              DEBUG ("Invalid value for field '%s' (first element was '%s')",
+                  field->field_name, field->field_value[0]);
+              continue;
+            }
         }
 
       /* Add Title */
@@ -631,11 +652,8 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
       /* Add Value */
       w = gtk_label_new (value);
-      if (field_data->linkify)
+      if (markup != NULL)
         {
-          gchar *markup;
-
-          markup = empathy_add_link_markup (value);
           gtk_label_set_markup (GTK_LABEL (w), markup);
           g_free (markup);
         }
