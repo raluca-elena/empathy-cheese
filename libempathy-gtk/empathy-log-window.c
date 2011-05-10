@@ -1884,7 +1884,6 @@ log_window_events_setup (EmpathyLogWindow *window)
       "icon-name", COL_EVENTS_ICON);
 
   cell = gtk_cell_renderer_text_new ();
-  g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
   gtk_tree_view_column_pack_start (column, cell, TRUE);
   gtk_tree_view_column_add_attribute (column, cell,
       "text", COL_EVENTS_TEXT);
