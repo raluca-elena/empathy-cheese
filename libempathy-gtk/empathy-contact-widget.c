@@ -526,12 +526,73 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
   return n_rows;
 }
 
+static gboolean
+channel_name_activated_cb (
+    GtkLabel *label,
+    gchar *uri,
+    EmpathyContactWidget *information)
+{
+  TpAccount *account = empathy_contact_get_account (information->contact);
+
+  empathy_join_muc (account, uri, empathy_get_current_action_time ());
+  return TRUE;
+}
+
+static void
+add_channel_list (
+    EmpathyContactWidget *information,
+    GPtrArray *channels,
+    guint row)
+{
+  GtkWidget *w;
+  GString *label_markup = g_string_new ("");
+  guint i;
+
+  w = gtk_label_new (_("Channels:"));
+  gtk_table_attach (GTK_TABLE (information->table_details),
+      w, 0, 1, row, row + 1, GTK_FILL, 0, 0, 0);
+  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
+  gtk_widget_show (w);
+
+  for (i = 0; i < channels->len; i++)
+    {
+      const gchar *channel_name = g_ptr_array_index (channels, i);
+      /* We abuse the URI of the link to hold the channel name. It seems to
+       * be okay to just use it essentially verbatim, rather than trying to
+       * ensure it's actually a valid URI.  g_string_append_uri_escaped()
+       * escapes way more than we actually need to; so we're just using
+       * g_markup_escape_text directly.
+       */
+      gchar *escaped = g_markup_escape_text (channel_name, -1);
+
+      if (i > 0)
+        g_string_append (label_markup, ", ");
+
+      g_string_append_printf (label_markup, "<a href='%s'>%s</a>",
+          escaped, channel_name);
+      g_free (escaped);
+    }
+
+  w = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (w), label_markup->str);
+  gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
+  g_signal_connect (w, "activate-link",
+      (GCallback) channel_name_activated_cb, information);
+  gtk_table_attach_defaults (GTK_TABLE (information->table_details),
+      w, 1, 2, row, row + 1);
+  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
+  gtk_widget_show (w);
+
+  g_string_free (label_markup, TRUE);
+}
+
 static guint
 contact_widget_details_update_show (EmpathyContactWidget *information)
 {
   TpContact *contact;
   GList *info, *l;
   guint n_rows = 0;
+  GPtrArray *channels = g_ptr_array_new ();
 
   contact = empathy_contact_get_tp_contact (information->contact);
   info = tp_contact_get_contact_info (contact);
@@ -547,6 +608,12 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
         continue;
 
       value = field->field_value[0];
+
+      if (!tp_strdiff (field->field_name, "x-irc-channel"))
+        {
+          g_ptr_array_add (channels, (gpointer) value);
+          continue;
+        }
 
       field_data = find_info_field_data (field->field_name);
       if (field_data == NULL)
@@ -585,6 +652,13 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
     }
   g_list_free (info);
 
+  if (channels->len > 0)
+    {
+      add_channel_list (information, channels, n_rows);
+      n_rows++;
+    }
+
+  g_ptr_array_unref (channels);
   return n_rows;
 }
 
