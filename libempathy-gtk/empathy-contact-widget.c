@@ -311,6 +311,17 @@ format_idle_time (GStrv values)
   return empathy_duration_to_string (duration);
 }
 
+static gchar *
+format_server (GStrv values)
+{
+  g_assert (values[0] != NULL);
+
+  if (values[1] == NULL)
+    return g_markup_escape_text (values[0], -1);
+  else
+    return g_markup_printf_escaped ("%s (%s)", values[0], values[1]);
+}
+
 static InfoFieldData info_field_datas[] =
 {
   { "fn",    N_("Full name:"),      NULL },
@@ -324,6 +335,9 @@ static InfoFieldData info_field_datas[] =
    * with their IM client.
    */
   { "x-idle-time", N_("Last seen:"), format_idle_time },
+  { "x-irc-server", N_("Server:"), format_server },
+  { "x-host", N_("Connected from:"), format_server },
+
   { NULL, NULL }
 };
 
