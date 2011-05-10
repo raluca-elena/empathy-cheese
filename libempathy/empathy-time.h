@@ -45,6 +45,7 @@ gchar  *empathy_time_to_string_utc   (gint64       t,
 gchar  *empathy_time_to_string_local (gint64       t,
 				      const gchar *format);
 gchar  *empathy_time_to_string_relative (gint64 t);
+gchar *empathy_duration_to_string (guint seconds);
 
 G_END_DECLS
 
