@@ -419,9 +419,6 @@ individual_store_add_individual (EmpathyIndividualStore *self,
   EmpathyIndividualStorePriv *priv;
   GtkTreeIter iter;
   GeeIterator *group_iter = NULL;
-  EmpathyContact *contact;
-  TpConnection *connection;
-  gchar *protocol_name;
 
   priv = GET_PRIV (self);
 
@@ -440,17 +437,22 @@ individual_store_add_individual (EmpathyIndividualStore *self,
         group_iter = gee_iterable_iterator (GEE_ITERABLE (group_set));
     }
 
-  contact = empathy_contact_dup_from_folks_individual (individual);
-  connection = empathy_contact_get_connection (contact);
-
-  tp_connection_parse_object_path (connection, &protocol_name, NULL);
-
   /* fall-back groups, in case there are no named groups */
   if (group_iter == NULL)
     {
       GtkTreeIter iter_group, *parent;
+      EmpathyContact *contact;
+      TpConnection *connection;
+      gchar *protocol_name = NULL;
 
       parent = &iter_group;
+
+      contact = empathy_contact_dup_from_folks_individual (individual);
+      if (contact != NULL)
+        {
+          connection = empathy_contact_get_connection (contact);
+          tp_connection_parse_object_path (connection, &protocol_name, NULL);
+        }
 
       if (!priv->show_groups)
         parent = NULL;
@@ -470,9 +472,10 @@ individual_store_add_individual (EmpathyIndividualStore *self,
 
       add_individual_to_store (GTK_TREE_STORE (self), &iter, parent,
           individual);
-    }
 
-  g_free (protocol_name);
+      g_free (protocol_name);
+      g_clear_object (&contact);
+    }
 
   /* Else add to each group. */
   while (group_iter != NULL && gee_iterator_next (group_iter))
@@ -505,8 +508,6 @@ individual_store_add_individual (EmpathyIndividualStore *self,
     }
 
   individual_store_contact_update (self, individual);
-
-  tp_clear_object (&contact);
 }
 
 static void
