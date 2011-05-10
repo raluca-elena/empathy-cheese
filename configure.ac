@@ -351,6 +351,31 @@ fi
 AM_CONDITIONAL(HAVE_WEBKIT, test "x$have_webkit" = "xyes")
 
 # -----------------------------------------------------------
+# gudev
+# -----------------------------------------------------------
+AC_ARG_ENABLE(gudev,
+              AS_HELP_STRING([--enable-gudev=@<:@no/yes/auto@:>@],
+                             [build with gudev support]), ,
+                             enable_gudev=auto)
+
+if test "x$enable_gudev" != "xno"; then
+
+   PKG_CHECK_MODULES(UDEV, [gudev-1.0],
+        have_gudev="yes", have_gudev="no")
+
+   if test "x$have_gudev" = "xyes"; then
+      AC_DEFINE(HAVE_UDEV, 1, [Define if you have gudev])
+   fi
+else
+   have_gudev=no
+fi
+
+if test "x$enable_gudev" = "xyes" -a "x$have_gudev" != "xyes"; then
+   AC_MSG_ERROR([Could not find gudev dependencies.])
+fi
+AM_CONDITIONAL(HAVE_UDEV, test "x$have_gudev" = "xyes")
+
+# -----------------------------------------------------------
 # spellchecking checks: enchant and iso-codes
 # -----------------------------------------------------------
 AC_ARG_ENABLE(spell,
@@ -632,6 +657,7 @@ Configure summary:
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
+	Camera monitoring...........:  ${have_gudev}
 
     Connectivity:
 	NetworkManager integration..:  ${have_nm}
