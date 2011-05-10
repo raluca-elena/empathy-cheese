@@ -322,6 +322,15 @@ format_server (GStrv values)
     return g_markup_printf_escaped ("%s (%s)", values[0], values[1]);
 }
 
+static gchar *
+presence_hack (GStrv values)
+{
+  if (tp_str_empty (values[0]))
+    return NULL;
+
+  return g_markup_escape_text (values[0], -1);
+}
+
 static InfoFieldData info_field_datas[] =
 {
   { "fn",    N_("Full name:"),      NULL },
@@ -337,6 +346,11 @@ static InfoFieldData info_field_datas[] =
   { "x-idle-time", N_("Last seen:"), format_idle_time },
   { "x-irc-server", N_("Server:"), format_server },
   { "x-host", N_("Connected from:"), format_server },
+
+  /* FIXME: once Idle implements SimplePresence using this information, we can
+   * and should bin this.
+   */
+  { "x-presence-status-message", N_("Away message:"), presence_hack },
 
   { NULL, NULL }
 };
