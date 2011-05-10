@@ -68,7 +68,7 @@ libempathy_headers =				\
 	empathy-types.h				\
 	empathy-utils.h
 
-libempathy_la_SOURCES =					\
+libempathy_handwritten_source =				\
 	$(libempathy_headers)				\
 	action-chain.c					\
 	empathy-account-settings.c			\
@@ -107,6 +107,10 @@ libempathy_la_SOURCES =					\
 	empathy-tp-streamed-media.c			\
 	empathy-utils.c
 
+libempathy_la_SOURCES = \
+	$(libempathy_handwritten_source) \
+	cheese-camera-device-monitor.c cheese-camera-device-monitor.h
+
 # do not distribute generated files
 nodist_libempathy_la_SOURCES =\
 	$(BUILT_SOURCES)
@@ -122,8 +126,7 @@ libempathy_la_LIBADD =		\
 	$(CONNMAN_LIBS)
 
 check_c_sources = \
-    $(libempathy_la_SOURCES) \
-    $(libempathy_headers)
+    $(libempathy_handwritten_source)
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
 
