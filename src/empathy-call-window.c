@@ -40,6 +40,7 @@
 #include <gst/farsight/fs-element-added-notifier.h>
 #include <gst/farsight/fs-utils.h>
 
+#include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy-gtk/empathy-avatar-image.h>
@@ -106,6 +107,8 @@ struct _EmpathyCallWindowPriv
   EmpathyCallHandler *handler;
 
   EmpathyContact *contact;
+
+  EmpathyCameraMonitor *camera_monitor;
 
   guint call_state;
   gboolean outgoing;
@@ -1057,6 +1060,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
 
+  priv->camera_monitor = empathy_camera_monitor_dup_singleton ();
+
+  g_object_bind_property (priv->camera_monitor, "available",
+      priv->camera_button, "sensitive",
+      G_BINDING_SYNC_CREATE);
+
   priv->lock = g_mutex_new ();
 
   gtk_container_add (GTK_CONTAINER (self), top_vbox);
@@ -1644,6 +1653,7 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->video_tee);
   tp_clear_object (&priv->ui_manager);
   tp_clear_object (&priv->fullscreen);
+  tp_clear_object (&priv->camera_monitor);
 
   g_list_free_full (priv->notifiers, g_object_unref);
 
@@ -2315,7 +2325,8 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
   empathy_sound_manager_stop (priv->sound_mgr, EMPATHY_SOUND_PHONE_OUTGOING);
 
   can_send_video = priv->video_input != NULL &&
-    empathy_contact_can_voip_video (priv->contact);
+    empathy_contact_can_voip_video (priv->contact) &&
+    empathy_camera_monitor_get_available (priv->camera_monitor);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
 
