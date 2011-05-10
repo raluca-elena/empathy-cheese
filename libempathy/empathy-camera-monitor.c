@@ -177,3 +177,10 @@ empathy_camera_monitor_dup_singleton (void)
 {
   return g_object_new (EMPATHY_TYPE_CAMERA_MONITOR, NULL);
 }
+
+gboolean empathy_camera_monitor_get_available (EmpathyCameraMonitor *self)
+{
+  g_return_val_if_fail (EMPATHY_IS_CAMERA_MONITOR (self), FALSE);
+
+  return self->priv->num_cameras > 0;
+}
