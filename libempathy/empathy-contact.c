@@ -40,6 +40,7 @@
 #endif
 
 #include "empathy-contact.h"
+#include "empathy-camera-monitor.h"
 #include "empathy-individual-manager.h"
 #include "empathy-utils.h"
 #include "empathy-enum-types.h"
@@ -1301,8 +1302,18 @@ empathy_contact_can_do_action (EmpathyContact *self,
         sensitivity = empathy_contact_can_voip_audio (self);
         break;
       case EMPATHY_ACTION_VIDEO_CALL:
-        sensitivity = empathy_contact_can_voip_video (self);
-        break;
+        {
+          EmpathyCameraMonitor *monitor;
+
+          monitor = empathy_camera_monitor_dup_singleton ();
+
+          sensitivity = empathy_contact_can_voip_video (self);
+          sensitivity = sensitivity &&
+              empathy_camera_monitor_get_available (monitor);
+
+          g_object_unref (monitor);
+          break;
+        }
       case EMPATHY_ACTION_VIEW_LOGS:
         sensitivity = contact_has_log (self);
         break;
