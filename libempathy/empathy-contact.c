@@ -653,8 +653,8 @@ empathy_contact_from_tpl_contact (TpAccount *account,
   is_user = (TPL_ENTITY_SELF == tpl_entity_get_entity_type (tpl_entity));
 
   retval = g_object_new (EMPATHY_TYPE_CONTACT,
-      "id", tpl_entity_get_alias (tpl_entity),
-      "alias", tpl_entity_get_identifier (tpl_entity),
+      "id", tpl_entity_get_identifier (tpl_entity),
+      "alias", tpl_entity_get_alias (tpl_entity),
       "account", account,
       "is-user", is_user,
       NULL);
