@@ -769,6 +769,9 @@ theme_adium_append_message (EmpathyChatView *view,
 			/* content */
 			html = consecutive ? priv->data->out_nextcontent_html : priv->data->out_content_html;
 		}
+
+		/* remove all the unread marks when we are sending a message */
+		theme_adium_remove_focus_marks (theme);
 	} else {
 		/* in */
 		if (is_backlog) {
