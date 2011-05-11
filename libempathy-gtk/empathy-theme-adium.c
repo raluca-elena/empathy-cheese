@@ -721,10 +721,6 @@ theme_adium_append_message (EmpathyChatView *view,
 	message_classes = g_string_new ("message");
 	if (!priv->has_focus && !is_backlog) {
 		if (!priv->has_unread_message) {
-			/* This is the first message we receive since we lost
-			 * focus; remove previous unread marks. */
-			theme_adium_remove_focus_marks (theme);
-
 			g_string_append (message_classes, " firstFocus");
 			priv->has_unread_message = TRUE;
 		}
@@ -925,11 +921,15 @@ static void
 theme_adium_focus_toggled (EmpathyChatView *view,
 			   gboolean         has_focus)
 {
+	EmpathyThemeAdium *self = (EmpathyThemeAdium *) view;
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 
 	priv->has_focus = has_focus;
 	if (priv->has_focus) {
 		priv->has_unread_message = FALSE;
+	}
+	else {
+		theme_adium_remove_focus_marks (self);
 	}
 }
 
