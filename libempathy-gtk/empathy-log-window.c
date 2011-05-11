@@ -43,6 +43,7 @@
 #include <extensions/extensions.h>
 
 #include <libempathy/action-chain-internal.h>
+#include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-message.h>
@@ -101,6 +102,9 @@ struct _EmpathyLogWindowPriv
   TpBaseClient *observer;
 
   EmpathyContact *selected_contact;
+
+  EmpathyCameraMonitor *camera_monitor;
+  GBinding *button_video_binding;
 
   /* Used to cancel logger calls when no longer needed */
   guint count;
@@ -404,6 +408,7 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->log_manager);
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
+  tp_clear_object (&self->priv->camera_monitor);
 
   G_OBJECT_CLASS (empathy_log_window_parent_class)->dispose (object);
 }
@@ -445,6 +450,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
       EMPATHY_TYPE_LOG_WINDOW, EmpathyLogWindowPriv);
 
   self->priv->chain = _tpl_action_chain_new_async (NULL, NULL, NULL);
+
+  self->priv->camera_monitor = empathy_camera_monitor_dup_singleton ();
 
   self->priv->log_manager = tpl_log_manager_dup_singleton ();
 
@@ -1854,6 +1861,7 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   gboolean profile, chat, call, video;
 
   tp_clear_object (&self->priv->selected_contact);
+  tp_clear_object (&self->priv->button_video_binding);
 
   view = GTK_TREE_VIEW (self->priv->treeview_who);
   model = gtk_tree_view_get_model (view);
@@ -1927,11 +1935,20 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
   video = capabilities & EMPATHY_CAPABILITIES_VIDEO;
 
+  if (video)
+    self->priv->button_video_binding = g_object_bind_property (
+        self->priv->camera_monitor, "available",
+        self->priv->button_video, "sensitive",
+        G_BINDING_SYNC_CREATE);
+
  out:
   gtk_widget_set_sensitive (self->priv->button_profile, profile);
   gtk_widget_set_sensitive (self->priv->button_chat, chat);
   gtk_widget_set_sensitive (self->priv->button_call, call);
-  gtk_widget_set_sensitive (self->priv->button_video, video);
+
+  /* Don't override the binding */
+  if (!video)
+    gtk_widget_set_sensitive (self->priv->button_video, video);
 }
 
 static void
