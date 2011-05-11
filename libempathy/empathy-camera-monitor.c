@@ -165,6 +165,11 @@ empathy_camera_monitor_init (EmpathyCameraMonitor *self)
       G_CALLBACK (on_camera_added), self);
   g_signal_connect (self->priv->cheese_monitor, "removed",
       G_CALLBACK (on_camera_removed), self);
+
+#ifndef HAVE_UDEV
+  /* No udev, assume there are cameras present */
+  self->priv->num_cameras = 1;
+#endif
 }
 
 EmpathyCameraMonitor *
