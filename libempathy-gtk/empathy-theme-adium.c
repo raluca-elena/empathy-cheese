@@ -571,10 +571,16 @@ theme_adium_append_event_escaped (EmpathyChatView *view,
 static void
 theme_adium_remove_focus_marks (EmpathyThemeAdium *theme)
 {
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
 	WebKitDOMDocument *dom;
 	WebKitDOMNodeList *nodes;
 	guint i;
 	GError *error = NULL;
+
+	if (!priv->has_unread_message)
+		return;
+
+	priv->has_unread_message = FALSE;
 
 	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (theme));
 	if (dom == NULL) {
@@ -928,10 +934,7 @@ theme_adium_focus_toggled (EmpathyChatView *view,
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 
 	priv->has_focus = has_focus;
-	if (priv->has_focus) {
-		priv->has_unread_message = FALSE;
-	}
-	else {
+	if (!priv->has_focus) {
 		theme_adium_remove_focus_marks (self);
 	}
 }
