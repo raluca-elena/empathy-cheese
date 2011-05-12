@@ -794,6 +794,7 @@ chat_window_update_chat_tab (EmpathyChat *chat)
 static void
 chat_window_chat_notify_cb (EmpathyChat *chat)
 {
+	EmpathyChatWindow *window;
 	EmpathyContact *old_remote_contact;
 	EmpathyContact *remote_contact = NULL;
 
@@ -820,6 +821,11 @@ chat_window_chat_notify_cb (EmpathyChat *chat)
 	}
 
 	chat_window_update_chat_tab (chat);
+
+	window = chat_window_find_chat (chat);
+	if (window != NULL) {
+		chat_window_update (window, FALSE);
+	}
 }
 
 static void
