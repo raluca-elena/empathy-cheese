@@ -59,6 +59,8 @@ EmpathyMessage *         empathy_message_from_tpl_log_event (TplEvent           
 EmpathyMessage *         empathy_message_new_from_tp_message (TpMessage *tp_msg,
 							      gboolean incoming);
 
+TpMessage *              empathy_message_get_tp_message    (EmpathyMessage *message);
+
 TpChannelTextMessageType empathy_message_get_tptype        (EmpathyMessage           *message);
 EmpathyContact *         empathy_message_get_sender        (EmpathyMessage           *message);
 void                     empathy_message_set_sender        (EmpathyMessage           *message,
