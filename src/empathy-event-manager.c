@@ -43,6 +43,7 @@
 #include <libempathy-gtk/empathy-images.h>
 #include <libempathy-gtk/empathy-contact-dialogs.h>
 #include <libempathy-gtk/empathy-sound-manager.h>
+#include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-event-manager.h"
 #include "empathy-main-window.h"
@@ -316,7 +317,7 @@ event_manager_approval_approve (EventManagerApproval *approval)
     }
   else
     {
-      timestamp = tp_user_action_time_from_x11 (gtk_get_current_event_time ());
+      timestamp = empathy_get_current_action_time ();
     }
 
   g_assert (approval->operation != NULL);

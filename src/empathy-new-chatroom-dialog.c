@@ -683,8 +683,8 @@ new_chatroom_dialog_join (EmpathyNewChatroomDialog *dialog)
 	g_strstrip (room_name);
 
 	DEBUG ("Requesting channel for '%s'", room_name);
-	empathy_join_muc (account, room_name,
-		gtk_get_current_event_time ());
+
+	empathy_join_muc (account, room_name, empathy_get_current_action_time ());
 
 	g_free (room_name);
 }

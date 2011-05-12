@@ -134,7 +134,8 @@ empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
    * we return from this function. */
   video = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->check_video));
 
-  call_contact (account, contact_id, video, gtk_get_current_event_time ());
+  call_contact (account, contact_id, video,
+      empathy_get_current_action_time ());
 
 out:
   gtk_widget_destroy (GTK_WIDGET (dialog));

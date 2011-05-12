@@ -85,12 +85,12 @@ empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
     {
       case EMP_NEW_MESSAGE_TEXT:
         empathy_chat_with_contact_id (account, contact_id,
-            gtk_get_current_event_time ());
+            empathy_get_current_action_time ());
         break;
 
       case EMP_NEW_MESSAGE_SMS:
         empathy_sms_contact_id (account, contact_id,
-            gtk_get_current_event_time ());
+            empathy_get_current_action_time ());
         break;
 
       default:

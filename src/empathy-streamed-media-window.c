@@ -2713,7 +2713,7 @@ start_call (EmpathyStreamedMediaWindow *self)
 
   priv->call_started = TRUE;
   empathy_streamed_media_handler_start_call (priv->handler,
-      gtk_get_current_event_time ());
+      empathy_get_current_action_time ());
 
   if (empathy_streamed_media_handler_has_initial_video (priv->handler))
     {

@@ -903,7 +903,7 @@ contact_list_view_row_activated (GtkTreeView       *view,
 	if (contact) {
 		DEBUG ("Starting a chat");
 		empathy_chat_with_contact (contact,
-			gtk_get_current_event_time ());
+			empathy_get_current_action_time ());
 		g_object_unref (contact);
 	}
 }

@@ -1584,7 +1584,7 @@ main_window_favorite_chatroom_join (EmpathyChatroom *chatroom)
 		join_fav_account_sig_ctx *ctx;
 
 		ctx = join_fav_account_sig_ctx_new (account, chatroom,
-			gtk_get_current_event_time ());
+			empathy_get_current_action_time ());
 
 		ctx->sig_id = g_signal_connect_data (account, "status-changed",
 			G_CALLBACK (account_status_changed_cb), ctx,
@@ -1595,7 +1595,7 @@ main_window_favorite_chatroom_join (EmpathyChatroom *chatroom)
 		return;
 	}
 
-	join_chatroom (chatroom, gtk_get_current_event_time ());
+	join_chatroom (chatroom, empathy_get_current_action_time ());
 }
 
 static void

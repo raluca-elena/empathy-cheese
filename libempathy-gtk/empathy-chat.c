@@ -753,7 +753,7 @@ empathy_chat_join_muc (EmpathyChat *chat,
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 
 	empathy_join_muc (priv->account, room,
-		gtk_get_current_event_time ());
+		empathy_get_current_action_time ());
 }
 
 static void
@@ -824,7 +824,7 @@ chat_command_msg_internal (EmpathyChat *chat,
 		NULL);
 
 	req = tp_account_channel_request_new (priv->account, request,
-		tp_user_action_time_from_x11 (gtk_get_current_event_time ()));
+		empathy_get_current_action_time ());
 
 	/* FIXME: We should probably search in members alias. But this
 	 * is enough for IRC */
