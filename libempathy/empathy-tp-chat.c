@@ -453,6 +453,35 @@ message_received_cb (TpTextChannel   *channel,
 	handle_incoming_message (chat, message, FALSE);
 }
 
+static gboolean
+find_pending_message_func (gconstpointer a,
+			   gconstpointer b)
+{
+	EmpathyMessage *msg = (EmpathyMessage *) a;
+	TpMessage *message = (TpMessage *) b;
+
+	if (empathy_message_get_tp_message (msg) == message)
+		return 0;
+
+	return -1;
+}
+
+static void
+pending_message_removed_cb (TpTextChannel   *channel,
+		            TpMessage *message,
+		            EmpathyTpChat *chat)
+{
+	EmpathyTpChatPriv *priv = GET_PRIV (chat);
+	GList *m;
+
+	m = g_queue_find_custom (priv->pending_messages_queue, message,
+				 find_pending_message_func);
+	g_assert (m != NULL);
+
+	g_object_unref (m->data);
+	g_queue_delete_link (priv->pending_messages_queue, m);
+}
+
 static void
 message_sent_cb (TpTextChannel   *channel,
 		 TpMessage *message,
@@ -911,6 +940,8 @@ check_almost_ready (EmpathyTpChat *chat)
 
 	tp_g_signal_connect_object (priv->channel, "message-received",
 		G_CALLBACK (message_received_cb), chat, 0);
+	tp_g_signal_connect_object (priv->channel, "pending-message-removed",
+		G_CALLBACK (pending_message_removed_cb), chat, 0);
 
 	list_pending_messages (chat);
 
@@ -1807,34 +1838,25 @@ empathy_tp_chat_acknowledge_message (EmpathyTpChat *chat,
 				     EmpathyMessage *message) {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
 	GList *messages = NULL;
-	GList *m;
 	TpMessage *tp_msg;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (chat));
 	g_return_if_fail (priv->ready);
 
 	if (!empathy_message_is_incoming (message))
-		goto out;
+		return;
 
 	tp_msg = empathy_message_get_tp_message (message);
 	messages = g_list_append (messages, tp_msg);
 	acknowledge_messages (chat, messages);
 	g_list_free (messages);
-
-out:
-	m = g_queue_find (priv->pending_messages_queue, message);
-	g_assert (m != NULL);
-	g_queue_delete_link (priv->pending_messages_queue, m);
-	g_object_unref (message);
 }
 
 void
 empathy_tp_chat_acknowledge_messages (EmpathyTpChat *chat,
 				      const GSList *messages) {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-	/* Copy messages as the messges list (probably is) our own */
-	GSList *msgs = g_slist_copy ((GSList *) messages);
-	GSList *l;
+	const GSList *l;
 	GList *messages_to_ack = NULL;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (chat));
@@ -1843,27 +1865,19 @@ empathy_tp_chat_acknowledge_messages (EmpathyTpChat *chat,
 	if (messages == NULL)
 		return;
 
-	for (l = msgs; l != NULL; l = g_slist_next (l)) {
-		GList *m;
-
+	for (l = messages; l != NULL; l = g_slist_next (l)) {
 		EmpathyMessage *message = EMPATHY_MESSAGE (l->data);
-
-		m = g_queue_find (priv->pending_messages_queue, message);
-		g_assert (m != NULL);
-		g_queue_delete_link (priv->pending_messages_queue, m);
 
 		if (empathy_message_is_incoming (message)) {
 			TpMessage *tp_msg = empathy_message_get_tp_message (message);
 			messages_to_ack = g_list_append (messages_to_ack, tp_msg);
 		}
-		g_object_unref (message);
 	}
 
 	if (messages_to_ack != NULL)
 		acknowledge_messages (chat, messages_to_ack);
 
 	g_list_free (messages_to_ack);
-	g_slist_free (msgs);
 }
 
 void
