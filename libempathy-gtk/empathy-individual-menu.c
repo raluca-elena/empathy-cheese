@@ -31,6 +31,7 @@
 #include <folks/folks.h>
 #include <folks/folks-telepathy.h>
 
+#include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-chatroom-manager.h>
@@ -674,6 +675,7 @@ empathy_individual_video_call_menu_item_new (FolksIndividual *individual,
 {
   GtkWidget *item;
   GtkWidget *image;
+  EmpathyCameraMonitor *monitor;
 
   g_return_val_if_fail (FOLKS_IS_INDIVIDUAL (individual) ||
       EMPATHY_IS_CONTACT (contact),
@@ -697,6 +699,11 @@ empathy_individual_video_call_menu_item_new (FolksIndividual *individual,
           G_CALLBACK (empathy_individual_video_call_menu_item_activated),
           EMPATHY_ACTION_VIDEO_CALL);
     }
+
+  monitor = empathy_camera_monitor_dup_singleton ();
+  g_object_set_data_full (G_OBJECT (item), "monitor", monitor, g_object_unref);
+  g_object_bind_property (monitor, "available", item, "sensitive",
+      G_BINDING_SYNC_CREATE);
 
   return item;
 }
