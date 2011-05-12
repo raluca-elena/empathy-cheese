@@ -2281,6 +2281,9 @@ empathy_chat_window_add_chat (EmpathyChatWindow *window,
 	g_signal_connect (chat, "notify::n-messages-sending",
 			  G_CALLBACK (chat_window_chat_notify_cb),
 			  NULL);
+	g_signal_connect (chat, "notify::nb-unread-messages",
+			  G_CALLBACK (chat_window_chat_notify_cb),
+			  NULL);
 	chat_window_chat_notify_cb (chat);
 
 	gtk_notebook_append_page_menu (GTK_NOTEBOOK (priv->notebook), child, label, popup_label);
