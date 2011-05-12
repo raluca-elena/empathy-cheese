@@ -1994,3 +1994,9 @@ empathy_context_menu_new (GtkWidget *attach_to)
 
 	return menu;
 }
+
+gint64
+empathy_get_current_action_time (void)
+{
+  return (tp_user_action_time_from_x11 (gtk_get_current_event_time ()));
+}
