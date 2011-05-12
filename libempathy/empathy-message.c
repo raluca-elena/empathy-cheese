@@ -596,16 +596,6 @@ empathy_message_type_to_str (TpChannelTextMessageType type)
 	}
 }
 
-guint
-empathy_message_get_id (EmpathyMessage *message)
-{
-	EmpathyMessagePriv *priv = GET_PRIV (message);
-
-	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), 0);
-
-	return priv->id;
-}
-
 gboolean
 empathy_message_is_incoming (EmpathyMessage *message)
 {
@@ -651,10 +641,8 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 				     gboolean incoming)
 {
 	EmpathyMessage *message;
-	EmpathyMessagePriv *priv;
 	gchar *body;
 	TpChannelTextMessageFlags flags;
-	guint id;
 
 	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
 
@@ -669,15 +657,6 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"incoming", incoming,
 		"tp-message", tp_msg,
 		NULL);
-
-	priv = GET_PRIV (message);
-
-	/* FIXME: this is pretty low level, ideally we shouldn't have to use the
-	 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
-	id = tp_asv_get_uint32 (tp_message_peek (tp_msg, 0),
-		"pending-message-id", NULL);
-
-	priv->id = id;
 
 	g_free (body);
 	return message;

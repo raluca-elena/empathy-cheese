@@ -77,8 +77,6 @@ gboolean                 empathy_message_should_highlight  (EmpathyMessage      
 TpChannelTextMessageType empathy_message_type_from_str     (const gchar              *type_str);
 const gchar *            empathy_message_type_to_str       (TpChannelTextMessageType  type);
 
-guint                    empathy_message_get_id (EmpathyMessage *message);
-
 gboolean                 empathy_message_equal (EmpathyMessage *message1, EmpathyMessage *message2);
 
 TpChannelTextMessageFlags empathy_message_get_flags        (EmpathyMessage           *message);
