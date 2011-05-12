@@ -2432,6 +2432,11 @@ empathy_chat_window_present_chat (EmpathyChat *chat,
 		window = empathy_chat_window_get_default (empathy_chat_is_room (chat));
 		if (!window) {
 			window = empathy_chat_window_new ();
+
+			/* we want to display the newly created window even if we don't present
+			* it */
+			priv = GET_PRIV (window);
+			gtk_widget_show (priv->dialog);
 		}
 
 		empathy_chat_window_add_chat (window, chat);
