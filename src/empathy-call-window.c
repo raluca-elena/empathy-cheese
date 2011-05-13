@@ -61,8 +61,6 @@
 #include "empathy-video-src.h"
 #include "ev-sidebar.h"
 
-#define BUTTON_ID "empathy-call-dtmf-button-id"
-
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
 #define CONTENT_HBOX_CHILDREN_PACKING_PADDING 3
@@ -324,7 +322,7 @@ dtmf_button_pressed_cb (GtkButton *button, EmpathyCallWindow *window)
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
 
-  button_quark = g_quark_from_static_string (BUTTON_ID);
+  button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
   event = GPOINTER_TO_UINT (g_object_get_qdata (G_OBJECT (button),
     button_quark));
 
@@ -344,51 +342,6 @@ dtmf_button_released_cb (GtkButton *button, EmpathyCallWindow *window)
   tpy_call_channel_dtmf_stop_tone (call);
 
   g_object_unref (call);
-}
-
-static GtkWidget *
-empathy_call_window_create_dtmf (EmpathyCallWindow *self)
-{
-  GtkWidget *table;
-  int i;
-  GQuark button_quark;
-  struct {
-    const gchar *label;
-    TpDTMFEvent event;
-  } dtmfbuttons[] = { { "1", TP_DTMF_EVENT_DIGIT_1 },
-                      { "2", TP_DTMF_EVENT_DIGIT_2 },
-                      { "3", TP_DTMF_EVENT_DIGIT_3 },
-                      { "4", TP_DTMF_EVENT_DIGIT_4 },
-                      { "5", TP_DTMF_EVENT_DIGIT_5 },
-                      { "6", TP_DTMF_EVENT_DIGIT_6 },
-                      { "7", TP_DTMF_EVENT_DIGIT_7 },
-                      { "8", TP_DTMF_EVENT_DIGIT_8 },
-                      { "9", TP_DTMF_EVENT_DIGIT_9 },
-                      { "#", TP_DTMF_EVENT_HASH },
-                      { "0", TP_DTMF_EVENT_DIGIT_0 },
-                      { "*", TP_DTMF_EVENT_ASTERISK },
-                      { NULL, } };
-
-  button_quark = g_quark_from_static_string (BUTTON_ID);
-
-  table = gtk_table_new (4, 3, TRUE);
-
-  for (i = 0; dtmfbuttons[i].label != NULL; i++)
-    {
-      GtkWidget *button = gtk_button_new_with_label (dtmfbuttons[i].label);
-      gtk_table_attach (GTK_TABLE (table), button, i % 3, i % 3 + 1,
-        i/3, i/3 + 1, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 1, 1);
-
-      g_object_set_qdata (G_OBJECT (button), button_quark,
-        GUINT_TO_POINTER (dtmfbuttons[i].event));
-
-      g_signal_connect (G_OBJECT (button), "pressed",
-        G_CALLBACK (dtmf_button_pressed_cb), self);
-      g_signal_connect (G_OBJECT (button), "released",
-        G_CALLBACK (dtmf_button_released_cb), self);
-    }
-
-  return table;
 }
 
 static GtkWidget *
@@ -1152,7 +1105,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "video-input",
       _("Video input"), page);
 
-  priv->dtmf_panel = empathy_call_window_create_dtmf (self);
+  priv->dtmf_panel = empathy_create_dtmf_dialpad (G_OBJECT (self),
+      G_CALLBACK (dtmf_button_pressed_cb),
+      G_CALLBACK (dtmf_button_released_cb));
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "dialpad",
       _("Dialpad"), priv->dtmf_panel);
 

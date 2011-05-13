@@ -2011,3 +2011,50 @@ empathy_individual_match_string (FolksIndividual *individual,
    * contact's vCard for example. */
   return retval;
 }
+
+GtkWidget *
+empathy_create_dtmf_dialpad (GObject *self,
+    GCallback dtmf_button_pressed_cb,
+    GCallback dtmf_button_released_cb)
+{
+  GtkWidget *table;
+  int i;
+  GQuark button_quark;
+  struct {
+    const gchar *label;
+    TpDTMFEvent event;
+  } dtmfbuttons[] = { { "1", TP_DTMF_EVENT_DIGIT_1 },
+                      { "2", TP_DTMF_EVENT_DIGIT_2 },
+                      { "3", TP_DTMF_EVENT_DIGIT_3 },
+                      { "4", TP_DTMF_EVENT_DIGIT_4 },
+                      { "5", TP_DTMF_EVENT_DIGIT_5 },
+                      { "6", TP_DTMF_EVENT_DIGIT_6 },
+                      { "7", TP_DTMF_EVENT_DIGIT_7 },
+                      { "8", TP_DTMF_EVENT_DIGIT_8 },
+                      { "9", TP_DTMF_EVENT_DIGIT_9 },
+                      { "#", TP_DTMF_EVENT_HASH },
+                      { "0", TP_DTMF_EVENT_DIGIT_0 },
+                      { "*", TP_DTMF_EVENT_ASTERISK },
+                      { NULL, } };
+
+  button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
+
+  table = gtk_table_new (4, 3, TRUE);
+
+  for (i = 0; dtmfbuttons[i].label != NULL; i++)
+    {
+      GtkWidget *button = gtk_button_new_with_label (dtmfbuttons[i].label);
+      gtk_table_attach (GTK_TABLE (table), button, i % 3, i % 3 + 1,
+        i/3, i/3 + 1, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 1, 1);
+
+      g_object_set_qdata (G_OBJECT (button), button_quark,
+        GUINT_TO_POINTER (dtmfbuttons[i].event));
+
+      g_signal_connect (G_OBJECT (button), "pressed",
+        dtmf_button_pressed_cb, self);
+      g_signal_connect (G_OBJECT (button), "released",
+        dtmf_button_released_cb, self);
+    }
+
+  return table;
+}
