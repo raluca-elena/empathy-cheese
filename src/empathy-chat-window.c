@@ -1532,6 +1532,48 @@ chat_window_new_message_cb (EmpathyChat       *chat,
 	chat_window_icon_update (priv, TRUE);
 }
 
+static void
+chat_window_command_part (EmpathyChat *chat,
+			   GStrv        strv)
+{
+	EmpathyChat *chat_to_be_parted;
+	EmpathyTpChat *tp_chat = NULL;
+
+	if (strv[1] == NULL) {
+		/* No chatroom ID specified  */
+		tp_chat = empathy_chat_get_tp_chat (chat);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, "");
+		return;
+	}
+	chat_to_be_parted = empathy_chat_window_find_chat (
+		empathy_chat_get_account (chat), strv[1]);
+
+	if (chat_to_be_parted != NULL) {
+		/* Found a chatroom matching the specified ID */
+		tp_chat = empathy_chat_get_tp_chat (chat_to_be_parted);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, strv[2]);
+	} else {
+		gchar *message;
+
+		/* Going by the syntax of PART command:
+		 *
+		 * /PART [<chatroom-ID>] [<reason>]
+		 *
+		 * Chatroom-ID is not a must to specify a reason.
+		 * If strv[1] (chatroom-ID) is not a valid identifier for a connected
+		 * MUC then the current chatroom should be parted and srtv[1] should
+		 * be treated as part of the optional part-message. */
+		message = g_strconcat (strv[1], " ", strv[2], NULL);
+		tp_chat = empathy_chat_get_tp_chat (chat);
+		if (tp_chat)
+			empathy_tp_chat_leave (tp_chat, message);
+
+		g_free (message);
+	}
+}
+
 static GtkNotebook *
 notebook_create_window_cb (GtkNotebook *source,
 			 GtkWidget   *page,
@@ -1617,6 +1659,9 @@ chat_window_page_added_cb (GtkNotebook      *notebook,
 	g_signal_connect (chat, "new-message",
 			  G_CALLBACK (chat_window_new_message_cb),
 			  window);
+	g_signal_connect (chat, "part-command-entered",
+			  G_CALLBACK (chat_window_command_part),
+			  NULL);
 	g_signal_connect (chat, "notify::tp-chat",
 			  G_CALLBACK (chat_window_update_chat_tab),
 			  window);

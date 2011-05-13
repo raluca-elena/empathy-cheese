@@ -44,7 +44,6 @@
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-chatroom-manager.h>
-#include <src/empathy-chat-window.h>
 
 #include "empathy-chat.h"
 #include "empathy-spell.h"
@@ -159,6 +158,7 @@ typedef struct {
 enum {
 	COMPOSING,
 	NEW_MESSAGE,
+	PART_COMMAND_ENTERED,
 	LAST_SIGNAL
 };
 
@@ -699,7 +699,6 @@ nick_command_supported (EmpathyChat *chat)
 		EMP_IFACE_QUARK_CONNECTION_INTERFACE_RENAMING);
 }
 
-#if 0
 static gboolean
 part_command_supported (EmpathyChat *chat)
 {
@@ -710,7 +709,6 @@ part_command_supported (EmpathyChat *chat)
 	return tp_proxy_has_interface_by_id (channel,
 			TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP);
 }
-#endif
 
 static void
 chat_command_clear (EmpathyChat *chat,
@@ -777,35 +775,12 @@ chat_command_join (EmpathyChat *chat,
 	g_strfreev (rooms);
 }
 
-void
-empathy_chat_leave_chat (EmpathyChat *chat)
-{
-	EmpathyChatPriv *priv = GET_PRIV (chat);
-
-	empathy_tp_chat_leave (priv->tp_chat, "");
-}
-
-#if 0
 static void
 chat_command_part (EmpathyChat *chat,
 			   GStrv        strv)
 {
-	EmpathyChatPriv *priv = GET_PRIV (chat);
-	EmpathyChat *chat_to_be_parted;
-
-	if (strv[1] == NULL) {
-		empathy_tp_chat_leave (priv->tp_chat, "");
-		return;
-	}
-	chat_to_be_parted = empathy_chat_window_find_chat (priv->account, strv[1]);
-
-	if (chat_to_be_parted != NULL) {
-		empathy_tp_chat_leave (empathy_chat_get_tp_chat (chat_to_be_parted), strv[2]);
-	} else {
-		empathy_tp_chat_leave (priv->tp_chat, strv[1]);
-	}
+	g_signal_emit (chat, signals[PART_COMMAND_ENTERED], 0, strv);
 }
-#endif
 
 static void
 chat_command_msg_internal (EmpathyChat *chat,
@@ -956,12 +931,10 @@ static ChatCommandItem commands[] = {
 	{"j", 2, 2, chat_command_join, NULL,
 	 N_("/j <chat room ID>: join a new chat room")},
 
-#if 0
 	/* FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=643295 */
 	{"part", 1, 3, chat_command_part, part_command_supported,
 	 N_("/part [<chat room ID>] [<reason>]: leave the chat room, "
 	    "by default the current one")},
-#endif
 
 	{"query", 2, 3, chat_command_query, NULL,
 	 N_("/query <contact ID> [<message>]: open a private chat")},
@@ -3027,6 +3000,16 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_MESSAGE, G_TYPE_BOOLEAN);
 
+	signals[PART_COMMAND_ENTERED] =
+			g_signal_new ("part-command-entered",
+				  G_OBJECT_CLASS_TYPE (object_class),
+				  G_SIGNAL_RUN_LAST,
+				  0,
+				  NULL, NULL,
+				  g_cclosure_marshal_VOID__POINTER,
+				  G_TYPE_NONE,
+				  1, G_TYPE_STRV);
+
 	g_type_class_add_private (object_class, sizeof (EmpathyChatPriv));
 }
 
@@ -3349,6 +3332,18 @@ password_entry_changed_cb (GtkEditable *entry,
 }
 
 static void
+chat_invalidated_cb (TpProxy       *proxy,
+			   guint          domain,
+			   gint           code,
+			   gchar         *message,
+			   gpointer       password_infobar)
+{
+	/* Destroy the password infobar whenever a channel is invalidated
+	 * so we don't have multiple infobars when the MUC is rejoined */
+	gtk_widget_destroy (GTK_WIDGET (password_infobar));
+}
+
+static void
 display_password_info_bar (EmpathyChat *self)
 {
 	EmpathyChatPriv *priv = GET_PRIV (self);
@@ -3430,12 +3425,19 @@ display_password_info_bar (EmpathyChat *self)
 			    TRUE, TRUE, 3);
 	gtk_widget_show_all (hbox);
 
+	tp_g_signal_connect_object (empathy_tp_chat_get_channel (priv->tp_chat),
+				  "invalidated", G_CALLBACK (chat_invalidated_cb),
+				  info_bar, 0);
+
 	data->response_id = g_signal_connect (info_bar, "response",
 					      G_CALLBACK (password_infobar_response_cb), data);
 
 	gtk_widget_show_all (info_bar);
 	/* ... but hide the spinner */
 	gtk_widget_hide (spinner);
+
+	/* prevent the user from typing anything */
+	gtk_widget_set_sensitive (self->input_text_view, FALSE);
 }
 
 static void
