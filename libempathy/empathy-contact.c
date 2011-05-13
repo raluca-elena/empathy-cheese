@@ -1302,18 +1302,8 @@ empathy_contact_can_do_action (EmpathyContact *self,
         sensitivity = empathy_contact_can_voip_audio (self);
         break;
       case EMPATHY_ACTION_VIDEO_CALL:
-        {
-          EmpathyCameraMonitor *monitor;
-
-          monitor = empathy_camera_monitor_dup_singleton ();
-
-          sensitivity = empathy_contact_can_voip_video (self);
-          sensitivity = sensitivity &&
-              empathy_camera_monitor_get_available (monitor);
-
-          g_object_unref (monitor);
-          break;
-        }
+        sensitivity = empathy_contact_can_voip_video (self);
+        break;
       case EMPATHY_ACTION_VIEW_LOGS:
         sensitivity = contact_has_log (self);
         break;

@@ -700,10 +700,15 @@ empathy_individual_video_call_menu_item_new (FolksIndividual *individual,
           EMPATHY_ACTION_VIDEO_CALL);
     }
 
-  monitor = empathy_camera_monitor_dup_singleton ();
-  g_object_set_data_full (G_OBJECT (item), "monitor", monitor, g_object_unref);
-  g_object_bind_property (monitor, "available", item, "sensitive",
-      G_BINDING_SYNC_CREATE);
+  /* Only follow available cameras if the contact can do Video calls */
+  if (gtk_widget_get_sensitive (item))
+    {
+      monitor = empathy_camera_monitor_dup_singleton ();
+      g_object_set_data_full (G_OBJECT (item),
+          "monitor", monitor, g_object_unref);
+      g_object_bind_property (monitor, "available", item, "sensitive",
+          G_BINDING_SYNC_CREATE);
+    }
 
   return item;
 }
