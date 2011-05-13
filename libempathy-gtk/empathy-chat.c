@@ -1293,6 +1293,7 @@ chat_message_received_cb (EmpathyTpChat  *tp_chat,
 
 static void
 chat_pending_message_removed_cb (EmpathyTpChat  *tp_chat,
+				 EmpathyMessage *message,
 				 EmpathyChat    *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);

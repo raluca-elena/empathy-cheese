@@ -479,10 +479,10 @@ pending_message_removed_cb (TpTextChannel   *channel,
 				 find_pending_message_func);
 	g_assert (m != NULL);
 
+	g_signal_emit (chat, signals[PENDING_MESSAGE_REMOVED], 0, m->data);
+
 	g_object_unref (m->data);
 	g_queue_delete_link (priv->pending_messages_queue, m);
-
-	g_signal_emit (chat, signals[PENDING_MESSAGE_REMOVED], 0);
 }
 
 static void
@@ -1672,9 +1672,9 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__VOID,
+			      g_cclosure_marshal_VOID__OBJECT,
 			      G_TYPE_NONE,
-			      0);
+			      1, EMPATHY_TYPE_MESSAGE);
 
 	g_type_class_add_private (object_class, sizeof (EmpathyTpChatPriv));
 }
