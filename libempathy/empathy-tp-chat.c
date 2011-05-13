@@ -94,8 +94,6 @@ G_DEFINE_TYPE_WITH_CODE (EmpathyTpChat, empathy_tp_chat, G_TYPE_OBJECT,
 			 G_IMPLEMENT_INTERFACE (EMPATHY_TYPE_CONTACT_LIST,
 						tp_chat_iface_init));
 
-static void acknowledge_messages (EmpathyTpChat *chat, const GList *messages);
-
 static void
 tp_chat_set_delivery_status (EmpathyTpChat         *self,
 		             const gchar           *token,
@@ -1837,20 +1835,10 @@ empathy_tp_chat_get_pending_messages (EmpathyTpChat *chat)
 	return priv->pending_messages_queue->head;
 }
 
-static void
-acknowledge_messages (EmpathyTpChat *chat,
-		      const GList *messages) {
-	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-
-	tp_text_channel_ack_messages_async (TP_TEXT_CHANNEL (priv->channel),
-	    messages, NULL, NULL);
-}
-
 void
 empathy_tp_chat_acknowledge_message (EmpathyTpChat *chat,
 				     EmpathyMessage *message) {
 	EmpathyTpChatPriv *priv = GET_PRIV (chat);
-	GList *messages = NULL;
 	TpMessage *tp_msg;
 
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (chat));
@@ -1860,9 +1848,8 @@ empathy_tp_chat_acknowledge_message (EmpathyTpChat *chat,
 		return;
 
 	tp_msg = empathy_message_get_tp_message (message);
-	messages = g_list_append (messages, tp_msg);
-	acknowledge_messages (chat, messages);
-	g_list_free (messages);
+	tp_text_channel_ack_message_async (TP_TEXT_CHANNEL (priv->channel),
+					   tp_msg, NULL, NULL);
 }
 
 void
@@ -1887,8 +1874,10 @@ empathy_tp_chat_acknowledge_messages (EmpathyTpChat *chat,
 		}
 	}
 
-	if (messages_to_ack != NULL)
-		acknowledge_messages (chat, messages_to_ack);
+	if (messages_to_ack != NULL) {
+		tp_text_channel_ack_messages_async (TP_TEXT_CHANNEL (priv->channel),
+						    messages_to_ack, NULL, NULL);
+	}
 
 	g_list_free (messages_to_ack);
 }
