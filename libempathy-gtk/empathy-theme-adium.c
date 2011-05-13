@@ -61,6 +61,9 @@ typedef struct {
 	guint                 pages_loading;
 	/* Queue of GValue* containing an EmpathyMessage or string */
 	GQueue                message_queue;
+	/* Queue of owned gchar* of message token to remove unread
+	 * marker for when we lose focus. */
+	GQueue                acked_messages;
 	GtkWidget            *inspector_window;
 	GSettings            *gsettings_chat;
 	gboolean              has_focus;
@@ -946,16 +949,91 @@ theme_adium_copy_clipboard (EmpathyChatView *view)
 }
 
 static void
+theme_adium_remove_mark_from_message (EmpathyThemeAdium *self,
+				      const gchar *token)
+{
+	WebKitDOMDocument *dom;
+	WebKitDOMNodeList *nodes;
+	gchar *class, *tmp;
+	GError *error = NULL;
+
+	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (self));
+	if (dom == NULL) {
+		return;
+	}
+
+	tmp = tp_escape_as_identifier (token);
+	class = g_strdup_printf (".x-empathy-message-id-%s", tmp);
+	g_free (tmp);
+
+	/* Get all nodes with focus class */
+	nodes = webkit_dom_document_query_selector_all (dom, class, &error);
+	g_free (class);
+
+	if (nodes == NULL) {
+		DEBUG ("Error getting focus nodes: %s",
+			error ? error->message : "No error");
+		g_clear_error (&error);
+		return;
+	}
+
+	theme_adium_remove_focus_marks (self, nodes);
+}
+
+static void
+theme_adium_remove_acked_message_unread_mark_foreach (gpointer data,
+						      gpointer user_data)
+{
+	EmpathyThemeAdium *self = user_data;
+	gchar *token = data;
+
+	theme_adium_remove_mark_from_message (self, token);
+	g_free (token);
+}
+
+static void
 theme_adium_focus_toggled (EmpathyChatView *view,
 			   gboolean         has_focus)
 {
-	EmpathyThemeAdium *self = (EmpathyThemeAdium *) view;
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 
 	priv->has_focus = has_focus;
 	if (!priv->has_focus) {
-		theme_adium_remove_all_focus_marks (self);
+		/* We've lost focus, so let's make sure all the acked
+		 * messages have lost their unread marker. */
+		g_queue_foreach (&priv->acked_messages,
+				 theme_adium_remove_acked_message_unread_mark_foreach,
+				 view);
+		g_queue_clear (&priv->acked_messages);
 	}
+}
+
+static void
+theme_adium_message_acknowledged (EmpathyChatView *view,
+				  EmpathyMessage  *message)
+{
+	EmpathyThemeAdium *self = (EmpathyThemeAdium *) view;
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
+	TpMessage *tp_msg;
+
+	tp_msg = empathy_message_get_tp_message (message);
+
+	if (tp_msg == NULL) {
+		return;
+	}
+
+	/* We only want to actually remove the unread marker if the
+	 * view doesn't have focus. If we did it all the time we would
+	 * never see the unread markers, ever! So, we'll queue these
+	 * up, and when we lose focus, we'll remove the markers. */
+	if (priv->has_focus) {
+		g_queue_push_tail (&priv->acked_messages,
+				   g_strdup (tp_message_get_token (tp_msg)));
+		return;
+	}
+
+	theme_adium_remove_mark_from_message (self,
+					      tp_message_get_token (tp_msg));
 }
 
 static void
@@ -1078,6 +1156,7 @@ theme_adium_iface_init (EmpathyChatViewIface *iface)
 	iface->highlight = theme_adium_highlight;
 	iface->copy_clipboard = theme_adium_copy_clipboard;
 	iface->focus_toggled = theme_adium_focus_toggled;
+	iface->message_acknowledged = theme_adium_message_acknowledged;
 }
 
 static void
@@ -1141,6 +1220,11 @@ theme_adium_dispose (GObject *object)
 	if (priv->inspector_window) {
 		gtk_widget_destroy (priv->inspector_window);
 		priv->inspector_window = NULL;
+	}
+
+	if (priv->acked_messages.length > 0) {
+		g_queue_foreach (&priv->acked_messages, (GFunc) g_free, NULL);
+		g_queue_clear (&priv->acked_messages);
 	}
 
 	G_OBJECT_CLASS (empathy_theme_adium_parent_class)->dispose (object);
