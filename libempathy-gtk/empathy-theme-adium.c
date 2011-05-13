@@ -638,6 +638,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	EmpathyThemeAdium     *theme = EMPATHY_THEME_ADIUM (view);
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
 	EmpathyContact        *sender;
+	TpMessage             *tp_msg;
 	TpAccount             *account;
 	gchar                 *body_escaped;
 	const gchar           *body;
@@ -758,6 +759,16 @@ theme_adium_append_message (EmpathyChatView *view,
 	 *         (for example, encryption being turned on)
 	 * %status% - See %status% in theme_adium_append_html ()
 	 */
+
+	/* x-empathy-message-id-* */
+	tp_msg = empathy_message_get_tp_message (msg);
+	if (tp_msg != NULL) {
+		gchar *tmp = tp_escape_as_identifier (
+		    tp_message_get_token (tp_msg));
+		g_string_append_printf (message_classes,
+		    " x-empathy-message-id-%s", tmp);
+		g_free (tmp);
+	}
 
 	/* Define javascript function to use */
 	if (consecutive) {
