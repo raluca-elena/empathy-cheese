@@ -3905,11 +3905,9 @@ empathy_chat_messages_read (EmpathyChat *self)
 	if (priv->retrieving_backlogs)
 		return;
 
-	if (priv->tp_chat != NULL ) {
+	if (priv->tp_chat != NULL) {
 		empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
 	}
-
-	empathy_chat_view_focus_toggled (self->view, TRUE);
 }
 
 /* Return TRUE if on of the contacts in this chat is composing */
