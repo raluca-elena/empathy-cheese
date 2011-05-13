@@ -1278,6 +1278,7 @@ chat_message_received (EmpathyChat *chat,
 
 	if (empathy_message_is_incoming (message)) {
 		priv->unread_messages++;
+		g_object_notify (G_OBJECT (chat), "nb-unread-messages");
 	}
 
 	g_signal_emit (chat, signals[NEW_MESSAGE], 0, message, pending);
