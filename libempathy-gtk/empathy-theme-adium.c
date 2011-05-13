@@ -771,7 +771,11 @@ theme_adium_append_message (EmpathyChatView *view,
 	 * %status% - See %status% in theme_adium_append_html ()
 	 */
 
-	/* x-empathy-message-id-* */
+	/* This is slightly a hack, but it's the only way to add
+	 * arbitrary data to messages in the HTML. We add another
+	 * class called "x-empathy-message-id-*" to the message. This
+	 * way, we can remove the unread marker for this specific
+	 * message later. */
 	tp_msg = empathy_message_get_tp_message (msg);
 	if (tp_msg != NULL) {
 		gchar *tmp = tp_escape_as_identifier (
