@@ -2022,19 +2022,20 @@ empathy_create_dtmf_dialpad (GObject *self,
   GQuark button_quark;
   struct {
     const gchar *label;
+    const gchar *sublabel;
     TpDTMFEvent event;
-  } dtmfbuttons[] = { { "1", TP_DTMF_EVENT_DIGIT_1 },
-                      { "2", TP_DTMF_EVENT_DIGIT_2 },
-                      { "3", TP_DTMF_EVENT_DIGIT_3 },
-                      { "4", TP_DTMF_EVENT_DIGIT_4 },
-                      { "5", TP_DTMF_EVENT_DIGIT_5 },
-                      { "6", TP_DTMF_EVENT_DIGIT_6 },
-                      { "7", TP_DTMF_EVENT_DIGIT_7 },
-                      { "8", TP_DTMF_EVENT_DIGIT_8 },
-                      { "9", TP_DTMF_EVENT_DIGIT_9 },
-                      { "#", TP_DTMF_EVENT_HASH },
-                      { "0", TP_DTMF_EVENT_DIGIT_0 },
-                      { "*", TP_DTMF_EVENT_ASTERISK },
+  } dtmfbuttons[] = { { "1", "",     TP_DTMF_EVENT_DIGIT_1 },
+                      { "2", "abc",  TP_DTMF_EVENT_DIGIT_2 },
+                      { "3", "def",  TP_DTMF_EVENT_DIGIT_3 },
+                      { "4", "ghi",  TP_DTMF_EVENT_DIGIT_4 },
+                      { "5", "jkl",  TP_DTMF_EVENT_DIGIT_5 },
+                      { "6", "mno",  TP_DTMF_EVENT_DIGIT_6 },
+                      { "7", "pqrs", TP_DTMF_EVENT_DIGIT_7 },
+                      { "8", "tuv",  TP_DTMF_EVENT_DIGIT_8 },
+                      { "9", "wxyz", TP_DTMF_EVENT_DIGIT_9 },
+                      { "#", "",     TP_DTMF_EVENT_HASH },
+                      { "0", "",     TP_DTMF_EVENT_DIGIT_0 },
+                      { "*", "",     TP_DTMF_EVENT_ASTERISK },
                       { NULL, } };
 
   button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
@@ -2043,7 +2044,32 @@ empathy_create_dtmf_dialpad (GObject *self,
 
   for (i = 0; dtmfbuttons[i].label != NULL; i++)
     {
-      GtkWidget *button = gtk_button_new_with_label (dtmfbuttons[i].label);
+      GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
+      GtkWidget *button = gtk_button_new ();
+      GtkWidget *label;
+      gchar *str;
+
+      gtk_container_add (GTK_CONTAINER (button), vbox);
+
+      /* main label */
+      label = gtk_label_new ("");
+      str = g_strdup_printf ("<span size='x-large'>%s</span>",
+          dtmfbuttons[i].label);
+      gtk_label_set_markup (GTK_LABEL (label), str);
+      g_free (str);
+
+      gtk_box_pack_start (GTK_BOX (vbox), label, TRUE, TRUE, 3);
+
+      /* sub label */
+      label = gtk_label_new ("");
+      str = g_strdup_printf (
+          "<span foreground='#555555'>%s</span>",
+          dtmfbuttons[i].sublabel);
+      gtk_label_set_markup (GTK_LABEL (label), str);
+      g_free (str);
+
+      gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, TRUE, 0);
+
       gtk_table_attach (GTK_TABLE (table), button, i % 3, i % 3 + 1,
         i/3, i/3 + 1, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 1, 1);
 
