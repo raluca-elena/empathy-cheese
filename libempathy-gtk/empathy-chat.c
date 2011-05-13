@@ -1298,6 +1298,9 @@ chat_pending_message_removed_cb (EmpathyTpChat  *tp_chat,
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 
+	empathy_chat_view_message_acknowledged (chat->view,
+	    message);
+
 	priv->unread_messages--;
 	g_object_notify (G_OBJECT (chat), "nb-unread-messages");
 }
