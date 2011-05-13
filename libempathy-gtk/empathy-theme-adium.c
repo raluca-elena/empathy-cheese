@@ -569,32 +569,10 @@ theme_adium_append_event_escaped (EmpathyChatView *view,
 }
 
 static void
-theme_adium_remove_focus_marks (EmpathyThemeAdium *theme)
+theme_adium_remove_focus_marks (EmpathyThemeAdium *theme,
+    WebKitDOMNodeList *nodes)
 {
-	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
-	WebKitDOMDocument *dom;
-	WebKitDOMNodeList *nodes;
 	guint i;
-	GError *error = NULL;
-
-	if (!priv->has_unread_message)
-		return;
-
-	priv->has_unread_message = FALSE;
-
-	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (theme));
-	if (dom == NULL) {
-		return;
-	}
-
-	/* Get all nodes with focus class */
-	nodes = webkit_dom_document_query_selector_all (dom, ".focus", &error);
-	if (nodes == NULL) {
-		DEBUG ("Error getting focus nodes: %s",
-			error ? error->message : "No error");
-		g_clear_error (&error);
-		return;
-	}
 
 	/* Remove focus and firstFocus class */
 	for (i = 0; i < webkit_dom_node_list_get_length (nodes); i++) {
@@ -629,6 +607,36 @@ theme_adium_remove_focus_marks (EmpathyThemeAdium *theme)
 		g_strfreev (classes);
 		g_string_free (new_class_name, TRUE);
 	}
+}
+
+static void
+theme_adium_remove_all_focus_marks (EmpathyThemeAdium *theme)
+{
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
+	WebKitDOMDocument *dom;
+	WebKitDOMNodeList *nodes;
+	GError *error = NULL;
+
+	if (!priv->has_unread_message)
+		return;
+
+	priv->has_unread_message = FALSE;
+
+	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (theme));
+	if (dom == NULL) {
+		return;
+	}
+
+	/* Get all nodes with focus class */
+	nodes = webkit_dom_document_query_selector_all (dom, ".focus", &error);
+	if (nodes == NULL) {
+		DEBUG ("Error getting focus nodes: %s",
+			error ? error->message : "No error");
+		g_clear_error (&error);
+		return;
+	}
+
+	theme_adium_remove_focus_marks (theme, nodes);
 }
 
 static void
@@ -788,7 +796,7 @@ theme_adium_append_message (EmpathyChatView *view,
 		}
 
 		/* remove all the unread marks when we are sending a message */
-		theme_adium_remove_focus_marks (theme);
+		theme_adium_remove_all_focus_marks (theme);
 	} else {
 		/* in */
 		if (is_backlog) {
@@ -946,7 +954,7 @@ theme_adium_focus_toggled (EmpathyChatView *view,
 
 	priv->has_focus = has_focus;
 	if (!priv->has_focus) {
-		theme_adium_remove_focus_marks (self);
+		theme_adium_remove_all_focus_marks (self);
 	}
 }
 
