@@ -1293,9 +1293,9 @@ chat_message_received_cb (EmpathyTpChat  *tp_chat,
 }
 
 static void
-chat_pending_message_removed_cb (EmpathyTpChat  *tp_chat,
-				 EmpathyMessage *message,
-				 EmpathyChat    *chat)
+chat_message_acknowledged_cb (EmpathyTpChat  *tp_chat,
+			      EmpathyMessage *message,
+			      EmpathyChat    *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 
@@ -2895,7 +2895,7 @@ chat_finalize (GObject *object)
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_message_received_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
-			chat_pending_message_removed_cb, chat);
+			chat_message_acknowledged_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_send_error_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
@@ -3579,8 +3579,8 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect (tp_chat, "message-received",
 			  G_CALLBACK (chat_message_received_cb),
 			  chat);
-	g_signal_connect (tp_chat, "pending-message-removed",
-			  G_CALLBACK (chat_pending_message_removed_cb),
+	g_signal_connect (tp_chat, "message_acknowledged",
+			  G_CALLBACK (chat_message_acknowledged_cb),
 			  chat);
 	g_signal_connect (tp_chat, "send-error",
 			  G_CALLBACK (chat_send_error_cb),

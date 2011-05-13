@@ -84,7 +84,7 @@ enum {
 	CHAT_STATE_CHANGED,
 	PROPERTY_CHANGED,
 	DESTROY,
-	PENDING_MESSAGE_REMOVED,
+	MESSAGE_ACKNOWLEDGED,
 	LAST_SIGNAL
 };
 
@@ -479,7 +479,7 @@ pending_message_removed_cb (TpTextChannel   *channel,
 				 find_pending_message_func);
 	g_assert (m != NULL);
 
-	g_signal_emit (chat, signals[PENDING_MESSAGE_REMOVED], 0, m->data);
+	g_signal_emit (chat, signals[MESSAGE_ACKNOWLEDGED], 0, m->data);
 
 	g_object_unref (m->data);
 	g_queue_delete_link (priv->pending_messages_queue, m);
@@ -1666,8 +1666,8 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_TYPE_NONE,
 			      0);
 
-	signals[PENDING_MESSAGE_REMOVED] =
-		g_signal_new ("pending-message-removed",
+	signals[MESSAGE_ACKNOWLEDGED] =
+		g_signal_new ("message-acknowledged",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
 			      0,
