@@ -680,10 +680,20 @@ empathy_contact_from_tpl_contact (TpAccount *account,
 
   if (existing_contact != NULL)
     {
+      EmpathyContactPriv *priv;
+
       retval = g_object_new (EMPATHY_TYPE_CONTACT,
           "tp-contact", empathy_contact_get_tp_contact (existing_contact),
-          "alias", tpl_entity_get_alias (tpl_entity),
           NULL);
+
+      priv = GET_PRIV (retval);
+
+      /* contact_set_property() calls empathy_contact_set_alias(), which
+       * tries to set the alias on the FolksPersona, but we don't want to
+       * do that when creating an EmpathyContact from a TplEntity. So just
+       * set priv->alias instead of passing it to g_object_new() instead. */
+      g_free (priv->alias);
+      priv->alias = g_strdup (tpl_entity_get_alias (tpl_entity));
     }
   else
     {
