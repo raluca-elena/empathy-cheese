@@ -34,8 +34,6 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 
-#include <libempathy-gtk/empathy-call-utils.h>
-
 #include "empathy-call-factory.h"
 #include "empathy-call-handler.h"
 #include "src-marshal.h"
@@ -207,56 +205,6 @@ empathy_call_factory_get (void)
   g_return_val_if_fail (call_factory != NULL, NULL);
 
   return EMPATHY_CALL_FACTORY (call_factory);
-}
-
-static void
-create_call_channel_cb (GObject *source,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  GError *error = NULL;
-
-  if (!tp_account_channel_request_create_channel_finish (
-        TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
-    {
-      DEBUG ("Failed to create call channel: %s", error->message);
-      g_error_free (error);
-    }
-}
-
-/**
- * empathy_call_factory_new_call_with_streams:
- * @factory: an #EmpathyCallFactory
- * @contact: an #EmpathyContact
- * @initial_audio: if %TRUE the call will be started with audio
- * @initial_video: if %TRUE the call will be started with video
- *
- * Initiate a new Call with @contact.
- */
-void
-empathy_call_factory_new_call_with_streams (EmpathyContact *contact,
-    gboolean initial_audio,
-    gboolean initial_video,
-    gint64 timestamp,
-    gpointer user_data)
-{
-  GHashTable *call_request;
-  TpAccount *account;
-  TpAccountChannelRequest *call_req;
-
-  call_request = empathy_call_create_call_request (
-      empathy_contact_get_id (contact),
-      initial_audio, initial_video);
-
-  account = empathy_contact_get_account (contact);
-
-  call_req = tp_account_channel_request_new (account, call_request, timestamp);
-
-  tp_account_channel_request_create_channel_async (call_req, NULL, NULL,
-      create_call_channel_cb, NULL);
-
-  g_hash_table_unref (call_request);
-  g_object_unref (call_req);
 }
 
 static void
