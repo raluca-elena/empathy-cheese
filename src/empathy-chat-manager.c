@@ -18,6 +18,7 @@
  */
 
 #include <telepathy-glib/telepathy-glib.h>
+#include <telepathy-glib/proxy-subclass.h>
 
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-request-util.h>
@@ -30,6 +31,8 @@
 
 #include "empathy-chat-manager.h"
 
+#include <extensions/extensions.h>
+
 enum {
   CLOSED_CHATS_CHANGED,
   DISPLAYED_CHATS_CHANGED,
@@ -38,7 +41,13 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-G_DEFINE_TYPE(EmpathyChatManager, empathy_chat_manager, G_TYPE_OBJECT)
+static void svc_iface_init (gpointer, gpointer);
+
+G_DEFINE_TYPE_WITH_CODE (EmpathyChatManager, empathy_chat_manager,
+    G_TYPE_OBJECT,
+    G_IMPLEMENT_INTERFACE (EMP_TYPE_SVC_CHAT_MANAGER,
+        svc_iface_init)
+    )
 
 /* private structure */
 typedef struct _EmpathyChatManagerPriv EmpathyChatManagerPriv;
@@ -363,6 +372,22 @@ empathy_chat_manager_constructor (GType type,
 }
 
 static void
+empathy_chat_manager_constructed (GObject *obj)
+{
+  TpDBusDaemon *dbus_daemon;
+
+  dbus_daemon = tp_dbus_daemon_dup (NULL);
+
+  if (dbus_daemon != NULL)
+    {
+      tp_dbus_daemon_register_object (dbus_daemon,
+          "/org/gnome/Empathy/ChatManager", obj);
+
+      g_object_unref (dbus_daemon);
+    }
+}
+
+static void
 empathy_chat_manager_class_init (
   EmpathyChatManagerClass *empathy_chat_manager_class)
 {
@@ -370,6 +395,7 @@ empathy_chat_manager_class_init (
 
   object_class->finalize = empathy_chat_manager_finalize;
   object_class->constructor = empathy_chat_manager_constructor;
+  object_class->constructed = empathy_chat_manager_constructed;
 
   signals[CLOSED_CHATS_CHANGED] =
     g_signal_new ("closed-chats-changed",
@@ -452,4 +478,48 @@ empathy_chat_manager_get_num_closed_chats (EmpathyChatManager *self)
   EmpathyChatManagerPriv *priv = GET_PRIV (self);
 
   return g_queue_get_length (priv->closed_queue);
+}
+
+static void
+empathy_chat_manager_dbus_undo_closed_chat (EmpSvcChatManager *manager,
+    DBusGMethodInvocation *context)
+{
+  empathy_chat_manager_undo_closed_chat ((EmpathyChatManager *) manager);
+
+  emp_svc_chat_manager_return_from_undo_closed_chat (context);
+}
+
+static void
+svc_iface_init (gpointer g_iface,
+    gpointer iface_data)
+{
+  EmpSvcChatManagerClass *klass = (EmpSvcChatManagerClass *) g_iface;
+
+#define IMPLEMENT(x) emp_svc_chat_manager_implement_##x (\
+    klass, empathy_chat_manager_dbus_##x)
+  IMPLEMENT(undo_closed_chat);
+#undef IMPLEMENT
+}
+
+void
+empathy_chat_manager_call_undo_closed_chat (void)
+{
+  TpDBusDaemon *dbus_daemon = tp_dbus_daemon_dup (NULL);
+  TpProxy *proxy;
+
+  if (dbus_daemon == NULL)
+    return;
+
+  proxy = g_object_new (TP_TYPE_PROXY,
+      "dbus-daemon", dbus_daemon,
+      "dbus-connection", tp_proxy_get_dbus_connection (TP_PROXY (dbus_daemon)),
+      "bus-name", "org.freedesktop.Telepathy.Client.Empathy.Chat",
+      "object-path", "/org/gnome/Empathy/ChatManager",
+      NULL);
+
+  tp_proxy_add_interface_by_id (proxy, EMP_IFACE_QUARK_CHAT_MANAGER);
+
+  emp_cli_chat_manager_call_undo_closed_chat (proxy, -1, NULL, NULL, NULL, NULL);
+
+  g_object_unref (dbus_daemon);
 }
