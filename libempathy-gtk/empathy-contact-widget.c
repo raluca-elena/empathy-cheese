@@ -40,6 +40,7 @@
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-location.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-time.h>
 #include <libempathy/empathy-utils.h>
 
@@ -283,20 +284,74 @@ contact_widget_bday_changed_cb (GtkCalendar *calendar,
 
 static void contact_widget_details_notify_cb (EmpathyContactWidget *information);
 
+typedef gchar * (* FieldFormatFunc) (GStrv);
+
 typedef struct
 {
   const gchar *field_name;
   const gchar *title;
-  gboolean linkify;
+  FieldFormatFunc format;
 } InfoFieldData;
+
+static gchar *
+linkify_first_value (GStrv values)
+{
+  return empathy_add_link_markup (values[0]);
+}
+
+static gchar *
+format_idle_time (GStrv values)
+{
+  const gchar *value = values[0];
+  int duration = strtol (value, NULL, 10);
+
+  if (duration <= 0)
+    return NULL;
+
+  return empathy_duration_to_string (duration);
+}
+
+static gchar *
+format_server (GStrv values)
+{
+  g_assert (values[0] != NULL);
+
+  if (values[1] == NULL)
+    return g_markup_escape_text (values[0], -1);
+  else
+    return g_markup_printf_escaped ("%s (%s)", values[0], values[1]);
+}
+
+static gchar *
+presence_hack (GStrv values)
+{
+  if (tp_str_empty (values[0]))
+    return NULL;
+
+  return g_markup_escape_text (values[0], -1);
+}
 
 static InfoFieldData info_field_datas[] =
 {
-  { "fn",    N_("Full name:"),      FALSE },
-  { "tel",   N_("Phone number:"),   FALSE },
-  { "email", N_("E-mail address:"), TRUE },
-  { "url",   N_("Website:"),        TRUE },
-  { "bday",  N_("Birthday:"),       FALSE },
+  { "fn",    N_("Full name:"),      NULL },
+  { "tel",   N_("Phone number:"),   NULL },
+  { "email", N_("E-mail address:"), linkify_first_value },
+  { "url",   N_("Website:"),        linkify_first_value },
+  { "bday",  N_("Birthday:"),       NULL },
+
+  /* Note to translators: this is the caption for a string of the form "5
+   * minutes ago", and refers to the time since the contact last interacted
+   * with their IM client.
+   */
+  { "x-idle-time", N_("Last seen:"), format_idle_time },
+  { "x-irc-server", N_("Server:"), format_server },
+  { "x-host", N_("Connected from:"), format_server },
+
+  /* FIXME: once Idle implements SimplePresence using this information, we can
+   * and should bin this.
+   */
+  { "x-presence-status-message", N_("Away message:"), presence_hack },
+
   { NULL, NULL }
 };
 
@@ -526,12 +581,73 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
   return n_rows;
 }
 
+static gboolean
+channel_name_activated_cb (
+    GtkLabel *label,
+    gchar *uri,
+    EmpathyContactWidget *information)
+{
+  TpAccount *account = empathy_contact_get_account (information->contact);
+
+  empathy_join_muc (account, uri, empathy_get_current_action_time ());
+  return TRUE;
+}
+
+static void
+add_channel_list (
+    EmpathyContactWidget *information,
+    GPtrArray *channels,
+    guint row)
+{
+  GtkWidget *w;
+  GString *label_markup = g_string_new ("");
+  guint i;
+
+  w = gtk_label_new (_("Channels:"));
+  gtk_table_attach (GTK_TABLE (information->table_details),
+      w, 0, 1, row, row + 1, GTK_FILL, 0, 0, 0);
+  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
+  gtk_widget_show (w);
+
+  for (i = 0; i < channels->len; i++)
+    {
+      const gchar *channel_name = g_ptr_array_index (channels, i);
+      /* We abuse the URI of the link to hold the channel name. It seems to
+       * be okay to just use it essentially verbatim, rather than trying to
+       * ensure it's actually a valid URI.  g_string_append_uri_escaped()
+       * escapes way more than we actually need to; so we're just using
+       * g_markup_escape_text directly.
+       */
+      gchar *escaped = g_markup_escape_text (channel_name, -1);
+
+      if (i > 0)
+        g_string_append (label_markup, ", ");
+
+      g_string_append_printf (label_markup, "<a href='%s'>%s</a>",
+          escaped, channel_name);
+      g_free (escaped);
+    }
+
+  w = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (w), label_markup->str);
+  gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
+  g_signal_connect (w, "activate-link",
+      (GCallback) channel_name_activated_cb, information);
+  gtk_table_attach_defaults (GTK_TABLE (information->table_details),
+      w, 1, 2, row, row + 1);
+  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
+  gtk_widget_show (w);
+
+  g_string_free (label_markup, TRUE);
+}
+
 static guint
 contact_widget_details_update_show (EmpathyContactWidget *information)
 {
   TpContact *contact;
   GList *info, *l;
   guint n_rows = 0;
+  GPtrArray *channels = g_ptr_array_new ();
 
   contact = empathy_contact_get_tp_contact (information->contact);
   info = tp_contact_get_contact_info (contact);
@@ -541,6 +657,7 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       TpContactInfoField *field = l->data;
       InfoFieldData *field_data;
       const gchar *value;
+      gchar *markup = NULL;
       GtkWidget *w;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
@@ -548,11 +665,29 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
       value = field->field_value[0];
 
+      if (!tp_strdiff (field->field_name, "x-irc-channel"))
+        {
+          g_ptr_array_add (channels, (gpointer) field->field_value[0]);
+          continue;
+        }
+
       field_data = find_info_field_data (field->field_name);
       if (field_data == NULL)
         {
           DEBUG ("Unhandled ContactInfo field: %s", field->field_name);
           continue;
+        }
+
+      if (field_data->format != NULL)
+        {
+          markup = field_data->format (field->field_value);
+
+          if (markup == NULL)
+            {
+              DEBUG ("Invalid value for field '%s' (first element was '%s')",
+                  field->field_name, field->field_value[0]);
+              continue;
+            }
         }
 
       /* Add Title */
@@ -564,11 +699,8 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
 
       /* Add Value */
       w = gtk_label_new (value);
-      if (field_data->linkify)
+      if (markup != NULL)
         {
-          gchar *markup;
-
-          markup = empathy_add_link_markup (value);
           gtk_label_set_markup (GTK_LABEL (w), markup);
           g_free (markup);
         }
@@ -585,6 +717,13 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
     }
   g_list_free (info);
 
+  if (channels->len > 0)
+    {
+      add_channel_list (information, channels, n_rows);
+      n_rows++;
+    }
+
+  g_ptr_array_unref (channels);
   return n_rows;
 }
 

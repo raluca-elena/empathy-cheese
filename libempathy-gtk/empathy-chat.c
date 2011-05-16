@@ -47,6 +47,7 @@
 
 #include "empathy-chat.h"
 #include "empathy-spell.h"
+#include "empathy-contact-dialogs.h"
 #include "empathy-contact-list-store.h"
 #include "empathy-contact-list-view.h"
 #include "empathy-contact-menu.h"
@@ -905,6 +906,84 @@ chat_command_say (EmpathyChat *chat,
 	g_object_unref (message);
 }
 
+static void
+whois_got_contact_cb (TpConnection *connection,
+		      guint n_contacts,
+		      TpContact * const *contacts,
+		      const gchar * const *requested_ids,
+		      GHashTable *failed_id_errors,
+		      const GError *error,
+		      gpointer user_data,
+		      GObject *weak_object)
+{
+	EmpathyChat *chat = EMPATHY_CHAT (weak_object);
+
+	g_return_if_fail (n_contacts <= 1);
+
+	if (n_contacts == 0) {
+		GHashTableIter iter;
+		gpointer key = NULL, value = NULL;
+		gchar *id;
+		GError *id_error;
+
+		/* tp-glib guarantees that the contacts you requested will be
+		 * in failed_id_errors regardless of whether the individual
+		 * contact was invalid or the whole operation failed.
+		 */
+		g_hash_table_iter_init (&iter, failed_id_errors);
+		g_hash_table_iter_next (&iter, &key, &value);
+		id = key;
+		id_error = value;
+
+		DEBUG ("Error getting TpContact for '%s': %s %u %s",
+			id, g_quark_to_string (id_error->domain),
+			id_error->code, id_error->message);
+
+		if (error == NULL) {
+			/* The specific ID failed. */
+			gchar *event = g_strdup_printf (
+				_("“%s” is not a valid contact ID"), id);
+			empathy_chat_view_append_event (chat->view, event);
+			g_free (event);
+		}
+		/* Otherwise we're disconnected or something; so the window
+		 * will already say ‘Disconnected’, so let's not show anything.
+		 */
+	} else {
+		EmpathyContact *empathy_contact;
+		GtkWidget *window;
+
+		g_return_if_fail (contacts[0] != NULL);
+		empathy_contact = empathy_contact_dup_from_tp_contact (
+			contacts[0]);
+
+		window = gtk_widget_get_toplevel (GTK_WIDGET (chat));
+		/* If we're alive and this command is running, we'd better be
+		 * in a window. */
+		g_return_if_fail (window != NULL);
+		g_return_if_fail (gtk_widget_is_toplevel (window));
+		empathy_contact_information_dialog_show (empathy_contact,
+			GTK_WINDOW (window));
+		g_object_unref (empathy_contact);
+	}
+}
+
+static void
+chat_command_whois (EmpathyChat *chat,
+		    GStrv strv)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+	TpConnection *conn;
+
+	conn = empathy_tp_chat_get_connection (priv->tp_chat);
+	tp_connection_get_contacts_by_id (conn,
+		/* Element 0 of 'strv' is "whois"; element 1 is the contact ID
+		 * entered by the user (including spaces, if any). */
+		1, (const gchar * const *) strv + 1,
+		0, NULL,
+		whois_got_contact_cb, NULL, NULL, G_OBJECT (chat));
+}
+
 static void chat_command_help (EmpathyChat *chat, GStrv strv);
 
 typedef void (*ChatCommandFunc) (EmpathyChat *chat, GStrv strv);
@@ -952,6 +1031,9 @@ static ChatCommandItem commands[] = {
 	 N_("/say <message>: send <message> to the current conversation. "
 	    "This is used to send a message starting with a '/'. For example: "
 	    "\"/say /join is used to join a new chat room\"")},
+
+	{"whois", 2, 2, chat_command_whois, NULL,
+	 N_("/whois <contact ID>: display information about a contact")},
 
 	{"help", 1, 2, chat_command_help, NULL,
 	 N_("/help [<command>]: show all supported commands. "
