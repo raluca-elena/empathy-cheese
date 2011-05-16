@@ -475,7 +475,9 @@ pending_message_removed_cb (TpTextChannel   *channel,
 
 	m = g_queue_find_custom (priv->pending_messages_queue, message,
 				 find_pending_message_func);
-	g_assert (m != NULL);
+
+	if (m == NULL)
+		return;
 
 	g_signal_emit (chat, signals[MESSAGE_ACKNOWLEDGED], 0, m->data);
 
