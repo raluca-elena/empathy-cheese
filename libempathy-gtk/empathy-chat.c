@@ -3921,3 +3921,26 @@ empathy_chat_get_n_messages_sending (EmpathyChat *self)
 		return n_messages;
 	}
 }
+
+gchar *
+empathy_chat_get_text (EmpathyChat *self)
+{
+	GtkTextBuffer *buffer;
+	GtkTextIter     start, end;
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->input_text_view));
+
+	gtk_text_buffer_get_bounds (buffer, &start, &end);
+	return gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
+}
+
+void
+empathy_chat_set_text (EmpathyChat *self,
+		       const gchar *text)
+{
+	GtkTextBuffer *buffer;
+
+	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->input_text_view));
+
+	gtk_text_buffer_set_text (buffer, text, -1);
+}
