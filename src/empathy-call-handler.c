@@ -884,6 +884,21 @@ empathy_call_handler_start_tpfs (EmpathyCallHandler *self)
       on_tf_channel_ready, self);
 }
 
+static void
+on_call_accepted_cb (GObject *source_object,
+    GAsyncResult *res,
+    gpointer user_data)
+{
+  TpyCallChannel *call = TPY_CALL_CHANNEL (source_object);
+  GError *error = NULL;
+
+  if (!tpy_call_channel_accept_finish (call, res, &error))
+    {
+      g_warning ("could not accept Call: %s", error->message);
+      g_error_free (error);
+    }
+}
+
 #if 0
 static void
 empathy_call_handler_request_cb (GObject *source,
@@ -918,21 +933,6 @@ empathy_call_handler_request_cb (GObject *source,
   empathy_call_handler_start_tpfs (self);
 }
 #endif
-
-static void
-on_call_accepted_cb (GObject *source_object,
-    GAsyncResult *res,
-    gpointer user_data)
-{
-  TpyCallChannel *call = TPY_CALL_CHANNEL (source_object);
-  GError *error = NULL;
-
-  if (!tpy_call_channel_accept_finish (call, res, &error))
-    {
-      g_warning ("could not accept Call: %s", error->message);
-      g_error_free (error);
-    }
-}
 
 void
 empathy_call_handler_start_call (EmpathyCallHandler *handler,
