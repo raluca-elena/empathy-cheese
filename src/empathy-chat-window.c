@@ -1547,7 +1547,7 @@ chat_window_command_part (EmpathyChat *chat,
 		return;
 	}
 	chat_to_be_parted = empathy_chat_window_find_chat (
-		empathy_chat_get_account (chat), strv[1]);
+		empathy_chat_get_account (chat), strv[1], FALSE);
 
 	if (chat_to_be_parted != NULL) {
 		/* Found a chatroom matching the specified ID */
