@@ -179,7 +179,8 @@ on_call_invalidated_cb (TpyCallChannel *call,
   if (priv->call == call)
     {
       /* Invalidated unexpectedly? Fake call ending */
-      g_signal_emit (self, signals[STATE_CHANGED], 0, TPY_CALL_STATE_ENDED);
+      g_signal_emit (self, signals[STATE_CHANGED], 0,
+          TPY_CALL_STATE_ENDED, NULL);
       tp_clear_object (&priv->call);
       tp_clear_object (&priv->tfchannel);
     }
