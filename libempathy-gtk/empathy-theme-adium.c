@@ -1009,6 +1009,8 @@ theme_adium_focus_toggled (EmpathyChatView *view,
 				 theme_adium_remove_acked_message_unread_mark_foreach,
 				 view);
 		g_queue_clear (&priv->acked_messages);
+
+		priv->has_unread_message = FALSE;
 	}
 }
 
