@@ -1397,6 +1397,51 @@ chat_message_acknowledged_cb (EmpathyTpChat  *tp_chat,
 }
 
 static void
+append_balance_error (EmpathyChat *chat,
+		      const gchar *message_body)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+	TpConnection *conn = tp_channel_borrow_connection (TP_CHANNEL (priv->tp_chat));
+	const gchar *uri = tp_connection_get_balance_uri (conn);
+	const gchar *error = _("insufficient balance to send message");
+	gchar *str, *str_markup = NULL;
+
+	if (message_body != NULL) {
+		str = g_strdup_printf (_("Error sending message '%s': %s"), message_body, error);
+	} else {
+		str = g_strdup_printf (_("Error sending message: %s"), error);
+	}
+
+	if (!tp_str_empty (uri)) {
+		/* translators: error used when user doesn't have enough credit on his
+		 * account to send the message. */
+		gchar *markup_error = g_strdup_printf (_("insufficient balance to send message."
+							 " <a href='%s'>Top up</a>."), uri);
+
+		if (message_body != NULL) {
+			gchar *escaped_body = g_markup_escape_text (message_body, -1);
+
+			str_markup = g_strdup_printf (_("Error sending message '%s': %s"),
+				escaped_body, markup_error);
+
+			g_free (escaped_body);
+		} else {
+			str_markup = g_strdup_printf (_("Error sending message: %s"), markup_error);
+		}
+
+		g_free (markup_error);
+	}
+
+	if (str_markup != NULL)
+		empathy_chat_view_append_event_markup (chat->view, str_markup, str);
+	else
+		empathy_chat_view_append_event (chat->view, str);
+
+	g_free (str);
+	g_free (str_markup);
+}
+
+static void
 chat_send_error_cb (EmpathyTpChat          *tp_chat,
 		    const gchar            *message_body,
 		    TpChannelTextSendError  error_code,
@@ -1407,9 +1452,8 @@ chat_send_error_cb (EmpathyTpChat          *tp_chat,
 	gchar       *str;
 
 	if (!tp_strdiff (dbus_error, TP_ERROR_STR_INSUFFICIENT_BALANCE)) {
-		/* translators: error used when user doesn't have enough credit on his
-		 * account to send the message. */
-		error = _("insufficient balance to send message");
+		append_balance_error (chat, message_body);
+		return;
 	} else if (!tp_strdiff (dbus_error, TP_ERROR_STR_NOT_CAPABLE)) {
 		error = _("not capable");
 	}
