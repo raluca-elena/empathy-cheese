@@ -14,7 +14,7 @@
 
 #include "empathy-invite-participant-dialog.h"
 
-#include "libempathy-gtk/empathy-individual-view.h"
+#include <libempathy-gtk/empathy-individual-view.h>
 
 G_DEFINE_TYPE (EmpathyInviteParticipantDialog,
     empathy_invite_participant_dialog, GTK_TYPE_DIALOG);
@@ -202,7 +202,7 @@ filter_func (GtkTreeModel *model,
       if (handle == 0)
         handle = empathy_contact_get_handle (member);
 
-      if (handle ==  tp_contact_get_handle (contact))
+      if (handle == tp_contact_get_handle (contact))
         {
           display = FALSE;
           break;
@@ -218,9 +218,6 @@ filter_func (GtkTreeModel *model,
 static void
 empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 {
-  EmpathyInviteParticipantDialogPrivate *priv = G_TYPE_INSTANCE_GET_PRIVATE (
-      self, EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
-      EmpathyInviteParticipantDialogPrivate);
   GtkDialog *dialog = GTK_DIALOG (self);
   GtkWidget *label;
   char *str;
@@ -229,7 +226,9 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   GtkTreeSelection *selection;
   GtkWidget *scroll;
 
-  self->priv = priv;
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (
+      self, EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
+      EmpathyInviteParticipantDialogPrivate);
 
   content = gtk_dialog_get_content_area (dialog);
 
@@ -253,8 +252,8 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 
   empathy_individual_store_set_show_groups (self->priv->store, FALSE);
 
-  self->priv->view =  empathy_individual_view_new (self->priv->store,
-      EMPATHY_INDIVIDUAL_VIEW_FEATURE_NONE , EMPATHY_INDIVIDUAL_FEATURE_NONE);
+  self->priv->view = empathy_individual_view_new (self->priv->store,
+      EMPATHY_INDIVIDUAL_VIEW_FEATURE_NONE, EMPATHY_INDIVIDUAL_FEATURE_NONE);
 
   empathy_individual_view_set_custom_filter (self->priv->view,
       filter_func, self);
@@ -306,7 +305,7 @@ empathy_invite_participant_dialog_get_selected (
   FolksIndividual *individual;
   TpContact *contact;
 
-  individual =  empathy_individual_view_dup_selected (self->priv->view);
+  individual = empathy_individual_view_dup_selected (self->priv->view);
   if (individual == NULL)
     return NULL;
 
