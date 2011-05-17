@@ -2004,11 +2004,16 @@ log_window_chats_set_selected (EmpathyLogWindow *window)
       TplEntity   *this_target;
       const gchar *this_chat_id;
       gboolean     this_is_chatroom;
+      gint         this_type;
 
       gtk_tree_model_get (model, &iter,
+          COL_WHO_TYPE, &this_type,
           COL_WHO_ACCOUNT, &this_account,
           COL_WHO_TARGET, &this_target,
           -1);
+
+      if (this_type != COL_TYPE_NORMAL)
+        continue;
 
       this_chat_id = tpl_entity_get_identifier (this_target);
       this_is_chatroom = tpl_entity_get_entity_type (this_target)
