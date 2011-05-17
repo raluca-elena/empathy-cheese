@@ -167,7 +167,7 @@ filter_func (GtkTreeModel *model,
   TpContact *contact;
   gboolean is_online;
   GList *members, *l;
-  gboolean display;
+  gboolean display = FALSE;
   TpChannel *channel;
 
   gtk_tree_model_get (model, iter,
@@ -176,13 +176,14 @@ filter_func (GtkTreeModel *model,
       -1);
 
   if (individual == NULL || !is_online)
-    return FALSE;
+    goto out;
 
   /* Filter out individuals not having a persona on the same connection as the
    * EmpathyTpChat. */
   contact = get_tp_contact_for_chat (self, individual);
+
   if (contact == NULL)
-    return FALSE;
+    goto out;
 
   /* Filter out contacts which are already in the chat */
   members = empathy_contact_list_get_members (EMPATHY_CONTACT_LIST (
@@ -212,6 +213,8 @@ filter_func (GtkTreeModel *model,
   g_list_foreach (members, (GFunc) g_object_unref, NULL);
   g_list_free (members);
 
+out:
+  tp_clear_object (&individual);
   return display;
 }
 
