@@ -212,3 +212,14 @@ empathy_chat_view_focus_toggled (EmpathyChatView *view,
 	}
 }
 
+void
+empathy_chat_view_message_acknowledged (EmpathyChatView *view,
+				        EmpathyMessage  *message)
+{
+	g_return_if_fail (EMPATHY_IS_CHAT_VIEW (view));
+
+	if (EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->message_acknowledged) {
+		EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->message_acknowledged (view, message);
+	}
+}
+

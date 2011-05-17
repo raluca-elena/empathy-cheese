@@ -174,6 +174,7 @@ enum {
 	PROP_SHOW_CONTACTS,
 	PROP_SMS_CHANNEL,
 	PROP_N_MESSAGES_SENDING,
+	PROP_NB_UNREAD_MESSAGES,
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -219,6 +220,10 @@ chat_get_property (GObject    *object,
 	case PROP_N_MESSAGES_SENDING:
 		g_value_set_uint (value,
 			empathy_chat_get_n_messages_sending (chat));
+		break;
+	case PROP_NB_UNREAD_MESSAGES:
+		g_value_set_uint (value,
+			empathy_chat_get_nb_unread_messages (chat));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -1326,7 +1331,11 @@ chat_message_received (EmpathyChat *chat,
 			       TP_CHANNEL_CHAT_STATE_ACTIVE,
 			       chat);
 
-	priv->unread_messages++;
+	if (empathy_message_is_incoming (message)) {
+		priv->unread_messages++;
+		g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+	}
+
 	g_signal_emit (chat, signals[NEW_MESSAGE], 0, message, pending);
 }
 
@@ -1336,6 +1345,20 @@ chat_message_received_cb (EmpathyTpChat  *tp_chat,
 			  EmpathyChat    *chat)
 {
 	chat_message_received (chat, message, FALSE);
+}
+
+static void
+chat_message_acknowledged_cb (EmpathyTpChat  *tp_chat,
+			      EmpathyMessage *message,
+			      EmpathyChat    *chat)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
+	empathy_chat_view_message_acknowledged (chat->view,
+	    message);
+
+	priv->unread_messages--;
+	g_object_notify (G_OBJECT (chat), "nb-unread-messages");
 }
 
 static void
@@ -2927,6 +2950,8 @@ chat_finalize (GObject *object)
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_message_received_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
+			chat_message_acknowledged_cb, chat);
+		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_send_error_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_state_changed_cb, chat);
@@ -3059,6 +3084,14 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 					 g_param_spec_uint ("n-messages-sending",
 						 	    "Num Messages Sending",
 							    "The number of messages being sent",
+							    0, G_MAXUINT, 0,
+							    G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (object_class,
+					 PROP_NB_UNREAD_MESSAGES,
+					 g_param_spec_uint ("nb-unread-messages",
+							    "Num Unread Messages",
+							    "The number of unread messages",
 							    0, G_MAXUINT, 0,
 							    G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
 
@@ -3630,6 +3663,9 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect (tp_chat, "message-received",
 			  G_CALLBACK (chat_message_received_cb),
 			  chat);
+	g_signal_connect (tp_chat, "message_acknowledged",
+			  G_CALLBACK (chat_message_acknowledged_cb),
+			  chat);
 	g_signal_connect (tp_chat, "send-error",
 			  G_CALLBACK (chat_send_error_cb),
 			  chat);
@@ -3957,12 +3993,9 @@ empathy_chat_messages_read (EmpathyChat *self)
 	if (priv->retrieving_backlogs)
 		return;
 
-	if (priv->tp_chat != NULL ) {
+	if (priv->tp_chat != NULL) {
 		empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
 	}
-	priv->unread_messages = 0;
-
-	empathy_chat_view_focus_toggled (self->view, TRUE);
 }
 
 /* Return TRUE if on of the contacts in this chat is composing */

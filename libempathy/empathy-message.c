@@ -40,6 +40,7 @@
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyMessage)
 typedef struct {
+	TpMessage *tp_message;
 	TpChannelTextMessageType  type;
 	EmpathyContact           *sender;
 	EmpathyContact           *receiver;
@@ -73,6 +74,7 @@ enum {
 	PROP_IS_BACKLOG,
 	PROP_INCOMING,
 	PROP_FLAGS,
+	PROP_TP_MESSAGE,
 };
 
 static void
@@ -153,6 +155,15 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
 							       G_PARAM_CONSTRUCT_ONLY));
 
+	g_object_class_install_property (object_class,
+					 PROP_TP_MESSAGE,
+					 g_param_spec_object ("tp-message",
+							       "TpMessage",
+							       "The TpMessage of this message",
+							       TP_TYPE_MESSAGE,
+							       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+							       G_PARAM_CONSTRUCT_ONLY));
+
 	g_type_class_add_private (object_class, sizeof (EmpathyMessagePriv));
 
 }
@@ -179,6 +190,10 @@ empathy_message_finalize (GObject *object)
 	}
 	if (priv->receiver) {
 		g_object_unref (priv->receiver);
+	}
+
+	if (priv->tp_message) {
+		g_object_unref (priv->tp_message);
 	}
 
 	g_free (priv->body);
@@ -220,6 +235,9 @@ message_get_property (GObject    *object,
 		break;
 	case PROP_FLAGS:
 		g_value_set_uint (value, priv->flags);
+		break;
+	case PROP_TP_MESSAGE:
+		g_value_set_object (value, priv->tp_message);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -266,6 +284,9 @@ message_set_property (GObject      *object,
 		break;
 	case PROP_FLAGS:
 		priv->flags = g_value_get_uint (value);
+		break;
+	case PROP_TP_MESSAGE:
+		priv->tp_message = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -340,6 +361,18 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	g_free (body);
 
 	return retval;
+}
+
+TpMessage *
+empathy_message_get_tp_message (EmpathyMessage *message)
+{
+	EmpathyMessagePriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), NULL);
+
+	priv = GET_PRIV (message);
+
+	return priv->tp_message;
 }
 
 TpChannelTextMessageType
@@ -563,16 +596,6 @@ empathy_message_type_to_str (TpChannelTextMessageType type)
 	}
 }
 
-guint
-empathy_message_get_id (EmpathyMessage *message)
-{
-	EmpathyMessagePriv *priv = GET_PRIV (message);
-
-	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), 0);
-
-	return priv->id;
-}
-
 gboolean
 empathy_message_is_incoming (EmpathyMessage *message)
 {
@@ -618,10 +641,8 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 				     gboolean incoming)
 {
 	EmpathyMessage *message;
-	EmpathyMessagePriv *priv;
 	gchar *body;
 	TpChannelTextMessageFlags flags;
-	guint id;
 
 	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
 
@@ -634,16 +655,8 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"flags", flags,
 		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
 		"incoming", incoming,
+		"tp-message", tp_msg,
 		NULL);
-
-	priv = GET_PRIV (message);
-
-	/* FIXME: this is pretty low level, ideally we shouldn't have to use the
-	 * ID directly but we don't use TpTextChannel's ack API everywhere yet. */
-	id = tp_asv_get_uint32 (tp_message_peek (tp_msg, 0),
-		"pending-message-id", NULL);
-
-	priv->id = id;
 
 	g_free (body);
 	return message;

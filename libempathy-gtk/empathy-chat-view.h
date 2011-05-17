@@ -70,6 +70,8 @@ struct _EmpathyChatViewIface {
 	void             (*copy_clipboard)       (EmpathyChatView *view);
 	void             (*focus_toggled)        (EmpathyChatView *view,
 						  gboolean         has_focus);
+	void             (*message_acknowledged) (EmpathyChatView *view,
+						  EmpathyMessage  *message);
 };
 
 GType            empathy_chat_view_get_type             (void) G_GNUC_CONST;
@@ -101,6 +103,8 @@ void             empathy_chat_view_highlight            (EmpathyChatView *view,
 void             empathy_chat_view_copy_clipboard       (EmpathyChatView *view);
 void             empathy_chat_view_focus_toggled        (EmpathyChatView *view,
 							 gboolean         has_focus);
+void             empathy_chat_view_message_acknowledged (EmpathyChatView *view,
+							 EmpathyMessage  *message);
 
 G_END_DECLS
 
