@@ -394,7 +394,7 @@ reject_channel_claim_cb (GObject *source,
   TpChannelDispatchOperation *cdo = TP_CHANNEL_DISPATCH_OPERATION (source);
   GError *error = NULL;
 
-  if (!tp_channel_dispatch_operation_claim_finish (cdo, result, &error))
+  if (!tp_channel_dispatch_operation_claim_with_finish (cdo, result, &error))
     {
       DEBUG ("Failed to claim channel: %s", error->message);
 
@@ -427,7 +427,7 @@ reject_auth_channel_claim_cb (GObject *source,
   TpChannelDispatchOperation *cdo = TP_CHANNEL_DISPATCH_OPERATION (source);
   GError *error = NULL;
 
-  if (!tp_channel_dispatch_operation_claim_finish (cdo, result, &error))
+  if (!tp_channel_dispatch_operation_claim_with_finish (cdo, result, &error))
     {
       DEBUG ("Failed to claim channel: %s", error->message);
 
@@ -442,6 +442,8 @@ reject_auth_channel_claim_cb (GObject *source,
 static void
 reject_approval (EventManagerApproval *approval)
 {
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
+
   /* We have to claim the channel before closing it */
 
   /* Unfortunately, we need to special case the auth channels for the
@@ -451,14 +453,16 @@ reject_approval (EventManagerApproval *approval)
    * directly. */
   if (approval->handler_instance != NULL)
     {
-      tp_channel_dispatch_operation_claim_async (approval->operation,
-          reject_channel_claim_cb, g_object_ref (approval->handler_instance));
+      tp_channel_dispatch_operation_claim_with_async (approval->operation,
+          priv->approver, reject_channel_claim_cb,
+          g_object_ref (approval->handler_instance));
     }
   else if (tp_channel_get_channel_type_id (approval->main_channel)
       == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      tp_channel_dispatch_operation_claim_async (approval->operation,
-          reject_auth_channel_claim_cb, approval->main_channel);
+      tp_channel_dispatch_operation_claim_with_async (approval->operation,
+          priv->auth_approver, reject_auth_channel_claim_cb,
+          approval->main_channel);
     }
 }
 

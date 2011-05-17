@@ -344,7 +344,7 @@ claim_cb (GObject *source,
   ObserveChannelsData *data = user_data;
   GError *error = NULL;
 
-  if (!tp_channel_dispatch_operation_claim_finish (
+  if (!tp_channel_dispatch_operation_claim_with_finish (
           TP_CHANNEL_DISPATCH_OPERATION (source), result, &error))
     {
       DEBUG ("Failed to call Claim: %s", error->message);
@@ -388,8 +388,8 @@ get_password_cb (GObject *source,
       DEBUG ("We have a password for account %s, calling Claim",
           tp_proxy_get_object_path (source));
 
-      tp_channel_dispatch_operation_claim_async (data->dispatch_operation,
-          claim_cb, data);
+      tp_channel_dispatch_operation_claim_with_async (data->dispatch_operation,
+          TP_BASE_CLIENT (data->self), claim_cb, data);
 
       tp_observe_channels_context_accept (data->context);
     }

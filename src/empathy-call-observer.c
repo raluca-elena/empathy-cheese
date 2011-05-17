@@ -181,7 +181,7 @@ on_cdo_claim_cb (GObject *source_object,
 
   cdo = TP_CHANNEL_DISPATCH_OPERATION (source_object);
 
-  tp_channel_dispatch_operation_claim_finish (cdo, result, &error);
+  tp_channel_dispatch_operation_claim_with_finish (cdo, result, &error);
   if (error != NULL)
     {
       DEBUG ("Could not claim CDO: %s", error->message);
@@ -227,7 +227,8 @@ cdo_prepare_cb (GObject *source_object,
       return;
     }
 
-  tp_channel_dispatch_operation_claim_async (cdo, on_cdo_claim_cb, ctx);
+  tp_channel_dispatch_operation_claim_with_async (cdo,
+      ctx->self->priv->observer, on_cdo_claim_cb, ctx);
 
   tp_observe_channels_context_accept (ctx->context);
 }
