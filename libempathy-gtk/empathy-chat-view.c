@@ -84,6 +84,22 @@ empathy_chat_view_append_event (EmpathyChatView *view,
 }
 
 void
+empathy_chat_view_append_event_markup (EmpathyChatView *view,
+				       const gchar     *markup_text,
+				       const gchar     *fallback_text)
+{
+	g_return_if_fail (EMPATHY_IS_CHAT_VIEW (view));
+
+	if (EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->append_event_markup) {
+		EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->append_event_markup (view,
+									      markup_text,
+									      fallback_text);
+	} else {
+		empathy_chat_view_append_event (view, fallback_text);
+	}
+}
+
+void
 empathy_chat_view_edit_message (EmpathyChatView *view,
 				EmpathyMessage  *message)
 {
