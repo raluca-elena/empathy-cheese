@@ -976,6 +976,14 @@ theme_adium_append_event (EmpathyChatView *view,
 }
 
 static void
+theme_adium_append_event_markup (EmpathyChatView *view,
+				 const gchar     *markup_text,
+				 const gchar     *fallback_text)
+{
+	theme_adium_append_event_escaped (view, markup_text);
+}
+
+static void
 theme_adium_edit_message (EmpathyChatView *view,
 			  EmpathyMessage  *message)
 {
@@ -1291,6 +1299,7 @@ theme_adium_iface_init (EmpathyChatViewIface *iface)
 {
 	iface->append_message = theme_adium_append_message;
 	iface->append_event = theme_adium_append_event;
+	iface->append_event_markup = theme_adium_append_event_markup;
 	iface->edit_message = theme_adium_edit_message;
 	iface->scroll = theme_adium_scroll;
 	iface->scroll_down = theme_adium_scroll_down;
