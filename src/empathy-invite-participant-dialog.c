@@ -210,8 +210,7 @@ filter_func (GtkTreeModel *model,
         }
     }
 
-  g_list_foreach (members, (GFunc) g_object_unref, NULL);
-  g_list_free (members);
+  g_list_free_full (members, g_object_unref);
 
 out:
   tp_clear_object (&individual);
