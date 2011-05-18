@@ -444,7 +444,7 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
   /* If there was a message saved from last time it was closed
    * (perhaps by accident?) save it to our hash table so it can be
    * used again when the same chat pops up. Hot. */
-  message = empathy_chat_get_text (chat);
+  message = empathy_chat_dup_text (chat);
 
   chats = g_hash_table_lookup (priv->messages,
       tp_proxy_get_object_path (data->account));

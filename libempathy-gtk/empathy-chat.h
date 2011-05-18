@@ -97,7 +97,7 @@ gboolean           empathy_chat_is_composing (EmpathyChat *chat);
 gboolean           empathy_chat_is_sms_channel       (EmpathyChat *self);
 guint              empathy_chat_get_n_messages_sending (EmpathyChat *self);
 
-gchar *            empathy_chat_get_text             (EmpathyChat *self);
+gchar *            empathy_chat_dup_text             (EmpathyChat *self);
 void               empathy_chat_set_text             (EmpathyChat *self,
                                                       const gchar *text);
 

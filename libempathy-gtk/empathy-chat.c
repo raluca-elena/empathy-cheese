@@ -3923,7 +3923,7 @@ empathy_chat_get_n_messages_sending (EmpathyChat *self)
 }
 
 gchar *
-empathy_chat_get_text (EmpathyChat *self)
+empathy_chat_dup_text (EmpathyChat *self)
 {
 	GtkTextBuffer *buffer;
 	GtkTextIter     start, end;
