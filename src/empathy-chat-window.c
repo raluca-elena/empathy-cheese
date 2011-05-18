@@ -1191,7 +1191,8 @@ chat_window_tabs_undo_close_tab_activate_cb (GtkAction         *action,
 					     EmpathyChatWindow *window)
 {
 	EmpathyChatWindowPriv *priv = GET_PRIV (window);
-	empathy_chat_manager_undo_closed_chat (priv->chat_manager);
+	empathy_chat_manager_undo_closed_chat (priv->chat_manager,
+					       empathy_get_current_action_time ());
 }
 
 static void
