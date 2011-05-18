@@ -453,6 +453,7 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
    * don't actually have a message to save. */
   if (chats == NULL && tp_str_empty (message))
     {
+      g_free (message);
       return;
     }
   else if (chats == null && !tp_str_empty (message))
