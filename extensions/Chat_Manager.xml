@@ -20,6 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.</
   <interface name="org.gnome.Empathy.ChatManager">
 
     <method name="UndoClosedChat" tp:name-for-bindings="Undo_Closed_Chat">
+      <arg direction="in" type="x" name="User_Time">
+        <tp:docstring>
+          The user action time for the event.
+        </tp:docstring>
+      </arg>
       <tp:docstring>
         Ask the chat manager to undo closing a tab. If there is no tab
         to be opened then return successfully.

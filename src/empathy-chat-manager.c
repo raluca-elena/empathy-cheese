@@ -24,6 +24,8 @@
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
+#include <libempathy-gtk/empathy-ui-utils.h>
+
 #include "empathy-chat-window.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -508,7 +510,8 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
 }
 
 void
-empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self)
+empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self,
+    gint64 timestamp)
 {
   EmpathyChatManagerPriv *priv = GET_PRIV (self);
   ChatData *data;
@@ -522,11 +525,9 @@ empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self)
       data->room ? "room" : "contact", data->id);
 
   if (data->room)
-    empathy_join_muc (data->account, data->id,
-        TP_USER_ACTION_TIME_NOT_USER_ACTION);
+    empathy_join_muc (data->account, data->id, timestamp);
   else
-    empathy_chat_with_contact_id (data->account, data->id,
-        TP_USER_ACTION_TIME_NOT_USER_ACTION);
+    empathy_chat_with_contact_id (data->account, data->id, timestamp);
 
   g_signal_emit (self, signals[CLOSED_CHATS_CHANGED], 0,
       g_queue_get_length (priv->closed_queue));
@@ -544,9 +545,11 @@ empathy_chat_manager_get_num_closed_chats (EmpathyChatManager *self)
 
 static void
 empathy_chat_manager_dbus_undo_closed_chat (EmpSvcChatManager *manager,
+    gint64 timestamp,
     DBusGMethodInvocation *context)
 {
-  empathy_chat_manager_undo_closed_chat ((EmpathyChatManager *) manager);
+  empathy_chat_manager_undo_closed_chat ((EmpathyChatManager *) manager,
+      timestamp);
 
   emp_svc_chat_manager_return_from_undo_closed_chat (context);
 }
@@ -581,7 +584,8 @@ empathy_chat_manager_call_undo_closed_chat (void)
 
   tp_proxy_add_interface_by_id (proxy, EMP_IFACE_QUARK_CHAT_MANAGER);
 
-  emp_cli_chat_manager_call_undo_closed_chat (proxy, -1, NULL, NULL, NULL, NULL);
+  emp_cli_chat_manager_call_undo_closed_chat (proxy, -1, empathy_get_current_action_time (),
+      NULL, NULL, NULL, NULL);
 
   g_object_unref (proxy);
   g_object_unref (dbus_daemon);
