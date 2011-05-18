@@ -456,7 +456,7 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
       g_free (message);
       return;
     }
-  else if (chats == null && !tp_str_empty (message))
+  else if (chats == NULL && !tp_str_empty (message))
     {
       chats = g_hash_table_new_full (g_str_hash, g_str_equal,
           g_free, g_free);
