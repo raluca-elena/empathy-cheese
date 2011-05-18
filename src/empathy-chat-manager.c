@@ -51,7 +51,9 @@ struct _EmpathyChatManagerPriv
 
   guint num_displayed_chat;
 
-  /* account path -> GHashTable<contact -> non-NULL message> */
+  /* account path -> (GHashTable<(owned gchar *) contact ID
+   *                  -> (owned gchar *) non-NULL message>)
+   */
   GHashTable *messages;
 
   TpBaseClient *handler;
