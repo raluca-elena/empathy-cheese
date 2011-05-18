@@ -521,5 +521,6 @@ empathy_chat_manager_call_undo_closed_chat (void)
 
   emp_cli_chat_manager_call_undo_closed_chat (proxy, -1, NULL, NULL, NULL, NULL);
 
+  g_object_unref (proxy);
   g_object_unref (dbus_daemon);
 }
