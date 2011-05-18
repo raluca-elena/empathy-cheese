@@ -49,6 +49,7 @@ typedef struct {
 	TpChannelTextMessageType  type;
 	EmpathyContact           *sender;
 	EmpathyContact           *receiver;
+	gchar                    *token;
 	gchar                    *body;
 	gint64                    timestamp;
 	gboolean                  is_backlog;
@@ -74,6 +75,7 @@ enum {
 	PROP_TYPE,
 	PROP_SENDER,
 	PROP_RECEIVER,
+	PROP_TOKEN,
 	PROP_BODY,
 	PROP_TIMESTAMP,
 	PROP_IS_BACKLOG,
@@ -116,6 +118,13 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							      "The receiver of the message",
 							      EMPATHY_TYPE_CONTACT,
 							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+					 PROP_TOKEN,
+					 g_param_spec_string ("token",
+						 	      "Message Token",
+							      "The message-token",
+							      NULL,
+							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_BODY,
 					 g_param_spec_string ("body",
@@ -201,6 +210,7 @@ empathy_message_finalize (GObject *object)
 		g_object_unref (priv->tp_message);
 	}
 
+	g_free (priv->token);
 	g_free (priv->body);
 
 	G_OBJECT_CLASS (empathy_message_parent_class)->finalize (object);
@@ -225,6 +235,9 @@ message_get_property (GObject    *object,
 		break;
 	case PROP_RECEIVER:
 		g_value_set_object (value, priv->receiver);
+		break;
+	case PROP_TOKEN:
+		g_value_set_string (value, priv->token);
 		break;
 	case PROP_BODY:
 		g_value_set_string (value, priv->body);
@@ -271,6 +284,10 @@ message_set_property (GObject      *object,
 	case PROP_RECEIVER:
 		empathy_message_set_receiver (EMPATHY_MESSAGE (object),
 					     EMPATHY_CONTACT (g_value_get_object (value)));
+		break;
+	case PROP_TOKEN:
+		g_assert (priv->token == NULL); /* construct only */
+		priv->token = g_value_dup_string (value);
 		break;
 	case PROP_BODY:
 		g_assert (priv->body == NULL); /* construct only */
@@ -473,6 +490,18 @@ empathy_message_set_receiver (EmpathyMessage *message, EmpathyContact *contact)
 }
 
 const gchar *
+empathy_message_get_token (EmpathyMessage *message)
+{
+	EmpathyMessagePriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), NULL);
+
+	priv = GET_PRIV (message);
+
+	return priv->token;
+}
+
+const gchar *
 empathy_message_get_body (EmpathyMessage *message)
 {
 	EmpathyMessagePriv *priv;
@@ -668,6 +697,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
+		"token", tp_message_get_token (tp_msg),
 		"type", tp_message_get_message_type (tp_msg),
 		"timestamp", tp_message_get_received_timestamp (tp_msg),
 		"flags", flags,

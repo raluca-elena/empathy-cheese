@@ -69,6 +69,7 @@ EmpathyContact *         empathy_message_get_receiver      (EmpathyMessage      
 void                     empathy_message_set_receiver      (EmpathyMessage           *message,
 							    EmpathyContact           *contact);
 const gchar *            empathy_message_get_body          (EmpathyMessage           *message);
+const gchar *            empathy_message_get_token         (EmpathyMessage           *message);
 gint64                   empathy_message_get_timestamp     (EmpathyMessage           *message);
 gboolean                 empathy_message_is_backlog        (EmpathyMessage           *message);
 gboolean                 empathy_message_is_incoming       (EmpathyMessage           *message);
