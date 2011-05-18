@@ -1028,6 +1028,64 @@ theme_adium_append_event (EmpathyChatView *view,
 }
 
 static void
+theme_adium_edit_message (EmpathyChatView *view,
+			  EmpathyMessage  *message)
+{
+	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
+	WebKitDOMDocument *doc;
+	WebKitDOMElement *span;
+	gchar *id, *parsed_body;
+	GError *error = NULL;
+
+	if (priv->pages_loading != 0) {
+		GValue *value = tp_g_value_slice_new (EMPATHY_TYPE_MESSAGE);
+		g_value_set_object (value, message);
+		g_queue_push_tail (&priv->message_queue, value);
+		return;
+	}
+
+	id = g_strdup_printf ("message-token-%s",
+		empathy_message_get_supersedes (message));
+	/* we don't pass a token here, because doing so will return another
+	 * <span> element, and we don't want nested <span> elements */
+	parsed_body = theme_adium_parse_body (EMPATHY_THEME_ADIUM (view),
+		empathy_message_get_body (message), NULL);
+
+	/* find the element */
+	doc = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (view));
+	span = webkit_dom_document_get_element_by_id (doc, id);
+
+	if (span == NULL) {
+		DEBUG ("Failed to find id '%s'", id);
+		goto except;
+	}
+
+	if (!WEBKIT_DOM_IS_HTML_ELEMENT (span)) {
+		DEBUG ("Not a HTML element");
+		goto except;
+	}
+
+	/* update the HTML */
+	webkit_dom_html_element_set_inner_html (WEBKIT_DOM_HTML_ELEMENT (span),
+		parsed_body, &error);
+
+	if (error != NULL) {
+		DEBUG ("Error setting new inner-HTML: %s", error->message);
+		g_error_free (error);
+	}
+
+	goto finally;
+
+except:
+	DEBUG ("Could not find message to edit with: %s",
+		empathy_message_get_body (message));
+
+finally:
+	g_free (id);
+	g_free (parsed_body);
+}
+
+static void
 theme_adium_scroll (EmpathyChatView *view,
 		    gboolean         allow_scrolling)
 {
@@ -1323,6 +1381,7 @@ theme_adium_iface_init (EmpathyChatViewIface *iface)
 {
 	iface->append_message = theme_adium_append_message;
 	iface->append_event = theme_adium_append_event;
+	iface->edit_message = theme_adium_edit_message;
 	iface->scroll = theme_adium_scroll;
 	iface->scroll_down = theme_adium_scroll_down;
 	iface->get_has_selection = theme_adium_get_has_selection;
@@ -1356,8 +1415,12 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 		GValue *value = l->data;
 
 		if (G_VALUE_HOLDS_OBJECT (value)) {
-			theme_adium_append_message (chat_view,
-				g_value_get_object (value));
+			EmpathyMessage *message = g_value_get_object (value);
+
+			if (empathy_message_is_edit (message))
+				theme_adium_edit_message (chat_view, message);
+			else
+				theme_adium_append_message (chat_view, message);
 		} else {
 			theme_adium_append_event (chat_view,
 				g_value_get_string (value));
@@ -1365,6 +1428,7 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 
 		tp_g_value_slice_free (value);
 	}
+
 	g_queue_clear (&priv->message_queue);
 }
 
