@@ -51,6 +51,11 @@ struct _EmpathyChatManagerPriv
 
   guint num_displayed_chat;
 
+  /* account path -> (GHashTable<(owned gchar *) contact ID
+   *                  -> (owned gchar *) non-NULL message>)
+   */
+  GHashTable *messages;
+
   TpBaseClient *handler;
 };
 
@@ -138,6 +143,8 @@ process_tp_chat (EmpathyChatManager *self,
     }
   else
     {
+      GHashTable *chats = NULL;
+
       chat = empathy_chat_new (tp_chat);
       /* empathy_chat_new returns a floating reference as EmpathyChat is
        * a GtkWidget. This reference will be taken by a container
@@ -150,6 +157,18 @@ process_tp_chat (EmpathyChatManager *self,
 
       g_signal_emit (self, signals[DISPLAYED_CHATS_CHANGED], 0,
           priv->num_displayed_chat);
+
+      /* Set the saved message in the channel if we have one. */
+      chats = g_hash_table_lookup (priv->messages,
+          tp_proxy_get_object_path (account));
+
+      if (chats != NULL)
+        {
+          const gchar *msg = g_hash_table_lookup (chats, id);
+
+          if (msg != NULL)
+            empathy_chat_set_text (chat, msg);
+        }
 
       g_object_weak_ref ((GObject *) chat, chat_destroyed_cb, self);
     }
@@ -275,6 +294,8 @@ empathy_chat_manager_init (EmpathyChatManager *self)
   GError *error = NULL;
 
   priv->closed_queue = g_queue_new ();
+  priv->messages = g_hash_table_new_full (g_str_hash, g_str_equal,
+      g_free, (GDestroyNotify) g_hash_table_unref);
 
   dbus = tp_dbus_daemon_dup (&error);
   if (dbus == NULL)
@@ -332,6 +353,8 @@ empathy_chat_manager_finalize (GObject *object)
       g_queue_free (priv->closed_queue);
       priv->closed_queue = NULL;
     }
+
+  tp_clear_pointer (&priv->messages, g_hash_table_unref);
 
   tp_clear_object (&priv->handler);
   tp_clear_object (&priv->chatroom_mgr);
@@ -407,6 +430,8 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
 {
   EmpathyChatManagerPriv *priv = GET_PRIV (self);
   ChatData *data;
+  GHashTable *chats;
+  gchar *message;
 
   data = chat_data_new (chat);
 
@@ -417,6 +442,43 @@ empathy_chat_manager_closed_chat (EmpathyChatManager *self,
 
   g_signal_emit (self, signals[CLOSED_CHATS_CHANGED], 0,
       g_queue_get_length (priv->closed_queue));
+
+  /* If there was a message saved from last time it was closed
+   * (perhaps by accident?) save it to our hash table so it can be
+   * used again when the same chat pops up. Hot. */
+  message = empathy_chat_dup_text (chat);
+
+  chats = g_hash_table_lookup (priv->messages,
+      tp_proxy_get_object_path (data->account));
+
+  /* Don't create a new hash table if we don't already have one and we
+   * don't actually have a message to save. */
+  if (chats == NULL && tp_str_empty (message))
+    {
+      g_free (message);
+      return;
+    }
+  else if (chats == NULL && !tp_str_empty (message))
+    {
+      chats = g_hash_table_new_full (g_str_hash, g_str_equal,
+          g_free, g_free);
+
+      g_hash_table_insert (priv->messages,
+          g_strdup (tp_proxy_get_object_path (data->account)),
+          chats);
+    }
+
+  if (tp_str_empty (message))
+    {
+      g_hash_table_remove (chats, data->id);
+      /* might be '\0' */
+      g_free (message);
+    }
+  else
+    {
+      /* takes ownership of message */
+      g_hash_table_insert (chats, g_strdup (data->id), message);
+    }
 }
 
 void
