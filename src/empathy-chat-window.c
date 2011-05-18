@@ -982,17 +982,13 @@ chat_window_invite_participant_activate_cb (GtkAction         *action,
 	EmpathyChatWindowPriv *priv;
 	GtkWidget             *dialog;
 	EmpathyTpChat         *tp_chat;
-	TpChannel             *channel;
 	int                    response;
-	TpAccount             *account;
 
 	priv = GET_PRIV (window);
 
 	g_return_if_fail (priv->current_chat != NULL);
 
 	tp_chat = empathy_chat_get_tp_chat (priv->current_chat);
-	channel = empathy_tp_chat_get_channel (tp_chat);
-	account = empathy_chat_get_account (priv->current_chat);
 
 	dialog = empathy_invite_participant_dialog_new (
 			GTK_WINDOW (priv->dialog), tp_chat);
