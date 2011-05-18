@@ -513,7 +513,7 @@ empathy_chat_manager_call_undo_closed_chat (void)
   proxy = g_object_new (TP_TYPE_PROXY,
       "dbus-daemon", dbus_daemon,
       "dbus-connection", tp_proxy_get_dbus_connection (TP_PROXY (dbus_daemon)),
-      "bus-name", "org.freedesktop.Telepathy.Client.Empathy.Chat",
+      "bus-name", EMPATHY_CHAT_BUS_NAME,
       "object-path", "/org/gnome/Empathy/ChatManager",
       NULL);
 
