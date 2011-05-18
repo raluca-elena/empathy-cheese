@@ -315,7 +315,8 @@ static EmpathyStringParser string_parsers_with_smiley[] = {
 
 static gchar *
 theme_adium_parse_body (EmpathyThemeAdium *self,
-	const gchar *text)
+	const gchar *text,
+	const gchar *token)
 {
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (self);
 	EmpathyStringParser *parsers;
@@ -332,7 +333,18 @@ theme_adium_parse_body (EmpathyThemeAdium *self,
 	 * by html tags. Also escape text to make sure html code is
 	 * displayed verbatim. */
 	string = g_string_sized_new (strlen (text));
+
+	/* wrap this in HTML that allows us to find the message for later
+	 * editing */
+	if (!tp_str_empty (token))
+		g_string_append_printf (string,
+			"<span id=\"message-token-%s\">",
+			token);
+
 	empathy_string_parser_substr (text, -1, parsers, string);
+
+	if (!tp_str_empty (token))
+		g_string_append (string, "</span>");
 
 	/* Wrap body in order to make tabs and multiple spaces displayed
 	 * properly. See bug #625745. */
@@ -817,7 +829,6 @@ theme_adium_append_message (EmpathyChatView *view,
 	TpMessage             *tp_msg;
 	TpAccount             *account;
 	gchar                 *body_escaped;
-	const gchar           *body;
 	const gchar           *name;
 	const gchar           *contact_id;
 	EmpathyAvatar         *avatar;
@@ -846,8 +857,9 @@ theme_adium_append_message (EmpathyChatView *view,
 	if (service_name == NULL)
 		service_name = tp_account_get_protocol (account);
 	timestamp = empathy_message_get_timestamp (msg);
-	body = empathy_message_get_body (msg);
-	body_escaped = theme_adium_parse_body (theme, body);
+	body_escaped = theme_adium_parse_body (theme,
+		empathy_message_get_body (msg),
+		empathy_message_get_token (msg));
 	name = empathy_contact_get_alias (sender);
 	contact_id = empathy_contact_get_id (sender);
 	action = (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION);
