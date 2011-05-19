@@ -39,7 +39,6 @@
 #include "empathy-debug.h"
 
 struct _EmpathyTpChatPrivate {
-	gboolean               dispose_has_run;
 	TpAccount             *account;
 	EmpathyContact        *user;
 	EmpathyContact        *remote_contact;
@@ -815,20 +814,9 @@ tp_chat_dispose (GObject *object)
 {
 	EmpathyTpChat *self = EMPATHY_TP_CHAT (object);
 
-	if (self->priv->dispose_has_run)
-		return;
-
-	self->priv->dispose_has_run = TRUE;
-
 	tp_clear_object (&self->priv->account);
-
-	if (self->priv->remote_contact != NULL)
-		g_object_unref (self->priv->remote_contact);
-	self->priv->remote_contact = NULL;
-
-	if (self->priv->user != NULL)
-		g_object_unref (self->priv->user);
-	self->priv->user = NULL;
+	tp_clear_object (&self->priv->remote_contact);
+	tp_clear_object (&self->priv->user);
 
 	g_queue_foreach (self->priv->messages_queue, (GFunc) g_object_unref, NULL);
 	g_queue_clear (self->priv->messages_queue);
