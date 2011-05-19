@@ -81,8 +81,6 @@ EmpathyContact *empathy_tp_chat_get_remote_contact   (EmpathyTpChat      *chat);
 TpAccount    * empathy_tp_chat_get_account          (EmpathyTpChat      *chat);
 void           empathy_tp_chat_send                 (EmpathyTpChat      *chat,
 						     TpMessage     *message);
-void           empathy_tp_chat_set_state            (EmpathyTpChat      *chat,
-						     TpChannelChatState  state);
 void           empathy_tp_chat_set_property         (EmpathyTpChat      *chat,
 						     const gchar        *name,
 						     const GValue       *value);

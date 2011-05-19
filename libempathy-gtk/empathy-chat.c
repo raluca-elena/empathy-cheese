@@ -326,6 +326,34 @@ chat_composing_remove_timeout (EmpathyChat *chat)
 	}
 }
 
+static void
+set_chate_state_cb (GObject *source,
+		    GAsyncResult *result,
+		    gpointer user_data)
+{
+	GError *error = NULL;
+
+	if (!tp_text_channel_set_chat_state_finish (TP_TEXT_CHANNEL (source), result,
+		&error)) {
+		DEBUG ("Failed to set chat state: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
+set_chat_state (EmpathyChat *self,
+		TpChannelChatState state)
+{
+	EmpathyChatPriv *priv = GET_PRIV (self);
+
+	if (!tp_proxy_has_interface_by_id (priv->tp_chat,
+		TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE))
+		return;
+
+	tp_text_channel_set_chat_state_async (TP_TEXT_CHANNEL (priv->tp_chat), state,
+		set_chate_state_cb, self);
+}
+
 static gboolean
 chat_composing_stop_timeout_cb (EmpathyChat *chat)
 {
@@ -334,8 +362,7 @@ chat_composing_stop_timeout_cb (EmpathyChat *chat)
 	priv = GET_PRIV (chat);
 
 	priv->composing_stop_timeout_id = 0;
-	empathy_tp_chat_set_state (priv->tp_chat,
-				   TP_CHANNEL_CHAT_STATE_PAUSED);
+	set_chat_state (chat, TP_CHANNEL_CHAT_STATE_PAUSED);
 
 	return FALSE;
 }
@@ -351,8 +378,7 @@ chat_composing_start (EmpathyChat *chat)
 		/* Just restart the timeout */
 		chat_composing_remove_timeout (chat);
 	} else {
-		empathy_tp_chat_set_state (priv->tp_chat,
-					   TP_CHANNEL_CHAT_STATE_COMPOSING);
+		set_chat_state (chat, TP_CHANNEL_CHAT_STATE_COMPOSING);
 	}
 
 	priv->composing_stop_timeout_id = g_timeout_add_seconds (
@@ -369,8 +395,7 @@ chat_composing_stop (EmpathyChat *chat)
 	priv = GET_PRIV (chat);
 
 	chat_composing_remove_timeout (chat);
-	empathy_tp_chat_set_state (priv->tp_chat,
-				   TP_CHANNEL_CHAT_STATE_ACTIVE);
+	set_chat_state (chat, TP_CHANNEL_CHAT_STATE_ACTIVE);
 }
 
 static gint

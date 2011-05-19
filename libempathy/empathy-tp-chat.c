@@ -1578,25 +1578,6 @@ empathy_tp_chat_send (EmpathyTpChat *self,
 	g_free (message_body);
 }
 
-void
-empathy_tp_chat_set_state (EmpathyTpChat *self,
-			   TpChannelChatState  state)
-{
-	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
-
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_CHAT_STATE)) {
-		DEBUG ("Set state: %d", state);
-		tp_cli_channel_interface_chat_state_call_set_chat_state ((TpChannel *) self, -1,
-									 state,
-									 tp_chat_async_cb,
-									 "setting chat state",
-									 NULL,
-									 G_OBJECT (self));
-	}
-}
-
-
 const GList *
 empathy_tp_chat_get_pending_messages (EmpathyTpChat *self)
 {
