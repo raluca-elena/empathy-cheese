@@ -275,6 +275,7 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 	gint                            x_offset, y_offset;
 	guint                           xpad, ypad;
 	GtkStyleContext                 *style;
+	GtkStateFlags                    state;
 
 	expander = (EmpathyCellRendererExpander *) cell;
 	priv = GET_PRIV (expander);
@@ -292,11 +293,16 @@ empathy_cell_renderer_expander_render (GtkCellRenderer      *cell,
 	style = gtk_widget_get_style_context (widget);
 
 	gtk_style_context_save (style);
+	gtk_style_context_add_class (style, GTK_STYLE_CLASS_EXPANDER);
+
+	state = gtk_cell_renderer_get_state (cell, widget, flags);
 
 	if (priv->expander_style == GTK_EXPANDER_COLLAPSED)
-		gtk_style_context_set_state (style, GTK_STATE_NORMAL);
+		state |= GTK_STATE_FLAG_NORMAL;
 	else
-		gtk_style_context_set_state (style, GTK_STATE_ACTIVE);
+		state |= GTK_STATE_FLAG_ACTIVE;
+
+	gtk_style_context_set_state (style, state);
 
 	gtk_render_expander (style,
 			     cr,
