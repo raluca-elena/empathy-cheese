@@ -1409,21 +1409,15 @@ individual_view_search_key_navigation_cb (GtkWidget *search,
   GdkEvent *event,
   EmpathyIndividualView *view)
 {
-  GdkEventKey *eventkey = ((GdkEventKey *) event);
+  GdkEvent *new_event;
   gboolean ret = FALSE;
 
-  if (eventkey->keyval == GDK_KEY_Up || eventkey->keyval == GDK_KEY_Down
-      || eventkey->keyval == GDK_KEY_F2)
-    {
-      GdkEvent *new_event;
+  new_event = gdk_event_copy (event);
+  gtk_widget_grab_focus (GTK_WIDGET (view));
+  ret = gtk_widget_event (GTK_WIDGET (view), new_event);
+  gtk_widget_grab_focus (search);
 
-      new_event = gdk_event_copy (event);
-      gtk_widget_grab_focus (GTK_WIDGET (view));
-      ret = gtk_widget_event (GTK_WIDGET (view), new_event);
-      gtk_widget_grab_focus (search);
-
-      gdk_event_free (new_event);
-    }
+  gdk_event_free (new_event);
 
   return ret;
 }

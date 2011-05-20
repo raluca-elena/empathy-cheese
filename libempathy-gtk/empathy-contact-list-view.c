@@ -1283,19 +1283,15 @@ contact_list_view_search_key_navigation_cb (GtkWidget *search,
 					    GdkEvent *event,
 					    EmpathyContactListView *view)
 {
-	GdkEventKey *eventkey = ((GdkEventKey *) event);
+	GdkEvent *new_event;
 	gboolean ret = FALSE;
 
-	if (eventkey->keyval == GDK_KEY_Up || eventkey->keyval == GDK_KEY_Down) {
-		GdkEvent *new_event;
+	new_event = gdk_event_copy (event);
+	gtk_widget_grab_focus (GTK_WIDGET (view));
+	ret = gtk_widget_event (GTK_WIDGET (view), new_event);
+	gtk_widget_grab_focus (search);
 
-		new_event = gdk_event_copy (event);
-		gtk_widget_grab_focus (GTK_WIDGET (view));
-		ret = gtk_widget_event (GTK_WIDGET (view), new_event);
-		gtk_widget_grab_focus (search);
-
-		gdk_event_free (new_event);
-	}
+	gdk_event_free (new_event);
 
 	return ret;
 }
