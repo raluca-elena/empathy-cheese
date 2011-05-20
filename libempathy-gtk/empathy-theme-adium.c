@@ -1035,6 +1035,7 @@ theme_adium_edit_message (EmpathyChatView *view,
 	WebKitDOMDocument *doc;
 	WebKitDOMElement *span;
 	gchar *id, *parsed_body;
+	gchar *tooltip, *timestamp;
 	GError *error = NULL;
 
 	if (priv->pages_loading != 0) {
@@ -1072,7 +1073,20 @@ theme_adium_edit_message (EmpathyChatView *view,
 	if (error != NULL) {
 		DEBUG ("Error setting new inner-HTML: %s", error->message);
 		g_error_free (error);
+		goto except;
 	}
+
+	/* set a tooltip */
+	timestamp = empathy_time_to_string_local (
+		empathy_message_get_timestamp (message),
+		"%H:%M:%S");
+	tooltip = g_strdup_printf (_("Message edited at %s"), timestamp);
+
+	webkit_dom_html_element_set_title (WEBKIT_DOM_HTML_ELEMENT (span),
+		tooltip);
+
+	g_free (tooltip);
+	g_free (timestamp);
 
 	goto finally;
 
