@@ -262,8 +262,7 @@ live_search_entry_key_pressed_cb (GtkEntry *entry,
     }
 
   /* emit key navigation signal, so other widgets can respond to it properly */
-  if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down
-      || event->keyval == GDK_KEY_Left || event->keyval == GDK_KEY_Right)
+  if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
      {
        g_signal_emit (self, signals[KEYNAV], 0, event, &ret);
        return ret;
