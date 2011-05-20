@@ -277,10 +277,11 @@ live_search_entry_key_pressed_cb (GtkEntry *entry,
        return fire_key_navigation_sig (self, event);
      }
 
-  if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End)
+  if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End ||
+      event->keyval == GDK_KEY_space)
     {
       /* If the live search is visible, the entry should catch the Home/End
-       * events */
+       * and space events */
       if (!gtk_widget_get_visible (GTK_WIDGET (self)))
         {
           return fire_key_navigation_sig (self, event);
@@ -355,10 +356,11 @@ live_search_key_press_event_cb (GtkWidget *widget,
        event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down)
      return FALSE;
 
-   if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End)
+   if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End ||
+       event->keyval == GDK_KEY_space)
      {
-       /* Home/End keys have to be forwarded to the entry only if the live
-        * search is visible (to move the cursor inside the entry). */
+       /* Home/End and space keys have to be forwarded to the entry only if
+        * the live search is visible (to move the cursor inside the entry). */
        if (!gtk_widget_get_visible (GTK_WIDGET (self)))
          return FALSE;
      }
