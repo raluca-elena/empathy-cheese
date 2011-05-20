@@ -50,6 +50,7 @@ typedef struct {
 	EmpathyContact           *sender;
 	EmpathyContact           *receiver;
 	gchar                    *token;
+	gchar                    *supersedes;
 	gchar                    *body;
 	gint64                    timestamp;
 	gboolean                  is_backlog;
@@ -76,6 +77,7 @@ enum {
 	PROP_SENDER,
 	PROP_RECEIVER,
 	PROP_TOKEN,
+	PROP_SUPERSEDES,
 	PROP_BODY,
 	PROP_TIMESTAMP,
 	PROP_IS_BACKLOG,
@@ -123,6 +125,13 @@ empathy_message_class_init (EmpathyMessageClass *class)
 					 g_param_spec_string ("token",
 						 	      "Message Token",
 							      "The message-token",
+							      NULL,
+							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (object_class,
+					 PROP_SUPERSEDES,
+					 g_param_spec_string ("supersedes",
+							      "Supersedes Token",
+							      "The message-token this message supersedes",
 							      NULL,
 							      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
@@ -211,6 +220,7 @@ empathy_message_finalize (GObject *object)
 	}
 
 	g_free (priv->token);
+	g_free (priv->supersedes);
 	g_free (priv->body);
 
 	G_OBJECT_CLASS (empathy_message_parent_class)->finalize (object);
@@ -238,6 +248,9 @@ message_get_property (GObject    *object,
 		break;
 	case PROP_TOKEN:
 		g_value_set_string (value, priv->token);
+		break;
+	case PROP_SUPERSEDES:
+		g_value_set_string (value, priv->supersedes);
 		break;
 	case PROP_BODY:
 		g_value_set_string (value, priv->body);
@@ -288,6 +301,10 @@ message_set_property (GObject      *object,
 	case PROP_TOKEN:
 		g_assert (priv->token == NULL); /* construct only */
 		priv->token = g_value_dup_string (value);
+		break;
+	case PROP_SUPERSEDES:
+		g_assert (priv->supersedes == NULL); /* construct only */
+		priv->supersedes = g_value_dup_string (value);
 		break;
 	case PROP_BODY:
 		g_assert (priv->body == NULL); /* construct only */
@@ -502,6 +519,30 @@ empathy_message_get_token (EmpathyMessage *message)
 }
 
 const gchar *
+empathy_message_get_supersedes (EmpathyMessage *message)
+{
+	EmpathyMessagePriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), NULL);
+
+	priv = GET_PRIV (message);
+
+	return priv->supersedes;
+}
+
+gboolean
+empathy_message_is_edit (EmpathyMessage *message)
+{
+	EmpathyMessagePriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), FALSE);
+
+	priv = GET_PRIV (message);
+
+	return !tp_str_empty (priv->supersedes);
+}
+
+const gchar *
 empathy_message_get_body (EmpathyMessage *message)
 {
 	EmpathyMessagePriv *priv;
@@ -698,6 +739,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
 		"token", tp_message_get_token (tp_msg),
+		"supersedes", tp_message_get_supersedes (tp_msg),
 		"type", tp_message_get_message_type (tp_msg),
 		"timestamp", tp_message_get_received_timestamp (tp_msg),
 		"flags", flags,
