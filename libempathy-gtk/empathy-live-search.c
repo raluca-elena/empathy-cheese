@@ -276,6 +276,16 @@ live_search_entry_key_pressed_cb (GtkEntry *entry,
        return fire_key_navigation_sig (self, event);
      }
 
+  if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End)
+    {
+      /* If the live search is visible, the entry should catch the Home/End
+       * events */
+      if (!gtk_widget_get_visible (GTK_WIDGET (self)))
+        {
+          return fire_key_navigation_sig (self, event);
+        }
+    }
+
   return FALSE;
 }
 
@@ -341,6 +351,14 @@ live_search_key_press_event_cb (GtkWidget *widget,
    * navigation in the treeview and are not needed in the search entry */
    if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
      return FALSE;
+
+   if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End)
+     {
+       /* Home/End keys have to be forwarded to the entry only if the live
+        * search is visible (to move the cursor inside the entry). */
+       if (!gtk_widget_get_visible (GTK_WIDGET (self)))
+         return FALSE;
+     }
 
   /* realize the widget if it is not realized yet */
   gtk_widget_realize (priv->search_entry);
