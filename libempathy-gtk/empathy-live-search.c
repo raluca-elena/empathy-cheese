@@ -271,7 +271,8 @@ live_search_entry_key_pressed_cb (GtkEntry *entry,
     }
 
   /* emit key navigation signal, so other widgets can respond to it properly */
-  if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
+  if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down
+      || event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down)
      {
        return fire_key_navigation_sig (self, event);
      }
@@ -347,9 +348,11 @@ live_search_key_press_event_cb (GtkWidget *widget,
       event->keyval == GDK_KEY_Control_R)
     return FALSE;
 
-  /* dont forward the up and down arrow keys to the entry, they are needed for
-   * navigation in the treeview and are not needed in the search entry */
-   if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
+  /* dont forward the up/down and Page Up/Down arrow keys to the entry,
+   * they are needed for navigation in the treeview and are not needed in
+   * the search entry */
+   if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down ||
+       event->keyval == GDK_KEY_Page_Up || event->keyval == GDK_KEY_Page_Down)
      return FALSE;
 
    if (event->keyval == GDK_KEY_Home || event->keyval == GDK_KEY_End)
