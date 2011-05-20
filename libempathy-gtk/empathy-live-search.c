@@ -247,12 +247,21 @@ live_search_match_words (const gchar *string,
 }
 
 static gboolean
+fire_key_navigation_sig (EmpathyLiveSearch *self,
+    GdkEventKey *event)
+{
+  gboolean ret;
+
+  g_signal_emit (self, signals[KEYNAV], 0, event, &ret);
+  return ret;
+}
+
+static gboolean
 live_search_entry_key_pressed_cb (GtkEntry *entry,
     GdkEventKey *event,
     gpointer user_data)
 {
   EmpathyLiveSearch *self = EMPATHY_LIVE_SEARCH (user_data);
-  gboolean ret;
 
   /* if esc key pressed, hide the search */
   if (event->keyval == GDK_KEY_Escape)
@@ -264,8 +273,7 @@ live_search_entry_key_pressed_cb (GtkEntry *entry,
   /* emit key navigation signal, so other widgets can respond to it properly */
   if (event->keyval == GDK_KEY_Up || event->keyval == GDK_KEY_Down)
      {
-       g_signal_emit (self, signals[KEYNAV], 0, event, &ret);
-       return ret;
+       return fire_key_navigation_sig (self, event);
      }
 
   return FALSE;
