@@ -1036,6 +1036,7 @@ theme_adium_edit_message (EmpathyChatView *view,
 	WebKitDOMElement *span;
 	gchar *id, *parsed_body;
 	gchar *tooltip, *timestamp;
+	GtkIconInfo *icon_info;
 	GError *error = NULL;
 
 	if (priv->pages_loading != 0) {
@@ -1087,6 +1088,33 @@ theme_adium_edit_message (EmpathyChatView *view,
 
 	g_free (tooltip);
 	g_free (timestamp);
+
+	/* mark this message as edited */
+	icon_info = gtk_icon_theme_lookup_icon (gtk_icon_theme_get_default (),
+		EMPATHY_IMAGE_EDIT_MESSAGE, 16, 0);
+
+	if (icon_info != NULL) {
+		/* set the icon as a background image using CSS
+		 * FIXME: the icon won't update in response to theme changes */
+		gchar *style = g_strdup_printf (
+			"background-image:url('%s');"
+			"background-repeat:no-repeat;"
+			"background-position:left center;"
+			"padding-left:19px;", /* 16px icon + 3px padding */
+			gtk_icon_info_get_filename (icon_info));
+
+		webkit_dom_element_set_attribute (span, "style", style, &error);
+
+		if (error != NULL) {
+			DEBUG ("Error setting element style: %s",
+				error->message);
+			g_clear_error (&error);
+			/* not fatal */
+		}
+
+		g_free (style);
+		gtk_icon_info_free (icon_info);
+	}
 
 	goto finally;
 
