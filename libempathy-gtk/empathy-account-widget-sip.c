@@ -153,6 +153,7 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
           "checkbutton_loose-routing", "loose-routing",
           "checkbutton_discover-binding", "discover-binding",
           "spinbutton_keepalive-interval", "keepalive-interval",
+          "checkbutton_ignore-tls-errors", "ignore-tls-errors",
           NULL);
 
       account_widget_sip_discover_stun_toggled_cb (

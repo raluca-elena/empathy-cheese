@@ -419,6 +419,26 @@
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkAlignment" id="alignment15">
+                            <property name="visible">True</property>
+                            <property name="left_padding">12</property>
+                            <child>
+                              <object class="GtkCheckButton" id="checkbutton_ignore-tls-errors">
+                                <property name="label" translatable="yes">Ignore TLS Errors</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="right_attach">4</property>
+                            <property name="top_attach">13</property>
+                            <property name="bottom_attach">14</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel" id="label_stun-port">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
