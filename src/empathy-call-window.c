@@ -2705,14 +2705,7 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
     {
-/* FIXME: part of the improvements for DRAFT2
-      tp_g_signal_connect_object (call, "audio-stream-error",
-        G_CALLBACK (empathy_call_window_audio_stream_error), window,
-        0);
-      tp_g_signal_connect_object (call, "video-stream-error",
-        G_CALLBACK (empathy_call_window_video_stream_error), window,
-        0);
-*/
+      call_handler_notify_call_cb (priv->handler, NULL, window);
       g_object_unref (call);
     }
   else
