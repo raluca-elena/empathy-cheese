@@ -86,6 +86,7 @@ enum {
 typedef enum {
   CONNECTING,
   CONNECTED,
+  HELD,
   DISCONNECTED,
   REDIALING
 } CallState;
@@ -2094,9 +2095,10 @@ empathy_call_window_update_timer (gpointer user_data)
 
   time_ = g_timer_elapsed (priv->timer, NULL);
 
-  /* Translators: number of minutes:seconds the caller has been connected */
-  str = g_strdup_printf (_("Connected — %d:%02dm"), (int) time_ / 60,
-    (int) time_ % 60);
+  /* Translators: 'status - minutes:seconds' the caller has been connected */
+  str = g_strdup_printf (_("%s — %d:%02dm"),
+      priv->call_state == HELD ? _("On hold") : _("Connected"),
+      (int) time_ / 60, (int) time_ % 60);
   empathy_call_window_status_message (self, str);
   g_free (str);
 
@@ -2661,6 +2663,35 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
 }
 
 static void
+empathy_call_window_members_changed_cb (TpyCallChannel *call,
+    GHashTable *members,
+    EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  GHashTableIter iter;
+  gpointer key, value;
+  gboolean held = FALSE;
+
+  g_hash_table_iter_init (&iter, members);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    {
+      if (GPOINTER_TO_INT (value) & TPY_CALL_MEMBER_FLAG_HELD)
+        {
+          /* This assumes this is a 1-1 call, otherwise one participant
+           * putting the call on hold wouldn't mean the call is on hold
+           * for everyone. */
+          held = TRUE;
+          break;
+        }
+    }
+
+  if (held)
+    priv->call_state = HELD;
+  else if (priv->call_state == HELD)
+    priv->call_state = CONNECTED;
+}
+
+static void
 call_handler_notify_call_cb (EmpathyCallHandler *handler,
     GParamSpec *spec,
     EmpathyCallWindow *self)
@@ -2678,6 +2709,10 @@ call_handler_notify_call_cb (EmpathyCallHandler *handler,
   tp_g_signal_connect_object (call, "video-stream-error",
       G_CALLBACK (empathy_call_window_video_stream_error), self, 0);
 */
+
+  tp_g_signal_connect_object (call, "members-changed",
+      G_CALLBACK (empathy_call_window_members_changed_cb), self, 0);
+
   g_object_unref (call);
 }
 
