@@ -667,6 +667,9 @@ empathy_account_widget_setup_widget (EmpathyAccountWidget *self,
     {
       DEBUG ("Unknown type of widget for param %s", param_name);
     }
+
+  gtk_widget_set_sensitive (widget,
+      empathy_account_settings_param_is_supported (priv->settings, param_name));
 }
 
 static GHashTable *
