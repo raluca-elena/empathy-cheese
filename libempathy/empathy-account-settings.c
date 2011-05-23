@@ -1785,3 +1785,12 @@ empathy_account_settings_supports_sasl (EmpathyAccountSettings *self)
 
   return priv->supports_sasl;
 }
+
+gboolean
+empathy_account_settings_param_is_supported (EmpathyAccountSettings *self,
+    const gchar *param)
+{
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+
+  return tp_protocol_has_param (priv->protocol_obj, param);
+}
