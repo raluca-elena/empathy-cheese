@@ -63,6 +63,81 @@ enum
   EMP_NEW_MESSAGE_SMS,
 };
 
+static const gchar *
+get_error_display_message (GError *error)
+{
+  if (error->domain != TP_ERROR)
+    goto out;
+
+  switch (error->code)
+    {
+      case TP_ERROR_NETWORK_ERROR:
+        return _("Network error");
+      case TP_ERROR_OFFLINE:
+        return _("The contact is offline");
+      case TP_ERROR_INVALID_HANDLE:
+        return _("The specified contact is either invalid or unknown");
+      case TP_ERROR_NOT_CAPABLE:
+        return _("The contact does not support this kind of conversation");
+      case TP_ERROR_NOT_IMPLEMENTED:
+        return _("The requested functionality is not implemented "
+                 "for this protocol");
+      case TP_ERROR_INVALID_ARGUMENT:
+        /* Not very user friendly to say 'invalid arguments' */
+        break;
+      case TP_ERROR_NOT_AVAILABLE:
+        return _("Could not start a conversation with the given contact");
+      case TP_ERROR_CHANNEL_BANNED:
+        return _("You are banned from this channel");
+      case TP_ERROR_CHANNEL_FULL:
+        return _("This channel is full");
+      case TP_ERROR_CHANNEL_INVITE_ONLY:
+        return _("You must be invited to join this channel");
+      case TP_ERROR_DISCONNECTED:
+        return _("Can't proceed while disconnected");
+      case TP_ERROR_PERMISSION_DENIED:
+        return _("Permission denied");
+      default:
+        DEBUG ("Unhandled error code: %d", error->code);
+    }
+
+out:
+  return _("There was an error starting the conversation");
+}
+
+static void
+show_chat_error (GError *error)
+{
+  GtkWidget *dialog;
+
+  dialog = gtk_message_dialog_new (NULL, 0,
+      GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+      "%s",
+      get_error_display_message (error));
+
+  g_signal_connect_swapped (dialog, "response",
+      G_CALLBACK (gtk_widget_destroy),
+      dialog);
+
+  gtk_widget_show (dialog);
+}
+
+static void
+ensure_text_channel_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  GError *error = NULL;
+
+  if (!tp_account_channel_request_ensure_channel_finish (
+        TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
+    {
+      DEBUG ("Failed to ensure text channel: %s", error->message);
+      show_chat_error (error);
+      g_error_free (error);
+    }
+}
+
 static void
 empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
 {
@@ -81,13 +156,13 @@ empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
       case EMP_NEW_MESSAGE_TEXT:
         empathy_chat_with_contact_id (account, contact_id,
             empathy_get_current_action_time (),
-            NULL, NULL);
+            ensure_text_channel_cb, NULL);
         break;
 
       case EMP_NEW_MESSAGE_SMS:
         empathy_sms_contact_id (account, contact_id,
             empathy_get_current_action_time (),
-            NULL, NULL);
+            ensure_text_channel_cb, NULL);
         break;
 
       default:
