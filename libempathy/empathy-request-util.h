@@ -45,9 +45,11 @@ G_BEGIN_DECLS
 /* Requesting 1 to 1 text channels */
 void empathy_chat_with_contact_id (TpAccount *account,
   const gchar *contact_id,
-  gint64 timestamp);
+  gint64 timestamp,
+  GAsyncReadyCallback callback,
+  gpointer user_data);
 
-void  empathy_chat_with_contact (EmpathyContact *contact,
+void empathy_chat_with_contact (EmpathyContact *contact,
   gint64 timestamp);
 
 /* Request a muc channel */
@@ -58,7 +60,9 @@ void empathy_join_muc (TpAccount *account,
 /* Request a sms channel */
 void empathy_sms_contact_id (TpAccount *account,
   const gchar *contact_id,
-  gint64 timestamp);
+  gint64 timestamp,
+  GAsyncReadyCallback callback,
+  gpointer user_data);
 
 G_END_DECLS
 

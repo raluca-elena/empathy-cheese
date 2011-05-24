@@ -20,9 +20,7 @@
 
 #include "empathy-auth-factory.h"
 
-#include <telepathy-glib/interfaces.h>
-#include <telepathy-glib/simple-handler.h>
-#include <telepathy-glib/util.h>
+#include <telepathy-glib/telepathy-glib.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_TLS
 #include "empathy-debug.h"

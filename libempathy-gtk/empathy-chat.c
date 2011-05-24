@@ -275,11 +275,13 @@ account_reconnected (EmpathyChat *chat,
 			if (priv->sms_channel)
 				empathy_sms_contact_id (
 					account, priv->id,
-					TP_USER_ACTION_TIME_NOT_USER_ACTION);
+					TP_USER_ACTION_TIME_NOT_USER_ACTION,
+					NULL, NULL);
 			else
 				empathy_chat_with_contact_id (
 					account, priv->id,
-					TP_USER_ACTION_TIME_NOT_USER_ACTION);
+					TP_USER_ACTION_TIME_NOT_USER_ACTION,
+					NULL, NULL);
 			break;
 		case TP_HANDLE_TYPE_ROOM:
 			empathy_join_muc (account, priv->id,

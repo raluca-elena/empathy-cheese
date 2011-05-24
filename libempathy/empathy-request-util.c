@@ -40,7 +40,7 @@ empathy_chat_with_contact (EmpathyContact *contact,
 {
   empathy_chat_with_contact_id (
       empathy_contact_get_account (contact), empathy_contact_get_id (contact),
-      timestamp);
+      timestamp, NULL, NULL);
 }
 
 static void
@@ -63,7 +63,9 @@ create_text_channel (TpAccount *account,
     TpHandleType target_handle_type,
     const gchar *target_id,
     gboolean sms_channel,
-    gint64 timestamp)
+    gint64 timestamp,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   GHashTable *request;
   TpAccountChannelRequest *req;
@@ -83,19 +85,23 @@ create_text_channel (TpAccount *account,
   tp_account_channel_request_set_delegate_to_preferred_handler (req, TRUE);
 
   tp_account_channel_request_ensure_channel_async (req, EMPATHY_CHAT_BUS_NAME,
-      NULL, ensure_text_channel_cb, NULL);
+      NULL, callback ? callback : ensure_text_channel_cb, user_data);
 
   g_hash_table_unref (request);
   g_object_unref (req);
 }
 
+/* @callback is optional, but if it's provided, it should call the right
+ * _finish() func that we call in ensure_text_channel_cb() */
 void
 empathy_chat_with_contact_id (TpAccount *account,
     const gchar *contact_id,
-    gint64 timestamp)
+    gint64 timestamp,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   create_text_channel (account, TP_HANDLE_TYPE_CONTACT,
-      contact_id, FALSE, timestamp);
+      contact_id, FALSE, timestamp, callback, user_data);
 }
 
 void
@@ -104,14 +110,18 @@ empathy_join_muc (TpAccount *account,
     gint64 timestamp)
 {
   create_text_channel (account, TP_HANDLE_TYPE_ROOM,
-      room_name, FALSE, timestamp);
+      room_name, FALSE, timestamp, NULL, NULL);
 }
 
+/* @callback is optional, but if it's provided, it should call the right
+ * _finish() func that we call in ensure_text_channel_cb() */
 void
 empathy_sms_contact_id (TpAccount *account,
     const gchar *contact_id,
-    gint64 timestamp)
+    gint64 timestamp,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
 {
   create_text_channel (account, TP_HANDLE_TYPE_CONTACT,
-      contact_id, TRUE, timestamp);
+      contact_id, TRUE, timestamp, callback, user_data);
 }
