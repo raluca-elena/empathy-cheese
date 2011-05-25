@@ -3370,7 +3370,7 @@ provide_password_cb (GObject *tp_chat,
 	EmpathyChatPriv *priv = GET_PRIV (self);
 	GError *error = NULL;
 
-	if (!empathy_tp_chat_provide_password_finish (EMPATHY_TP_CHAT (tp_chat), res,
+	if (!tp_channel_provide_password_finish (TP_CHANNEL (tp_chat), res,
 						      &error)) {
 		DEBUG ("error: %s", error->message);
 		/* FIXME: what should we do if that's another error? Close the channel?
@@ -3434,7 +3434,7 @@ password_infobar_response_cb (GtkWidget *info_bar,
 
 	password = gtk_entry_get_text (GTK_ENTRY (data->entry));
 
-	empathy_tp_chat_provide_password_async (priv->tp_chat, password,
+	tp_channel_provide_password_async (TP_CHANNEL (priv->tp_chat), password,
 						provide_password_cb, data);
 
 	gtk_widget_set_sensitive (data->button, FALSE);
@@ -3597,7 +3597,7 @@ provide_saved_password_cb (GObject *tp_chat,
 	EmpathyChatPriv *priv = GET_PRIV (self);
 	GError *error = NULL;
 
-	if (!empathy_tp_chat_provide_password_finish (EMPATHY_TP_CHAT (tp_chat), res,
+	if (!tp_channel_provide_password_finish (TP_CHANNEL (tp_chat), res,
 						      &error)) {
 		DEBUG ("error: %s", error->message);
 		/* FIXME: what should we do if that's another error? Close the channel?
@@ -3637,7 +3637,7 @@ chat_room_got_password_cb (GObject *source,
 		return;
 	}
 
-	empathy_tp_chat_provide_password_async (priv->tp_chat, password,
+	tp_channel_provide_password_async (TP_CHANNEL (priv->tp_chat), password,
 						provide_saved_password_cb, self);
 }
 
@@ -3646,7 +3646,7 @@ chat_password_needed_changed_cb (EmpathyChat *self)
 {
 	EmpathyChatPriv *priv = GET_PRIV (self);
 
-	if (empathy_tp_chat_password_needed (priv->tp_chat)) {
+	if (tp_channel_password_needed (TP_CHANNEL (priv->tp_chat))) {
 		empathy_keyring_get_room_password_async (priv->account,
 							 empathy_tp_chat_get_id (priv->tp_chat),
 							 chat_room_got_password_cb, self);

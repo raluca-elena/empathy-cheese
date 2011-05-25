@@ -49,10 +49,6 @@ struct _EmpathyTpChatPrivate {
 	GQueue                *pending_messages_queue;
 	gboolean               had_properties_list;
 	GPtrArray             *properties;
-	TpChannelPasswordFlags password_flags;
-	/* TRUE if we fetched the password flag of the channel or if it's not needed
-	 * (channel doesn't implement the Password interface) */
-	gboolean               got_password_flags;
 	gboolean               can_upgrade_to_muc;
 
 	GHashTable            *messages_being_sent;
@@ -67,7 +63,6 @@ enum {
 	PROP_0,
 	PROP_ACCOUNT,
 	PROP_REMOTE_CONTACT,
-	PROP_PASSWORD_NEEDED,
 	PROP_N_MESSAGES_SENDING,
 };
 
@@ -860,19 +855,18 @@ tp_chat_finalize (GObject *object)
 static void
 check_almost_ready (EmpathyTpChat *self)
 {
+	TpChannel *channel = (TpChannel *) self;
+
 	if (self->priv->ready_result == NULL)
 		return;
 
 	if (self->priv->user == NULL)
 		return;
 
-	if (!self->priv->got_password_flags)
-		return;
-
 	/* We need either the members (room) or the remote contact (private chat).
 	 * If the chat is protected by a password we can't get these information so
 	 * consider the chat as ready so it can be presented to the user. */
-	if (!empathy_tp_chat_password_needed (self) && self->priv->members == NULL &&
+	if (!tp_channel_password_needed (channel) && self->priv->members == NULL &&
 	    self->priv->remote_contact == NULL)
 		return;
 
@@ -1223,42 +1217,6 @@ tp_chat_got_self_contact_cb (TpConnection            *connection,
 }
 
 static void
-password_flags_changed_cb (TpChannel *channel,
-    guint added,
-    guint removed,
-    gpointer user_data,
-    GObject *weak_object)
-{
-	EmpathyTpChat *self = EMPATHY_TP_CHAT (weak_object);
-	gboolean was_needed, needed;
-
-	was_needed = empathy_tp_chat_password_needed (self);
-
-	self->priv->password_flags |= added;
-	self->priv->password_flags ^= removed;
-
-	needed = empathy_tp_chat_password_needed (self);
-
-	if (was_needed != needed)
-		g_object_notify (G_OBJECT (self), "password-needed");
-}
-
-static void
-got_password_flags_cb (TpChannel *proxy,
-			     guint password_flags,
-			     const GError *error,
-			     gpointer user_data,
-			     GObject *weak_object)
-{
-	EmpathyTpChat *self = EMPATHY_TP_CHAT (weak_object);
-
-	self->priv->got_password_flags = TRUE;
-	self->priv->password_flags = password_flags;
-
-	check_almost_ready (EMPATHY_TP_CHAT (self));
-}
-
-static void
 tp_chat_get_property (GObject    *object,
 		      guint       param_id,
 		      GValue     *value,
@@ -1272,9 +1230,6 @@ tp_chat_get_property (GObject    *object,
 		break;
 	case PROP_REMOTE_CONTACT:
 		g_value_set_object (value, self->priv->remote_contact);
-		break;
-	case PROP_PASSWORD_NEEDED:
-		g_value_set_boolean (value, empathy_tp_chat_password_needed (self));
 		break;
 	case PROP_N_MESSAGES_SENDING:
 		g_value_set_uint (value,
@@ -1360,14 +1315,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 							      "The remote contact if there is no group iface on the channel",
 							      EMPATHY_TYPE_CONTACT,
 							      G_PARAM_READABLE));
-
-	g_object_class_install_property (object_class,
-					 PROP_PASSWORD_NEEDED,
-					 g_param_spec_boolean ("password-needed",
-							       "password needed",
-							       "TRUE if a password is needed to join the channel",
-							       FALSE,
-							       G_PARAM_READABLE));
 
 	g_object_class_install_property (object_class,
 					 PROP_N_MESSAGES_SENDING,
@@ -1584,67 +1531,6 @@ empathy_tp_chat_acknowledge_all_messages (EmpathyTpChat *self)
     (GSList *) empathy_tp_chat_get_pending_messages (self));
 }
 
-gboolean
-empathy_tp_chat_password_needed (EmpathyTpChat *self)
-{
-	return self->priv->password_flags & TP_CHANNEL_PASSWORD_FLAG_PROVIDE;
-}
-
-static void
-provide_password_cb (TpChannel *channel,
-				      gboolean correct,
-				      const GError *error,
-				      gpointer user_data,
-				      GObject *weak_object)
-{
-	GSimpleAsyncResult *result = user_data;
-
-	if (error != NULL) {
-		g_simple_async_result_set_from_error (result, error);
-	}
-	else if (!correct) {
-		/* The current D-Bus API is a bit weird so re-use the
-		 * AuthenticationFailed error */
-		g_simple_async_result_set_error (result, TP_ERRORS,
-						 TP_ERROR_AUTHENTICATION_FAILED, "Wrong password");
-	}
-
-	g_simple_async_result_complete (result);
-	g_object_unref (result);
-}
-
-void
-empathy_tp_chat_provide_password_async (EmpathyTpChat *self,
-						     const gchar *password,
-						     GAsyncReadyCallback callback,
-						     gpointer user_data)
-{
-	GSimpleAsyncResult *result;
-
-	result = g_simple_async_result_new (G_OBJECT (self),
-					    callback, user_data,
-					    empathy_tp_chat_provide_password_finish);
-
-	tp_cli_channel_interface_password_call_provide_password
-		((TpChannel *) self, -1, password, provide_password_cb, result,
-		 NULL, G_OBJECT (self));
-}
-
-gboolean
-empathy_tp_chat_provide_password_finish (EmpathyTpChat *self,
-						      GAsyncResult *result,
-						      GError **error)
-{
-	if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result),
-		error))
-		return FALSE;
-
-	g_return_val_if_fail (g_simple_async_result_is_valid (result,
-							      G_OBJECT (self), empathy_tp_chat_provide_password_finish), FALSE);
-
-	return TRUE;
-}
-
 /**
  * empathy_tp_chat_can_add_contact:
  *
@@ -1848,22 +1734,6 @@ conn_prepared_cb (GObject *source,
 									       tp_chat_property_flags_changed_cb,
 									       NULL, NULL,
 									       G_OBJECT (self), NULL);
-	}
-
-	/* Check if the chat is password protected */
-	if (tp_proxy_has_interface_by_id (self,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_PASSWORD)) {
-		self->priv->got_password_flags = FALSE;
-
-		tp_cli_channel_interface_password_connect_to_password_flags_changed
-			(channel, password_flags_changed_cb, self, NULL,
-			 G_OBJECT (self), NULL);
-
-		tp_cli_channel_interface_password_call_get_password_flags
-			(channel, -1, got_password_flags_cb, self, NULL, G_OBJECT (self));
-	} else {
-		/* No Password interface, so no need to fetch the password flags */
-		self->priv->got_password_flags = TRUE;
 	}
 }
 
