@@ -106,11 +106,12 @@ out:
 }
 
 static void
-show_chat_error (GError *error)
+show_chat_error (GError *error,
+    GtkWindow *parent)
 {
   GtkWidget *dialog;
 
-  dialog = gtk_message_dialog_new (NULL, 0,
+  dialog = gtk_message_dialog_new (parent, GTK_DIALOG_MODAL,
       GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
       "%s",
       get_error_display_message (error));
@@ -133,7 +134,7 @@ ensure_text_channel_cb (GObject *source,
         TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
     {
       DEBUG ("Failed to ensure text channel: %s", error->message);
-      show_chat_error (error);
+      show_chat_error (error, user_data);
       g_error_free (error);
     }
 }
@@ -156,13 +157,15 @@ empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
       case EMP_NEW_MESSAGE_TEXT:
         empathy_chat_with_contact_id (account, contact_id,
             empathy_get_current_action_time (),
-            ensure_text_channel_cb, NULL);
+            ensure_text_channel_cb,
+            gtk_widget_get_parent_window (GTK_WIDGET (dialog)));
         break;
 
       case EMP_NEW_MESSAGE_SMS:
         empathy_sms_contact_id (account, contact_id,
             empathy_get_current_action_time (),
-            ensure_text_channel_cb, NULL);
+            ensure_text_channel_cb,
+            gtk_widget_get_parent_window (GTK_WIDGET (dialog)));
         break;
 
       default:
