@@ -82,6 +82,7 @@ typedef struct
   TpAccount *account;
   gchar *id;
   gboolean room;
+  gboolean sms;
 } ChatData;
 
 static ChatData *
@@ -94,6 +95,7 @@ chat_data_new (EmpathyChat *chat)
   data->account = g_object_ref (empathy_chat_get_account (chat));
   data->id = g_strdup (empathy_chat_get_id (chat));
   data->room = empathy_chat_is_room (chat);
+  data->sms = empathy_chat_is_sms_channel (chat);
 
   return data;
 }
@@ -466,6 +468,8 @@ empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self,
 
   if (data->room)
     empathy_join_muc (data->account, data->id, timestamp);
+  else if (data->sms)
+    empathy_sms_contact_id (data->account, data->id, timestamp);
   else
     empathy_chat_with_contact_id (data->account, data->id, timestamp);
 
