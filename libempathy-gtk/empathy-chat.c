@@ -2332,31 +2332,37 @@ got_filtered_messages_cb (GObject *manager,
 
 	for (l = messages; l; l = g_list_next (l)) {
 		EmpathyMessage *message;
-		GList *supersedes;
+
 		g_assert (TPL_IS_EVENT (l->data));
 
-		/* we need the last message this one supersedes, which is the
-		 * the original */
-		supersedes = tpl_text_event_dup_supersedes (l->data);
-
-		if (supersedes != NULL) {
-			message = empathy_message_from_tpl_log_event (
-				g_list_last (supersedes)->data);
-			empathy_chat_view_append_message (chat->view, message);
-
-			g_object_unref (message);
-		}
-
-		g_list_free_full (supersedes, g_object_unref);
-
-		/* append the latest message */
 		message = empathy_message_from_tpl_log_event (l->data);
 		g_object_unref (l->data);
 
-		if (empathy_message_is_edit (message))
+		if (empathy_message_is_edit (message)) {
+			/* this is an edited message, create a synthetic event
+			 * using the supersedes token and
+			 * original-message-sent timestamp, that we can then
+			 * replace */
+			EmpathyMessage *syn_msg = g_object_new (
+				EMPATHY_TYPE_MESSAGE,
+				"body", "",
+				"token", empathy_message_get_supersedes (message),
+				"type", empathy_message_get_tptype (message),
+				"timestamp", empathy_message_get_original_timestamp (message),
+				"incoming", empathy_message_is_incoming (message),
+				"is-backlog", TRUE,
+				"receiver", empathy_message_get_receiver (message),
+				"sender", empathy_message_get_sender (message),
+				NULL);
+
+			empathy_chat_view_append_message (chat->view, syn_msg);
 			empathy_chat_view_edit_message (chat->view, message);
-		else
+
+			g_object_unref (syn_msg);
+		} else {
+			/* append the latest message */
 			empathy_chat_view_append_message (chat->view, message);
+		}
 
 		g_object_unref (message);
 	}
