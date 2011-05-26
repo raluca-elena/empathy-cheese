@@ -270,11 +270,9 @@ avatar_chooser_finalize (GObject *object)
 	avatar_chooser_set_connection (EMPATHY_AVATAR_CHOOSER (object), NULL);
 	g_assert (self->priv->connection == NULL);
 
-	if (self->priv->avatar != NULL) {
-		empathy_avatar_unref (self->priv->avatar);
-	}
+	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
 
-	g_object_unref (self->priv->gsettings_ui);
+	tp_clear_object (&self->priv->gsettings_ui);
 
 	G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->finalize (object);
 }
@@ -283,10 +281,7 @@ static void
 avatar_chooser_set_connection (EmpathyAvatarChooser *self,
 			       TpConnection         *connection)
 {
-	if (self->priv->connection != NULL) {
-		g_object_unref (self->priv->connection);
-		self->priv->connection = NULL;
-	}
+	tp_clear_object (&self->priv->connection);
 
 	if (connection != NULL) {
 		GQuark features[] = { TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS, 0 };
@@ -591,10 +586,7 @@ avatar_chooser_clear_image (EmpathyAvatarChooser *self)
 {
 	GtkWidget *image;
 
-	if (self->priv->avatar != NULL) {
-		empathy_avatar_unref (self->priv->avatar);
-		self->priv->avatar = NULL;
-	}
+	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
 
 	image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_AVATAR_DEFAULT,
 		GTK_ICON_SIZE_DIALOG);
@@ -690,9 +682,7 @@ avatar_chooser_set_image (EmpathyAvatarChooser *self,
 		avatar = conv;
 	}
 
-	if (self->priv->avatar != NULL) {
-		empathy_avatar_unref (self->priv->avatar);
-	}
+	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
 	self->priv->avatar = avatar;
 
 	pixbuf_view = empathy_pixbuf_scale_down_if_necessary (pixbuf, AVATAR_SIZE_VIEW);
