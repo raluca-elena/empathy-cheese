@@ -53,6 +53,7 @@ typedef struct {
 	gchar                    *supersedes;
 	gchar                    *body;
 	gint64                    timestamp;
+	gint64                    original_timestamp;
 	gboolean                  is_backlog;
 	guint                     id;
 	gboolean                  incoming;
@@ -80,6 +81,7 @@ enum {
 	PROP_SUPERSEDES,
 	PROP_BODY,
 	PROP_TIMESTAMP,
+	PROP_ORIGINAL_TIMESTAMP,
 	PROP_IS_BACKLOG,
 	PROP_INCOMING,
 	PROP_FLAGS,
@@ -150,6 +152,13 @@ empathy_message_class_init (EmpathyMessageClass *class)
 							    G_MININT64, G_MAXINT64, 0,
 							    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
 							    G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (object_class,
+					 PROP_ORIGINAL_TIMESTAMP,
+					 g_param_spec_int64 ("original-timestamp",
+							     "Original Timestamp",
+							     "Timestamp of the original message",
+							     G_MININT64, G_MAXINT64, 0,
+							     G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (object_class,
 					 PROP_IS_BACKLOG,
 					 g_param_spec_boolean ("is-backlog",
@@ -258,6 +267,9 @@ message_get_property (GObject    *object,
 	case PROP_TIMESTAMP:
 		g_value_set_int64 (value, priv->timestamp);
 		break;
+	case PROP_ORIGINAL_TIMESTAMP:
+		g_value_set_int64 (value, priv->original_timestamp);
+		break;
 	case PROP_IS_BACKLOG:
 		g_value_set_boolean (value, priv->is_backlog);
 		break;
@@ -315,6 +327,9 @@ message_set_property (GObject      *object,
 		if (priv->timestamp <= 0)
 			priv->timestamp = empathy_time_get_current ();
 		break;
+	case PROP_ORIGINAL_TIMESTAMP:
+		priv->original_timestamp = g_value_get_int64 (value);
+		break;
 	case PROP_IS_BACKLOG:
 		priv->is_backlog = g_value_get_boolean (value);
 		break;
@@ -345,6 +360,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	const gchar *token = NULL, *supersedes = NULL;
 	EmpathyContact *contact;
 	TpChannelTextMessageType type = TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL;
+	gint64 original_timestamp;
 
 	g_return_val_if_fail (TPL_IS_EVENT (logevent), NULL);
 
@@ -372,6 +388,8 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		type = tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent));
 		token = tpl_text_event_get_message_token (textevent);
 		supersedes = tpl_text_event_get_supersedes_token (textevent);
+
+		original_timestamp = tpl_text_event_get_original_timestamp (textevent);
 	}
 #ifdef HAVE_CALL_LOGS
 	else if (TPL_IS_CALL_EVENT (logevent)) {
@@ -403,6 +421,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		"body", body,
 		"is-backlog", TRUE,
 		"timestamp", tpl_event_get_timestamp (logevent),
+		"original-timestamp", original_timestamp,
 		NULL);
 
 	if (receiver != NULL) {
@@ -573,6 +592,18 @@ empathy_message_get_timestamp (EmpathyMessage *message)
 	return priv->timestamp;
 }
 
+gint64
+empathy_message_get_original_timestamp (EmpathyMessage *message)
+{
+	EmpathyMessagePriv *priv;
+
+	g_return_val_if_fail (EMPATHY_IS_MESSAGE (message), -1);
+
+	priv = GET_PRIV (message);
+
+	return priv->original_timestamp;
+}
+
 gboolean
 empathy_message_is_backlog (EmpathyMessage *message)
 {
@@ -738,10 +769,15 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	EmpathyMessage *message;
 	gchar *body;
 	TpChannelTextMessageFlags flags;
+	gint64 original_timestamp;
+	const GHashTable *part = tp_message_peek (tp_msg, 0);
 
 	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
 
 	body = tp_message_to_text (tp_msg, &flags);
+
+	original_timestamp = tp_asv_get_int64 (part,
+		"original-message-received", NULL);
 
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
@@ -749,6 +785,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"supersedes", tp_message_get_supersedes (tp_msg),
 		"type", tp_message_get_message_type (tp_msg),
 		"timestamp", tp_message_get_received_timestamp (tp_msg),
+		"original-timestamp", original_timestamp,
 		"flags", flags,
 		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
 		"incoming", incoming,

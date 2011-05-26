@@ -73,6 +73,7 @@ const gchar *            empathy_message_get_token         (EmpathyMessage      
 const gchar *            empathy_message_get_supersedes    (EmpathyMessage           *message);
 gboolean                 empathy_message_is_edit           (EmpathyMessage           *message);
 gint64                   empathy_message_get_timestamp     (EmpathyMessage           *message);
+gint64                   empathy_message_get_original_timestamp (EmpathyMessage      *message);
 gboolean                 empathy_message_is_backlog        (EmpathyMessage           *message);
 gboolean                 empathy_message_is_incoming       (EmpathyMessage           *message);
 
