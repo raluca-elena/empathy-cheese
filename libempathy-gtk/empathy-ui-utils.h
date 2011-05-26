@@ -121,12 +121,9 @@ gboolean    empathy_text_iter_backward_search           (const GtkTextIter*iter,
 							 GtkTextIter      *match_end,
 							 const GtkTextIter*limit);
 /* Windows */
-gboolean    empathy_window_get_is_visible               (GtkWindow        *window);
 void        empathy_window_present                      (GtkWindow *window);
 void        empathy_window_present_with_time            (GtkWindow        *window,
 							 guint32 timestamp);
-void        empathy_window_iconify                      (GtkWindow        *window,
-							 GtkStatusIcon    *status_icon);
 GtkWindow * empathy_get_toplevel_window                 (GtkWidget        *widget);
 
 /* URL */

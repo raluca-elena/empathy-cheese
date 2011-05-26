@@ -1532,56 +1532,6 @@ empathy_text_iter_backward_search (const GtkTextIter   *iter,
 	return retval;
 }
 
-gboolean
-empathy_window_get_is_visible (GtkWindow *window)
-{
-	GdkWindowState  state;
-	GdkWindow      *gdk_window;
-
-	g_return_val_if_fail (GTK_IS_WINDOW (window), FALSE);
-
-	gdk_window = gtk_widget_get_window (GTK_WIDGET (window));
-	if (!gdk_window) {
-		return FALSE;
-	}
-
-	state = gdk_window_get_state (gdk_window);
-	if (state & (GDK_WINDOW_STATE_WITHDRAWN | GDK_WINDOW_STATE_ICONIFIED)) {
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-void
-empathy_window_iconify (GtkWindow *window, GtkStatusIcon *status_icon)
-{
-	GdkRectangle  icon_location;
-	gulong        data[4];
-	Display      *dpy;
-	GdkWindow    *gdk_window;
-
-	gtk_status_icon_get_geometry (status_icon, NULL, &icon_location, NULL);
-	gdk_window = gtk_widget_get_window (GTK_WIDGET (window));
-	dpy = GDK_WINDOW_XDISPLAY (gdk_window);
-
-	data[0] = icon_location.x;
-	data[1] = icon_location.y;
-	data[2] = icon_location.width;
-	data[3] = icon_location.height;
-
-	XChangeProperty (dpy,
-			 GDK_WINDOW_XID (gdk_window),
-			 gdk_x11_get_xatom_by_name_for_display (
-				gdk_window_get_display (gdk_window),
-			 "_NET_WM_ICON_GEOMETRY"),
-			 XA_CARDINAL, 32, PropModeReplace,
-			 (guchar *)&data, 4);
-
-	gtk_window_set_skip_taskbar_hint (window, TRUE);
-	gtk_window_iconify (window);
-}
-
 /* Takes care of moving the window to the current workspace. */
 void
 empathy_window_present_with_time (GtkWindow *window,
@@ -1613,9 +1563,6 @@ empathy_window_present_with_time (GtkWindow *window,
 		gtk_window_present (window);
 	else
 		gtk_window_present_with_time (window, timestamp);
-
-	gtk_window_set_skip_taskbar_hint (window, FALSE);
-	gtk_window_deiconify (window);
 }
 
 void

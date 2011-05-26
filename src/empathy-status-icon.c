@@ -62,7 +62,7 @@ typedef struct {
 	EmpathyEvent        *event;
 	GSettings           *gsettings_ui;
 
-	GtkWindow           *window;
+	GtkWidget           *window;
 	GtkUIManager        *ui_manager;
 	GtkWidget           *popup_menu;
 	GtkAction           *show_window_item;
@@ -222,7 +222,7 @@ status_icon_set_visibility (EmpathyStatusIcon *icon,
 	}
 
 	if (!visible) {
-		empathy_window_iconify (priv->window, priv->icon);
+		gtk_widget_hide (priv->window);
 	} else {
 		empathy_window_present (GTK_WINDOW (priv->window));
 	}
@@ -246,7 +246,7 @@ status_icon_toggle_visibility (EmpathyStatusIcon *icon)
 	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
 	gboolean               visible;
 
-	visible = gtk_window_is_active (priv->window);
+	visible = gtk_window_is_active (GTK_WINDOW (priv->window));
 	status_icon_set_visibility (icon, !visible, TRUE);
 }
 
@@ -334,7 +334,7 @@ status_icon_popup_menu_cb (GtkStatusIcon     *status_icon,
 	GtkWidget             *submenu;
 	gboolean               show;
 
-	show = empathy_window_get_is_visible (GTK_WINDOW (priv->window));
+	show = gtk_widget_get_visible (priv->window);
 
 	g_signal_handlers_block_by_func (priv->show_window_item,
 					 status_icon_show_hide_window_cb,
