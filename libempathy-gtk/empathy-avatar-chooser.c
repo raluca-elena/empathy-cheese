@@ -258,14 +258,6 @@ avatar_chooser_drag_motion_cb (GtkWidget *widget,
   return FALSE;
 }
 
-static void
-avatar_chooser_drag_leave_cb (GtkWidget *widget,
-    GdkDragContext *context,
-    guint time_,
-    EmpathyAvatarChooser *self)
-{
-}
-
 static gboolean
 avatar_chooser_drag_drop_cb (GtkWidget *widget,
     GdkDragContext *context,
@@ -1045,9 +1037,6 @@ empathy_avatar_chooser_init (EmpathyAvatarChooser *self)
 
   g_signal_connect (self, "drag-motion",
       G_CALLBACK (avatar_chooser_drag_motion_cb),
-      self);
-  g_signal_connect (self, "drag-leave",
-      G_CALLBACK (avatar_chooser_drag_leave_cb),
       self);
   g_signal_connect (self, "drag-drop",
       G_CALLBACK (avatar_chooser_drag_drop_cb),
