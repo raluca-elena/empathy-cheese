@@ -117,10 +117,10 @@ gboolean empathy_contact_can_do_action (EmpathyContact *self,
 
 #define EMPATHY_TYPE_AVATAR (empathy_avatar_get_type ())
 GType empathy_avatar_get_type (void) G_GNUC_CONST;
-EmpathyAvatar * empathy_avatar_new (guchar *data,
+EmpathyAvatar * empathy_avatar_new (const guchar *data,
     gsize len,
-    gchar *format,
-    gchar *filename);
+    const gchar *format,
+    const gchar *filename);
 EmpathyAvatar * empathy_avatar_ref (EmpathyAvatar *avatar);
 void empathy_avatar_unref (EmpathyAvatar *avatar);
 

@@ -607,9 +607,11 @@ avatar_chooser_maybe_convert_and_scale (EmpathyAvatarChooser *self,
 
   g_free (new_format_name);
 
-  /* Takes ownership of new_mime_type and best_image_data */
   avatar = empathy_avatar_new ((guchar *) best_image_data,
     best_image_size, new_mime_type, NULL);
+
+  g_free (best_image_data);
+  g_free (new_mime_type);
 
   return avatar;
 }
@@ -655,6 +657,7 @@ avatar_chooser_set_image (EmpathyAvatarChooser *self,
   g_object_unref (pixbuf);
 }
 
+/* takes ownership of @data */
 static void
 avatar_chooser_set_image_from_data (EmpathyAvatarChooser *self,
     gchar *data,
@@ -679,10 +682,12 @@ avatar_chooser_set_image_from_data (EmpathyAvatarChooser *self,
       return;
     }
 
-  /* avatar takes ownership of data and mime_type */
   avatar = empathy_avatar_new ((guchar *) data, size, mime_type, NULL);
 
   avatar_chooser_set_image (self, avatar, pixbuf, set_locally);
+
+  g_free (mime_type);
+  g_free (data);
 }
 
 static void
@@ -730,12 +735,8 @@ avatar_chooser_drag_data_received_cb (GtkWidget          *widget,
 
       if (handled)
         {
-          /* this in turn calls empathy_avatar_new (), which assumes
-           * ownership of data.
-           */
-          avatar_chooser_set_image_from_data (self, data,
-                      bytes_read,
-                      TRUE);
+          /* pass data to the avatar_chooser_set_image_from_data */
+          avatar_chooser_set_image_from_data (self, data, bytes_read, TRUE);
         }
 
       g_object_unref (file);
@@ -801,6 +802,7 @@ avatar_chooser_set_image_from_file (EmpathyAvatarChooser *self,
       return;
     }
 
+  /* pass image_data to the avatar_chooser_set_image_from_data */
   avatar_chooser_set_image_from_data (self, image_data, image_size, TRUE);
 }
 
@@ -809,8 +811,6 @@ static void
 avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *self,
                GdkPixbuf *pb)
 {
-  /* dup the string as empathy_avatar_new steals ownership of the it */
-  gchar *mime = g_strdup ("image/png");
   gsize size;
   gchar *buf;
   EmpathyAvatar *avatar = NULL;
@@ -825,8 +825,10 @@ avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *self,
       return;
     }
 
-  avatar = empathy_avatar_new ((guchar *) buf, size, mime, NULL);
+  avatar = empathy_avatar_new ((guchar *) buf, size, "image/png", NULL);
   avatar_chooser_set_image (self, avatar, pb, TRUE);
+
+  g_free (buf);
 }
 
 static gboolean

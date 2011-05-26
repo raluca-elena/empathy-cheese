@@ -1282,17 +1282,16 @@ contact_load_avatar_cache (EmpathyContact *contact,
         }
     }
 
-  if (data)
+  if (data != NULL)
     {
       DEBUG ("Avatar loaded from %s", filename);
       avatar = empathy_avatar_new ((guchar *) data, len, NULL, filename);
       contact_set_avatar (contact, avatar);
       empathy_avatar_unref (avatar);
     }
-  else
-    {
-      g_free (filename);
-    }
+
+  g_free (data);
+  g_free (filename);
 
   return data != NULL;
 }
@@ -1319,24 +1318,23 @@ empathy_avatar_get_type (void)
  * @format: the mime type of the avatar image
  * @filename: the filename where the avatar is stored in cache
  *
- * Create a #EmpathyAvatar from the provided data. This function takes the
- * ownership of @data, @format and @filename.
+ * Create a #EmpathyAvatar from the provided data.
  *
  * Returns: a new #EmpathyAvatar
  */
 EmpathyAvatar *
-empathy_avatar_new (guchar *data,
+empathy_avatar_new (const guchar *data,
                     gsize len,
-                    gchar *format,
-                    gchar *filename)
+                    const gchar *format,
+                    const gchar *filename)
 {
   EmpathyAvatar *avatar;
 
   avatar = g_slice_new0 (EmpathyAvatar);
-  avatar->data = data;
+  avatar->data = g_memdup (data, len);
   avatar->len = len;
-  avatar->format = format;
-  avatar->filename = filename;
+  avatar->format = g_strdup (format);
+  avatar->filename = g_strdup (filename);
   avatar->refcount = 1;
 
   return avatar;
@@ -1783,12 +1781,17 @@ contact_set_avatar_from_tp_contact (EmpathyContact *contact)
       EmpathyAvatar *avatar;
       gchar *data;
       gsize len;
+      gchar *path;
 
       g_file_load_contents (file, NULL, &data, &len, NULL, NULL);
-      avatar = empathy_avatar_new ((guchar *) data, len, g_strdup (mime),
-          g_file_get_path (file));
+      path = g_file_get_path (file);
+
+      avatar = empathy_avatar_new ((guchar *) data, len, mime, path);
+
       contact_set_avatar (contact, avatar);
       empathy_avatar_unref (avatar);
+      g_free (path);
+      g_free (data);
     }
   else
     {
