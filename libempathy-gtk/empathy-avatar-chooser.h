@@ -30,37 +30,42 @@
 
 G_BEGIN_DECLS
 
-#define EMPATHY_TYPE_AVATAR_CHOOSER	       (empathy_avatar_chooser_get_type ())
-#define EMPATHY_AVATAR_CHOOSER(obj)	       (G_TYPE_CHECK_INSTANCE_CAST ((obj), EMPATHY_TYPE_AVATAR_CHOOSER, EmpathyAvatarChooser))
+#define EMPATHY_TYPE_AVATAR_CHOOSER        (empathy_avatar_chooser_get_type ())
+#define EMPATHY_AVATAR_CHOOSER(obj)        (G_TYPE_CHECK_INSTANCE_CAST ((obj), EMPATHY_TYPE_AVATAR_CHOOSER, EmpathyAvatarChooser))
 #define EMPATHY_AVATAR_CHOOSER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), EMPATHY_TYPE_AVATAR_CHOOSER, EmpathyAvatarChooserClass))
-#define EMPATHY_IS_AVATAR_CHOOSER(obj)	       (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EMPATHY_TYPE_AVATAR_CHOOSER))
+#define EMPATHY_IS_AVATAR_CHOOSER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), EMPATHY_TYPE_AVATAR_CHOOSER))
 #define EMPATHY_IS_AVATAR_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((obj), EMPATHY_TYPE_AVATAR_CHOOSER))
 
 typedef struct _EmpathyAvatarChooser        EmpathyAvatarChooser;
 typedef struct _EmpathyAvatarChooserClass   EmpathyAvatarChooserClass;
 typedef struct _EmpathyAvatarChooserPrivate EmpathyAvatarChooserPrivate;
 
-struct _EmpathyAvatarChooser {
-	GtkButton parent;
+struct _EmpathyAvatarChooser
+{
+  GtkButton parent;
 
-	/*<private>*/
-	EmpathyAvatarChooserPrivate *priv;
+  /*<private>*/
+  EmpathyAvatarChooserPrivate *priv;
 };
 
-struct _EmpathyAvatarChooserClass {
-	GtkButtonClass parent_class;
+struct _EmpathyAvatarChooserClass
+{
+  GtkButtonClass parent_class;
 };
 
-GType      empathy_avatar_chooser_get_type       (void);
-GtkWidget *empathy_avatar_chooser_new            (void);
-void       empathy_avatar_chooser_set            (EmpathyAvatarChooser *chooser,
-						  EmpathyAvatar        *avatar);
-void       empathy_avatar_chooser_get_image_data (EmpathyAvatarChooser *chooser,
-						  const gchar         **data,
-						  gsize                *data_size,
-						  const gchar         **mime_type);
+GType empathy_avatar_chooser_get_type (void);
 
-void       empathy_avatar_chooser_set_account (EmpathyAvatarChooser *self,
-						  TpAccount *account);
+GtkWidget *empathy_avatar_chooser_new (void);
+
+void empathy_avatar_chooser_set (EmpathyAvatarChooser *self,
+    EmpathyAvatar *avatar);
+
+void empathy_avatar_chooser_get_image_data (EmpathyAvatarChooser *self,
+    const gchar **data,
+    gsize *data_size,
+    const gchar **mime_type);
+
+void empathy_avatar_chooser_set_account (EmpathyAvatarChooser *self,
+    TpAccount *account);
 
 #endif /* __EMPATHY_AVATAR_CHOOSER_H__ */
