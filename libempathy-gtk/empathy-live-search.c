@@ -484,12 +484,17 @@ live_search_set_property (GObject *object,
 }
 
 static void
-live_search_hide (GtkWidget *widget)
+live_search_unmap (GtkWidget *widget)
 {
   EmpathyLiveSearch *self = EMPATHY_LIVE_SEARCH (widget);
   EmpathyLiveSearchPriv *priv = GET_PRIV (self);
 
-  GTK_WIDGET_CLASS (empathy_live_search_parent_class)->hide (widget);
+  GTK_WIDGET_CLASS (empathy_live_search_parent_class)->unmap (widget);
+
+  /* unmap can happen if a parent gets hidden, in that case we want to hide
+   * the live search as well, so when it gets mapped again, the live search
+   * won't be shown. */
+  gtk_widget_hide (widget);
 
   gtk_entry_set_text (GTK_ENTRY (priv->search_entry), "");
   gtk_widget_grab_focus (priv->hook_widget);
@@ -532,7 +537,7 @@ empathy_live_search_class_init (EmpathyLiveSearchClass *klass)
   object_class->get_property = live_search_get_property;
   object_class->set_property = live_search_set_property;
 
-  widget_class->hide = live_search_hide;
+  widget_class->unmap = live_search_unmap;
   widget_class->show = live_search_show;
   widget_class->grab_focus = live_search_grab_focus;
 
