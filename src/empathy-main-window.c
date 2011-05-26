@@ -1076,6 +1076,50 @@ main_window_setup_balance (EmpathyMainWindow *window,
 }
 
 static void
+main_window_remove_balance_action (EmpathyMainWindow *window,
+				   TpAccount         *account)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GtkAction *action;
+	char *name;
+	GList *a;
+
+	if (priv->balance_action_group == NULL)
+		return;
+
+	name = main_window_account_to_action_name (account);
+
+	action = gtk_action_group_get_action (
+		priv->balance_action_group, name);
+
+	if (action != NULL) {
+		guint merge_id;
+
+		DEBUG ("Removing action");
+
+		merge_id = GPOINTER_TO_UINT (g_object_get_data (
+			G_OBJECT (action),
+			"merge-id"));
+
+		gtk_ui_manager_remove_ui (priv->ui_manager,
+			merge_id);
+		gtk_action_group_remove_action (
+			priv->balance_action_group, action);
+	}
+
+	g_free (name);
+
+	a = gtk_action_group_list_actions (
+		priv->balance_action_group);
+
+	gtk_action_set_visible (
+		priv->view_balance_show_in_roster,
+		g_list_length (a) > 0);
+
+	g_list_free (a);
+}
+
+static void
 main_window_connection_changed_cb (TpAccount  *account,
 				   guint       old_status,
 				   guint       current,
@@ -1084,8 +1128,6 @@ main_window_connection_changed_cb (TpAccount  *account,
 				   GHashTable *details,
 				   EmpathyMainWindow *window)
 {
-	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-
 	main_window_update_status (window);
 
 	if (current == TP_CONNECTION_STATUS_DISCONNECTED &&
@@ -1098,42 +1140,7 @@ main_window_connection_changed_cb (TpAccount  *account,
 				    EMPATHY_SOUND_ACCOUNT_DISCONNECTED);
 
 		/* remove balance action if required */
-		if (priv->balance_action_group != NULL) {
-			GtkAction *action;
-			char *name;
-			GList *a;
-
-			name = main_window_account_to_action_name (account);
-
-			action = gtk_action_group_get_action (
-				priv->balance_action_group, name);
-
-			if (action != NULL) {
-				guint merge_id;
-
-				DEBUG ("Removing action");
-
-				merge_id = GPOINTER_TO_UINT (g_object_get_data (
-					G_OBJECT (action),
-					"merge-id"));
-
-				gtk_ui_manager_remove_ui (priv->ui_manager,
-					merge_id);
-				gtk_action_group_remove_action (
-					priv->balance_action_group, action);
-			}
-
-			g_free (name);
-
-			a = gtk_action_group_list_actions (
-				priv->balance_action_group);
-
-			gtk_action_set_visible (
-				priv->view_balance_show_in_roster,
-				g_list_length (a) > 0);
-
-			g_list_free (a);
-		}
+		main_window_remove_balance_action (window, account);
 	}
 
 	if (current == TP_CONNECTION_STATUS_CONNECTED) {
@@ -1919,6 +1926,9 @@ main_window_account_removed_cb (TpAccountManager  *manager,
 
 	/* remove errors if any */
 	main_window_remove_error (window, account);
+
+	/* remove the balance action if required */
+	main_window_remove_balance_action (window, account);
 }
 
 static void
