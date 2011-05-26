@@ -38,12 +38,13 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyAvatarChooser        EmpathyAvatarChooser;
 typedef struct _EmpathyAvatarChooserClass   EmpathyAvatarChooserClass;
+typedef struct _EmpathyAvatarChooserPrivate EmpathyAvatarChooserPrivate;
 
 struct _EmpathyAvatarChooser {
 	GtkButton parent;
 
 	/*<private>*/
-	gpointer priv;
+	EmpathyAvatarChooserPrivate *priv;
 };
 
 struct _EmpathyAvatarChooserClass {
