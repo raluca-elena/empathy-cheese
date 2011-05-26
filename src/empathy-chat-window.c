@@ -2181,18 +2181,6 @@ empathy_chat_window_init (EmpathyChatWindow *window)
 						   window);
 }
 
-static GtkWidget *
-empathy_chat_window_get_dialog (EmpathyChatWindow *window)
-{
-	EmpathyChatWindowPriv *priv;
-
-	g_return_val_if_fail (window != NULL, NULL);
-
-	priv = GET_PRIV (window);
-
-	return priv->dialog;
-}
-
 /* Returns the window to open a new tab in if there is a suitable window,
  * otherwise, returns NULL indicating that a new window should be added.
  */
@@ -2215,12 +2203,9 @@ empathy_chat_window_get_default (gboolean room)
 
 	for (l = chat_windows; l; l = l->next) {
 		EmpathyChatWindow *chat_window;
-		GtkWidget         *dialog;
 		guint nb_rooms, nb_private;
 
 		chat_window = l->data;
-
-		dialog = empathy_chat_window_get_dialog (chat_window);
 
 		empathy_chat_window_get_nb_chats (chat_window, &nb_rooms, &nb_private);
 
@@ -2232,9 +2217,6 @@ empathy_chat_window_get_default (gboolean room)
 		if (!room && nb_private == 0)
 			continue;
 
-		/* Found a window on this desktop, make it visible if necessary */
-		if (!empathy_window_get_is_visible (GTK_WINDOW (dialog)))
-			empathy_window_present (GTK_WINDOW (dialog));
 		return chat_window;
 	}
 
