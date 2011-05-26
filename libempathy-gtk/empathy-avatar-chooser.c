@@ -170,17 +170,15 @@ avatar_chooser_set_property (GObject *object,
 }
 
 static void
-avatar_chooser_finalize (GObject *object)
+avatar_chooser_dispose (GObject *object)
 {
   EmpathyAvatarChooser *self = (EmpathyAvatarChooser *) object;
 
-  avatar_chooser_set_connection (EMPATHY_AVATAR_CHOOSER (object), NULL);
-  g_assert (self->priv->connection == NULL);
-
+  tp_clear_object (&self->priv->connection);
   tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
   tp_clear_object (&self->priv->gsettings_ui);
 
-  G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->finalize (object);
+  G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->dispose (object);
 }
 
 static void
@@ -189,7 +187,7 @@ empathy_avatar_chooser_class_init (EmpathyAvatarChooserClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GParamSpec *param_spec;
 
-  object_class->finalize = avatar_chooser_finalize;
+  object_class->dispose = avatar_chooser_dispose;
   object_class->get_property = avatar_chooser_get_property;
   object_class->set_property = avatar_chooser_set_property;
 
