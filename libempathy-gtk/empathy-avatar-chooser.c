@@ -86,40 +86,6 @@ struct _EmpathyAvatarChooserPrivate {
 	GSettings *gsettings_ui;
 };
 
-static void       avatar_chooser_finalize              (GObject              *object);
-static void       avatar_chooser_set_connection        (EmpathyAvatarChooser *self,
-							TpConnection         *connection);
-static void       avatar_chooser_set_image             (EmpathyAvatarChooser *self,
-							EmpathyAvatar        *avatar,
-							GdkPixbuf            *pixbuf,
-							gboolean              set_locally);
-static gboolean   avatar_chooser_drag_motion_cb        (GtkWidget            *widget,
-							GdkDragContext       *context,
-							gint                  x,
-							gint                  y,
-							guint                 time,
-							EmpathyAvatarChooser *self);
-static void       avatar_chooser_drag_leave_cb         (GtkWidget            *widget,
-							GdkDragContext       *context,
-							guint                 time,
-							EmpathyAvatarChooser *self);
-static gboolean   avatar_chooser_drag_drop_cb          (GtkWidget            *widget,
-							GdkDragContext       *context,
-							gint                  x,
-							gint                  y,
-							guint                 time,
-							EmpathyAvatarChooser *self);
-static void       avatar_chooser_drag_data_received_cb (GtkWidget            *widget,
-							GdkDragContext       *context,
-							gint                  x,
-							gint                  y,
-							GtkSelectionData     *selection_data,
-							guint                 info,
-							guint                 time,
-							EmpathyAvatarChooser *self);
-static void       avatar_chooser_clicked_cb            (GtkWidget            *button,
-							EmpathyAvatarChooser *self);
-
 enum {
 	CHANGED,
 	LAST_SIGNAL
@@ -166,6 +132,19 @@ avatar_chooser_get_property (GObject    *object,
 }
 
 static void
+avatar_chooser_set_connection (EmpathyAvatarChooser *self,
+			       TpConnection         *connection)
+{
+	tp_clear_object (&self->priv->connection);
+
+	if (connection != NULL) {
+		GQuark features[] = { TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS, 0 };
+		self->priv->connection = g_object_ref (connection);
+		tp_proxy_prepare_async (self->priv->connection, features, NULL, NULL);
+	}
+}
+
+static void
 avatar_chooser_set_property (GObject      *object,
 			     guint         param_id,
 			     const GValue *value,
@@ -181,6 +160,21 @@ avatar_chooser_set_property (GObject      *object,
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
 	}
+}
+
+static void
+avatar_chooser_finalize (GObject *object)
+{
+	EmpathyAvatarChooser *self = (EmpathyAvatarChooser *) object;
+
+	avatar_chooser_set_connection (EMPATHY_AVATAR_CHOOSER (object), NULL);
+	g_assert (self->priv->connection == NULL);
+
+	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
+
+	tp_clear_object (&self->priv->gsettings_ui);
+
+	G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->finalize (object);
 }
 
 static void
@@ -229,95 +223,88 @@ empathy_avatar_chooser_class_init (EmpathyAvatarChooserClass *klass)
 	g_type_class_add_private (object_class, sizeof (EmpathyAvatarChooserPrivate));
 }
 
-static void
-empathy_avatar_chooser_init (EmpathyAvatarChooser *self)
+static gboolean
+avatar_chooser_drag_motion_cb (GtkWidget          *widget,
+			      GdkDragContext     *context,
+			      gint                x,
+			      gint                y,
+			      guint               time_,
+			      EmpathyAvatarChooser *self)
 {
-	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
-		EMPATHY_TYPE_AVATAR_CHOOSER, EmpathyAvatarChooserPrivate);
+	GList                  *p;
 
-	gtk_drag_dest_set (GTK_WIDGET (self),
-			   GTK_DEST_DEFAULT_ALL,
-			   drop_types,
-			   G_N_ELEMENTS (drop_types),
-			   GDK_ACTION_COPY);
+	for (p = gdk_drag_context_list_targets (context); p != NULL;
+	     p = p->next) {
+		gchar *possible_type;
 
-	self->priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
+		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
 
-	g_signal_connect (self, "drag-motion",
-			  G_CALLBACK (avatar_chooser_drag_motion_cb),
-			  self);
-	g_signal_connect (self, "drag-leave",
-			  G_CALLBACK (avatar_chooser_drag_leave_cb),
-			  self);
-	g_signal_connect (self, "drag-drop",
-			  G_CALLBACK (avatar_chooser_drag_drop_cb),
-			  self);
-	g_signal_connect (self, "drag-data-received",
-			  G_CALLBACK (avatar_chooser_drag_data_received_cb),
-			  self);
-	g_signal_connect (self, "clicked",
-			  G_CALLBACK (avatar_chooser_clicked_cb),
-			  self);
+		if (!strcmp (possible_type, URI_LIST_TYPE)) {
+			g_free (possible_type);
+			gdk_drag_status (context, GDK_ACTION_COPY, time_);
 
-	empathy_avatar_chooser_set (self, NULL);
+			return TRUE;
+		}
+
+		g_free (possible_type);
+	}
+
+	return FALSE;
 }
 
 static void
-avatar_chooser_finalize (GObject *object)
+avatar_chooser_drag_leave_cb (GtkWidget          *widget,
+			     GdkDragContext     *context,
+			     guint               time_,
+			     EmpathyAvatarChooser *self)
 {
-	EmpathyAvatarChooser *self = (EmpathyAvatarChooser *) object;
+}
 
-	avatar_chooser_set_connection (EMPATHY_AVATAR_CHOOSER (object), NULL);
-	g_assert (self->priv->connection == NULL);
+static gboolean
+avatar_chooser_drag_drop_cb (GtkWidget          *widget,
+			    GdkDragContext     *context,
+			    gint                x,
+			    gint                y,
+			    guint               time_,
+			    EmpathyAvatarChooser *self)
+{
+	GList                  *p;
+
+	if (gdk_drag_context_list_targets (context) == NULL) {
+		return FALSE;
+	}
+
+	for (p = gdk_drag_context_list_targets (context);
+	     p != NULL; p = p->next) {
+		char *possible_type;
+
+		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
+		if (!strcmp (possible_type, URI_LIST_TYPE)) {
+			g_free (possible_type);
+			gtk_drag_get_data (widget, context,
+					   GDK_POINTER_TO_ATOM (p->data),
+					   time_);
+
+			return TRUE;
+		}
+
+		g_free (possible_type);
+	}
+
+	return FALSE;
+}
+
+static void
+avatar_chooser_clear_image (EmpathyAvatarChooser *self)
+{
+	GtkWidget *image;
 
 	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
 
-	tp_clear_object (&self->priv->gsettings_ui);
-
-	G_OBJECT_CLASS (empathy_avatar_chooser_parent_class)->finalize (object);
-}
-
-static void
-avatar_chooser_set_connection (EmpathyAvatarChooser *self,
-			       TpConnection         *connection)
-{
-	tp_clear_object (&self->priv->connection);
-
-	if (connection != NULL) {
-		GQuark features[] = { TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS, 0 };
-		self->priv->connection = g_object_ref (connection);
-		tp_proxy_prepare_async (self->priv->connection, features, NULL, NULL);
-	}
-}
-
-static void
-avatar_chooser_error_show (EmpathyAvatarChooser *self,
-			   const gchar          *primary_text,
-			   const gchar          *secondary_text)
-{
-	GtkWidget *parent;
-	GtkWidget *dialog;
-
-	parent = gtk_widget_get_toplevel (GTK_WIDGET (self));
-	if (!GTK_IS_WINDOW (parent)) {
-		parent = NULL;
-	}
-
-	dialog = gtk_message_dialog_new (parent ? GTK_WINDOW (parent) : NULL,
-					 GTK_DIALOG_MODAL,
-					 GTK_MESSAGE_WARNING,
-					 GTK_BUTTONS_CLOSE,
-					 "%s", primary_text);
-
-	if (secondary_text != NULL) {
-		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
-							  "%s", secondary_text);
-	}
-
-	g_signal_connect (dialog, "response",
-			  G_CALLBACK (gtk_widget_destroy), NULL);
-	gtk_widget_show (dialog);
-
+	image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_AVATAR_DEFAULT,
+		GTK_ICON_SIZE_DIALOG);
+	gtk_button_set_image (GTK_BUTTON (self), image);
+	g_signal_emit (self, signals[CHANGED], 0);
 }
 
 static gboolean
@@ -406,6 +393,36 @@ avatar_chooser_need_mime_type_conversion (const gchar *current_mime_type,
 	g_slist_free (formats);
 
 	return TRUE;
+}
+
+static void
+avatar_chooser_error_show (EmpathyAvatarChooser *self,
+			   const gchar          *primary_text,
+			   const gchar          *secondary_text)
+{
+	GtkWidget *parent;
+	GtkWidget *dialog;
+
+	parent = gtk_widget_get_toplevel (GTK_WIDGET (self));
+	if (!GTK_IS_WINDOW (parent)) {
+		parent = NULL;
+	}
+
+	dialog = gtk_message_dialog_new (parent ? GTK_WINDOW (parent) : NULL,
+					 GTK_DIALOG_MODAL,
+					 GTK_MESSAGE_WARNING,
+					 GTK_BUTTONS_CLOSE,
+					 "%s", primary_text);
+
+	if (secondary_text != NULL) {
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
+							  "%s", secondary_text);
+	}
+
+	g_signal_connect (dialog, "response",
+			  G_CALLBACK (gtk_widget_destroy), NULL);
+	gtk_widget_show (dialog);
+
 }
 
 static EmpathyAvatar *
@@ -582,80 +599,6 @@ avatar_chooser_maybe_convert_and_scale (EmpathyAvatarChooser *self,
 }
 
 static void
-avatar_chooser_clear_image (EmpathyAvatarChooser *self)
-{
-	GtkWidget *image;
-
-	tp_clear_pointer (&self->priv->avatar, empathy_avatar_unref);
-
-	image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_AVATAR_DEFAULT,
-		GTK_ICON_SIZE_DIALOG);
-	gtk_button_set_image (GTK_BUTTON (self), image);
-	g_signal_emit (self, signals[CHANGED], 0);
-}
-
-static void
-avatar_chooser_set_image_from_data (EmpathyAvatarChooser *self,
-				    gchar                *data,
-				    gsize                 size,
-				    gboolean              set_locally)
-{
-	GdkPixbuf     *pixbuf;
-	EmpathyAvatar *avatar = NULL;
-	gchar         *mime_type = NULL;
-
-	if (data == NULL) {
-		avatar_chooser_clear_image (self);
-		return;
-	}
-
-	pixbuf = empathy_pixbuf_from_data_and_mime (data, size, &mime_type);
-	if (pixbuf == NULL) {
-		g_free (data);
-		data = NULL;
-		return;
-	}
-
-	/* avatar takes ownership of data and mime_type */
-	avatar = empathy_avatar_new ((guchar *) data, size, mime_type, NULL);
-
-	avatar_chooser_set_image (self, avatar, pixbuf, set_locally);
-}
-
-static void
-avatar_chooser_set_image_from_avatar (EmpathyAvatarChooser *self,
-				      EmpathyAvatar        *avatar,
-				      gboolean              set_locally)
-{
-	GdkPixbuf *pixbuf;
-	gchar     *mime_type = NULL;
-
-	g_assert (avatar != NULL);
-
-	pixbuf = empathy_pixbuf_from_data_and_mime ((gchar *) avatar->data,
-						    avatar->len,
-						    &mime_type);
-	if (pixbuf == NULL) {
-		DEBUG ("couldn't make a pixbuf from avatar; giving up");
-		return;
-	}
-
-	if (avatar->format == NULL) {
-		avatar->format = mime_type;
-	} else {
-		if (strcmp (mime_type, avatar->format)) {
-			DEBUG ("avatar->format is %s; gdkpixbuf yields %s!",
-				avatar->format, mime_type);
-		}
-		g_free (mime_type);
-	}
-
-	empathy_avatar_ref (avatar);
-
-	avatar_chooser_set_image (self, avatar, pixbuf, set_locally);
-}
-
-static void
 avatar_chooser_set_image (EmpathyAvatarChooser *self,
 			  EmpathyAvatar        *avatar,
 			  GdkPixbuf            *pixbuf,
@@ -696,116 +639,31 @@ avatar_chooser_set_image (EmpathyAvatarChooser *self,
 }
 
 static void
-avatar_chooser_set_image_from_file (EmpathyAvatarChooser *self,
-				    const gchar          *filename)
+avatar_chooser_set_image_from_data (EmpathyAvatarChooser *self,
+				    gchar                *data,
+				    gsize                 size,
+				    gboolean              set_locally)
 {
-	gchar  *image_data = NULL;
-	gsize   image_size = 0;
-	GError *error = NULL;
-
-	if (!g_file_get_contents (filename, &image_data, &image_size, &error)) {
-		DEBUG ("Failed to load image from '%s': %s", filename,
-			error ? error->message : "No error given");
-
-		g_clear_error (&error);
-		return;
-	}
-
-	avatar_chooser_set_image_from_data (self, image_data, image_size, TRUE);
-}
-
-#ifdef HAVE_CHEESE
-static void
-avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *self,
-				       GdkPixbuf            *pb)
-{
-	/* dup the string as empathy_avatar_new steals ownership of the it */
-	gchar         *mime = g_strdup ("image/png");
-	gsize          size;
-	gchar         *buf;
+	GdkPixbuf     *pixbuf;
 	EmpathyAvatar *avatar = NULL;
-	GError        *error = NULL;
-	if (!gdk_pixbuf_save_to_buffer (pb, &buf, &size, "png", &error, NULL)) {
-		avatar_chooser_error_show (self,
-			_("Couldn't save pixbuf to png"),
-			error ? error->message : NULL);
-		g_clear_error (&error);
+	gchar         *mime_type = NULL;
+
+	if (data == NULL) {
+		avatar_chooser_clear_image (self);
 		return;
 	}
-	avatar = empathy_avatar_new ((guchar *) buf, size, mime, NULL);
-	avatar_chooser_set_image (self, avatar, pb, TRUE);
-}
-#endif
 
-static gboolean
-avatar_chooser_drag_motion_cb (GtkWidget          *widget,
-			      GdkDragContext     *context,
-			      gint                x,
-			      gint                y,
-			      guint               time_,
-			      EmpathyAvatarChooser *self)
-{
-	GList                  *p;
-
-	for (p = gdk_drag_context_list_targets (context); p != NULL;
-	     p = p->next) {
-		gchar *possible_type;
-
-		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
-
-		if (!strcmp (possible_type, URI_LIST_TYPE)) {
-			g_free (possible_type);
-			gdk_drag_status (context, GDK_ACTION_COPY, time_);
-
-			return TRUE;
-		}
-
-		g_free (possible_type);
+	pixbuf = empathy_pixbuf_from_data_and_mime (data, size, &mime_type);
+	if (pixbuf == NULL) {
+		g_free (data);
+		data = NULL;
+		return;
 	}
 
-	return FALSE;
-}
+	/* avatar takes ownership of data and mime_type */
+	avatar = empathy_avatar_new ((guchar *) data, size, mime_type, NULL);
 
-static void
-avatar_chooser_drag_leave_cb (GtkWidget          *widget,
-			     GdkDragContext     *context,
-			     guint               time_,
-			     EmpathyAvatarChooser *self)
-{
-}
-
-static gboolean
-avatar_chooser_drag_drop_cb (GtkWidget          *widget,
-			    GdkDragContext     *context,
-			    gint                x,
-			    gint                y,
-			    guint               time_,
-			    EmpathyAvatarChooser *self)
-{
-	GList                  *p;
-
-	if (gdk_drag_context_list_targets (context) == NULL) {
-		return FALSE;
-	}
-
-	for (p = gdk_drag_context_list_targets (context);
-	     p != NULL; p = p->next) {
-		char *possible_type;
-
-		possible_type = gdk_atom_name (GDK_POINTER_TO_ATOM (p->data));
-		if (!strcmp (possible_type, URI_LIST_TYPE)) {
-			g_free (possible_type);
-			gtk_drag_get_data (widget, context,
-					   GDK_POINTER_TO_ATOM (p->data),
-					   time_);
-
-			return TRUE;
-		}
-
-		g_free (possible_type);
-	}
-
-	return FALSE;
+	avatar_chooser_set_image (self, avatar, pixbuf, set_locally);
 }
 
 static void
@@ -895,7 +753,47 @@ avatar_chooser_update_preview_cb (GtkFileChooser       *file_chooser,
 	gtk_file_chooser_set_preview_widget_active (file_chooser, TRUE);
 }
 
+static void
+avatar_chooser_set_image_from_file (EmpathyAvatarChooser *self,
+				    const gchar          *filename)
+{
+	gchar  *image_data = NULL;
+	gsize   image_size = 0;
+	GError *error = NULL;
+
+	if (!g_file_get_contents (filename, &image_data, &image_size, &error)) {
+		DEBUG ("Failed to load image from '%s': %s", filename,
+			error ? error->message : "No error given");
+
+		g_clear_error (&error);
+		return;
+	}
+
+	avatar_chooser_set_image_from_data (self, image_data, image_size, TRUE);
+}
+
 #ifdef HAVE_CHEESE
+static void
+avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *self,
+				       GdkPixbuf            *pb)
+{
+	/* dup the string as empathy_avatar_new steals ownership of the it */
+	gchar         *mime = g_strdup ("image/png");
+	gsize          size;
+	gchar         *buf;
+	EmpathyAvatar *avatar = NULL;
+	GError        *error = NULL;
+	if (!gdk_pixbuf_save_to_buffer (pb, &buf, &size, "png", &error, NULL)) {
+		avatar_chooser_error_show (self,
+			_("Couldn't save pixbuf to png"),
+			error ? error->message : NULL);
+		g_clear_error (&error);
+		return;
+	}
+	avatar = empathy_avatar_new ((guchar *) buf, size, mime, NULL);
+	avatar_chooser_set_image (self, avatar, pb, TRUE);
+}
+
 static gboolean
 destroy_chooser (GtkWidget *self)
 {
@@ -1078,6 +976,72 @@ avatar_chooser_clicked_cb (GtkWidget            *button,
 	gtk_widget_show (GTK_WIDGET (chooser_dialog));
 
 	g_free (saved_dir);
+}
+
+static void
+empathy_avatar_chooser_init (EmpathyAvatarChooser *self)
+{
+	self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+		EMPATHY_TYPE_AVATAR_CHOOSER, EmpathyAvatarChooserPrivate);
+
+	gtk_drag_dest_set (GTK_WIDGET (self),
+			   GTK_DEST_DEFAULT_ALL,
+			   drop_types,
+			   G_N_ELEMENTS (drop_types),
+			   GDK_ACTION_COPY);
+
+	self->priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
+
+	g_signal_connect (self, "drag-motion",
+			  G_CALLBACK (avatar_chooser_drag_motion_cb),
+			  self);
+	g_signal_connect (self, "drag-leave",
+			  G_CALLBACK (avatar_chooser_drag_leave_cb),
+			  self);
+	g_signal_connect (self, "drag-drop",
+			  G_CALLBACK (avatar_chooser_drag_drop_cb),
+			  self);
+	g_signal_connect (self, "drag-data-received",
+			  G_CALLBACK (avatar_chooser_drag_data_received_cb),
+			  self);
+	g_signal_connect (self, "clicked",
+			  G_CALLBACK (avatar_chooser_clicked_cb),
+			  self);
+
+	empathy_avatar_chooser_set (self, NULL);
+}
+
+static void
+avatar_chooser_set_image_from_avatar (EmpathyAvatarChooser *self,
+				      EmpathyAvatar        *avatar,
+				      gboolean              set_locally)
+{
+	GdkPixbuf *pixbuf;
+	gchar     *mime_type = NULL;
+
+	g_assert (avatar != NULL);
+
+	pixbuf = empathy_pixbuf_from_data_and_mime ((gchar *) avatar->data,
+						    avatar->len,
+						    &mime_type);
+	if (pixbuf == NULL) {
+		DEBUG ("couldn't make a pixbuf from avatar; giving up");
+		return;
+	}
+
+	if (avatar->format == NULL) {
+		avatar->format = mime_type;
+	} else {
+		if (strcmp (mime_type, avatar->format)) {
+			DEBUG ("avatar->format is %s; gdkpixbuf yields %s!",
+				avatar->format, mime_type);
+		}
+		g_free (mime_type);
+	}
+
+	empathy_avatar_ref (avatar);
+
+	avatar_chooser_set_image (self, avatar, pixbuf, set_locally);
 }
 
 /**
