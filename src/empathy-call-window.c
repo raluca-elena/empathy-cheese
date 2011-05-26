@@ -1767,6 +1767,10 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       g_signal_handlers_disconnect_by_func (priv->audio_input_adj,
           empathy_call_window_mic_volume_changed_cb, self);
 
+      if (priv->audio_output != NULL)
+        g_object_unref (priv->audio_output);
+      priv->audio_output = NULL;
+
       if (priv->video_tee != NULL)
         g_object_unref (priv->video_tee);
       priv->video_tee = NULL;
@@ -2045,6 +2049,7 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self)
   if (priv->audio_output == NULL)
     {
       priv->audio_output = empathy_audio_sink_new ();
+      g_object_ref_sink (priv->audio_output);
 
       if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_output))
         {
