@@ -734,6 +734,7 @@ avatar_chooser_set_image_from_file (EmpathyAvatarChooser *chooser,
 	avatar_chooser_set_image_from_data (chooser, image_data, image_size, TRUE);
 }
 
+#ifdef HAVE_CHEESE
 static void
 avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *chooser,
 				       GdkPixbuf            *pb)
@@ -754,7 +755,7 @@ avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *chooser,
 	avatar = empathy_avatar_new ((guchar *) buf, size, mime, NULL);
 	avatar_chooser_set_image (chooser, avatar, pb, TRUE);
 }
-
+#endif
 
 static gboolean
 avatar_chooser_drag_motion_cb (GtkWidget          *widget,
