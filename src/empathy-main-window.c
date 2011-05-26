@@ -1128,6 +1128,8 @@ main_window_connection_changed_cb (TpAccount  *account,
 				   GHashTable *details,
 				   EmpathyMainWindow *window)
 {
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+
 	main_window_update_status (window);
 
 	if (current == TP_CONNECTION_STATUS_DISCONNECTED &&
