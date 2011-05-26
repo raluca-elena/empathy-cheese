@@ -257,7 +257,6 @@ empathy_app_command_line (GApplication *app,
 
       /* Setting up UI */
       self->window = empathy_main_window_dup ();
-      gtk_widget_show (self->window);
       self->icon = empathy_status_icon_new (GTK_WINDOW (self->window),
           self->start_hidden);
 
