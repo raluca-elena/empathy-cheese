@@ -54,8 +54,6 @@ struct _EmpathyTpChatPrivate {
 	 * (channel doesn't implement the Password interface) */
 	gboolean               got_password_flags;
 	gboolean               can_upgrade_to_muc;
-	gboolean               got_sms_channel;
-	gboolean               sms_channel;
 
 	GHashTable            *messages_being_sent;
 
@@ -70,7 +68,6 @@ enum {
 	PROP_ACCOUNT,
 	PROP_REMOTE_CONTACT,
 	PROP_PASSWORD_NEEDED,
-	PROP_SMS_CHANNEL,
 	PROP_N_MESSAGES_SENDING,
 };
 
@@ -872,9 +869,6 @@ check_almost_ready (EmpathyTpChat *self)
 	if (!self->priv->got_password_flags)
 		return;
 
-	if (!self->priv->got_sms_channel)
-		return;
-
 	/* We need either the members (room) or the remote contact (private chat).
 	 * If the chat is protected by a password we can't get these information so
 	 * consider the chat as ready so it can be presented to the user. */
@@ -1265,41 +1259,6 @@ got_password_flags_cb (TpChannel *proxy,
 }
 
 static void
-sms_channel_changed_cb (TpChannel *channel,
-			gboolean   sms_channel,
-			gpointer   user_data,
-			GObject   *chat)
-{
-	EmpathyTpChat *self = (EmpathyTpChat *) chat;
-
-	self->priv->sms_channel = sms_channel;
-
-	g_object_notify (G_OBJECT (chat), "sms-channel");
-}
-
-static void
-get_sms_channel_cb (TpProxy      *channel,
-		    const GValue *value,
-		    const GError *in_error,
-		    gpointer      user_data,
-		    GObject      *chat)
-{
-	EmpathyTpChat *self = (EmpathyTpChat *) chat;
-
-	if (in_error != NULL) {
-		DEBUG ("Failed to get SMSChannel: %s", in_error->message);
-		return;
-	}
-
-	g_return_if_fail (G_VALUE_HOLDS_BOOLEAN (value));
-
-	self->priv->sms_channel = g_value_get_boolean (value);
-	self->priv->got_sms_channel = TRUE;
-
-	check_almost_ready (EMPATHY_TP_CHAT (chat));
-}
-
-static void
 tp_chat_get_property (GObject    *object,
 		      guint       param_id,
 		      GValue     *value,
@@ -1316,9 +1275,6 @@ tp_chat_get_property (GObject    *object,
 		break;
 	case PROP_PASSWORD_NEEDED:
 		g_value_set_boolean (value, empathy_tp_chat_password_needed (self));
-		break;
-	case PROP_SMS_CHANNEL:
-		g_value_set_boolean (value, self->priv->sms_channel);
 		break;
 	case PROP_N_MESSAGES_SENDING:
 		g_value_set_uint (value,
@@ -1410,14 +1366,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 					 g_param_spec_boolean ("password-needed",
 							       "password needed",
 							       "TRUE if a password is needed to join the channel",
-							       FALSE,
-							       G_PARAM_READABLE));
-
-	g_object_class_install_property (object_class,
-					 PROP_SMS_CHANNEL,
-					 g_param_spec_boolean ("sms-channel",
-						 	       "SMS Channel",
-							       "TRUE if channel is for sending SMSes",
 							       FALSE,
 							       G_PARAM_READABLE));
 
@@ -1805,15 +1753,6 @@ empathy_tp_chat_get_self_contact (EmpathyTpChat *self)
 	return self->priv->user;
 }
 
-
-gboolean
-empathy_tp_chat_is_sms_channel (EmpathyTpChat *self)
-{
-	g_return_val_if_fail (EMPATHY_IS_TP_CHAT (self), FALSE);
-
-	return self->priv->sms_channel;
-}
-
 GQuark
 empathy_tp_chat_get_feature_ready (void)
 {
@@ -1925,21 +1864,6 @@ conn_prepared_cb (GObject *source,
 	} else {
 		/* No Password interface, so no need to fetch the password flags */
 		self->priv->got_password_flags = TRUE;
-	}
-
-	/* Check if the chat is for SMS */
-	if (tp_proxy_has_interface_by_id (channel,
-					  TP_IFACE_QUARK_CHANNEL_INTERFACE_SMS)) {
-		tp_cli_channel_interface_sms_connect_to_sms_channel_changed (
-			channel,
-			sms_channel_changed_cb, self, NULL, G_OBJECT (self), NULL);
-
-		tp_cli_dbus_properties_call_get (channel, -1,
-			TP_IFACE_CHANNEL_INTERFACE_SMS, "SMSChannel",
-			get_sms_channel_cb, self, NULL, G_OBJECT (self));
-	} else {
-		/* if there's no SMS support, then we're not waiting for it */
-		self->priv->got_sms_channel = TRUE;
 	}
 }
 

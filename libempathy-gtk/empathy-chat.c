@@ -3642,7 +3642,8 @@ chat_sms_channel_changed_cb (EmpathyChat *self)
 {
 	EmpathyChatPriv *priv = GET_PRIV (self);
 
-	priv->sms_channel = empathy_tp_chat_is_sms_channel (priv->tp_chat);
+	priv->sms_channel = tp_text_channel_is_sms_channel (
+		(TpTextChannel *) priv->tp_chat);
 	g_object_notify (G_OBJECT (self), "sms-channel");
 }
 
@@ -3703,7 +3704,7 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect_swapped (tp_chat, "notify::password-needed",
 				  G_CALLBACK (chat_password_needed_changed_cb),
 				  chat);
-	g_signal_connect_swapped (tp_chat, "notify::sms-channel",
+	g_signal_connect_swapped (tp_chat, "notify::is-sms-channel",
 				  G_CALLBACK (chat_sms_channel_changed_cb),
 				  chat);
 	g_signal_connect_swapped (tp_chat, "notify::n-messages-sending",
