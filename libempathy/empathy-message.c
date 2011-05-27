@@ -360,7 +360,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	const gchar *token = NULL, *supersedes = NULL;
 	EmpathyContact *contact;
 	TpChannelTextMessageType type = TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL;
-	gint64 original_timestamp;
+	gint64 timestamp, original_timestamp = 0;
 
 	g_return_val_if_fail (TPL_IS_EVENT (logevent), NULL);
 
@@ -383,17 +383,31 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	if (TPL_IS_TEXT_EVENT (logevent)) {
 		TplTextEvent *textevent = TPL_TEXT_EVENT (logevent);
 
+		supersedes = tpl_text_event_get_supersedes_token (textevent);
+
+		/* tp-logger is kind of messy in that instead of having
+		 * timestamp and original-timestamp like Telepathy it has
+		 * timestamp (which is the original) and edited-timestamp,
+		 * (which is when the message was edited) */
+		if (tp_str_empty (supersedes)) {
+			/* not an edited message */
+			timestamp = tpl_event_get_timestamp (logevent);
+		} else {
+			/* this is an edited event */
+			original_timestamp = tpl_event_get_timestamp (logevent);
+			timestamp = tpl_text_event_get_edit_timestamp (textevent);
+		}
+
 		body = g_strdup (tpl_text_event_get_message (textevent));
 
 		type = tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent));
 		token = tpl_text_event_get_message_token (textevent);
-		supersedes = tpl_text_event_get_supersedes_token (textevent);
-
-		original_timestamp = tpl_text_event_get_original_timestamp (textevent);
 	}
 #ifdef HAVE_CALL_LOGS
 	else if (TPL_IS_CALL_EVENT (logevent)) {
 		TplCallEvent *call = TPL_CALL_EVENT (logevent);
+
+		timestamp = tpl_event_get_timestamp (logevent);
 
 		if (tpl_call_event_get_end_reason (call) == TPL_CALL_END_REASON_NO_ANSWER)
 			body = g_strdup_printf (_("Missed call from %s"),
@@ -420,7 +434,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		"supersedes", supersedes,
 		"body", body,
 		"is-backlog", TRUE,
-		"timestamp", tpl_event_get_timestamp (logevent),
+		"timestamp", timestamp,
 		"original-timestamp", original_timestamp,
 		NULL);
 
