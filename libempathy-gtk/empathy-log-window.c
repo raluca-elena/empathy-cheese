@@ -1965,6 +1965,8 @@ log_window_who_setup (EmpathyLogWindow *window)
       COL_WHO_NAME, sort_by_name,
       NULL, NULL);
 
+  gtk_tree_view_set_search_column (view, COL_WHO_NAME);
+
   /* set up signals */
   g_signal_connect (selection, "changed",
       G_CALLBACK (log_window_who_changed_cb), window);
@@ -2164,6 +2166,8 @@ log_window_when_setup (EmpathyLogWindow *window)
       COL_WHEN_DATE, sort_by_date,
       NULL, NULL);
 
+  gtk_tree_view_set_search_column (view, COL_WHEN_TEXT);
+
   /* set up signals */
   g_signal_connect (selection, "changed",
       G_CALLBACK (log_window_when_changed_cb),
@@ -2295,6 +2299,7 @@ log_window_what_setup (EmpathyLogWindow *window)
       "text", COL_WHAT_TEXT);
 
   gtk_tree_view_append_column (view, column);
+  gtk_tree_view_set_search_column (view, COL_WHAT_TEXT);
 
   /* set up treeview properties */
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
