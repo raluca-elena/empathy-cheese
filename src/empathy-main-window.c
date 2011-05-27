@@ -817,20 +817,17 @@ main_window_balance_activate_cb (GtkAction         *action,
 
 static void
 main_window_balance_update_balance (GtkAction   *action,
-				    GValueArray *balance)
+				    TpConnection *conn)
 {
 	TpAccount *account = g_object_get_data (G_OBJECT (action), "account");
 	GtkWidget *label;
 	int amount = 0;
 	guint scale = G_MAXINT32;
-	const char *currency = "";
+	const gchar *currency = "";
 	char *money, *str;
 
-	if (balance != NULL)
-		tp_value_array_unpack (balance, 3,
-			&amount,
-			&scale,
-			&currency);
+	if (!tp_connection_get_balance (conn, &amount, &scale, &currency))
+		return;
 
 	if (amount == 0 &&
 	    scale == G_MAXINT32 &&
@@ -861,41 +858,13 @@ main_window_balance_update_balance (GtkAction   *action,
 }
 
 static void
-main_window_setup_balance_got_balance_props (TpProxy      *conn,
-					     GHashTable   *props,
-					     const GError *in_error,
-					     gpointer      user_data,
-					     GObject      *action)
-{
-	GValueArray *balance = NULL;
-	const char *uri;
-
-	if (in_error != NULL) {
-		DEBUG ("Failed to get account balance properties: %s",
-			in_error->message);
-		goto finally;
-	}
-
-	balance = tp_asv_get_boxed (props, "AccountBalance",
-		TP_STRUCT_TYPE_CURRENCY_AMOUNT);
-	uri = tp_asv_get_string (props, "ManageCreditURI");
-
-	g_object_set_data_full (action, "manage-credit-uri",
-		g_strdup (uri), g_free);
-	gtk_action_set_sensitive (GTK_ACTION (action), !tp_str_empty (uri));
-
-finally:
-	main_window_balance_update_balance (GTK_ACTION (action), balance);
-}
-
-static void
 main_window_balance_changed_cb (TpConnection      *conn,
-				const GValueArray *balance,
-				gpointer           user_data,
-				GObject           *action)
+				guint balance,
+				guint scale,
+				const gchar *currency,
+				GtkAction *action)
 {
-	main_window_balance_update_balance (GTK_ACTION (action),
-		(GValueArray *) balance);
+	main_window_balance_update_balance (action, conn);
 }
 
 static GtkAction *
@@ -1012,15 +981,17 @@ main_window_setup_balance_create_widget (EmpathyMainWindow *window,
 }
 
 static void
-main_window_setup_balance_conn_ready (GObject      *conn,
+main_window_setup_balance_conn_ready (GObject      *source,
 				      GAsyncResult *result,
 				      gpointer      user_data)
 {
 	EmpathyMainWindow *window = user_data;
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-	TpAccount *account = g_object_get_data (conn, "account");
+	TpConnection *conn = TP_CONNECTION (source);
+	TpAccount *account = g_object_get_data (source, "account");
 	GtkAction *action;
 	GError *error = NULL;
+	const gchar *uri;
 
 	if (!tp_proxy_prepare_finish (conn, result, &error)) {
 		DEBUG ("Failed to prepare connection: %s", error->message);
@@ -1029,10 +1000,8 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 		return;
 	}
 
-	if (!tp_proxy_has_interface_by_id (conn,
-			TP_IFACE_QUARK_CONNECTION_INTERFACE_BALANCE)) {
+	if (!tp_proxy_is_prepared (conn, TP_CONNECTION_FEATURE_BALANCE))
 		return;
-	}
 
 	DEBUG ("Setting up balance for acct: %s",
 		tp_account_get_display_name (account));
@@ -1048,15 +1017,17 @@ main_window_setup_balance_conn_ready (GObject      *conn,
 	/* create the display widget */
 	main_window_setup_balance_create_widget (window, action);
 
-	/* request the current balance and monitor for any changes */
-	tp_cli_dbus_properties_call_get_all (conn, -1,
-		TP_IFACE_CONNECTION_INTERFACE_BALANCE,
-		main_window_setup_balance_got_balance_props,
-		window, NULL, G_OBJECT (action));
+	/* check the current balance and monitor for any changes */
+	uri = tp_connection_get_balance_uri (conn);
 
-	tp_cli_connection_interface_balance_connect_to_balance_changed (
-		TP_CONNECTION (conn), main_window_balance_changed_cb,
-		window, NULL, G_OBJECT (action), NULL);
+	g_object_set_data_full (G_OBJECT (action), "manage-credit-uri",
+		g_strdup (uri), g_free);
+	gtk_action_set_sensitive (GTK_ACTION (action), !tp_str_empty (uri));
+
+	main_window_balance_update_balance (GTK_ACTION (action), conn);
+
+	g_signal_connect (conn, "balance-changed",
+		G_CALLBACK (main_window_balance_changed_cb), action);
 }
 
 static void
@@ -1064,6 +1035,7 @@ main_window_setup_balance (EmpathyMainWindow *window,
 			   TpAccount         *account)
 {
 	TpConnection *conn = tp_account_get_connection (account);
+	GQuark features[] = { TP_CONNECTION_FEATURE_BALANCE, 0 };
 
 	if (conn == NULL)
 		return;
@@ -1071,7 +1043,7 @@ main_window_setup_balance (EmpathyMainWindow *window,
 	/* need to prepare the connection:
 	 * store the account on the connection */
 	g_object_set_data (G_OBJECT (conn), "account", account);
-	tp_proxy_prepare_async (conn, NULL,
+	tp_proxy_prepare_async (conn, features,
 		main_window_setup_balance_conn_ready, window);
 }
 
