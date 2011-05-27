@@ -1903,6 +1903,8 @@ log_window_events_setup (EmpathyLogWindow *window)
       COL_EVENTS_TS,
       GTK_SORT_ASCENDING);
 
+  gtk_tree_view_set_enable_search (view, FALSE);
+
   g_object_unref (store);
 }
 
