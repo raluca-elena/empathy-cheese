@@ -3402,6 +3402,7 @@ provide_password_cb (GObject *tp_chat,
 
 	/* Room joined */
 	gtk_widget_set_sensitive (priv->hpaned, TRUE);
+	gtk_widget_set_sensitive (self->input_text_view, TRUE);
 	gtk_widget_grab_focus (self->input_text_view);
 }
 
