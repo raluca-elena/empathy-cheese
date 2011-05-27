@@ -160,7 +160,6 @@ enum
   COL_WHAT_SUBTYPE,
   COL_WHAT_TEXT,
   COL_WHAT_ICON,
-  COL_WHAT_EXPANDER,
   COL_WHAT_COUNT
 };
 
@@ -2275,8 +2274,7 @@ log_window_what_setup (EmpathyLogWindow *window)
       G_TYPE_INT,         /* history type */
       G_TYPE_INT,         /* history subtype */
       G_TYPE_STRING,      /* stringified history type */
-      G_TYPE_STRING,      /* icon */
-      G_TYPE_BOOLEAN);    /* expander (hidden) */
+      G_TYPE_STRING);     /* icon */
 
   model = GTK_TREE_MODEL (store);
   sortable = GTK_TREE_SORTABLE (store);
