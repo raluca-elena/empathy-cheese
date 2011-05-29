@@ -609,7 +609,7 @@ account_chooser_setup (EmpathyAccountChooser *chooser)
 	gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
 
 	store = gtk_list_store_new (COL_ACCOUNT_COUNT,
-				    G_TYPE_STRING,    /* Image */
+				    GDK_TYPE_PIXBUF,    /* Image */
 				    G_TYPE_STRING,    /* Name */
 				    G_TYPE_BOOLEAN,   /* Enabled */
 				    G_TYPE_UINT,      /* Row type */
@@ -625,10 +625,9 @@ account_chooser_setup (EmpathyAccountChooser *chooser)
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
-					"icon-name", COL_ACCOUNT_IMAGE,
+					"pixbuf", COL_ACCOUNT_IMAGE,
 					"sensitive", COL_ACCOUNT_ENABLED,
 					NULL);
-	g_object_set (renderer, "stock-size", GTK_ICON_SIZE_BUTTON, NULL);
 
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
@@ -763,6 +762,7 @@ account_chooser_filter_ready_cb (gboolean is_enabled,
 	GtkListStore              *store;
 	GtkComboBox               *combobox;
 	const gchar               *icon_name;
+	GdkPixbuf                 *pixbuf;
 
 	chooser = fr_data->chooser;
 	priv = GET_PRIV (chooser);
@@ -772,12 +772,17 @@ account_chooser_filter_ready_cb (gboolean is_enabled,
 	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
 	icon_name = tp_account_get_icon_name (account);
+	pixbuf = empathy_pixbuf_from_icon_name (icon_name,
+		GTK_ICON_SIZE_BUTTON);
 
 	gtk_list_store_set (store, iter,
-			    COL_ACCOUNT_IMAGE, icon_name,
+			    COL_ACCOUNT_IMAGE, pixbuf,
 			    COL_ACCOUNT_TEXT, tp_account_get_display_name (account),
 			    COL_ACCOUNT_ENABLED, is_enabled,
 			    -1);
+
+	if (pixbuf != NULL)
+		g_object_unref (pixbuf);
 
 	/* set first connected account as active account */
 	if (priv->account_manually_set == FALSE &&
