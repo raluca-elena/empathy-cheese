@@ -390,10 +390,6 @@ chat_composing_start (EmpathyChat *chat)
 static void
 chat_composing_stop (EmpathyChat *chat)
 {
-	EmpathyChatPriv *priv;
-
-	priv = GET_PRIV (chat);
-
 	chat_composing_remove_timeout (chat);
 	set_chat_state (chat, TP_CHANNEL_CHAT_STATE_ACTIVE);
 }
