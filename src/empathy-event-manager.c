@@ -432,26 +432,6 @@ out:
 }
 
 static void
-reject_auth_channel_claim_cb (GObject *source,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  TpChannelDispatchOperation *cdo = TP_CHANNEL_DISPATCH_OPERATION (source);
-  GError *error = NULL;
-
-  if (!tp_channel_dispatch_operation_claim_with_finish (cdo, result, &error))
-    {
-      DEBUG ("Failed to claim channel: %s", error->message);
-
-      g_error_free (error);
-      return;
-    }
-
-  tp_cli_channel_call_close (TP_CHANNEL (user_data), -1,
-      NULL, NULL, NULL, NULL);
-}
-
-static void
 reject_approval (EventManagerApproval *approval)
 {
   EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
@@ -472,9 +452,8 @@ reject_approval (EventManagerApproval *approval)
   else if (tp_channel_get_channel_type_id (approval->main_channel)
       == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      tp_channel_dispatch_operation_claim_with_async (approval->operation,
-          priv->auth_approver, reject_auth_channel_claim_cb,
-          approval->main_channel);
+      tp_channel_dispatch_operation_close_channels_async (approval->operation,
+          NULL, NULL);
     }
 }
 
