@@ -137,5 +137,12 @@ GdkPixbuf *empathy_individual_store_get_individual_status_icon (
     EmpathyIndividualStore *store,
     FolksIndividual *individual);
 
+void individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
+void individual_store_remove_individual_and_disconnect (
+    EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_STORE_H__ */

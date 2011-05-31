@@ -910,7 +910,7 @@ individual_personas_changed_cb (FolksIndividual *individual,
     }
 }
 
-static void
+void
 individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
@@ -944,7 +944,7 @@ individual_store_disconnect_individual (EmpathyIndividualStore *self,
       (GCallback) individual_personas_changed_cb, self);
 }
 
-static void
+void
 individual_store_remove_individual_and_disconnect (
     EmpathyIndividualStore *self,
     FolksIndividual *individual)
