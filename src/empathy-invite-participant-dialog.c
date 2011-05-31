@@ -25,9 +25,12 @@ enum
   PROP_TP_CHAT = 1
 };
 
+typedef struct _AddTemporaryIndividualCtx AddTemporaryIndividualCtx;
+
 struct _EmpathyInviteParticipantDialogPrivate
 {
   EmpathyTpChat *tp_chat;
+  TpAccountManager *account_mgr;
 
   EmpathyIndividualStore *store;
   EmpathyIndividualView *view;
@@ -36,6 +39,10 @@ struct _EmpathyInviteParticipantDialogPrivate
 
   GPtrArray *search_words;
   gchar *search_str;
+
+  /* Context representing the FolksIndividual which are added because of the
+   * current search from the user. */
+  AddTemporaryIndividualCtx *add_temp_ctx;
 };
 
 static void
@@ -79,16 +86,57 @@ invite_participant_dialog_set_property (GObject *object,
     };
 }
 
+struct _AddTemporaryIndividualCtx
+{
+  EmpathyInviteParticipantDialog *self;
+  /* List of owned FolksIndividual */
+  GList *individuals;
+};
+
+static AddTemporaryIndividualCtx *
+add_temporary_individual_ctx_new (EmpathyInviteParticipantDialog *self)
+{
+  AddTemporaryIndividualCtx *ctx = g_slice_new0 (AddTemporaryIndividualCtx);
+
+  ctx->self = self;
+  return ctx;
+}
+
+static void
+add_temporary_individual_ctx_free (AddTemporaryIndividualCtx *ctx)
+{
+  GList *l;
+
+  /* Remove all the individuals from the model */
+  for (l = ctx->individuals; l != NULL; l = g_list_next (l))
+    {
+      FolksIndividual *individual = l->data;
+
+      individual_store_remove_individual_and_disconnect (ctx->self->priv->store,
+          individual);
+
+      g_object_unref (individual);
+    }
+
+  g_list_free (ctx->individuals);
+  g_slice_free (AddTemporaryIndividualCtx, ctx);
+}
+
 static void
 invite_participant_dialog_dispose (GObject *object)
 {
   EmpathyInviteParticipantDialog *self = (EmpathyInviteParticipantDialog *)
     object;
 
+  tp_clear_pointer (&self->priv->add_temp_ctx,
+      add_temporary_individual_ctx_free);
+
   tp_clear_object (&self->priv->tp_chat);
   tp_clear_object (&self->priv->store);
   tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
   tp_clear_pointer (&self->priv->search_str, g_free);
+
+  tp_clear_object (&self->priv->account_mgr);
 
   G_OBJECT_CLASS (empathy_invite_participant_dialog_parent_class)->dispose (
       object);
@@ -236,6 +284,88 @@ out:
 }
 
 static void
+get_contacts_cb (TpConnection *connection,
+    guint n_contacts,
+    TpContact * const *contacts,
+    const gchar * const *requested_ids,
+    GHashTable *failed_id_errors,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  EmpathyInviteParticipantDialog *self =
+    (EmpathyInviteParticipantDialog *) weak_object;
+  AddTemporaryIndividualCtx *ctx = user_data;
+  TpAccount *account;
+  TpfPersonaStore *store;
+  FolksIndividual *individual;
+  GList *personas = NULL;
+
+  if (self->priv->add_temp_ctx != ctx)
+    /* another request has been started */
+    return;
+
+  if (n_contacts != 1)
+    return;
+
+  account = g_object_get_data (G_OBJECT (connection), "account");
+
+  store = tpf_persona_store_new (account);
+  personas = g_list_append (personas, tpf_persona_new (contacts[0], store));
+
+  individual = folks_individual_new (personas);
+
+  /* Pass ownership to the list */
+  ctx->individuals = g_list_prepend (ctx->individuals, individual);
+
+  individual_store_add_individual_and_connect (self->priv->store, individual);
+
+  g_list_free_full (personas, g_object_unref);
+  g_object_unref (store);
+}
+
+static void
+add_temporary_individuals (EmpathyInviteParticipantDialog *self,
+    const gchar *id)
+{
+  GList *accounts, *l;
+
+  tp_clear_pointer (&self->priv->add_temp_ctx,
+      add_temporary_individual_ctx_free);
+
+  if (tp_str_empty (id))
+    return;
+
+  self->priv->add_temp_ctx = add_temporary_individual_ctx_new (self);
+
+  /* Try to add an individual for each connected account */
+  accounts = tp_account_manager_get_valid_accounts (self->priv->account_mgr);
+  for (l = accounts; l != NULL; l = g_list_next (l))
+    {
+      TpAccount *account = l->data;
+      TpConnection *conn;
+      TpContactFeature features[] = { TP_CONTACT_FEATURE_ALIAS,
+          TP_CONTACT_FEATURE_AVATAR_DATA,
+          TP_CONTACT_FEATURE_PRESENCE,
+          TP_CONTACT_FEATURE_CAPABILITIES };
+
+      conn = tp_account_get_connection (account);
+      if (conn == NULL)
+        continue;
+
+      /* One day we'll have tp_connection_get_account()... */
+      g_object_set_data_full (G_OBJECT (conn), "account",
+          g_object_ref (account), g_object_unref);
+
+      tp_connection_get_contacts_by_id (conn, 1, &id, G_N_ELEMENTS (features),
+          features, get_contacts_cb, self->priv->add_temp_ctx, NULL,
+          G_OBJECT (self));
+    }
+
+  g_list_free (accounts);
+}
+
+static void
 search_text_changed (GtkEntry *entry,
     EmpathyInviteParticipantDialog *self)
 {
@@ -248,6 +378,8 @@ search_text_changed (GtkEntry *entry,
 
   self->priv->search_words = empathy_live_search_strip_utf8_string (id);
   self->priv->search_str = g_strdup (id);
+
+  add_temporary_individuals (self, id);
 
   empathy_individual_view_refilter (self->priv->view);
 }
@@ -263,10 +395,19 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   GtkTreeSelection *selection;
   GtkWidget *scroll;
   GtkWidget *search_entry;
+  GQuark features[] = { TP_ACCOUNT_MANAGER_FEATURE_CORE, 0 };
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (
       self, EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
       EmpathyInviteParticipantDialogPrivate);
+
+  self->priv->account_mgr = tp_account_manager_dup ();
+
+  /* We don't wait for the CORE feature to be prepared, which is fine as we
+   * won't use the account manager until user starts searching. Furthermore,
+   * the AM has probably already been prepared by another Empathy
+   * component. */
+  tp_proxy_prepare_async (self->priv->account_mgr, features, NULL, NULL);
 
   content = gtk_dialog_get_content_area (dialog);
 
