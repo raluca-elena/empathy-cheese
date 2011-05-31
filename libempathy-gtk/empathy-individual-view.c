@@ -2854,3 +2854,11 @@ empathy_individual_view_set_custom_filter (EmpathyIndividualView *self,
   priv->custom_filter = filter;
   priv->custom_filter_data = data;
 }
+
+void
+empathy_individual_view_refilter (EmpathyIndividualView *self)
+{
+  EmpathyIndividualViewPriv *priv = GET_PRIV (self);
+
+  gtk_tree_model_filter_refilter (priv->filter);
+}

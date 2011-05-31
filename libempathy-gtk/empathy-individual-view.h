@@ -133,5 +133,7 @@ void empathy_individual_view_set_custom_filter (EmpathyIndividualView *self,
     GtkTreeModelFilterVisibleFunc filter,
     gpointer data);
 
+void empathy_individual_view_refilter (EmpathyIndividualView *self);
+
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_VIEW_H__ */
