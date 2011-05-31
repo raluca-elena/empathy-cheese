@@ -118,7 +118,7 @@ view_selection_changed_cb (GtkWidget *treeview,
 
   gtk_widget_set_sensitive (self->priv->invite_button, individual != NULL);
 
-  g_object_unref (individual);
+  tp_clear_object (&individual);
 }
 
 /* Return the TpContact of @individual which is on the same connection as the
