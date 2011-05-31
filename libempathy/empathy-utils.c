@@ -1031,4 +1031,3 @@ empathy_format_currency (gint         amount,
 
 	return money;
 }
-

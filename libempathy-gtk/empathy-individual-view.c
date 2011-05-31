@@ -1692,7 +1692,6 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
 {
   EmpathyIndividualViewPriv *priv = GET_PRIV (self);
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
-  const gchar *str;
   GList *personas, *l;
   gboolean is_favorite, contains_interesting_persona = FALSE;
 
@@ -1729,37 +1728,8 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     return (priv->show_offline || is_online);
   }
 
-  /* check alias name */
-  str = folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual));
-
-  if (empathy_live_search_match (live, str))
-    return TRUE;
-
-  /* check contact id, remove the @server.com part */
-  for (l = personas; l; l = l->next)
-    {
-      const gchar *p;
-      gchar *dup_str = NULL;
-      gboolean visible;
-
-      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
-        continue;
-
-      str = folks_persona_get_display_id (l->data);
-      p = strstr (str, "@");
-      if (p != NULL)
-        str = dup_str = g_strndup (str, p - str);
-
-      visible = empathy_live_search_match (live, str);
-      g_free (dup_str);
-      if (visible)
-        return TRUE;
-    }
-
-  /* FIXME: Add more rules here, we could check phone numbers in
-   * contact's vCard for example. */
-
-  return FALSE;
+  return empathy_individual_match_words (individual,
+      empathy_live_search_get_words (live));
 }
 
 static gchar *

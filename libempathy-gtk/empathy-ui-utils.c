@@ -44,6 +44,7 @@
 
 #include "empathy-ui-utils.h"
 #include "empathy-images.h"
+#include "empathy-live-search.h"
 #include "empathy-smiley-manager.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -1946,4 +1947,45 @@ gint64
 empathy_get_current_action_time (void)
 {
   return (tp_user_action_time_from_x11 (gtk_get_current_event_time ()));
+}
+
+gboolean
+empathy_individual_match_words (FolksIndividual *individual,
+    GPtrArray *words)
+{
+  const gchar *str;
+  GList *personas, *l;
+
+  /* check alias name */
+  str = folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual));
+
+  if (empathy_live_search_match_words (str, words))
+    return TRUE;
+
+  personas = folks_individual_get_personas (individual);
+
+  /* check contact id, remove the @server.com part */
+  for (l = personas; l; l = l->next)
+    {
+      const gchar *p;
+      gchar *dup_str = NULL;
+      gboolean visible;
+
+      if (!empathy_folks_persona_is_interesting (FOLKS_PERSONA (l->data)))
+        continue;
+
+      str = folks_persona_get_display_id (l->data);
+      p = strstr (str, "@");
+      if (p != NULL)
+        str = dup_str = g_strndup (str, p - str);
+
+      visible = empathy_live_search_match_words (str, words);
+      g_free (dup_str);
+      if (visible)
+        return TRUE;
+    }
+
+  /* FIXME: Add more rules here, we could check phone numbers in
+   * contact's vCard for example. */
+  return FALSE;
 }
