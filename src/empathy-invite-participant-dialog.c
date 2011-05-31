@@ -15,6 +15,7 @@
 #include "empathy-invite-participant-dialog.h"
 
 #include <libempathy-gtk/empathy-individual-view.h>
+#include <libempathy-gtk/empathy-ui-utils.h>
 
 G_DEFINE_TYPE (EmpathyInviteParticipantDialog,
     empathy_invite_participant_dialog, GTK_TYPE_DIALOG);
@@ -32,6 +33,8 @@ struct _EmpathyInviteParticipantDialogPrivate
   EmpathyIndividualView *view;
 
   GtkWidget *invite_button;
+
+  GPtrArray *search_words;
 };
 
 static void
@@ -83,6 +86,7 @@ invite_participant_dialog_dispose (GObject *object)
 
   tp_clear_object (&self->priv->tp_chat);
   tp_clear_object (&self->priv->store);
+  tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
 
   G_OBJECT_CLASS (empathy_invite_participant_dialog_parent_class)->dispose (
       object);
@@ -174,8 +178,21 @@ filter_func (GtkTreeModel *model,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, &is_online,
       -1);
 
-  if (individual == NULL || !is_online)
+  if (individual == NULL)
     goto out;
+
+  if (self->priv->search_words == NULL)
+    {
+      /* Not searching, display online contacts */
+      if (!is_online)
+        goto out;
+    }
+  else
+    {
+      if (!empathy_individual_match_words (individual,
+            self->priv->search_words))
+        goto out;
+    }
 
   /* Filter out individuals not having a persona on the same connection as the
    * EmpathyTpChat. */
@@ -217,6 +234,18 @@ out:
 }
 
 static void
+search_text_changed (GtkEntry *entry,
+    EmpathyInviteParticipantDialog *self)
+{
+  tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
+
+  self->priv->search_words = empathy_live_search_strip_utf8_string (
+      gtk_entry_get_text (entry));
+
+  empathy_individual_view_refilter (self->priv->view);
+}
+
+static void
 empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
 {
   GtkDialog *dialog = GTK_DIALOG (self);
@@ -226,6 +255,7 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   EmpathyIndividualManager *mgr;
   GtkTreeSelection *selection;
   GtkWidget *scroll;
+  GtkWidget *search_entry;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (
       self, EMPATHY_TYPE_INVITE_PARTICIPANT_DIALOG,
@@ -245,6 +275,14 @@ empathy_invite_participant_dialog_init (EmpathyInviteParticipantDialog *self)
   gtk_widget_show (label);
 
   gtk_dialog_add_button (dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+
+  /* Search entry */
+  search_entry = gtk_entry_new ();
+  gtk_box_pack_start (GTK_BOX (content), search_entry, FALSE, TRUE, 6);
+  gtk_widget_show (search_entry);
+
+  g_signal_connect (search_entry, "changed",
+      G_CALLBACK (search_text_changed), self);
 
   /* Add the treeview */
   mgr = empathy_individual_manager_dup_singleton ();
