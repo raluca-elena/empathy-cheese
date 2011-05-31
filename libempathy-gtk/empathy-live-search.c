@@ -139,8 +139,8 @@ append_word (GPtrArray **word_array,
     }
 }
 
-static GPtrArray *
-strip_utf8_string (const gchar *string)
+GPtrArray *
+empathy_live_search_strip_utf8_string (const gchar *string)
 {
   GPtrArray *word_array = NULL;
   GString *word = NULL;
@@ -230,8 +230,8 @@ live_search_match_prefix (const gchar *string,
   return FALSE;
 }
 
-static gboolean
-live_search_match_words (const gchar *string,
+gboolean
+empathy_live_search_match_words (const gchar *string,
     GPtrArray *words)
 {
   guint i;
@@ -309,7 +309,7 @@ live_search_text_changed (GtkEntry *entry,
   if (priv->stripped_words != NULL)
     g_ptr_array_unref (priv->stripped_words);
 
-  priv->stripped_words = strip_utf8_string (text);
+  priv->stripped_words = empathy_live_search_strip_utf8_string (text);
 
   g_object_notify (G_OBJECT (self), "text");
 }
@@ -702,7 +702,7 @@ empathy_live_search_match (EmpathyLiveSearch *self,
 
   priv = GET_PRIV (self);
 
-  return live_search_match_words (string, priv->stripped_words);
+  return empathy_live_search_match_words (string, priv->stripped_words);
 }
 
 gboolean
@@ -712,11 +712,18 @@ empathy_live_search_match_string (const gchar *string,
   GPtrArray *words;
   gboolean match;
 
-  words = strip_utf8_string (prefix);
-  match = live_search_match_words (string, words);
+  words = empathy_live_search_strip_utf8_string (prefix);
+  match = empathy_live_search_match_words (string, words);
   if (words != NULL)
     g_ptr_array_unref (words);
 
   return match;
 }
 
+GPtrArray *
+empathy_live_search_get_words (EmpathyLiveSearch *self)
+{
+  EmpathyLiveSearchPriv *priv = GET_PRIV (self);
+
+  return priv->stripped_words;
+}

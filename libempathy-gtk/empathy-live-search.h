@@ -65,6 +65,13 @@ void empathy_live_search_set_text (EmpathyLiveSearch *self,
 gboolean empathy_live_search_match (EmpathyLiveSearch *self,
     const gchar *string);
 
+GPtrArray * empathy_live_search_strip_utf8_string (const gchar *string);
+
+gboolean empathy_live_search_match_words (const gchar *string,
+    GPtrArray *words);
+
+GPtrArray * empathy_live_search_get_words (EmpathyLiveSearch *self);
+
 /* Made public for unit tests */
 gboolean empathy_live_search_match_string (const gchar *string,
    const gchar *prefix);
