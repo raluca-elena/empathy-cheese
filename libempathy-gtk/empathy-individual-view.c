@@ -2564,6 +2564,10 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
 
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), NULL);
 
+  if (priv->individual_features == EMPATHY_INDIVIDUAL_FEATURE_NONE)
+    /* No need to create a context menu */
+    return NULL;
+
   individual = empathy_individual_view_dup_selected (view);
   if (individual == NULL)
     return NULL;
