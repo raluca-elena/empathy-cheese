@@ -304,7 +304,8 @@ get_contacts_cb (TpConnection *connection,
   TpAccount *account;
   TpfPersonaStore *store;
   FolksIndividual *individual;
-  GList *personas = NULL;
+  TpfPersona *persona_new;
+  GeeSet *personas;
 
   if (self->priv->add_temp_ctx != ctx)
     /* another request has been started */
@@ -316,7 +317,12 @@ get_contacts_cb (TpConnection *connection,
   account = g_object_get_data (G_OBJECT (connection), "account");
 
   store = tpf_persona_store_new (account);
-  personas = g_list_append (personas, tpf_persona_new (contacts[0], store));
+  personas = GEE_SET (
+      gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref, g_object_unref,
+      g_direct_hash, g_direct_equal));
+  persona_new = tpf_persona_new (contacts[0], store);
+  gee_collection_add (GEE_COLLECTION (personas),
+      tpf_persona_new (contacts[0], store));
 
   individual = folks_individual_new (personas);
 
@@ -325,7 +331,8 @@ get_contacts_cb (TpConnection *connection,
 
   individual_store_add_individual_and_connect (self->priv->store, individual);
 
-  g_list_free_full (personas, g_object_unref);
+  g_clear_object (&persona_new);
+  g_clear_object (&personas);
   g_object_unref (store);
 }
 
