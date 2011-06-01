@@ -35,6 +35,7 @@ struct _EmpathyInviteParticipantDialogPrivate
   GtkWidget *invite_button;
 
   GPtrArray *search_words;
+  gchar *search_str;
 };
 
 static void
@@ -87,6 +88,7 @@ invite_participant_dialog_dispose (GObject *object)
   tp_clear_object (&self->priv->tp_chat);
   tp_clear_object (&self->priv->store);
   tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
+  tp_clear_pointer (&self->priv->search_str, g_free);
 
   G_OBJECT_CLASS (empathy_invite_participant_dialog_parent_class)->dispose (
       object);
@@ -189,8 +191,8 @@ filter_func (GtkTreeModel *model,
     }
   else
     {
-      if (!empathy_individual_match_words (individual,
-            self->priv->search_words))
+      if (!empathy_individual_match_string (individual,
+            self->priv->search_str, self->priv->search_words))
         goto out;
     }
 
@@ -237,10 +239,15 @@ static void
 search_text_changed (GtkEntry *entry,
     EmpathyInviteParticipantDialog *self)
 {
-  tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
+  const gchar *id;
 
-  self->priv->search_words = empathy_live_search_strip_utf8_string (
-      gtk_entry_get_text (entry));
+  tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
+  tp_clear_pointer (&self->priv->search_str, g_free);
+
+  id = gtk_entry_get_text (entry);
+
+  self->priv->search_words = empathy_live_search_strip_utf8_string (id);
+  self->priv->search_str = g_strdup (id);
 
   empathy_individual_view_refilter (self->priv->view);
 }

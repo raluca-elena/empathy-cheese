@@ -149,8 +149,9 @@ GtkWidget * empathy_context_menu_new                    (GtkWidget *attach_to);
 
 gint64      empathy_get_current_action_time             (void);
 
-gboolean empathy_individual_match_words (
+gboolean empathy_individual_match_string (
     FolksIndividual *individual,
+    const gchar *text,
     GPtrArray *words);
 
 G_END_DECLS

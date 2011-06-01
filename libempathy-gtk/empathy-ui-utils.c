@@ -1949,8 +1949,13 @@ empathy_get_current_action_time (void)
   return (tp_user_action_time_from_x11 (gtk_get_current_event_time ()));
 }
 
+/* @words = empathy_live_search_strip_utf8_string (@text);
+ *
+ * User has to pass both so we don't have to compute @words ourself each time
+ * this function is called. */
 gboolean
-empathy_individual_match_words (FolksIndividual *individual,
+empathy_individual_match_string (FolksIndividual *individual,
+    const char *text,
     GPtrArray *words)
 {
   const gchar *str;
@@ -1975,6 +1980,12 @@ empathy_individual_match_words (FolksIndividual *individual,
         continue;
 
       str = folks_persona_get_display_id (l->data);
+
+      /* Accept the persona if @text is a full prefix of his ID; that allows
+       * user to find, say, a jabber contact by typing his JID. */
+      if (g_str_has_prefix (str, text))
+        return TRUE;
+
       p = strstr (str, "@");
       if (p != NULL)
         str = dup_str = g_strndup (str, p - str);

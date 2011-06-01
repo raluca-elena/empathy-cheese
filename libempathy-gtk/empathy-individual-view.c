@@ -1728,7 +1728,8 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     return (priv->show_offline || is_online);
   }
 
-  return empathy_individual_match_words (individual,
+  return empathy_individual_match_string (individual,
+      empathy_live_search_get_text (live),
       empathy_live_search_get_words (live));
 }
 
