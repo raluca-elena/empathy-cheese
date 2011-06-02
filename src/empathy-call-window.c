@@ -124,6 +124,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *toolbar;
   GtkWidget *pane;
   GtkAction *redial;
+  GtkAction *menu_dialpad;
   GtkAction *menu_fullscreen;
   GtkAction *action_camera_on;
   GtkWidget *tool_button_camera_off;
@@ -260,6 +261,9 @@ static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
   guint button);
 
 static void empathy_call_window_redial_cb (gpointer object,
+  EmpathyCallWindow *window);
+
+static void empathy_call_window_dialpad_cb (gpointer object,
   EmpathyCallWindow *window);
 
 static void empathy_call_window_restart_call (EmpathyCallWindow *window);
@@ -1019,6 +1023,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "microphone", &priv->mic_button,
     "toolbar", &priv->toolbar,
     "menuredial", &priv->redial,
+    "menudialpad", &priv->menu_dialpad,
     "ui_manager", &priv->ui_manager,
     "menufullscreen", &priv->menu_fullscreen,
     "camera_off", &priv->tool_button_camera_off,
@@ -1046,6 +1051,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "hangup", "clicked", empathy_call_window_hangup_cb,
     "menuredial", "activate", empathy_call_window_redial_cb,
     "redial", "clicked", empathy_call_window_redial_cb,
+    "menudialpad", "activate", empathy_call_window_dialpad_cb,
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "camera_off", "toggled", tool_button_camera_off_toggled_cb,
@@ -3063,6 +3069,18 @@ empathy_call_window_redial_cb (gpointer object,
 
   if (priv->call_state != CONNECTED)
     empathy_call_window_restart_call (window);
+}
+
+static void
+empathy_call_window_dialpad_cb (gpointer object,
+    EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
+      TRUE);
+  empathy_sidebar_set_page (EMPATHY_SIDEBAR (priv->sidebar),
+      priv->dtmf_panel);
 }
 
 static void
