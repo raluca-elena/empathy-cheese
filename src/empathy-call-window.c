@@ -240,6 +240,10 @@ static void empathy_call_window_sidebar_hidden_cb (EvSidebar *sidebar,
 static void empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
   EmpathyCallWindow *window);
 
+static void empathy_call_window_sidebar_changed_cb (EmpathySidebar *sidebar,
+  GParamSpec *pspec,
+  EmpathyCallWindow *window);
+
 static void empathy_call_window_hangup_cb (gpointer object,
   EmpathyCallWindow *window);
 
@@ -263,7 +267,7 @@ static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
 static void empathy_call_window_redial_cb (gpointer object,
   EmpathyCallWindow *window);
 
-static void empathy_call_window_dialpad_cb (gpointer object,
+static void empathy_call_window_dialpad_cb (GtkToggleAction *menu,
   EmpathyCallWindow *window);
 
 static void empathy_call_window_restart_call (EmpathyCallWindow *window);
@@ -1051,7 +1055,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "hangup", "clicked", empathy_call_window_hangup_cb,
     "menuredial", "activate", empathy_call_window_redial_cb,
     "redial", "clicked", empathy_call_window_redial_cb,
-    "menudialpad", "activate", empathy_call_window_dialpad_cb,
+    "menudialpad", "toggled", empathy_call_window_dialpad_cb,
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "camera_off", "toggled", tool_button_camera_off_toggled_cb,
@@ -1135,6 +1139,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "hide", G_CALLBACK (empathy_call_window_sidebar_hidden_cb), self);
   g_signal_connect (G_OBJECT (priv->sidebar),
     "show", G_CALLBACK (empathy_call_window_sidebar_shown_cb), self);
+  g_signal_connect (G_OBJECT (priv->sidebar), "notify::current-page",
+    G_CALLBACK (empathy_call_window_sidebar_changed_cb), self);
   gtk_paned_pack2 (GTK_PANED (priv->pane), priv->sidebar, FALSE, FALSE);
 
   page = empathy_call_window_create_audio_input (self);
@@ -2904,6 +2910,8 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   GtkWidget *arrow;
   int w, h, handle_size;
   GtkAllocation allocation, sidebar_allocation;
+  GtkWidget *page;
+  gboolean active, dialpad_shown;
 
   gtk_widget_get_allocation (GTK_WIDGET (window), &allocation);
   w = allocation.width;
@@ -2912,7 +2920,9 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   gtk_widget_style_get (priv->pane, "handle_size", &handle_size, NULL);
 
   gtk_widget_get_allocation (priv->sidebar, &sidebar_allocation);
-  if (gtk_toggle_button_get_active (toggle))
+  active = gtk_toggle_button_get_active (toggle);
+
+  if (active)
     {
       arrow = gtk_arrow_new (GTK_ARROW_LEFT, GTK_SHADOW_NONE);
       gtk_widget_show (priv->sidebar);
@@ -2929,6 +2939,18 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
 
   if (w > 0 && h > 0)
     gtk_window_resize (GTK_WINDOW (window), w, h);
+
+  /* Update the 'Dialpad' menu */
+  g_object_get (priv->sidebar, "current-page", &page, NULL);
+  dialpad_shown = active && page == priv->dtmf_panel;
+  g_object_unref (page);
+
+  g_signal_handlers_block_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
+  gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (priv->menu_dialpad),
+      (dialpad_shown));
+  g_signal_handlers_unblock_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
 }
 
 static void
@@ -3010,6 +3032,26 @@ empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
 }
 
 static void
+empathy_call_window_sidebar_changed_cb (EmpathySidebar *sidebar,
+  GParamSpec *pspec,
+  EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  GtkWidget *page;
+
+  g_object_get (sidebar, "current-page", &page, NULL);
+
+  g_signal_handlers_block_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
+  gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (priv->menu_dialpad),
+      (page == priv->dtmf_panel));
+  g_signal_handlers_unblock_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
+
+  g_object_unref (page);
+}
+
+static void
 empathy_call_window_hangup_cb (gpointer object,
                                EmpathyCallWindow *window)
 {
@@ -3072,15 +3114,20 @@ empathy_call_window_redial_cb (gpointer object,
 }
 
 static void
-empathy_call_window_dialpad_cb (gpointer object,
+empathy_call_window_dialpad_cb (GtkToggleAction *menu,
     EmpathyCallWindow *window)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  gboolean active;
+
+  active = gtk_toggle_action_get_active (menu);
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
-      TRUE);
-  empathy_sidebar_set_page (EMPATHY_SIDEBAR (priv->sidebar),
-      priv->dtmf_panel);
+      active);
+
+  if (active)
+    empathy_sidebar_set_page (EMPATHY_SIDEBAR (priv->sidebar),
+        priv->dtmf_panel);
 }
 
 static void
