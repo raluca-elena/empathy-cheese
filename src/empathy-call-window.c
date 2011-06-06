@@ -1832,6 +1832,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
   gtk_window_unfullscreen (GTK_WINDOW (self));
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
+  gtk_widget_set_sensitive (priv->dtmf_panel, FALSE);
 
   could_reset_pipeline = empathy_call_window_reset_pipeline (self);
 
