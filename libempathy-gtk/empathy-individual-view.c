@@ -1694,13 +1694,18 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     gboolean is_online,
     gboolean is_searching,
     const gchar *group,
-    gboolean is_fake_group)
+    gboolean is_fake_group,
+    guint event_count)
 {
   EmpathyIndividualViewPriv *priv = GET_PRIV (self);
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
   GeeSet *personas;
   GeeIterator *iter;
   gboolean is_favorite, contains_interesting_persona = FALSE;
+
+  /* Always display individuals having pending events */
+  if (event_count > 0)
+    return TRUE;
 
   /* We're only giving the visibility wrt filtering here, not things like
    * presence. */
@@ -1777,6 +1782,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
   GtkTreeIter child_iter;
   gboolean visible, is_online;
   gboolean is_searching = TRUE;
+  guint event_count;
 
   if (priv->custom_filter != NULL)
     return priv->custom_filter (model, iter, priv->custom_filter_data);
@@ -1790,6 +1796,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, &is_separator,
       EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, &is_online,
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
+      EMPATHY_INDIVIDUAL_STORE_COL_EVENT_COUNT, &event_count,
       -1);
 
   if (individual != NULL)
@@ -1800,7 +1807,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       group = get_group (model, iter, &is_fake_group);
 
       visible = individual_view_is_visible_individual (self, individual,
-          is_online, is_searching, group, is_fake_group);
+          is_online, is_searching, group, is_fake_group, event_count);
 
       g_object_unref (individual);
       g_free (group);
@@ -1832,6 +1839,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       gtk_tree_model_get (model, &child_iter,
         EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
         EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, &is_online,
+        EMPATHY_INDIVIDUAL_STORE_COL_EVENT_COUNT, &event_count,
         -1);
 
       if (individual == NULL)
@@ -1840,7 +1848,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       group = get_group (model, &child_iter, &is_fake_group);
 
       visible = individual_view_is_visible_individual (self, individual,
-          is_online, is_searching, group, is_fake_group);
+          is_online, is_searching, group, is_fake_group, event_count);
 
       g_object_unref (individual);
       g_free (group);
