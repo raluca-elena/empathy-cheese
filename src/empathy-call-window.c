@@ -2904,6 +2904,20 @@ empathy_call_window_state_event_cb (GtkWidget *widget,
 }
 
 static void
+empathy_call_window_update_dialpad_menu (EmpathyCallWindow *window,
+    gboolean toggled)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  g_signal_handlers_block_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
+  gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (priv->menu_dialpad),
+      toggled);
+  g_signal_handlers_unblock_by_func (priv->menu_dialpad,
+      empathy_call_window_dialpad_cb, window);
+}
+
+static void
 empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   EmpathyCallWindow *window)
 {
@@ -2946,12 +2960,7 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   dialpad_shown = active && page == priv->dtmf_panel;
   g_object_unref (page);
 
-  g_signal_handlers_block_by_func (priv->menu_dialpad,
-      empathy_call_window_dialpad_cb, window);
-  gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (priv->menu_dialpad),
-      (dialpad_shown));
-  g_signal_handlers_unblock_by_func (priv->menu_dialpad,
-      empathy_call_window_dialpad_cb, window);
+  empathy_call_window_update_dialpad_menu (window, dialpad_shown);
 }
 
 static void
@@ -3041,14 +3050,7 @@ empathy_call_window_sidebar_changed_cb (EmpathySidebar *sidebar,
   GtkWidget *page;
 
   g_object_get (sidebar, "current-page", &page, NULL);
-
-  g_signal_handlers_block_by_func (priv->menu_dialpad,
-      empathy_call_window_dialpad_cb, window);
-  gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (priv->menu_dialpad),
-      (page == priv->dtmf_panel));
-  g_signal_handlers_unblock_by_func (priv->menu_dialpad,
-      empathy_call_window_dialpad_cb, window);
-
+  empathy_call_window_update_dialpad_menu (window, page == priv->dtmf_panel);
   g_object_unref (page);
 }
 
