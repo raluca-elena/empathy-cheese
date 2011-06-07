@@ -204,8 +204,7 @@ main_window_flash_foreach (GtkTreeModel *model,
 	GdkPixbuf        *pixbuf = NULL;
 
 	gtk_tree_model_get (model, iter,
-			    EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL,
-				&individual,
+			    EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
 			    -1);
 
 	if (individual == NULL)
