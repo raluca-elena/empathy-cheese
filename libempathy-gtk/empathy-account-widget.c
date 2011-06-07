@@ -2098,8 +2098,8 @@ do_constructed (GObject *obj)
           /* The password might not have been retrieved from the
            * keyring yet. We should update the remember password
            * toggle button and the password entry when/if it is. */
-          g_signal_connect (priv->settings, "password-retrieved",
-              G_CALLBACK (account_settings_password_retrieved_cb), self);
+          tp_g_signal_connect_object (priv->settings, "password-retrieved",
+              G_CALLBACK (account_settings_password_retrieved_cb), self, 0);
         }
 
       g_signal_connect (priv->remember_password_widget, "toggled",
