@@ -432,11 +432,93 @@ main_window_auth_display (EmpathyMainWindow *window,
 }
 
 static void
+modify_event_count (GtkTreeModel *model,
+		    GtkTreeIter *iter,
+		    EmpathyEvent *event,
+		    gboolean increase)
+{
+	FolksIndividual *individual;
+	EmpathyContact *contact;
+	guint count;
+
+	gtk_tree_model_get (model, iter,
+			    EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
+			    EMPATHY_INDIVIDUAL_STORE_COL_EVENT_COUNT, &count,
+			    -1);
+
+	if (individual == NULL)
+		return;
+
+	increase ? count++ : count--;
+
+	contact = empathy_contact_dup_from_folks_individual (individual);
+	if (contact == event->contact) {
+		gtk_tree_store_set (GTK_TREE_STORE (model), iter,
+				    EMPATHY_INDIVIDUAL_STORE_COL_EVENT_COUNT, count, -1);
+	}
+
+	tp_clear_object (&contact);
+	g_object_unref (individual);
+}
+
+static gboolean
+increase_event_count_foreach (GtkTreeModel *model,
+			      GtkTreePath *path,
+			      GtkTreeIter *iter,
+			      gpointer user_data)
+{
+	EmpathyEvent *event = user_data;
+
+	modify_event_count (model, iter, event, TRUE);
+
+	return FALSE;
+}
+
+static void
+increase_event_count (EmpathyMainWindow *self,
+		      EmpathyEvent *event)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (self);
+	GtkTreeModel *model;
+
+	model = GTK_TREE_MODEL (priv->individual_store);
+
+	gtk_tree_model_foreach (model, increase_event_count_foreach, event);
+}
+
+static gboolean
+decrease_event_count_foreach (GtkTreeModel *model,
+			      GtkTreePath *path,
+			      GtkTreeIter *iter,
+			      gpointer user_data)
+{
+	EmpathyEvent *event = user_data;
+
+	modify_event_count (model, iter, event, FALSE);
+
+	return FALSE;
+}
+
+static void
+decrease_event_count (EmpathyMainWindow *self,
+		      EmpathyEvent *event)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (self);
+	GtkTreeModel *model;
+
+	model = GTK_TREE_MODEL (priv->individual_store);
+
+	gtk_tree_model_foreach (model, decrease_event_count_foreach, event);
+}
+
+static void
 main_window_event_added_cb (EmpathyEventManager *manager,
 			    EmpathyEvent        *event,
 			    EmpathyMainWindow   *window)
 {
 	if (event->contact) {
+		increase_event_count (window, event);
+
 		main_window_flash_start (window);
 	} else if (event->type == EMPATHY_EVENT_TYPE_AUTH) {
 		main_window_auth_display (window, event);
@@ -459,6 +541,8 @@ main_window_event_removed_cb (EmpathyEventManager *manager,
 	if (!event->contact) {
 		return;
 	}
+
+	decrease_event_count (window, event);
 
 	data.on = FALSE;
 	data.event = event;

@@ -1572,6 +1572,7 @@ individual_store_setup (EmpathyIndividualStore *self)
     G_TYPE_BOOLEAN,             /* Can make video calls */
     G_TYPE_BOOLEAN,             /* Is a fake group */
     G_TYPE_STRV,                /* Client types */
+    G_TYPE_UINT,                /* Event count */
   };
 
   priv = GET_PRIV (self);
