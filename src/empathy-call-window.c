@@ -3125,12 +3125,12 @@ empathy_call_window_dialpad_cb (GtkToggleAction *menu,
 
   active = gtk_toggle_action_get_active (menu);
 
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
-      active);
-
   if (active)
     empathy_sidebar_set_page (EMPATHY_SIDEBAR (priv->sidebar),
         priv->dtmf_panel);
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
+      active);
 }
 
 static void
