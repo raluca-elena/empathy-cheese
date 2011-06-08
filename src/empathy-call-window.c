@@ -241,7 +241,7 @@ static void empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
   EmpathyCallWindow *window);
 
 static void empathy_call_window_sidebar_changed_cb (EvSidebar *sidebar,
-  GParamSpec *pspec,
+  const gchar *page,
   EmpathyCallWindow *window);
 
 static void empathy_call_window_hangup_cb (gpointer object,
@@ -1140,7 +1140,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "hide", G_CALLBACK (empathy_call_window_sidebar_hidden_cb), self);
   g_signal_connect (G_OBJECT (priv->sidebar),
     "show", G_CALLBACK (empathy_call_window_sidebar_shown_cb), self);
-  g_signal_connect (G_OBJECT (priv->sidebar), "notify::current-page",
+  g_signal_connect (G_OBJECT (priv->sidebar), "changed",
     G_CALLBACK (empathy_call_window_sidebar_changed_cb), self);
   gtk_paned_pack2 (GTK_PANED (priv->pane), priv->sidebar, FALSE, FALSE);
 
@@ -3050,15 +3050,11 @@ empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
 
 static void
 empathy_call_window_sidebar_changed_cb (EvSidebar *sidebar,
-  GParamSpec *pspec,
+  const gchar *page,
   EmpathyCallWindow *window)
 {
-  gchar *page;
-
-  page = ev_sidebar_get_current_page (sidebar);
   empathy_call_window_update_dialpad_menu (window,
       !tp_strdiff (page, "dialpad"));
-  g_free (page);
 }
 
 static void
