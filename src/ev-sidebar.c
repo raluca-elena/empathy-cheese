@@ -50,6 +50,7 @@ struct _EvSidebarPrivate {
 
 enum {
 	CLOSED,
+	CHANGED,
 	LAST_SIGNAL
 };
 
@@ -77,6 +78,15 @@ ev_sidebar_class_init (EvSidebarClass *ev_sidebar_class)
 				NULL, NULL,
 				g_cclosure_marshal_VOID__VOID,
 				G_TYPE_NONE, 0);
+
+	ev_sidebar_table_signals[CHANGED] =
+		g_signal_new ("changed",
+				G_TYPE_FROM_CLASS (g_object_class),
+				G_SIGNAL_RUN_LAST,
+				G_STRUCT_OFFSET (EvSidebarClass, closed),
+				NULL, NULL,
+				g_cclosure_marshal_VOID__STRING,
+				G_TYPE_NONE, 1, G_TYPE_STRING);
 
 }
 
@@ -109,11 +119,17 @@ ev_sidebar_combobox_changed_cb (GtkComboBox *combo_box,
 		indices = gtk_tree_path_get_indices (path);
 
 		if (indices != NULL) {
+			gchar *page;
+
 			gtk_notebook_set_current_page (GTK_NOTEBOOK (ev_sidebar->priv->notebook), indices[0]);
+			gtk_tree_model_get (model, &iter, PAGE_COLUMN_ID, &page, -1);
+			g_signal_emit (G_OBJECT (ev_sidebar), ev_sidebar_table_signals[CHANGED], 0, page);
+			g_free (page);
 		}
 
 		gtk_tree_path_free (path);
 	}
+
 }
 
 static void
