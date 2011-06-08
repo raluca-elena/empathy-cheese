@@ -240,7 +240,7 @@ static void empathy_call_window_sidebar_hidden_cb (EvSidebar *sidebar,
 static void empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
   EmpathyCallWindow *window);
 
-static void empathy_call_window_sidebar_changed_cb (EmpathySidebar *sidebar,
+static void empathy_call_window_sidebar_changed_cb (EvSidebar *sidebar,
   GParamSpec *pspec,
   EmpathyCallWindow *window);
 
@@ -2925,7 +2925,7 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   GtkWidget *arrow;
   int w, h, handle_size;
   GtkAllocation allocation, sidebar_allocation;
-  GtkWidget *page;
+  gchar *page;
   gboolean active, dialpad_shown;
 
   gtk_widget_get_allocation (GTK_WIDGET (window), &allocation);
@@ -2956,9 +2956,9 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
     gtk_window_resize (GTK_WINDOW (window), w, h);
 
   /* Update the 'Dialpad' menu */
-  g_object_get (priv->sidebar, "current-page", &page, NULL);
-  dialpad_shown = active && page == priv->dtmf_panel;
-  g_object_unref (page);
+  page = ev_sidebar_get_current_page (EV_SIDEBAR (priv->sidebar));
+  dialpad_shown = active && !tp_strdiff (page, "dialpad");
+  g_free (page);
 
   empathy_call_window_update_dialpad_menu (window, dialpad_shown);
 }
@@ -3042,16 +3042,16 @@ empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
 }
 
 static void
-empathy_call_window_sidebar_changed_cb (EmpathySidebar *sidebar,
+empathy_call_window_sidebar_changed_cb (EvSidebar *sidebar,
   GParamSpec *pspec,
   EmpathyCallWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-  GtkWidget *page;
+  gchar *page;
 
-  g_object_get (sidebar, "current-page", &page, NULL);
-  empathy_call_window_update_dialpad_menu (window, page == priv->dtmf_panel);
-  g_object_unref (page);
+  page = ev_sidebar_get_current_page (sidebar);
+  empathy_call_window_update_dialpad_menu (window,
+      !tp_strdiff (page, "dialpad"));
+  g_free (page);
 }
 
 static void
@@ -3126,8 +3126,7 @@ empathy_call_window_dialpad_cb (GtkToggleAction *menu,
   active = gtk_toggle_action_get_active (menu);
 
   if (active)
-    empathy_sidebar_set_page (EMPATHY_SIDEBAR (priv->sidebar),
-        priv->dtmf_panel);
+    ev_sidebar_set_current_page (EV_SIDEBAR (priv->sidebar), "dialpad");
 
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
       active);
