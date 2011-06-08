@@ -30,6 +30,7 @@
 #include <telepathy-yell/telepathy-yell.h>
 
 #include <libempathy/empathy-channel-factory.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-call-factory.h"
@@ -89,7 +90,7 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
     }
 
   priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
-      "Empathy.Call", FALSE, handle_channels_cb, obj, NULL);
+      EMPATHY_CALL_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, obj, NULL);
 
   factory = empathy_channel_factory_new ();
   tp_base_client_set_channel_factory (priv->handler,
