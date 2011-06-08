@@ -1358,6 +1358,10 @@ tp_contact_list_get_flags (EmpathyContactList *list)
 		if (group_flags & TP_CHANNEL_GROUP_FLAG_CAN_REMOVE) {
 			flags |= EMPATHY_CONTACT_LIST_CAN_REMOVE;
 		}
+
+		if (group_flags & TP_CHANNEL_GROUP_FLAG_MESSAGE_ADD) {
+			flags |= EMPATHY_CONTACT_LIST_MESSAGE_ADD;
+		}
 	}
 
 	if (priv->deny != NULL)
