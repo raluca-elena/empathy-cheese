@@ -376,7 +376,7 @@ handle_delivery_report (EmpathyTpChat *self,
 	 * TpMessage. (fdo #35884) */
 	echo = tp_asv_get_boxed (header, "delivery-echo",
 		TP_ARRAY_TYPE_MESSAGE_PART_LIST);
-	if (echo != NULL && echo->len >= 1) {
+	if (echo != NULL && echo->len >= 2) {
 		const GHashTable *echo_body;
 
 		echo_body = g_ptr_array_index (echo, 1);
