@@ -121,8 +121,6 @@ TpChannelChatState
 
 EmpathyContact * empathy_tp_chat_get_self_contact   (EmpathyTpChat      *self);
 
-gboolean       empathy_tp_chat_is_sms_channel       (EmpathyTpChat      *chat);
-
 G_END_DECLS
 
 #endif /* __EMPATHY_TP_CHAT_H__ */
