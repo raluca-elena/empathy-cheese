@@ -35,7 +35,9 @@
 #include <telepathy-logger/entity.h>
 #include <telepathy-logger/event.h>
 #include <telepathy-logger/text-event.h>
-#include <telepathy-logger/call-event.h>
+#ifdef HAVE_CALL_LOGS
+# include <telepathy-logger/call-event.h>
+#endif
 
 #include "empathy-message.h"
 #include "empathy-utils.h"
@@ -332,7 +334,9 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 			TPL_TEXT_EVENT (logevent)));
 
 		type = tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent));
-	} else if (TPL_IS_CALL_EVENT (logevent)) {
+	}
+#ifdef HAVE_CALL_LOGS
+	else if (TPL_IS_CALL_EVENT (logevent)) {
 		TplCallEvent *call = TPL_CALL_EVENT (logevent);
 		if (tpl_call_event_get_end_reason (call) == TPL_CALL_END_REASON_NO_ANSWER)
 			body = g_strdup_printf (_("Missed call from %s"),
@@ -343,7 +347,9 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		else
 			body = g_strdup_printf (_("Call from %s"),
 				tpl_entity_get_alias (tpl_event_get_sender (logevent)));
-	} else {
+	}
+#endif
+	else {
 		/* Unknown event type */
 		return NULL;
 	}

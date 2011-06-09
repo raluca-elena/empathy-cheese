@@ -214,16 +214,33 @@ AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
 # -----------------------------------------------------------
 # Call support in tp-logger
 # -----------------------------------------------------------
-SAVE_CFLAGS=$CFLAGS
-SAVE_CPPFLAGS=$CPPFLAGS
-CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
-CPPFLAGS="$CPPFLAGS $EMPATHY_CFLAGS"
+AC_ARG_WITH(call-logs,
+            AC_HELP_STRING([--enable-call-logs=@<:@no/yes/auto@:>@],
+            [build with call logs support]),,
+            [with_call_logs=auto])
+if test "x$with_call_logs" != "xno" ; then
+   SAVE_CFLAGS=$CFLAGS
+   SAVE_CPPFLAGS=$CPPFLAGS
+   CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
+   CPPFLAGS="$CPPFLAGS $EMPATHY_CFLAGS"
 
-AC_CHECK_HEADER(telepathy-logger/call-event.h,,
-  AC_MSG_ERROR([tp-logger must be compiled with --enable-call]))
+   AC_CHECK_HEADER(telepathy-logger/call-event.h,
+      have_call_logs="yes", have_call_logs="no")
 
-CFLAGS=$SAVE_CFLAGS
-CPPFLAGS=$SAVE_CPPFLAGS
+   CFLAGS=$SAVE_CFLAGS
+   CPPFLAGS=$SAVE_CPPFLAGS
+
+   if test "x$have_call_logs" = "xyes"; then
+      AC_DEFINE(HAVE_CALL_LOGS, 1, [Define if you have call log support])
+   fi
+else
+  have_call_logs=no
+fi
+
+if test "x$with_call_logs" = "xyes" -a "x$have_call_logs" != "xyes"; then
+   AC_MSG_ERROR([Call logs support requested but telepathy-logger wasn't
+                 built with --enable-call])
+fi
 
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
@@ -607,7 +624,7 @@ Configure summary:
 	Spell checking (enchant)....:  ${have_enchant}
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
-	Geocode support (Geoclue):     ${have_geocode}
+	Geocode support (Geoclue)...:  ${have_geocode}
 	Adium themes (Webkit).......:  ${have_webkit}
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
@@ -621,4 +638,5 @@ Configure summary:
 	Nautilus-sendto plugin......:  ${have_nst}
 	Salut E-D-S support.........:  ${with_eds}
 	Exp. Call channel handler...:  ${have_farstream}
+	Exp. Call log support.......:  ${have_call_logs}
 "

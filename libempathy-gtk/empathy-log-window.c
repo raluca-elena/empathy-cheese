@@ -34,7 +34,9 @@
 #include <telepathy-glib/proxy-subclass.h>
 
 #include <telepathy-logger/telepathy-logger.h>
-#include <telepathy-logger/call-event.h>
+#ifdef HAVE_CALL_LOGS
+# include <telepathy-logger/call-event.h>
+#endif
 
 #include <extensions/extensions.h>
 
@@ -766,6 +768,7 @@ get_icon_for_event (TplEvent *event)
 {
   const gchar *icon = NULL;
 
+#ifdef HAVE_CALL_LOGS
   if (TPL_IS_CALL_EVENT (event))
     {
       TplCallEvent *call = TPL_CALL_EVENT (event);
@@ -780,6 +783,7 @@ get_icon_for_event (TplEvent *event)
       else if (tpl_entity_get_entity_type (receiver) == TPL_ENTITY_SELF)
         icon = EMPATHY_IMAGE_CALL_INCOMING;
     }
+#endif
 
   return icon;
 }
@@ -833,6 +837,7 @@ log_window_append_chat_message (TplEvent *event,
   g_date_time_unref (date);
 }
 
+#ifdef HAVE_CALL_LOGS
 static void
 log_window_append_call (TplEvent *event,
     EmpathyMessage *message)
@@ -897,6 +902,7 @@ log_window_append_call (TplEvent *event,
   g_free (pretty_date);
   g_date_time_unref (started_date);
 }
+#endif
 
 static void
 log_window_append_message (TplEvent *event,
@@ -904,8 +910,10 @@ log_window_append_message (TplEvent *event,
 {
   if (TPL_IS_TEXT_EVENT (event))
     log_window_append_chat_message (event, message);
+#ifdef HAVE_CALL_LOGS
   else if (TPL_IS_CALL_EVENT (event))
     log_window_append_call (event, message);
+#endif
   else
     DEBUG ("Message type not handled");
 }
@@ -2253,7 +2261,7 @@ log_window_what_setup (EmpathyLogWindow *window)
   GtkTreeModel      *model;
   GtkTreeSelection  *selection;
   GtkTreeViewColumn *column;
-  GtkTreeIter        iter, parent;
+  GtkTreeIter        iter;
   GtkTreeStore      *store;
   GtkCellRenderer   *cell;
   guint i;
@@ -2261,13 +2269,18 @@ log_window_what_setup (EmpathyLogWindow *window)
     { TPL_EVENT_MASK_ANY, 0, NULL, _("Anything") },
     { WHAT_TYPE_SEPARATOR, 0, NULL, "separator" },
     { TPL_EVENT_MASK_TEXT, 0, "stock_text_justify", _("Text chats") },
-    { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, "call-start", _("Calls") }
+#ifdef HAVE_CALL_LOGS
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, "call-start", _("Calls") },
+#endif
   };
+#ifdef HAVE_CALL_LOGS
   struct event call_events [] = {
     { TPL_EVENT_MASK_CALL, EVENT_CALL_INCOMING, "call-start", _("Incoming calls") },
     { TPL_EVENT_MASK_CALL, EVENT_CALL_OUTGOING, "call-start", _("Outgoing calls") },
     { TPL_EVENT_MASK_CALL, EVENT_CALL_MISSED, "call-stop", _("Missed calls") }
   };
+  GtkTreeIter parent;
+#endif
 
   view = GTK_TREE_VIEW (window->treeview_what);
   selection = gtk_tree_view_get_selection (view);
@@ -2321,6 +2334,7 @@ log_window_what_setup (EmpathyLogWindow *window)
           -1);
     }
 
+#ifdef HAVE_CALL_LOGS
   gtk_tree_model_iter_nth_child (model, &parent, NULL, 3);
   for (i = 0; i < G_N_ELEMENTS (call_events); i++)
     {
@@ -2332,6 +2346,7 @@ log_window_what_setup (EmpathyLogWindow *window)
           COL_WHAT_ICON, call_events[i].icon,
           -1);
     }
+#endif
 
   gtk_tree_view_expand_all (view);
 
@@ -2423,6 +2438,7 @@ log_window_got_messages_for_date_cb (GObject *manager,
       TplEvent *event = l->data;
       gboolean append = TRUE;
 
+#ifdef HAVE_CALL_LOGS
       if (TPL_IS_CALL_EVENT (l->data)
           && ctx->event_mask & TPL_EVENT_MASK_CALL
           && ctx->event_mask != TPL_EVENT_MASK_ANY)
@@ -2458,6 +2474,7 @@ log_window_got_messages_for_date_cb (GObject *manager,
                 }
             }
         }
+#endif
 
       if (append)
         {
