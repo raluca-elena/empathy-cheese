@@ -42,6 +42,7 @@
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-message.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-time.h>
 
@@ -316,7 +317,7 @@ toolbutton_chat_clicked (GtkToolButton *toolbutton,
   g_return_if_fail (type == COL_TYPE_NORMAL);
 
   contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_dispatcher_chat_with_contact (contact,
+  empathy_chat_with_contact (contact,
       gtk_get_current_event_time ());
 
   g_object_unref (contact);
