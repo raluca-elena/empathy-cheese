@@ -426,7 +426,7 @@ if test "x$enable_geocode" != "xno"; then
       geocode-glib
    ], have_geocode="yes", have_geocode="no")
 
-   if test "x$have_geoclue" = "xyes"; then
+   if test "x$have_geocode" = "xyes"; then
       AC_DEFINE(HAVE_GEOCODE, 1, [Define if you have geocode])
    fi
 else
