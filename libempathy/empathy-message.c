@@ -343,6 +343,9 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 		else
 			body = g_strdup_printf (_("Call from %s"),
 				tpl_entity_get_alias (tpl_event_get_sender (logevent)));
+	} else {
+		/* Unknown event type */
+		return NULL;
 	}
 
 	receiver = tpl_event_get_receiver (logevent);
