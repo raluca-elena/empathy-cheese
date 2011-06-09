@@ -43,56 +43,13 @@
 /* Exit after $TIMEOUT seconds if not displaying any call window */
 #define TIMEOUT 60
 
-static guint nb_windows = 0;
-static guint timeout_id = 0;
+#define EMPATHY_CALL_DBUS_NAME "org.gnome.Empathy.Call"
+
+static GtkApplication *app = NULL;
+static gboolean activated = FALSE;
 static gboolean use_timer = TRUE;
 
-static gboolean
-timeout_cb (gpointer data)
-{
-  DEBUG ("Timing out; exiting");
-
-  gtk_main_quit ();
-  return FALSE;
-}
-
-static void
-start_timer (void)
-{
-  if (!use_timer)
-    return;
-
-  if (timeout_id != 0)
-    return;
-
-  DEBUG ("Start timer");
-
-  timeout_id = g_timeout_add_seconds (TIMEOUT, timeout_cb, NULL);
-}
-
-static void
-stop_timer (void)
-{
-  if (timeout_id == 0)
-    return;
-
-  DEBUG ("Stop timer");
-
-  g_source_remove (timeout_id);
-  timeout_id = 0;
-}
-
-static void
-call_window_destroy_cb (EmpathyCallWindow *window,
-    gpointer user_data)
-{
-  nb_windows--;
-
-  if (nb_windows > 0)
-    return;
-
-  start_timer ();
-}
+static EmpathyCallFactory *call_factory = NULL;
 
 static void
 new_call_handler_cb (EmpathyCallFactory *factory,
@@ -106,13 +63,41 @@ new_call_handler_cb (EmpathyCallFactory *factory,
 
   window = empathy_call_window_new (handler);
 
-  nb_windows++;
-  stop_timer ();
+  g_application_hold (G_APPLICATION (app));
 
-  g_signal_connect (window, "destroy",
-      G_CALLBACK (call_window_destroy_cb), NULL);
+  g_signal_connect_swapped (window, "destroy",
+      G_CALLBACK (g_application_release), app);
 
   gtk_widget_show (GTK_WIDGET (window));
+}
+
+static void
+activate_cb (GApplication *application)
+{
+  GError *error = NULL;
+
+  if (activated)
+    return;
+
+  activated = TRUE;
+
+  if (!use_timer)
+    {
+      /* keep a 'ref' to the application */
+      g_application_hold (G_APPLICATION (app));
+    }
+
+  g_assert (call_factory == NULL);
+  call_factory = empathy_call_factory_initialise ();
+
+  g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
+      G_CALLBACK (new_call_handler_cb), NULL);
+
+  if (!empathy_call_factory_register (call_factory, &error))
+    {
+      g_critical ("Failed to register Handler: %s", error->message);
+      g_error_free (error);
+    }
 }
 
 int
@@ -126,8 +111,8 @@ main (int argc,
 #ifdef ENABLE_DEBUG
   TpDebugSender *debug_sender;
 #endif
-  EmpathyCallFactory *call_factory;
   GError *error = NULL;
+  gint retval;
 
   /* Init */
   g_thread_init (NULL);
@@ -156,23 +141,14 @@ main (int argc,
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
 
+  app = gtk_application_new (EMPATHY_CALL_DBUS_NAME, G_APPLICATION_FLAGS_NONE);
+  g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
+
 #ifdef ENABLE_DEBUG
   /* Set up debug sender */
   debug_sender = tp_debug_sender_dup ();
   g_log_set_default_handler (tp_debug_sender_log_handler, G_LOG_DOMAIN);
 #endif
-
-  call_factory = empathy_call_factory_initialise ();
-
-  g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
-      G_CALLBACK (new_call_handler_cb), NULL);
-
-  if (!empathy_call_factory_register (call_factory, &error))
-    {
-      g_critical ("Failed to register Handler: %s", error->message);
-      g_error_free (error);
-      return EXIT_FAILURE;
-    }
 
   if (g_getenv ("EMPATHY_PERSIST") != NULL)
     {
@@ -181,15 +157,19 @@ main (int argc,
       use_timer = FALSE;
     }
 
-  start_timer ();
+  /* the inactivity timeout can only be set while the application is held */
+  g_application_hold (G_APPLICATION (app));
+  g_application_set_inactivity_timeout (G_APPLICATION (app), TIMEOUT * 1000);
+  g_application_release (G_APPLICATION (app));
 
-  gtk_main ();
+  retval = g_application_run (G_APPLICATION (app), argc, argv);
 
-  g_object_unref (call_factory);
+  g_object_unref (app);
+  tp_clear_object (&call_factory);
 
 #ifdef ENABLE_DEBUG
   g_object_unref (debug_sender);
 #endif
 
-  return EXIT_SUCCESS;
+  return retval;
 }
