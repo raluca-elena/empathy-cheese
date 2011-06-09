@@ -1984,7 +1984,7 @@ empathy_individual_match_string (FolksIndividual *individual,
 
           /* Accept the persona if @text is a full prefix of his ID; that allows
            * user to find, say, a jabber contact by typing his JID. */
-          if (!g_str_has_prefix (str, text))
+          if (g_str_has_prefix (str, text))
             {
               retval = TRUE;
             }
