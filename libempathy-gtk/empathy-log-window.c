@@ -624,7 +624,7 @@ is_same_confroom (TplEvent *e1,
     return FALSE;
 
   return g_str_equal (tpl_entity_get_identifier (room1),
-      tpl_entity_get_identifier (room1));
+      tpl_entity_get_identifier (room2));
 }
 
 static TplEntity *
