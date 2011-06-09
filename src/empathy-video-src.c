@@ -24,6 +24,9 @@
 
 #include <gst/interfaces/colorbalance.h>
 
+#define DEBUG_FLAG EMPATHY_DEBUG_VOIP
+#include <libempathy/empathy-debug.h>
+
 #include "empathy-video-src.h"
 
 G_DEFINE_TYPE(EmpathyGstVideoSrc, empathy_video_src, GST_TYPE_BIN)
@@ -143,7 +146,7 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
     }
 
   str = gst_caps_to_string (caps);
-  g_debug ("Current video src caps are : %s", str);
+  DEBUG ("Current video src caps are : %s", str);
   g_free (str);
 
   if ((element = empathy_gst_add_to_bin (GST_BIN (obj),

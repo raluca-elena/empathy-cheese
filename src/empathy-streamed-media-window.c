@@ -2503,7 +2503,7 @@ empathy_streamed_media_window_src_added_cb (EmpathyStreamedMediaHandler *handler
             }
           else
             {
-              g_debug ("Could not link real sink, linked fakesink instead");
+              DEBUG ("Could not link real sink, linked fakesink instead");
             }
           gst_object_unref (sinkpad);
         }

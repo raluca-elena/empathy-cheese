@@ -1731,7 +1731,7 @@ empathy_call_window_conference_added_cb (EmpathyCallHandler *handler,
   FsElementAddedNotifier *notifier;
   GKeyFile *keyfile;
 
-  g_debug ("Conference added");
+  DEBUG ("Conference added");
 
   /* Add notifier to set the various element properties as needed */
   notifier = fs_element_added_notifier_new ();
@@ -1938,7 +1938,7 @@ empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
 
-  g_print ("window: removing content\n");
+  DEBUG ("removing content");
 
   /*
    * This assumes that there is only one video stream per channel...
@@ -2449,7 +2449,7 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
             }
           else
             {
-              g_debug ("Could not link real sink, linked fakesink instead");
+              DEBUG ("Could not link real sink, linked fakesink instead");
             }
           gst_object_unref (sinkpad);
         }

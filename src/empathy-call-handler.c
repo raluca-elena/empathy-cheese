@@ -656,7 +656,7 @@ empathy_call_handler_bus_message (EmpathyCallHandler *handler,
       FsCodec *codec;
       FsSession *session;
 
-      g_print ("empathy_call_handler_bus_message: farsight-send-codec-changed\n");
+      DEBUG ("farsight-send-codec-changed");
 
       val = gst_structure_get_value (s, "codec");
       codec = g_value_get_boxed (val);
@@ -673,7 +673,7 @@ empathy_call_handler_bus_message (EmpathyCallHandler *handler,
       GList *codecs;
       FsStream *stream;
 
-      g_print ("empathy_call_handler_bus_message: farsight-recv-codecs-changed\n");
+      DEBUG ("farsight-recv-codecs-changed");
 
       val = gst_structure_get_value (s, "codecs");
       codecs = g_value_get_boxed (val);
@@ -690,7 +690,7 @@ empathy_call_handler_bus_message (EmpathyCallHandler *handler,
       FsCandidate *remote_candidate, *local_candidate;
       FsStream *stream;
 
-      g_print ("empathy_call_handler_bus_message: farsight-new-active-candidate-pair\n");
+      DEBUG ("farsight-new-active-candidate-pair");
 
       val = gst_structure_get_value (s, "remote-candidate");
       remote_candidate = g_value_get_boxed (val);
@@ -821,7 +821,7 @@ on_tf_channel_content_removed_cb (TfChannel *tfchannel,
   GstPad *spad;
   gboolean retval;
 
-  g_print ("removing content\n");
+  DEBUG ("removing content");
 
   g_object_get (content, "media-type", &mtype,
     "sink-pad", &spad, NULL);
