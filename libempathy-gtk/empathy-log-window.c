@@ -2252,7 +2252,6 @@ log_window_what_setup (EmpathyLogWindow *window)
   GtkTreeView       *view;
   GtkTreeModel      *model;
   GtkTreeSelection  *selection;
-  GtkTreeSortable   *sortable;
   GtkTreeViewColumn *column;
   GtkTreeIter        iter, parent;
   GtkTreeStore      *store;
@@ -2281,7 +2280,6 @@ log_window_what_setup (EmpathyLogWindow *window)
       G_TYPE_STRING);     /* icon */
 
   model = GTK_TREE_MODEL (store);
-  sortable = GTK_TREE_SORTABLE (store);
 
   gtk_tree_view_set_model (view, model);
 
@@ -2591,7 +2589,6 @@ log_manager_got_dates_cb (GObject *manager,
   Ctx *ctx = user_data;
   GtkTreeView *view;
   GtkTreeModel *model;
-  GtkTreeSelection *selection;
   GtkListStore *store;
   GtkTreeIter iter;
   GList *dates;
@@ -2615,7 +2612,6 @@ log_manager_got_dates_cb (GObject *manager,
   view = GTK_TREE_VIEW (log_window->treeview_when);
   model = gtk_tree_view_get_model (view);
   store = GTK_LIST_STORE (model);
-  selection = gtk_tree_view_get_selection (view);
 
   for (l = dates; l != NULL; l = l->next)
     {
