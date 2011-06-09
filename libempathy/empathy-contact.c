@@ -652,16 +652,25 @@ empathy_contact_new (TpContact *tp_contact)
   return retval;
 }
 
+typedef struct
+{
+  TplEntity *entity;
+  TpAccount *account;
+} FindContactData;
+
 static gboolean
 contact_is_tpl_entity (gpointer key,
     gpointer value,
     gpointer user_data)
 {
-  TpContact *contact = key;
-  TplEntity *entity = user_data;
+  EmpathyContact *contact = value;
+  FindContactData *data = user_data;
 
-  return !tp_strdiff (tp_contact_get_identifier (contact),
-      tpl_entity_get_identifier (entity));
+  return !tp_strdiff (empathy_contact_get_id (contact),
+              tpl_entity_get_identifier (data->entity)) &&
+         !tp_strdiff (tp_proxy_get_object_path (data->account),
+              tp_proxy_get_object_path (
+                  empathy_contact_get_account (contact)));
 }
 
 EmpathyContact *
@@ -675,8 +684,15 @@ empathy_contact_from_tpl_contact (TpAccount *account,
   g_return_val_if_fail (TPL_IS_ENTITY (tpl_entity), NULL);
 
   if (contacts_table != NULL)
-    existing_contact = g_hash_table_find (contacts_table,
-        contact_is_tpl_entity, tpl_entity);
+    {
+      FindContactData data;
+
+      data.entity = tpl_entity;
+      data.account = account;
+
+      existing_contact = g_hash_table_find (contacts_table,
+        contact_is_tpl_entity, &data);
+    }
 
   if (existing_contact != NULL)
     {
