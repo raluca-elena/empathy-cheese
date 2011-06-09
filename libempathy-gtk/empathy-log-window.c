@@ -2480,7 +2480,7 @@ log_window_got_messages_for_date_cb (GObject *manager,
         {
           EmpathyMessage *msg = empathy_message_from_tpl_log_event (event);
           log_window_append_message (event, msg);
-          g_object_unref (msg);
+          tp_clear_object (&msg);
         }
 
       g_object_unref (event);
