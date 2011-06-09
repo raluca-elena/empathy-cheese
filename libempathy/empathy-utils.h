@@ -66,15 +66,6 @@ xmlNodePtr   empathy_xml_node_find_child_prop_value (xmlNodePtr       node,
 						    const gchar     *prop_name,
 						    const gchar     *prop_value);
 
-/* Calls */
-void         empathy_call_new_with_streams		(EmpathyContact *contact,
-							 gboolean initial_audio,
-							 gboolean initial_video,
-							 gint64 timestamp);
-GHashTable * empathy_call_create_streamed_media_request (EmpathyContact *contact,
-							 gboolean initial_audio,
-							 gboolean initial_video);
-
 /* Others */
 const gchar * empathy_presence_get_default_message  (TpConnectionPresenceType presence);
 const gchar * empathy_presence_to_str               (TpConnectionPresenceType presence);

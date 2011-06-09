@@ -10,6 +10,7 @@ AM_CPPFLAGS =                                           \
 	-DG_LOG_DOMAIN=\"empathy\"			\
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
+	$(YELL_CFLAGS)					\
 	$(GEOCLUE_CFLAGS)				\
 	$(GEOCODE_CFLAGS)				\
 	$(NETWORK_MANAGER_CFLAGS)			\
@@ -110,6 +111,7 @@ nodist_libempathy_la_SOURCES =\
 
 libempathy_la_LIBADD =		\
 	$(top_builddir)/extensions/libemp-extensions.la \
+	$(top_builddir)/telepathy-yell/telepathy-yell/libtelepathy-yell.la \
 	$(GCR_LIBS) \
 	$(EMPATHY_LIBS) \
 	$(GEOCLUE_LIBS) \
@@ -134,12 +136,12 @@ empathy-marshal.list: $(libempathy_la_SOURCES) Makefile.am
 		mv $@.tmp $@; \
 	fi
 
-%-marshal.h: %-marshal.list Makefile
-	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.h
+empathy-marshal.h: empathy-marshal.list Makefile
+	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_empathy_marshal $< > empathy-marshal.h
 
-%-marshal.c: %-marshal.list Makefile
+empathy-marshal.c: empathy-marshal.list Makefile
 	$(AM_V_GEN)echo "#include \"empathy-marshal.h\"" > $@ && \
-	$(GLIB_GENMARSHAL) --body --prefix=_$(subst -,_,$*)_marshal $< >> $*-marshal.c
+	$(GLIB_GENMARSHAL) --body --prefix=_empathy_marshal $< >> empathy-marshal.c
 
 empathy-enum-types.h: stamp-empathy-enum-types.h
 	$(AM_V_GEN)true

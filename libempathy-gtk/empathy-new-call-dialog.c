@@ -28,6 +28,8 @@
 
 #include <telepathy-glib/interfaces.h>
 
+#include <telepathy-yell/telepathy-yell.h>
+
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-utils.h>
@@ -41,6 +43,7 @@
 
 #include "empathy-new-call-dialog.h"
 #include "empathy-account-chooser.h"
+#include "empathy-call-utils.h"
 
 static EmpathyNewCallDialog *dialog_singleton = NULL;
 
@@ -62,21 +65,6 @@ struct _EmpathyNewCallDialogPriv {
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_NEW_CALL_DIALOG, \
     EmpathyNewCallDialogPriv))
 
-static void
-create_media_channel_cb (GObject *source,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  GError *error = NULL;
-
-  if (!tp_account_channel_request_create_channel_finish (
-        TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
-    {
-      DEBUG ("Failed to create media channel: %s", error->message);
-      g_error_free (error);
-    }
-}
-
 /**
  * SECTION:empathy-new-call-dialog
  * @title: EmpathyNewCallDialog
@@ -86,34 +74,6 @@ create_media_channel_cb (GObject *source,
  * #EmpathyNewCallDialog is a dialog which allows a call
  * to be started with any contact on any enabled account.
  */
-
-static void
-call_contact (TpAccount *account,
-    const gchar *contact_id,
-    gboolean video,
-    gint64 timestamp)
-{
-  GHashTable *request;
-  TpAccountChannelRequest *req;
-
-  request = tp_asv_new (
-      TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
-        TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
-      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
-      TP_PROP_CHANNEL_TARGET_ID, G_TYPE_STRING, contact_id,
-      TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_AUDIO, G_TYPE_BOOLEAN,
-        TRUE,
-      TP_PROP_CHANNEL_TYPE_STREAMED_MEDIA_INITIAL_VIDEO, G_TYPE_BOOLEAN,
-        video,
-      NULL);
-
-  req = tp_account_channel_request_new (account, request, timestamp);
-
-  tp_account_channel_request_create_channel_async (req, EMPATHY_AV_BUS_NAME,
-      NULL, create_media_channel_cb, NULL);
-
-  g_object_unref (req);
-}
 
 static void
 empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
@@ -134,7 +94,8 @@ empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
    * we return from this function. */
   video = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->check_video));
 
-  call_contact (account, contact_id, video,
+  empathy_call_new_with_streams (contact_id,
+      account, TRUE, video,
       empathy_get_current_action_time ());
 
 out:
@@ -169,7 +130,8 @@ conn_prepared_cb (GObject *conn,
 
       chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
 
-      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA))
+      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA)
+          && tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL))
         continue;
 
       if (tp_asv_get_uint32 (fixed, TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) !=

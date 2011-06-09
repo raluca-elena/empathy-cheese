@@ -51,6 +51,7 @@ struct _EmpathyEventManagerClass {
 typedef enum {
     EMPATHY_EVENT_TYPE_CHAT,
     EMPATHY_EVENT_TYPE_VOIP,
+    EMPATHY_EVENT_TYPE_CALL,
     EMPATHY_EVENT_TYPE_TRANSFER,
     EMPATHY_EVENT_TYPE_SUBSCRIPTION,
     EMPATHY_EVENT_TYPE_PRESENCE_ONLINE,
@@ -67,6 +68,7 @@ typedef struct {
     gchar *header;
     gchar *message;
     gboolean must_ack;
+    GObject *handler_instance;
 } EmpathyEvent;
 
 GType                empathy_event_manager_get_type      (void) G_GNUC_CONST;

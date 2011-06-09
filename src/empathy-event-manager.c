@@ -29,6 +29,8 @@
 #include <telepathy-glib/interfaces.h>
 #include <telepathy-glib/simple-approver.h>
 
+#include <telepathy-yell/telepathy-yell.h>
+
 #include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
@@ -55,6 +57,8 @@
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyEventManager)
 
 #define NOTIFICATION_TIMEOUT 2 /* seconds */
+
+#define ACCEPT_WITHOUT_VIDEO 1
 
 /* The time interval in milliseconds between 2 incoming rings */
 #define MS_BETWEEN_RING 500
@@ -233,6 +237,7 @@ event_manager_add (EmpathyEventManager *manager,
   event->public.header = g_strdup (header);
   event->public.message = g_strdup (message);
   event->public.must_ack = (func != NULL);
+  event->public.handler_instance = approval->handler_instance;
   event->inhibit = FALSE;
   event->func = func;
   event->user_data = user_data;
@@ -406,6 +411,13 @@ reject_channel_claim_cb (GObject *source,
     {
       empathy_tp_streamed_media_close (user_data);
     }
+  else if (TPY_IS_CALL_CHANNEL (user_data))
+    {
+      tpy_call_channel_hangup_async (user_data,
+          TPY_CALL_STATE_CHANGE_REASON_USER_REQUESTED,
+          "", "", NULL, NULL);
+      tp_channel_close_async (user_data, NULL, NULL);
+    }
   else if (EMPATHY_IS_TP_CHAT (user_data))
     {
       empathy_tp_chat_leave (user_data, "");
@@ -475,13 +487,19 @@ event_manager_call_window_confirmation_dialog_response_cb (GtkDialog *dialog,
   gtk_widget_destroy (approval->dialog);
   approval->dialog = NULL;
 
-  if (response != GTK_RESPONSE_ACCEPT)
+  if (response == GTK_RESPONSE_ACCEPT)
     {
-      reject_approval (approval);
+      event_manager_approval_approve (approval);
+    }
+  else if (response == ACCEPT_WITHOUT_VIDEO)
+    {
+      tpy_call_channel_send_video (TPY_CALL_CHANNEL (approval->main_channel),
+        FALSE);
+      event_manager_approval_approve (approval);
     }
   else
     {
-      event_manager_approval_approve (approval);
+      reject_approval (approval);
     }
 }
 
@@ -491,9 +509,9 @@ event_channel_process_voip_func (EventPriv *event)
   GtkWidget *dialog;
   GtkWidget *button;
   GtkWidget *image;
-  EmpathyTpStreamedMedia *call;
   gboolean video;
   gchar *title;
+  EmpathyEventType etype = event->public.type;
 
   if (event->approval->dialog != NULL)
     {
@@ -501,9 +519,23 @@ event_channel_process_voip_func (EventPriv *event)
       return;
     }
 
-  call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
-
-  video = empathy_tp_streamed_media_has_initial_video (call);
+  if (etype == EMPATHY_EVENT_TYPE_VOIP)
+    {
+      EmpathyTpStreamedMedia *call;
+      call = EMPATHY_TP_STREAMED_MEDIA (event->approval->handler_instance);
+      video = empathy_tp_streamed_media_has_initial_video (call);
+    }
+  else if (etype == EMPATHY_EVENT_TYPE_CALL)
+    {
+      TpyCallChannel *call;
+      call = TPY_CALL_CHANNEL (event->approval->handler_instance);
+      g_object_get (G_OBJECT (call), "initial-video", &video, NULL);
+    }
+  else
+    {
+      g_warning ("Unknown event type: %d", event->public.type);
+      return;
+    }
 
   dialog = gtk_message_dialog_new (NULL, 0,
       GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
@@ -545,15 +577,26 @@ event_channel_process_voip_func (EventPriv *event)
     GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
 
-  button = gtk_dialog_add_button (GTK_DIALOG (dialog),
-      _("_Answer"), GTK_RESPONSE_ACCEPT);
+  if (video && etype == EMPATHY_EVENT_TYPE_CALL)
+    {
+      button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+        _("_Answer"), ACCEPT_WITHOUT_VIDEO);
 
-  image = gtk_image_new_from_icon_name ("call-start", GTK_ICON_SIZE_BUTTON);
+      image = gtk_image_new_from_icon_name ("call-start",
+        GTK_ICON_SIZE_BUTTON);
+      gtk_button_set_image (GTK_BUTTON (button), image);
+    }
+
+  button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+    video ? _("_Answer with video") : _("_Answer"), GTK_RESPONSE_ACCEPT);
+
+  image = gtk_image_new_from_icon_name ("call-start",
+        GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (button), image);
 
   g_signal_connect (dialog, "response",
-      G_CALLBACK (event_manager_call_window_confirmation_dialog_response_cb),
-      event->approval);
+    G_CALLBACK (event_manager_call_window_confirmation_dialog_response_cb),
+    event->approval);
 
   gtk_widget_show (dialog);
 
@@ -613,7 +656,8 @@ event_manager_approval_done (EventManagerApproval *approval)
 
       channel_type = tp_channel_get_channel_type_id (approval->main_channel);
 
-      if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
+      if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA ||
+          channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
         {
           priv->ringing--;
           if (priv->ringing == 0)
@@ -648,6 +692,79 @@ cdo_invalidated_cb (TpProxy *cdo,
   DEBUG ("ChannelDispatchOperation has been invalidated: %s", message);
 
   event_manager_approval_done (approval);
+}
+
+static void
+event_manager_call_state_changed_cb (TpyCallChannel *call,
+  TpyCallState state,
+  TpyCallFlags flags,
+   const GValueArray *call_state_reason,
+  GHashTable *call_state_details,
+  EventManagerApproval *approval)
+{
+  if (state == TPY_CALL_STATE_ENDED)
+    {
+      DEBUG ("Call ended, seems we missed it :/");
+      reject_approval (approval);
+    }
+}
+
+static void
+event_manager_call_channel_got_contact_cb (TpConnection *connection,
+                                 EmpathyContact *contact,
+                                 const GError *error,
+                                 gpointer user_data,
+                                 GObject *object)
+{
+  EventManagerApproval *approval = (EventManagerApproval *) user_data;
+  EmpathyEventManagerPriv *priv = GET_PRIV (approval->manager);
+  GtkWidget *window;
+  TpyCallChannel *call;
+  gchar *header;
+  gboolean video;
+
+  call = TPY_CALL_CHANNEL (approval->handler_instance);
+
+  if (error != NULL)
+    {
+      DEBUG ("Can't get the contact for the call.. Rejecting?");
+      reject_approval (approval);
+      return;
+    }
+
+  if (tpy_call_channel_get_state (call, NULL, NULL) == TPY_CALL_STATE_ENDED)
+    {
+      DEBUG ("Call already ended, seems we missed it :/");
+      reject_approval (approval);
+      return;
+    }
+
+  approval->handler = g_signal_connect (call, "state-changed",
+    G_CALLBACK (event_manager_call_state_changed_cb), approval);
+
+  window = empathy_main_window_dup ();
+  approval->contact = g_object_ref (contact);
+
+  g_object_get (G_OBJECT (call), "initial-video", &video, NULL);
+
+  header = g_strdup_printf (
+    video ? _("Incoming video call from %s") :_("Incoming call from %s"),
+    empathy_contact_get_alias (approval->contact));
+
+  event_manager_add (approval->manager, NULL,
+      approval->contact, EMPATHY_EVENT_TYPE_CALL,
+      video ? EMPATHY_IMAGE_VIDEO_CALL : EMPATHY_IMAGE_VOIP,
+      header, NULL, approval,
+      event_channel_process_voip_func, NULL);
+
+  g_free (header);
+
+  priv->ringing++;
+  if (priv->ringing == 1)
+    empathy_sound_manager_start_playing (priv->sound_mgr, window,
+        EMPATHY_SOUND_PHONE_INCOMING, MS_BETWEEN_RING);
+
+  g_object_unref (window);
 }
 
 static void
@@ -884,6 +1001,7 @@ find_main_channel (GList *channels)
       channel_type = tp_channel_get_channel_type_id (channel);
 
       if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA ||
+          channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL ||
           channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER ||
           channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
         return channel;
@@ -985,7 +1103,8 @@ approve_channels (TpSimpleApprover *approver,
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_STREAMED_MEDIA)
     {
       EmpathyContact *contact;
-      EmpathyTpStreamedMedia *call = empathy_tp_streamed_media_new (account, channel);
+      EmpathyTpStreamedMedia *call = empathy_tp_streamed_media_new (account,
+        channel);
 
       approval->handler_instance = G_OBJECT (call);
 
@@ -1004,6 +1123,19 @@ approve_channels (TpSimpleApprover *approver,
         }
 
     }
+  else if (channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
+    {
+      TpyCallChannel *call = TPY_CALL_CHANNEL (channel);
+      const gchar *id;
+
+      approval->handler_instance = g_object_ref (call);
+
+      id = tp_channel_get_identifier (channel);
+
+      empathy_tp_contact_factory_get_from_id (connection, id,
+        event_manager_call_channel_got_contact_cb,
+        approval, NULL, G_OBJECT (self));
+    }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
     {
       TpHandle handle;
@@ -1013,7 +1145,6 @@ approve_channels (TpSimpleApprover *approver,
 
       handle = tp_channel_get_handle (channel, NULL);
 
-      connection = tp_channel_borrow_connection (channel);
       empathy_tp_contact_factory_get_from_handle (connection, handle,
         event_manager_ft_got_contact_cb, approval, NULL, G_OBJECT (self));
     }
@@ -1320,6 +1451,12 @@ empathy_event_manager_init (EmpathyEventManager *manager)
       tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        NULL));
+  tp_base_client_take_approver_filter (priv->approver,
+      tp_asv_new (
+        TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TPY_IFACE_CHANNEL_TYPE_CALL,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         NULL));
 

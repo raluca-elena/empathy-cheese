@@ -46,6 +46,7 @@
 #include "empathy-ui-utils.h"
 #include "empathy-share-my-desktop.h"
 #include "empathy-linking-dialog.h"
+#include "empathy-call-utils.h"
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIndividualMenu)
 
@@ -617,7 +618,9 @@ empathy_individual_audio_call_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_call_new_with_streams (contact, TRUE, FALSE,
+  empathy_call_new_with_streams (empathy_contact_get_id (contact),
+      empathy_contact_get_account (contact),
+      TRUE, FALSE,
       empathy_get_current_action_time ());
 }
 
@@ -659,7 +662,9 @@ empathy_individual_video_call_menu_item_activated (GtkMenuItem *item,
 {
   g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
-  empathy_call_new_with_streams (contact, TRUE, TRUE,
+  empathy_call_new_with_streams (empathy_contact_get_id (contact),
+      empathy_contact_get_account (contact),
+      TRUE, TRUE,
       empathy_get_current_action_time ());
 }
 

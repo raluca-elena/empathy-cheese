@@ -26,6 +26,12 @@
           </object>
         </child>
         <child>
+          <object class="GtkToggleAction" id="menudialpad">
+            <property name="name">menudialpad</property>
+            <property name="label" translatable="yes">_Dialpad</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="camera">
             <property name="name">camera</property>
             <property name="label" translatable="yes">V_ideo</property>
@@ -82,6 +88,7 @@
         <menu action="call">
           <menuitem action="menuhangup"/>
           <menuitem action="menuredial"/>
+          <menuitem action="menudialpad"/>
         </menu>
         <menu action="camera">
           <menuitem action="action_camera_off"/>

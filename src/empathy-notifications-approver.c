@@ -25,7 +25,10 @@
 #include <libnotify/notify.h>
 #include <telepathy-glib/telepathy-glib.h>
 
+#include <telepathy-yell/telepathy-yell.h>
+
 #include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-tp-streamed-media.h>
 
 #include <libempathy-gtk/empathy-notify-manager.h>
 
@@ -119,6 +122,20 @@ notification_close_helper (EmpathyNotificationsApprover *self)
 }
 
 static void
+notification_approve_no_video_cb (NotifyNotification *notification,
+    gchar *action,
+    EmpathyNotificationsApprover *self)
+{
+  if (self->priv->event)
+    {
+      tpy_call_channel_send_video (
+          TPY_CALL_CHANNEL (self->priv->event->handler_instance),
+          FALSE);
+      empathy_event_approve (self->priv->event);
+    }
+}
+
+static void
 notification_approve_cb (NotifyNotification *notification,
     gchar *action,
     EmpathyNotificationsApprover *self)
@@ -178,6 +195,8 @@ static void
 add_notification_actions (EmpathyNotificationsApprover *self,
     NotifyNotification *notification)
 {
+  gboolean video;
+
   switch (self->priv->event->type) {
     case EMPATHY_EVENT_TYPE_CHAT:
       notify_notification_add_action (notification,
@@ -186,12 +205,27 @@ add_notification_actions (EmpathyNotificationsApprover *self,
       break;
 
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
+      if (self->priv->event->type == EMPATHY_EVENT_TYPE_VOIP)
+        video = empathy_tp_streamed_media_has_initial_video (
+            EMPATHY_TP_STREAMED_MEDIA (self->priv->event->handler_instance));
+      else
+        video = tpy_call_channel_has_initial_video (
+            TPY_CALL_CHANNEL (self->priv->event->handler_instance));
+
       notify_notification_add_action (notification,
         "reject", _("Reject"), (NotifyActionCallback) notification_decline_cb,
           self, NULL);
 
+      if (video && self->priv->event->type == EMPATHY_EVENT_TYPE_CALL)
+          notify_notification_add_action (notification,
+          "answer-no-video", _("Answer"),
+          (NotifyActionCallback) notification_approve_no_video_cb,
+          self, NULL);
+
       notify_notification_add_action (notification,
-        "answer", _("Answer"), (NotifyActionCallback) notification_approve_cb,
+          "answer", video ? _("Answer with video") : _("Answer"),
+          (NotifyActionCallback) notification_approve_cb,
           self, NULL);
       break;
 
@@ -241,6 +275,7 @@ notification_is_urgent (EmpathyNotificationsApprover *self,
   switch (self->priv->event->type) {
     case EMPATHY_EVENT_TYPE_CHAT:
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
     case EMPATHY_EVENT_TYPE_TRANSFER:
     case EMPATHY_EVENT_TYPE_INVITATION:
     case EMPATHY_EVENT_TYPE_AUTH:
@@ -266,6 +301,7 @@ get_category_for_event_type (EmpathyEventType type)
     case EMPATHY_EVENT_TYPE_PRESENCE_OFFLINE:
       return "presence.offline";
     case EMPATHY_EVENT_TYPE_VOIP:
+    case EMPATHY_EVENT_TYPE_CALL:
     case EMPATHY_EVENT_TYPE_TRANSFER:
     case EMPATHY_EVENT_TYPE_INVITATION:
     case EMPATHY_EVENT_TYPE_AUTH:

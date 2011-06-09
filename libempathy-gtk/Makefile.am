@@ -8,6 +8,7 @@ AM_CPPFLAGS =                                           \
 	-DPKGDATADIR=\""$(pkgdatadir)"\"		\
 	-DGCR_API_SUBJECT_TO_CHANGE			\
 	$(EMPATHY_CFLAGS)				\
+	$(YELL_CFLAGS)					\
 	$(ENCHANT_CFLAGS)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
 	$(GEOCLUE_CFLAGS)				\
@@ -35,6 +36,7 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-account-widget.c		\
 	empathy-avatar-chooser.c		\
 	empathy-avatar-image.c			\
+	empathy-call-utils.c			\
 	empathy-cell-renderer-activatable.c	\
 	empathy-cell-renderer-expander.c	\
 	empathy-cell-renderer-text.c		\
@@ -95,6 +97,7 @@ libempathy_gtk_headers =			\
 	empathy-account-widget.h		\
 	empathy-avatar-chooser.h		\
 	empathy-avatar-image.h			\
+	empathy-call-utils.h			\
 	empathy-cell-renderer-activatable.h	\
 	empathy-cell-renderer-expander.h	\
 	empathy-cell-renderer-text.h		\
@@ -159,6 +162,7 @@ nodist_libempathy_gtk_la_SOURCES =\
 	$(BUILT_SOURCES)
 
 libempathy_gtk_la_LIBADD =			\
+	$(EMPATHY_LIBS)			\
 	$(EMPATHY_LIBS)			\
 	$(GTK_LIBS)			\
 	$(LIBNOTIFY_LIBS)			\

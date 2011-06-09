@@ -35,6 +35,7 @@ FOLKS_REQUIRED=0.5.1
 GLIB_REQUIRED=2.28.0
 GNUTLS_REQUIRED=2.8.5
 GTK_REQUIRED=3.0.2
+GSTREAMER_REQUIRED=0.10.32
 KEYRING_REQUIRED=2.26.0
 GCR_REQUIRED=2.91.4
 LIBCANBERRA_GTK_REQUIRED=0.25
@@ -61,6 +62,15 @@ GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 # FIXME: don't disable deprecated symbols until bgo #636654 has been fixed
 #ifelse(empathy_released, 1, [], [enable_maintainer_mode="yes"])
 #GNOME_MAINTAINER_MODE_DEFINES
+
+# telepathy-yell
+prev_top_build_prefix=$ac_top_build_prefix
+prev_ac_configure_args=$ac_configure_args
+ac_configure_args="$ac_configure_args --disable-shared-library"
+AX_CONFIG_DIR([telepathy-yell])
+ac_top_build_prefix=$prev_top_build_prefix
+ac_configure_args=$prev_ac_configure_args
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:"$ac_top_build_prefix"telepathy-yell/telepathy-yell
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
@@ -154,7 +164,7 @@ PKG_CHECK_MODULES(EMPATHY,
    gmodule-export-2.0
    gobject-2.0
    gsettings-desktop-schemas
-   gstreamer-0.10
+   gstreamer-0.10 >= $GSTREAMER_REQUIRED
    gstreamer-interfaces-0.10
    libxml-2.0
    telepathy-glib >= $TELEPATHY_GLIB_REQUIRED
@@ -166,11 +176,39 @@ PKG_CHECK_MODULES(EMPATHY,
    gcr-3 >= $GCR_REQUIRED
 ])
 
+PKG_CHECK_MODULES(YELL, [telepathy-yell])
+
 PKG_CHECK_MODULES(EMPATHY_AV,
 [
    farsight2-0.10
    telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
 ])
+
+# -----------------------------------------------------------
+# Call interface
+# -----------------------------------------------------------
+AC_ARG_WITH(call,
+            AC_HELP_STRING([--enable-call=@<:@no/yes/auto@:>@],
+            [build with Call interface support]),,
+            [with_call=auto])
+if test "x$with_call" != "xno" ; then
+   PKG_CHECK_MODULES(EMPATHY_CALL,
+   [
+      farsight2-0.10
+      telepathy-farstream
+   ], have_farstream="yes", have_farstream="no" )
+
+   if test "x$have_farstream" = "xyes"; then
+      AC_DEFINE(HAVE_CALL, 1, [Define if you have Call channel support])
+   fi
+else
+  have_farstream=no
+fi
+
+if test "x$with_call" = "xyes" -a "x$have_farstream" != "xyes"; then
+   AC_MSG_ERROR([Could not find Call handler dependencies.])
+fi
+AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
 
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
@@ -556,7 +594,7 @@ Configure summary:
 	Location awareness (Geoclue):  ${have_geoclue}
 	Geocode support (Geoclue):     ${have_geocode}
 	Adium themes (Webkit).......:  ${have_webkit}
-	Meego widgets ..............:  ${have_meego}
+	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
 
@@ -567,4 +605,5 @@ Configure summary:
     Extras:
 	Nautilus-sendto plugin......:  ${have_nst}
 	Salut E-D-S support.........:  ${with_eds}
+	Exp. Call channel handler...:  ${have_farstream}
 "
