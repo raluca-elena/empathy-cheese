@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+#include <glib/gi18n-lib.h>
+
 #include <telepathy-glib/util.h>
 #include <telepathy-glib/account.h>
 #include <telepathy-glib/account-manager.h>
@@ -33,6 +35,9 @@
 #include <telepathy-logger/entity.h>
 #include <telepathy-logger/event.h>
 #include <telepathy-logger/text-event.h>
+#ifdef HAVE_CALL_LOGS
+# include <telepathy-logger/call-event.h>
+#endif
 
 #include "empathy-message.h"
 #include "empathy-utils.h"
@@ -304,6 +309,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	TplEntity *sender = NULL;
 	gchar *body= NULL;
 	EmpathyContact *contact;
+	TpChannelTextMessageType type = TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL;
 
 	g_return_val_if_fail (TPL_IS_EVENT (logevent), NULL);
 
@@ -323,24 +329,36 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 			tpl_event_get_account_path (logevent));
 	g_object_unref (acc_man);
 
-	/* TODO Currently only TplTextEvent exists as subclass of TplEvent, in
-	 * future more TplEvent will exist and EmpathyMessage should probably
-	 * be enhanced to support other types of log entries (ie TplCallEvent).
-	 *
-	 * For now we just check (simply) that we are dealing with the only supported type,
-	 * then there will be a if/then/else or switch handling all the supported
-	 * cases.
-	 */
-	if (!TPL_IS_TEXT_EVENT (logevent))
-		return NULL;
+	if (TPL_IS_TEXT_EVENT (logevent)) {
+		body = g_strdup (tpl_text_event_get_message (
+			TPL_TEXT_EVENT (logevent)));
 
-	body = g_strdup (tpl_text_event_get_message (
-				TPL_TEXT_EVENT (logevent)));
+		type = tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent));
+	}
+#ifdef HAVE_CALL_LOGS
+	else if (TPL_IS_CALL_EVENT (logevent)) {
+		TplCallEvent *call = TPL_CALL_EVENT (logevent);
+		if (tpl_call_event_get_end_reason (call) == TPL_CALL_END_REASON_NO_ANSWER)
+			body = g_strdup_printf (_("Missed call from %s"),
+				tpl_entity_get_alias (tpl_event_get_sender (logevent)));
+		else if (tpl_entity_get_entity_type (tpl_event_get_sender (logevent)) == TPL_ENTITY_SELF)
+			body = g_strdup_printf (_("Called %s"),
+				tpl_entity_get_alias (tpl_event_get_receiver (logevent)));
+		else
+			body = g_strdup_printf (_("Call from %s"),
+				tpl_entity_get_alias (tpl_event_get_sender (logevent)));
+	}
+#endif
+	else {
+		/* Unknown event type */
+		return NULL;
+	}
+
 	receiver = tpl_event_get_receiver (logevent);
 	sender = tpl_event_get_sender (logevent);
 
 	retval = g_object_new (EMPATHY_TYPE_MESSAGE,
-		"type", tpl_text_event_get_message_type (TPL_TEXT_EVENT (logevent)),
+		"type", type,
 		"body", body,
 		"is-backlog", TRUE,
 		"timestamp", tpl_event_get_timestamp (logevent),

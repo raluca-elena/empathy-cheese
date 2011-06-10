@@ -42,7 +42,7 @@ LIBCANBERRA_GTK_REQUIRED=0.25
 LIBNOTIFY_REQUIRED=0.7.0
 TELEPATHY_FARSIGHT_REQUIRED=0.0.14
 TELEPATHY_GLIB_REQUIRED=0.15.1
-TELEPATHY_LOGGER=0.2.0
+TELEPATHY_LOGGER=0.2.8
 
 # Optional deps
 CLUTTER_GTK_REQUIRED=0.90.3
@@ -209,6 +209,38 @@ if test "x$with_call" = "xyes" -a "x$have_farstream" != "xyes"; then
    AC_MSG_ERROR([Could not find Call handler dependencies.])
 fi
 AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
+
+
+# -----------------------------------------------------------
+# Call support in tp-logger
+# -----------------------------------------------------------
+AC_ARG_WITH(call-logs,
+            AC_HELP_STRING([--enable-call-logs=@<:@no/yes/auto@:>@],
+            [build with call logs support]),,
+            [with_call_logs=auto])
+if test "x$with_call_logs" != "xno" ; then
+   SAVE_CFLAGS=$CFLAGS
+   SAVE_CPPFLAGS=$CPPFLAGS
+   CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
+   CPPFLAGS="$CPPFLAGS $EMPATHY_CFLAGS"
+
+   AC_CHECK_HEADER(telepathy-logger/call-event.h,
+      have_call_logs="yes", have_call_logs="no")
+
+   CFLAGS=$SAVE_CFLAGS
+   CPPFLAGS=$SAVE_CPPFLAGS
+
+   if test "x$have_call_logs" = "xyes"; then
+      AC_DEFINE(HAVE_CALL_LOGS, 1, [Define if you have call log support])
+   fi
+else
+  have_call_logs=no
+fi
+
+if test "x$with_call_logs" = "xyes" -a "x$have_call_logs" != "xyes"; then
+   AC_MSG_ERROR([Call logs support requested but telepathy-logger wasn't
+                 built with --enable-call])
+fi
 
 # -----------------------------------------------------------
 # evolution-data-server (about-me)
@@ -592,7 +624,7 @@ Configure summary:
 	Spell checking (enchant)....:  ${have_enchant}
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
-	Geocode support (Geoclue):     ${have_geocode}
+	Geocode support (Geoclue)...:  ${have_geocode}
 	Adium themes (Webkit).......:  ${have_webkit}
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
@@ -606,4 +638,5 @@ Configure summary:
 	Nautilus-sendto plugin......:  ${have_nst}
 	Salut E-D-S support.........:  ${with_eds}
 	Exp. Call channel handler...:  ${have_farstream}
+	Exp. Call log support.......:  ${have_call_logs}
 "

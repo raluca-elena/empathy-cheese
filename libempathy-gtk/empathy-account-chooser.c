@@ -312,6 +312,30 @@ empathy_account_chooser_new (void)
 	return chooser;
 }
 
+gboolean
+empathy_account_chooser_has_all_selected (EmpathyAccountChooser *chooser)
+{
+	EmpathyAccountChooserPriv *priv;
+	GtkTreeModel              *model;
+	GtkTreeIter                iter;
+	RowType                    type;
+
+	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), FALSE);
+
+	priv = GET_PRIV (chooser);
+
+	g_return_val_if_fail (priv->has_all_option == TRUE, FALSE);
+
+	model = gtk_combo_box_get_model (GTK_COMBO_BOX (chooser));
+	if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (chooser), &iter)) {
+		return FALSE;
+	}
+
+	gtk_tree_model_get (model, &iter, COL_ACCOUNT_ROW_TYPE, &type, -1);
+
+	return type == ROW_ALL;
+}
+
 /**
  * empathy_account_chooser_dup_account:
  * @chooser: an #EmpathyAccountChooser
@@ -414,6 +438,30 @@ empathy_account_chooser_set_account (EmpathyAccountChooser *chooser,
 	return data.set;
 }
 
+void
+empathy_account_chooser_set_all (EmpathyAccountChooser *chooser)
+{
+	EmpathyAccountChooserPriv *priv;
+	GtkComboBox    *combobox;
+	GtkTreeModel   *model;
+	GtkTreeIter     iter;
+
+	g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser));
+
+	priv = GET_PRIV (chooser);
+
+	g_return_if_fail (priv->has_all_option);
+
+	combobox = GTK_COMBO_BOX (chooser);
+	model = gtk_combo_box_get_model (combobox);
+
+	if (gtk_tree_model_get_iter_first (model, &iter)) {
+		/* 'All accounts' is the first row */
+		gtk_combo_box_set_active_iter (combobox, &iter);
+		priv->account_manually_set = TRUE;
+	}
+}
+
 /**
  * empathy_account_chooser_get_has_all_option:
  * @chooser: an #EmpathyAccountChooser
@@ -488,7 +536,7 @@ empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
 
 		gtk_list_store_prepend (store, &iter);
 		gtk_list_store_set (store, &iter,
-				    COL_ACCOUNT_TEXT, _("All"),
+				    COL_ACCOUNT_TEXT, _("All accounts"),
 				    COL_ACCOUNT_ENABLED, TRUE,
 				    COL_ACCOUNT_POINTER, NULL,
 				    COL_ACCOUNT_ROW_TYPE, ROW_ALL,
@@ -697,8 +745,15 @@ account_chooser_find_account_foreach (GtkTreeModel *model,
 {
 	FindAccountData *data = user_data;
 	TpAccount  *account;
+	RowType type;
 
-	gtk_tree_model_get (model, iter, COL_ACCOUNT_POINTER, &account, -1);
+	gtk_tree_model_get (model, iter,
+		COL_ACCOUNT_POINTER, &account,
+		COL_ACCOUNT_ROW_TYPE, &type,
+		 -1);
+
+	if (type != ROW_ACCOUNT)
+		return FALSE;
 
 	if (account == data->account) {
 		data->found = TRUE;
@@ -1052,4 +1107,12 @@ empathy_account_chooser_get_account (EmpathyAccountChooser *chooser)
 	g_object_unref (account);
 
 	return account;
+}
+
+TpAccountManager *
+empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self)
+{
+	EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+
+	return priv->manager;
 }

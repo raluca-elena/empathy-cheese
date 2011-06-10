@@ -27,7 +27,7 @@
 
 #include <gtk/gtk.h>
 
-#include <telepathy-glib/account.h>
+#include <telepathy-glib/telepathy-glib.h>
 
 G_BEGIN_DECLS
 
@@ -81,9 +81,12 @@ TpAccount *    empathy_account_chooser_get_account        (EmpathyAccountChooser
 TpConnection * empathy_account_chooser_get_connection     (EmpathyAccountChooser *chooser);
 gboolean       empathy_account_chooser_set_account        (EmpathyAccountChooser *chooser,
 							   TpAccount             *account);
+void           empathy_account_chooser_set_all            (EmpathyAccountChooser *chooser);
+TpAccountManager * empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self);
 gboolean       empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *chooser);
 void           empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
 							   gboolean               has_all_option);
+gboolean       empathy_account_chooser_has_all_selected   (EmpathyAccountChooser *chooser);
 void           empathy_account_chooser_set_filter         (EmpathyAccountChooser *chooser,
 							   EmpathyAccountChooserFilterFunc filter,
 							   gpointer               user_data);
