@@ -304,27 +304,19 @@ status_preset_dialog_preset_selection_changed (GtkTreeSelection *selection,
 {
 	/* update the sensitivity of the Remove button */
 	gtk_widget_set_sensitive (remove_button,
-			gtk_tree_selection_get_selected (selection, NULL, NULL));
+			gtk_tree_selection_count_selected_rows (selection) != 0);
 }
 
 static void
-status_preset_dialog_preset_remove (GtkButton *button,
-				    EmpathyStatusPresetDialog *self)
+foreach_removed_status (GtkTreeModel *model,
+			GtkTreePath *path,
+			GtkTreeIter *iter,
+			gpointer data)
 {
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkTreeSelection *selection;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
 	TpConnectionPresenceType state;
 	char *status;
 
-	selection = gtk_tree_view_get_selection (
-			GTK_TREE_VIEW (priv->presets_treeview));
-
-	g_return_if_fail (gtk_tree_selection_get_selected (selection,
-				&model, &iter));
-
-	gtk_tree_model_get (model, &iter,
+	gtk_tree_model_get (model, iter,
 			PRESETS_STORE_STATE, &state,
 			PRESETS_STORE_STATUS, &status,
 			-1);
@@ -333,7 +325,18 @@ status_preset_dialog_preset_remove (GtkButton *button,
 	empathy_status_presets_remove (state, status);
 
 	g_free (status);
+}
 
+static void
+status_preset_dialog_preset_remove (GtkButton *button,
+				    EmpathyStatusPresetDialog *self)
+{
+	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
+	GtkTreeSelection *selection;
+
+	selection = gtk_tree_view_get_selection (
+			GTK_TREE_VIEW (priv->presets_treeview));
+	gtk_tree_selection_selected_foreach (selection, foreach_removed_status, NULL);
 	status_preset_dialog_presets_update (self);
 }
 
@@ -517,6 +520,7 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			EmpathyStatusPresetDialogPriv);
 	GtkBuilder *gui;
 	GtkWidget *toplevel_vbox, *remove_button, *entry;
+	GtkTreeSelection *selection;
 	char *filename;
 
 	gtk_window_set_title (GTK_WINDOW (self),
@@ -536,11 +540,13 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			NULL);
 	g_free (filename);
 
-	g_signal_connect (gtk_tree_view_get_selection (
-				GTK_TREE_VIEW (priv->presets_treeview)),
+	selection = gtk_tree_view_get_selection (
+		GTK_TREE_VIEW (priv->presets_treeview));
+	g_signal_connect (selection,
 			"changed",
 			G_CALLBACK (status_preset_dialog_preset_selection_changed),
 			remove_button);
+	gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
 
 	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
 	g_signal_connect (entry, "activate",
