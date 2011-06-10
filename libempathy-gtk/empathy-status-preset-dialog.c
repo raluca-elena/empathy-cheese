@@ -523,6 +523,7 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			_("Edit Custom Messages"));
 	gtk_dialog_add_button (GTK_DIALOG (self),
 			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
+	gtk_window_set_resizable (GTK_WINDOW (self), FALSE);
 
 	filename = empathy_file_lookup ("empathy-status-preset-dialog.ui",
 			"libempathy-gtk");
