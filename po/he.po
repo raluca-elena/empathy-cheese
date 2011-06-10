@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-08 09:55+0300\n"
-"PO-Revision-Date: 2011-06-08 09:56+0200\n"
+"POT-Creation-Date: 2011-06-10 08:05+0300\n"
+"PO-Revision-Date: 2011-06-10 08:07+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -509,140 +509,141 @@ msgstr "התרחשה שגיאה בזמן ניסיון העברת הקובץ"
 msgid "The other participant is unable to transfer the file"
 msgstr "המשתתף האחר לא יכול להעביר את הקובץ"
 
-#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:384
+#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:325
 msgid "Unknown reason"
 msgstr "סיבה לא ידועה"
 
-#: ../libempathy/empathy-utils.c:305
+#: ../libempathy/empathy-utils.c:246
 msgid "Available"
 msgstr "זמין"
 
-#: ../libempathy/empathy-utils.c:307
+#: ../libempathy/empathy-utils.c:248
 msgid "Busy"
 msgstr "עסוק"
 
-#: ../libempathy/empathy-utils.c:310
+#: ../libempathy/empathy-utils.c:251
 msgid "Away"
 msgstr "מרוחק"
 
-#: ../libempathy/empathy-utils.c:312
+#: ../libempathy/empathy-utils.c:253
 msgid "Invisible"
 msgstr "בלתי נראה"
 
-#: ../libempathy/empathy-utils.c:314
+#: ../libempathy/empathy-utils.c:255
 msgid "Offline"
 msgstr "לא מחובר"
 
 #. translators: presence type is unknown
-#: ../libempathy/empathy-utils.c:317
+#: ../libempathy/empathy-utils.c:258
 msgctxt "presence"
 msgid "Unknown"
 msgstr "לא ידוע"
 
-#: ../libempathy/empathy-utils.c:356
+#: ../libempathy/empathy-utils.c:297
 msgid "No reason specified"
 msgstr "לא צויינה סיבה"
 
-#: ../libempathy/empathy-utils.c:358 ../libempathy/empathy-utils.c:414
+#: ../libempathy/empathy-utils.c:299 ../libempathy/empathy-utils.c:355
 msgid "Status is set to offline"
 msgstr "המצב מוגדר כמנותק"
 
-#: ../libempathy/empathy-utils.c:360 ../libempathy/empathy-utils.c:394
+#: ../libempathy/empathy-utils.c:301 ../libempathy/empathy-utils.c:335
+#: ../libempathy-gtk/empathy-call-utils.c:47
 msgid "Network error"
 msgstr "שגיאת רשת"
 
-#: ../libempathy/empathy-utils.c:362 ../libempathy/empathy-utils.c:396
+#: ../libempathy/empathy-utils.c:303 ../libempathy/empathy-utils.c:337
 msgid "Authentication failed"
 msgstr "האימות נכשל"
 
-#: ../libempathy/empathy-utils.c:364 ../libempathy/empathy-utils.c:398
+#: ../libempathy/empathy-utils.c:305 ../libempathy/empathy-utils.c:339
 msgid "Encryption error"
 msgstr "שגיאת הצפנה"
 
-#: ../libempathy/empathy-utils.c:366
+#: ../libempathy/empathy-utils.c:307
 msgid "Name in use"
 msgstr "השם בשימוש"
 
-#: ../libempathy/empathy-utils.c:368 ../libempathy/empathy-utils.c:400
+#: ../libempathy/empathy-utils.c:309 ../libempathy/empathy-utils.c:341
 msgid "Certificate not provided"
 msgstr "לא סופקה תעודה"
 
-#: ../libempathy/empathy-utils.c:370 ../libempathy/empathy-utils.c:402
+#: ../libempathy/empathy-utils.c:311 ../libempathy/empathy-utils.c:343
 msgid "Certificate untrusted"
 msgstr "התעודה אינה מאובטחת"
 
-#: ../libempathy/empathy-utils.c:372 ../libempathy/empathy-utils.c:404
+#: ../libempathy/empathy-utils.c:313 ../libempathy/empathy-utils.c:345
 msgid "Certificate expired"
 msgstr "התעודה לא תקפה"
 
-#: ../libempathy/empathy-utils.c:374 ../libempathy/empathy-utils.c:406
+#: ../libempathy/empathy-utils.c:315 ../libempathy/empathy-utils.c:347
 msgid "Certificate not activated"
 msgstr "התעודה אינה פעילה"
 
-#: ../libempathy/empathy-utils.c:376 ../libempathy/empathy-utils.c:408
+#: ../libempathy/empathy-utils.c:317 ../libempathy/empathy-utils.c:349
 msgid "Certificate hostname mismatch"
 msgstr "שם המארח בתעודה לא תואם"
 
-#: ../libempathy/empathy-utils.c:378 ../libempathy/empathy-utils.c:410
+#: ../libempathy/empathy-utils.c:319 ../libempathy/empathy-utils.c:351
 msgid "Certificate fingerprint mismatch"
 msgstr "טביעת האצבע של התעודה אינה תואמת"
 
-#: ../libempathy/empathy-utils.c:380 ../libempathy/empathy-utils.c:412
+#: ../libempathy/empathy-utils.c:321 ../libempathy/empathy-utils.c:353
 msgid "Certificate self-signed"
 msgstr "תעודה בחתימה עצמית"
 
-#: ../libempathy/empathy-utils.c:382
+#: ../libempathy/empathy-utils.c:323
 msgid "Certificate error"
 msgstr "שגיאת תעודה"
 
-#: ../libempathy/empathy-utils.c:416
+#: ../libempathy/empathy-utils.c:357
 msgid "Encryption is not available"
 msgstr "אין הצפנה זמינה"
 
-#: ../libempathy/empathy-utils.c:418
+#: ../libempathy/empathy-utils.c:359
 msgid "Certificate is invalid"
 msgstr "התעודה שגויה"
 
-#: ../libempathy/empathy-utils.c:420
+#: ../libempathy/empathy-utils.c:361
 msgid "Connection has been refused"
 msgstr "החיבור נתקל בסירוב"
 
-#: ../libempathy/empathy-utils.c:422
+#: ../libempathy/empathy-utils.c:363
 msgid "Connection can't be established"
 msgstr "לא ניתן לקיים את החיבור"
 
-#: ../libempathy/empathy-utils.c:424
+#: ../libempathy/empathy-utils.c:365
 msgid "Connection has been lost"
 msgstr "החיבור נקטע"
 
-#: ../libempathy/empathy-utils.c:426
+#: ../libempathy/empathy-utils.c:367
 msgid "This resource is already connected to the server"
 msgstr "המשאב כבר מחובר לשרת"
 
-#: ../libempathy/empathy-utils.c:428
+#: ../libempathy/empathy-utils.c:369
 msgid ""
 "Connection has been replaced by a new connection using the same resource"
 msgstr "החיבור הוחלף בחיבור חדש באמצעות אותו המשאב"
 
-#: ../libempathy/empathy-utils.c:431
+#: ../libempathy/empathy-utils.c:372
 msgid "The account already exists on the server"
 msgstr "החשבון כבר קיים בשרת"
 
-#: ../libempathy/empathy-utils.c:433
+#: ../libempathy/empathy-utils.c:374
 msgid "Server is currently too busy to handle the connection"
 msgstr "השרת עסוק מכדי לטפל בחיבור"
 
-#: ../libempathy/empathy-utils.c:435
+#: ../libempathy/empathy-utils.c:376
 msgid "Certificate has been revoked"
 msgstr "התעודה נשללה"
 
-#: ../libempathy/empathy-utils.c:437
+#: ../libempathy/empathy-utils.c:378
 msgid ""
 "Certificate uses an insecure cipher algorithm or is cryptographically weak"
 msgstr ""
 "התעודה משתמשת באלגוריתם הצפנה בלתי מאובטח או שהוא חלש מבחינה קריפטוגרפית"
 
-#: ../libempathy/empathy-utils.c:440
+#: ../libempathy/empathy-utils.c:381
 msgid ""
 "The length of the server certificate, or the depth of the server certificate "
 "chain, exceed the limits imposed by the cryptography library"
@@ -650,20 +651,20 @@ msgstr ""
 "אורך אישור האבטחה של השרת או עומק מחרוזת אישור האבטחה של השרת חורגים "
 "מהמגבלות שהוצבו על ידי ספריית ההצפנה"
 
-#: ../libempathy/empathy-utils.c:603
+#: ../libempathy/empathy-utils.c:544
 #: ../libempathy-gtk/empathy-contact-list-store.h:73
 msgid "People Nearby"
 msgstr "אנשים בקרבתי"
 
-#: ../libempathy/empathy-utils.c:608
+#: ../libempathy/empathy-utils.c:549
 msgid "Yahoo! Japan"
 msgstr "‏Yahoo! יפן"
 
-#: ../libempathy/empathy-utils.c:637
+#: ../libempathy/empathy-utils.c:578
 msgid "Google Talk"
 msgstr "Google Talk"
 
-#: ../libempathy/empathy-utils.c:638
+#: ../libempathy/empathy-utils.c:579
 msgid "Facebook Chat"
 msgstr "צ׳אט Facebook"
 
@@ -1239,6 +1240,27 @@ msgstr "כל הקבצים"
 msgid "Click to enlarge"
 msgstr "יש ללחוץ כדי להגדיל"
 
+#: ../libempathy-gtk/empathy-call-utils.c:42
+#: ../libempathy-gtk/empathy-call-utils.c:58
+msgid "There was an error starting the call"
+msgstr "התחלת השיחה נכשלה"
+
+#: ../libempathy-gtk/empathy-call-utils.c:49
+msgid "The specified contact doesn't support calls"
+msgstr "איש הקשר המסוים הזה אינו תומך בשיחות"
+
+#: ../libempathy-gtk/empathy-call-utils.c:51
+msgid "The specified contact is offline"
+msgstr "איש הקשר המסוים הזה מנותק"
+
+#: ../libempathy-gtk/empathy-call-utils.c:53
+msgid "The specified contact is not valid"
+msgstr "איש הקשר המסוים הזה אינו תקני"
+
+#: ../libempathy-gtk/empathy-call-utils.c:55
+msgid "Emergency calls are not supported on this protocol"
+msgstr "אין תמיכה בשיחות חירום בפרוטוקול זה"
+
 #: ../libempathy-gtk/empathy-chat.c:695
 msgid "Failed to open private chat"
 msgstr "ארע כשל בפתיחת שיחה פרטית"
@@ -1478,8 +1500,8 @@ msgid "%s is now known as %s"
 msgstr "‏%s נודע כעת בכינוי %s"
 
 #: ../libempathy-gtk/empathy-chat.c:2648
-#: ../src/empathy-streamed-media-window.c:1957
-#: ../src/empathy-event-manager.c:1130
+#: ../src/empathy-streamed-media-window.c:1935
+#: ../src/empathy-event-manager.c:1261 ../src/empathy-call-window.c:1869
 msgid "Disconnected"
 msgstr "מנותק"
 
@@ -1513,18 +1535,19 @@ msgstr "חדר זה מוגן בססמה:"
 msgid "Join"
 msgstr "הצטרפות"
 
-#: ../libempathy-gtk/empathy-chat.c:3738 ../src/empathy-event-manager.c:1151
+#: ../libempathy-gtk/empathy-chat.c:3739 ../src/empathy-event-manager.c:1282
+#: ../src/empathy-call-window.c:2125
 msgid "Connected"
 msgstr "מחובר"
 
-#: ../libempathy-gtk/empathy-chat.c:3793
+#: ../libempathy-gtk/empathy-chat.c:3794
 #: ../libempathy-gtk/empathy-log-window.c:650
 msgid "Conversation"
 msgstr "שיחה"
 
 #. Translators: this string is a something like
 #. * "Escher Cat (SMS)"
-#: ../libempathy-gtk/empathy-chat.c:3798
+#: ../libempathy-gtk/empathy-chat.c:3799
 #, c-format
 msgid "%s (SMS)"
 msgstr "%s (SMS)"
@@ -1641,104 +1664,104 @@ msgid "Favorite People"
 msgstr "אנשים מועדפים"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:1983
-#: ../libempathy-gtk/empathy-individual-view.c:2367
+#: ../libempathy-gtk/empathy-individual-view.c:2375
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "האם להסיר את הקבוצה '%s'?"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:1985
-#: ../libempathy-gtk/empathy-individual-view.c:2370
+#: ../libempathy-gtk/empathy-individual-view.c:2378
 msgid "Removing group"
 msgstr "הקבוצה מוסרת"
 
 #. Remove
 #: ../libempathy-gtk/empathy-contact-list-view.c:2034
 #: ../libempathy-gtk/empathy-contact-list-view.c:2111
-#: ../libempathy-gtk/empathy-individual-view.c:2425
-#: ../libempathy-gtk/empathy-individual-view.c:2628
+#: ../libempathy-gtk/empathy-individual-view.c:2433
+#: ../libempathy-gtk/empathy-individual-view.c:2636
 #: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "ה_סרה"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:2064
-#: ../libempathy-gtk/empathy-individual-view.c:2492
+#: ../libempathy-gtk/empathy-individual-view.c:2500
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "להסיר את איש הקשר '%s'?"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:2066
-#: ../libempathy-gtk/empathy-individual-view.c:2513
+#: ../libempathy-gtk/empathy-individual-view.c:2521
 msgid "Removing contact"
 msgstr "איש קשר מוסר"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:219
+#: ../libempathy-gtk/empathy-contact-menu.c:220
 #: ../src/empathy-main-window.ui.h:14
 msgid "_Add Contact…"
 msgstr "הוספת _איש קשר…"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:299
+#: ../libempathy-gtk/empathy-contact-menu.c:300
 msgid "_Block Contact"
 msgstr "ח_סימת איש קשר"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:328
-#: ../libempathy-gtk/empathy-individual-menu.c:546
+#: ../libempathy-gtk/empathy-contact-menu.c:329
+#: ../libempathy-gtk/empathy-individual-menu.c:547
 #: ../src/empathy-main-window.ui.h:16
 msgid "_Chat"
 msgstr "_שיחה"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:358
-#: ../libempathy-gtk/empathy-individual-menu.c:635
+#: ../libempathy-gtk/empathy-contact-menu.c:361
+#: ../libempathy-gtk/empathy-individual-menu.c:638
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "שיחה _קולית"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:389
-#: ../libempathy-gtk/empathy-individual-menu.c:677
+#: ../libempathy-gtk/empathy-contact-menu.c:394
+#: ../libempathy-gtk/empathy-individual-menu.c:682
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "שיחת _וידאו"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:435
-#: ../libempathy-gtk/empathy-individual-menu.c:720
+#: ../libempathy-gtk/empathy-contact-menu.c:440
+#: ../libempathy-gtk/empathy-individual-menu.c:725
 #: ../src/empathy-main-window.ui.h:27
 msgid "_Previous Conversations"
 msgstr "שיחות _קודמות"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:457
-#: ../libempathy-gtk/empathy-individual-menu.c:761
+#: ../libempathy-gtk/empathy-contact-menu.c:462
+#: ../libempathy-gtk/empathy-individual-menu.c:766
 msgid "Send File"
 msgstr "שליחת קובץ"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:480
-#: ../libempathy-gtk/empathy-individual-menu.c:803
+#: ../libempathy-gtk/empathy-contact-menu.c:485
+#: ../libempathy-gtk/empathy-individual-menu.c:808
 msgid "Share My Desktop"
 msgstr "שיתוף שולחן העבודה שלי"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:520
+#: ../libempathy-gtk/empathy-contact-menu.c:525
 #: ../libempathy-gtk/empathy-contact-widget.c:1890
-#: ../libempathy-gtk/empathy-individual-menu.c:838
+#: ../libempathy-gtk/empathy-individual-menu.c:843
 #: ../libempathy-gtk/empathy-individual-widget.c:1386
 msgid "Favorite"
 msgstr "מועדף"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:549
-#: ../libempathy-gtk/empathy-individual-menu.c:866
+#: ../libempathy-gtk/empathy-contact-menu.c:554
+#: ../libempathy-gtk/empathy-individual-menu.c:871
 msgid "Infor_mation"
 msgstr "_מידע"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:595
+#: ../libempathy-gtk/empathy-contact-menu.c:600
 msgctxt "Edit contact (contextual menu)"
 msgid "_Edit"
 msgstr "ע_ריכה"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:649
-#: ../libempathy-gtk/empathy-individual-menu.c:1053
+#: ../libempathy-gtk/empathy-contact-menu.c:654
+#: ../libempathy-gtk/empathy-individual-menu.c:1058
 #: ../src/empathy-chat-window.c:1010
 msgid "Inviting you to this room"
 msgstr "מזמין/ה אותך לחדר זה"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:680
-#: ../libempathy-gtk/empathy-individual-menu.c:1099
+#: ../libempathy-gtk/empathy-contact-menu.c:685
+#: ../libempathy-gtk/empathy-individual-menu.c:1104
 msgid "_Invite to Chat Room"
 msgstr "ה_זמנה לחדר שיחה"
 
@@ -2026,7 +2049,7 @@ msgid "Select"
 msgstr "בחירה"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:409
-#: ../src/empathy-main-window.c:1751
+#: ../src/empathy-main-window.c:1835
 msgid "Group"
 msgstr "קבוצה"
 
@@ -2062,34 +2085,34 @@ msgstr "אנשי הקשר שנבחרו ברשימה שמימין יקושרו ז
 #. Translators: this is used in the context menu for a contact. The first
 #. * parameter is a contact ID (e.g. foo@jabber.org) and the second is one
 #. * of the user's account IDs (e.g. me@hotmail.com).
-#: ../libempathy-gtk/empathy-individual-menu.c:136
+#: ../libempathy-gtk/empathy-individual-menu.c:137
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #. add an SMS button
-#: ../libempathy-gtk/empathy-individual-menu.c:592
+#: ../libempathy-gtk/empathy-individual-menu.c:593
 #: ../libempathy-gtk/empathy-new-message-dialog.c:248
 msgid "_SMS"
 msgstr "_SMS"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:914
+#: ../libempathy-gtk/empathy-individual-menu.c:919
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "ע_ריכה"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:940
+#: ../libempathy-gtk/empathy-individual-menu.c:945
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "_קישור אנשי קשר…"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2332
+#: ../libempathy-gtk/empathy-individual-view.c:2340
 msgid "Delete and _Block"
 msgstr "מחיקה ו_חסימה"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2501
+#: ../libempathy-gtk/empathy-individual-view.c:2509
 #, c-format
 msgid ""
 "Do you really want to remove the linked contact '%s'? Note that this will "
@@ -2229,17 +2252,17 @@ msgid "New Conversation"
 msgstr "שיחה חדשה"
 
 #. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:254
+#: ../libempathy-gtk/empathy-new-call-dialog.c:216
 msgid "Send _Video"
 msgstr "שליחת _וידאו"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:262
+#: ../libempathy-gtk/empathy-new-call-dialog.c:224
 msgid "C_all"
 msgstr "ה_תקשרות"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:272
+#: ../libempathy-gtk/empathy-new-call-dialog.c:234
 msgid "New Call"
 msgstr "שיחה חדשה"
 
@@ -2666,23 +2689,23 @@ msgstr "אין הודעת שגיאה"
 msgid "Instant Message (Empathy)"
 msgstr "הודעה מיידית (Empathy)"
 
-#: ../src/empathy.c:307
+#: ../src/empathy.c:309
 msgid "Don't connect on startup"
 msgstr "לא להתחבר בהפעלה"
 
-#: ../src/empathy.c:311
+#: ../src/empathy.c:313
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "אין להציג את רשימת אנשי הקשר או כל דו־שיח אחר בהפעלה"
 
-#: ../src/empathy.c:319
+#: ../src/empathy.c:321
 msgid "- Empathy IM Client"
 msgstr "- לקוח המסרים המידיים Empathy"
 
-#: ../src/empathy.c:498
+#: ../src/empathy.c:500
 msgid "Error contacting the Account Manager"
 msgstr "שגיאה ביצירת קשר עם מנהל החשבונות"
 
-#: ../src/empathy.c:500
+#: ../src/empathy.c:502
 #, c-format
 msgid ""
 "There was an error while trying to connect to the Telepathy Account Manager. "
@@ -2909,7 +2932,7 @@ msgid "Your new account has not been saved yet."
 msgstr "החשבון החדש שלך לא נשמר עדיין."
 
 #: ../src/empathy-accounts-dialog.c:345
-#: ../src/empathy-streamed-media-window.c:809
+#: ../src/empathy-streamed-media-window.c:797 ../src/empathy-call-window.c:780
 msgid "Connecting…"
 msgstr "בהתחברות…"
 
@@ -3016,128 +3039,143 @@ msgstr "לקוח האימות של Empathy"
 msgid "People nearby"
 msgstr "אנשים בקרבתי"
 
-#: ../src/empathy-av.c:118
+#: ../src/empathy-av.c:118 ../src/empathy-call.c:120
 msgid "- Empathy Audio/Video Client"
 msgstr "- לקוח השמע/הווידאו Empathy"
 
-#: ../src/empathy-av.c:134
+#: ../src/empathy-av.c:134 ../src/empathy-call.c:138
 msgid "Empathy Audio/Video Client"
 msgstr "לקוח השמע/הווידאו Empathy"
 
-#: ../src/empathy-streamed-media-window.c:479
+#: ../src/empathy-streamed-media-window.c:478 ../src/empathy-call-window.c:472
 msgid "Contrast"
 msgstr "ניגוד"
 
-#: ../src/empathy-streamed-media-window.c:482
+#: ../src/empathy-streamed-media-window.c:481 ../src/empathy-call-window.c:475
 msgid "Brightness"
 msgstr "בהירות"
 
-#: ../src/empathy-streamed-media-window.c:485
+#: ../src/empathy-streamed-media-window.c:484 ../src/empathy-call-window.c:478
 msgid "Gamma"
 msgstr "גאמה"
 
-#: ../src/empathy-streamed-media-window.c:590
+#: ../src/empathy-streamed-media-window.c:589 ../src/empathy-call-window.c:583
 msgid "Volume"
 msgstr "עצמה"
 
-#: ../src/empathy-streamed-media-window.c:1166
+#: ../src/empathy-streamed-media-window.c:1153
+#: ../src/empathy-call-window.c:1127
 msgid "_Sidebar"
 msgstr "_סרגל צד"
 
-#: ../src/empathy-streamed-media-window.c:1186
+#: ../src/empathy-streamed-media-window.c:1173
+#: ../src/empathy-call-window.c:1149
 msgid "Audio input"
 msgstr "קלט שמע"
 
-#: ../src/empathy-streamed-media-window.c:1190
+#: ../src/empathy-streamed-media-window.c:1177
+#: ../src/empathy-call-window.c:1153
 msgid "Video input"
 msgstr "קלט וידאו"
 
-#: ../src/empathy-streamed-media-window.c:1194
+#: ../src/empathy-streamed-media-window.c:1181
+#: ../src/empathy-call-window.c:1157
 msgid "Dialpad"
 msgstr "מקשי חיוג"
 
-#: ../src/empathy-streamed-media-window.c:1205
+#: ../src/empathy-streamed-media-window.c:1192
+#: ../src/empathy-call-window.c:1167
 msgid "Details"
 msgstr "פרטים"
 
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
-#: ../src/empathy-streamed-media-window.c:1274
+#: ../src/empathy-streamed-media-window.c:1261
+#: ../src/empathy-call-window.c:1239
 #, c-format
 msgid "Call with %s"
 msgstr "שיחה עם %s"
 
 #. translators: Call is a noun. This string is used in the window
 #. * title
-#: ../src/empathy-streamed-media-window.c:1353
+#: ../src/empathy-streamed-media-window.c:1340
 msgid "Call"
 msgstr "התקשרות"
 
-#: ../src/empathy-streamed-media-window.c:1507
+#: ../src/empathy-streamed-media-window.c:1494
+#: ../src/empathy-call-window.c:1459
 msgid "The IP address as seen by the machine"
 msgstr "כתובת ה־IP כפי שנראית על ידי המחשב"
 
-#: ../src/empathy-streamed-media-window.c:1509
+#: ../src/empathy-streamed-media-window.c:1496
+#: ../src/empathy-call-window.c:1461
 msgid "The IP address as seen by a server on the Internet"
 msgstr "כתובת ה־IP כפי שנראית על ידי שרת באינטרנט"
 
-#: ../src/empathy-streamed-media-window.c:1511
+#: ../src/empathy-streamed-media-window.c:1498
+#: ../src/empathy-call-window.c:1463
 msgid "The IP address of the peer as seen by the other side"
 msgstr "כתובת ה־IP כדי שנראית על ידי עמית מהצד השני"
 
-#: ../src/empathy-streamed-media-window.c:1513
+#: ../src/empathy-streamed-media-window.c:1500
+#: ../src/empathy-call-window.c:1465
 msgid "The IP address of a relay server"
 msgstr "כתובת ה־IP של שרת הממסר"
 
-#: ../src/empathy-streamed-media-window.c:1515
+#: ../src/empathy-streamed-media-window.c:1502
+#: ../src/empathy-call-window.c:1467
 msgid "The IP address of the multicast group"
 msgstr "כתובת ה־IP של קבוצת התשדורת"
 
-#: ../src/empathy-streamed-media-window.c:1906
+#: ../src/empathy-streamed-media-window.c:1884
 msgctxt "encoding video codec"
 msgid "Unknown"
 msgstr "לא ידוע"
 
-#: ../src/empathy-streamed-media-window.c:1909
+#: ../src/empathy-streamed-media-window.c:1887
 msgctxt "encoding audio codec"
 msgid "Unknown"
 msgstr "לא ידוע"
 
-#: ../src/empathy-streamed-media-window.c:1912
+#: ../src/empathy-streamed-media-window.c:1890
 msgctxt "decoding video codec"
 msgid "Unknown"
 msgstr "לא ידוע"
 
-#: ../src/empathy-streamed-media-window.c:1915
+#: ../src/empathy-streamed-media-window.c:1893
 msgctxt "decoding audio codec"
 msgid "Unknown"
 msgstr "לא ידוע"
 
 #. Translators: number of minutes:seconds the caller has been connected
-#: ../src/empathy-streamed-media-window.c:2274
+#: ../src/empathy-streamed-media-window.c:2185
 #, c-format
 msgid "Connected — %d:%02dm"
 msgstr "מחובר — %d:%02d דק׳"
 
-#: ../src/empathy-streamed-media-window.c:2335
+#: ../src/empathy-streamed-media-window.c:2246
+#: ../src/empathy-call-window.c:2187
 msgid "Technical Details"
 msgstr "פרטים טכניים"
 
-#: ../src/empathy-streamed-media-window.c:2373
+#: ../src/empathy-streamed-media-window.c:2284
+#: ../src/empathy-call-window.c:2225
 #, c-format
 msgid ""
 "%s's software does not understand any of the audio formats supported by your "
 "computer"
 msgstr "התכנה של %s אינה מבינה את מבני השמע הנתמכים על ידי המחשב שלך"
 
-#: ../src/empathy-streamed-media-window.c:2378
+#: ../src/empathy-streamed-media-window.c:2289
+#: ../src/empathy-call-window.c:2230
 #, c-format
 msgid ""
 "%s's software does not understand any of the video formats supported by your "
 "computer"
 msgstr "התכנה של %s אינה מבינה את מבני הווידאו הנתמכים על ידי המחשב שלך"
 
-#: ../src/empathy-streamed-media-window.c:2384
+#: ../src/empathy-streamed-media-window.c:2295
+#: ../src/empathy-call-window.c:2236
 #, c-format
 msgid ""
 "Can't establish a connection to %s. One of you might be on a network that "
@@ -3146,21 +3184,25 @@ msgstr ""
 "לא ניתן להפעיל את החיבור אל %s. כנראה אחד ממשתתפי השיחה מחובר לרשת שאינה "
 "מאפשרת חיבורים ישירים."
 
-#: ../src/empathy-streamed-media-window.c:2390
+#: ../src/empathy-streamed-media-window.c:2301
+#: ../src/empathy-call-window.c:2242
 msgid "There was a failure on the network"
 msgstr "אירעה שגיאה ברשת"
 
-#: ../src/empathy-streamed-media-window.c:2394
+#: ../src/empathy-streamed-media-window.c:2305
+#: ../src/empathy-call-window.c:2246
 msgid ""
 "The audio formats necessary for this call are not installed on your computer"
 msgstr "מבני השמע הדרושים לקיום שיחה זו אינם מותקנים במחשבך"
 
-#: ../src/empathy-streamed-media-window.c:2397
+#: ../src/empathy-streamed-media-window.c:2308
+#: ../src/empathy-call-window.c:2249
 msgid ""
 "The video formats necessary for this call are not installed on your computer"
 msgstr "מבני הווידאו הדרושים לקיום שיחה זו אינם מותקנים במחשבך"
 
-#: ../src/empathy-streamed-media-window.c:2407
+#: ../src/empathy-streamed-media-window.c:2318
+#: ../src/empathy-call-window.c:2261
 #, c-format
 msgid ""
 "Something unexpected happened in a Telepathy component. Please <a href=\"%s"
@@ -3170,19 +3212,23 @@ msgstr ""
 "משהו בלתי צפוי ארע ברכיב של Telepathy. נא <a href=\"%s\">לדווח על באג זה</a> "
 "ולהוסיף דוחות שנאספו מחלון 'ניפוי השגיאות' שבתפריט העזרה."
 
-#: ../src/empathy-streamed-media-window.c:2415
+#: ../src/empathy-streamed-media-window.c:2326
+#: ../src/empathy-call-window.c:2270
 msgid "There was a failure in the call engine"
 msgstr "אירעה שגיאה במנוע הקריאה"
 
-#: ../src/empathy-streamed-media-window.c:2418
+#: ../src/empathy-streamed-media-window.c:2329
+#: ../src/empathy-call-window.c:2273
 msgid "The end of the stream was reached"
 msgstr "התזרים הגיע לסיומו"
 
-#: ../src/empathy-streamed-media-window.c:2458
+#: ../src/empathy-streamed-media-window.c:2369
+#: ../src/empathy-call-window.c:2313
 msgid "Can't establish audio stream"
 msgstr "לא ניתן לקיים תזרים שמע"
 
-#: ../src/empathy-streamed-media-window.c:2468
+#: ../src/empathy-streamed-media-window.c:2379
+#: ../src/empathy-call-window.c:2323
 msgid "Can't establish video stream"
 msgstr "לא ניתן לקיים תזרים וידאו"
 
@@ -3254,7 +3300,9 @@ msgstr "שלח צליל"
 msgid "Toggle audio transmission"
 msgstr "החלפה בין העברה ואי העברה של שמע"
 
-#: ../src/empathy-call-window.ui.h:18
+#: ../src/empathy-call-window.ui.h:18 ../src/empathy-call-window.c:1824
+#: ../src/empathy-call-window.c:1825 ../src/empathy-call-window.c:1826
+#: ../src/empathy-call-window.c:1827
 msgid "Unknown"
 msgstr "לא ידוע"
 
@@ -3282,7 +3330,11 @@ msgstr "תצוגה מקדימה לווידאו"
 msgid "_Call"
 msgstr "_שיחה"
 
-#: ../src/empathy-call-window.ui.h:25 ../src/empathy-main-window.ui.h:30
+#: ../src/empathy-call-window.ui.h:25
+msgid "_Dialpad"
+msgstr "מ_קשי חיוג"
+
+#: ../src/empathy-call-window.ui.h:26 ../src/empathy-main-window.ui.h:30
 msgid "_View"
 msgstr "_תצוגה"
 
@@ -3421,90 +3473,95 @@ msgstr "חיבור אוטומטי"
 msgid "Manage Favorite Rooms"
 msgstr "ניהול חדרי שיחה מועדפים"
 
-#: ../src/empathy-event-manager.c:510
+#: ../src/empathy-event-manager.c:542
 msgid "Incoming video call"
 msgstr "שיחה קולית נכנסת"
 
-#: ../src/empathy-event-manager.c:510
+#: ../src/empathy-event-manager.c:542
 msgid "Incoming call"
 msgstr "שיחה נכנסת"
 
-#: ../src/empathy-event-manager.c:514
+#: ../src/empathy-event-manager.c:546
 #, c-format
 msgid "%s is video calling you. Do you want to answer?"
 msgstr "‏%s מתקשר אליך עם וידאו, האם ברצונך לענות?"
 
-#: ../src/empathy-event-manager.c:515
+#: ../src/empathy-event-manager.c:547
 #, c-format
 msgid "%s is calling you. Do you want to answer?"
 msgstr "‏%s מתקשר אליך, האם ברצונך לענות?"
 
-#: ../src/empathy-event-manager.c:518 ../src/empathy-event-manager.c:667
+#: ../src/empathy-event-manager.c:550 ../src/empathy-event-manager.c:751
+#: ../src/empathy-event-manager.c:784
 #, c-format
 msgid "Incoming call from %s"
 msgstr "שיחה נכנסת מ־%s"
 
-#: ../src/empathy-event-manager.c:543
+#: ../src/empathy-event-manager.c:575
 msgid "_Reject"
 msgstr "_דחייה"
 
-#: ../src/empathy-event-manager.c:549
+#: ../src/empathy-event-manager.c:583 ../src/empathy-event-manager.c:591
 msgid "_Answer"
 msgstr "_מענה"
 
-#: ../src/empathy-event-manager.c:667
+#: ../src/empathy-event-manager.c:591
+msgid "_Answer with video"
+msgstr "מ_ענה עם וידאו"
+
+#: ../src/empathy-event-manager.c:751 ../src/empathy-event-manager.c:784
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "שיחת וידאו נכנסת מ־%s"
 
-#: ../src/empathy-event-manager.c:740
+#: ../src/empathy-event-manager.c:857
 msgid "Room invitation"
 msgstr "הזמנה לחדר"
 
-#: ../src/empathy-event-manager.c:742
+#: ../src/empathy-event-manager.c:859
 #, c-format
 msgid "Invitation to join %s"
 msgstr "הזמנה להצטרף ל־%s"
 
-#: ../src/empathy-event-manager.c:749
+#: ../src/empathy-event-manager.c:866
 #, c-format
 msgid "%s is inviting you to join %s"
 msgstr "‏%s מזמין/ה אותך להצטרף אל %s"
 
-#: ../src/empathy-event-manager.c:757
+#: ../src/empathy-event-manager.c:874
 msgid "_Decline"
 msgstr "_סירוב"
 
-#: ../src/empathy-event-manager.c:762
+#: ../src/empathy-event-manager.c:879
 #: ../src/empathy-new-chatroom-dialog.ui.h:7
 msgid "_Join"
 msgstr "ה_צטרפות"
 
-#: ../src/empathy-event-manager.c:789
+#: ../src/empathy-event-manager.c:906
 #, c-format
 msgid "%s invited you to join %s"
 msgstr "‏%s הזמין/ה אותך להצטרף אל %s"
 
-#: ../src/empathy-event-manager.c:795
+#: ../src/empathy-event-manager.c:912
 #, c-format
 msgid "You have been invited to join %s"
 msgstr "הוזמנת להצטרף אל %s"
 
-#: ../src/empathy-event-manager.c:846
+#: ../src/empathy-event-manager.c:963
 #, c-format
 msgid "Incoming file transfer from %s"
 msgstr "העברת קבצים נכנסת מ־%s"
 
-#: ../src/empathy-event-manager.c:1024 ../src/empathy-main-window.c:375
+#: ../src/empathy-event-manager.c:1155 ../src/empathy-main-window.c:375
 msgid "Password required"
 msgstr "נדרשת ססמה"
 
-#: ../src/empathy-event-manager.c:1080
+#: ../src/empathy-event-manager.c:1211
 #, c-format
 msgid "%s would like permission to see when you are online"
 msgstr "%s רוצה הרשאות לצפייה מתי המשתמש שלך מחובר"
 
-#: ../src/empathy-event-manager.c:1084
+#: ../src/empathy-event-manager.c:1215
 #, c-format
 msgid ""
 "\n"
@@ -3656,47 +3713,47 @@ msgstr "הזנת ססמה"
 msgid "Disconnect"
 msgstr "ניתוק"
 
-#: ../src/empathy-main-window.c:538
+#: ../src/empathy-main-window.c:622
 msgid "No match found"
 msgstr "לא נמצאה התאמה"
 
-#: ../src/empathy-main-window.c:693
+#: ../src/empathy-main-window.c:777
 msgid "Reconnect"
 msgstr "התחברות מחדש"
 
-#: ../src/empathy-main-window.c:699
+#: ../src/empathy-main-window.c:783
 msgid "Edit Account"
 msgstr "עריכת חשבון"
 
-#: ../src/empathy-main-window.c:705
+#: ../src/empathy-main-window.c:789
 msgid "Close"
 msgstr "סגירה"
 
 #. Translators: this string will be something like:
 #. *   Top up My Account ($1.23)..."
-#: ../src/empathy-main-window.c:844
+#: ../src/empathy-main-window.c:928
 #, c-format
 msgid "Top up %s (%s)..."
 msgstr "Top up %s (%s)..."
 
-#: ../src/empathy-main-window.c:891
+#: ../src/empathy-main-window.c:975
 msgid "Top up account credit"
 msgstr "אשראי חשבון ה־Top up"
 
 #. top up button
-#: ../src/empathy-main-window.c:966
+#: ../src/empathy-main-window.c:1050
 msgid "Top Up..."
 msgstr "Top Up..."
 
-#: ../src/empathy-main-window.c:1733
+#: ../src/empathy-main-window.c:1817
 msgid "Contact"
 msgstr "איש קשר"
 
-#: ../src/empathy-main-window.c:2085
+#: ../src/empathy-main-window.c:2169
 msgid "Contact List"
 msgstr "רשימת אנשי קשר"
 
-#: ../src/empathy-main-window.c:2203
+#: ../src/empathy-main-window.c:2287
 msgid "Show and edit accounts"
 msgstr "הצגה ועריכה של חשבונות"
 
@@ -4196,29 +4253,34 @@ msgstr "מנפה השגיאות של Empathy"
 msgid "- Empathy Chat Client"
 msgstr "- לקוח הצ׳אטים Empathy"
 
-#: ../src/empathy-notifications-approver.c:184
+#: ../src/empathy-notifications-approver.c:203
 msgid "Respond"
 msgstr "תגובה"
 
-#: ../src/empathy-notifications-approver.c:190
+#: ../src/empathy-notifications-approver.c:217
 msgid "Reject"
 msgstr "דחייה"
 
-#: ../src/empathy-notifications-approver.c:194
+#: ../src/empathy-notifications-approver.c:222
+#: ../src/empathy-notifications-approver.c:227
 msgid "Answer"
 msgstr "מענה"
 
-#: ../src/empathy-notifications-approver.c:201
-#: ../src/empathy-notifications-approver.c:211
+#: ../src/empathy-notifications-approver.c:227
+msgid "Answer with video"
+msgstr "מענה עם וידאו"
+
+#: ../src/empathy-notifications-approver.c:235
+#: ../src/empathy-notifications-approver.c:245
 msgid "Decline"
 msgstr "סירוב"
 
-#: ../src/empathy-notifications-approver.c:205
-#: ../src/empathy-notifications-approver.c:216
+#: ../src/empathy-notifications-approver.c:239
+#: ../src/empathy-notifications-approver.c:250
 msgid "Accept"
 msgstr "אישור"
 
-#: ../src/empathy-notifications-approver.c:226
+#: ../src/empathy-notifications-approver.c:260
 msgid "Provide"
 msgstr "הזנה"
 
@@ -4231,6 +4293,21 @@ msgstr "שיחה שלא נענתה מאת %s"
 #, c-format
 msgid "%s just tried to call you, but you were in another call."
 msgstr "התקבלה בקשת שיחה מאת %s, אך באותו הזמן כבר היית בשיחה אחרת."
+
+#: ../src/empathy-call-window.c:1246
+#, c-format
+msgid "Call with %d participants"
+msgstr "שיחה עם %d משתתפים"
+
+#. Translators: 'status - minutes:seconds' the caller has been connected
+#: ../src/empathy-call-window.c:2124
+#, c-format
+msgid "%s — %d:%02dm"
+msgstr "%s — %d:%02d דק׳"
+
+#: ../src/empathy-call-window.c:2125
+msgid "On hold"
+msgstr "בהמתנה"
 
 #: ../libempathy-gtk/empathy-search-bar.c:282
 msgid "_Match case"
