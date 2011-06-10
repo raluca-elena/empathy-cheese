@@ -47,9 +47,10 @@ G_BEGIN_DECLS
 #define EMPATHY_IMAGE_DOCUMENT_SEND       "document-send"
 #define EMPATHY_IMAGE_AVATAR_DEFAULT      "avatar-default"
 
-#define EMPATHY_IMAGE_CALL_MISSED         "call-start"
+#define EMPATHY_IMAGE_CALL                "call-start"
+#define EMPATHY_IMAGE_CALL_MISSED         "call-stop"
 #define EMPATHY_IMAGE_CALL_INCOMING       "call-start"
-#define EMPATHY_IMAGE_CALL_OUTGOING       "call-stop"
+#define EMPATHY_IMAGE_CALL_OUTGOING       "call-start"
 
 G_END_DECLS
 

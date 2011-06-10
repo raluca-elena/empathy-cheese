@@ -2270,14 +2270,14 @@ log_window_what_setup (EmpathyLogWindow *window)
     { WHAT_TYPE_SEPARATOR, 0, NULL, "separator" },
     { TPL_EVENT_MASK_TEXT, 0, "stock_text_justify", _("Text chats") },
 #ifdef HAVE_CALL_LOGS
-    { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, "call-start", _("Calls") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, EMPATHY_IMAGE_CALL, _("Calls") },
 #endif
   };
 #ifdef HAVE_CALL_LOGS
   struct event call_events [] = {
-    { TPL_EVENT_MASK_CALL, EVENT_CALL_INCOMING, "call-start", _("Incoming calls") },
-    { TPL_EVENT_MASK_CALL, EVENT_CALL_OUTGOING, "call-start", _("Outgoing calls") },
-    { TPL_EVENT_MASK_CALL, EVENT_CALL_MISSED, "call-stop", _("Missed calls") }
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_INCOMING, EMPATHY_IMAGE_CALL_INCOMING, _("Incoming calls") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_OUTGOING, EMPATHY_IMAGE_CALL_OUTGOING, _("Outgoing calls") },
+    { TPL_EVENT_MASK_CALL, EVENT_CALL_MISSED, EMPATHY_IMAGE_CALL_MISSED, _("Missed calls") }
   };
   GtkTreeIter parent;
 #endif
