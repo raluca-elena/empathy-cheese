@@ -1,3 +1,78 @@
+NEW in 3.1.2 (10/06/2011)
+============
+
+The "Big one" release.
+
+Dependencies:
+
+ • Folks ≥ 0.5.1
+ • GStreamer ≥ 0.10.32
+ • telepathy-glib ≥ 0.15.1
+ • telepathy-logger ≥ 0.2.8
+ • telepathy-farstream (optional)
+ • geocode-glib (optional)
+ • libcheese (optional)
+
+Empathy has now a brand new log viewer displaying calls as well as chats.
+Your telepathy-logger has to be built with call support to be able to enjoy
+this feature.
+
+We now support CSS variants in Adium themes (WebKit 1.4.1 recommended).
+If built with libcheese, Empathy can now use a webcam to create an avatar.
+
+This release also brings empathy-call, a new experimental handler for
+Call channels, our new audio/video API that is going to replace
+StreamedMedia channels.
+If you wish to test it, you'll need to install telepathy-farstream.
+This new handler can easily be disabled by passing --enable-call=no
+during the configure.
+
+Bugs fixed:
+ - Fixed #521747, Use Cheese to set avatar (Raluca Elena Podiuc)
+ - Fixed #585474, Support for CSS variants in adium themes (Xavier Claessens)
+ - Fixed #596737, No obvious way to view all the history (Emilio Pozuelo Monfort)
+ - Fixed #598904, Log viewer should show an account-independent calendar (Emilio Pozuelo Monfort)
+ - Fixed #635259, Allow to initiate a conversation/call from the previous conversations dialog (Emilio Pozuelo Monfort)
+ - Fixed #646526, It's difficult to find a MUC with the same name but connected via different accounts (Chandni Verma)
+ - Fixed #647011, Backport Call suport from 2.34 (Emilio Pozuelo Monfort)
+ - Fixed #648822, Port Empathy to Folks 0.5.1 (Travis Reitter)
+ - Fixed #649881, Weird parametrized variable syntax is not supported in message styles (Xavier Claessens)
+ - Fixed #649892, Use geocode-glib (Guillaume Desmottes)
+ - Fixed #650015, Chatroom joined but not displayed (Guillaume Desmottes)
+ - Fixed #650386, Should use tp_channel_dispatch_operation_claim_async() (Guillaume Desmottes)
+ - Fixed #650554, Make EmpathyTpChat a subclass of TpTextChannel (Guillaume Desmottes)
+ - Fixed #650590, cell-renderer-expander: fix rendering with GTK+3 (Cosimo Cecchi)
+ - Fixed #650844, SIP widget: add ignore-tls-errors (Guillaume Desmottes)
+ - Fixed #650846, Should insensitive unsupported params (Guillaume Desmottes)
+ - Fixed #650854, Fix expand/fill of some account widgets (Guillaume Desmottes)
+ - Fixed #650939, Cleanup empathy-avatar-chooser (Guillaume Desmottes)
+ - Fixed #651058, Insensitive text entry when joining a password protected IRC room (Chandni Verma)
+ - Fixed #651242, Use tp-glib high level SMS API (Guillaume Desmottes)
+ - Fixed #651489, protocol chooser is the slowest thing ever (Sjoerd Simons)
+ - Fixed #651913, Messages from offline contacts no longer show up in contact list (Guillaume Desmottes)
+ - Fixed #652015, Patch to fix a crash in empathy-accounts (Guillaume Desmottes)
+ - Fixed #652264, log viewer: tpl_entity_get_entity_type: assertion `TPL_IS_ENTITY (self)' failed
+ - Fixed #652270, "Missed call" icon should be the same everywhere (Guillaume Desmottes)
+ - Fixed #619866, Log viewer should be redesigne (Matthew Paul Thomas, Emilio Pozuelo Monfort)
+
+Translations:
+ - Updated an Translation (Daniel Martinez)
+ - Updated ca@valencia Translation (Carles Ferrando)
+ - Updated cs Translation (Marek Černocký)
+ - Updated eo Translation (Kristjan SCHMIDT)
+ - Updated es Translation (Daniel Mustieles, Jorge González)
+ - Updated fa Translation (Arash Mousavi)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated th Translation (Sira Nokyoongtong)
+ - Updated tr Translation (Muhammet Kara)
+ - Updated ug Translation (Abduxukur Abdurixit)
+ - Updated uk Translation (Daniel Korostil)
+ - Updated vi Translation (Nguyễn Thái Ngọc Duy)
+
 NEW in 3.1.1 (09/05/2011)
 ============
 

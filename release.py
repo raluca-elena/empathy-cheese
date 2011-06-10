@@ -9,7 +9,7 @@ import time
 from string import Template
 from optparse import OptionParser
 
-last_tag_pattern = 'EMPATHY_2_91*'
+last_tag_pattern = 'EMPATHY_3_0*'
 upload_server = 'master.gnome.org'
 template = '''\
 $name $version is now available for download from:
