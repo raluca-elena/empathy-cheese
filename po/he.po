@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-10 08:05+0300\n"
-"PO-Revision-Date: 2011-06-10 08:07+0200\n"
+"POT-Creation-Date: 2011-06-10 12:48+0300\n"
+"PO-Revision-Date: 2011-06-10 12:53+0200\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -481,6 +481,21 @@ msgstr "הקובץ הנבחר אינו קובץ רגיל"
 msgid "The selected file is empty"
 msgstr "הקובץ הנבחר ריק"
 
+#: ../libempathy/empathy-message.c:342 ../src/empathy-call-observer.c:130
+#, c-format
+msgid "Missed call from %s"
+msgstr "שיחה שלא נענתה מאת %s"
+
+#: ../libempathy/empathy-message.c:345
+#, c-format
+msgid "Called %s"
+msgstr "התקשרת ל%s"
+
+#: ../libempathy/empathy-message.c:348
+#, c-format
+msgid "Call from %s"
+msgstr "שיחה מאת %s"
+
 #: ../libempathy/empathy-tp-file.c:268
 msgid "Socket type not supported"
 msgstr "סוג השקע אינו נתמך"
@@ -714,12 +729,11 @@ msgstr[1] "לפני %d חודשים"
 msgid "in the future"
 msgstr "בעתיד"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:491
-msgid "All"
-msgstr "הכול"
+#: ../libempathy-gtk/empathy-account-chooser.c:539
+msgid "All accounts"
+msgstr "כל החשבונות"
 
 #: ../libempathy-gtk/empathy-account-widget.c:681
-#: ../libempathy-gtk/empathy-log-window.c:643
 #: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "חשבון"
@@ -1541,7 +1555,6 @@ msgid "Connected"
 msgstr "מחובר"
 
 #: ../libempathy-gtk/empathy-chat.c:3794
-#: ../libempathy-gtk/empathy-log-window.c:650
 msgid "Conversation"
 msgstr "שיחה"
 
@@ -2204,38 +2217,157 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_ניתוק"
 
-#: ../libempathy-gtk/empathy-log-window.c:660
-msgid "Date"
-msgstr "תאריך"
+#: ../libempathy-gtk/empathy-log-window.c:505
+msgid "Show"
+msgstr "הצגה"
 
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:2
-msgid "Conversations"
-msgstr "שיחות"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:3
-#: ../libempathy-gtk/empathy-search-bar.ui.h:1
-msgid "Find Next"
-msgstr "חיפוש הבא"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:4
-#: ../libempathy-gtk/empathy-search-bar.ui.h:2
-msgid "Find Previous"
-msgstr "חיפוש הקודם"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:5
-msgid "Previous Conversations"
-msgstr "שיחות קודמות"
-
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:7
+#: ../libempathy-gtk/empathy-log-window.c:527
 msgid "Search"
 msgstr "חיפוש"
 
-#. Searching *for* something
-#: ../libempathy-gtk/empathy-log-window.ui.h:9
-msgid "_For:"
-msgstr "_ערך:"
+#: ../libempathy-gtk/empathy-log-window.c:742
+#: ../libempathy-gtk/empathy-log-window.c:856
+msgctxt "A date with the time"
+msgid "%A, %e %B %Y %X"
+msgstr "%A %d ב%B %Y %X"
+
+#: ../libempathy-gtk/empathy-log-window.c:744
+#, c-format
+msgid "Chat with %s"
+msgstr "שיחה עם %s"
+
+#. Translators: this is an emote: '* Danielle waves'
+#: ../libempathy-gtk/empathy-log-window.c:811
+#, c-format
+msgid "<i>* %s %s</i>"
+msgstr "* %s %s"
+
+#. Translators: this is a message: 'Danielle: hello'
+#. * The string in bold is the sender's name
+#: ../libempathy-gtk/empathy-log-window.c:819
+#, c-format
+msgid "<b>%s:</b> %s"
+msgstr "<b>%s:</b> %s"
+
+#: ../libempathy-gtk/empathy-log-window.c:875
+#: ../libempathy-gtk/empathy-log-window.c:877 ../src/empathy-ft-manager.c:1026
+msgid "%"
+msgstr "%"
+
+#: ../libempathy-gtk/empathy-log-window.c:884
+#, c-format
+msgid "Call took %s, ended at %s"
+msgstr "השיחה ארכה %s, הסתיימה ב־%s"
+
+#: ../libempathy-gtk/empathy-log-window.c:1210
+msgid "Today"
+msgstr "היום"
+
+#: ../libempathy-gtk/empathy-log-window.c:1214
+msgid "Yesterday"
+msgstr "אתמול"
+
+#: ../libempathy-gtk/empathy-log-window.c:1230
+msgctxt ""
+"A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+msgid "%e %B %Y"
+msgstr "ה־%e ב%B %Y"
+
+#: ../libempathy-gtk/empathy-log-window.c:1311
+#: ../libempathy-gtk/empathy-log-window.c:2677
+msgid "Anytime"
+msgstr "כל זמן שהוא"
+
+#: ../libempathy-gtk/empathy-log-window.c:1382
+#: ../libempathy-gtk/empathy-log-window.c:1685
+msgid "Anyone"
+msgstr "כל אחד"
+
+#: ../libempathy-gtk/empathy-log-window.c:1950
+msgid "Who"
+msgstr "מי"
+
+#: ../libempathy-gtk/empathy-log-window.c:2153
+msgid "When"
+msgstr "מתי"
+
+#: ../libempathy-gtk/empathy-log-window.c:2269
+msgid "Anything"
+msgstr "כל דבר"
+
+#: ../libempathy-gtk/empathy-log-window.c:2271
+msgid "Text chats"
+msgstr "מלל הצ׳אטים"
+
+#: ../libempathy-gtk/empathy-log-window.c:2273
+msgid "Calls"
+msgstr "שיחות"
+
+#: ../libempathy-gtk/empathy-log-window.c:2278
+msgid "Incoming calls"
+msgstr "שיחות נכנסות"
+
+#: ../libempathy-gtk/empathy-log-window.c:2279
+msgid "Outgoing calls"
+msgstr "שיחות יוצאות"
+
+#: ../libempathy-gtk/empathy-log-window.c:2280
+msgid "Missed calls"
+msgstr "שיחות שלא נענו"
+
+#: ../libempathy-gtk/empathy-log-window.c:2301
+msgid "What"
+msgstr "מה"
+
+#: ../libempathy-gtk/empathy-log-window.c:2914
+msgid "Are you sure you want to delete all logs of previous conversations?"
+msgstr "האם אכן ברצונך למחוק את כל היומנים של הדיונים האחרונים שלך?"
+
+#: ../libempathy-gtk/empathy-log-window.c:2918
+msgid "Clear All"
+msgstr "מחיקת הכול"
+
+#: ../libempathy-gtk/empathy-log-window.c:2925
+msgid "Delete from:"
+msgstr "מחיקה עד מ־:"
+
+#. translators: Call is a noun. This string is used in the window
+#. * title
+#: ../libempathy-gtk/empathy-log-window.ui.h:1
+#: ../src/empathy-streamed-media-window.c:1340
+msgid "Call"
+msgstr "התקשרות"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:2
+#: ../src/empathy-chat-window.ui.h:3
+msgid "Chat"
+msgstr "שיחה"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:3
+msgid "History"
+msgstr "היסטוריה"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:4
+msgid "Profile"
+msgstr "פרופיל"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:5
+#: ../src/empathy-call-window.ui.h:20
+msgid "Video"
+msgstr "וידאו"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:6
+#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:20
+msgid "_Edit"
+msgstr "ע_ריכה"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:7
+msgid "_File"
+msgstr "_קובץ"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:8
+msgid "page 2"
+msgstr "עמוד 2"
 
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:2
 msgid "Contact ID:"
@@ -2320,6 +2452,14 @@ msgstr "הודעות מותאמות אישית…"
 #, c-format
 msgid "New %s account"
 msgstr "חשבון %s חדש"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:1
+msgid "Find Next"
+msgstr "חיפוש הבא"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:2
+msgid "Find Previous"
+msgstr "חיפוש הקודם"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:3
 msgid "Find:"
@@ -3096,12 +3236,6 @@ msgstr "פרטים"
 msgid "Call with %s"
 msgstr "שיחה עם %s"
 
-#. translators: Call is a noun. This string is used in the window
-#. * title
-#: ../src/empathy-streamed-media-window.c:1340
-msgid "Call"
-msgstr "התקשרות"
-
 #: ../src/empathy-streamed-media-window.c:1494
 #: ../src/empathy-call-window.c:1459
 msgid "The IP address as seen by the machine"
@@ -3310,10 +3444,6 @@ msgstr "לא ידוע"
 msgid "V_ideo"
 msgstr "_וידאו"
 
-#: ../src/empathy-call-window.ui.h:20
-msgid "Video"
-msgstr "וידאו"
-
 #: ../src/empathy-call-window.ui.h:21
 msgid "Video Off"
 msgstr "וידאו כבוי"
@@ -3389,10 +3519,6 @@ msgstr "ני_קוי"
 msgid "C_ontact"
 msgstr "איש _קשר"
 
-#: ../src/empathy-chat-window.ui.h:3
-msgid "Chat"
-msgstr "שיחה"
-
 #: ../src/empathy-chat-window.ui.h:4
 msgid "Insert _Smiley"
 msgstr "הוספת _סמיילי"
@@ -3424,10 +3550,6 @@ msgstr "_שיחה"
 #: ../src/empathy-chat-window.ui.h:11
 msgid "_Detach Tab"
 msgstr "_ניתוק הלשונית"
-
-#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:20
-msgid "_Edit"
-msgstr "ע_ריכה"
 
 #: ../src/empathy-chat-window.ui.h:13
 msgid "_Favorite Chat Room"
@@ -3660,10 +3782,6 @@ msgstr "נבדקת השלמות של \"%s\""
 #, c-format
 msgid "Hashing \"%s\""
 msgstr "מתבצע גיבוב ל־\"%s\""
-
-#: ../src/empathy-ft-manager.c:1026
-msgid "%"
-msgstr "%"
 
 #: ../src/empathy-ft-manager.c:1038
 msgid "File"
@@ -4284,11 +4402,6 @@ msgstr "אישור"
 msgid "Provide"
 msgstr "הזנה"
 
-#: ../src/empathy-call-observer.c:130
-#, c-format
-msgid "Missed call from %s"
-msgstr "שיחה שלא נענתה מאת %s"
-
 #: ../src/empathy-call-observer.c:133
 #, c-format
 msgid "%s just tried to call you, but you were in another call."
@@ -4312,6 +4425,21 @@ msgstr "בהמתנה"
 #: ../libempathy-gtk/empathy-search-bar.c:282
 msgid "_Match case"
 msgstr "התאמת _רישיות"
+
+#~ msgid "All"
+#~ msgstr "הכול"
+
+#~ msgid "Date"
+#~ msgstr "תאריך"
+
+#~ msgid "Conversations"
+#~ msgstr "שיחות"
+
+#~ msgid "Previous Conversations"
+#~ msgstr "שיחות קודמות"
+
+#~ msgid "_For:"
+#~ msgstr "_ערך:"
 
 #~ msgid "_Enabled"
 #~ msgstr "מו_פעל"
@@ -4394,9 +4522,6 @@ msgstr "התאמת _רישיות"
 #~ msgid "Whether the Salut account has been created on the first Empathy run."
 #~ msgstr ""
 #~ "Whether the Salut account has been created on the first Empathy run."
-
-#~ msgid "Accounts"
-#~ msgstr "חשבונות"
 
 #~ msgid " Accounts"
 #~ msgstr "חשבונות"
@@ -4570,9 +4695,6 @@ msgstr "התאמת _רישיות"
 
 #~ msgid "<b>Servers</b>"
 #~ msgstr "<b>שרתים</b>"
-
-#~ msgid "<b>Topic:</b>"
-#~ msgstr "<b>נושא:</b>"
 
 #~ msgid "<b>Contact</b>"
 #~ msgstr "<b>איש קשר</b>"
