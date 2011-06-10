@@ -472,6 +472,7 @@ status_preset_dialog_add_preset (GtkWidget *widget,
 				priv->text_cell,
 				FALSE);
 			gtk_widget_grab_focus (priv->presets_treeview);
+			gtk_tree_path_free (path);
 			break;
 		}
         }
