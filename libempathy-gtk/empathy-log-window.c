@@ -611,6 +611,9 @@ is_same_confroom (TplEvent *e1,
   TplEntity *receiver2 = tpl_event_get_receiver (e2);
   TplEntity *room1, *room2;
 
+  if (receiver1 == NULL || receiver2 == NULL)
+    return FALSE;
+
   if (tpl_entity_get_entity_type (sender1) == TPL_ENTITY_ROOM)
     room1 = sender1;
   else if (tpl_entity_get_entity_type (receiver1) == TPL_ENTITY_ROOM)
