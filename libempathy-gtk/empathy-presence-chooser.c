@@ -66,9 +66,6 @@
  * Widget which extends #GtkComboBoxEntry to change presence.
  */
 
-/* Flashing delay for icons (milliseconds). */
-#define FLASH_TIMEOUT 500
-
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyPresenceChooser)
 
 /* For custom message dialog */
