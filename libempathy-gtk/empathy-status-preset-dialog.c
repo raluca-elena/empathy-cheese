@@ -65,6 +65,9 @@ struct _EmpathyStatusPresetDialogPriv
 	int block_add_combo_changed;
 
 	GtkWidget *presets_treeview;
+	GtkTreeViewColumn *column;
+	GtkCellRenderer *text_cell;
+
 	GtkWidget *add_combobox;
 	GtkWidget *add_button;
 
@@ -278,6 +281,7 @@ status_preset_dialog_setup_presets_treeview (EmpathyStatusPresetDialog *self)
 	status_preset_dialog_presets_update (self);
 
 	column = gtk_tree_view_column_new ();
+	priv->column = column;
 	gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
 
 	renderer = gtk_cell_renderer_pixbuf_new ();
@@ -286,6 +290,7 @@ status_preset_dialog_setup_presets_treeview (EmpathyStatusPresetDialog *self)
 			"icon-name", PRESETS_STORE_ICON_NAME);
 
 	renderer = gtk_cell_renderer_text_new ();
+	priv->text_cell = renderer;
 	gtk_tree_view_column_pack_start (column, renderer, TRUE);
 	gtk_tree_view_column_add_attribute (column, renderer,
 			"text", PRESETS_STORE_STATUS);
@@ -460,14 +465,13 @@ status_preset_dialog_add_preset (GtkWidget *widget,
 			GtkTreePath *path;
 
 			path = gtk_tree_model_get_path (model, &iter);
-
-			gtk_tree_selection_select_iter (
-				gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->presets_treeview)),
-				&iter);
-			gtk_tree_view_scroll_to_cell (
-					GTK_TREE_VIEW (priv->presets_treeview),
-					path, NULL,
-					FALSE, 0., 0.);
+			gtk_tree_view_set_cursor_on_cell (
+				GTK_TREE_VIEW (priv->presets_treeview),
+				path,
+				priv->column,
+				priv->text_cell,
+				FALSE);
+			gtk_widget_grab_focus (priv->presets_treeview);
 			break;
 		}
         }
