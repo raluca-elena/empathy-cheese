@@ -93,8 +93,8 @@ empathy_chat_with_contact_id (TpAccount *account,
     const gchar *contact_id,
     gint64 timestamp)
 {
-	create_text_channel (account, TP_HANDLE_TYPE_CONTACT,
-        contact_id, FALSE, timestamp);
+  create_text_channel (account, TP_HANDLE_TYPE_CONTACT,
+      contact_id, FALSE, timestamp);
 }
 
 void
@@ -102,8 +102,8 @@ empathy_join_muc (TpAccount *account,
     const gchar *room_name,
     gint64 timestamp)
 {
-	create_text_channel (account, TP_HANDLE_TYPE_ROOM,
-        room_name, FALSE, timestamp);
+  create_text_channel (account, TP_HANDLE_TYPE_ROOM,
+      room_name, FALSE, timestamp);
 }
 
 void
