@@ -342,6 +342,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 			body = g_strdup_printf (_("Missed call from %s"),
 				tpl_entity_get_alias (tpl_event_get_sender (logevent)));
 		else if (tpl_entity_get_entity_type (tpl_event_get_sender (logevent)) == TPL_ENTITY_SELF)
+			/* Translators: this is an outgoing call, e.g. 'Called Alice' */
 			body = g_strdup_printf (_("Called %s"),
 				tpl_entity_get_alias (tpl_event_get_receiver (logevent)));
 		else
