@@ -59,7 +59,7 @@ typedef struct {
 	gint64                last_timestamp;
 	gboolean              last_is_backlog;
 	guint                 pages_loading;
-	/* Queue of GValue* containing an EmpathyMessage or string */
+	/* Queue of QueuedItem*s containing an EmpathyMessage or string */
 	GQueue                message_queue;
 	/* Queue of owned gchar* of message token to remove unread
 	 * marker for when we lose focus. */
@@ -118,6 +118,45 @@ G_DEFINE_TYPE_WITH_CODE (EmpathyThemeAdium, empathy_theme_adium,
 			 WEBKIT_TYPE_WEB_VIEW,
 			 G_IMPLEMENT_INTERFACE (EMPATHY_TYPE_CHAT_VIEW,
 						theme_adium_iface_init));
+
+enum {
+	QUEUED_EVENT,
+	QUEUED_MESSAGE,
+	QUEUED_EDIT
+};
+
+typedef struct {
+	guint type;
+	EmpathyMessage *msg;
+	char *str;
+} QueuedItem;
+
+static QueuedItem *
+queue_item (GQueue *queue,
+	    guint type,
+	    EmpathyMessage *msg,
+	    const char *str)
+{
+	QueuedItem *item = g_slice_new0 (QueuedItem);
+
+	item->type = type;
+	if (msg != NULL)
+		item->msg = g_object_ref (msg);
+	item->str = g_strdup (str);
+
+	g_queue_push_tail (queue, item);
+
+	return item;
+}
+
+static void
+free_queued_item (QueuedItem *item)
+{
+	tp_clear_object (&item->msg);
+	g_free (item->str);
+
+	g_slice_free (QueuedItem, item);
+}
 
 static void
 theme_adium_update_enable_webkit_developer_tools (EmpathyThemeAdium *theme)
@@ -843,9 +882,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	gboolean               action;
 
 	if (priv->pages_loading != 0) {
-		GValue *value = tp_g_value_slice_new (EMPATHY_TYPE_MESSAGE);
-		g_value_set_object (value, msg);
-		g_queue_push_tail (&priv->message_queue, value);
+		queue_item (&priv->message_queue, QUEUED_MESSAGE, msg, NULL);
 		return;
 	}
 
@@ -1017,8 +1054,7 @@ theme_adium_append_event (EmpathyChatView *view,
 	gchar *str_escaped;
 
 	if (priv->pages_loading != 0) {
-		g_queue_push_tail (&priv->message_queue,
-			tp_g_value_slice_new_string (str));
+		queue_item (&priv->message_queue, QUEUED_EVENT, NULL, str);
 		return;
 	}
 
@@ -1040,9 +1076,7 @@ theme_adium_edit_message (EmpathyChatView *view,
 	GError *error = NULL;
 
 	if (priv->pages_loading != 0) {
-		GValue *value = tp_g_value_slice_new (EMPATHY_TYPE_MESSAGE);
-		g_value_set_object (value, message);
-		g_queue_push_tail (&priv->message_queue, value);
+		queue_item (&priv->message_queue, QUEUED_EDIT, message, NULL);
 		return;
 	}
 
@@ -1454,21 +1488,24 @@ theme_adium_load_finished_cb (WebKitWebView  *view,
 
 	/* Display queued messages */
 	for (l = priv->message_queue.head; l != NULL; l = l->next) {
-		GValue *value = l->data;
+		QueuedItem *item = l->data;
 
-		if (G_VALUE_HOLDS_OBJECT (value)) {
-			EmpathyMessage *message = g_value_get_object (value);
+		switch (item->type)
+		{
+			case QUEUED_MESSAGE:
+				theme_adium_append_message (chat_view, item->msg);
+				break;
 
-			if (empathy_message_is_edit (message))
-				theme_adium_edit_message (chat_view, message);
-			else
-				theme_adium_append_message (chat_view, message);
-		} else {
-			theme_adium_append_event (chat_view,
-				g_value_get_string (value));
+			case QUEUED_EDIT:
+				theme_adium_edit_message (chat_view, item->msg);
+				break;
+
+			case QUEUED_EVENT:
+				theme_adium_append_event (chat_view, item->str);
+				break;
 		}
 
-		tp_g_value_slice_free (value);
+		free_queued_item (item);
 	}
 
 	g_queue_clear (&priv->message_queue);
