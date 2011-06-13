@@ -1384,8 +1384,10 @@ chat_message_acknowledged_cb (EmpathyTpChat  *tp_chat,
 	empathy_chat_view_message_acknowledged (chat->view,
 	    message);
 
-	priv->unread_messages--;
-	g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+	if (!empathy_message_is_edit (message)) {
+		priv->unread_messages--;
+		g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+	}
 }
 
 static void
