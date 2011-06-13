@@ -199,6 +199,9 @@ struct _EmpathyCallWindowPriv
   EmpathyCallWindowFullscreen *fullscreen;
   gboolean is_fullscreen;
 
+  gboolean got_video;
+  guint got_video_src;
+
   /* Those fields represent the state of the window before it actually was in
      fullscreen mode. */
   gboolean sidebar_was_visible_before_fs;
@@ -587,6 +590,16 @@ empathy_call_window_create_audio_input (EmpathyCallWindow *self)
       3);
 
   return hbox;
+}
+
+static void
+empathy_call_window_show_video_output (EmpathyCallWindow *self,
+    gboolean show)
+{
+  if (self->priv->video_output != NULL)
+    g_object_set (self->priv->video_output, "visible", show, NULL);
+
+  gtk_widget_set_visible (self->priv->remote_user_avatar_widget, !show);
 }
 
 static void
@@ -1634,6 +1647,12 @@ empathy_call_window_dispose (GObject *object)
       priv->bus_message_source_id = 0;
     }
 
+  if (priv->got_video_src > 0)
+    {
+      g_source_remove (priv->got_video_src);
+      priv->got_video_src = 0;
+    }
+
   tp_clear_object (&priv->pipeline);
   tp_clear_object (&priv->video_input);
   tp_clear_object (&priv->audio_input);
@@ -1869,6 +1888,11 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
       if (priv->video_output != NULL)
         clutter_actor_destroy (priv->video_output);
       priv->video_output = NULL;
+      if (priv->got_video_src > 0)
+        {
+          g_source_remove (priv->got_video_src);
+          priv->got_video_src = 0;
+        }
 
       gtk_widget_show (priv->remote_user_avatar_widget);
 
@@ -2358,6 +2382,42 @@ emapthy_call_window_show_video_output_cb (gpointer user_data)
   return FALSE;
 }
 
+static gboolean
+empathy_call_window_check_video_cb (gpointer data)
+{
+  EmpathyCallWindow *self = data;
+
+  if (self->priv->got_video)
+    {
+      self->priv->got_video = FALSE;
+      return TRUE;
+    }
+
+  /* No video in the last N seconds, display the remote avatar */
+  empathy_call_window_show_video_output (self, FALSE);
+
+  return TRUE;
+}
+
+/* Called from the streaming thread */
+static gboolean
+empathy_call_window_video_probe_cb (GstPad *pad,
+    GstMiniObject *mini_obj,
+    EmpathyCallWindow *self)
+{
+  if (G_UNLIKELY (!self->priv->got_video))
+    {
+      /* show the remote video */
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
+          emapthy_call_window_show_video_output_cb,
+          g_object_ref (self), g_object_unref);
+
+      self->priv->got_video = TRUE;
+    }
+
+  return TRUE;
+}
+
 /* Called from the streaming thread */
 static gboolean
 empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
@@ -2379,6 +2439,13 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
       case TP_MEDIA_STREAM_TYPE_VIDEO:
         g_idle_add (emapthy_call_window_show_video_output_cb, self);
         pad = empathy_call_window_get_video_sink_pad (self);
+
+        gst_pad_add_data_probe (src,
+            G_CALLBACK (empathy_call_window_video_probe_cb), self);
+        if (priv->got_video_src > 0)
+          g_source_remove (priv->got_video_src);
+        priv->got_video_src = g_timeout_add_seconds (5,
+            empathy_call_window_check_video_cb, self);
         break;
       default:
         g_assert_not_reached ();
