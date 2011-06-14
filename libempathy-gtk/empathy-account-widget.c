@@ -1098,6 +1098,30 @@ static void
 account_widget_launch_external_clicked (GtkWidget *button,
     TpAccount *account)
 {
+  GdkAppLaunchContext *context = NULL;
+  GdkDisplay *display;
+  GAppInfo *app_info;
+  GError *error = NULL;
+
+  app_info = g_object_get_data (G_OBJECT (button), "app-info");
+
+  g_return_if_fail (G_IS_APP_INFO (app_info));
+
+  display = gdk_display_get_default ();
+  context = gdk_display_get_app_launch_context (display);
+
+  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+        &error))
+    {
+      g_critical ("Failed to bisho: %s", error->message);
+      g_clear_error (&error);
+    }
+}
+
+static void
+account_widget_launch_external_clicked_meego (GtkWidget *button,
+    TpAccount *account)
+{
   if (!tp_strdiff (tp_account_get_storage_provider (account),
         "com.meego.libsocialweb"))
     {
@@ -1155,17 +1179,34 @@ account_widget_build_external (EmpathyAccountWidget *self,
   TpAccount *account = empathy_account_settings_get_account (settings);
   GtkWidget *bar, *widget;
   gchar *str;
+  const gchar *provider, *name = NULL;
+  GDesktopAppInfo *desktop_info = NULL;
 
   self->ui_details->widget = gtk_vbox_new (FALSE, 6);
   priv->table_common_settings = gtk_table_new (1, 2, FALSE);
 
-  if (!tp_strdiff (tp_account_get_storage_provider (account),
-        "com.meego.libsocialweb"))
+  provider = tp_account_get_storage_provider (account);
+
+  if (!tp_strdiff (provider, "com.meego.libsocialweb"))
     {
-      /* we know how to handle this external provider */
+      name = _("My Web Accounts");
+    }
+  else if (!tp_strdiff (provider, "org.gnome.OnlineAccounts"))
+    {
+      /* FIXME: we should publish the .desktop file in some general way */
+      desktop_info = g_desktop_app_info_new ("goa-prefs.desktop");
+
+      if (desktop_info == NULL)
+        g_critical ("Could not locate 'goa-prefs.desktop'");
+      else
+        name = g_app_info_get_name (G_APP_INFO (desktop_info));
+    }
+
+  if (name != NULL)
+    {
       str = g_strdup_printf (
-          _("The account %s is edited via My Web Accounts."),
-          empathy_account_settings_get_display_name (settings));
+          _("The account %s is edited via %s."),
+          empathy_account_settings_get_display_name (settings), name);
     }
   else
     {
@@ -1185,15 +1226,30 @@ account_widget_build_external (EmpathyAccountWidget *self,
       widget);
   gtk_container_set_border_width (GTK_CONTAINER (bar), 6);
 
-  if (!tp_strdiff (tp_account_get_storage_provider (account),
-        "com.meego.libsocialweb"))
+  if (!tp_strdiff (provider, "com.meego.libsocialweb"))
     {
       /* we know how to handle this external provider */
       widget = gtk_info_bar_add_button (GTK_INFO_BAR (bar),
           _("Launch My Web Accounts"), RESPONSE_LAUNCH);
 
       g_signal_connect (widget, "clicked",
+          G_CALLBACK (account_widget_launch_external_clicked_meego), account);
+    }
+  else if (desktop_info != NULL)
+    {
+      /* general handler */
+      str = g_strdup_printf (_("Edit %s"), name);
+
+      widget = gtk_info_bar_add_button (GTK_INFO_BAR (bar),
+          str, RESPONSE_LAUNCH);
+
+      g_object_set_data_full (G_OBJECT (widget), "app-info",
+          g_object_ref (desktop_info), g_object_unref);
+
+      g_signal_connect (widget, "clicked",
           G_CALLBACK (account_widget_launch_external_clicked), account);
+
+      g_free (str);
     }
 
   gtk_box_pack_start (GTK_BOX (self->ui_details->widget), bar,
@@ -1202,6 +1258,8 @@ account_widget_build_external (EmpathyAccountWidget *self,
       priv->table_common_settings, FALSE, TRUE, 0);
 
   gtk_widget_show_all (self->ui_details->widget);
+
+  tp_clear_object (&desktop_info);
 }
 
 static void
