@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-06-11 21:39+0000\n"
-"PO-Revision-Date: 2011-06-13 08:44+0100\n"
+"POT-Creation-Date: 2011-06-13 15:52+0000\n"
+"PO-Revision-Date: 2011-06-14 08:47+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenščina <gnome-si@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -52,9 +52,8 @@ msgid "Chat window theme"
 msgstr "Tema klepetalnega okna"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:4
-#, fuzzy
 msgid "Chat window theme variant"
-msgstr "Uporabi temo za klepetalnice"
+msgstr "Različica teme klepetalnega okna"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:5
 msgid "Comma-separated list of spell checker languages to use (e.g. \"en, fr, nl\")."
@@ -257,9 +256,8 @@ msgid "The theme that is used to display the conversation in chat windows."
 msgstr "Tema uporabljena za prikaz pogovorov v klepetalnih oknih."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:55
-#, fuzzy
 msgid "The theme variant that is used to display the conversation in chat windows."
-msgstr "Tema uporabljena za prikaz pogovorov v klepetalnih oknih."
+msgstr "Različica teme, ki je uporabljena za prikaz pogovorov v klepetalnih oknih."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:56
 msgid "Use graphical smileys"
@@ -450,14 +448,14 @@ msgid "Missed call from %s"
 msgstr "Zgrešen klic od %s"
 
 #: ../libempathy/empathy-message.c:345
-#, fuzzy, c-format
+#, c-format
 msgid "Called %s"
-msgstr "Tako imenovano"
+msgstr "Klicanje uporabnika %s"
 
 #: ../libempathy/empathy-message.c:348
-#, fuzzy, c-format
+#, c-format
 msgid "Call from %s"
-msgstr "Klic od %s"
+msgstr "Klic uporabnika %s"
 
 #: ../libempathy/empathy-tp-file.c:268
 msgid "Socket type not supported"
@@ -710,7 +708,6 @@ msgid "in the future"
 msgstr "v prihodnosti"
 
 #: ../libempathy-gtk/empathy-account-chooser.c:539
-#, fuzzy
 msgid "All accounts"
 msgstr "Vsi računi"
 
@@ -1116,9 +1113,8 @@ msgid "Discover the STUN server automatically"
 msgstr "Samodejno odkrij strežnik STUN"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:6
-#, fuzzy
 msgid "Ignore TLS Errors"
-msgstr "_Prezri SSL napake preverjanja potrdila"
+msgstr "Prezri napake TLS"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:7
 msgid "Interval (seconds)"
@@ -1207,18 +1203,16 @@ msgid "None of the accepted image formats are supported on your system"
 msgstr "Vaš sistem ne podpira nobene izmed sprejetih vrst slik"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:822
-#, fuzzy
 msgid "Couldn't save pixbuf to png"
-msgstr "Ni mogoče najti primernega zapisa za shranjevanje slike"
+msgstr "Ni mogoče shraniti medpomnilnika sličice v zapis png"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:938
 msgid "Select Your Avatar Image"
 msgstr "Izberite sliko za svojo podobo"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:942
-#, fuzzy
 msgid "Take a picture..."
-msgstr "Zajem slike"
+msgstr "Zajem slike ..."
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:945
 msgid "No Image"
@@ -1238,28 +1232,24 @@ msgstr "Kliknite za povečavo"
 
 #: ../libempathy-gtk/empathy-call-utils.c:42
 #: ../libempathy-gtk/empathy-call-utils.c:58
-#, fuzzy
 msgid "There was an error starting the call"
-msgstr "Prišlo je do neznane napake med zaganjanjem strežnika X."
+msgstr "Prišlo je do napake med začenjanjem klica"
 
 #: ../libempathy-gtk/empathy-call-utils.c:49
 msgid "The specified contact doesn't support calls"
 msgstr "Določen stik ne podpira klicev."
 
 #: ../libempathy-gtk/empathy-call-utils.c:51
-#, fuzzy
 msgid "The specified contact is offline"
-msgstr "Izbrani stik ni povezan v omrežje."
+msgstr "Izbrani stik ni povezan v omrežje"
 
 #: ../libempathy-gtk/empathy-call-utils.c:53
-#, fuzzy
 msgid "The specified contact is not valid"
-msgstr "Izbrana vrsta mape ni veljavna"
+msgstr "Izbrani stik ni veljaven"
 
 #: ../libempathy-gtk/empathy-call-utils.c:55
-#, fuzzy
 msgid "Emergency calls are not supported on this protocol"
-msgstr "Tema ni podprta pri tem pogovoru"
+msgstr "Klic v sili ni podprt s tem protokolom"
 
 #: ../libempathy-gtk/empathy-chat.c:695
 msgid "Failed to open private chat"
@@ -1274,9 +1264,9 @@ msgid "You are not allowed to change the topic"
 msgstr "Za spreminjanje teme nimate ustreznih dovoljenj."
 
 #: ../libempathy-gtk/empathy-chat.c:966
-#, fuzzy, c-format
+#, c-format
 msgid "“%s” is not a valid contact ID"
-msgstr "Izbran ID ni veljaven"
+msgstr "“%s” ni veljaven ID stika"
 
 #: ../libempathy-gtk/empathy-chat.c:1023
 msgid "/clear: clear all messages from the current conversation"
@@ -1813,9 +1803,8 @@ msgid "Last seen:"
 msgstr "Zadnjič viden:"
 
 #: ../libempathy-gtk/empathy-contact-widget.c:348
-#, fuzzy
 msgid "Connected from:"
-msgstr "Veljavno od:"
+msgstr "Povezan od:"
 
 #. FIXME: once Idle implements SimplePresence using this information, we can
 #. * and should bin this.
@@ -2206,9 +2195,9 @@ msgid "%A, %e %B %Y %X"
 msgstr "%A, %d. %B %Y"
 
 #: ../libempathy-gtk/empathy-log-window.c:747
-#, fuzzy, c-format
+#, c-format
 msgid "Chat with %s"
-msgstr "Klepet s stikom"
+msgstr "Klepet s stikom %s"
 
 #. Translators: this is an emote: '* Danielle waves'
 #: ../libempathy-gtk/empathy-log-window.c:814
@@ -2270,37 +2259,32 @@ msgid "Anything"
 msgstr "Karkoli"
 
 #: ../libempathy-gtk/empathy-log-window.c:2274
-#, fuzzy
 msgid "Text chats"
-msgstr "Besedilni pogled"
+msgstr "Besedilni klepet"
 
 #: ../libempathy-gtk/empathy-log-window.c:2276
 msgid "Calls"
 msgstr "Klici"
 
 #: ../libempathy-gtk/empathy-log-window.c:2281
-#, fuzzy
 msgid "Incoming calls"
-msgstr "_Samodejno odgovori na prihajajoče klice"
+msgstr "Dohodni klici"
 
 #: ../libempathy-gtk/empathy-log-window.c:2282
-#, fuzzy
 msgid "Outgoing calls"
-msgstr "Zgodovina klicev"
+msgstr "Odhodni klici"
 
 #: ../libempathy-gtk/empathy-log-window.c:2283
-#, fuzzy
 msgid "Missed calls"
-msgstr "Zgodovina klicev"
+msgstr "Prezrti klici"
 
 #: ../libempathy-gtk/empathy-log-window.c:2304
 msgid "What"
 msgstr "Kaj"
 
 #: ../libempathy-gtk/empathy-log-window.c:2917
-#, fuzzy
 msgid "Are you sure you want to delete all logs of previous conversations?"
-msgstr "Ali ste prepričani, da želite blokirati ponovno vzpostavitev stika med '%s' in vami?"
+msgstr "Ali ste prepričani, da želite izbrisati vse podatke beležanja predhodnih pogovorov?"
 
 #: ../libempathy-gtk/empathy-log-window.c:2921
 msgid "Clear All"
@@ -3557,9 +3541,8 @@ msgid "_Answer"
 msgstr "_Odgovori"
 
 #: ../src/empathy-event-manager.c:591
-#, fuzzy
 msgid "_Answer with video"
-msgstr "Analiziranje video datotek"
+msgstr "_Odgovori z videom"
 
 #: ../src/empathy-event-manager.c:751
 #: ../src/empathy-event-manager.c:784
@@ -4130,9 +4113,8 @@ msgid "Themes"
 msgstr "Teme"
 
 #: ../src/empathy-preferences.ui.h:25
-#, fuzzy
 msgid "Variant:"
-msgstr "velikost pisave"
+msgstr "Različica:"
 
 #: ../src/empathy-preferences.ui.h:26
 msgid "_Automatically connect on startup"
@@ -4303,9 +4285,8 @@ msgid "Answer"
 msgstr "Odgovori"
 
 #: ../src/empathy-notifications-approver.c:227
-#, fuzzy
 msgid "Answer with video"
-msgstr "Analiziranje video datotek"
+msgstr "Odgovori z videom"
 
 #: ../src/empathy-notifications-approver.c:235
 #: ../src/empathy-notifications-approver.c:245
@@ -4327,15 +4308,15 @@ msgid "%s just tried to call you, but you were in another call."
 msgstr "%s je klical med drugim pogovorom."
 
 #: ../src/empathy-call-window.c:1246
-#, fuzzy, c-format
+#, c-format
 msgid "Call with %d participants"
-msgstr "V pogovoru z %s"
+msgstr "Klepet večih (%s) uporabnikov"
 
 #. Translators: 'status - minutes:seconds' the caller has been connected
 #: ../src/empathy-call-window.c:2124
-#, fuzzy, c-format
+#, c-format
 msgid "%s — %d:%02dm"
-msgstr "Povezan - %d:%02d m"
+msgstr "%s — %d:%02dm"
 
 #: ../src/empathy-call-window.c:2125
 msgid "On hold"
