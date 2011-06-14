@@ -1,12 +1,17 @@
 MY_SUBDIRS = tools extensions po data telepathy-yell libempathy libempathy-gtk src help tests
 NST_SUBDIRS = nautilus-sendto-plugin
+GOA_SUBDIRS = goa-mc-plugin
 
-DIST_SUBDIRS = $(MY_SUBDIRS) $(NST_SUBDIRS)
+DIST_SUBDIRS = $(MY_SUBDIRS) $(NST_SUBDIRS) $(GOA_SUBDIRS)
 
 SUBDIRS = $(MY_SUBDIRS)
 
 if HAVE_NST
 SUBDIRS += $(NST_SUBDIRS)
+endif
+
+if HAVE_GOA
+SUBDIRS += $(GOA_SUBDIRS)
 endif
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}

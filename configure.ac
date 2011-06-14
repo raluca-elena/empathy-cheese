@@ -580,6 +580,35 @@ fi
 AM_CONDITIONAL(HAVE_NST, test "x$have_nst" = "xyes")
 
 # -----------------------------------------------------------
+# goa-mc-plugin
+# -----------------------------------------------------------
+AC_ARG_ENABLE(goa,
+              AS_HELP_STRING([--enable-goa=@<:@no/yes/auto@:>@],
+                             [build GOA MC plugin]), ,
+                             enable_goa=auto)
+
+if test "x$enable_goa" != "xno"; then
+   PKG_CHECK_MODULES(GOA,
+    [
+       mission-control-plugins
+       goa-1.0
+    ], have_goa="yes", have_goa="no")
+
+   AC_MSG_CHECKING([Mission Control plugins dir])
+   MISSION_CONTROL_PLUGINS_DIR=`pkg-config --variable=plugindir mission-control-plugins`
+
+   AC_SUBST(MISSION_CONTROL_PLUGINS_DIR)
+else
+   have_goa=no
+fi
+
+if test "x$enable_goa" = "xyes" -a "x$have_goa" != "xyes"; then
+   AC_MSG_ERROR([Could not find GOA dependencies.])
+fi
+
+AM_CONDITIONAL(HAVE_GOA, test "x$have_goa" = "xyes")
+
+# -----------------------------------------------------------
 # new, single-window control center
 # -----------------------------------------------------------
 AC_ARG_ENABLE(control_center_embedding,
@@ -664,6 +693,7 @@ AC_CONFIG_FILES([
    libempathy-gtk/Makefile
    src/Makefile
    nautilus-sendto-plugin/Makefile
+   goa-mc-plugin/Makefile
    help/Makefile
    tests/Makefile
    tests/interactive/Makefile
@@ -697,6 +727,7 @@ Configure summary:
 
     Extras:
 	Nautilus-sendto plugin......:  ${have_nst}
+	GOA MC plugin...............:  ${have_goa}
 	Salut E-D-S support.........:  ${with_eds}
 	Exp. Call channel handler...:  ${have_call}
 	Exp. Call log support.......:  ${have_call_logs}
