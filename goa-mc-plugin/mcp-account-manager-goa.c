@@ -209,6 +209,32 @@ mcp_account_manager_goa_init (McpAccountManagerGoa *self)
   goa_client_new (NULL, _goa_client_new_cb, self);
 }
 
+static void
+_account_added_cb (GoaClient *client,
+    GoaObject *object,
+    McpAccountManagerGoa *self)
+{
+      GoaAccount *account = goa_object_peek_account (object);
+
+      _new_account (self, account);
+}
+
+static void
+_account_removed_cb (GoaClient *client,
+    GoaObject *object,
+    McpAccountManagerGoa *self)
+{
+  GoaAccount *account = goa_object_peek_account (object);
+  char *name = get_tp_account_name (account);
+
+  if (self->priv->ready)
+    g_signal_emit_by_name (self, "deleted", name);
+
+  g_hash_table_remove (self->priv->accounts, name);
+
+  g_free (name);
+}
+
 
 static void
 _goa_client_new_cb (GObject *obj,
@@ -232,14 +258,18 @@ _goa_client_new_cb (GObject *obj,
 
   for (ptr = accounts; ptr != NULL; ptr = ptr->next)
     {
-      GoaAccount *account = goa_object_get_account (ptr->data);
+      GoaAccount *account = goa_object_peek_account (ptr->data);
 
       _new_account (self, account);
     }
 
   g_list_free_full (accounts, g_object_unref);
 
-  /* FIXME: track accounts created/destroyed */
+  g_signal_connect (self->priv->client, "account-added",
+      G_CALLBACK (_account_added_cb), self);
+  g_signal_connect (self->priv->client, "account-removed",
+      G_CALLBACK (_account_removed_cb), self);
+  /* FIXME: do we need to support account-changed ? */
 }
 
 
