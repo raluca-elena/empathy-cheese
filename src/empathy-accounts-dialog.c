@@ -2180,6 +2180,8 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   GtkWidget                    *content_area;
   GtkWidget *action_area, *vbox, *hbox, *align;
   GtkWidget *alig;
+  GtkWidget *sw, *toolbar;
+  GtkStyleContext *context;
 
   filename = empathy_file_lookup ("empathy-accounts-dialog.ui", "src");
 
@@ -2196,6 +2198,8 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
       "hbox_protocol", &priv->hbox_protocol,
       "notebook_account", &priv->notebook_account,
       "alignment_loading", &alig,
+      "accounts_sw", &sw,
+      "add_remove_toolbar", &toolbar,
       NULL);
   g_free (filename);
 
@@ -2323,6 +2327,13 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   gtk_window_set_default_size (GTK_WINDOW (dialog), 640, 450);
 
   gtk_window_set_type_hint (GTK_WINDOW (dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
+
+  /* join the add/remove toolbar to the treeview */
+  context = gtk_widget_get_style_context (sw);
+  gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
+
+  context = gtk_widget_get_style_context (toolbar);
+  gtk_style_context_set_junction_sides (context, GTK_JUNCTION_TOP);
 
   /* add dialog buttons */
   gtk_button_box_set_layout (GTK_BUTTON_BOX (action_area), GTK_BUTTONBOX_END);
