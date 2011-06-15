@@ -11,89 +11,94 @@
         <property name="visible">True</property>
         <property name="spacing">6</property>
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow17">
-            <property name="height_request">200</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">never</property>
-            <property name="vscrollbar_policy">automatic</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkTreeView" id="treeview">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="enable_search">False</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
-            <property name="spacing">6</property>
-            <property name="homogeneous">True</property>
+            <property name="spacing">0</property>
             <child>
-              <object class="GtkHBox" id="hbox1">
+              <object class="GtkScrolledWindow" id="accounts_sw">
+                <property name="height_request">200</property>
                 <property name="visible">True</property>
-                <property name="spacing">6</property>
-                <property name="homogeneous">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">never</property>
+                <property name="vscrollbar_policy">automatic</property>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkButton" id="button_add">
-                    <property name="label" translatable="yes">_Add…</property>
+                  <object class="GtkTreeView" id="treeview">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="image">add_image</property>
-                    <property name="use_underline">True</property>
+                    <property name="enable_search">False</property>
                   </object>
-                  <packing>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="button_remove">
-                    <property name="label" translatable="yes">_Remove</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="image">remove_image</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
               <packing>
-                <property name="fill">False</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button_import">
-                <property name="label" translatable="yes">_Import…</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_underline">True</property>
+              <object class="GtkToolbar" id="add_remove_toolbar">
+                <property name="visible">True</property>
+		<property name="icon_size">1</property>
+		<style>
+		  <class name="inline-toolbar"/>
+		</style>
+                <child>
+                  <object class="GtkToolButton" id="button_add">
+                    <property name="tooltip-text" translatable="yes">Add…</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="icon_name">list-add-symbolic</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="button_remove">
+                    <property name="tooltip-text" translatable="yes">Remove</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="icon_name">list-remove-symbolic</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                  </packing>
+                </child>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_import">
+            <property name="label" translatable="yes">_Import…</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_action_appearance">False</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">0</property>
       </packing>
     </child>
@@ -277,13 +282,5 @@
         <property name="position">1</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkImage" id="remove_image">
-    <property name="visible">True</property>
-    <property name="stock">gtk-remove</property>
-  </object>
-  <object class="GtkImage" id="add_image">
-    <property name="visible">True</property>
-    <property name="stock">gtk-add</property>
   </object>
 </interface>
