@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-06-13 15:52+0000\n"
-"PO-Revision-Date: 2011-06-14 08:47+0100\n"
+"POT-Creation-Date: 2011-06-16 12:55+0000\n"
+"PO-Revision-Date: 2011-06-16 15:14+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
 "Language-Team: Slovenščina <gnome-si@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -421,7 +421,7 @@ msgstr "Upravljanje s sporočanjem in računi VoIP"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2320
+#: ../src/empathy-accounts-dialog.c:2324
 msgid "Messaging and VoIP Accounts"
 msgstr "Sporočanje in računi VoIP"
 
@@ -447,12 +447,13 @@ msgstr "Izbrana datoteka je prazna"
 msgid "Missed call from %s"
 msgstr "Zgrešen klic od %s"
 
-#: ../libempathy/empathy-message.c:345
+#. Translators: this is an outgoing call, e.g. 'Called Alice'
+#: ../libempathy/empathy-message.c:346
 #, c-format
 msgid "Called %s"
 msgstr "Klicanje uporabnika %s"
 
-#: ../libempathy/empathy-message.c:348
+#: ../libempathy/empathy-message.c:349
 #, c-format
 msgid "Call from %s"
 msgstr "Klic uporabnika %s"
@@ -1662,7 +1663,6 @@ msgstr "Odstranjevanje skupine"
 #: ../libempathy-gtk/empathy-contact-list-view.c:2111
 #: ../libempathy-gtk/empathy-individual-view.c:2433
 #: ../libempathy-gtk/empathy-individual-view.c:2636
-#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "_Odstrani"
 
@@ -3047,26 +3047,30 @@ msgstr ""
 "Ali ste prepričani, da želite nadaljevati?"
 
 #: ../src/empathy-accounts-dialog.ui.h:1
+msgid "Add…"
+msgstr "Dodaj ..."
+
+#: ../src/empathy-accounts-dialog.ui.h:2
 msgid "Loading account information"
 msgstr "Nalaganje podrobnosti računa"
 
-#: ../src/empathy-accounts-dialog.ui.h:2
+#: ../src/empathy-accounts-dialog.ui.h:3
 msgid "No protocol installed"
 msgstr "Ni nameščenih protokolov"
 
-#: ../src/empathy-accounts-dialog.ui.h:3
+#: ../src/empathy-accounts-dialog.ui.h:4
 msgid "Protocol:"
 msgstr "Protokol:"
 
-#: ../src/empathy-accounts-dialog.ui.h:4
+#: ../src/empathy-accounts-dialog.ui.h:5
+msgid "Remove"
+msgstr "Odstrani"
+
+#: ../src/empathy-accounts-dialog.ui.h:6
 msgid "To add a new account, you first have to install a backend for each protocol you want to use."
 msgstr "Za dodajanje novega računa morate najprej namestiti zaledje za vsak protokol, ki ga želite uporabiti."
 
-#: ../src/empathy-accounts-dialog.ui.h:5
-msgid "_Add…"
-msgstr "_Dodaj ..."
-
-#: ../src/empathy-accounts-dialog.ui.h:6
+#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Import…"
 msgstr "_Uvozi ..."
 
