@@ -1625,7 +1625,7 @@ geocode_cb (GObject *source,
   g_object_notify ((GObject *) contact, "location");
 
 out:
-  tp_clear_pointer (&result, g_hash_table_unref);
+  tp_clear_pointer (&resolved, g_hash_table_unref);
   g_object_unref (contact);
 }
 
