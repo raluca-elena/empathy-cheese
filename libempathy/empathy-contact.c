@@ -1645,6 +1645,8 @@ update_geocode (EmpathyContact *contact)
     return;
 
   geocode = geocode_object_new_for_params (location);
+  if (geocode == NULL)
+    return;
 
   geocode_object_resolve_async (geocode, NULL, geocode_cb,
       g_object_ref (contact));
