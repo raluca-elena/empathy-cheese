@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy 2.92.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-09 13:47+0200\n"
-"PO-Revision-Date: 2011-06-09 13:49+0200\n"
+"POT-Creation-Date: 2011-06-19 17:33+0200\n"
+"PO-Revision-Date: 2011-06-19 17:37+0200\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: no\n"
@@ -458,7 +458,7 @@ msgstr "Håndter meldings- og VoIP-kontoer"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2320
+#: ../src/empathy-accounts-dialog.c:2324
 msgid "Messaging and VoIP Accounts"
 msgstr "Meldings- og VoIP-kontoer"
 
@@ -477,6 +477,22 @@ msgstr "Valgt fil er ikke en vanlig fil"
 #: ../libempathy/empathy-ft-handler.c:1178
 msgid "The selected file is empty"
 msgstr "Valgt fil er tom"
+
+#: ../libempathy/empathy-message.c:342 ../src/empathy-call-observer.c:130
+#, c-format
+msgid "Missed call from %s"
+msgstr "Tapt anrop fra %s"
+
+#. Translators: this is an outgoing call, e.g. 'Called Alice'
+#: ../libempathy/empathy-message.c:346
+#, c-format
+msgid "Called %s"
+msgstr "Samtale med %s"
+
+#: ../libempathy/empathy-message.c:349
+#, c-format
+msgid "Call from %s"
+msgstr "Samtale fra %s"
 
 #: ../libempathy/empathy-tp-file.c:268
 msgid "Socket type not supported"
@@ -712,12 +728,11 @@ msgstr[1] "%d måneder siden"
 msgid "in the future"
 msgstr "i fremtiden"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:491
-msgid "All"
-msgstr "Alle"
+#: ../libempathy-gtk/empathy-account-chooser.c:539
+msgid "All accounts"
+msgstr "Alle kontoer"
 
 #: ../libempathy-gtk/empathy-account-widget.c:681
-#: ../libempathy-gtk/empathy-log-window.c:643
 #: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "Konto"
@@ -1542,7 +1557,6 @@ msgid "Connected"
 msgstr "Koblet til"
 
 #: ../libempathy-gtk/empathy-chat.c:3794
-#: ../libempathy-gtk/empathy-log-window.c:650
 msgid "Conversation"
 msgstr "Samtale"
 
@@ -1680,7 +1694,6 @@ msgstr "Fjerner gruppe"
 #: ../libempathy-gtk/empathy-contact-list-view.c:2111
 #: ../libempathy-gtk/empathy-individual-view.c:2433
 #: ../libempathy-gtk/empathy-individual-view.c:2636
-#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "Fje_rn"
 
@@ -2205,38 +2218,157 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Fjern kobling"
 
-#: ../libempathy-gtk/empathy-log-window.c:660
-msgid "Date"
-msgstr "Dato"
+#: ../libempathy-gtk/empathy-log-window.c:505
+msgid "Show"
+msgstr "Vis"
 
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:2
-msgid "Conversations"
-msgstr "Samtaler"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:3
-#: ../libempathy-gtk/empathy-search-bar.ui.h:1
-msgid "Find Next"
-msgstr "Finn neste"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:4
-#: ../libempathy-gtk/empathy-search-bar.ui.h:2
-msgid "Find Previous"
-msgstr "Finn forrige"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:5
-msgid "Previous Conversations"
-msgstr "Tidligere samtaler"
-
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:7
+#: ../libempathy-gtk/empathy-log-window.c:527
 msgid "Search"
 msgstr "Søk"
 
-#. Searching *for* something
-#: ../libempathy-gtk/empathy-log-window.ui.h:9
-msgid "_For:"
-msgstr "_For:"
+#: ../libempathy-gtk/empathy-log-window.c:745
+#: ../libempathy-gtk/empathy-log-window.c:859
+msgctxt "A date with the time"
+msgid "%A, %e %B %Y %X"
+msgstr "%A, %e %B %Y %X"
+
+#: ../libempathy-gtk/empathy-log-window.c:747
+#, c-format
+msgid "Chat with %s"
+msgstr "Prat med %s"
+
+#. Translators: this is an emote: '* Danielle waves'
+#: ../libempathy-gtk/empathy-log-window.c:814
+#, c-format
+msgid "<i>* %s %s</i>"
+msgstr "<i>* %s %s</i>"
+
+#. Translators: this is a message: 'Danielle: hello'
+#. * The string in bold is the sender's name
+#: ../libempathy-gtk/empathy-log-window.c:822
+#, c-format
+msgid "<b>%s:</b> %s"
+msgstr "<b>%s:</b> %s"
+
+#: ../libempathy-gtk/empathy-log-window.c:878
+#: ../libempathy-gtk/empathy-log-window.c:880 ../src/empathy-ft-manager.c:1026
+msgid "%"
+msgstr "%"
+
+#: ../libempathy-gtk/empathy-log-window.c:887
+#, c-format
+msgid "Call took %s, ended at %s"
+msgstr "Samtalen tok %s, avsluttet %s"
+
+#: ../libempathy-gtk/empathy-log-window.c:1213
+msgid "Today"
+msgstr "I dag"
+
+#: ../libempathy-gtk/empathy-log-window.c:1217
+msgid "Yesterday"
+msgstr "I går"
+
+#: ../libempathy-gtk/empathy-log-window.c:1233
+msgctxt ""
+"A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+msgid "%e %B %Y"
+msgstr "%e %B %Y"
+
+#: ../libempathy-gtk/empathy-log-window.c:1314
+#: ../libempathy-gtk/empathy-log-window.c:2680
+msgid "Anytime"
+msgstr "Når som helst"
+
+#: ../libempathy-gtk/empathy-log-window.c:1385
+#: ../libempathy-gtk/empathy-log-window.c:1688
+msgid "Anyone"
+msgstr "Hvem som helst"
+
+#: ../libempathy-gtk/empathy-log-window.c:1953
+msgid "Who"
+msgstr "Hvem"
+
+#: ../libempathy-gtk/empathy-log-window.c:2156
+msgid "When"
+msgstr "Når"
+
+#: ../libempathy-gtk/empathy-log-window.c:2272
+msgid "Anything"
+msgstr "Hva som helst"
+
+#: ../libempathy-gtk/empathy-log-window.c:2274
+msgid "Text chats"
+msgstr "Tekstsamtaler"
+
+#: ../libempathy-gtk/empathy-log-window.c:2276
+msgid "Calls"
+msgstr "Samtaler"
+
+#: ../libempathy-gtk/empathy-log-window.c:2281
+msgid "Incoming calls"
+msgstr "Innkommende samtaler"
+
+#: ../libempathy-gtk/empathy-log-window.c:2282
+msgid "Outgoing calls"
+msgstr "Utgående samtaler"
+
+#: ../libempathy-gtk/empathy-log-window.c:2283
+msgid "Missed calls"
+msgstr "Tapte samtaler"
+
+#: ../libempathy-gtk/empathy-log-window.c:2304
+msgid "What"
+msgstr "Hva"
+
+#: ../libempathy-gtk/empathy-log-window.c:2917
+msgid "Are you sure you want to delete all logs of previous conversations?"
+msgstr "Er du sikker på at du vil slette alle logger av tidligere samtaler?"
+
+#: ../libempathy-gtk/empathy-log-window.c:2921
+msgid "Clear All"
+msgstr "Tøm alle"
+
+#: ../libempathy-gtk/empathy-log-window.c:2928
+msgid "Delete from:"
+msgstr "Slett fra:"
+
+#. translators: Call is a noun. This string is used in the window
+#. * title
+#: ../libempathy-gtk/empathy-log-window.ui.h:1
+#: ../src/empathy-streamed-media-window.c:1340
+msgid "Call"
+msgstr "Ring"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:2
+#: ../src/empathy-chat-window.ui.h:3
+msgid "Chat"
+msgstr "Prat"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:3
+msgid "History"
+msgstr "Historikk"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:4
+msgid "Profile"
+msgstr "Profil"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:5
+#: ../src/empathy-call-window.ui.h:20
+msgid "Video"
+msgstr "Video"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:6
+#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:20
+msgid "_Edit"
+msgstr "_Rediger"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:7
+msgid "_File"
+msgstr "_Fil"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:8
+msgid "page 2"
+msgstr "side 2"
 
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:2
 msgid "Contact ID:"
@@ -2321,6 +2453,14 @@ msgstr "Egendefinerte meldinger …"
 #, c-format
 msgid "New %s account"
 msgstr "Ny %s-konto"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:1
+msgid "Find Next"
+msgstr "Finn neste"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:2
+msgid "Find Previous"
+msgstr "Finn forrige"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:3
 msgid "Find:"
@@ -3006,18 +3146,26 @@ msgstr ""
 "dine endringer. Er du sikker på at du vil fortsette?"
 
 #: ../src/empathy-accounts-dialog.ui.h:1
+msgid "Add…"
+msgstr "Legg til …"
+
+#: ../src/empathy-accounts-dialog.ui.h:2
 msgid "Loading account information"
 msgstr "Laster kontoinformasjon"
 
-#: ../src/empathy-accounts-dialog.ui.h:2
+#: ../src/empathy-accounts-dialog.ui.h:3
 msgid "No protocol installed"
 msgstr "Ingen protokoll installert"
 
-#: ../src/empathy-accounts-dialog.ui.h:3
+#: ../src/empathy-accounts-dialog.ui.h:4
 msgid "Protocol:"
 msgstr "Protokoll:"
 
-#: ../src/empathy-accounts-dialog.ui.h:4
+#: ../src/empathy-accounts-dialog.ui.h:5
+msgid "Remove"
+msgstr "Fjern"
+
+#: ../src/empathy-accounts-dialog.ui.h:6
 msgid ""
 "To add a new account, you first have to install a backend for each protocol "
 "you want to use."
@@ -3025,11 +3173,7 @@ msgstr ""
 "Du må installere en motor for hver protokoll du ønsker å bruke før du legger "
 "til en ny konto."
 
-#: ../src/empathy-accounts-dialog.ui.h:5
-msgid "_Add…"
-msgstr "_Legg til …"
-
-#: ../src/empathy-accounts-dialog.ui.h:6
+#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Import…"
 msgstr "_Importer …"
 
@@ -3101,12 +3245,6 @@ msgstr "Detaljer"
 #, c-format
 msgid "Call with %s"
 msgstr "Samtale med %s"
-
-#. translators: Call is a noun. This string is used in the window
-#. * title
-#: ../src/empathy-streamed-media-window.c:1340
-msgid "Call"
-msgstr "Ring"
 
 #: ../src/empathy-streamed-media-window.c:1494
 #: ../src/empathy-call-window.c:1459
@@ -3325,10 +3463,6 @@ msgstr "Ukjent"
 msgid "V_ideo"
 msgstr "V_ideo"
 
-#: ../src/empathy-call-window.ui.h:20
-msgid "Video"
-msgstr "Video"
-
 #: ../src/empathy-call-window.ui.h:21
 msgid "Video Off"
 msgstr "Video av"
@@ -3404,10 +3538,6 @@ msgstr "_Tøm"
 msgid "C_ontact"
 msgstr "K_ontakt"
 
-#: ../src/empathy-chat-window.ui.h:3
-msgid "Chat"
-msgstr "Prat"
-
 #: ../src/empathy-chat-window.ui.h:4
 msgid "Insert _Smiley"
 msgstr "Sett inn _smilefjes"
@@ -3439,10 +3569,6 @@ msgstr "_Samtale"
 #: ../src/empathy-chat-window.ui.h:11
 msgid "_Detach Tab"
 msgstr "Riv _løs fane"
-
-#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:20
-msgid "_Edit"
-msgstr "_Rediger"
 
 #: ../src/empathy-chat-window.ui.h:13
 msgid "_Favorite Chat Room"
@@ -3675,10 +3801,6 @@ msgstr "Sjekker integriteten for «%s»"
 #, c-format
 msgid "Hashing \"%s\""
 msgstr "Hasher «%s»"
-
-#: ../src/empathy-ft-manager.c:1026
-msgid "%"
-msgstr "%"
 
 #: ../src/empathy-ft-manager.c:1038
 msgid "File"
@@ -4301,11 +4423,6 @@ msgstr "Godta"
 #: ../src/empathy-notifications-approver.c:260
 msgid "Provide"
 msgstr "Oppgi"
-
-#: ../src/empathy-call-observer.c:130
-#, c-format
-msgid "Missed call from %s"
-msgstr "Tapt anrop fra %s"
 
 #: ../src/empathy-call-observer.c:133
 #, c-format
