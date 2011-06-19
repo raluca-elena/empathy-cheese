@@ -1,23 +1,23 @@
 # translation of empathy.master.po to Español
 # Copyright (C) 2003 Free Software Foundation
 # This file is distributed under the same license as the Gossip package.
-# Daniel Mustieles <daniel.mustieles@gmail.com>, 2010, 2011.
 # Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010, 2011.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2010, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-06-10 08:39+0000\n"
-"PO-Revision-Date: 2011-06-11 11:55+0200\n"
-"Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
-"Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
+"POT-Creation-Date: 2011-06-15 14:59+0000\n"
+"PO-Revision-Date: 2011-06-19 11:37+0200\n"
+"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
+"Language-Team: Español <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bits\n"
+"Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../data/empathy.desktop.in.in.h:1
 msgid "Chat on Google Talk, Facebook, MSN and many other chat services"
@@ -501,7 +501,7 @@ msgstr "Gestionar las cuentas de mensajería y Voz IP"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2320
+#: ../src/empathy-accounts-dialog.c:2324
 msgid "Messaging and VoIP Accounts"
 msgstr "Cuentas de mensajería y Voz IP"
 
@@ -526,15 +526,14 @@ msgstr "El archivo seleccionado está vacío"
 msgid "Missed call from %s"
 msgstr "Llamada perdida de %s"
 
-#: ../libempathy/empathy-message.c:345
+#. Translators: this is an outgoing call, e.g. 'Called Alice'
+#: ../libempathy/empathy-message.c:346
 #, c-format
-#| msgid "Call with %s"
 msgid "Called %s"
 msgstr "Llamó %s"
 
-#: ../libempathy/empathy-message.c:348
+#: ../libempathy/empathy-message.c:349
 #, c-format
-#| msgid "Missed call from %s"
 msgid "Call from %s"
 msgstr "Llamada de %s"
 
@@ -776,7 +775,6 @@ msgid "in the future"
 msgstr "en el futuro"
 
 #: ../libempathy-gtk/empathy-account-chooser.c:539
-#| msgid "Accounts"
 msgid "All accounts"
 msgstr "Todas las cuentas"
 
@@ -1743,7 +1741,6 @@ msgstr "Quitando grupo"
 #: ../libempathy-gtk/empathy-contact-list-view.c:2111
 #: ../libempathy-gtk/empathy-individual-view.c:2433
 #: ../libempathy-gtk/empathy-individual-view.c:2636
-#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Remove"
 msgstr "_Quitar"
 
@@ -2280,126 +2277,111 @@ msgstr "Mostrar"
 msgid "Search"
 msgstr "Buscar"
 
-#: ../libempathy-gtk/empathy-log-window.c:742
-#: ../libempathy-gtk/empathy-log-window.c:856
-#| msgid "%A %B %d %Y"
+#: ../libempathy-gtk/empathy-log-window.c:745
+#: ../libempathy-gtk/empathy-log-window.c:859
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
 msgstr "%A, %e de %B de %Y a las %X"
 
-#: ../libempathy-gtk/empathy-log-window.c:744
+#: ../libempathy-gtk/empathy-log-window.c:747
 #, c-format
-#| msgid "Call with %s"
 msgid "Chat with %s"
 msgstr "Chat con %s"
 
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:811
+#: ../libempathy-gtk/empathy-log-window.c:814
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:819
+#: ../libempathy-gtk/empathy-log-window.c:822
 #, c-format
-#| msgid "<b>Topic:</b>"
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:875
-#: ../libempathy-gtk/empathy-log-window.c:877 ../src/empathy-ft-manager.c:1026
+#: ../libempathy-gtk/empathy-log-window.c:878
+#: ../libempathy-gtk/empathy-log-window.c:880 ../src/empathy-ft-manager.c:1026
 msgid "%"
 msgstr "%"
 
-#: ../libempathy-gtk/empathy-log-window.c:884
+#: ../libempathy-gtk/empathy-log-window.c:887
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "La llamada duró %s, finalizó a las %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1210
+#: ../libempathy-gtk/empathy-log-window.c:1213
 msgid "Today"
 msgstr "Hoy"
 
-#: ../libempathy-gtk/empathy-log-window.c:1214
-#| msgid "Western"
+#: ../libempathy-gtk/empathy-log-window.c:1217
 msgid "Yesterday"
 msgstr "Ayer"
 
-#: ../libempathy-gtk/empathy-log-window.c:1230
-#| msgid "%A %B %d %Y"
+#: ../libempathy-gtk/empathy-log-window.c:1233
 msgctxt ""
 "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
 msgstr "%e de %B de %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1311
-#: ../libempathy-gtk/empathy-log-window.c:2677
+#: ../libempathy-gtk/empathy-log-window.c:1314
+#: ../libempathy-gtk/empathy-log-window.c:2680
 msgid "Anytime"
 msgstr "Cualquier hora"
 
-#: ../libempathy-gtk/empathy-log-window.c:1382
-#: ../libempathy-gtk/empathy-log-window.c:1685
-#| msgid "None"
+#: ../libempathy-gtk/empathy-log-window.c:1385
+#: ../libempathy-gtk/empathy-log-window.c:1688
 msgid "Anyone"
 msgstr "Cualquiera"
 
-#: ../libempathy-gtk/empathy-log-window.c:1950
+#: ../libempathy-gtk/empathy-log-window.c:1953
 msgid "Who"
 msgstr "Quién"
 
-#: ../libempathy-gtk/empathy-log-window.c:2153
+#: ../libempathy-gtk/empathy-log-window.c:2156
 msgid "When"
 msgstr "Cuándo"
 
-#: ../libempathy-gtk/empathy-log-window.c:2269
+#: ../libempathy-gtk/empathy-log-window.c:2272
 msgid "Anything"
 msgstr "Cualquier cosa"
 
-#: ../libempathy-gtk/empathy-log-window.c:2271
-#| msgid "Set status"
+#: ../libempathy-gtk/empathy-log-window.c:2274
 msgid "Text chats"
 msgstr "Chats de texto"
 
-#: ../libempathy-gtk/empathy-log-window.c:2273
-#| msgid "Call"
+#: ../libempathy-gtk/empathy-log-window.c:2276
 msgid "Calls"
 msgstr "Llamadas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2278
-#| msgid "Incoming call"
+#: ../libempathy-gtk/empathy-log-window.c:2281
 msgid "Incoming calls"
 msgstr "Llamadas entrantes"
 
-#: ../libempathy-gtk/empathy-log-window.c:2279
-#| msgid "Outgoing voice call"
+#: ../libempathy-gtk/empathy-log-window.c:2282
 msgid "Outgoing calls"
 msgstr "Llamadas salientes"
 
-#: ../libempathy-gtk/empathy-log-window.c:2280
-#| msgid "Missed call from %s"
+#: ../libempathy-gtk/empathy-log-window.c:2283
 msgid "Missed calls"
 msgstr "Llamadas perdidas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2301
-#| msgid "Chat"
+#: ../libempathy-gtk/empathy-log-window.c:2304
 msgid "What"
 msgstr "Qué"
 
-#: ../libempathy-gtk/empathy-log-window.c:2914
-#| msgid "Are you sure you want to block '%s' from contacting you again?"
+#: ../libempathy-gtk/empathy-log-window.c:2917
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr ""
 "¿Está seguro de que quiere eliminar todos los registros de conversaciones "
 "anteriores?"
 
-#: ../libempathy-gtk/empathy-log-window.c:2918
-#| msgid "C_lear"
+#: ../libempathy-gtk/empathy-log-window.c:2921
 msgid "Clear All"
 msgstr "Limpiar todo"
 
-#: ../libempathy-gtk/empathy-log-window.c:2925
-#| msgid "Connected from:"
+#: ../libempathy-gtk/empathy-log-window.c:2928
 msgid "Delete from:"
 msgstr "Eliminar de:"
 
@@ -2420,7 +2402,6 @@ msgid "History"
 msgstr "Histórico"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:4
-#| msgid "Provide"
 msgid "Profile"
 msgstr "Perfil"
 
@@ -2435,7 +2416,6 @@ msgid "_Edit"
 msgstr "_Editar"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:7
-#| msgid "File"
 msgid "_File"
 msgstr "_Archivo"
 
@@ -3220,18 +3200,28 @@ msgstr ""
 "¿Seguro que quiere continuar?"
 
 #: ../src/empathy-accounts-dialog.ui.h:1
+#| msgid "_Add…"
+msgid "Add…"
+msgstr "Añadir…"
+
+#: ../src/empathy-accounts-dialog.ui.h:2
 msgid "Loading account information"
 msgstr "Cargando información de la cuenta"
 
-#: ../src/empathy-accounts-dialog.ui.h:2
+#: ../src/empathy-accounts-dialog.ui.h:3
 msgid "No protocol installed"
 msgstr "No hay protocolos instalados"
 
-#: ../src/empathy-accounts-dialog.ui.h:3
+#: ../src/empathy-accounts-dialog.ui.h:4
 msgid "Protocol:"
 msgstr "Protocolo:"
 
-#: ../src/empathy-accounts-dialog.ui.h:4
+#: ../src/empathy-accounts-dialog.ui.h:5
+#| msgid "_Remove"
+msgid "Remove"
+msgstr "Quitar"
+
+#: ../src/empathy-accounts-dialog.ui.h:6
 msgid ""
 "To add a new account, you first have to install a backend for each protocol "
 "you want to use."
@@ -3239,11 +3229,7 @@ msgstr ""
 "Para añadir una nueva cuenta debe instalar primero un «backend» para cada "
 "protocolo que quiera usar."
 
-#: ../src/empathy-accounts-dialog.ui.h:5
-msgid "_Add…"
-msgstr "_Añadir…"
-
-#: ../src/empathy-accounts-dialog.ui.h:6
+#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Import…"
 msgstr "_Importar…"
 
