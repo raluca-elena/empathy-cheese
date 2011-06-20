@@ -84,6 +84,18 @@ empathy_chat_view_append_event (EmpathyChatView *view,
 }
 
 void
+empathy_chat_view_edit_message (EmpathyChatView *view,
+				EmpathyMessage  *message)
+{
+	g_return_if_fail (EMPATHY_IS_CHAT_VIEW (view));
+
+	if (EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->edit_message) {
+		EMPATHY_TYPE_CHAT_VIEW_GET_IFACE (view)->edit_message (
+			view, message);
+	}
+}
+
+void
 empathy_chat_view_scroll (EmpathyChatView *view,
 			  gboolean        allow_scrolling)
 {

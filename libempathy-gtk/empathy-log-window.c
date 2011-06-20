@@ -771,8 +771,15 @@ get_icon_for_event (TplEvent *event)
 {
   const gchar *icon = NULL;
 
+  if (TPL_IS_TEXT_EVENT (event))
+    {
+      TplTextEvent *text = TPL_TEXT_EVENT (event);
+
+      if (!tp_str_empty (tpl_text_event_get_supersedes_token (text)))
+        icon = EMPATHY_IMAGE_EDIT_MESSAGE;
+    }
 #ifdef HAVE_CALL_LOGS
-  if (TPL_IS_CALL_EVENT (event))
+  else if (TPL_IS_CALL_EVENT (event))
     {
       TplCallEvent *call = TPL_CALL_EVENT (event);
       TplCallEndReason reason = tpl_call_event_get_end_reason (call);

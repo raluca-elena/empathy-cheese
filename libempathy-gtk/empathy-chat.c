@@ -38,6 +38,7 @@
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/util.h>
 #include <telepathy-logger/log-manager.h>
+#include <telepathy-logger/text-event.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-keyring.h>
@@ -1336,23 +1337,33 @@ chat_message_received (EmpathyChat *chat,
 
 	sender = empathy_message_get_sender (message);
 
-	DEBUG ("Appending new message from %s (%d)",
-		empathy_contact_get_alias (sender),
-		empathy_contact_get_handle (sender));
+	if (empathy_message_is_edit (message)) {
+		DEBUG ("Editing message '%s' to '%s'",
+			empathy_message_get_supersedes (message),
+			empathy_message_get_body (message));
 
-	empathy_chat_view_append_message (chat->view, message);
+		empathy_chat_view_edit_message (chat->view, message);
+	} else {
+		DEBUG ("Appending new message '%s' from %s (%d)",
+			empathy_message_get_token (message),
+			empathy_contact_get_alias (sender),
+			empathy_contact_get_handle (sender));
 
-	/* We received a message so the contact is no longer composing */
+		empathy_chat_view_append_message (chat->view, message);
+
+		if (empathy_message_is_incoming (message)) {
+			priv->unread_messages++;
+			g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+		}
+
+		g_signal_emit (chat, signals[NEW_MESSAGE], 0, message, pending);
+	}
+
+	/* We received a message so the contact is no longer
+	 * composing */
 	chat_state_changed_cb (priv->tp_chat, sender,
 			       TP_CHANNEL_CHAT_STATE_ACTIVE,
 			       chat);
-
-	if (empathy_message_is_incoming (message)) {
-		priv->unread_messages++;
-		g_object_notify (G_OBJECT (chat), "nb-unread-messages");
-	}
-
-	g_signal_emit (chat, signals[NEW_MESSAGE], 0, message, pending);
 }
 
 static void
@@ -1373,8 +1384,10 @@ chat_message_acknowledged_cb (EmpathyTpChat  *tp_chat,
 	empathy_chat_view_message_acknowledged (chat->view,
 	    message);
 
-	priv->unread_messages--;
-	g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+	if (!empathy_message_is_edit (message)) {
+		priv->unread_messages--;
+		g_object_notify (G_OBJECT (chat), "nb-unread-messages");
+	}
 }
 
 static void
@@ -2318,12 +2331,38 @@ got_filtered_messages_cb (GObject *manager,
 
 	for (l = messages; l; l = g_list_next (l)) {
 		EmpathyMessage *message;
+
 		g_assert (TPL_IS_EVENT (l->data));
 
 		message = empathy_message_from_tpl_log_event (l->data);
 		g_object_unref (l->data);
 
-		empathy_chat_view_append_message (chat->view, message);
+		if (empathy_message_is_edit (message)) {
+			/* this is an edited message, create a synthetic event
+			 * using the supersedes token and
+			 * original-message-sent timestamp, that we can then
+			 * replace */
+			EmpathyMessage *syn_msg = g_object_new (
+				EMPATHY_TYPE_MESSAGE,
+				"body", "",
+				"token", empathy_message_get_supersedes (message),
+				"type", empathy_message_get_tptype (message),
+				"timestamp", empathy_message_get_original_timestamp (message),
+				"incoming", empathy_message_is_incoming (message),
+				"is-backlog", TRUE,
+				"receiver", empathy_message_get_receiver (message),
+				"sender", empathy_message_get_sender (message),
+				NULL);
+
+			empathy_chat_view_append_message (chat->view, syn_msg);
+			empathy_chat_view_edit_message (chat->view, message);
+
+			g_object_unref (syn_msg);
+		} else {
+			/* append the latest message */
+			empathy_chat_view_append_message (chat->view, message);
+		}
+
 		g_object_unref (message);
 	}
 	g_list_free (messages);
