@@ -2419,6 +2419,20 @@ log_window_what_setup (EmpathyLogWindow *window)
 }
 
 static void
+log_window_maybe_expand_events (void)
+{
+  GtkTreeView       *view;
+  GtkTreeModel      *model;
+
+  view = GTK_TREE_VIEW (log_window->treeview_events);
+  model = gtk_tree_view_get_model (view);
+
+  /* If there's only one result, expand it */
+  if (gtk_tree_model_iter_n_children (model, NULL) == 1)
+    gtk_tree_view_expand_all (view);
+}
+
+static void
 start_spinner (void)
 {
   gtk_spinner_start (GTK_SPINNER (log_window->spinner));
@@ -2447,6 +2461,7 @@ static void
 show_events (TplActionChain *chain,
     gpointer user_data)
 {
+  log_window_maybe_expand_events ();
   gtk_spinner_stop (GTK_SPINNER (log_window->spinner));
   gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
       PAGE_EVENTS);
