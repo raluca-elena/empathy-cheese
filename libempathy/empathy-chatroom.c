@@ -213,6 +213,7 @@ chatroom_finalize (GObject *object)
 	g_object_unref (priv->account);
 	g_free (priv->room);
 	g_free (priv->name);
+	g_free (priv->subject);
 
 	(G_OBJECT_CLASS (empathy_chatroom_parent_class)->finalize) (object);
 }
