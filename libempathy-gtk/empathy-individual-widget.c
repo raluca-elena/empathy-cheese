@@ -397,8 +397,8 @@ details_request_cb (TpContact *contact,
 
       tp_clear_object (&priv->details_cancellable);
 
-      g_signal_connect (contact, "notify::contact-info",
-          (GCallback) details_notify_cb, self);
+      tp_g_signal_connect_object (contact, "notify::contact-info",
+          (GCallback) details_notify_cb, self, 0);
     }
 
   details_data_free (data);
