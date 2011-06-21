@@ -121,6 +121,7 @@ struct _EmpathyChatPriv {
 	GtkWidget         *search_bar;
 
 	guint              unread_messages;
+	guint              unread_messages_when_offline;
 	/* TRUE if the pending messages can be displayed. This is to avoid to show
 	 * pending messages *before* messages from logs. (#603980) */
 	gboolean           can_show_pending;
@@ -2688,6 +2689,8 @@ chat_invalidated_cb (EmpathyTpChat *tp_chat,
 	gtk_widget_set_sensitive (chat->input_text_view, FALSE);
 
 	chat_update_contacts_visibility (chat, FALSE);
+
+	priv->unread_messages_when_offline = priv->unread_messages;
 }
 
 static gboolean
@@ -4025,6 +4028,14 @@ empathy_chat_messages_read (EmpathyChat *self)
 
 	if (priv->tp_chat != NULL) {
 		empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
+	}
+
+	if (priv->unread_messages_when_offline > 0) {
+		/* We can't ack those as the connection has gone away so just consider
+		* them as read. */
+		priv->unread_messages -= priv->unread_messages_when_offline;
+		g_object_notify (G_OBJECT (self), "nb-unread-messages");
+		priv->unread_messages_when_offline = 0;
 	}
 }
 
