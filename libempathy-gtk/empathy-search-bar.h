@@ -44,7 +44,7 @@ typedef struct _EmpathySearchBarClass EmpathySearchBarClass;
 
 struct _EmpathySearchBar
 {
-  GtkBin parent;
+  GtkBox parent;
 
   /*<private>*/
   gpointer priv;
@@ -52,7 +52,7 @@ struct _EmpathySearchBar
 
 struct _EmpathySearchBarClass
 {
-  GtkBinClass parent_class;
+  GtkBoxClass parent_class;
 };
 
 GType       empathy_search_bar_get_type (void) G_GNUC_CONST;

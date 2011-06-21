@@ -33,7 +33,7 @@
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathySearchBar)
 
-G_DEFINE_TYPE (EmpathySearchBar, empathy_search_bar, GTK_TYPE_BIN);
+G_DEFINE_TYPE (EmpathySearchBar, empathy_search_bar, GTK_TYPE_BOX);
 
 typedef struct _EmpathySearchBarPriv EmpathySearchBarPriv;
 struct _EmpathySearchBarPriv
@@ -60,45 +60,6 @@ empathy_search_bar_new (EmpathyChatView *view)
   GET_PRIV (self)->chat_view = view;
 
   return GTK_WIDGET (self);
-}
-
-static void
-empathy_search_bar_get_preferred_height (GtkWidget *widget,
-    gint *minimun_height,
-    gint *natural_height)
-{
-  GtkBin *bin;
-  GtkWidget *child;
-
-  bin = GTK_BIN (widget);
-  child = gtk_bin_get_child (bin);
-
-  if (child && gtk_widget_get_visible (child))
-      gtk_widget_get_preferred_height (child, minimun_height, natural_height);
-}
-
-static void
-empathy_search_bar_size_allocate (GtkWidget *widget,
-    GtkAllocation *allocation)
-{
-  GtkBin *bin;
-  GtkWidget *child;
-  GtkAllocation child_allocation;
-
-  bin = GTK_BIN (widget);
-  child = gtk_bin_get_child (bin);
-
-  gtk_widget_set_allocation (widget, allocation);
-
-  if (child && gtk_widget_get_visible (child))
-    {
-      child_allocation.x = allocation->x;
-      child_allocation.y = allocation->y;
-      child_allocation.width = MAX (allocation->width, 0);
-      child_allocation.height = MAX (allocation->height, 0);
-
-      gtk_widget_size_allocate (child, &child_allocation);
-    }
 }
 
 static void
@@ -332,7 +293,7 @@ empathy_search_bar_init (EmpathySearchBar * self)
   g_signal_connect (G_OBJECT (self), "key-press-event",
       G_CALLBACK (empathy_search_bar_key_pressed), NULL);
 
-  gtk_container_add (GTK_CONTAINER (self), internal);
+  gtk_box_pack_start (GTK_BOX (self), internal, TRUE, TRUE, 0);
   gtk_widget_show_all (internal);
   gtk_widget_hide (priv->search_not_found);
   g_object_unref (gui);
@@ -342,13 +303,8 @@ static void
 empathy_search_bar_class_init (EmpathySearchBarClass *class)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (class);
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (class);
 
   g_type_class_add_private (gobject_class, sizeof (EmpathySearchBarPriv));
-
-  /* Neither GtkBin nor GtkContainer seems to do this for us :( */
-  widget_class->get_preferred_height = empathy_search_bar_get_preferred_height;
-  widget_class->size_allocate = empathy_search_bar_size_allocate;
 }
 
 void
