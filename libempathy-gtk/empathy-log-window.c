@@ -127,6 +127,7 @@ static void log_window_when_changed_cb           (GtkTreeSelection *selection,
                                                   EmpathyLogWindow *window);
 static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
                                                   EmpathyLogWindow *window);
+static void start_spinner                        (void);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -1145,6 +1146,7 @@ populate_events_from_search_hits (GList *accounts,
         }
     }
 
+  start_spinner ();
   _tpl_action_chain_start (log_window->chain);
 
   g_date_free (anytime);
@@ -2396,14 +2398,6 @@ log_window_maybe_expand_events (void)
     gtk_tree_view_expand_all (view);
 }
 
-static void
-start_spinner (void)
-{
-  gtk_spinner_start (GTK_SPINNER (log_window->spinner));
-  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
-      PAGE_EMPTY);
-}
-
 static gboolean
 show_spinner (gpointer data)
 {
@@ -2431,6 +2425,17 @@ show_events (TplActionChain *chain,
       PAGE_EVENTS);
 
   _tpl_action_chain_continue (chain);
+}
+
+static void
+start_spinner (void)
+{
+  gtk_spinner_start (GTK_SPINNER (log_window->spinner));
+  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
+      PAGE_EMPTY);
+
+  g_timeout_add (1000, show_spinner, NULL);
+  _tpl_action_chain_append (log_window->chain, show_events, NULL);
 }
 
 static void
@@ -2620,8 +2625,6 @@ log_window_get_messages_for_dates (EmpathyLogWindow *window,
     }
 
   start_spinner ();
-  g_timeout_add (1000, show_spinner, NULL);
-  _tpl_action_chain_append (window->chain, show_events, NULL);
   _tpl_action_chain_start (window->chain);
 
   g_list_free_full (accounts, g_object_unref);
