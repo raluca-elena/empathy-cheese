@@ -88,6 +88,8 @@ typedef struct
   TplActionChain *chain;
   TplLogManager *log_manager;
 
+  EmpathyContact *selected_contact;
+
   /* Used to cancel logger calls when no longer needed */
   guint count;
 
@@ -295,132 +297,39 @@ static void
 toolbutton_profile_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  TplEntity *target;
-  EmpathyContact *contact;
-  gint type;
-
   g_return_if_fail (window != NULL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_TARGET, &target,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
-
-  contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_contact_information_dialog_show (contact,
+  empathy_contact_information_dialog_show (window->selected_contact,
       GTK_WINDOW (window->window));
-  g_object_unref (contact);
-
-  g_object_unref (account);
-  g_object_unref (target);
 }
 
 static void
 toolbutton_chat_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  TplEntity *target;
-  EmpathyContact *contact;
-  gint type;
-
   g_return_if_fail (window != NULL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_TARGET, &target,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
-
-  contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_chat_with_contact (contact,
+  empathy_chat_with_contact (window->selected_contact,
       gtk_get_current_event_time ());
-
-  g_object_unref (contact);
-  g_object_unref (account);
-  g_object_unref (target);
 }
 
 static void
 toolbutton_av_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  gchar *contact;
-  gint type;
   gboolean video;
 
   g_return_if_fail (window != NULL);
-
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_NAME, &contact,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
   video = (GTK_WIDGET (toolbutton) == window->button_video);
 
-  empathy_call_new_with_streams (contact, account,
+  empathy_call_new_with_streams (
+      empathy_contact_get_id (window->selected_contact),
+      empathy_contact_get_account (window->selected_contact),
       TRUE, video, gtk_get_current_event_time ());
-
-  g_free (contact);
-  g_object_unref (account);
 }
 
 GtkWidget *
@@ -580,6 +489,7 @@ log_window_destroy_cb (GtkWidget *widget,
   _tpl_action_chain_free (window->chain);
   g_object_unref (window->log_manager);
   tp_clear_object (&window->selected_account);
+  tp_clear_object (&window->selected_contact);
   g_free (window->selected_chat_id);
 
   g_free (window);
@@ -1563,11 +1473,11 @@ log_window_search_entry_icon_pressed_cb (GtkEntry *entry,
 }
 
 static void
-log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
-    GtkTreeModel *model,
-    GtkTreeSelection *selection)
+log_window_update_buttons_sensitivity (EmpathyLogWindow *window)
 {
-  EmpathyContact *contact;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
   EmpathyCapabilities capabilities;
   TpAccount *account;
   TplEntity *target;
@@ -1576,16 +1486,22 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
   GtkTreePath *path;
   gboolean profile, chat, call, video;
 
+  tp_clear_object (&window->selected_contact);
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
   profile = chat = call = video = FALSE;
 
   if (!gtk_tree_model_get_iter_first (model, &iter))
-    goto out;
+    goto events;
 
   if (gtk_tree_selection_count_selected_rows (selection) != 1)
-    goto out;
+    goto events;
 
   if (gtk_tree_selection_iter_is_selected (selection, &iter))
-    goto out;
+    goto events;
 
   paths = gtk_tree_selection_get_selected_rows (selection, &model);
   g_return_if_fail (paths != NULL);
@@ -1599,12 +1515,46 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
 
   g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
-  contact = empathy_contact_from_tpl_contact (account, target);
+  window->selected_contact = empathy_contact_from_tpl_contact (account,
+      target);
 
   g_object_unref (account);
   g_object_unref (target);
 
-  capabilities = empathy_contact_get_capabilities (contact);
+  capabilities = empathy_contact_get_capabilities (window->selected_contact);
+
+  profile = chat = TRUE;
+  call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
+  video = capabilities & EMPATHY_CAPABILITIES_VIDEO;
+
+  goto out;
+
+ events:
+  /* If the Who pane doesn't contain a contact (e.g. it has many
+   * selected, or has 'Anyone', let's try to get the contact from
+   * the selected event. */
+  view = GTK_TREE_VIEW (log_window->treeview_events);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_count_selected_rows (selection) != 1)
+    goto out;
+
+  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
+    goto out;
+
+  gtk_tree_model_get (model, &iter,
+      COL_EVENTS_ACCOUNT, &account,
+      COL_EVENTS_TARGET, &target,
+      -1);
+
+  window->selected_contact = empathy_contact_from_tpl_contact (account,
+      target);
+
+  g_object_unref (account);
+  g_object_unref (target);
+
+  capabilities = empathy_contact_get_capabilities (window->selected_contact);
 
   profile = chat = TRUE;
   call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
@@ -1648,7 +1598,7 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
         }
     }
 
-  log_window_update_buttons_sensitivity (window, model, selection);
+  log_window_update_buttons_sensitivity (window);
 
   /* The contact changed, so the dates need to be updated */
   log_window_chats_get_messages (window, TRUE);
@@ -1908,6 +1858,15 @@ who_row_is_separator (GtkTreeModel *model,
 }
 
 static void
+log_window_events_changed_cb (GtkTreeSelection *selection,
+    EmpathyLogWindow *window)
+{
+  DEBUG ("log_window_events_changed_cb");
+
+  log_window_update_buttons_sensitivity (window);
+}
+
+static void
 log_window_events_setup (EmpathyLogWindow *window)
 {
   GtkTreeView       *view;
@@ -1959,7 +1918,7 @@ log_window_events_setup (EmpathyLogWindow *window)
   gtk_tree_view_append_column (view, column);
 
   /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_NONE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
   gtk_tree_view_set_headers_visible (view, FALSE);
 
   gtk_tree_sortable_set_sort_column_id (sortable,
@@ -1967,6 +1926,11 @@ log_window_events_setup (EmpathyLogWindow *window)
       GTK_SORT_ASCENDING);
 
   gtk_tree_view_set_enable_search (view, FALSE);
+
+  /* set up signals */
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (log_window_events_changed_cb),
+      window);
 
   g_object_unref (store);
 }
