@@ -88,6 +88,8 @@ typedef struct
   TplActionChain *chain;
   TplLogManager *log_manager;
 
+  EmpathyContact *selected_contact;
+
   /* Used to cancel logger calls when no longer needed */
   guint count;
 
@@ -125,6 +127,7 @@ static void log_window_when_changed_cb           (GtkTreeSelection *selection,
                                                   EmpathyLogWindow *window);
 static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
                                                   EmpathyLogWindow *window);
+static void start_spinner                        (void);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -295,132 +298,39 @@ static void
 toolbutton_profile_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  TplEntity *target;
-  EmpathyContact *contact;
-  gint type;
-
   g_return_if_fail (window != NULL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_TARGET, &target,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
-
-  contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_contact_information_dialog_show (contact,
+  empathy_contact_information_dialog_show (window->selected_contact,
       GTK_WINDOW (window->window));
-  g_object_unref (contact);
-
-  g_object_unref (account);
-  g_object_unref (target);
 }
 
 static void
 toolbutton_chat_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  TplEntity *target;
-  EmpathyContact *contact;
-  gint type;
-
   g_return_if_fail (window != NULL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_TARGET, &target,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
-
-  contact = empathy_contact_from_tpl_contact (account, target);
-  empathy_chat_with_contact (contact,
+  empathy_chat_with_contact (window->selected_contact,
       gtk_get_current_event_time ());
-
-  g_object_unref (contact);
-  g_object_unref (account);
-  g_object_unref (target);
 }
 
 static void
 toolbutton_av_clicked (GtkToolButton *toolbutton,
     EmpathyLogWindow *window)
 {
-  GtkTreeView *view;
-  GtkTreeSelection *selection;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-  GtkTreePath *path;
-  GList *paths;
-  TpAccount *account;
-  gchar *contact;
-  gint type;
   gboolean video;
 
   g_return_if_fail (window != NULL);
-
-  view = GTK_TREE_VIEW (log_window->treeview_who);
-  selection = gtk_tree_view_get_selection (view);
-
-  paths = gtk_tree_selection_get_selected_rows (selection, &model);
-  g_return_if_fail (paths != NULL);
-
-  path = paths->data;
-  gtk_tree_model_get_iter (model, &iter, path);
-  gtk_tree_model_get (model, &iter,
-      COL_WHO_ACCOUNT, &account,
-      COL_WHO_NAME, &contact,
-      COL_WHO_TYPE, &type,
-      -1);
-
-  g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
-
-  g_return_if_fail (type == COL_TYPE_NORMAL);
+  g_return_if_fail (EMPATHY_IS_CONTACT (window->selected_contact));
 
   video = (GTK_WIDGET (toolbutton) == window->button_video);
 
-  empathy_call_new_with_streams (contact, account,
+  empathy_call_new_with_streams (
+      empathy_contact_get_id (window->selected_contact),
+      empathy_contact_get_account (window->selected_contact),
       TRUE, video, gtk_get_current_event_time ());
-
-  g_free (contact);
-  g_object_unref (account);
 }
 
 GtkWidget *
@@ -580,6 +490,7 @@ log_window_destroy_cb (GtkWidget *widget,
   _tpl_action_chain_free (window->chain);
   g_object_unref (window->log_manager);
   tp_clear_object (&window->selected_account);
+  tp_clear_object (&window->selected_contact);
   g_free (window->selected_chat_id);
 
   g_free (window);
@@ -804,7 +715,7 @@ log_window_append_chat_message (TplEvent *event,
 {
   GtkTreeStore *store = log_window->store_events;
   GtkTreeIter iter, parent;
-  gchar *pretty_date, *body;
+  gchar *pretty_date, *alias, *body, *msg;
   GDateTime *date;
 
   date = g_date_time_new_from_unix_utc (
@@ -814,21 +725,62 @@ log_window_append_chat_message (TplEvent *event,
 
   get_parent_iter_for_message (event, message, &parent);
 
+  msg = g_markup_escape_text (empathy_message_get_body (message), -1);
+  alias = g_markup_escape_text (
+      tpl_entity_get_alias (tpl_event_get_sender (event)), -1);
+
+  /* If the user is searching, highlight the matched text */
+  if (!EMP_STR_EMPTY (log_window->last_find))
+    {
+      gchar *str = g_regex_escape_string (log_window->last_find, -1);
+      gchar *replacement = g_markup_printf_escaped (
+          "<span background=\"yellow\">%s</span>",
+          log_window->last_find);
+      GError *error = NULL;
+      GRegex *regex = g_regex_new (str, 0, 0, &error);
+
+      if (regex == NULL)
+        {
+          DEBUG ("Could not create regex: %s", error->message);
+          g_error_free (error);
+        }
+      else
+        {
+          gchar *new_msg = g_regex_replace_literal (regex,
+              empathy_message_get_body (message), -1, 0, replacement,
+              0, &error);
+
+          if (new_msg != NULL)
+            {
+              /* We pass ownership of new_msg to msg, which is freed later */
+              g_free (msg);
+              msg = new_msg;
+            }
+          else
+            {
+              DEBUG ("Error while performing string substitution: %s",
+                  error->message);
+              g_error_free (error);
+            }
+        }
+
+      g_free (str);
+      g_free (replacement);
+
+      tp_clear_pointer (&regex, g_regex_unref);
+    }
+
   if (tpl_text_event_get_message_type (TPL_TEXT_EVENT (event))
       == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)
     {
       /* Translators: this is an emote: '* Danielle waves' */
-      body = g_markup_printf_escaped (_("<i>* %s %s</i>"),
-          tpl_entity_get_alias (tpl_event_get_sender (event)),
-          empathy_message_get_body (message));
+      body = g_strdup_printf (_("<i>* %s %s</i>"), alias, msg);
     }
   else
     {
       /* Translators: this is a message: 'Danielle: hello'
        * The string in bold is the sender's name */
-      body = g_markup_printf_escaped (_("<b>%s:</b> %s"),
-          tpl_entity_get_alias (tpl_event_get_sender (event)),
-          empathy_message_get_body (message));
+      body = g_strdup_printf (_("<b>%s:</b> %s"), alias, msg);
     }
 
   gtk_tree_store_append (store, &iter, &parent);
@@ -842,7 +794,9 @@ log_window_append_chat_message (TplEvent *event,
       COL_EVENTS_EVENT, event,
       -1);
 
+  g_free (msg);
   g_free (body);
+  g_free (alias);
   g_free (pretty_date);
   g_date_time_unref (date);
 }
@@ -1192,6 +1146,7 @@ populate_events_from_search_hits (GList *accounts,
         }
     }
 
+  start_spinner ();
   _tpl_action_chain_start (log_window->chain);
 
   g_date_free (anytime);
@@ -1520,11 +1475,11 @@ log_window_search_entry_icon_pressed_cb (GtkEntry *entry,
 }
 
 static void
-log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
-    GtkTreeModel *model,
-    GtkTreeSelection *selection)
+log_window_update_buttons_sensitivity (EmpathyLogWindow *window)
 {
-  EmpathyContact *contact;
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;
   EmpathyCapabilities capabilities;
   TpAccount *account;
   TplEntity *target;
@@ -1533,16 +1488,22 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
   GtkTreePath *path;
   gboolean profile, chat, call, video;
 
+  tp_clear_object (&window->selected_contact);
+
+  view = GTK_TREE_VIEW (log_window->treeview_who);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
   profile = chat = call = video = FALSE;
 
   if (!gtk_tree_model_get_iter_first (model, &iter))
-    goto out;
+    goto events;
 
   if (gtk_tree_selection_count_selected_rows (selection) != 1)
-    goto out;
+    goto events;
 
   if (gtk_tree_selection_iter_is_selected (selection, &iter))
-    goto out;
+    goto events;
 
   paths = gtk_tree_selection_get_selected_rows (selection, &model);
   g_return_if_fail (paths != NULL);
@@ -1556,12 +1517,46 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *window,
 
   g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
 
-  contact = empathy_contact_from_tpl_contact (account, target);
+  window->selected_contact = empathy_contact_from_tpl_contact (account,
+      target);
 
   g_object_unref (account);
   g_object_unref (target);
 
-  capabilities = empathy_contact_get_capabilities (contact);
+  capabilities = empathy_contact_get_capabilities (window->selected_contact);
+
+  profile = chat = TRUE;
+  call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
+  video = capabilities & EMPATHY_CAPABILITIES_VIDEO;
+
+  goto out;
+
+ events:
+  /* If the Who pane doesn't contain a contact (e.g. it has many
+   * selected, or has 'Anyone', let's try to get the contact from
+   * the selected event. */
+  view = GTK_TREE_VIEW (log_window->treeview_events);
+  model = gtk_tree_view_get_model (view);
+  selection = gtk_tree_view_get_selection (view);
+
+  if (gtk_tree_selection_count_selected_rows (selection) != 1)
+    goto out;
+
+  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
+    goto out;
+
+  gtk_tree_model_get (model, &iter,
+      COL_EVENTS_ACCOUNT, &account,
+      COL_EVENTS_TARGET, &target,
+      -1);
+
+  window->selected_contact = empathy_contact_from_tpl_contact (account,
+      target);
+
+  g_object_unref (account);
+  g_object_unref (target);
+
+  capabilities = empathy_contact_get_capabilities (window->selected_contact);
 
   profile = chat = TRUE;
   call = capabilities & EMPATHY_CAPABILITIES_AUDIO;
@@ -1605,7 +1600,7 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
         }
     }
 
-  log_window_update_buttons_sensitivity (window, model, selection);
+  log_window_update_buttons_sensitivity (window);
 
   /* The contact changed, so the dates need to be updated */
   log_window_chats_get_messages (window, TRUE);
@@ -1865,6 +1860,15 @@ who_row_is_separator (GtkTreeModel *model,
 }
 
 static void
+log_window_events_changed_cb (GtkTreeSelection *selection,
+    EmpathyLogWindow *window)
+{
+  DEBUG ("log_window_events_changed_cb");
+
+  log_window_update_buttons_sensitivity (window);
+}
+
+static void
 log_window_events_setup (EmpathyLogWindow *window)
 {
   GtkTreeView       *view;
@@ -1916,7 +1920,7 @@ log_window_events_setup (EmpathyLogWindow *window)
   gtk_tree_view_append_column (view, column);
 
   /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_NONE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
   gtk_tree_view_set_headers_visible (view, FALSE);
 
   gtk_tree_sortable_set_sort_column_id (sortable,
@@ -1924,6 +1928,11 @@ log_window_events_setup (EmpathyLogWindow *window)
       GTK_SORT_ASCENDING);
 
   gtk_tree_view_set_enable_search (view, FALSE);
+
+  /* set up signals */
+  g_signal_connect (selection, "changed",
+      G_CALLBACK (log_window_events_changed_cb),
+      window);
 
   g_object_unref (store);
 }
@@ -2376,11 +2385,17 @@ log_window_what_setup (EmpathyLogWindow *window)
 }
 
 static void
-start_spinner (void)
+log_window_maybe_expand_events (void)
 {
-  gtk_spinner_start (GTK_SPINNER (log_window->spinner));
-  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
-      PAGE_EMPTY);
+  GtkTreeView       *view;
+  GtkTreeModel      *model;
+
+  view = GTK_TREE_VIEW (log_window->treeview_events);
+  model = gtk_tree_view_get_model (view);
+
+  /* If there's only one result, expand it */
+  if (gtk_tree_model_iter_n_children (model, NULL) == 1)
+    gtk_tree_view_expand_all (view);
 }
 
 static gboolean
@@ -2404,11 +2419,23 @@ static void
 show_events (TplActionChain *chain,
     gpointer user_data)
 {
+  log_window_maybe_expand_events ();
   gtk_spinner_stop (GTK_SPINNER (log_window->spinner));
   gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
       PAGE_EVENTS);
 
   _tpl_action_chain_continue (chain);
+}
+
+static void
+start_spinner (void)
+{
+  gtk_spinner_start (GTK_SPINNER (log_window->spinner));
+  gtk_notebook_set_current_page (GTK_NOTEBOOK (log_window->notebook),
+      PAGE_EMPTY);
+
+  g_timeout_add (1000, show_spinner, NULL);
+  _tpl_action_chain_append (log_window->chain, show_events, NULL);
 }
 
 static void
@@ -2598,8 +2625,6 @@ log_window_get_messages_for_dates (EmpathyLogWindow *window,
     }
 
   start_spinner ();
-  g_timeout_add (1000, show_spinner, NULL);
-  _tpl_action_chain_append (window->chain, show_events, NULL);
   _tpl_action_chain_start (window->chain);
 
   g_list_free_full (accounts, g_object_unref);
