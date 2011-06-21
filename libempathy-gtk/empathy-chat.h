@@ -50,7 +50,7 @@ typedef struct _EmpathyChatClass  EmpathyChatClass;
 typedef struct _EmpathyChatPriv   EmpathyChatPriv;
 
 struct _EmpathyChat {
-	GtkBin parent;
+	GtkBox parent;
 	EmpathyChatPriv *priv;
 
 	/* Protected */
@@ -59,7 +59,7 @@ struct _EmpathyChat {
 };
 
 struct _EmpathyChatClass {
-	GtkBinClass parent;
+	GtkBoxClass parent;
 };
 
 GType              empathy_chat_get_type             (void);

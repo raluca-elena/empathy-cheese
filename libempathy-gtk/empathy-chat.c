@@ -180,7 +180,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-G_DEFINE_TYPE (EmpathyChat, empathy_chat, GTK_TYPE_BIN);
+G_DEFINE_TYPE (EmpathyChat, empathy_chat, GTK_TYPE_BOX);
 
 static gboolean update_misspelled_words (gpointer data);
 
@@ -2941,31 +2941,8 @@ chat_create_ui (EmpathyChat *chat)
 	g_list_free (list);
 
 	/* Add the main widget in the chat widget */
-	gtk_container_add (GTK_CONTAINER (chat), priv->widget);
+	gtk_box_pack_start (GTK_BOX (chat), priv->widget, TRUE, TRUE, 0);
 	g_object_unref (gui);
-}
-
-static void
-chat_size_allocate (GtkWidget     *widget,
-		    GtkAllocation *allocation)
-{
-  GtkBin *bin = GTK_BIN (widget);
-  GtkAllocation child_allocation;
-  GtkWidget *child;
-
-  gtk_widget_set_allocation (widget, allocation);
-
-  child = gtk_bin_get_child (bin);
-
-  if (child && gtk_widget_get_visible (child))
-    {
-      child_allocation.x = allocation->x + gtk_container_get_border_width (GTK_CONTAINER (widget));
-      child_allocation.y = allocation->y + gtk_container_get_border_width (GTK_CONTAINER (widget));
-      child_allocation.width = MAX (allocation->width - gtk_container_get_border_width (GTK_CONTAINER (widget)) * 2, 0);
-      child_allocation.height = MAX (allocation->height - gtk_container_get_border_width (GTK_CONTAINER (widget)) * 2, 0);
-
-      gtk_widget_size_allocate (child, &child_allocation);
-    }
 }
 
 static void
@@ -3058,15 +3035,12 @@ chat_constructed (GObject *object)
 static void
 empathy_chat_class_init (EmpathyChatClass *klass)
 {
-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 	GObjectClass   *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = chat_finalize;
 	object_class->get_property = chat_get_property;
 	object_class->set_property = chat_set_property;
 	object_class->constructed = chat_constructed;
-
-	widget_class->size_allocate = chat_size_allocate;
 
 	g_object_class_install_property (object_class,
 					 PROP_TP_CHAT,
