@@ -897,7 +897,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	body_escaped = theme_adium_parse_body (theme,
 		empathy_message_get_body (msg),
 		empathy_message_get_token (msg));
-	name = empathy_contact_get_alias (sender);
+	name = empathy_contact_get_logged_alias (sender);
 	contact_id = empathy_contact_get_id (sender);
 	action = (empathy_message_get_tptype (msg) == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION);
 

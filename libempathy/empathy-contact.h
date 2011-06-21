@@ -77,6 +77,7 @@ EmpathyContact * empathy_contact_from_tpl_contact (TpAccount *account,
 TpContact * empathy_contact_get_tp_contact (EmpathyContact *contact);
 const gchar * empathy_contact_get_id (EmpathyContact *contact);
 const gchar * empathy_contact_get_alias (EmpathyContact *contact);
+const gchar * empathy_contact_get_logged_alias (EmpathyContact *contact);
 void empathy_contact_set_alias (EmpathyContact *contact, const gchar *alias);
 void empathy_contact_change_group (EmpathyContact *contact, const gchar *group,
     gboolean is_member);

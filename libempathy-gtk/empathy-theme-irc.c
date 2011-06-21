@@ -62,11 +62,11 @@ theme_irc_append_message (EmpathyChatTextView *view,
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 
 	contact = empathy_message_get_sender (message);
-	name = empathy_contact_get_alias (contact);
+	name = empathy_contact_get_logged_alias (contact);
 
 	if (empathy_message_get_tptype (message) == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION) {
 		tmp = g_strdup_printf (" * %s %s",
-				       empathy_contact_get_alias (contact),
+				       empathy_contact_get_logged_alias (contact),
 				       empathy_message_get_body (message));
 		empathy_chat_text_view_append_body (view, tmp,
 						    EMPATHY_CHAT_TEXT_VIEW_TAG_ACTION);

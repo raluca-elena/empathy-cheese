@@ -56,6 +56,7 @@ typedef struct {
   FolksPersona *persona;
   gchar *id;
   gchar *alias;
+  gchar *logged_alias;
   EmpathyAvatar *avatar;
   TpConnectionPresenceType presence;
   guint handle;
@@ -109,6 +110,7 @@ enum
   PROP_PERSONA,
   PROP_ID,
   PROP_ALIAS,
+  PROP_LOGGED_ALIAS,
   PROP_AVATAR,
   PROP_PRESENCE,
   PROP_PRESENCE_MESSAGE,
@@ -316,6 +318,15 @@ empathy_contact_class_init (EmpathyContactClass *class)
         "An alias for the contact",
         NULL,
         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (object_class,
+      PROP_LOGGED_ALIAS,
+      g_param_spec_string ("logged-alias",
+        "Logged alias",
+        "The alias the user had when a message was logged, "
+        "only set when using empathy_contact_from_tpl_contact()",
+        NULL,
+        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (object_class,
       PROP_AVATAR,
@@ -557,6 +568,9 @@ contact_get_property (GObject *object,
       case PROP_ALIAS:
         g_value_set_string (value, empathy_contact_get_alias (contact));
         break;
+      case PROP_LOGGED_ALIAS:
+        g_value_set_string (value, empathy_contact_get_logged_alias (contact));
+        break;
       case PROP_AVATAR:
         g_value_set_boxed (value, empathy_contact_get_avatar (contact));
         break;
@@ -607,6 +621,10 @@ contact_set_property (GObject *object,
         break;
       case PROP_ALIAS:
         empathy_contact_set_alias (contact, g_value_get_string (value));
+        break;
+      case PROP_LOGGED_ALIAS:
+        g_assert (priv->logged_alias == NULL);
+        priv->logged_alias = g_value_dup_string (value);
         break;
       case PROP_PRESENCE:
         empathy_contact_set_presence (contact, g_value_get_uint (value));
@@ -696,20 +714,10 @@ empathy_contact_from_tpl_contact (TpAccount *account,
 
   if (existing_contact != NULL)
     {
-      EmpathyContactPriv *priv;
-
       retval = g_object_new (EMPATHY_TYPE_CONTACT,
           "tp-contact", empathy_contact_get_tp_contact (existing_contact),
+          "logged-alias", tpl_entity_get_alias (tpl_entity),
           NULL);
-
-      priv = GET_PRIV (retval);
-
-      /* contact_set_property() calls empathy_contact_set_alias(), which
-       * tries to set the alias on the FolksPersona, but we don't want to
-       * do that when creating an EmpathyContact from a TplEntity. So just
-       * set priv->alias instead of passing it to g_object_new() instead. */
-      g_free (priv->alias);
-      priv->alias = g_strdup (tpl_entity_get_alias (tpl_entity));
     }
   else
     {
@@ -776,6 +784,21 @@ empathy_contact_get_alias (EmpathyContact *contact)
     return alias;
   else
     return empathy_contact_get_id (contact);
+}
+
+const gchar *
+empathy_contact_get_logged_alias (EmpathyContact *contact)
+{
+  EmpathyContactPriv *priv;
+
+  g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
+
+  priv = GET_PRIV (contact);
+
+  if (priv->logged_alias != NULL)
+    return priv->logged_alias;
+  else
+    return empathy_contact_get_alias (contact);
 }
 
 void
