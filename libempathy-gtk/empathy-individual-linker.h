@@ -43,14 +43,14 @@ G_BEGIN_DECLS
         EmpathyIndividualLinkerClass))
 
 typedef struct {
-	GtkBin parent;
+	GtkBox parent;
 
 	/*<private>*/
 	gpointer priv;
 } EmpathyIndividualLinker;
 
 typedef struct {
-	GtkBinClass parent_class;
+	GtkBoxClass parent_class;
 } EmpathyIndividualLinkerClass;
 
 GType empathy_individual_linker_get_type (void) G_GNUC_CONST;

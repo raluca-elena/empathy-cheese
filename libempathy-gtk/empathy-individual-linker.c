@@ -85,7 +85,7 @@ enum {
 };
 
 G_DEFINE_TYPE (EmpathyIndividualLinker, empathy_individual_linker,
-    GTK_TYPE_BIN);
+    GTK_TYPE_BOX);
 
 static void
 contact_toggle_cell_data_func (GtkTreeViewColumn *tree_column,
@@ -494,7 +494,7 @@ set_up (EmpathyIndividualLinker *self)
   gtk_box_pack_start (GTK_BOX (top_vbox), label, FALSE, TRUE, 0);
 
   /* Add the main vbox to the bin */
-  gtk_container_add (GTK_CONTAINER (self), GTK_WIDGET (top_vbox));
+  gtk_box_pack_start (GTK_BOX (self), GTK_WIDGET (top_vbox), TRUE, TRUE, 0);
   gtk_widget_show (GTK_WIDGET (top_vbox));
 }
 
@@ -578,44 +578,14 @@ finalize (GObject *object)
 }
 
 static void
-size_allocate (GtkWidget *widget,
-    GtkAllocation *allocation)
-{
-  GtkBin *bin = GTK_BIN (widget);
-  GtkAllocation child_allocation;
-  GtkWidget *child;
-
-  gtk_widget_set_allocation (widget, allocation);
-
-  child = gtk_bin_get_child (bin);
-
-  if (child && gtk_widget_get_visible (child))
-    {
-      child_allocation.x = allocation->x +
-          gtk_container_get_border_width (GTK_CONTAINER (widget));
-      child_allocation.y = allocation->y +
-          gtk_container_get_border_width (GTK_CONTAINER (widget));
-      child_allocation.width = MAX (allocation->width -
-          gtk_container_get_border_width (GTK_CONTAINER (widget)) * 2, 0);
-      child_allocation.height = MAX (allocation->height -
-          gtk_container_get_border_width (GTK_CONTAINER (widget)) * 2, 0);
-
-      gtk_widget_size_allocate (child, &child_allocation);
-    }
-}
-
-static void
 empathy_individual_linker_class_init (EmpathyIndividualLinkerClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   object_class->get_property = get_property;
   object_class->set_property = set_property;
   object_class->dispose = dispose;
   object_class->finalize = finalize;
-
-  widget_class->size_allocate = size_allocate;
 
   /**
    * EmpathyIndividualLinker:start-individual:
