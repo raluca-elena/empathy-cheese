@@ -154,6 +154,7 @@ enum
   COL_WHO_TYPE,
   COL_WHO_ICON,
   COL_WHO_NAME,
+  COL_WHO_ID,
   COL_WHO_ACCOUNT,
   COL_WHO_TARGET,
   COL_WHO_COUNT
@@ -1339,6 +1340,7 @@ populate_entities_from_search_hits (void)
               COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                                  : EMPATHY_IMAGE_AVATAR_DEFAULT,
               COL_WHO_NAME, tpl_entity_get_alias (hit->target),
+              COL_WHO_ID, tpl_entity_get_identifier (hit->target),
               COL_WHO_ACCOUNT, hit->account,
               COL_WHO_TARGET, hit->target,
               -1);
@@ -1669,6 +1671,7 @@ log_manager_got_entities_cb (GObject *manager,
           COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                              : EMPATHY_IMAGE_AVATAR_DEFAULT,
           COL_WHO_NAME, tpl_entity_get_alias (entity),
+          COL_WHO_ID, tpl_entity_get_identifier (entity),
           COL_WHO_ACCOUNT, ctx->account,
           COL_WHO_TARGET, entity,
           -1);
@@ -1968,6 +1971,7 @@ log_window_who_setup (EmpathyLogWindow *window)
       G_TYPE_INT,           /* type */
       G_TYPE_STRING,        /* icon */
       G_TYPE_STRING,        /* name */
+      G_TYPE_STRING,        /* id */
       TP_TYPE_ACCOUNT,      /* account */
       TPL_TYPE_ENTITY);     /* target */
 
@@ -2008,6 +2012,7 @@ log_window_who_setup (EmpathyLogWindow *window)
       NULL, NULL);
 
   gtk_tree_view_set_search_column (view, COL_WHO_NAME);
+  gtk_tree_view_set_tooltip_column (view, COL_WHO_ID);
 
   /* set up signals */
   g_signal_connect (selection, "changed",
