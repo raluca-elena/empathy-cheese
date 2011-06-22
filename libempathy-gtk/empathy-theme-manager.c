@@ -85,6 +85,7 @@ static gboolean
 theme_manager_emit_changed_idle_cb (gpointer manager)
 {
 	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
+#ifdef HAVE_WEBKIT
 	const gchar *adium_path = NULL;
 
 	if (priv->adium_data) {
@@ -93,6 +94,7 @@ theme_manager_emit_changed_idle_cb (gpointer manager)
 	DEBUG ("Emit theme-changed with: name='%s' adium_path='%s' "
 	       "adium_variant='%s'", priv->name, adium_path,
 	       priv->adium_variant);
+#endif /* HAVE_WEBKIT */
 
 	g_signal_emit (manager, signals[THEME_CHANGED], 0, NULL);
 	priv->emit_changed_idle = 0;
