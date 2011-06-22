@@ -67,7 +67,7 @@ typedef struct
 
 static ServiceInfo services_infos[N_SERVICES] = {
     { "label_username_example", TRUE },
-    { "label_username_g_example", TRUE },
+    { "label_username_g_example", FALSE },
     { "label_username_f_example", FALSE },
 };
 
