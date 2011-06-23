@@ -135,9 +135,8 @@ struct _EmpathyCallWindowPriv
   GtkWidget *tool_button_camera_preview;
   GtkWidget *tool_button_camera_on;
 
-  /* The frames and boxes that contain self and remote avatar and video
+  /* The boxes that contain self and remote avatar and video
      input/output. When we redial, we destroy and re-create the boxes */
-  GtkWidget *remote_user_output_frame;
   GtkWidget *remote_user_output_hbox;
   GtkWidget *self_user_output_hbox;
 
@@ -178,6 +177,7 @@ struct _EmpathyCallWindowPriv
 
   GstElement *video_input;
   GstElement *video_preview_sink;
+  GstElement *video_output_sink;
   GstElement *audio_input;
   GstElement *audio_output;
   GstElement *pipeline;
@@ -616,13 +616,27 @@ static void
 create_video_output_widget (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstBus *bus;
+  ClutterActor *video_output_texture;
 
   g_assert (priv->video_output == NULL);
   g_assert (priv->pipeline != NULL);
 
-  bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
-  priv->video_output = empathy_video_widget_new (bus);
+  priv->video_output = gtk_clutter_embed_new ();
+  video_output_texture = clutter_texture_new ();
+  clutter_actor_set_size (video_output_texture,
+      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
+
+  priv->video_output_sink = clutter_gst_video_sink_new (
+      CLUTTER_TEXTURE (video_output_texture));
+
+  clutter_container_add (
+      CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
+          GTK_CLUTTER_EMBED (priv->video_output))),
+      video_output_texture,
+      NULL);
+
+  gtk_widget_set_size_request (priv->video_output,
+      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
 
   gtk_box_pack_start (GTK_BOX (priv->remote_user_output_hbox),
       priv->video_output, TRUE, TRUE, 0);
@@ -631,8 +645,6 @@ create_video_output_widget (EmpathyCallWindow *self)
       GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect (G_OBJECT (priv->video_output), "button-press-event",
       G_CALLBACK (empathy_call_window_video_button_press_cb), self);
-
-  g_object_unref (bus);
 }
 
 static void
@@ -1093,14 +1105,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
                                   CONTENT_HBOX_BORDER_WIDTH);
   gtk_paned_pack1 (GTK_PANED (priv->pane), priv->content_hbox, TRUE, FALSE);
 
-  /* remote user output frame */
-  priv->remote_user_output_frame = gtk_frame_new (NULL);
-  gtk_widget_set_size_request (priv->remote_user_output_frame,
-      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
-  gtk_box_pack_start (GTK_BOX (priv->content_hbox),
-      priv->remote_user_output_frame, TRUE, TRUE,
-      CONTENT_HBOX_CHILDREN_PACKING_PADDING);
-
+  /* remote user output */
   priv->remote_user_output_hbox = gtk_hbox_new (FALSE, 0);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
@@ -1108,8 +1113,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_box_pack_start (GTK_BOX (priv->remote_user_output_hbox),
       priv->remote_user_avatar_widget, TRUE, TRUE, 0);
 
-  gtk_container_add (GTK_CONTAINER (priv->remote_user_output_frame),
-      priv->remote_user_output_hbox);
+  gtk_box_pack_start (GTK_BOX (priv->content_hbox),
+      priv->remote_user_output_hbox, TRUE, TRUE,
+      CONTENT_HBOX_CHILDREN_PACKING_PADDING);
 
   /* self user output */
   priv->self_user_output_hbox = gtk_hbox_new (FALSE, 0);
@@ -1960,8 +1966,7 @@ empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
         {
           GstElement *output;
 
-          output = empathy_video_widget_get_element (EMPATHY_VIDEO_WIDGET
-              (priv->video_output));
+          output = priv->video_output_sink;
 
           gst_element_set_state (output, GST_STATE_NULL);
           gst_element_set_state (priv->funnel, GST_STATE_NULL);
@@ -1997,8 +2002,7 @@ empathy_call_window_get_video_sink_pad (EmpathyCallWindow *self)
 
   if (priv->funnel == NULL)
     {
-      output = empathy_video_widget_get_element (EMPATHY_VIDEO_WIDGET
-        (priv->video_output));
+      output = priv->video_output_sink;
 
       priv->funnel = gst_element_factory_make ("fsfunnel", NULL);
 
