@@ -196,19 +196,22 @@ if test "x$with_call" != "xno" ; then
    [
       farsight2-0.10
       telepathy-farstream
-   ], have_farstream="yes", have_farstream="no" )
+      clutter-1.0
+      clutter-gtk-1.0
+      clutter-gst-1.0
+   ], have_call="yes", have_call="no" )
 
-   if test "x$have_farstream" = "xyes"; then
+   if test "x$have_call" = "xyes"; then
       AC_DEFINE(HAVE_CALL, 1, [Define if you have Call channel support])
    fi
 else
-  have_farstream=no
+  have_call=no
 fi
 
-if test "x$with_call" = "xyes" -a "x$have_farstream" != "xyes"; then
+if test "x$with_call" = "xyes" -a "x$have_call" != "xyes"; then
    AC_MSG_ERROR([Could not find Call handler dependencies.])
 fi
-AM_CONDITIONAL(HAVE_CALL, test "x$have_farstream" = "xyes")
+AM_CONDITIONAL(HAVE_CALL, test "x$have_call" = "xyes")
 
 
 # -----------------------------------------------------------
@@ -637,6 +640,6 @@ Configure summary:
     Extras:
 	Nautilus-sendto plugin......:  ${have_nst}
 	Salut E-D-S support.........:  ${with_eds}
-	Exp. Call channel handler...:  ${have_farstream}
+	Exp. Call channel handler...:  ${have_call}
 	Exp. Call log support.......:  ${have_call_logs}
 "
