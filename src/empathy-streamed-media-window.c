@@ -1028,7 +1028,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   GError *error = NULL;
   GtkWidget *scroll;
 
-  filename = empathy_file_lookup ("empathy-call-window.ui", "src");
+  filename = empathy_file_lookup ("empathy-streamed-media-window.ui", "src");
   gui = empathy_builder_get_file (filename,
     "call_window_vbox", &top_vbox,
     "errors_vbox", &priv->errors_vbox,

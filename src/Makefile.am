@@ -224,6 +224,7 @@ ui_DATA = 					\
 	empathy-accounts-dialog.ui		\
 	empathy-call-window-fullscreen.ui	\
 	empathy-call-window.ui			\
+	empathy-streamed-media-window.ui	\
 	empathy-chat-window.ui			\
 	empathy-chatrooms-window.ui		\
 	empathy-ft-manager.ui			\
