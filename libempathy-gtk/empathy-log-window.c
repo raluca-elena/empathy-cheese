@@ -154,6 +154,7 @@ enum
   COL_WHO_TYPE,
   COL_WHO_ICON,
   COL_WHO_NAME,
+  COL_WHO_ID,
   COL_WHO_ACCOUNT,
   COL_WHO_TARGET,
   COL_WHO_COUNT
@@ -605,12 +606,24 @@ model_is_parent (GtkTreeModel *model,
 }
 
 static const gchar *
-get_contact_alias_for_message (EmpathyMessage *message)
+get_contact_alias_for_message (EmpathyMessage *message,
+    TplEvent *event)
 {
   EmpathyContact *sender, *receiver;
+  TplEntity *ent_sender, *ent_receiver;
 
   sender = empathy_message_get_sender (message);
   receiver = empathy_message_get_receiver (message);
+
+  ent_sender = tpl_event_get_sender (event);
+  ent_receiver = tpl_event_get_receiver (event);
+
+  /* If this is a MUC, we want to show "Chat with <room>". */
+  if (tpl_entity_get_entity_type (ent_sender) == TPL_ENTITY_ROOM)
+    return tpl_entity_get_alias (ent_sender);
+  if (ent_receiver &&
+      tpl_entity_get_entity_type (ent_receiver) == TPL_ENTITY_ROOM)
+    return tpl_entity_get_alias (ent_receiver);
 
   if (empathy_contact_is_user (sender))
     return empathy_contact_get_alias (receiver);
@@ -656,7 +669,7 @@ get_parent_iter_for_message (TplEvent *event,
           C_("A date with the time", "%A, %e %B %Y %X"));
 
       body = g_markup_printf_escaped (_("Chat with %s"),
-          get_contact_alias_for_message (message));
+          get_contact_alias_for_message (message, event));
 
       gtk_tree_store_append (store, &iter, NULL);
       gtk_tree_store_set (store, &iter,
@@ -1327,6 +1340,7 @@ populate_entities_from_search_hits (void)
               COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                                  : EMPATHY_IMAGE_AVATAR_DEFAULT,
               COL_WHO_NAME, tpl_entity_get_alias (hit->target),
+              COL_WHO_ID, tpl_entity_get_identifier (hit->target),
               COL_WHO_ACCOUNT, hit->account,
               COL_WHO_TARGET, hit->target,
               -1);
@@ -1657,6 +1671,7 @@ log_manager_got_entities_cb (GObject *manager,
           COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                              : EMPATHY_IMAGE_AVATAR_DEFAULT,
           COL_WHO_NAME, tpl_entity_get_alias (entity),
+          COL_WHO_ID, tpl_entity_get_identifier (entity),
           COL_WHO_ACCOUNT, ctx->account,
           COL_WHO_TARGET, entity,
           -1);
@@ -1956,6 +1971,7 @@ log_window_who_setup (EmpathyLogWindow *window)
       G_TYPE_INT,           /* type */
       G_TYPE_STRING,        /* icon */
       G_TYPE_STRING,        /* name */
+      G_TYPE_STRING,        /* id */
       TP_TYPE_ACCOUNT,      /* account */
       TPL_TYPE_ENTITY);     /* target */
 
@@ -1996,6 +2012,7 @@ log_window_who_setup (EmpathyLogWindow *window)
       NULL, NULL);
 
   gtk_tree_view_set_search_column (view, COL_WHO_NAME);
+  gtk_tree_view_set_tooltip_column (view, COL_WHO_ID);
 
   /* set up signals */
   g_signal_connect (selection, "changed",
