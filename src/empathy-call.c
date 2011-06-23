@@ -26,6 +26,10 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include <clutter/clutter.h>
+#include <clutter-gtk/clutter-gtk.h>
+#include <clutter-gst/clutter-gst.h>
+
 #include <telepathy-glib/debug-sender.h>
 
 #include <telepathy-yell/telepathy-yell.h>
@@ -133,6 +137,9 @@ main (int argc,
   g_option_context_free (optcontext);
 
   tpy_cli_init ();
+
+  gtk_clutter_init (&argc, &argv);
+  clutter_gst_init (&argc, &argv);
 
   empathy_gtk_init ();
   g_set_application_name (_("Empathy Audio/Video Client"));
