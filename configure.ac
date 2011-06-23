@@ -45,7 +45,7 @@ TELEPATHY_GLIB_REQUIRED=0.15.2
 TELEPATHY_LOGGER=0.2.10
 
 # Optional deps
-CLUTTER_GTK_REQUIRED=0.90.3
+CLUTTER_GTK_REQUIRED=1.0.1
 ENCHANT_REQUIRED=1.2.0
 GEOCLUE_REQUIRED=0.11
 ISO_CODES_REQUIRED=0.35
@@ -182,6 +182,7 @@ PKG_CHECK_MODULES(EMPATHY_AV,
 [
    farsight2-0.10
    telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
+   clutter-gtk-1.0 >= $CLUTTER_GTK_REQUIRED
 ])
 
 # -----------------------------------------------------------
@@ -196,6 +197,7 @@ if test "x$with_call" != "xno" ; then
    [
       farsight2-0.10
       telepathy-farstream
+      clutter-gtk-1.0 >= $CLUTTER_GTK_REQUIRED
    ], have_farstream="yes", have_farstream="no" )
 
    if test "x$have_farstream" = "xyes"; then

@@ -39,6 +39,7 @@
 #include <libempathy/empathy-debug.h>
 
 #include <gst/gst.h>
+#include <clutter-gst/clutter-gst.h>
 
 /* Exit after $TIMEOUT seconds if not displaying any call window */
 #define TIMEOUT 60
@@ -133,6 +134,8 @@ main (int argc,
   g_option_context_free (optcontext);
 
   tpy_cli_init ();
+
+  clutter_gst_init (&argc, &argv);
 
   empathy_gtk_init ();
   g_set_application_name (_("Empathy Audio/Video Client"));

@@ -27,6 +27,7 @@
 #include <glib-object.h>
 #include <gst/gst.h>
 #include <gtk/gtk.h>
+#include <clutter-gtk/clutter-gtk.h>
 
 G_BEGIN_DECLS
 
@@ -34,11 +35,11 @@ typedef struct _EmpathyVideoWidget EmpathyVideoWidget;
 typedef struct _EmpathyVideoWidgetClass EmpathyVideoWidgetClass;
 
 struct _EmpathyVideoWidgetClass {
-    GtkDrawingAreaClass parent_class;
+    GtkClutterEmbedClass parent_class;
 };
 
 struct _EmpathyVideoWidget {
-    GtkDrawingArea parent;
+    GtkClutterEmbed parent;
 };
 
 GType empathy_video_widget_get_type (void);
