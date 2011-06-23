@@ -29,6 +29,10 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
+#include <clutter/clutter.h>
+#include <clutter-gtk/clutter-gtk.h>
+#include <clutter-gst/clutter-gst.h>
+
 #include <telepathy-glib/util.h>
 #include <telepathy-farstream/telepathy-farstream.h>
 #include <telepathy-glib/util.h>
@@ -134,7 +138,6 @@ struct _EmpathyCallWindowPriv
   /* The frames and boxes that contain self and remote avatar and video
      input/output. When we redial, we destroy and re-create the boxes */
   GtkWidget *remote_user_output_frame;
-  GtkWidget *self_user_output_frame;
   GtkWidget *remote_user_output_hbox;
   GtkWidget *self_user_output_hbox;
 
@@ -143,7 +146,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *content_hbox;
 
   /* This vbox is contained in the content_hbox and it contains the
-     self_user_output_frame and the sidebar button. When toggling fullscreen,
+     self_user_output_hbox and the sidebar button. When toggling fullscreen,
      it needs to be repacked. We keep a reference on it for easier access. */
   GtkWidget *vbox;
 
@@ -174,6 +177,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *audio_local_candidate_info_img;
 
   GstElement *video_input;
+  GstElement *video_preview_sink;
   GstElement *audio_input;
   GstElement *audio_output;
   GstElement *pipeline;
@@ -668,8 +672,7 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
   g_assert (priv->video_input != NULL);
   g_assert (priv->video_tee != NULL);
 
-  preview = empathy_video_widget_get_element (
-      EMPATHY_VIDEO_WIDGET (priv->video_preview));
+  preview = priv->video_preview_sink;
 
   if (!gst_bin_add (GST_BIN (priv->pipeline), priv->video_input))
     {
@@ -700,24 +703,35 @@ static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstBus *bus;
+  ClutterActor *video_preview_texture;
 
   g_assert (priv->video_preview == NULL);
 
-  bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
+  priv->video_preview = gtk_clutter_embed_new ();
 
-  priv->video_preview = empathy_video_widget_new_with_size (bus,
+  video_preview_texture = clutter_texture_new ();
+  clutter_actor_set_size (video_preview_texture,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
-  g_object_set (priv->video_preview,
+
+  priv->video_preview_sink = clutter_gst_video_sink_new (
+      CLUTTER_TEXTURE (video_preview_texture));
+
+  g_object_set (priv->video_preview_sink,
       "sync", FALSE,
       "async", TRUE,
-      "flip-video", TRUE,
       NULL);
+
+  clutter_container_add (
+      CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
+          GTK_CLUTTER_EMBED (priv->video_preview))),
+      video_preview_texture,
+      NULL);
+
+  gtk_widget_set_size_request (priv->video_preview,
+      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
 
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->video_preview, TRUE, TRUE, 0);
-
-  g_object_unref (bus);
 }
 
 static void
@@ -739,8 +753,7 @@ play_camera (EmpathyCallWindow *window,
   else
     state = GST_STATE_NULL;
 
-  preview = empathy_video_widget_get_element (
-      EMPATHY_VIDEO_WIDGET (priv->video_preview));
+  preview = priv->video_preview_sink;
 
   gst_element_set_state (preview, state);
   gst_element_set_state (priv->video_input, state);
@@ -1098,19 +1111,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_container_add (GTK_CONTAINER (priv->remote_user_output_frame),
       priv->remote_user_output_hbox);
 
-  /* self user output frame */
-  priv->self_user_output_frame = gtk_frame_new (NULL);
-  gtk_widget_set_size_request (priv->self_user_output_frame,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
-
+  /* self user output */
   priv->self_user_output_hbox = gtk_hbox_new (FALSE, 0);
 
   priv->self_user_avatar_widget = gtk_image_new ();
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->self_user_avatar_widget, TRUE, TRUE, 0);
-
-  gtk_container_add (GTK_CONTAINER (priv->self_user_output_frame),
-      priv->self_user_output_hbox);
 
   create_pipeline (self);
   create_video_output_widget (self);
@@ -1123,7 +1129,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->vbox = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (priv->content_hbox), priv->vbox,
       FALSE, FALSE, CONTENT_HBOX_CHILDREN_PACKING_PADDING);
-  gtk_box_pack_start (GTK_BOX (priv->vbox), priv->self_user_output_frame,
+  gtk_box_pack_start (GTK_BOX (priv->vbox), priv->self_user_output_hbox,
       FALSE, FALSE, 0);
 
   empathy_call_window_setup_toolbar (self);
@@ -2542,8 +2548,7 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
   disable_camera (self);
 
   DEBUG ("remove video input");
-  preview = empathy_video_widget_get_element (
-    EMPATHY_VIDEO_WIDGET (priv->video_preview));
+  preview = priv->video_preview_sink;
 
   gst_element_set_state (priv->video_input, GST_STATE_NULL);
   gst_element_set_state (priv->video_tee, GST_STATE_NULL);
