@@ -66,8 +66,8 @@
 #define CONTENT_HBOX_SPACING 3
 #define CONTENT_HBOX_CHILDREN_PACKING_PADDING 3
 
-#define SELF_VIDEO_SECTION_WIDTH 160
-#define SELF_VIDEO_SECTION_HEIGTH 120
+#define SELF_VIDEO_SECTION_WIDTH 120
+#define SELF_VIDEO_SECTION_HEIGTH 90
 
 /* The avatar's default width and height are set to the same value because we
    want a square icon. */
@@ -115,8 +115,9 @@ struct _EmpathyCallWindowPriv
   GtkWidget *errors_vbox;
   /* widget displays the video received from the remote user. This widget is
    * alive only during call. */
-  GtkWidget *video_output;
-  GtkWidget *video_preview;
+  ClutterActor *video_output;
+  ClutterActor *video_preview;
+  GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *self_user_avatar_widget;
   GtkWidget *sidebar;
@@ -135,17 +136,17 @@ struct _EmpathyCallWindowPriv
   GtkWidget *tool_button_camera_preview;
   GtkWidget *tool_button_camera_on;
 
-  /* The boxes that contain self and remote avatar and video
-     input/output. When we redial, we destroy and re-create the boxes */
-  GtkWidget *remote_user_output_hbox;
-  GtkWidget *self_user_output_hbox;
+  /* The box that contains self and remote avatar and video
+     input/output. When we redial, we destroy and re-create the box */
+  ClutterActor *video_box;
+  ClutterLayoutManager *video_layout;
 
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
 
   /* This vbox is contained in the content_hbox and it contains the
-     self_user_output_hbox and the sidebar button. When toggling fullscreen,
+     sidebar button. When toggling fullscreen,
      it needs to be repacked. We keep a reference on it for easier access. */
   GtkWidget *vbox;
 
@@ -616,34 +617,21 @@ static void
 create_video_output_widget (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  ClutterActor *video_output_texture;
 
   g_assert (priv->video_output == NULL);
   g_assert (priv->pipeline != NULL);
 
-  priv->video_output = gtk_clutter_embed_new ();
-  video_output_texture = clutter_texture_new ();
-  clutter_actor_set_size (video_output_texture,
-      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
+  priv->video_output = clutter_texture_new ();
 
   priv->video_output_sink = clutter_gst_video_sink_new (
-      CLUTTER_TEXTURE (video_output_texture));
+      CLUTTER_TEXTURE (priv->video_output));
 
-  clutter_container_add (
-      CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
-          GTK_CLUTTER_EMBED (priv->video_output))),
-      video_output_texture,
-      NULL);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_box),
+      priv->video_output);
 
-  gtk_widget_set_size_request (priv->video_output,
-      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
-
-  gtk_box_pack_start (GTK_BOX (priv->remote_user_output_hbox),
-      priv->video_output, TRUE, TRUE, 0);
-
-  gtk_widget_add_events (priv->video_output,
+  gtk_widget_add_events (priv->video_container,
       GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
-  g_signal_connect (G_OBJECT (priv->video_output), "button-press-event",
+  g_signal_connect (G_OBJECT (priv->video_container), "button-press-event",
       G_CALLBACK (empathy_call_window_video_button_press_cb), self);
 }
 
@@ -715,35 +703,25 @@ static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  ClutterActor *video_preview_texture;
 
   g_assert (priv->video_preview == NULL);
 
-  priv->video_preview = gtk_clutter_embed_new ();
-
-  video_preview_texture = clutter_texture_new ();
-  clutter_actor_set_size (video_preview_texture,
+  priv->video_preview = clutter_texture_new ();
+  clutter_actor_set_size (priv->video_preview,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
 
   priv->video_preview_sink = clutter_gst_video_sink_new (
-      CLUTTER_TEXTURE (video_preview_texture));
+      CLUTTER_TEXTURE (priv->video_preview));
 
   g_object_set (priv->video_preview_sink,
       "sync", FALSE,
       "async", TRUE,
       NULL);
 
-  clutter_container_add (
-      CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
-          GTK_CLUTTER_EMBED (priv->video_preview))),
-      video_preview_texture,
-      NULL);
-
-  gtk_widget_set_size_request (priv->video_preview,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
-
-  gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
-      priv->video_preview, TRUE, TRUE, 0);
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
+      priv->video_preview,
+      CLUTTER_BIN_ALIGNMENT_START,
+      CLUTTER_BIN_ALIGNMENT_END);
 }
 
 static void
@@ -784,7 +762,7 @@ display_video_preview (EmpathyCallWindow *self,
       DEBUG ("Show video preview");
 
       play_camera (self, TRUE);
-      gtk_widget_show (priv->video_preview);
+      clutter_actor_show (priv->video_preview);
       gtk_widget_hide (priv->self_user_avatar_widget);
     }
   else
@@ -794,7 +772,7 @@ display_video_preview (EmpathyCallWindow *self,
 
       if (priv->video_preview != NULL)
         {
-          gtk_widget_hide (priv->video_preview);
+          clutter_actor_hide (priv->video_preview);
           play_camera (self, FALSE);
         }
       gtk_widget_show (priv->self_user_avatar_widget);
@@ -1043,6 +1021,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
   GtkWidget *page;
   gchar *filename;
   GtkWidget *scroll;
+  ClutterConstraint *size_constraint;
+  ClutterActor *remote_avatar;
 
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_CALL_WINDOW, EmpathyCallWindowPriv);
@@ -1105,24 +1085,41 @@ empathy_call_window_init (EmpathyCallWindow *self)
                                   CONTENT_HBOX_BORDER_WIDTH);
   gtk_paned_pack1 (GTK_PANED (priv->pane), priv->content_hbox, TRUE, FALSE);
 
-  /* remote user output */
-  priv->remote_user_output_hbox = gtk_hbox_new (FALSE, 0);
+  /* avatar/video box */
+  priv->video_layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_FILL,
+      CLUTTER_BIN_ALIGNMENT_FILL);
+
+  priv->video_box = clutter_box_new (priv->video_layout);
+
+  priv->video_container = gtk_clutter_embed_new ();
+  clutter_container_add (
+      CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
+          GTK_CLUTTER_EMBED (priv->video_container))),
+      priv->video_box,
+      NULL);
+
+  size_constraint = clutter_bind_constraint_new (
+      gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
+      CLUTTER_BIND_SIZE, 0);
+  clutter_actor_add_constraint (priv->video_box, size_constraint);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
+  remote_avatar = gtk_clutter_actor_new_with_contents (
+      priv->remote_user_avatar_widget);
 
-  gtk_box_pack_start (GTK_BOX (priv->remote_user_output_hbox),
-      priv->remote_user_avatar_widget, TRUE, TRUE, 0);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_box),
+      remote_avatar);
 
   gtk_box_pack_start (GTK_BOX (priv->content_hbox),
-      priv->remote_user_output_hbox, TRUE, TRUE,
+      priv->video_container, TRUE, TRUE,
       CONTENT_HBOX_CHILDREN_PACKING_PADDING);
 
-  /* self user output */
-  priv->self_user_output_hbox = gtk_hbox_new (FALSE, 0);
-
   priv->self_user_avatar_widget = gtk_image_new ();
+
+#if 0
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->self_user_avatar_widget, TRUE, TRUE, 0);
+#endif
 
   create_pipeline (self);
   create_video_output_widget (self);
@@ -1135,8 +1132,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->vbox = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (priv->content_hbox), priv->vbox,
       FALSE, FALSE, CONTENT_HBOX_CHILDREN_PACKING_PADDING);
-  gtk_box_pack_start (GTK_BOX (priv->vbox), priv->self_user_output_hbox,
-      FALSE, FALSE, 0);
 
   empathy_call_window_setup_toolbar (self);
 
@@ -1188,8 +1183,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_widget_hide (priv->sidebar);
 
   priv->fullscreen = empathy_call_window_fullscreen_new (self);
+#if 0
   empathy_call_window_fullscreen_set_video_widget (priv->fullscreen,
       priv->video_output);
+#endif
   g_signal_connect (G_OBJECT (priv->fullscreen->leave_fullscreen_button),
       "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
 
@@ -1334,7 +1331,7 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
 
   /* The remote avatar is shown by default and will be hidden when we receive
      video from the remote side. */
-  gtk_widget_hide (priv->video_output);
+  clutter_actor_hide (priv->video_output);
   gtk_widget_show (priv->remote_user_avatar_widget);
 }
 
@@ -1708,7 +1705,7 @@ disconnect_video_output_motion_handler (EmpathyCallWindow *self)
 
   if (priv->video_output_motion_handler_id != 0)
     {
-      g_signal_handler_disconnect (G_OBJECT (priv->video_output),
+      g_signal_handler_disconnect (G_OBJECT (priv->video_container),
           priv->video_output_motion_handler_id);
       priv->video_output_motion_handler_id = 0;
     }
@@ -1811,7 +1808,7 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       priv->video_tee = NULL;
 
       if (priv->video_preview != NULL)
-        gtk_widget_destroy (priv->video_preview);
+        clutter_actor_destroy (priv->video_preview);
       priv->video_preview = NULL;
 
       priv->funnel = NULL;
@@ -1914,7 +1911,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
       /* destroy the video output; it will be recreated when we'll redial */
       disconnect_video_output_motion_handler (self);
       if (priv->video_output != NULL)
-        gtk_widget_destroy (priv->video_output);
+        clutter_actor_destroy (priv->video_output);
       priv->video_output = NULL;
 
       gtk_widget_show (priv->remote_user_avatar_widget);
@@ -2377,7 +2374,7 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
 
   gtk_widget_set_sensitive (priv->mic_button, TRUE);
 
-  gtk_widget_hide (priv->video_output);
+  clutter_actor_hide (priv->video_output);
   gtk_widget_show (priv->remote_user_avatar_widget);
 
   g_object_unref (call);
@@ -2400,7 +2397,7 @@ emapthy_call_window_show_video_output_cb (gpointer user_data)
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
 
   gtk_widget_hide (self->priv->remote_user_avatar_widget);
-  gtk_widget_show (self->priv->video_output);
+  clutter_actor_show (self->priv->video_output);
 
   return FALSE;
 }
@@ -2565,7 +2562,7 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
   priv->video_input = NULL;
   g_object_unref (priv->video_tee);
   priv->video_tee = NULL;
-  gtk_widget_destroy (priv->video_preview);
+  clutter_actor_destroy (priv->video_preview);
   priv->video_preview = NULL;
 
   gtk_widget_set_sensitive (priv->tool_button_camera_on, FALSE);
@@ -2859,10 +2856,12 @@ show_borders (EmpathyCallWindow *window, gboolean set_fullscreen)
 
   if (priv->video_output != NULL)
     {
+#if 0
       gtk_box_set_child_packing (GTK_BOX (priv->content_hbox),
           priv->video_output, TRUE, TRUE,
           set_fullscreen ? 0 : CONTENT_HBOX_CHILDREN_PACKING_PADDING,
           GTK_PACK_START);
+#endif
     }
 
   gtk_box_set_child_packing (GTK_BOX (priv->content_hbox),
@@ -2901,7 +2900,7 @@ empathy_call_window_state_event_cb (GtkWidget *widget,
                 priv->video_output != NULL)
             {
               priv->video_output_motion_handler_id = g_signal_connect (
-                  G_OBJECT (priv->video_output), "motion-notify-event",
+                  G_OBJECT (priv->video_container), "motion-notify-event",
                   G_CALLBACK (empathy_call_window_video_output_motion_notify),
                   window);
             }
@@ -3167,7 +3166,7 @@ empathy_call_window_fullscreen_toggle (EmpathyCallWindow *window)
 }
 
 static gboolean
-empathy_call_window_video_button_press_cb (GtkWidget *video_output,
+empathy_call_window_video_button_press_cb (GtkWidget *video_preview,
   GdkEventButton *event, EmpathyCallWindow *window)
 {
   if (event->button == 3 && event->type == GDK_BUTTON_PRESS)
