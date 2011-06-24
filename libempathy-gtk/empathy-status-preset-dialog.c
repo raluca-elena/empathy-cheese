@@ -68,9 +68,6 @@ struct _EmpathyStatusPresetDialogPriv
 	GtkTreeViewColumn *column;
 	GtkCellRenderer *text_cell;
 
-	GtkWidget *add_combobox;
-	GtkWidget *add_button;
-
 	GtkTreeIter selected_iter;
 	gboolean add_combo_changed;
 	char *saved_status;
@@ -148,69 +145,6 @@ status_preset_dialog_presets_update (EmpathyStatusPresetDialog *self)
 
 		g_list_free (presets);
 	}
-}
-
-static void
-status_preset_add_combo_reset (EmpathyStatusPresetDialog *self)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkWidget *entry;
-
-	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
-	gtk_entry_set_text (GTK_ENTRY (entry), "");
-
-	gtk_combo_box_set_active_iter (GTK_COMBO_BOX (priv->add_combobox),
-			&priv->selected_iter);
-}
-
-static void
-status_preset_dialog_setup_add_combobox (EmpathyStatusPresetDialog *self)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkWidget *combobox = priv->add_combobox;
-	GtkListStore *store;
-	GtkCellRenderer *renderer;
-	guint i;
-
-	store = gtk_list_store_new (ADD_COMBO_N_COLS,
-			G_TYPE_UINT,		/* ADD_COMBO_STATE */
-			G_TYPE_STRING,		/* ADD_COMBO_ICON_NAME */
-			G_TYPE_STRING,		/* ADD_COMBO_STATUS */
-			G_TYPE_STRING);		/* ADD_COMBO_DEFAULT_TEXT */
-
-	gtk_combo_box_set_model (GTK_COMBO_BOX (combobox),
-				 GTK_TREE_MODEL (store));
-	g_object_unref (store);
-
-	gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX (combobox),
-			ADD_COMBO_DEFAULT_TEXT);
-
-	for (i = 0; i < G_N_ELEMENTS (states); i++) {
-		gtk_list_store_insert_with_values (store, NULL, -1,
-				ADD_COMBO_STATE, states[i],
-				ADD_COMBO_ICON_NAME, empathy_icon_name_for_presence (states[i]),
-				ADD_COMBO_STATUS, empathy_presence_get_default_message (states[i]),
-				ADD_COMBO_DEFAULT_TEXT, "",
-				-1);
-	}
-
-	gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
-
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
-	gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (combobox), renderer,
-			"icon-name", ADD_COMBO_ICON_NAME);
-
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
-	gtk_cell_layout_add_attribute (GTK_CELL_LAYOUT (combobox), renderer,
-			"text", ADD_COMBO_STATUS);
-	g_object_set (renderer,
-			"style", PANGO_STYLE_ITALIC,
-			"foreground", "Gray", /* FIXME - theme */
-			NULL);
-
-	gtk_combo_box_set_active (GTK_COMBO_BOX (combobox), 0);
 }
 
 static void
@@ -346,177 +280,6 @@ status_preset_dialog_preset_remove (GtkButton *button,
 }
 
 static void
-status_preset_dialog_set_add_combo_changed (EmpathyStatusPresetDialog *self,
-					    gboolean state,
-					    gboolean reset_text)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkWidget *entry;
-
-	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
-
-	priv->add_combo_changed = state;
-	gtk_widget_set_sensitive (priv->add_button, state);
-
-	if (state) {
-		gtk_widget_override_color (entry, 0, NULL);
-	} else {
-		GdkRGBA color;
-
-		if (gdk_rgba_parse (&color, "Gray")) /* FIXME - theme */
-			gtk_widget_override_color (entry, 0, &color);
-
-		if (reset_text) {
-			priv->block_add_combo_changed++;
-			gtk_entry_set_text (GTK_ENTRY (entry),
-					_("Enter Custom Message"));
-			priv->block_add_combo_changed--;
-		}
-	}
-}
-
-static void
-status_preset_dialog_add_combo_changed (GtkComboBox *combo,
-					EmpathyStatusPresetDialog *self)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkWidget *entry;
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-
-	if (priv->block_add_combo_changed) return;
-
-	model = gtk_combo_box_get_model (combo);
-	entry = gtk_bin_get_child (GTK_BIN (combo));
-
-	if (gtk_combo_box_get_active_iter (combo, &iter)) {
-		char *icon_name;
-
-		priv->selected_iter = iter;
-		gtk_tree_model_get (model, &iter,
-				PRESETS_STORE_ICON_NAME, &icon_name,
-				-1);
-
-		gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry),
-				GTK_ENTRY_ICON_PRIMARY,
-				icon_name);
-
-		g_free (icon_name);
-
-		status_preset_dialog_set_add_combo_changed (self, FALSE, TRUE);
-		if (priv->saved_status && strlen (priv->saved_status) > 0) {
-			gtk_entry_set_text (GTK_ENTRY (entry),
-					priv->saved_status);
-		}
-	} else {
-		g_free (priv->saved_status);
-		priv->saved_status = g_strdup (
-				gtk_entry_get_text (GTK_ENTRY (entry)));
-
-		status_preset_dialog_set_add_combo_changed (self,
-				strlen (priv->saved_status) > 0, FALSE);
-	}
-}
-
-static void
-status_preset_dialog_add_preset (GtkWidget *widget,
-				 EmpathyStatusPresetDialog *self)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	GtkTreeModel *model;
-	GtkTreeIter iter;
-	GtkWidget *entry;
-	TpConnectionPresenceType state, cstate;
-	const char *status;
-	char *cstatus;
-	gboolean valid, match = FALSE;
-
-	g_return_if_fail (priv->add_combo_changed);
-
-	model = gtk_combo_box_get_model (GTK_COMBO_BOX (priv->add_combobox));
-	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
-
-	status = gtk_entry_get_text (GTK_ENTRY (entry));
-	gtk_tree_model_get (model, &priv->selected_iter,
-			PRESETS_STORE_STATE, &state,
-			-1);
-
-	DEBUG ("ADD PRESET (%i, %s)\n", state, status);
-	empathy_status_presets_set_last (state, status);
-
-	status_preset_dialog_presets_update (self);
-
-	/* select the added status*/
-	model = gtk_tree_view_get_model (GTK_TREE_VIEW (priv->presets_treeview));
-	for (valid = gtk_tree_model_get_iter_first (model, &iter);
-             valid;
-             valid = gtk_tree_model_iter_next (model, &iter)) {
-
-		gtk_tree_model_get (model, &iter,
-				PRESETS_STORE_STATE, &cstate,
-				PRESETS_STORE_STATUS, &cstatus,
-				-1);
-
-		match = (cstate == state) && (strcmp (cstatus, status) == 0);
-
-		g_free (cstatus);
-
-		if (match) {
-			GtkTreePath *path;
-
-			path = gtk_tree_model_get_path (model, &iter);
-			gtk_tree_view_set_cursor_on_cell (
-				GTK_TREE_VIEW (priv->presets_treeview),
-				path,
-				priv->column,
-				priv->text_cell,
-				FALSE);
-			gtk_widget_grab_focus (priv->presets_treeview);
-			gtk_tree_path_free (path);
-			break;
-		}
-        }
-
-	if (!match) g_warning ("No match");
-
-	status_preset_add_combo_reset (self);
-}
-
-static gboolean
-status_preset_dialog_add_combo_press_event (GtkWidget *widget,
-					    GdkEventButton *event,
-					    EmpathyStatusPresetDialog *self)
-{
-	if (!gtk_widget_has_focus (widget)) {
-		/* if the widget isn't focused, focus it and select the text */
-		gtk_widget_grab_focus (widget);
-		gtk_editable_select_region (GTK_EDITABLE (widget), 0, -1);
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-static gboolean
-status_preset_dialog_add_combo_focus_out (GtkWidget *widget,
-					  GdkEventFocus *event,
-					  EmpathyStatusPresetDialog *self)
-{
-	EmpathyStatusPresetDialogPriv *priv = GET_PRIV (self);
-	const char *status;
-
-	gtk_editable_set_position (GTK_EDITABLE (widget), 0);
-
-	status = gtk_entry_get_text (GTK_ENTRY (widget));
-	status_preset_dialog_set_add_combo_changed (self,
-			priv->add_combo_changed && strlen (status) > 0,
-			TRUE);
-
-	return FALSE;
-}
-
-static void
 empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 {
 	EmpathyStatusPresetDialogPriv *priv = self->priv =
@@ -524,8 +287,7 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			EMPATHY_TYPE_STATUS_PRESET_DIALOG,
 			EmpathyStatusPresetDialogPriv);
 	GtkBuilder *gui;
-	GtkWidget *toplevel_vbox, *presets_sw, *remove_toolbar, *remove_button,
-		*entry;
+	GtkWidget *toplevel_vbox, *presets_sw, *remove_toolbar, *remove_button;
 	GtkTreeSelection *selection;
 	char *filename;
 	GtkStyleContext *context;
@@ -544,8 +306,6 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			"presets-treeview", &priv->presets_treeview,
 			"remove-toolbar", &remove_toolbar,
 			"remove-button", &remove_button,
-			"add-combobox", &priv->add_combobox,
-			"add-button", &priv->add_button,
 			NULL);
 	g_free (filename);
 
@@ -563,27 +323,11 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			remove_button);
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
 
-	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
-	gtk_entry_set_icon_activatable (GTK_ENTRY (entry),
-			GTK_ENTRY_ICON_PRIMARY,
-			FALSE);
-	g_signal_connect (entry, "activate",
-			G_CALLBACK (status_preset_dialog_add_preset), self);
-	g_signal_connect (entry, "button-press-event",
-			G_CALLBACK (status_preset_dialog_add_combo_press_event),
-			self);
-	g_signal_connect (entry, "focus-out-event",
-			G_CALLBACK (status_preset_dialog_add_combo_focus_out),
-			self);
-
 	empathy_builder_connect (gui, self,
 			"remove-button", "clicked", status_preset_dialog_preset_remove,
-			"add-combobox", "changed", status_preset_dialog_add_combo_changed,
-			"add-button", "clicked", status_preset_dialog_add_preset,
 			NULL);
 
 	status_preset_dialog_setup_presets_treeview (self);
-	status_preset_dialog_setup_add_combobox (self);
 
 	gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (self))),
 	    toplevel_vbox, TRUE, TRUE, 0);
