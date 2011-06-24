@@ -2,118 +2,60 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkVBox" id="toplevel-vbox">
-    <property name="width_request">420</property>
-    <property name="height_request">260</property>
-    <property name="visible">True</property>
-    <property name="border_width">6</property>
-    <property name="orientation">vertical</property>
-    <property name="spacing">6</property>
-    <child>
-      <object class="GtkLabel" id="label2">
+      <object class="GtkVBox" id="toplevel-vbox">
         <property name="visible">True</property>
-        <property name="xalign">0</property>
-        <property name="label" translatable="yes">Saved Status Messages</property>
-        <property name="mnemonic_widget">add-combobox</property>
-        <attributes>
-          <attribute name="weight" value="bold"/>
-        </attributes>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkScrolledWindow" id="scrolledwindow1">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="hscrollbar_policy">never</property>
-        <property name="shadow_type">etched-in</property>
+        <property name="can_focus">False</property>
+        <property name="margin-left">5</property>
+        <property name="margin-right">5</property>
         <child>
-          <object class="GtkTreeView" id="presets-treeview">
+          <object class="GtkScrolledWindow" id="presets-sw">
+            <property name="width_request">408</property>
+            <property name="height_request">252</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="headers_visible">False</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="shadow_type">etched-in</property>
+            <child>
+              <object class="GtkTreeView" id="presets-treeview">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="headers_visible">False</property>
+              </object>
+            </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
-      </object>
-      <packing>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkHButtonBox" id="hbuttonbox1">
-        <property name="visible">True</property>
-        <property name="layout_style">end</property>
         <child>
-          <object class="GtkButton" id="remove-button">
-            <property name="label">gtk-remove</property>
+          <object class="GtkToolbar" id="remove-toolbar">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
+            <property name="can_focus">False</property>
+            <property name="icon_size">1</property>
+            <style>
+              <class name="inline-toolbar"/>
+            </style>
+            <child>
+              <object class="GtkToolButton" id="remove-button">
+                <property name="tooltip-text" translatable="yes">Remove</property>
+                <property name="visible">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-remove</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkLabel" id="label1">
-        <property name="visible">True</property>
-        <property name="xalign">0</property>
-        <property name="label" translatable="yes">Save _New Status Message</property>
-        <property name="use_underline">True</property>
-        <property name="mnemonic_widget">add-combobox</property>
-        <attributes>
-          <attribute name="weight" value="bold"/>
-        </attributes>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="position">3</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkHBox" id="hbox1">
-        <property name="visible">True</property>
-        <property name="spacing">3</property>
-        <child>
-          <object class="GtkComboBox" id="add-combobox">
-            <property name="visible">True</property>
-	    <property name="has-entry">True</property>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="add-button">
-            <property name="label">gtk-add</property>
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="use_stock">True</property>
-          </object>
-          <packing>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
       </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="position">4</property>
-      </packing>
-    </child>
-  </object>
 </interface>

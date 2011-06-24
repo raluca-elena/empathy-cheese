@@ -17,7 +17,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  *
- * Authors: Davyd Madeley <davyd.madeley@collabora.co.uk>
+ * Authors:
+ *   Danielle Madeley <danielle.madeley@collabora.co.uk>
+ *   Will Thompson <will.thompson@collabora.co.uk>
  */
 
 #include <config.h>
@@ -40,10 +42,7 @@ main (int argc, char **argv)
 	empathy_status_presets_get_all ();
 
 	dialog = empathy_status_preset_dialog_new (NULL);
-
-	gtk_widget_show (dialog);
-
-	gtk_main ();
+	gtk_dialog_run (GTK_DIALOG (dialog));
 
 	return 0;
 }
