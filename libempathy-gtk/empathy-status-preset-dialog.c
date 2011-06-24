@@ -564,6 +564,9 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_MULTIPLE);
 
 	entry = gtk_bin_get_child (GTK_BIN (priv->add_combobox));
+	gtk_entry_set_icon_activatable (GTK_ENTRY (entry),
+			GTK_ENTRY_ICON_PRIMARY,
+			FALSE);
 	g_signal_connect (entry, "activate",
 			G_CALLBACK (status_preset_dialog_add_preset), self);
 	g_signal_connect (entry, "button-press-event",
