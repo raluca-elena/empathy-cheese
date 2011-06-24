@@ -524,9 +524,11 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			EMPATHY_TYPE_STATUS_PRESET_DIALOG,
 			EmpathyStatusPresetDialogPriv);
 	GtkBuilder *gui;
-	GtkWidget *toplevel_vbox, *remove_button, *entry;
+	GtkWidget *toplevel_vbox, *presets_sw, *remove_toolbar, *remove_button,
+		*entry;
 	GtkTreeSelection *selection;
 	char *filename;
+	GtkStyleContext *context;
 
 	gtk_window_set_title (GTK_WINDOW (self),
 			_("Edit Custom Messages"));
@@ -538,12 +540,20 @@ empathy_status_preset_dialog_init (EmpathyStatusPresetDialog *self)
 			"libempathy-gtk");
 	gui = empathy_builder_get_file (filename,
 			"toplevel-vbox", &toplevel_vbox,
+			"presets-sw", &presets_sw,
 			"presets-treeview", &priv->presets_treeview,
+			"remove-toolbar", &remove_toolbar,
 			"remove-button", &remove_button,
 			"add-combobox", &priv->add_combobox,
 			"add-button", &priv->add_button,
 			NULL);
 	g_free (filename);
+
+	/* join the remove toolbar to the treeview */
+	context = gtk_widget_get_style_context (presets_sw);
+	gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
+	context = gtk_widget_get_style_context (remove_toolbar);
+	gtk_style_context_set_junction_sides (context, GTK_JUNCTION_TOP);
 
 	selection = gtk_tree_view_get_selection (
 		GTK_TREE_VIEW (priv->presets_treeview));
