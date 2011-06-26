@@ -44,7 +44,6 @@ static guint signals[LAST_SIGNAL] = {0};
 
 enum {
   PROP_GST_ELEMENT = 1,
-  PROP_GST_BUS,
   PROP_SYNC,
   PROP_ASYNC,
 };
@@ -55,7 +54,6 @@ typedef struct _EmpathyVideoWidgetPriv EmpathyVideoWidgetPriv;
 struct _EmpathyVideoWidgetPriv
 {
   gboolean dispose_has_run;
-  GstBus *bus;
   GstElement *videosink, *sink;
   GstPad *sink_pad;
   gulong notify_allocation_id;
@@ -170,9 +168,6 @@ empathy_video_widget_set_property (GObject *object,
 
   switch (property_id)
     {
-      case PROP_GST_BUS:
-        priv->bus = g_value_dup_object (value);
-        break;
       case PROP_SYNC:
         boolval = g_value_get_boolean (value);
         gst_base_sink_set_sync (GST_BASE_SINK (priv->sink), boolval);
@@ -197,9 +192,6 @@ empathy_video_widget_get_property (GObject *object,
     {
       case PROP_GST_ELEMENT:
         g_value_set_object (value, priv->videosink);
-        break;
-      case PROP_GST_BUS:
-        g_value_set_object (value, priv->bus);
         break;
       case PROP_SYNC:
         boolval = gst_base_sink_get_sync (GST_BASE_SINK (priv->sink));
@@ -236,13 +228,6 @@ empathy_video_widget_class_init (
     G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_GST_ELEMENT, param_spec);
 
-  param_spec = g_param_spec_object ("gst-bus",
-    "gst-bus",
-    "The toplevel bus from the pipeline in which this bin will be added",
-    GST_TYPE_BUS,
-    G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, PROP_GST_BUS, param_spec);
-
   param_spec = g_param_spec_boolean ("sync",
     "sync",
     "Whether the underlying sink should be sync or not",
@@ -277,11 +262,6 @@ empathy_video_widget_dispose (GObject *object)
   }
 
 
-  if (priv->bus != NULL)
-    g_object_unref (priv->bus);
-
-  priv->bus = NULL;
-
   if (priv->videosink != NULL)
     g_object_unref (priv->videosink);
 
@@ -299,20 +279,9 @@ empathy_video_widget_dispose (GObject *object)
 }
 
 GtkWidget *
-empathy_video_widget_new_with_size (GstBus *bus, gint width, gint height)
+empathy_video_widget_new (void)
 {
-  /* ignoring width, height: will use the full extent of the container */
-  return empathy_video_widget_new (bus);
-}
-
-GtkWidget *
-empathy_video_widget_new (GstBus *bus)
-{
-  g_return_val_if_fail (bus != NULL, NULL);
-
-  return GTK_WIDGET (g_object_new (EMPATHY_TYPE_VIDEO_WIDGET,
-    "gst-bus", bus,
-    NULL));
+  return GTK_WIDGET (g_object_new (EMPATHY_TYPE_VIDEO_WIDGET, NULL));
 }
 
 GstPad *

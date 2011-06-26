@@ -612,13 +612,11 @@ static void
 create_video_output_widget (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstBus *bus;
 
   g_assert (priv->video_output == NULL);
   g_assert (priv->pipeline != NULL);
 
-  bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
-  priv->video_output = empathy_video_widget_new (bus);
+  priv->video_output = empathy_video_widget_new ();
 
   gtk_box_pack_start (GTK_BOX (priv->remote_user_output_hbox),
       priv->video_output, TRUE, TRUE, 0);
@@ -627,8 +625,6 @@ create_video_output_widget (EmpathyCallWindow *self)
       GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect (G_OBJECT (priv->video_output), "button-press-event",
       G_CALLBACK (empathy_call_window_video_button_press_cb), self);
-
-  g_object_unref (bus);
 }
 
 static void
@@ -700,20 +696,14 @@ static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstBus *bus;
 
   g_assert (priv->video_preview == NULL);
 
-  bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
-
-  priv->video_preview = empathy_video_widget_new_with_size (bus,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+  priv->video_preview = empathy_video_widget_new ();
   g_object_set (priv->video_preview, "sync", FALSE, "async", TRUE, NULL);
 
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->video_preview, TRUE, TRUE, 0);
-
-  g_object_unref (bus);
 }
 
 static void
