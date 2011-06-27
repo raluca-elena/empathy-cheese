@@ -97,6 +97,8 @@ empathy_chatrooms_window_show (GtkWindow *parent)
 	static EmpathyChatroomsWindow *window = NULL;
 	GtkBuilder                    *gui;
 	gchar                         *filename;
+	GtkWidget                     *sw, *toolbar;
+	GtkStyleContext               *context;
 
 	if (window) {
 		gtk_window_present (GTK_WINDOW (window->window));
@@ -110,11 +112,19 @@ empathy_chatrooms_window_show (GtkWindow *parent)
 				       "chatrooms_window", &window->window,
 				       "hbox_account", &window->hbox_account,
 				       "label_account", &window->label_account,
+				       "sw_room_list", &sw,
 				       "treeview", &window->treeview,
+				       "toolbar_remove", &toolbar,
 				       "button_remove", &window->button_remove,
 				       "button_close", &window->button_close,
 				       NULL);
 	g_free (filename);
+
+	/* join the remove toolbar to the treeview */
+	context = gtk_widget_get_style_context (sw);
+	gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
+	context = gtk_widget_get_style_context (toolbar);
+	gtk_style_context_set_junction_sides (context, GTK_JUNCTION_TOP);
 
 	empathy_builder_connect (gui, window,
 			      "chatrooms_window", "destroy", chatrooms_window_destroy_cb,
