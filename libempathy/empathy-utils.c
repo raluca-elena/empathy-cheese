@@ -715,8 +715,11 @@ empathy_contact_dup_from_folks_individual (FolksIndividual *individual)
           TpContact *tp_contact;
 
           tp_contact = tpf_persona_get_contact (persona);
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+          if (tp_contact != NULL)
+            {
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+            }
         }
       g_clear_object (&persona);
     }

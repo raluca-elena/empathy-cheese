@@ -127,6 +127,9 @@ individual_menu_add_personas (GtkMenuShell *menu,
         goto while_finish;
 
       tp_contact = tpf_persona_get_contact (persona);
+      if (tp_contact == NULL)
+        goto while_finish;
+
       contact = empathy_contact_dup_from_tp_contact (tp_contact);
 
       store = folks_persona_get_store (FOLKS_PERSONA (persona));
@@ -1038,17 +1041,20 @@ room_sub_menu_activate_cb (GtkWidget *item,
           if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
             {
               tp_contact = tpf_persona_get_contact (persona);
-              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              if (tp_contact != NULL)
+                {
+                  contact = empathy_contact_dup_from_tp_contact (tp_contact);
 
-              rooms = empathy_chatroom_manager_get_chatrooms (mgr,
-                  empathy_contact_get_account (contact));
+                  rooms = empathy_chatroom_manager_get_chatrooms (mgr,
+                      empathy_contact_get_account (contact));
 
-              if (g_list_find (rooms, data->chatroom) == NULL)
-                g_clear_object (&contact);
+                  if (g_list_find (rooms, data->chatroom) == NULL)
+                    g_clear_object (&contact);
 
-              /* if contact != NULL here, we've found our match */
+                  /* if contact != NULL here, we've found our match */
 
-              g_list_free (rooms);
+                  g_list_free (rooms);
+                }
             }
           g_clear_object (&persona);
         }
@@ -1143,13 +1149,17 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
           if (empathy_folks_persona_is_interesting (FOLKS_PERSONA (persona)))
             {
               tp_contact = tpf_persona_get_contact (persona);
-              contact_cur = empathy_contact_dup_from_tp_contact (tp_contact);
+              if (tp_contact != NULL)
+                {
+                  contact_cur = empathy_contact_dup_from_tp_contact (
+                      tp_contact);
 
-              rooms_cur = empathy_chatroom_manager_get_chatrooms (mgr,
-                  empathy_contact_get_account (contact_cur));
-              rooms = g_list_concat (rooms, rooms_cur);
+                  rooms_cur = empathy_chatroom_manager_get_chatrooms (mgr,
+                      empathy_contact_get_account (contact_cur));
+                  rooms = g_list_concat (rooms, rooms_cur);
 
-              g_object_unref (contact_cur);
+                  g_object_unref (contact_cur);
+                }
             }
           g_clear_object (&persona);
         }

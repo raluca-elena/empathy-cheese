@@ -2032,6 +2032,9 @@ empathy_contact_dup_best_for_action (FolksIndividual *individual,
         goto while_finish;
 
       tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+      if (tp_contact == NULL)
+        goto while_finish;
+
       contact = empathy_contact_dup_from_tp_contact (tp_contact);
       empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 

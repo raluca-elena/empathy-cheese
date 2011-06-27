@@ -574,16 +574,20 @@ location_update (EmpathyIndividualWidget *self)
            * have to keep it alive for the duration of the function, since we're
            * accessing its private data. */
           tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, persona);
-
-          /* Try and get a location */
-          location = empathy_contact_get_location (contact);
-          /* if location isn't fully valid, treat the contact as insufficient */
-          if (location != NULL && g_hash_table_size (location) <= 0)
+          if (tp_contact != NULL)
             {
-              location = NULL;
-              g_clear_object (&contact);
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, persona);
+
+              /* Try and get a location */
+              location = empathy_contact_get_location (contact);
+              /* if location isn't fully valid, treat the contact as
+               * insufficient */
+              if (location != NULL && g_hash_table_size (location) <= 0)
+                {
+                  location = NULL;
+                  g_clear_object (&contact);
+                }
             }
         }
       g_clear_object (&persona);
@@ -747,6 +751,9 @@ location_update (EmpathyIndividualWidget *self)
 
               /* Get the contact */
               tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+              if (tp_contact == NULL)
+                goto while_finish;
+
               contact = empathy_contact_dup_from_tp_contact (tp_contact);
               empathy_contact_set_persona (contact, persona);
 
@@ -856,6 +863,9 @@ persona_dup_avatar (FolksPersona *persona)
     return NULL;
 
   tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+  if (tp_contact == NULL)
+    return NULL;
+
   contact = empathy_contact_dup_from_tp_contact (tp_contact);
   empathy_contact_set_persona (contact, persona);
 
@@ -1063,16 +1073,19 @@ individual_is_user (FolksIndividual *individual)
       if (TPF_IS_PERSONA (persona))
         {
           TpContact *tp_contact;
-          EmpathyContact *contact;
+          EmpathyContact *contact = NULL;
 
           /* Get the contact */
           tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, persona);
+          if (tp_contact != NULL)
+            {
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, persona);
 
-          /* Determine if the contact is the user */
-          if (empathy_contact_is_user (contact))
-            retval = g_object_ref (empathy_contact_get_account (contact));
+              /* Determine if the contact is the user */
+              if (empathy_contact_is_user (contact))
+                retval = g_object_ref (empathy_contact_get_account (contact));
+            }
 
           g_object_unref (contact);
         }
@@ -1409,6 +1422,9 @@ update_persona (EmpathyIndividualWidget *self, FolksPersona *persona)
   g_assert (table != NULL);
 
   tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+  if (tp_contact == NULL)
+    return;
+
   contact = empathy_contact_dup_from_tp_contact (tp_contact);
   empathy_contact_set_persona (contact, persona);
 

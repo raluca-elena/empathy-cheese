@@ -174,6 +174,7 @@ query_tooltip_cb (EmpathyPersonaView *self,
 {
   EmpathyPersonaViewPriv *priv = GET_PRIV (self);
   FolksPersona *persona;
+  TpContact *tp_contact;
   EmpathyContact *contact;
   GtkTreeModel *model;
   GtkTreeIter iter;
@@ -201,8 +202,14 @@ query_tooltip_cb (EmpathyPersonaView *self,
   if (persona == NULL)
     goto OUT;
 
-  contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-      TPF_PERSONA (persona)));
+  tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+  if (tp_contact == NULL)
+    {
+      g_clear_object (&persona);
+      goto OUT;
+    }
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact);
 
   if (priv->tooltip_widget == NULL)
     {

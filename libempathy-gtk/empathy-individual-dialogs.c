@@ -222,6 +222,9 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
           goto while_finish;
 
       contact = tpf_persona_get_contact (persona);
+      if (contact == NULL)
+        goto while_finish;
+
       flags = empathy_contact_manager_get_flags_for_connection (
           contact_manager, tp_contact_get_connection (contact));
 

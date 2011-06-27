@@ -133,21 +133,25 @@ individual_can_audio_video_call (FolksIndividual *individual,
     {
       FolksPersona *persona = gee_iterator_get (iter);
       TpContact *tp_contact;
-      EmpathyContact *contact;
 
       if (!empathy_folks_persona_is_interesting (persona))
         goto while_finish;
 
       tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
-      contact = empathy_contact_dup_from_tp_contact (tp_contact);
-      empathy_contact_set_persona (contact, persona);
+      if (tp_contact != NULL)
+        {
+          EmpathyContact *contact;
 
-      can_audio = can_audio || empathy_contact_get_capabilities (contact) &
-          EMPATHY_CAPABILITIES_AUDIO;
-      can_video = can_video || empathy_contact_get_capabilities (contact) &
-          EMPATHY_CAPABILITIES_VIDEO;
+          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+          empathy_contact_set_persona (contact, persona);
 
-      g_object_unref (contact);
+          can_audio = can_audio || empathy_contact_get_capabilities (contact) &
+              EMPATHY_CAPABILITIES_AUDIO;
+          can_video = can_video || empathy_contact_get_capabilities (contact) &
+              EMPATHY_CAPABILITIES_VIDEO;
+
+          g_object_unref (contact);
+        }
 while_finish:
       g_clear_object (&persona);
 
@@ -190,7 +194,8 @@ individual_get_client_types (FolksIndividual *individual)
           presence_type = folks_presence_details_get_presence_type (presence);
 
           tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
-          types = tp_contact_get_client_types (tp_contact);
+          if (tp_contact != NULL)
+            types = tp_contact_get_client_types (tp_contact);
         }
 
 while_finish:
@@ -900,14 +905,17 @@ individual_personas_changed_cb (FolksIndividual *individual,
       if (TPF_IS_PERSONA (persona))
         {
           tp_contact = tpf_persona_get_contact (persona);
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+          if (tp_contact != NULL)
+            {
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 
-          g_object_set_data (G_OBJECT (contact), "individual", NULL);
-          g_signal_handlers_disconnect_by_func (contact,
-              (GCallback) individual_store_contact_updated_cb, self);
+              g_object_set_data (G_OBJECT (contact), "individual", NULL);
+              g_signal_handlers_disconnect_by_func (contact,
+                  (GCallback) individual_store_contact_updated_cb, self);
 
-          g_object_unref (contact);
+              g_object_unref (contact);
+            }
         }
 
       g_clear_object (&persona);
@@ -924,16 +932,19 @@ individual_personas_changed_cb (FolksIndividual *individual,
       if (TPF_IS_PERSONA (persona))
         {
           tp_contact = tpf_persona_get_contact (persona);
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+          if (tp_contact != NULL)
+            {
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
 
-          g_object_set_data (G_OBJECT (contact), "individual", individual);
-          g_signal_connect (contact, "notify::capabilities",
-              (GCallback) individual_store_contact_updated_cb, self);
-          g_signal_connect (contact, "notify::client-types",
-              (GCallback) individual_store_contact_updated_cb, self);
+              g_object_set_data (G_OBJECT (contact), "individual", individual);
+              g_signal_connect (contact, "notify::capabilities",
+                  (GCallback) individual_store_contact_updated_cb, self);
+              g_signal_connect (contact, "notify::client-types",
+                  (GCallback) individual_store_contact_updated_cb, self);
 
-          g_object_unref (contact);
+              g_object_unref (contact);
+            }
         }
 
       g_clear_object (&persona);

@@ -531,14 +531,21 @@ empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
 
       if (TPF_IS_PERSONA (persona))
         {
-          conn = tp_contact_get_connection (tpf_persona_get_contact (persona));
-          manager = empathy_contact_manager_dup_singleton ();
+          TpContact *tp_contact;
 
-          if (empathy_contact_manager_get_flags_for_connection (manager, conn) &
-              EMPATHY_CONTACT_LIST_CAN_BLOCK)
-            retval = TRUE;
+          tp_contact = tpf_persona_get_contact (persona);
+          if (tp_contact != NULL)
+            {
+              conn = tp_contact_get_connection (tp_contact);
+              manager = empathy_contact_manager_dup_singleton ();
 
-          g_object_unref (manager);
+              if (empathy_contact_manager_get_flags_for_connection (
+                    manager, conn) &
+                  EMPATHY_CONTACT_LIST_CAN_BLOCK)
+                retval = TRUE;
+
+              g_object_unref (manager);
+            }
         }
       g_clear_object (&persona);
     }
@@ -569,20 +576,25 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
 
       if (TPF_IS_PERSONA (persona))
         {
-          contact = empathy_contact_dup_from_tp_contact (
-              tpf_persona_get_contact (persona));
-          empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
-          manager = empathy_contact_manager_dup_singleton ();
-          flags = empathy_contact_manager_get_flags_for_connection (manager,
-              empathy_contact_get_connection (contact));
+          TpContact *tp_contact;
 
-          if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
-            empathy_contact_list_set_blocked (
-                EMPATHY_CONTACT_LIST (manager),
-                contact, blocked, abusive);
+          tp_contact = tpf_persona_get_contact (persona);
+          if (tp_contact != NULL)
+            {
+              contact = empathy_contact_dup_from_tp_contact (tp_contact);
+              empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
+              manager = empathy_contact_manager_dup_singleton ();
+              flags = empathy_contact_manager_get_flags_for_connection (manager,
+                  empathy_contact_get_connection (contact));
 
-          g_object_unref (manager);
-          g_object_unref (contact);
+              if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+                empathy_contact_list_set_blocked (
+                    EMPATHY_CONTACT_LIST (manager),
+                    contact, blocked, abusive);
+
+              g_object_unref (manager);
+              g_object_unref (contact);
+            }
         }
       g_clear_object (&persona);
     }

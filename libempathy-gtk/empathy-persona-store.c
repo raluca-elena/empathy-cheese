@@ -278,6 +278,7 @@ add_persona (EmpathyPersonaStore *self,
   GtkTreeIter iter;
   GtkTreePath *path;
   FolksPersonaStore *store;
+  TpContact *tp_contact;
   EmpathyContact *contact;
   const gchar *alias;
 
@@ -290,8 +291,11 @@ add_persona (EmpathyPersonaStore *self,
   if (EMP_STR_EMPTY (alias))
     return;
 
-  contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-      TPF_PERSONA (persona)));
+  tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+  if (tp_contact == NULL)
+    return;
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact);
   store = folks_persona_get_store (persona);
 
   gtk_list_store_insert_with_values (GTK_LIST_STORE (self), &iter, 0,
@@ -348,14 +352,18 @@ get_persona_status_icon (EmpathyPersonaStore *self,
     FolksPersona *persona)
 {
   EmpathyPersonaStorePriv *priv = GET_PRIV (self);
+  TpContact *tp_contact;
   EmpathyContact *contact;
   const gchar *protocol_name = NULL;
   gchar *icon_name = NULL;
   GdkPixbuf *pixbuf_status = NULL;
   const gchar *status_icon_name = NULL;
 
-  contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-      TPF_PERSONA (persona)));
+  tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+  if (tp_contact == NULL)
+    return NULL;
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact);
 
   status_icon_name = empathy_icon_name_for_contact (contact);
   if (status_icon_name == NULL)
@@ -422,9 +430,10 @@ update_persona (EmpathyPersonaStore *self,
   else
     {
       FolksPersonaStore *store;
+      TpContact *tp_contact;
       EmpathyContact *contact;
       GtkTreeIter iter;
-      GdkPixbuf *pixbuf_avatar;
+      GdkPixbuf *pixbuf_avatar = NULL;
       GdkPixbuf *pixbuf_status;
       gboolean now_online = FALSE;
       gboolean was_online = TRUE;
@@ -464,39 +473,43 @@ update_persona (EmpathyPersonaStore *self,
         }
 
       /* We still need to use EmpathyContact for the capabilities stuff */
-      contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-          TPF_PERSONA (persona)));
-      store = folks_persona_get_store (persona);
+      tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+      if (tp_contact != NULL)
+        {
+          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+          store = folks_persona_get_store (persona);
 
-      pixbuf_avatar = empathy_pixbuf_avatar_from_contact_scaled (contact,
-          32, 32);
-      pixbuf_status = get_persona_status_icon (self, persona);
+          pixbuf_avatar = empathy_pixbuf_avatar_from_contact_scaled (contact,
+              32, 32);
+          pixbuf_status = get_persona_status_icon (self, persona);
 
-      gtk_list_store_set (GTK_LIST_STORE (self), &iter,
-          EMPATHY_PERSONA_STORE_COL_ICON_STATUS, pixbuf_status,
-          EMPATHY_PERSONA_STORE_COL_PIXBUF_AVATAR, pixbuf_avatar,
-          EMPATHY_PERSONA_STORE_COL_PIXBUF_AVATAR_VISIBLE, priv->show_avatars,
-          EMPATHY_PERSONA_STORE_COL_NAME, alias,
-          EMPATHY_PERSONA_STORE_COL_ACCOUNT_NAME,
-              folks_persona_store_get_display_name (store),
-          EMPATHY_PERSONA_STORE_COL_DISPLAY_ID,
-              folks_persona_get_display_id (persona),
-          EMPATHY_PERSONA_STORE_COL_PRESENCE_TYPE,
-              folks_presence_details_get_presence_type (
-                  FOLKS_PRESENCE_DETAILS (persona)),
-          EMPATHY_PERSONA_STORE_COL_STATUS,
-              folks_presence_details_get_presence_message (
-                  FOLKS_PRESENCE_DETAILS (persona)),
-          EMPATHY_PERSONA_STORE_COL_IS_ONLINE, now_online,
-          EMPATHY_PERSONA_STORE_COL_CAN_AUDIO_CALL,
-              empathy_contact_get_capabilities (contact) &
-                EMPATHY_CAPABILITIES_AUDIO,
-          EMPATHY_PERSONA_STORE_COL_CAN_VIDEO_CALL,
-              empathy_contact_get_capabilities (contact) &
-                EMPATHY_CAPABILITIES_VIDEO,
-          -1);
+          gtk_list_store_set (GTK_LIST_STORE (self), &iter,
+              EMPATHY_PERSONA_STORE_COL_ICON_STATUS, pixbuf_status,
+              EMPATHY_PERSONA_STORE_COL_PIXBUF_AVATAR, pixbuf_avatar,
+              EMPATHY_PERSONA_STORE_COL_PIXBUF_AVATAR_VISIBLE,
+                  priv->show_avatars,
+              EMPATHY_PERSONA_STORE_COL_NAME, alias,
+              EMPATHY_PERSONA_STORE_COL_ACCOUNT_NAME,
+                  folks_persona_store_get_display_name (store),
+              EMPATHY_PERSONA_STORE_COL_DISPLAY_ID,
+                  folks_persona_get_display_id (persona),
+              EMPATHY_PERSONA_STORE_COL_PRESENCE_TYPE,
+                  folks_presence_details_get_presence_type (
+                      FOLKS_PRESENCE_DETAILS (persona)),
+              EMPATHY_PERSONA_STORE_COL_STATUS,
+                  folks_presence_details_get_presence_message (
+                      FOLKS_PRESENCE_DETAILS (persona)),
+              EMPATHY_PERSONA_STORE_COL_IS_ONLINE, now_online,
+              EMPATHY_PERSONA_STORE_COL_CAN_AUDIO_CALL,
+                  empathy_contact_get_capabilities (contact) &
+                    EMPATHY_CAPABILITIES_AUDIO,
+              EMPATHY_PERSONA_STORE_COL_CAN_VIDEO_CALL,
+                  empathy_contact_get_capabilities (contact) &
+                    EMPATHY_CAPABILITIES_VIDEO,
+              -1);
 
-      g_object_unref (contact);
+          g_object_unref (contact);
+        }
 
       if (pixbuf_avatar)
         g_object_unref (pixbuf_avatar);
@@ -566,6 +579,7 @@ sort_personas (FolksPersona *persona_a,
 {
   EmpathyContact *contact;
   TpAccount *account_a, *account_b;
+  TpContact *tp_contact_a, *tp_contact_b;
   gint ret_val;
 
   g_return_val_if_fail (persona_a != NULL || persona_b != NULL, 0);
@@ -585,13 +599,21 @@ sort_personas (FolksPersona *persona_a,
   if (ret_val != 0)
     goto out;
 
-  contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-      TPF_PERSONA (persona_a)));
+  tp_contact_a = tpf_persona_get_contact (TPF_PERSONA (persona_a));
+  tp_contact_b = tpf_persona_get_contact (TPF_PERSONA (persona_b));
+
+  /* handle the case that one or more of these personas are from the cache */
+  if (tp_contact_a == NULL || tp_contact_b == NULL)
+    {
+      ret_val = (tp_contact_a != NULL ? 1 : -1);
+      goto out;
+    }
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact_a);
   account_a = empathy_contact_get_account (contact);
   g_object_unref (contact);
 
-  contact = empathy_contact_dup_from_tp_contact (tpf_persona_get_contact (
-      TPF_PERSONA (persona_b)));
+  contact = empathy_contact_dup_from_tp_contact (tp_contact_b);
   account_b = empathy_contact_get_account (contact);
   g_object_unref (contact);
 
