@@ -692,7 +692,8 @@ individual_view_drag_motion (GtkWidget *widget,
           EmpathyContact *contact = NULL;
 
           contact = empathy_contact_dup_from_folks_individual (individual);
-          caps = empathy_contact_get_capabilities (contact);
+          if (contact != NULL)
+            caps = empathy_contact_get_capabilities (contact);
 
           tp_clear_object (&contact);
         }

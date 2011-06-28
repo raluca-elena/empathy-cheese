@@ -1431,25 +1431,28 @@ individual_store_contact_sort (FolksIndividual *individual_a,
 
   contact_a = empathy_contact_dup_from_folks_individual (individual_a);
   contact_b = empathy_contact_dup_from_folks_individual (individual_b);
-  account_a = empathy_contact_get_account (contact_a);
-  account_b = empathy_contact_get_account (contact_b);
+  if (contact_a != NULL && contact_b != NULL)
+    {
+      account_a = empathy_contact_get_account (contact_a);
+      account_b = empathy_contact_get_account (contact_b);
 
-  g_assert (account_a != NULL);
-  g_assert (account_b != NULL);
+      g_assert (account_a != NULL);
+      g_assert (account_b != NULL);
 
-  /* protocol */
-  ret_val = g_strcmp0 (tp_account_get_protocol (account_a),
-      tp_account_get_protocol (account_b));
+      /* protocol */
+      ret_val = g_strcmp0 (tp_account_get_protocol (account_a),
+          tp_account_get_protocol (account_b));
 
-  if (ret_val != 0)
-    goto out;
+      if (ret_val != 0)
+        goto out;
 
-  /* account ID */
-  ret_val = g_strcmp0 (tp_proxy_get_object_path (account_a),
-      tp_proxy_get_object_path (account_b));
+      /* account ID */
+      ret_val = g_strcmp0 (tp_proxy_get_object_path (account_a),
+          tp_proxy_get_object_path (account_b));
 
-  if (ret_val != 0)
-    goto out;
+      if (ret_val != 0)
+        goto out;
+    }
 
   /* identifier */
   ret_val = g_utf8_collate (folks_individual_get_id (individual_a),
@@ -2003,8 +2006,12 @@ individual_store_get_individual_status_icon_with_icon_name (
   if (show_protocols_here)
     {
       contact = empathy_contact_dup_from_folks_individual (individual);
-      protocol_name = empathy_protocol_name_for_contact (contact);
-      icon_name = g_strdup_printf ("%s-%s", status_icon_name, protocol_name);
+      if (contact != NULL)
+        {
+          protocol_name = empathy_protocol_name_for_contact (contact);
+          icon_name = g_strdup_printf ("%s-%s", status_icon_name,
+              protocol_name);
+        }
     }
   else
     {
