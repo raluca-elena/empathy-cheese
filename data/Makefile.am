@@ -29,7 +29,8 @@ servicefile_in_files = \
 	org.freedesktop.Telepathy.Client.Empathy.Chat.service.in \
 	org.freedesktop.Telepathy.Client.Empathy.AudioVideo.service.in \
 	org.freedesktop.Telepathy.Client.Empathy.Auth.service.in \
-	org.freedesktop.Telepathy.Client.Empathy.Call.service.in
+	org.freedesktop.Telepathy.Client.Empathy.Call.service.in \
+	org.freedesktop.Telepathy.Client.Empathy.FileTransfer.service.in
 
 servicefile_DATA = $(servicefile_in_files:.service.in=.service)
 
@@ -45,12 +46,16 @@ org.freedesktop.Telepathy.Client.Empathy.Auth.service: org.freedesktop.Telepathy
 org.freedesktop.Telepathy.Client.Empathy.Call.service: org.freedesktop.Telepathy.Client.Empathy.Call.service.in
 	$(AM_V_GEN)sed -e "s|[@]libexecdir[@]|$(libexecdir)|" $< > $@
 
+org.freedesktop.Telepathy.Client.Empathy.FileTransfer.service: org.freedesktop.Telepathy.Client.Empathy.FileTransfer.service.in
+	$(AM_V_GEN)sed -e "s|[@]bindir[@]|$(bindir)|" $< > $@
+
 clientfiledir = $(datarootdir)/telepathy/clients
 clientfile_DATA = \
 	Empathy.Chat.client \
 	Empathy.AudioVideo.client \
 	Empathy.Auth.client \
-	Empathy.Call.client
+	Empathy.Call.client \
+	Empathy.FileTransfer.client
 
 htmldir = $(datadir)/empathy
 html_DATA = Template.html
