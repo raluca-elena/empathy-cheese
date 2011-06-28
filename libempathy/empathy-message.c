@@ -784,12 +784,17 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	EmpathyMessage *message;
 	gchar *body;
 	TpChannelTextMessageFlags flags;
+	gint64 timestamp;
 	gint64 original_timestamp;
 	const GHashTable *part = tp_message_peek (tp_msg, 0);
 
 	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
 
 	body = tp_message_to_text (tp_msg, &flags);
+
+	timestamp = tp_message_get_sent_timestamp (tp_msg);
+	if (timestamp == 0)
+		timestamp = tp_message_get_received_timestamp (tp_msg);
 
 	original_timestamp = tp_asv_get_int64 (part,
 		"original-message-received", NULL);
@@ -799,7 +804,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"token", tp_message_get_token (tp_msg),
 		"supersedes", tp_message_get_supersedes (tp_msg),
 		"type", tp_message_get_message_type (tp_msg),
-		"timestamp", tp_message_get_received_timestamp (tp_msg),
+		"timestamp", timestamp,
 		"original-timestamp", original_timestamp,
 		"flags", flags,
 		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
