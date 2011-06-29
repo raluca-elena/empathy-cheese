@@ -25,7 +25,6 @@ LDADD =								\
 	$(NULL)
 
 TEST_PROGS =                                     \
-     empathy-utils-test                          \
      empathy-irc-server-test                     \
      empathy-irc-network-test                    \
      empathy-irc-network-manager-test            \
@@ -34,9 +33,6 @@ TEST_PROGS =                                     \
      empathy-parser-test                         \
      empathy-live-search-test                    \
      empathy-tls-test
-
-empathy_utils_test_SOURCES = empathy-utils-test.c \
-     test-helper.c test-helper.h
 
 empathy_tls_test_SOURCES = empathy-tls-test.c \
      test-helper.c test-helper.h

@@ -45,16 +45,6 @@ G_BEGIN_DECLS
 
 void empathy_init (void);
 
-/* Strings */
-gchar * empathy_substring (const gchar *str,
-    gint start,
-    gint end);
-gint empathy_strcasecmp (const gchar *s1,
-    const gchar *s2);
-gint empathy_strncasecmp (const gchar *s1,
-    const gchar *s2,
-    gsize n);
-
 /* XML */
 gboolean empathy_xml_validate (xmlDoc *doc,
     const gchar *dtd_filename);

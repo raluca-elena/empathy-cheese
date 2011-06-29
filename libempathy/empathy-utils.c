@@ -105,39 +105,6 @@ empathy_init (void)
   initialized = TRUE;
 }
 
-gchar *
-empathy_substring (const gchar *str,
-    gint start,
-    gint end)
-{
-  return g_strndup (str + start, end - start);
-}
-
-gint
-empathy_strcasecmp (const gchar *s1,
-    const gchar *s2)
-{
-  return empathy_strncasecmp (s1, s2, -1);
-}
-
-gint
-empathy_strncasecmp (const gchar *s1,
-    const gchar *s2,
-    gsize n)
-{
-  gchar *u1, *u2;
-  gint ret_val;
-
-  u1 = g_utf8_casefold (s1, n);
-  u2 = g_utf8_casefold (s2, n);
-
-  ret_val = g_utf8_collate (u1, u2);
-  g_free (u1);
-  g_free (u2);
-
-  return ret_val;
-}
-
 gboolean
 empathy_xml_validate (xmlDoc      *doc,
     const gchar *dtd_filename)
