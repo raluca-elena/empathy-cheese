@@ -55,7 +55,7 @@ struct _McpAccountManagerGoaPrivate
   gboolean ready;
 
   GoaClient *client;
-  GHashTable *accounts; /* string -> GoaAccount */
+  GHashTable *accounts; /* alloc'ed string -> ref'ed GoaAccount */
 };
 
 
@@ -193,6 +193,7 @@ _new_account (McpAccountManagerGoa *self,
     g_signal_emit_by_name (self, "created", account_name);
 }
 
+
 DECLARE_GASYNC_CALLBACK (_goa_client_new_cb);
 
 static void
@@ -209,6 +210,7 @@ mcp_account_manager_goa_init (McpAccountManagerGoa *self)
   goa_client_new (NULL, _goa_client_new_cb, self);
 }
 
+
 static void
 _account_added_cb (GoaClient *client,
     GoaObject *object,
@@ -218,6 +220,7 @@ _account_added_cb (GoaClient *client,
 
       _new_account (self, account);
 }
+
 
 static void
 _account_removed_cb (GoaClient *client,
