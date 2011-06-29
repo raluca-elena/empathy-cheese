@@ -85,6 +85,9 @@ typedef struct
 
   gchar *last_find;
 
+  /* List of selected GDates, free with g_list_free_full (l, g_date_free) */
+  GList *current_dates;
+
   TplActionChain *chain;
   TplLogManager *log_manager;
 
@@ -490,6 +493,10 @@ log_window_destroy_cb (GtkWidget *widget,
   g_free (window->last_find);
   _tpl_action_chain_free (window->chain);
   g_object_unref (window->log_manager);
+
+  if (window->current_dates != NULL)
+    g_list_free_full (window->current_dates, (GDestroyNotify) g_date_free);
+
   tp_clear_object (&window->selected_account);
   tp_clear_object (&window->selected_contact);
   g_free (window->selected_chat_id);
@@ -2738,20 +2745,54 @@ log_manager_got_dates_cb (GObject *manager,
 }
 
 static void
-select_first_date (TplActionChain *chain, gpointer user_data)
+select_date (TplActionChain *chain, gpointer user_data)
 {
   GtkTreeView *view;
   GtkTreeModel *model;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
+  gboolean next;
+  gboolean selected = FALSE;
 
   view = GTK_TREE_VIEW (log_window->treeview_when);
   model = gtk_tree_view_get_model (view);
   selection = gtk_tree_view_get_selection (view);
 
-  /* Show messages of the most recent date */
-  if (gtk_tree_model_iter_nth_child (model, &iter, NULL, 2))
-    gtk_tree_selection_select_iter (selection, &iter);
+  if (log_window->current_dates != NULL)
+    {
+      for (next = gtk_tree_model_get_iter_first (model, &iter);
+           next;
+           next = gtk_tree_model_iter_next (model, &iter))
+        {
+          GDate *date;
+
+          gtk_tree_model_get (model, &iter,
+              COL_WHEN_DATE, &date,
+              -1);
+
+          if (g_list_find_custom (log_window->current_dates, date,
+                  (GCompareFunc) g_date_compare) != NULL)
+            {
+              GtkTreePath *path;
+
+              gtk_tree_selection_select_iter (selection, &iter);
+              path = gtk_tree_model_get_path (model, &iter);
+              gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
+              selected = TRUE;
+
+              gtk_tree_path_free (path);
+            }
+
+          g_date_free (date);
+        }
+    }
+
+  if (!selected)
+    {
+      /* Show messages of the most recent date */
+      if (gtk_tree_model_iter_nth_child (model, &iter, NULL, 2))
+        gtk_tree_selection_select_iter (selection, &iter);
+    }
 
   _tpl_action_chain_continue (log_window->chain);
 }
@@ -2819,6 +2860,38 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
     {
       GList *acc, *targ;
 
+      if (window->current_dates != NULL)
+        {
+          g_list_free_full (window->current_dates,
+              (GDestroyNotify) g_date_free);
+          window->current_dates = NULL;
+        }
+
+      if (gtk_tree_selection_count_selected_rows (selection) > 0)
+        {
+          GList *paths, *l;
+          GtkTreeIter iter;
+
+          paths = gtk_tree_selection_get_selected_rows (selection, NULL);
+
+          for (l = paths; l != NULL; l = l->next)
+            {
+              GtkTreePath *path = l->data;
+              GDate *date;
+
+              gtk_tree_model_get_iter (model, &iter, path);
+              gtk_tree_model_get (model, &iter,
+                  COL_WHEN_DATE, &date,
+                  -1);
+
+              /* The list takes ownership of the date. */
+              window->current_dates =
+                  g_list_prepend (window->current_dates, date);
+            }
+
+          g_list_free_full (paths, (GDestroyNotify) gtk_tree_path_free);
+        }
+
       g_signal_handlers_block_by_func (selection,
           log_window_when_changed_cb,
           window);
@@ -2841,7 +2914,7 @@ log_window_chats_get_messages (EmpathyLogWindow *window,
 
           _tpl_action_chain_append (window->chain, get_dates_for_entity, ctx);
         }
-      _tpl_action_chain_append (window->chain, select_first_date, NULL);
+      _tpl_action_chain_append (window->chain, select_date, NULL);
       _tpl_action_chain_start (window->chain);
     }
   else
