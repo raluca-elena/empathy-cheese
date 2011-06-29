@@ -136,6 +136,12 @@ get_tp_parameters (GoaAccount *account)
 
       PARAM ("param-account", goa_account_get_identity (account));
       PARAM ("param-server", "talk.google.com");
+      PARAM ("param-fallback-servers",
+          "talkx.l.google.com;"
+          "talkx.l.google.com:443,oldssl;"
+          "talkx.l.google.com:80");
+      PARAM ("param-extra-certificate-identities", "talk.google.com");
+      PARAM ("param-require-encryption", "true");
     }
   else
     {
