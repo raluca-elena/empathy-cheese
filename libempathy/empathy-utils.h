@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2003-2007 Imendio AB
  * Copyright (C) 2007-2011 Collabora Ltd.
@@ -44,43 +43,45 @@
 
 G_BEGIN_DECLS
 
-void         empathy_init                           (void);
+void empathy_init (void);
+
 /* Strings */
-gchar *      empathy_substring                      (const gchar     *str,
-						    gint             start,
-						    gint             end);
-gint         empathy_strcasecmp                     (const gchar     *s1,
-						    const gchar     *s2);
-gint         empathy_strncasecmp                    (const gchar     *s1,
-						    const gchar     *s2,
-						    gsize            n);
+gchar * empathy_substring (const gchar *str,
+    gint start,
+    gint end);
+gint empathy_strcasecmp (const gchar *s1,
+    const gchar *s2);
+gint empathy_strncasecmp (const gchar *s1,
+    const gchar *s2,
+    gsize n);
 
 /* XML */
-gboolean     empathy_xml_validate                   (xmlDoc          *doc,
-						    const gchar     *dtd_filename);
-xmlNodePtr   empathy_xml_node_get_child             (xmlNodePtr       node,
-						    const gchar     *child_name);
-xmlChar *    empathy_xml_node_get_child_content     (xmlNodePtr       node,
-						    const gchar     *child_name);
-xmlNodePtr   empathy_xml_node_find_child_prop_value (xmlNodePtr       node,
-						    const gchar     *prop_name,
-						    const gchar     *prop_value);
+gboolean empathy_xml_validate (xmlDoc *doc,
+    const gchar *dtd_filename);
+xmlNodePtr empathy_xml_node_get_child (xmlNodePtr node,
+    const gchar *child_name);
+xmlChar * empathy_xml_node_get_child_content (xmlNodePtr node,
+    const gchar *child_name);
+xmlNodePtr empathy_xml_node_find_child_prop_value (xmlNodePtr node,
+    const gchar *prop_name,
+    const gchar *prop_value);
 
 /* Others */
-const gchar * empathy_presence_get_default_message  (TpConnectionPresenceType presence);
-const gchar * empathy_presence_to_str               (TpConnectionPresenceType presence);
-TpConnectionPresenceType empathy_presence_from_str  (const gchar     *str);
-gchar *       empathy_file_lookup                   (const gchar     *filename,
-						     const gchar     *subdir);
-gboolean     empathy_proxy_equal                    (gconstpointer    a,
-						     gconstpointer    b);
-guint        empathy_proxy_hash                     (gconstpointer    key);
-gboolean     empathy_check_available_state          (void);
-gint        empathy_uint_compare                    (gconstpointer a,
-						     gconstpointer b);
+const gchar * empathy_presence_get_default_message (
+    TpConnectionPresenceType presence);
+const gchar * empathy_presence_to_str (TpConnectionPresenceType presence);
+TpConnectionPresenceType empathy_presence_from_str (const gchar *str);
+gchar * empathy_file_lookup (const gchar *filename,
+    const gchar *subdir);
+gboolean empathy_proxy_equal (gconstpointer a,
+    gconstpointer    b);
+guint empathy_proxy_hash (gconstpointer key);
+gboolean empathy_check_available_state (void);
+gint empathy_uint_compare (gconstpointer a,
+    gconstpointer b);
 
 const gchar * empathy_account_get_error_message (TpAccount *account,
-                                                 gboolean *user_requested);
+    gboolean *user_requested);
 
 gchar *empathy_protocol_icon_name (const gchar *protocol);
 const gchar *empathy_protocol_name_to_display_name (const gchar *proto_name);
@@ -96,11 +97,16 @@ gboolean empathy_account_manager_get_accounts_connected (gboolean *connecting);
 void empathy_connect_new_account (TpAccount *account,
     TpAccountManager *account_manager);
 
-TpConnectionPresenceType empathy_folks_presence_type_to_tp (FolksPresenceType type);
-gboolean empathy_folks_individual_contains_contact (FolksIndividual *individual);
-EmpathyContact * empathy_contact_dup_from_folks_individual (FolksIndividual *individual);
-TpChannelGroupChangeReason tp_channel_group_change_reason_from_folks_groups_change_reason (FolksGroupDetailsChangeReason reason);
-TpfPersonaStore * empathy_dup_persona_store_for_connection (TpConnection *connection);
+TpConnectionPresenceType empathy_folks_presence_type_to_tp (
+    FolksPresenceType type);
+gboolean empathy_folks_individual_contains_contact (
+    FolksIndividual *individual);
+EmpathyContact * empathy_contact_dup_from_folks_individual (
+    FolksIndividual *individual);
+TpChannelGroupChangeReason tp_channel_group_change_reason_from_folks_groups_change_reason (
+    FolksGroupDetailsChangeReason reason);
+TpfPersonaStore * empathy_dup_persona_store_for_connection (
+    TpConnection *connection);
 gboolean empathy_connection_can_add_personas (TpConnection *connection);
 gboolean empathy_connection_can_alias_personas (TpConnection *connection);
 gboolean empathy_connection_can_group_personas (TpConnection *connection);
@@ -108,7 +114,9 @@ gboolean empathy_folks_persona_is_interesting (FolksPersona *persona);
 
 gchar * empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert);
 
-gchar *empathy_format_currency (gint amount, guint scale, const gchar *currency);
+gchar *empathy_format_currency (gint amount,
+    guint scale,
+    const gchar *currency);
 
 /* Copied from wocky/wocky-utils.h */
 

@@ -60,448 +60,446 @@
 
 /* Translation between presence types and string */
 static struct {
-	const gchar *name;
-	TpConnectionPresenceType type;
+  const gchar *name;
+  TpConnectionPresenceType type;
 } presence_types[] = {
-	{ "available", TP_CONNECTION_PRESENCE_TYPE_AVAILABLE },
-	{ "busy",      TP_CONNECTION_PRESENCE_TYPE_BUSY },
-	{ "away",      TP_CONNECTION_PRESENCE_TYPE_AWAY },
-	{ "ext_away",  TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY },
-	{ "hidden",    TP_CONNECTION_PRESENCE_TYPE_HIDDEN },
-	{ "offline",   TP_CONNECTION_PRESENCE_TYPE_OFFLINE },
-	{ "unset",     TP_CONNECTION_PRESENCE_TYPE_UNSET },
-	{ "unknown",   TP_CONNECTION_PRESENCE_TYPE_UNKNOWN },
-	{ "error",     TP_CONNECTION_PRESENCE_TYPE_ERROR },
-	/* alternative names */
-	{ "dnd",      TP_CONNECTION_PRESENCE_TYPE_BUSY },
-	{ "brb",      TP_CONNECTION_PRESENCE_TYPE_AWAY },
-	{ "xa",       TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY },
-	{ NULL, },
+  { "available", TP_CONNECTION_PRESENCE_TYPE_AVAILABLE },
+  { "busy",      TP_CONNECTION_PRESENCE_TYPE_BUSY },
+  { "away",      TP_CONNECTION_PRESENCE_TYPE_AWAY },
+  { "ext_away",  TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY },
+  { "hidden",    TP_CONNECTION_PRESENCE_TYPE_HIDDEN },
+  { "offline",   TP_CONNECTION_PRESENCE_TYPE_OFFLINE },
+  { "unset",     TP_CONNECTION_PRESENCE_TYPE_UNSET },
+  { "unknown",   TP_CONNECTION_PRESENCE_TYPE_UNKNOWN },
+  { "error",     TP_CONNECTION_PRESENCE_TYPE_ERROR },
+  /* alternative names */
+  { "dnd",      TP_CONNECTION_PRESENCE_TYPE_BUSY },
+  { "brb",      TP_CONNECTION_PRESENCE_TYPE_AWAY },
+  { "xa",       TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY },
+  { NULL, },
 };
-
-
 
 void
 empathy_init (void)
 {
-	static gboolean initialized = FALSE;
+  static gboolean initialized = FALSE;
 
-	if (initialized)
-		return;
+  if (initialized)
+    return;
 
-	g_type_init ();
+  g_type_init ();
 
-	/* Setup gettext */
-	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+  /* Setup gettext */
+  bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+  bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
-	/* Setup debug output for empathy and telepathy-glib */
-	if (g_getenv ("EMPATHY_TIMING") != NULL) {
-		g_log_set_default_handler (tp_debug_timestamped_log_handler, NULL);
-	}
-	empathy_debug_set_flags (g_getenv ("EMPATHY_DEBUG"));
-	tp_debug_divert_messages (g_getenv ("EMPATHY_LOGFILE"));
+  /* Setup debug output for empathy and telepathy-glib */
+  if (g_getenv ("EMPATHY_TIMING") != NULL)
+    g_log_set_default_handler (tp_debug_timestamped_log_handler, NULL);
 
-	emp_cli_init ();
+  empathy_debug_set_flags (g_getenv ("EMPATHY_DEBUG"));
+  tp_debug_divert_messages (g_getenv ("EMPATHY_LOGFILE"));
 
-	initialized = TRUE;
+  emp_cli_init ();
+
+  initialized = TRUE;
 }
 
 gchar *
 empathy_substring (const gchar *str,
-		  gint         start,
-		  gint         end)
+    gint start,
+    gint end)
 {
-	return g_strndup (str + start, end - start);
+  return g_strndup (str + start, end - start);
 }
 
 gint
 empathy_strcasecmp (const gchar *s1,
-		   const gchar *s2)
+    const gchar *s2)
 {
-	return empathy_strncasecmp (s1, s2, -1);
+  return empathy_strncasecmp (s1, s2, -1);
 }
 
 gint
 empathy_strncasecmp (const gchar *s1,
-		    const gchar *s2,
-		    gsize        n)
+    const gchar *s2,
+    gsize n)
 {
-	gchar *u1, *u2;
-	gint   ret_val;
+  gchar *u1, *u2;
+  gint ret_val;
 
-	u1 = g_utf8_casefold (s1, n);
-	u2 = g_utf8_casefold (s2, n);
+  u1 = g_utf8_casefold (s1, n);
+  u2 = g_utf8_casefold (s2, n);
 
-	ret_val = g_utf8_collate (u1, u2);
-	g_free (u1);
-	g_free (u2);
+  ret_val = g_utf8_collate (u1, u2);
+  g_free (u1);
+  g_free (u2);
 
-	return ret_val;
+  return ret_val;
 }
 
 gboolean
 empathy_xml_validate (xmlDoc      *doc,
-		     const gchar *dtd_filename)
+    const gchar *dtd_filename)
 {
-	gchar        *path;
-	xmlChar      *escaped;
-	xmlValidCtxt  cvp;
-	xmlDtd       *dtd;
-	gboolean      ret;
+  gchar *path;
+  xmlChar *escaped;
+  xmlValidCtxt  cvp;
+  xmlDtd *dtd;
+  gboolean ret;
 
-	path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "libempathy",
-				 dtd_filename, NULL);
-	if (!g_file_test (path, G_FILE_TEST_EXISTS)) {
-		g_free (path);
-		path = g_build_filename (DATADIR, "empathy", dtd_filename, NULL);
-	}
-	DEBUG ("Loading dtd file %s", path);
+  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "libempathy",
+         dtd_filename, NULL);
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_free (path);
+      path = g_build_filename (DATADIR, "empathy", dtd_filename, NULL);
+    }
 
-	/* The list of valid chars is taken from libxml. */
-	escaped = xmlURIEscapeStr ((const xmlChar *) path,
-		(const xmlChar *)":@&=+$,/?;");
-	g_free (path);
+  DEBUG ("Loading dtd file %s", path);
 
-	memset (&cvp, 0, sizeof (cvp));
-	dtd = xmlParseDTD (NULL, escaped);
-	ret = xmlValidateDtd (&cvp, doc, dtd);
+  /* The list of valid chars is taken from libxml. */
+  escaped = xmlURIEscapeStr ((const xmlChar *) path,
+    (const xmlChar *)":@&=+$,/?;");
+  g_free (path);
 
-	xmlFree (escaped);
-	xmlFreeDtd (dtd);
+  memset (&cvp, 0, sizeof (cvp));
+  dtd = xmlParseDTD (NULL, escaped);
+  ret = xmlValidateDtd (&cvp, doc, dtd);
 
-	return ret;
+  xmlFree (escaped);
+  xmlFreeDtd (dtd);
+
+  return ret;
 }
 
 xmlNodePtr
 empathy_xml_node_get_child (xmlNodePtr   node,
-			   const gchar *child_name)
+    const gchar *child_name)
 {
-	xmlNodePtr l;
+  xmlNodePtr l;
 
-        g_return_val_if_fail (node != NULL, NULL);
-        g_return_val_if_fail (child_name != NULL, NULL);
+  g_return_val_if_fail (node != NULL, NULL);
+  g_return_val_if_fail (child_name != NULL, NULL);
 
-	for (l = node->children; l; l = l->next) {
-		if (l->name && strcmp ((const gchar *) l->name, child_name) == 0) {
-			return l;
-		}
-	}
+  for (l = node->children; l; l = l->next)
+    {
+      if (l->name && strcmp ((const gchar *) l->name, child_name) == 0)
+        return l;
+    }
 
-	return NULL;
+  return NULL;
 }
 
 xmlChar *
 empathy_xml_node_get_child_content (xmlNodePtr   node,
-				   const gchar *child_name)
+    const gchar *child_name)
 {
-	xmlNodePtr l;
+  xmlNodePtr l;
 
-        g_return_val_if_fail (node != NULL, NULL);
-        g_return_val_if_fail (child_name != NULL, NULL);
+  g_return_val_if_fail (node != NULL, NULL);
+  g_return_val_if_fail (child_name != NULL, NULL);
 
-	l = empathy_xml_node_get_child (node, child_name);
-	if (l) {
-		return xmlNodeGetContent (l);
-	}
+  l = empathy_xml_node_get_child (node, child_name);
+  if (l != NULL)
+    return xmlNodeGetContent (l);
 
-	return NULL;
+  return NULL;
 }
 
 xmlNodePtr
 empathy_xml_node_find_child_prop_value (xmlNodePtr   node,
-				       const gchar *prop_name,
-				       const gchar *prop_value)
+    const gchar *prop_name,
+    const gchar *prop_value)
 {
-	xmlNodePtr l;
-	xmlNodePtr found = NULL;
+  xmlNodePtr l;
+  xmlNodePtr found = NULL;
 
-        g_return_val_if_fail (node != NULL, NULL);
-        g_return_val_if_fail (prop_name != NULL, NULL);
-        g_return_val_if_fail (prop_value != NULL, NULL);
+  g_return_val_if_fail (node != NULL, NULL);
+  g_return_val_if_fail (prop_name != NULL, NULL);
+  g_return_val_if_fail (prop_value != NULL, NULL);
 
-	for (l = node->children; l && !found; l = l->next) {
-		xmlChar *prop;
+  for (l = node->children; l && !found; l = l->next)
+    {
+      xmlChar *prop;
 
-		if (!xmlHasProp (l, (const xmlChar *) prop_name)) {
-			continue;
-		}
+      if (!xmlHasProp (l, (const xmlChar *) prop_name))
+        continue;
 
-		prop = xmlGetProp (l, (const xmlChar *) prop_name);
-		if (prop && strcmp ((const gchar *) prop, prop_value) == 0) {
-			found = l;
-		}
+      prop = xmlGetProp (l, (const xmlChar *) prop_name);
+      if (prop && strcmp ((const gchar *) prop, prop_value) == 0)
+        found = l;
 
-		xmlFree (prop);
-	}
+      xmlFree (prop);
+    }
 
-	return found;
+  return found;
 }
 
 const gchar *
 empathy_presence_get_default_message (TpConnectionPresenceType presence)
 {
-	switch (presence) {
-	case TP_CONNECTION_PRESENCE_TYPE_AVAILABLE:
-		return _("Available");
-	case TP_CONNECTION_PRESENCE_TYPE_BUSY:
-		return _("Busy");
-	case TP_CONNECTION_PRESENCE_TYPE_AWAY:
-	case TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY:
-		return _("Away");
-	case TP_CONNECTION_PRESENCE_TYPE_HIDDEN:
-		return _("Invisible");
-	case TP_CONNECTION_PRESENCE_TYPE_OFFLINE:
-		return _("Offline");
-	case TP_CONNECTION_PRESENCE_TYPE_UNKNOWN:
-		/* translators: presence type is unknown */
-		return C_("presence", "Unknown");
-	case TP_CONNECTION_PRESENCE_TYPE_UNSET:
-	case TP_CONNECTION_PRESENCE_TYPE_ERROR:
-	default:
-		return NULL;
-	}
+  switch (presence)
+    {
+      case TP_CONNECTION_PRESENCE_TYPE_AVAILABLE:
+        return _("Available");
+      case TP_CONNECTION_PRESENCE_TYPE_BUSY:
+        return _("Busy");
+      case TP_CONNECTION_PRESENCE_TYPE_AWAY:
+      case TP_CONNECTION_PRESENCE_TYPE_EXTENDED_AWAY:
+        return _("Away");
+      case TP_CONNECTION_PRESENCE_TYPE_HIDDEN:
+        return _("Invisible");
+      case TP_CONNECTION_PRESENCE_TYPE_OFFLINE:
+        return _("Offline");
+      case TP_CONNECTION_PRESENCE_TYPE_UNKNOWN:
+        /* translators: presence type is unknown */
+        return C_("presence", "Unknown");
+      case TP_CONNECTION_PRESENCE_TYPE_UNSET:
+      case TP_CONNECTION_PRESENCE_TYPE_ERROR:
+      default:
+        return NULL;
+    }
 
-	return NULL;
+  return NULL;
 }
 
 const gchar *
 empathy_presence_to_str (TpConnectionPresenceType presence)
 {
-	int i;
+  int i;
 
-	for (i = 0 ; presence_types[i].name != NULL; i++)
-		if (presence == presence_types[i].type)
-			return presence_types[i].name;
+  for (i = 0 ; presence_types[i].name != NULL; i++)
+    if (presence == presence_types[i].type)
+      return presence_types[i].name;
 
-	return NULL;
+  return NULL;
 }
 
 TpConnectionPresenceType
 empathy_presence_from_str (const gchar *str)
 {
-	int i;
+  int i;
 
-	for (i = 0 ; presence_types[i].name != NULL; i++)
-		if (!tp_strdiff (str, presence_types[i].name))
-			return presence_types[i].type;
+  for (i = 0 ; presence_types[i].name != NULL; i++)
+    if (!tp_strdiff (str, presence_types[i].name))
+      return presence_types[i].type;
 
-	return TP_CONNECTION_PRESENCE_TYPE_UNSET;
+  return TP_CONNECTION_PRESENCE_TYPE_UNSET;
 }
 
 static const gchar *
 empathy_status_reason_get_default_message (TpConnectionStatusReason reason)
 {
-	switch (reason) {
-	case TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED:
-		return _("No reason specified");
-	case TP_CONNECTION_STATUS_REASON_REQUESTED:
-		return _("Status is set to offline");
-	case TP_CONNECTION_STATUS_REASON_NETWORK_ERROR:
-		return _("Network error");
-	case TP_CONNECTION_STATUS_REASON_AUTHENTICATION_FAILED:
-		return _("Authentication failed");
-	case TP_CONNECTION_STATUS_REASON_ENCRYPTION_ERROR:
-		return _("Encryption error");
-	case TP_CONNECTION_STATUS_REASON_NAME_IN_USE:
-		return _("Name in use");
-	case TP_CONNECTION_STATUS_REASON_CERT_NOT_PROVIDED:
-		return _("Certificate not provided");
-	case TP_CONNECTION_STATUS_REASON_CERT_UNTRUSTED:
-		return _("Certificate untrusted");
-	case TP_CONNECTION_STATUS_REASON_CERT_EXPIRED:
-		return _("Certificate expired");
-	case TP_CONNECTION_STATUS_REASON_CERT_NOT_ACTIVATED:
-		return _("Certificate not activated");
-	case TP_CONNECTION_STATUS_REASON_CERT_HOSTNAME_MISMATCH:
-		return _("Certificate hostname mismatch");
-	case TP_CONNECTION_STATUS_REASON_CERT_FINGERPRINT_MISMATCH:
-		return _("Certificate fingerprint mismatch");
-	case TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED:
-		return _("Certificate self-signed");
-	case TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR:
-		return _("Certificate error");
-	default:
-		return _("Unknown reason");
-	}
+  switch (reason)
+    {
+      case TP_CONNECTION_STATUS_REASON_NONE_SPECIFIED:
+        return _("No reason specified");
+      case TP_CONNECTION_STATUS_REASON_REQUESTED:
+        return _("Status is set to offline");
+      case TP_CONNECTION_STATUS_REASON_NETWORK_ERROR:
+        return _("Network error");
+      case TP_CONNECTION_STATUS_REASON_AUTHENTICATION_FAILED:
+        return _("Authentication failed");
+      case TP_CONNECTION_STATUS_REASON_ENCRYPTION_ERROR:
+        return _("Encryption error");
+      case TP_CONNECTION_STATUS_REASON_NAME_IN_USE:
+        return _("Name in use");
+      case TP_CONNECTION_STATUS_REASON_CERT_NOT_PROVIDED:
+        return _("Certificate not provided");
+      case TP_CONNECTION_STATUS_REASON_CERT_UNTRUSTED:
+        return _("Certificate untrusted");
+      case TP_CONNECTION_STATUS_REASON_CERT_EXPIRED:
+        return _("Certificate expired");
+      case TP_CONNECTION_STATUS_REASON_CERT_NOT_ACTIVATED:
+        return _("Certificate not activated");
+      case TP_CONNECTION_STATUS_REASON_CERT_HOSTNAME_MISMATCH:
+        return _("Certificate hostname mismatch");
+      case TP_CONNECTION_STATUS_REASON_CERT_FINGERPRINT_MISMATCH:
+        return _("Certificate fingerprint mismatch");
+      case TP_CONNECTION_STATUS_REASON_CERT_SELF_SIGNED:
+        return _("Certificate self-signed");
+      case TP_CONNECTION_STATUS_REASON_CERT_OTHER_ERROR:
+        return _("Certificate error");
+      default:
+        return _("Unknown reason");
+    }
 }
 
 static GHashTable *
 create_errors_to_message_hash (void)
 {
-	GHashTable *errors;
+  GHashTable *errors;
 
-	errors = g_hash_table_new (g_str_hash, g_str_equal);
-	g_hash_table_insert (errors, TP_ERROR_STR_NETWORK_ERROR, _("Network error"));
-	g_hash_table_insert (errors, TP_ERROR_STR_AUTHENTICATION_FAILED,
-		_("Authentication failed"));
-	g_hash_table_insert (errors, TP_ERROR_STR_ENCRYPTION_ERROR,
-		_("Encryption error"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_NOT_PROVIDED,
-		_("Certificate not provided"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_UNTRUSTED,
-		_("Certificate untrusted"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_EXPIRED,
-		_("Certificate expired"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_NOT_ACTIVATED,
-		_("Certificate not activated"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_HOSTNAME_MISMATCH,
-		_("Certificate hostname mismatch"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_FINGERPRINT_MISMATCH,
-		_("Certificate fingerprint mismatch"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_SELF_SIGNED,
-		_("Certificate self-signed"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CANCELLED,
-		_("Status is set to offline"));
-	g_hash_table_insert (errors, TP_ERROR_STR_ENCRYPTION_NOT_AVAILABLE,
-		_("Encryption is not available"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_INVALID,
-		_("Certificate is invalid"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_REFUSED,
-		_("Connection has been refused"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_FAILED,
-		_("Connection can't be established"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_LOST,
-		_("Connection has been lost"));
-	g_hash_table_insert (errors, TP_ERROR_STR_ALREADY_CONNECTED,
-		_("This resource is already connected to the server"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_REPLACED,
-		_("Connection has been replaced by a new connection using the "
-		"same resource"));
-	g_hash_table_insert (errors, TP_ERROR_STR_REGISTRATION_EXISTS,
-		_("The account already exists on the server"));
-	g_hash_table_insert (errors, TP_ERROR_STR_SERVICE_BUSY,
-		_("Server is currently too busy to handle the connection"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_REVOKED,
-		_("Certificate has been revoked"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_INSECURE,
-		_("Certificate uses an insecure cipher algorithm or is "
-		"cryptographically weak"));
-	g_hash_table_insert (errors, TP_ERROR_STR_CERT_LIMIT_EXCEEDED,
-		_("The length of the server certificate, or the depth of the "
-		"server certificate chain, exceed the limits imposed by the "
-		"cryptography library"));
+  errors = g_hash_table_new (g_str_hash, g_str_equal);
+  g_hash_table_insert (errors, TP_ERROR_STR_NETWORK_ERROR, _("Network error"));
+  g_hash_table_insert (errors, TP_ERROR_STR_AUTHENTICATION_FAILED,
+    _("Authentication failed"));
+  g_hash_table_insert (errors, TP_ERROR_STR_ENCRYPTION_ERROR,
+    _("Encryption error"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_NOT_PROVIDED,
+    _("Certificate not provided"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_UNTRUSTED,
+    _("Certificate untrusted"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_EXPIRED,
+    _("Certificate expired"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_NOT_ACTIVATED,
+    _("Certificate not activated"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_HOSTNAME_MISMATCH,
+    _("Certificate hostname mismatch"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_FINGERPRINT_MISMATCH,
+    _("Certificate fingerprint mismatch"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_SELF_SIGNED,
+    _("Certificate self-signed"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CANCELLED,
+    _("Status is set to offline"));
+  g_hash_table_insert (errors, TP_ERROR_STR_ENCRYPTION_NOT_AVAILABLE,
+    _("Encryption is not available"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_INVALID,
+    _("Certificate is invalid"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_REFUSED,
+    _("Connection has been refused"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_FAILED,
+    _("Connection can't be established"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_LOST,
+    _("Connection has been lost"));
+  g_hash_table_insert (errors, TP_ERROR_STR_ALREADY_CONNECTED,
+    _("This resource is already connected to the server"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CONNECTION_REPLACED,
+    _("Connection has been replaced by a new connection using the "
+    "same resource"));
+  g_hash_table_insert (errors, TP_ERROR_STR_REGISTRATION_EXISTS,
+    _("The account already exists on the server"));
+  g_hash_table_insert (errors, TP_ERROR_STR_SERVICE_BUSY,
+    _("Server is currently too busy to handle the connection"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_REVOKED,
+    _("Certificate has been revoked"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_INSECURE,
+    _("Certificate uses an insecure cipher algorithm or is "
+    "cryptographically weak"));
+  g_hash_table_insert (errors, TP_ERROR_STR_CERT_LIMIT_EXCEEDED,
+    _("The length of the server certificate, or the depth of the "
+    "server certificate chain, exceed the limits imposed by the "
+    "cryptography library"));
 
-	return errors;
+  return errors;
 }
 
 static const gchar *
 empathy_dbus_error_name_get_default_message  (const gchar *error)
 {
-	static GHashTable *errors_to_message = NULL;
+  static GHashTable *errors_to_message = NULL;
 
-	if (error == NULL)
-		return NULL;
+  if (error == NULL)
+    return NULL;
 
-	if (G_UNLIKELY (errors_to_message == NULL)) {
-		errors_to_message = create_errors_to_message_hash ();
-	}
+  if (G_UNLIKELY (errors_to_message == NULL))
+    errors_to_message = create_errors_to_message_hash ();
 
-	return g_hash_table_lookup (errors_to_message, error);
+  return g_hash_table_lookup (errors_to_message, error);
 }
 
 const gchar *
 empathy_account_get_error_message (TpAccount *account,
     gboolean *user_requested)
 {
-	const gchar *dbus_error;
-	const gchar *message;
+  const gchar *dbus_error;
+  const gchar *message;
         const GHashTable *details = NULL;
-	TpConnectionStatusReason reason;
+  TpConnectionStatusReason reason;
 
-	dbus_error = tp_account_get_detailed_error (account, &details);
+  dbus_error = tp_account_get_detailed_error (account, &details);
 
-        if (user_requested != NULL)
-          {
-            if (tp_asv_get_boolean (details, "user-requested", NULL))
-              *user_requested = TRUE;
-            else
-              *user_requested = FALSE;
-          }
+  if (user_requested != NULL)
+    {
+      if (tp_asv_get_boolean (details, "user-requested", NULL))
+        *user_requested = TRUE;
+      else
+        *user_requested = FALSE;
+    }
 
-	message = empathy_dbus_error_name_get_default_message (dbus_error);
-	if (message != NULL)
-		return message;
+  message = empathy_dbus_error_name_get_default_message (dbus_error);
+  if (message != NULL)
+    return message;
 
-	DEBUG ("Don't understand error '%s'; fallback to the status reason (%u)",
-		dbus_error, reason);
+  DEBUG ("Don't understand error '%s'; fallback to the status reason (%u)",
+    dbus_error, reason);
 
-	tp_account_get_connection_status (account, &reason);
+  tp_account_get_connection_status (account, &reason);
 
-	return empathy_status_reason_get_default_message (reason);
+  return empathy_status_reason_get_default_message (reason);
 }
 
 gchar *
 empathy_file_lookup (const gchar *filename, const gchar *subdir)
 {
-	gchar *path;
+  gchar *path;
 
-	if (!subdir) {
-		subdir = ".";
-	}
+  if (subdir == NULL)
+    subdir = ".";
 
-	path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), subdir, filename, NULL);
-	if (!g_file_test (path, G_FILE_TEST_EXISTS)) {
-		g_free (path);
-		path = g_build_filename (DATADIR, "empathy", filename, NULL);
-	}
+  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), subdir, filename, NULL);
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_free (path);
+      path = g_build_filename (DATADIR, "empathy", filename, NULL);
+    }
 
-	return path;
+  return path;
 }
 
 guint
 empathy_proxy_hash (gconstpointer key)
 {
-	TpProxy      *proxy = TP_PROXY (key);
-	TpProxyClass *proxy_class = TP_PROXY_GET_CLASS (key);
+  TpProxy *proxy = TP_PROXY (key);
+  TpProxyClass *proxy_class = TP_PROXY_GET_CLASS (key);
 
-	g_return_val_if_fail (TP_IS_PROXY (proxy), 0);
-	g_return_val_if_fail (proxy_class->must_have_unique_name, 0);
+  g_return_val_if_fail (TP_IS_PROXY (proxy), 0);
+  g_return_val_if_fail (proxy_class->must_have_unique_name, 0);
 
-	return g_str_hash (proxy->object_path) ^ g_str_hash (proxy->bus_name);
+  return g_str_hash (proxy->object_path) ^ g_str_hash (proxy->bus_name);
 }
 
 gboolean
 empathy_proxy_equal (gconstpointer a,
-		     gconstpointer b)
+    gconstpointer b)
 {
-	TpProxy *proxy_a = TP_PROXY (a);
-	TpProxy *proxy_b = TP_PROXY (b);
-	TpProxyClass *proxy_a_class = TP_PROXY_GET_CLASS (a);
-	TpProxyClass *proxy_b_class = TP_PROXY_GET_CLASS (b);
+  TpProxy *proxy_a = TP_PROXY (a);
+  TpProxy *proxy_b = TP_PROXY (b);
+  TpProxyClass *proxy_a_class = TP_PROXY_GET_CLASS (a);
+  TpProxyClass *proxy_b_class = TP_PROXY_GET_CLASS (b);
 
-	g_return_val_if_fail (TP_IS_PROXY (proxy_a), FALSE);
-	g_return_val_if_fail (TP_IS_PROXY (proxy_b), FALSE);
-	g_return_val_if_fail (proxy_a_class->must_have_unique_name, 0);
-	g_return_val_if_fail (proxy_b_class->must_have_unique_name, 0);
+  g_return_val_if_fail (TP_IS_PROXY (proxy_a), FALSE);
+  g_return_val_if_fail (TP_IS_PROXY (proxy_b), FALSE);
+  g_return_val_if_fail (proxy_a_class->must_have_unique_name, 0);
+  g_return_val_if_fail (proxy_b_class->must_have_unique_name, 0);
 
-	return g_str_equal (proxy_a->object_path, proxy_b->object_path) &&
-	       g_str_equal (proxy_a->bus_name, proxy_b->bus_name);
+  return g_str_equal (proxy_a->object_path, proxy_b->object_path) &&
+         g_str_equal (proxy_a->bus_name, proxy_b->bus_name);
 }
 
 gboolean
 empathy_check_available_state (void)
 {
-	TpConnectionPresenceType presence;
-	EmpathyPresenceManager *presence_mgr;
+  TpConnectionPresenceType presence;
+  EmpathyPresenceManager *presence_mgr;
 
-	presence_mgr = empathy_presence_manager_dup_singleton ();
-	presence = empathy_presence_manager_get_state (presence_mgr);
-	g_object_unref (presence_mgr);
+  presence_mgr = empathy_presence_manager_dup_singleton ();
+  presence = empathy_presence_manager_get_state (presence_mgr);
+  g_object_unref (presence_mgr);
 
-	if (presence != TP_CONNECTION_PRESENCE_TYPE_AVAILABLE &&
-		presence != TP_CONNECTION_PRESENCE_TYPE_UNSET) {
-		return FALSE;
-	}
+  if (presence != TP_CONNECTION_PRESENCE_TYPE_AVAILABLE &&
+    presence != TP_CONNECTION_PRESENCE_TYPE_UNSET)
+    return FALSE;
 
-	return TRUE;
+  return TRUE;
 }
 
 gint
 empathy_uint_compare (gconstpointer a,
-		      gconstpointer b)
+    gconstpointer b)
 {
-	return *(guint *) a - *(guint *) b;
+  return *(guint *) a - *(guint *) b;
 }
 
 gchar *
@@ -931,74 +929,79 @@ empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert)
 }
 
 gchar *
-empathy_format_currency (gint         amount,
-			 guint        scale,
-			 const gchar *currency)
+empathy_format_currency (gint amount,
+    guint scale,
+    const gchar *currency)
 {
 #define MINUS "\342\210\222"
 #define EURO "\342\202\254"
 #define YEN "\302\245"
 #define POUND "\302\243"
 
-	/* localised representations of currency */
-	/* FIXME: check these, especially negatives and decimals */
-	static const struct {
-		const char *currency;
-		const char *positive;
-		const char *negative;
-		const char *decimal;
-	} currencies[] = {
-		/* sym   positive    negative          decimal */
-		{ "EUR", EURO "%s",  MINUS EURO "%s",  "." },
-		{ "USD", "$%s",      MINUS "$%s",      "." },
-		{ "JPY", YEN "%s"    MINUS YEN "%s",   "." },
-		{ "GBP", POUND "%s", MINUS POUND "%s", "." },
-		{ "PLN", "%s zl",    MINUS "%s zl",    "." },
-		{ "BRL", "R$%s",     MINUS "R$%s",     "." },
-		{ "SEK", "%s kr",    MINUS "%s kr",    "." },
-		{ "DKK", "kr %s",    "kr " MINUS "%s", "." },
-		{ "HKD", "$%s",      MINUS "$%s",      "." },
-		{ "CHF", "%s Fr.",   MINUS "%s Fr.",   "." },
-		{ "NOK", "kr %s",    "kr" MINUS "%s",  "," },
-		{ "CAD", "$%s",      MINUS "$%s",      "." },
-		{ "TWD", "$%s",      MINUS "$%s",      "." },
-		{ "AUD", "$%s",      MINUS "$%s",      "." },
-	};
+  /* localised representations of currency */
+  /* FIXME: check these, especially negatives and decimals */
+  static const struct {
+    const char *currency;
+    const char *positive;
+    const char *negative;
+    const char *decimal;
+  } currencies[] = {
+    /* sym   positive    negative          decimal */
+    { "EUR", EURO "%s",  MINUS EURO "%s",  "." },
+    { "USD", "$%s",      MINUS "$%s",      "." },
+    { "JPY", YEN "%s"    MINUS YEN "%s",   "." },
+    { "GBP", POUND "%s", MINUS POUND "%s", "." },
+    { "PLN", "%s zl",    MINUS "%s zl",    "." },
+    { "BRL", "R$%s",     MINUS "R$%s",     "." },
+    { "SEK", "%s kr",    MINUS "%s kr",    "." },
+    { "DKK", "kr %s",    "kr " MINUS "%s", "." },
+    { "HKD", "$%s",      MINUS "$%s",      "." },
+    { "CHF", "%s Fr.",   MINUS "%s Fr.",   "." },
+    { "NOK", "kr %s",    "kr" MINUS "%s",  "," },
+    { "CAD", "$%s",      MINUS "$%s",      "." },
+    { "TWD", "$%s",      MINUS "$%s",      "." },
+    { "AUD", "$%s",      MINUS "$%s",      "." },
+  };
 
-	const char *positive = "%s";
-	const char *negative = MINUS "%s";
-	const char *decimal = ".";
-	char *fmt_amount, *money;
-	guint i;
+  const char *positive = "%s";
+  const char *negative = MINUS "%s";
+  const char *decimal = ".";
+  char *fmt_amount, *money;
+  guint i;
 
-	/* get the localised currency format */
-	for (i = 0; i < G_N_ELEMENTS (currencies); i++) {
-		if (!tp_strdiff (currency, currencies[i].currency)) {
-			positive = currencies[i].positive;
-			negative = currencies[i].negative;
-			decimal = currencies[i].decimal;
-			break;
-		}
-	}
+  /* get the localised currency format */
+  for (i = 0; i < G_N_ELEMENTS (currencies); i++)
+    {
+      if (!tp_strdiff (currency, currencies[i].currency))
+        {
+          positive = currencies[i].positive;
+          negative = currencies[i].negative;
+          decimal = currencies[i].decimal;
+          break;
+        }
+    }
 
-	/* format the amount using the scale */
-	if (scale == 0) {
-		/* no decimal point required */
-		fmt_amount = g_strdup_printf ("%d", amount);
-	} else {
-		/* don't use floating point arithmatic, it's noisy;
-		 * we take the absolute values, because we want the minus
-		 * sign to appear before the $ */
-		int divisor = pow (10, scale);
-		int dollars = abs (amount / divisor);
-		int cents = abs (amount % divisor);
+  /* format the amount using the scale */
+  if (scale == 0)
+    {
+      /* no decimal point required */
+      fmt_amount = g_strdup_printf ("%d", amount);
+    }
+  else
+    {
+      /* don't use floating point arithmatic, it's noisy;
+       * we take the absolute values, because we want the minus
+       * sign to appear before the $ */
+      int divisor = pow (10, scale);
+      int dollars = abs (amount / divisor);
+      int cents = abs (amount % divisor);
 
-		fmt_amount = g_strdup_printf ("%d%s%0*d",
-			dollars, decimal, scale, cents);
-	}
+      fmt_amount = g_strdup_printf ("%d%s%0*d",
+        dollars, decimal, scale, cents);
+    }
 
-	money = g_strdup_printf (amount < 0 ? negative : positive, fmt_amount);
-	g_free (fmt_amount);
+  money = g_strdup_printf (amount < 0 ? negative : positive, fmt_amount);
+  g_free (fmt_amount);
 
-	return money;
+  return money;
 }
