@@ -68,6 +68,7 @@ enum /* blocked-contacts columns */
 {
   COL_IDENTIFIER,
   COL_HANDLE,
+  COL_TEXT,
   N_COLUMNS
 };
 
@@ -634,12 +635,19 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
   for (ptr = members; ptr != NULL; ptr = ptr->next)
     {
       EmpathyContact *contact = ptr->data;
+      gchar *tmpstr;
+
+      tmpstr = g_strdup_printf ("%s (%s)",
+          empathy_contact_get_alias (contact),
+          empathy_contact_get_id (contact));
 
       gtk_list_store_insert_with_values (self->priv->completion_contacts,
           NULL, -1,
           COL_IDENTIFIER, empathy_contact_get_id (contact),
+          COL_TEXT, tmpstr,
           -1);
 
+      g_free (tmpstr);
       g_object_unref (contact);
     }
 
@@ -658,6 +666,68 @@ contact_blocking_dialog_view_selection_changed (GtkTreeSelection *selection,
 
   g_list_foreach (rows, (GFunc) gtk_tree_path_free, NULL);
   g_list_free (rows);
+}
+
+static gboolean
+contact_selector_dialog_match_func (GtkEntryCompletion *completion,
+    const gchar *key,
+    GtkTreeIter *iter,
+    gpointer user_data)
+{
+  GtkTreeModel *model;
+  gchar *str, *lower;
+  gboolean v = FALSE;
+
+  model = gtk_entry_completion_get_model (completion);
+  if (model == NULL || iter == NULL)
+    return FALSE;
+
+  gtk_tree_model_get (model, iter, COL_TEXT, &str, -1);
+  lower = g_utf8_strdown (str, -1);
+  if (strstr (lower, key))
+    {
+      DEBUG ("Key %s is matching name **%s**", key, str);
+      v = TRUE;
+      goto out;
+    }
+  g_free (str);
+  g_free (lower);
+
+  gtk_tree_model_get (model, iter, COL_IDENTIFIER, &str, -1);
+  lower = g_utf8_strdown (str, -1);
+  if (strstr (lower, key))
+    {
+      DEBUG ("Key %s is matching ID **%s**", key, str);
+      v = TRUE;
+      goto out;
+    }
+
+out:
+  g_free (str);
+  g_free (lower);
+
+  return v;
+}
+
+static gboolean
+contact_selector_dialog_match_selected_cb (GtkEntryCompletion *widget,
+    GtkTreeModel *model,
+    GtkTreeIter *iter,
+    EmpathyContactBlockingDialog *self)
+{
+  gchar *id;
+
+  if (iter == NULL || model == NULL)
+    return FALSE;
+
+  gtk_tree_model_get (model, iter, COL_IDENTIFIER, &id, -1);
+  gtk_entry_set_text (GTK_ENTRY (self->priv->add_contact_entry), id);
+
+  DEBUG ("Got selected match **%s**", id);
+
+  g_free (id);
+
+  return TRUE;
 }
 
 static void
@@ -736,11 +806,20 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       G_CALLBACK (contact_blocking_dialog_view_selection_changed), self);
 
   /* build the contact entry */
-  self->priv->completion_contacts = gtk_list_store_new (1, G_TYPE_STRING);
+  self->priv->completion_contacts = gtk_list_store_new (N_COLUMNS,
+      G_TYPE_STRING, /* id */
+      G_TYPE_UINT, /* handle */
+      G_TYPE_STRING); /* text */
   completion = gtk_entry_completion_new ();
   gtk_entry_completion_set_model (completion,
       GTK_TREE_MODEL (self->priv->completion_contacts));
-  gtk_entry_completion_set_text_column (completion, COL_IDENTIFIER);
+  gtk_entry_completion_set_text_column (completion, COL_TEXT);
+  gtk_entry_completion_set_match_func (completion,
+      contact_selector_dialog_match_func,
+      NULL, NULL);
+  g_signal_connect (completion, "match-selected",
+        G_CALLBACK (contact_selector_dialog_match_selected_cb),
+        self);
   gtk_entry_set_completion (GTK_ENTRY (self->priv->add_contact_entry),
       completion);
   g_object_unref (completion);
