@@ -290,6 +290,8 @@ notification_is_urgent (EmpathyNotificationsApprover *self,
   return FALSE;
 }
 
+/* Use x-empathy as prefix for unofficial categories
+ * http://www.galago-project.org/specs/notification/0.9/x211.html */
 static const gchar *
 get_category_for_event_type (EmpathyEventType type)
 {
@@ -302,11 +304,15 @@ get_category_for_event_type (EmpathyEventType type)
       return "presence.offline";
     case EMPATHY_EVENT_TYPE_VOIP:
     case EMPATHY_EVENT_TYPE_CALL:
+      return "x-empathy.call.incoming";
     case EMPATHY_EVENT_TYPE_TRANSFER:
+      return "x-empathy.transfer.incoming";
     case EMPATHY_EVENT_TYPE_INVITATION:
+      return "x-empathy.im.room-invitation";
     case EMPATHY_EVENT_TYPE_AUTH:
+      return "x-empathy.network.auth-request";
     case EMPATHY_EVENT_TYPE_SUBSCRIPTION:
-      return NULL;
+      return "x-empathy.im.subscription-request";
   }
 
   return NULL;
