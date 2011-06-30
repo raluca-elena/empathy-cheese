@@ -380,9 +380,11 @@ update_notification (EmpathyNotificationsApprover *self)
           NOTIFY_EXPIRES_DEFAULT);
 
       if (has_x_canonical_append)
-        /* We have to set a not empty string to keep libnotify happy */
-        notify_notification_set_hint_string (notification,
-            EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND, "1");
+        {
+          notify_notification_set_hint (notification,
+              EMPATHY_NOTIFY_MANAGER_CAP_X_CANONICAL_APPEND,
+              g_variant_new_boolean (TRUE));
+        }
 
       if (empathy_notify_manager_has_capability (self->priv->notify_mgr,
             EMPATHY_NOTIFY_MANAGER_CAP_ACTIONS))
@@ -393,8 +395,11 @@ update_notification (EmpathyNotificationsApprover *self)
 
       category = get_category_for_event_type (self->priv->event->type);
       if (category != NULL)
-        notify_notification_set_hint_string (notification,
-            EMPATHY_NOTIFY_MANAGER_CAP_CATEGORY, category);
+        {
+          notify_notification_set_hint (notification,
+              EMPATHY_NOTIFY_MANAGER_CAP_CATEGORY,
+              g_variant_new_string (category));
+        }
     }
 
   pixbuf = empathy_notify_manager_get_pixbuf_for_notification (
@@ -403,7 +408,7 @@ update_notification (EmpathyNotificationsApprover *self)
 
   if (pixbuf != NULL)
     {
-      notify_notification_set_icon_from_pixbuf (notification, pixbuf);
+      notify_notification_set_image_from_pixbuf (notification, pixbuf);
       g_object_unref (pixbuf);
     }
 
