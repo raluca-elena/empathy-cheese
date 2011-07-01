@@ -33,6 +33,8 @@
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/proxy-subclass.h>
 
+#include <telepathy-yell/telepathy-yell.h>
+
 #include <telepathy-logger/telepathy-logger.h>
 #ifdef HAVE_CALL_LOGS
 # include <telepathy-logger/call-event.h>
@@ -93,6 +95,11 @@ struct _EmpathyLogWindowPriv
   TplActionChain *chain;
   TplLogManager *log_manager;
 
+  /* Hash of TpChannel<->TpAccount for use by the observer until we can
+   * get a TpAccount from a TpConnection or wherever */
+  GHashTable *channels;
+  TpBaseClient *observer;
+
   EmpathyContact *selected_contact;
 
   /* Used to cancel logger calls when no longer needed */
@@ -131,6 +138,8 @@ static void log_window_when_changed_cb           (GtkTreeSelection *selection,
 static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
                                                   EmpathyLogWindow *self);
 static void start_spinner                        (void);
+
+static void log_window_create_observer           (EmpathyLogWindow *window);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -207,6 +216,15 @@ typedef enum
   EVENT_CALL_MISSED   = 1 << 2,
   EVENT_CALL_ALL      = 1 << 3,
 } EventSubtype;
+
+static gboolean
+log_window_get_selected (EmpathyLogWindow *window,
+    GList **accounts,
+    GList **entities,
+    gboolean *anyone,
+    GList **dates,
+    TplEventTypeMask *event_mask,
+    EventSubtype *subtype);
 
 static EmpathyLogWindow *log_window = NULL;
 
@@ -379,7 +397,9 @@ empathy_log_window_dispose (GObject *object)
     }
 
   tp_clear_pointer (&self->priv->chain, _tpl_action_chain_free);
+  tp_clear_pointer (&self->priv->channels, g_hash_table_unref);
 
+  tp_clear_object (&self->priv->observer);
   tp_clear_object (&self->priv->log_manager);
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
@@ -532,6 +552,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
   log_window_what_setup (self);
   log_window_when_setup (self);
 
+  log_window_create_observer (self);
+
   log_window_who_populate (self);
 
   gtk_widget_show (GTK_WIDGET (self));
@@ -602,6 +624,236 @@ is_same_confroom (TplEvent *e1,
 
   return g_str_equal (tpl_entity_get_identifier (room1),
       tpl_entity_get_identifier (room2));
+}
+
+static void
+maybe_refresh_logs (TpChannel *channel,
+    TpAccount *account)
+{
+  GList *accounts = NULL, *entities = NULL, *dates = NULL;
+  GList *acc, *ent;
+  TplEventTypeMask event_mask;
+  GDate *anytime = NULL, *today = NULL;
+  GDateTime *now = NULL;
+  gboolean refresh = FALSE;
+  gboolean anyone;
+  const gchar *type;
+
+  if (!log_window_get_selected (log_window,
+      &accounts, &entities, &anyone, &dates, &event_mask, NULL))
+    {
+      DEBUG ("Could not get selected rows");
+      return;
+    }
+
+  type = tp_channel_get_channel_type (channel);
+
+  /* If the channel type is not in the What pane, whatever has happened
+   * won't be displayed in the events pane. */
+  if (!tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_TEXT) &&
+      !(event_mask & TPL_EVENT_MASK_TEXT))
+    goto out;
+  if ((!tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA) ||
+       !tp_strdiff (type, TPY_IFACE_CHANNEL_TYPE_CALL)) &&
+      !(event_mask & TPL_EVENT_MASK_CALL))
+    goto out;
+
+  anytime = g_date_new_dmy (2, 1, -1);
+  now = g_date_time_new_now_local ();
+  today = g_date_new_dmy (g_date_time_get_day_of_month (now),
+      g_date_time_get_month (now),
+      g_date_time_get_year (now));
+
+  /* If Today (or anytime) isn't selected, anything that has happened now
+   * won't be displayed. */
+  if (!g_list_find_custom (dates, anytime, (GCompareFunc) g_date_compare) &&
+      !g_list_find_custom (dates, today, (GCompareFunc) g_date_compare))
+    goto out;
+
+  if (anyone)
+    {
+      refresh = TRUE;
+      goto out;
+    }
+
+  for (acc = accounts, ent = entities;
+       acc != NULL && ent != NULL;
+       acc = g_list_next (acc), ent = g_list_next (ent))
+    {
+      if (!account_equal (account, acc->data))
+        continue;
+
+      if (!tp_strdiff (tp_channel_get_identifier (channel),
+                       tpl_entity_get_identifier (ent->data)))
+        {
+          refresh = TRUE;
+          break;
+        }
+    }
+
+ out:
+  tp_clear_pointer (&anytime, g_date_free);
+  tp_clear_pointer (&today, g_date_free);
+  tp_clear_pointer (&now, g_date_time_unref);
+  g_list_free_full (accounts, g_object_unref);
+  g_list_free_full (entities, g_object_unref);
+  g_list_free_full (dates, (GFreeFunc) g_date_free);
+
+  if (refresh)
+    {
+      DEBUG ("Refreshing logs after received event");
+
+      /* FIXME:  We need to populate the entities in case we
+       * didn't have any previous logs with this contact. */
+      log_window_chats_get_messages (log_window, FALSE);
+    }
+}
+
+static void
+on_msg_sent (TpTextChannel *channel,
+    TpSignalledMessage *message,
+    guint flags,
+    gchar *token,
+    EmpathyLogWindow *self)
+{
+  TpAccount *account = g_hash_table_lookup (self->priv->channels, channel);
+
+  maybe_refresh_logs (TP_CHANNEL (channel), account);
+}
+
+static void
+on_msg_received (TpTextChannel *channel,
+    TpSignalledMessage *message,
+    EmpathyLogWindow *self)
+{
+  TpMessage *msg = TP_MESSAGE (message);
+  TpChannelTextMessageType type = tp_message_get_message_type (msg);
+  TpAccount *account = g_hash_table_lookup (self->priv->channels, channel);
+
+  if (type != TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL &&
+      type != TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)
+    return;
+
+  maybe_refresh_logs (TP_CHANNEL (channel), account);
+}
+
+static void
+on_channel_ended (TpChannel *channel,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyLogWindow *self)
+{
+  if (self->priv->channels != NULL)
+    g_hash_table_remove (self->priv->channels, channel);
+}
+
+static void
+on_call_ended (TpChannel *channel,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyLogWindow *self)
+{
+  TpAccount *account = g_hash_table_lookup (self->priv->channels, channel);
+
+  maybe_refresh_logs (channel, account);
+
+  if (self->priv->channels != NULL)
+    g_hash_table_remove (self->priv->channels, channel);
+}
+
+static void
+observe_channels (TpSimpleObserver *observer,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    GList *requests,
+    TpObserveChannelsContext *context,
+    gpointer user_data)
+{
+  EmpathyLogWindow *self = user_data;
+
+  GList *l;
+
+  for (l = channels; l != NULL; l = g_list_next (l))
+    {
+      TpChannel *channel = l->data;
+      const gchar *type = tp_channel_get_channel_type (channel);
+
+      if (!tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_TEXT))
+        {
+          TpTextChannel *text_channel = TP_TEXT_CHANNEL (channel);
+
+          g_hash_table_insert (self->priv->channels,
+              g_object_ref (channel), g_object_ref (account));
+
+          tp_g_signal_connect_object (text_channel, "message-sent",
+              G_CALLBACK (on_msg_sent), self, 0);
+          tp_g_signal_connect_object (text_channel, "message-received",
+              G_CALLBACK (on_msg_received), self, 0);
+          tp_g_signal_connect_object (channel, "invalidated",
+              G_CALLBACK (on_channel_ended), self, 0);
+        }
+      else if (!tp_strdiff (type, TPY_IFACE_CHANNEL_TYPE_CALL) ||
+          !tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA))
+        {
+          g_hash_table_insert (self->priv->channels,
+              g_object_ref (channel), g_object_ref (account));
+
+          tp_g_signal_connect_object (channel, "invalidated",
+              G_CALLBACK (on_call_ended), self, 0);
+        }
+      else
+        {
+          g_warning ("Unknown channel type: %s", type);
+        }
+    }
+
+  tp_observe_channels_context_accept (context);
+}
+
+static void
+log_window_create_observer (EmpathyLogWindow *self)
+{
+  TpDBusDaemon *dbus;
+  GError *error = NULL;
+
+  dbus = tp_dbus_daemon_dup (&error);
+
+  if (dbus == NULL)
+    {
+      DEBUG ("Could not connect to the bus: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  self->priv->observer = tp_simple_observer_new (dbus, TRUE, "LogWindow",
+      TRUE, observe_channels,
+      g_object_ref (self), g_object_unref);
+  self->priv->channels = g_hash_table_new_full (g_direct_hash, g_direct_equal,
+      g_object_unref, g_object_unref);
+
+  tp_base_client_take_observer_filter (self->priv->observer,
+      tp_asv_new (
+          TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+            TP_IFACE_CHANNEL_TYPE_TEXT,
+          NULL));
+  tp_base_client_take_observer_filter (self->priv->observer,
+      tp_asv_new (
+          TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+            TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA,
+          NULL));
+  tp_base_client_take_observer_filter (self->priv->observer,
+      tp_asv_new (
+          TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+            TPY_IFACE_CHANNEL_TYPE_CALL,
+          NULL));
+
+  tp_base_client_register (self->priv->observer, NULL);
+
+  g_object_unref (dbus);
 }
 
 static TplEntity *
@@ -997,6 +1249,7 @@ static gboolean
 log_window_get_selected (EmpathyLogWindow *self,
     GList **accounts,
     GList **entities,
+    gboolean *anyone,
     GList **dates,
     TplEventTypeMask *event_mask,
     EventSubtype *subtype)
@@ -1022,6 +1275,8 @@ log_window_get_selected (EmpathyLogWindow *self,
     *accounts = NULL;
   if (entities != NULL)
     *entities = NULL;
+  if (anyone != NULL)
+    *anyone = FALSE;
 
   for (l = paths; l != NULL; l = l->next)
     {
@@ -1040,6 +1295,8 @@ log_window_get_selected (EmpathyLogWindow *self,
         {
           if (accounts != NULL || entities != NULL)
             add_all_accounts_and_entities (accounts, entities);
+          if (anyone != NULL)
+            *anyone = TRUE;
           break;
         }
 
@@ -1174,7 +1431,7 @@ populate_events_from_search_hits (GList *accounts,
   gboolean is_anytime = FALSE;
 
   if (!log_window_get_selected (log_window,
-      NULL, NULL, NULL, &event_mask, &subtype))
+      NULL, NULL, NULL, NULL, &event_mask, &subtype))
     return;
 
   anytime = g_date_new_dmy (2, 1, -1);
@@ -2643,7 +2900,7 @@ log_window_get_messages_for_dates (EmpathyLogWindow *self,
   GDate *date, *anytime, *separator;
 
   if (!log_window_get_selected (self,
-      &accounts, &targets, NULL, &event_mask, &subtype))
+      &accounts, &targets, NULL, NULL, &event_mask, &subtype))
     return;
 
   anytime = g_date_new_dmy (2, 1, -1);
@@ -2872,7 +3129,7 @@ log_window_chats_get_messages (EmpathyLogWindow *self,
   GtkListStore *store;
   GtkTreeSelection *selection;
 
-  if (!log_window_get_selected (self, &accounts, &targets,
+  if (!log_window_get_selected (self, &accounts, &targets, NULL,
       &dates, &event_mask, NULL))
     return;
 
