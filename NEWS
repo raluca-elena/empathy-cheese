@@ -1,3 +1,56 @@
+NEW in 3.1.3 (04/07/2011)
+============
+
+This new release fixes loads of issues with the new log viewer.
+
+Bugs fixed:
+ - Fixed #646555, empathy crashed with SIGSEGV in event_manager_add (Guillaume Desmottes)
+ - Fixed #573652, Display current username beside the id in the log viewer (Emilio Pozuelo Monfort)
+ - Fixed #630943, Bigger default size for dialogs such as "Custom status" (Will Thompson)
+ - Fixed #644528, Remove live-addder (Sjoerd Simons)
+ - Fixed #651055, Use tp-glib high level password API (Guillaume Desmottes)
+ - Fixed #651205, support message editing (supersedes header) (Danielle Madeley)
+ - Fixed #651473, Use tp-glib Claim + reject API (Guillaume Desmottes)
+ - Fixed #652265, Should expand chats when there is only one in the treeview (Emilio Pozuelo Monfort)
+ - Fixed #652278, Events should be selectable to start actions (Emilio Pozuelo Monfort)
+ - Fixed #652279, Loading logs screen looks kinda shit (Emilio Pozuelo Monfort)
+ - Fixed #652345, Need context to translate (Emilio Pozuelo Monfort)
+ - Fixed #652443, Building master without webkit fails (Marc-Antoine Perennou)
+ - Fixed #652496, empathy crashed with SIGSEGV in details_notify_cb() (Guillaume Desmottes)
+ - Fixed #652522, Searching for string in logs no longer highlights find (Emilio Pozuelo Monfort)
+ - Fixed #652590, empathy-accounts account list should use gnome 3 style (Danielle Madeley)
+ - Fixed #653057, Google Talk broken account defaults (Will Thompson)
+ - Fixed #653090, Unread msg icon stays displayed after connection disconnect/reconnect (Guillaume Desmottes)
+ - Fixed #653175, MUC chats show up as "Chat with <contact>" (Emilio Pozuelo Monfort)
+ - Fixed #653510, Set 'server' parameter for GTalk accounts. (Will Thompson)
+ - Fixed #653551, Should show sent time, not received time (Guillaume Desmottes)
+ - Fixed #653575, Make FT handler invokable (Guillaume Desmottes)
+ - Fixed #653635, Date isn't remembered when changing Who or What panes (Emilio Pozuelo Monfort)
+ - Fixed #653650, Blocking contacts dialog should autocomplete when adding contacts by alias (Emilio Pozuelo Monfort)
+ - Fixed #653730, src/empathy-call-observer.c doesn't observe Call channels (Emilio Pozuelo Monfort)
+ - Fixed #653739, Don't use deprecated notify APIs (Guillaume Desmottes)
+ - Fixed #653760, Refresh logs when new stuff happens (Emilio Pozuelo Monfort)
+ - Fixed #653767, Untranslated strings (Gabor Kelemen)
+ - Fixed #653803, EmpathyLogWindow should be a GtkWindow (Emilio Pozuelo Monfort)
+
+Translations:
+ - Updated de Translation (Mario Blättermann)
+ - Updated es Translation (Daniel Mustieles, Jorge González)
+ - Updated gl Translation (Fran Diéguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated hu Translation (Gabor Kelemen)
+ - Updated lt Translation (Aurimas Černius)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Hannie Dumoleyn)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated te Translation (krishnababu k)
+ - Updated zh_CN Translation (Aron Xu)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+
+Documentation translations:
+ - Updated hu Documentation translation (Gabor Kelemen)
+
 NEW in 3.1.2.1 (14/06/2011)
 ==============
 
