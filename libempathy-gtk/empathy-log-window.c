@@ -2221,6 +2221,18 @@ log_window_events_changed_cb (GtkTreeSelection *selection,
 }
 
 static void
+log_window_events_row_activated_cb (GtkTreeView *view,
+    GtkTreePath *path,
+    GtkTreeViewColumn *column,
+    EmpathyLogWindow *self)
+{
+  if (gtk_tree_view_row_expanded (view, path))
+    gtk_tree_view_collapse_row (view, path);
+  else
+    gtk_tree_view_expand_row (view, path, FALSE);
+}
+
+static void
 log_window_events_setup (EmpathyLogWindow *self)
 {
   GtkTreeView       *view;
@@ -2284,6 +2296,10 @@ log_window_events_setup (EmpathyLogWindow *self)
   /* set up signals */
   g_signal_connect (selection, "changed",
       G_CALLBACK (log_window_events_changed_cb),
+      self);
+
+  g_signal_connect (view, "row-activated",
+      G_CALLBACK (log_window_events_row_activated_cb),
       self);
 
   g_object_unref (store);
