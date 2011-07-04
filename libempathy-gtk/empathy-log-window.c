@@ -917,12 +917,13 @@ model_is_parent (GtkTreeModel *model,
   return found;
 }
 
-static const gchar *
-get_contact_alias_for_message (EmpathyMessage *message,
+static gchar *
+get_display_string_for_chat_message (EmpathyMessage *message,
     TplEvent *event)
 {
-  EmpathyContact *sender, *receiver;
+  EmpathyContact *sender, *receiver, *target;
   TplEntity *ent_sender, *ent_receiver;
+  const gchar *format;
 
   sender = empathy_message_get_sender (message);
   receiver = empathy_message_get_receiver (message);
@@ -930,17 +931,25 @@ get_contact_alias_for_message (EmpathyMessage *message,
   ent_sender = tpl_event_get_sender (event);
   ent_receiver = tpl_event_get_receiver (event);
 
-  /* If this is a MUC, we want to show "Chat with <room>". */
+  /* If this is a MUC, we want to show "Chat in <room>". */
+  if (tpl_entity_get_entity_type (ent_sender) == TPL_ENTITY_ROOM ||
+      (ent_receiver != NULL &&
+      tpl_entity_get_entity_type (ent_receiver) == TPL_ENTITY_ROOM))
+    format = _("Chat in %s");
+  else
+    format = _("Chat with %s");
+
   if (tpl_entity_get_entity_type (ent_sender) == TPL_ENTITY_ROOM)
-    return tpl_entity_get_alias (ent_sender);
-  if (ent_receiver &&
+    target = sender;
+  else if (ent_receiver != NULL &&
       tpl_entity_get_entity_type (ent_receiver) == TPL_ENTITY_ROOM)
-    return tpl_entity_get_alias (ent_receiver);
+    target = receiver;
+  else if (empathy_contact_is_user (sender))
+    target = receiver;
+  else
+    target = sender;
 
-  if (empathy_contact_is_user (sender))
-    return empathy_contact_get_alias (receiver);
-
-  return empathy_contact_get_alias (sender);
+  return g_markup_printf_escaped (format, empathy_contact_get_alias (target));
 }
 
 static void
@@ -980,8 +989,7 @@ get_parent_iter_for_message (TplEvent *event,
       pretty_date = g_date_time_format (date,
           C_("A date with the time", "%A, %e %B %Y %X"));
 
-      body = g_markup_printf_escaped (_("Chat with %s"),
-          get_contact_alias_for_message (message, event));
+      body = get_display_string_for_chat_message (message, event);
 
       gtk_tree_store_append (store, &iter, NULL);
       gtk_tree_store_set (store, &iter,
