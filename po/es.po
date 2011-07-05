@@ -1,23 +1,23 @@
 # translation of empathy.master.po to Español
 # Copyright (C) 2003 Free Software Foundation
 # This file is distributed under the same license as the Gossip package.
-# Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010, 2011.
 # Daniel Mustieles <daniel.mustieles@gmail.com>, 2010, 2011.
+# Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-07-01 07:03+0000\n"
-"PO-Revision-Date: 2011-07-01 10:36+0200\n"
-"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
-"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"POT-Creation-Date: 2011-07-04 16:52+0000\n"
+"PO-Revision-Date: 2011-07-05 16:36+0200\n"
+"Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
+"Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: 8bits\n"
 "X-Generator: KBabel 1.11.4\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: ../data/empathy.desktop.in.in.h:1
 msgid "Chat on Google Talk, Facebook, MSN and many other chat services"
@@ -1384,8 +1384,8 @@ msgid ""
 "join a new chat room\""
 msgstr ""
 "/say <mensaje>: enviar un <mensaje> a la conversación actual. Esto se usa "
-"para enviar un mensaje comenzando por una «/». Por ejemplo: «/say /join se usa "
-"para unirse a una sala de chat nueva»"
+"para enviar un mensaje comenzando por una «/». Por ejemplo: «/say /join se "
+"usa para unirse a una sala de chat nueva»"
 
 #: ../libempathy-gtk/empathy-chat.c:1059
 msgid "/whois <contact ID>: display information about a contact"
@@ -1649,7 +1649,6 @@ msgid "Account:"
 msgstr "Cuenta:"
 
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:2
-#| msgid "_Blocked Contacts"
 msgid "Blocked Contacts"
 msgstr "Contactos bloqueados"
 
@@ -2274,119 +2273,130 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Desenlazar"
 
-#: ../libempathy-gtk/empathy-log-window.c:419
+#: ../libempathy-gtk/empathy-log-window.c:450
+msgid "History"
+msgstr "Histórico"
+
+#: ../libempathy-gtk/empathy-log-window.c:502
 msgid "Show"
 msgstr "Mostrar"
 
-#: ../libempathy-gtk/empathy-log-window.c:441
+#: ../libempathy-gtk/empathy-log-window.c:524
 msgid "Search"
 msgstr "Buscar"
 
-#: ../libempathy-gtk/empathy-log-window.c:676
-#: ../libempathy-gtk/empathy-log-window.c:840
-msgctxt "A date with the time"
-msgid "%A, %e %B %Y %X"
-msgstr "%A, %e de %B de %Y a las %X"
+#: ../libempathy-gtk/empathy-log-window.c:938
+#, c-format
+#| msgid "Chat with %s"
+msgid "Chat in %s"
+msgstr "Chat en %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:678
+#: ../libempathy-gtk/empathy-log-window.c:940
 #, c-format
 msgid "Chat with %s"
 msgstr "Chat con %s"
 
+#: ../libempathy-gtk/empathy-log-window.c:990
+#: ../libempathy-gtk/empathy-log-window.c:1153
+msgctxt "A date with the time"
+msgid "%A, %e %B %Y %X"
+msgstr "%A, %e de %B de %Y a las %X"
+
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:797
+#: ../libempathy-gtk/empathy-log-window.c:1110
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:803
+#: ../libempathy-gtk/empathy-log-window.c:1116
 #, c-format
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:859
-#: ../libempathy-gtk/empathy-log-window.c:861 ../src/empathy-ft-manager.c:1026
+#: ../libempathy-gtk/empathy-log-window.c:1172
+#: ../libempathy-gtk/empathy-log-window.c:1174
+#: ../src/empathy-ft-manager.c:1026
 msgid "%"
 msgstr "%"
 
-#: ../libempathy-gtk/empathy-log-window.c:868
+#: ../libempathy-gtk/empathy-log-window.c:1181
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "La llamada duró %s, finalizó a las %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1195
+#: ../libempathy-gtk/empathy-log-window.c:1513
 msgid "Today"
 msgstr "Hoy"
 
-#: ../libempathy-gtk/empathy-log-window.c:1199
+#: ../libempathy-gtk/empathy-log-window.c:1517
 msgid "Yesterday"
 msgstr "Ayer"
 
-#: ../libempathy-gtk/empathy-log-window.c:1215
+#: ../libempathy-gtk/empathy-log-window.c:1533
 msgctxt ""
 "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
 msgstr "%e de %B de %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1296
-#: ../libempathy-gtk/empathy-log-window.c:2736
+#: ../libempathy-gtk/empathy-log-window.c:1614
+#: ../libempathy-gtk/empathy-log-window.c:3066
 msgid "Anytime"
 msgstr "Cualquier hora"
 
-#: ../libempathy-gtk/empathy-log-window.c:1368
-#: ../libempathy-gtk/empathy-log-window.c:1712
+#: ../libempathy-gtk/empathy-log-window.c:1692
+#: ../libempathy-gtk/empathy-log-window.c:2041
 msgid "Anyone"
 msgstr "Cualquiera"
 
-#: ../libempathy-gtk/empathy-log-window.c:1992
+#: ../libempathy-gtk/empathy-log-window.c:2322
 msgid "Who"
 msgstr "Quién"
 
-#: ../libempathy-gtk/empathy-log-window.c:2196
+#: ../libempathy-gtk/empathy-log-window.c:2526
 msgid "When"
 msgstr "Cuándo"
 
-#: ../libempathy-gtk/empathy-log-window.c:2312
+#: ../libempathy-gtk/empathy-log-window.c:2642
 msgid "Anything"
 msgstr "Cualquier cosa"
 
-#: ../libempathy-gtk/empathy-log-window.c:2314
+#: ../libempathy-gtk/empathy-log-window.c:2644
 msgid "Text chats"
 msgstr "Chats de texto"
 
-#: ../libempathy-gtk/empathy-log-window.c:2316
+#: ../libempathy-gtk/empathy-log-window.c:2646
 msgid "Calls"
 msgstr "Llamadas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2321
+#: ../libempathy-gtk/empathy-log-window.c:2651
 msgid "Incoming calls"
 msgstr "Llamadas entrantes"
 
-#: ../libempathy-gtk/empathy-log-window.c:2322
+#: ../libempathy-gtk/empathy-log-window.c:2652
 msgid "Outgoing calls"
 msgstr "Llamadas salientes"
 
-#: ../libempathy-gtk/empathy-log-window.c:2323
+#: ../libempathy-gtk/empathy-log-window.c:2653
 msgid "Missed calls"
 msgstr "Llamadas perdidas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2344
+#: ../libempathy-gtk/empathy-log-window.c:2674
 msgid "What"
 msgstr "Qué"
 
-#: ../libempathy-gtk/empathy-log-window.c:3039
+#: ../libempathy-gtk/empathy-log-window.c:3369
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr ""
 "¿Está seguro de que quiere eliminar todos los registros de conversaciones "
 "anteriores?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3043
+#: ../libempathy-gtk/empathy-log-window.c:3373
 msgid "Clear All"
 msgstr "Limpiar todo"
 
-#: ../libempathy-gtk/empathy-log-window.c:3050
+#: ../libempathy-gtk/empathy-log-window.c:3380
 msgid "Delete from:"
 msgstr "Eliminar de:"
 
@@ -2411,29 +2421,25 @@ msgid "Delete All History..."
 msgstr "Borrar todo el histórico…"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:5
-msgid "History"
-msgstr "Histórico"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:6
 msgid "Profile"
 msgstr "Perfil"
 
-#: ../libempathy-gtk/empathy-log-window.ui.h:7
+#: ../libempathy-gtk/empathy-log-window.ui.h:6
 #: ../src/empathy-call-window.ui.h:20
 #: ../src/empathy-streamed-media-window.ui.h:20
 msgid "Video"
 msgstr "Vídeo"
 
-#: ../libempathy-gtk/empathy-log-window.ui.h:8
+#: ../libempathy-gtk/empathy-log-window.ui.h:7
 #: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:20
 msgid "_Edit"
 msgstr "_Editar"
 
-#: ../libempathy-gtk/empathy-log-window.ui.h:9
+#: ../libempathy-gtk/empathy-log-window.ui.h:8
 msgid "_File"
 msgstr "_Archivo"
 
-#: ../libempathy-gtk/empathy-log-window.ui.h:10
+#: ../libempathy-gtk/empathy-log-window.ui.h:9
 msgid "page 2"
 msgstr "página 2"
 
