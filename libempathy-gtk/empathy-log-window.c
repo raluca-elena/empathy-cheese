@@ -176,6 +176,7 @@ enum
 {
   COL_WHAT_TYPE,
   COL_WHAT_SUBTYPE,
+  COL_WHAT_SENSITIVE,
   COL_WHAT_TEXT,
   COL_WHAT_ICON,
   COL_WHAT_COUNT
@@ -1915,6 +1916,80 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
 }
 
 static void
+log_window_update_what_iter_sensitivity (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    gboolean sensitive)
+{
+  GtkTreeStore *store = GTK_TREE_STORE (model);
+  GtkTreeIter child;
+  gboolean next;
+
+  gtk_tree_store_set (store, iter,
+      COL_WHAT_SENSITIVE, sensitive,
+      -1);
+
+  for (next = gtk_tree_model_iter_children (model, &child, iter);
+       next;
+       next = gtk_tree_model_iter_next (model, &child))
+    {
+      gtk_tree_store_set (store, &child,
+          COL_WHAT_SENSITIVE, sensitive,
+          -1);
+    }
+}
+
+static void
+log_window_update_what_sensitivity (EmpathyLogWindow *self)
+{
+  GtkTreeView *view;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  GList *accounts, *targets, *acc, *targ;
+  gboolean next;
+
+  log_window_get_selected (self, &accounts, &targets, NULL, NULL,
+      NULL, NULL);
+
+  view = GTK_TREE_VIEW (self->priv->treeview_what);
+  model = gtk_tree_view_get_model (view);
+
+  /* For each event type... */
+  for (next = gtk_tree_model_get_iter_first (model, &iter);
+       next;
+       next = gtk_tree_model_iter_next (model, &iter))
+    {
+      TplEventTypeMask type;
+
+      gtk_tree_model_get (model, &iter,
+          COL_WHAT_TYPE, &type,
+          -1);
+
+      /* ...we set the type and its subtypes (if any) unsensitive... */
+      log_window_update_what_iter_sensitivity (model, &iter, FALSE);
+
+      for (acc = accounts, targ = targets;
+           acc != NULL && targ != NULL;
+           acc = acc->next, targ = targ->next)
+        {
+          TpAccount *account = acc->data;
+          TplEntity *target = targ->data;
+
+          if (tpl_log_manager_exists (self->priv->log_manager,
+                  account, target, type))
+            {
+              /* And then we set it (and its subtypes, again, if any)
+               * as sensitive if there are logs of that type. */
+              log_window_update_what_iter_sensitivity (model, &iter, TRUE);
+              break;
+            }
+        }
+    }
+
+  g_list_free_full (accounts, g_object_unref);
+  g_list_free_full (targets, g_object_unref);
+}
+
+static void
 log_window_who_changed_cb (GtkTreeSelection *selection,
     EmpathyLogWindow *self)
 {
@@ -1945,6 +2020,7 @@ log_window_who_changed_cb (GtkTreeSelection *selection,
         }
     }
 
+  log_window_update_what_sensitivity (self);
   log_window_update_buttons_sensitivity (self);
 
   /* The contact changed, so the dates need to be updated */
@@ -2678,6 +2754,7 @@ log_window_what_setup (EmpathyLogWindow *self)
   store = gtk_tree_store_new (COL_WHAT_COUNT,
       G_TYPE_INT,         /* history type */
       G_TYPE_INT,         /* history subtype */
+      G_TYPE_BOOLEAN,     /* sensitive */
       G_TYPE_STRING,      /* stringified history type */
       G_TYPE_STRING);     /* icon */
 
@@ -2699,6 +2776,8 @@ log_window_what_setup (EmpathyLogWindow *self)
   gtk_tree_view_column_pack_start (column, cell, TRUE);
   gtk_tree_view_column_add_attribute (column, cell,
       "text", COL_WHAT_TEXT);
+  gtk_tree_view_column_add_attribute (column, cell,
+      "sensitive", COL_WHAT_SENSITIVE);
 
   gtk_tree_view_append_column (view, column);
   gtk_tree_view_set_search_column (view, COL_WHAT_TEXT);
@@ -2718,6 +2797,7 @@ log_window_what_setup (EmpathyLogWindow *self)
       gtk_tree_store_set (store, &iter,
           COL_WHAT_TYPE, events[i].type,
           COL_WHAT_SUBTYPE, events[i].subtype,
+          COL_WHAT_SENSITIVE, TRUE,
           COL_WHAT_TEXT, events[i].text,
           COL_WHAT_ICON, events[i].icon,
           -1);
@@ -2731,6 +2811,7 @@ log_window_what_setup (EmpathyLogWindow *self)
       gtk_tree_store_set (store, &iter,
           COL_WHAT_TYPE, call_events[i].type,
           COL_WHAT_SUBTYPE, call_events[i].subtype,
+          COL_WHAT_SENSITIVE, TRUE,
           COL_WHAT_TEXT, call_events[i].text,
           COL_WHAT_ICON, call_events[i].icon,
           -1);
