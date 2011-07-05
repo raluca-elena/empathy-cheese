@@ -55,6 +55,7 @@ enum {
   PROP_MIN_HEIGHT,
   PROP_SYNC,
   PROP_ASYNC,
+  PROP_FLIP_VIDEO,
 };
 
 /* private structure */
@@ -67,11 +68,13 @@ struct _EmpathyVideoWidgetPriv
   GstElement *videosink;
   GstPad *sink_pad;
   GstElement *overlay;
+  GstElement *flip;
   FsElementAddedNotifier *notifier;
   gint min_width;
   gint min_height;
   gboolean sync;
   gboolean async;
+  gboolean flip_video;
 
   GMutex *lock;
 };
@@ -138,14 +141,20 @@ empathy_video_widget_constructed (GObject *object)
 
   g_object_set (colorspace, "qos", FALSE, NULL);
 
+  priv->flip = gst_element_factory_make ("videoflip", NULL);
+  g_assert (priv->flip != NULL);
+
   gst_bin_add_many (GST_BIN (priv->videosink), colorspace, videoscale,
-    sink, NULL);
+    priv->flip, sink, NULL);
 
   if (!gst_element_link (colorspace, videoscale))
     g_error ("Failed to link ffmpegcolorspace and videoscale");
 
-  if (!gst_element_link (videoscale, sink))
-    g_error ("Failed to link videoscale and gconfvideosink");
+  if (!gst_element_link (videoscale, priv->flip))
+    g_error ("Failed to link videoscale and videoflip");
+
+  if (!gst_element_link (priv->flip, sink))
+    g_error ("Failed to link videoflip and gconfvideosink");
 
   pad = gst_element_get_static_pad (colorspace, "sink");
   g_assert (pad != NULL);
@@ -203,6 +212,11 @@ empathy_video_widget_set_property (GObject *object,
         empathy_video_widget_element_set_sink_properties (
           EMPATHY_VIDEO_WIDGET (object));
         break;
+      case PROP_FLIP_VIDEO:
+        priv->flip_video = g_value_get_boolean (value);
+        gst_util_set_object_arg (G_OBJECT (priv->flip), "method",
+            priv->flip_video ? "horizontal-flip" : "none");
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -233,6 +247,9 @@ empathy_video_widget_get_property (GObject *object,
         break;
       case PROP_ASYNC:
         g_value_set_boolean (value, priv->async);
+        break;
+      case PROP_FLIP_VIDEO:
+        g_value_set_boolean (value, priv->flip_video);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -301,6 +318,13 @@ empathy_video_widget_class_init (
     TRUE,
     G_PARAM_CONSTRUCT | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_ASYNC, param_spec);
+
+  param_spec = g_param_spec_boolean ("flip-video",
+    "flip video",
+    "Whether the video should be flipped horizontally or not",
+    FALSE,
+    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_FLIP_VIDEO, param_spec);
 }
 
 void

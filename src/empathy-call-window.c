@@ -708,7 +708,11 @@ create_video_preview (EmpathyCallWindow *self)
 
   priv->video_preview = empathy_video_widget_new_with_size (bus,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
-  g_object_set (priv->video_preview, "sync", FALSE, "async", TRUE, NULL);
+  g_object_set (priv->video_preview,
+      "sync", FALSE,
+      "async", TRUE,
+      "flip-video", TRUE,
+      NULL);
 
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
       priv->video_preview, TRUE, TRUE, 0);
