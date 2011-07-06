@@ -705,15 +705,25 @@ static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  ClutterLayoutManager *layout;
+  ClutterActor *preview;
 
   g_assert (priv->video_preview == NULL);
 
-  priv->video_preview = clutter_texture_new ();
-  clutter_actor_set_size (priv->video_preview,
+  preview = clutter_texture_new ();
+  clutter_actor_set_size (preview,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
-
   priv->video_preview_sink = clutter_gst_video_sink_new (
-      CLUTTER_TEXTURE (priv->video_preview));
+      CLUTTER_TEXTURE (preview));
+
+  /* Add a little offset to the video preview */
+  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
+      CLUTTER_BIN_ALIGNMENT_START);
+  priv->video_preview = clutter_box_new (layout);
+  clutter_actor_set_size (priv->video_preview,
+      SELF_VIDEO_SECTION_WIDTH + 10, SELF_VIDEO_SECTION_HEIGTH + 10);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview),
+      preview);
 
   g_object_set (priv->video_preview_sink,
       "sync", FALSE,
