@@ -716,6 +716,14 @@ create_video_preview (EmpathyCallWindow *self)
   priv->video_preview_sink = clutter_gst_video_sink_new (
       CLUTTER_TEXTURE (preview));
 
+  /* Flip the video preview */
+  clutter_actor_set_rotation (preview,
+      CLUTTER_Y_AXIS,
+      180,
+      SELF_VIDEO_SECTION_WIDTH * 0.5,
+      0.0,
+      0.0);
+
   /* Add a little offset to the video preview */
   layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
       CLUTTER_BIN_ALIGNMENT_START);
