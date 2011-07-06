@@ -1022,6 +1022,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
   GtkWidget *scroll;
   ClutterConstraint *size_constraint;
   ClutterActor *remote_avatar;
+  GtkStyleContext *context;
+  GdkRGBA rgba;
+  ClutterColor bg;
 
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_CALL_WINDOW, EmpathyCallWindowPriv);
@@ -1091,6 +1094,20 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->video_box = clutter_box_new (priv->video_layout);
 
   priv->video_container = gtk_clutter_embed_new ();
+
+  /* Set the background color to that of the rest of the window */
+  context = gtk_widget_get_style_context (priv->content_hbox);
+  gtk_style_context_get_background_color (context,
+      GTK_STATE_FLAG_NORMAL, &rgba);
+  bg.red = CLAMP (rgba.red * 255.0, 0, 255);
+  bg.green = CLAMP (rgba.green * 255.0, 0, 255);
+  bg.blue = CLAMP (rgba.blue * 255.0, 0, 255);
+  bg.alpha = CLAMP (rgba.alpha * 255.0, 0, 255);
+  clutter_stage_set_color (
+      CLUTTER_STAGE (gtk_clutter_embed_get_stage (
+          GTK_CLUTTER_EMBED (priv->video_container))),
+      &bg);
+
   clutter_container_add (
       CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
           GTK_CLUTTER_EMBED (priv->video_container))),
