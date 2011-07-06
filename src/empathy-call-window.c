@@ -1344,10 +1344,7 @@ disable_camera (EmpathyCallWindow *self)
 
   DEBUG ("Disable camera");
 
-  display_video_preview (self, FALSE);
-
-  if (priv->camera_state == CAMERA_STATE_ON)
-    empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
+  empathy_call_window_set_send_video (self, CAMERA_STATE_OFF);
 
   priv->camera_state = CAMERA_STATE_OFF;
 }
