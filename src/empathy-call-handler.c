@@ -52,6 +52,8 @@ enum {
   CLOSED,
   CANDIDATES_CHANGED,
   STATE_CHANGED,
+  FRAMERATE_CHANGED,
+  RESOLUTION_CHANGED,
   LAST_SIGNAL
 };
 
@@ -511,6 +513,19 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
       G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_STRING);
+
+  signals[FRAMERATE_CHANGED] =
+    g_signal_new ("framerate-changed", G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0, NULL, NULL,
+      g_cclosure_marshal_generic,
+      G_TYPE_NONE, 1, G_TYPE_UINT);
+
+  signals[RESOLUTION_CHANGED] =
+    g_signal_new ("resolution-changed", G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0, NULL, NULL,
+      g_cclosure_marshal_generic,
+      G_TYPE_NONE,
+      2, G_TYPE_UINT, G_TYPE_UINT);
 }
 
 EmpathyCallHandler *
@@ -761,6 +776,31 @@ on_tf_content_src_pad_added_cb (TfContent *content,
 }
 
 static void
+on_tf_content_framerate_changed (TfContent *content,
+  GParamSpec *spec,
+  EmpathyCallHandler *handler)
+{
+  guint framerate;
+
+  g_object_get (content, "framerate", &framerate, NULL);
+
+  if (framerate != 0)
+    g_signal_emit (G_OBJECT (handler), signals[FRAMERATE_CHANGED], 0,
+        framerate);
+}
+
+static void
+on_tf_content_resolution_changed (TfContent *content,
+   guint width,
+   guint height,
+   EmpathyCallHandler *handler)
+{
+  if (width > 0 && height > 0)
+    g_signal_emit (G_OBJECT (handler), signals[RESOLUTION_CHANGED], 0,
+        width, height);
+}
+
+static void
 on_tf_channel_content_added_cb (TfChannel *tfchannel,
   TfContent *content,
   EmpathyCallHandler *handler)
@@ -811,6 +851,33 @@ on_tf_channel_content_added_cb (TfChannel *tfchannel,
  fs_codec_list_destroy (codecs);
  tp_clear_object (&fs_stream);
 */
+
+ if (mtype == FS_MEDIA_TYPE_VIDEO)
+   {
+     guint framerate, width, height;
+
+     g_signal_connect (content, "notify::framerate",
+         G_CALLBACK (on_tf_content_framerate_changed),
+         handler);
+
+     g_signal_connect (content, "resolution-changed",
+         G_CALLBACK (on_tf_content_resolution_changed),
+         handler);
+
+     g_object_get (content,
+         "framerate", &framerate,
+         "width", &width,
+         "height", &height,
+         NULL);
+
+     if (framerate > 0)
+       g_signal_emit (G_OBJECT (handler), signals[FRAMERATE_CHANGED], 0,
+           framerate);
+
+     if (width > 0 && height > 0)
+       g_signal_emit (G_OBJECT (handler), signals[RESOLUTION_CHANGED], 0,
+           width, height);
+   }
 
  gst_object_unref (spad);
 }
