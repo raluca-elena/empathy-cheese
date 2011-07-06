@@ -120,7 +120,6 @@ struct _EmpathyCallWindowPriv
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *sidebar;
-  GtkWidget *sidebar_button;
   GtkWidget *statusbar;
   GtkWidget *volume_button;
   GtkWidget *redial_button;
@@ -228,9 +227,6 @@ static gboolean empathy_call_window_delete_cb (GtkWidget *widget,
 
 static gboolean empathy_call_window_state_event_cb (GtkWidget *widget,
   GdkEventWindowState *event, EmpathyCallWindow *window);
-
-static void empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
-  EmpathyCallWindow *window);
 
 static void empathy_call_window_set_send_video (EmpathyCallWindow *window,
   CameraState state);
@@ -1034,7 +1030,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   GtkBuilder *gui;
   GtkWidget *top_vbox;
   GtkWidget *h;
-  GtkWidget *arrow;
   GtkWidget *page;
   gchar *filename;
   GtkWidget *scroll;
@@ -1162,16 +1157,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   empathy_call_window_setup_toolbar (self);
 
-  priv->sidebar_button = gtk_toggle_button_new_with_mnemonic (_("_Sidebar"));
-  arrow = gtk_arrow_new (GTK_ARROW_RIGHT, GTK_SHADOW_NONE);
-  g_signal_connect (G_OBJECT (priv->sidebar_button), "toggled",
-    G_CALLBACK (empathy_call_window_sidebar_toggled_cb), self);
-
-  gtk_button_set_image (GTK_BUTTON (priv->sidebar_button), arrow);
-
   h = gtk_hbox_new (FALSE, 3);
   gtk_box_pack_end (GTK_BOX (priv->vbox), h, FALSE, FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (h), priv->sidebar_button, FALSE, FALSE, 3);
 
   priv->sidebar = ev_sidebar_new ();
   g_signal_connect (G_OBJECT (priv->sidebar),
@@ -2941,15 +2928,14 @@ empathy_call_window_update_dialpad_menu (EmpathyCallWindow *window,
 }
 
 static void
-empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
-  EmpathyCallWindow *window)
+empathy_call_window_show_sidebar (EmpathyCallWindow *window,
+    gboolean active)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
-  GtkWidget *arrow;
   int w, h, handle_size;
   GtkAllocation allocation, sidebar_allocation;
   gchar *page;
-  gboolean active, dialpad_shown;
+  gboolean dialpad_shown;
 
   gtk_widget_get_allocation (GTK_WIDGET (window), &allocation);
   w = allocation.width;
@@ -2958,22 +2944,17 @@ empathy_call_window_sidebar_toggled_cb (GtkToggleButton *toggle,
   gtk_widget_style_get (priv->pane, "handle_size", &handle_size, NULL);
 
   gtk_widget_get_allocation (priv->sidebar, &sidebar_allocation);
-  active = gtk_toggle_button_get_active (toggle);
 
   if (active)
     {
-      arrow = gtk_arrow_new (GTK_ARROW_LEFT, GTK_SHADOW_NONE);
       gtk_widget_show (priv->sidebar);
       w += sidebar_allocation.width + handle_size;
     }
   else
     {
-      arrow = gtk_arrow_new (GTK_ARROW_RIGHT, GTK_SHADOW_NONE);
       w -= sidebar_allocation.width + handle_size;
       gtk_widget_hide (priv->sidebar);
     }
-
-  gtk_button_set_image (GTK_BUTTON (priv->sidebar_button), arrow);
 
   if (w > 0 && h > 0)
     gtk_window_resize (GTK_WINDOW (window), w, h);
@@ -3048,20 +3029,14 @@ static void
 empathy_call_window_sidebar_hidden_cb (EvSidebar *sidebar,
   EmpathyCallWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
-    FALSE);
+  empathy_call_window_show_sidebar (window, FALSE);
 }
 
 static void
 empathy_call_window_sidebar_shown_cb (EvSidebar *sidebar,
   EmpathyCallWindow *window)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
-    TRUE);
+  empathy_call_window_show_sidebar (window, TRUE);
 }
 
 static void
@@ -3147,8 +3122,7 @@ empathy_call_window_dialpad_cb (GtkToggleAction *menu,
   if (active)
     ev_sidebar_set_current_page (EV_SIDEBAR (priv->sidebar), "dialpad");
 
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (priv->sidebar_button),
-      active);
+  empathy_call_window_show_sidebar (window, active);
 }
 
 static void
