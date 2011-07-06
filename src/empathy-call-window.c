@@ -2736,6 +2736,35 @@ empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
   return FALSE;
 }
 
+static void
+empathy_call_window_framerate_changed_cb (EmpathyCallHandler *handler,
+    guint framerate,
+    EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+
+  DEBUG ("Framerate changed to %u", framerate);
+
+  if (priv->video_input != NULL)
+    empathy_video_src_set_framerate (priv->video_input, framerate);
+}
+
+static void
+empathy_call_window_resolution_changed_cb (EmpathyCallHandler *handler,
+    guint width,
+    guint height,
+    EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+
+  DEBUG ("Resolution changed to %ux%u", width, height);
+
+  if (priv->video_input != NULL)
+    {
+      empathy_video_src_set_resolution (priv->video_input, width, height);
+    }
+}
+
 /* Called with global lock held */
 static GstPad *
 empathy_call_window_get_video_sink_pad (EmpathyCallWindow *self)
@@ -3679,6 +3708,11 @@ empathy_call_window_connect_handler (EmpathyCallWindow *self)
    * call window. */
   g_signal_connect (priv->handler, "notify::call-channel",
     G_CALLBACK (call_handler_notify_call_cb), self);
+
+  g_signal_connect (priv->handler, "framerate-changed",
+    G_CALLBACK (empathy_call_window_framerate_changed_cb), self);
+  g_signal_connect (priv->handler, "resolution-changed",
+    G_CALLBACK (empathy_call_window_resolution_changed_cb), self);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
