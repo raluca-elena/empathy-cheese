@@ -61,7 +61,7 @@ typedef struct {
 	guint                 pages_loading;
 	/* Queue of QueuedItem*s containing an EmpathyMessage or string */
 	GQueue                message_queue;
-	/* Queue of owned gchar* of message token to remove unread
+	/* Queue of guint32 of pending message id to remove unread
 	 * marker for when we lose focus. */
 	GQueue                acked_messages;
 	GtkWidget            *inspector_window;
@@ -992,11 +992,14 @@ theme_adium_append_message (EmpathyChatView *view,
 	 * message later. */
 	tp_msg = empathy_message_get_tp_message (msg);
 	if (tp_msg != NULL) {
-		gchar *tmp = tp_escape_as_identifier (
-		    tp_message_get_token (tp_msg));
-		g_string_append_printf (message_classes,
-		    " x-empathy-message-id-%s", tmp);
-		g_free (tmp);
+		guint32 id;
+		gboolean valid;
+
+		id = tp_message_get_pending_message_id (tp_msg, &valid);
+		if (valid) {
+			g_string_append_printf (message_classes,
+			    " x-empathy-message-id-%u", id);
+		}
 	}
 
 	/* Define javascript function to use */
@@ -1259,11 +1262,11 @@ theme_adium_copy_clipboard (EmpathyChatView *view)
 
 static void
 theme_adium_remove_mark_from_message (EmpathyThemeAdium *self,
-				      const gchar *token)
+				      guint32 id)
 {
 	WebKitDOMDocument *dom;
 	WebKitDOMNodeList *nodes;
-	gchar *class, *tmp;
+	gchar *class;
 	GError *error = NULL;
 
 	dom = webkit_web_view_get_dom_document (WEBKIT_WEB_VIEW (self));
@@ -1271,9 +1274,7 @@ theme_adium_remove_mark_from_message (EmpathyThemeAdium *self,
 		return;
 	}
 
-	tmp = tp_escape_as_identifier (token);
-	class = g_strdup_printf (".x-empathy-message-id-%s", tmp);
-	g_free (tmp);
+	class = g_strdup_printf (".x-empathy-message-id-%u", id);
 
 	/* Get all nodes with focus class */
 	nodes = webkit_dom_document_query_selector_all (dom, class, &error);
@@ -1294,10 +1295,9 @@ theme_adium_remove_acked_message_unread_mark_foreach (gpointer data,
 						      gpointer user_data)
 {
 	EmpathyThemeAdium *self = user_data;
-	gchar *token = data;
+	guint32 id = GPOINTER_TO_UINT (data);
 
-	theme_adium_remove_mark_from_message (self, token);
-	g_free (token);
+	theme_adium_remove_mark_from_message (self, id);
 }
 
 static void
@@ -1326,10 +1326,18 @@ theme_adium_message_acknowledged (EmpathyChatView *view,
 	EmpathyThemeAdium *self = (EmpathyThemeAdium *) view;
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (view);
 	TpMessage *tp_msg;
+	guint32 id;
+	gboolean valid;
 
 	tp_msg = empathy_message_get_tp_message (message);
 
 	if (tp_msg == NULL) {
+		return;
+	}
+
+	id = tp_message_get_pending_message_id (tp_msg, &valid);
+	if (!valid) {
+		g_warning ("Acknoledged message doesn't have a pending ID");
 		return;
 	}
 
@@ -1339,12 +1347,11 @@ theme_adium_message_acknowledged (EmpathyChatView *view,
 	 * up, and when we lose focus, we'll remove the markers. */
 	if (priv->has_focus) {
 		g_queue_push_tail (&priv->acked_messages,
-				   g_strdup (tp_message_get_token (tp_msg)));
+				   GUINT_TO_POINTER (id));
 		return;
 	}
 
-	theme_adium_remove_mark_from_message (self,
-					      tp_message_get_token (tp_msg));
+	theme_adium_remove_mark_from_message (self, id);
 }
 
 static void
@@ -1543,7 +1550,6 @@ theme_adium_dispose (GObject *object)
 	}
 
 	if (priv->acked_messages.length > 0) {
-		g_queue_foreach (&priv->acked_messages, (GFunc) g_free, NULL);
 		g_queue_clear (&priv->acked_messages);
 	}
 
