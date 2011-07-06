@@ -119,7 +119,6 @@ struct _EmpathyCallWindowPriv
   ClutterActor *video_preview;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
-  GtkWidget *self_user_avatar_widget;
   GtkWidget *sidebar;
   GtkWidget *sidebar_button;
   GtkWidget *statusbar;
@@ -763,7 +762,6 @@ display_video_preview (EmpathyCallWindow *self,
 
       play_camera (self, TRUE);
       clutter_actor_show (priv->video_preview);
-      gtk_widget_hide (priv->self_user_avatar_widget);
     }
   else
     {
@@ -775,7 +773,6 @@ display_video_preview (EmpathyCallWindow *self,
           clutter_actor_hide (priv->video_preview);
           play_camera (self, FALSE);
         }
-      gtk_widget_show (priv->self_user_avatar_widget);
     }
 }
 
@@ -1114,13 +1111,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
       priv->video_container, TRUE, TRUE,
       CONTENT_HBOX_CHILDREN_PACKING_PADDING);
 
-  priv->self_user_avatar_widget = gtk_image_new ();
-
-#if 0
-  gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
-      priv->self_user_avatar_widget, TRUE, TRUE, 0);
-#endif
-
   create_pipeline (self);
   create_video_output_widget (self);
   create_audio_input (self);
@@ -1288,39 +1278,16 @@ contact_avatar_changed_cb (EmpathyContact *contact,
 }
 
 static void
-empathy_call_window_got_self_contact_cb (TpConnection *connection,
-    EmpathyContact *contact, const GError *error, gpointer user_data,
-    GObject *weak_object)
-{
-  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
-
-  init_contact_avatar_with_size (contact, priv->self_user_avatar_widget,
-      MIN (SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH));
-
-  g_signal_connect (contact, "notify::avatar",
-      G_CALLBACK (contact_avatar_changed_cb), priv->self_user_avatar_widget);
-}
-
-static void
 empathy_call_window_setup_avatars (EmpathyCallWindow *self,
     EmpathyCallHandler *handler)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  TpConnection *connection;
 
   g_signal_connect (priv->contact, "notify::name",
       G_CALLBACK (contact_name_changed_cb), self);
   g_signal_connect (priv->contact, "notify::avatar",
     G_CALLBACK (contact_avatar_changed_cb),
     priv->remote_user_avatar_widget);
-
-  /* Retrieving the self avatar */
-  connection = empathy_contact_get_connection (priv->contact);
-  empathy_tp_contact_factory_get_from_handle (connection,
-      tp_connection_get_self_handle (connection),
-      empathy_call_window_got_self_contact_cb, self, NULL,
-      G_OBJECT (self));
 
   set_window_title (self);
 
