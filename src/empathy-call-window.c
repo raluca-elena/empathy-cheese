@@ -622,6 +622,9 @@ create_video_output_widget (EmpathyCallWindow *self)
 
   priv->video_output = clutter_texture_new ();
 
+  clutter_texture_set_keep_aspect_ratio (CLUTTER_TEXTURE (priv->video_output),
+      TRUE);
+
   priv->video_output_sink = clutter_gst_video_sink_new (
       CLUTTER_TEXTURE (priv->video_output));
 
@@ -1006,7 +1009,6 @@ create_pipeline (EmpathyCallWindow *self)
   g_object_unref (bus);
 }
 
-
 static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
@@ -1083,8 +1085,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_paned_pack1 (GTK_PANED (priv->pane), priv->content_hbox, TRUE, FALSE);
 
   /* avatar/video box */
-  priv->video_layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_FILL,
-      CLUTTER_BIN_ALIGNMENT_FILL);
+  priv->video_layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
 
   priv->video_box = clutter_box_new (priv->video_layout);
 
