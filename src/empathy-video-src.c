@@ -54,6 +54,11 @@ struct _EmpathyGstVideoSrcPrivate
   GstElement *src;
   /* Element implementing a ColorBalance interface */
   GstElement *balance;
+  /* Element for resolution and framerate adjustment */
+  GstElement *capsfilter;
+  guint width;
+  guint height;
+  guint framerate;
 };
 
 #define EMPATHY_GST_VIDEO_SRC_GET_PRIVATE(o) \
@@ -162,6 +167,7 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
     g_error (
       "Failed to add \"capsfilter\" (gstreamer core elements missing?)");
 
+  priv->capsfilter = element;
   g_object_set (G_OBJECT (element), "caps", caps, NULL);
 
 
@@ -392,4 +398,50 @@ empathy_video_src_dup_device (EmpathyGstVideoSrc *self)
   g_object_get (priv->src, "device", &device, NULL);
 
   return device;
+}
+
+void
+empathy_video_src_set_framerate (GstElement *src,
+    guint framerate)
+{
+  EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
+  GstCaps *caps;
+
+  g_return_if_fail (priv->capsfilter != NULL);
+
+  g_object_get (priv->capsfilter, "caps", &caps, NULL);
+  caps = gst_caps_make_writable (caps);
+
+  gst_caps_set_simple (caps,
+      "framerate", GST_TYPE_FRACTION, framerate, 1,
+      NULL);
+
+  g_object_set (priv->capsfilter, "caps", caps, NULL);
+}
+
+void
+empathy_video_src_set_resolution (GstElement *src,
+    guint width,
+    guint height)
+{
+  EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
+  GstCaps *caps;
+
+  g_return_if_fail (priv->capsfilter != NULL);
+
+  gst_element_set_locked_state (priv->src, TRUE);
+  gst_element_set_state (priv->src, GST_STATE_NULL);
+
+  g_object_get (priv->capsfilter, "caps", &caps, NULL);
+  caps = gst_caps_make_writable (caps);
+
+  gst_caps_set_simple (caps,
+      "width", G_TYPE_INT, width,
+      "height", G_TYPE_INT, height,
+      NULL);
+
+  g_object_set (priv->capsfilter, "caps", caps, NULL);
+
+  gst_element_set_locked_state (priv->src, FALSE);
+  gst_element_sync_state_with_parent (priv->src);
 }

@@ -85,6 +85,12 @@ void empathy_video_src_change_device (EmpathyGstVideoSrc *self,
   const gchar *device);
 gchar * empathy_video_src_dup_device (EmpathyGstVideoSrc *self);
 
+void empathy_video_src_set_framerate (GstElement *src,
+    guint framerate);
+
+void empathy_video_src_set_resolution (GstElement *src,
+    guint width, guint height);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_GST_VIDEO_SRC_H__*/
