@@ -1280,8 +1280,8 @@ empathy_call_window_play_camera (EmpathyCallWindow *self,
   preview = priv->video_preview_sink;
 
   gst_element_set_state (preview, state);
-  gst_element_set_state (priv->video_input, state);
   gst_element_set_state (priv->video_tee, state);
+  gst_element_set_state (priv->video_input, state);
 }
 
 static void
