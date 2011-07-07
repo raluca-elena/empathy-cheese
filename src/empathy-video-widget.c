@@ -76,6 +76,7 @@ struct _EmpathyVideoWidgetPriv
   gboolean sync;
   gboolean async;
   gboolean flip_video;
+  guintptr xid;
 
   GMutex *lock;
 };
@@ -105,11 +106,13 @@ empathy_video_widget_init (EmpathyVideoWidget *obj)
 static void
 empathy_video_widget_realized (GtkWidget *widget, gpointer user_data)
 {
+  EmpathyVideoWidgetPriv *priv = GET_PRIV (widget);
+
   /* requesting the XID forces the GdkWindow to be native in GTK+ 2.18
    * onwards, requesting the native window in a thread causes a BadWindowID,
    * so we need to request it now. We could call gdk_window_ensure_native(),
    * but that would mean we require GTK+ 2.18, so instead we call this */
-  GDK_WINDOW_XID (gtk_widget_get_window (GTK_WIDGET (widget)));
+  priv->xid = GDK_WINDOW_XID (gtk_widget_get_window (GTK_WIDGET (widget)));
 }
 
 static void
@@ -440,9 +443,9 @@ empathy_video_widget_sync_message_cb (GstBus *bus, GstMessage *message,
 
   if (gst_structure_has_name (s, "prepare-xwindow-id"))
     {
-      g_assert (gtk_widget_get_realized (GTK_WIDGET (self)));
-      gst_x_overlay_set_xwindow_id (GST_X_OVERLAY (priv->overlay),
-        GDK_WINDOW_XID (gtk_widget_get_window (GTK_WIDGET (self))));
+      g_assert (priv->xid != 0);
+      gst_x_overlay_set_window_handle (GST_X_OVERLAY (priv->overlay),
+          priv->xid);
     }
 }
 
