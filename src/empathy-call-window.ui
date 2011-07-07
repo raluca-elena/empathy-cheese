@@ -32,43 +32,6 @@
           </object>
         </child>
         <child>
-          <object class="GtkAction" id="camera">
-            <property name="name">camera</property>
-            <property name="label" translatable="yes">V_ideo</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkRadioAction" id="action_camera_off">
-            <property name="name">action_camera_off</property>
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Video Off</property>
-            <property name="draw_as_radio">True</property>
-            <property name="value">0</property>
-            <property name="current-value">0</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkRadioAction" id="action_camera_preview">
-            <property name="name">action_camera_preview</property>
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Video Preview</property>
-            <property name="draw_as_radio">True</property>
-            <property name="group">action_camera_off</property>
-            <property name="value">1</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkRadioAction" id="action_camera_on">
-            <property name="name">action_camera_on</property>
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="label" translatable="yes">Video On</property>
-            <property name="draw_as_radio">True</property>
-            <property name="group">action_camera_off</property>
-            <property name="value">2</property>
-          </object>
-        </child>
-        <child>
           <object class="GtkAction" id="view">
             <property name="name">view</property>
             <property name="label" translatable="yes">_View</property>
@@ -89,11 +52,6 @@
           <menuitem action="menuhangup"/>
           <menuitem action="menuredial"/>
           <menuitem action="menudialpad"/>
-        </menu>
-        <menu action="camera">
-          <menuitem action="action_camera_off"/>
-          <menuitem action="action_camera_preview"/>
-          <menuitem action="action_camera_on"/>
         </menu>
         <menu action="view">
           <menuitem action="menufullscreen"/>
@@ -166,43 +124,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSeparatorToolItem" id="camera_separator">
+              <object class="GtkToggleToolButton" id="camera">
                 <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleToolButton" id="camera_off">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Camera Off</property>
-                <property name="sensitive">True</property>
-                <property name="tooltip_text" translatable="yes">Disable camera and stop sending video</property>
-              </object>
-              <packing>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleToolButton" id="camera_preview">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Preview</property>
-                <property name="icon_name">avatar-default</property>
-                <property name="sensitive">True</property>
-                <property name="tooltip_text" translatable="yes">Enable camera but don't send video</property>
-              </object>
-              <packing>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleToolButton" id="camera_on">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Camera On</property>
+                <property name="label" translatable="yes">Send Video</property>
                 <property name="icon_name">camera-web</property>
                 <property name="sensitive">False</property>
-                <property name="tooltip_text" translatable="yes">Enable camera and send video</property>
+                <property name="tooltip_text" translatable="yes">Toggle video transmission</property>
               </object>
               <packing>
                 <property name="homogeneous">True</property>
