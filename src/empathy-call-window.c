@@ -116,6 +116,7 @@ struct _EmpathyCallWindowPriv
    * alive only during call. */
   ClutterActor *video_output;
   ClutterActor *video_preview;
+  ClutterActor *preview_hidden_button;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *sidebar;
@@ -673,11 +674,66 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
 }
 
 static void
+empathy_call_window_disable_camera_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  clutter_actor_destroy (self->priv->preview_hidden_button);
+
+  gtk_toggle_tool_button_set_active (
+      GTK_TOGGLE_TOOL_BUTTON (self->priv->camera_button), FALSE);
+}
+
+static void
+empathy_call_window_minimise_camera_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  clutter_actor_hide (self->priv->video_preview);
+  clutter_actor_show (self->priv->preview_hidden_button);
+}
+
+static void
+empathy_call_window_maximise_camera_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  clutter_actor_show (self->priv->video_preview);
+  clutter_actor_hide (self->priv->preview_hidden_button);
+}
+
+static void
+empathy_call_window_preview_button_clicked_cb (GtkButton *button,
+    EmpathyCallWindow *self)
+{
+  GtkWidget *menu;
+
+  menu = gtk_ui_manager_get_widget (self->priv->ui_manager,
+      "/preview-menu");
+  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
+      0, gtk_get_current_event_time ());
+  gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
+}
+
+static void
+empathy_call_window_preview_hidden_button_clicked_cb (GtkButton *button,
+    EmpathyCallWindow *self)
+{
+  GtkWidget *menu;
+
+  menu = gtk_ui_manager_get_widget (self->priv->ui_manager,
+      "/preview-hidden-menu");
+  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
+      0, gtk_get_current_event_time ());
+  gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
+}
+
+static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  ClutterLayoutManager *layout;
+  ClutterLayoutManager *layout, *layout_center;
   ClutterActor *preview;
+  ClutterActor *box;
+  ClutterActor *b;
+  GtkWidget *button;
 
   g_assert (priv->video_preview == NULL);
 
@@ -701,13 +757,51 @@ create_video_preview (EmpathyCallWindow *self)
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
       SELF_VIDEO_SECTION_WIDTH + 10, SELF_VIDEO_SECTION_HEIGTH + 10);
-  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview),
-      preview);
+
+  layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
+  box = clutter_box_new (layout_center);
+  clutter_actor_set_size (box,
+      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (box), preview);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
 
   g_object_set (priv->video_preview_sink,
       "sync", FALSE,
       "async", TRUE,
       NULL);
+
+  /* Translators: this is an "Info" label. It should be as short
+   * as possible. */
+  button = gtk_button_new_with_label (_("i"));
+  b = gtk_clutter_actor_new_with_contents (button);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (layout_center),
+      b,
+      CLUTTER_BIN_ALIGNMENT_END,
+      CLUTTER_BIN_ALIGNMENT_END);
+
+  g_signal_connect (button, "clicked",
+      G_CALLBACK (empathy_call_window_preview_button_clicked_cb),
+      self);
+
+  /* Translators: this is an "Info" label. It should be as short
+   * as possible. */
+  button = gtk_button_new_with_label (_("i"));
+  priv->preview_hidden_button =
+      gtk_clutter_actor_new_with_contents (button);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
+      priv->preview_hidden_button,
+      CLUTTER_BIN_ALIGNMENT_START,
+      CLUTTER_BIN_ALIGNMENT_END);
+
+  clutter_actor_hide (priv->preview_hidden_button);
+
+  g_signal_connect (button, "clicked",
+      G_CALLBACK (empathy_call_window_preview_hidden_button_clicked_cb),
+      self);
 
   clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
       priv->video_preview,
@@ -912,6 +1006,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
+    "menupreviewdisable", "activate", empathy_call_window_disable_camera_cb,
+    "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,
+    "menupreviewmaximise", "activate", empathy_call_window_maximise_camera_cb,
     NULL);
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);

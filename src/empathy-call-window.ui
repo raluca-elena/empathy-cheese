@@ -44,6 +44,24 @@
           </object>
           <accelerator key="F11"/>
         </child>
+        <child>
+          <object class="GtkAction" id="menupreviewminimise">
+            <property name="name">menupreviewminimise</property>
+            <property name="label" translatable="yes">Minimise me</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menupreviewmaximise">
+            <property name="name">menupreviewmaximise</property>
+            <property name="label" translatable="yes">Maximise me</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menupreviewdisable">
+            <property name="name">menupreviewdisable</property>
+            <property name="label" translatable="yes">Disable camera</property>
+          </object>
+        </child>
       </object>
     </child>
     <ui>
@@ -59,6 +77,14 @@
       </menubar>
       <popup name="video-popup">
           <menuitem name="menufullscreen" action="menufullscreen"/>
+      </popup>
+      <popup name="preview-menu">
+          <menuitem name="menupreviewminimise" action="menupreviewminimise"/>
+          <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
+      </popup>
+      <popup name="preview-hidden-menu">
+          <menuitem name="menupreviewmaximise" action="menupreviewmaximise"/>
+          <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
       </popup>
     </ui>
   </object>
