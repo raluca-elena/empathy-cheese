@@ -63,6 +63,12 @@ GType empathy_call_window_get_type (void);
     EmpathyCallWindowClass))
 
 EmpathyCallWindow *empathy_call_window_new (EmpathyCallHandler *handler);
+void empathy_call_window_present (EmpathyCallWindow *window,
+  EmpathyCallHandler *handler);
+void empathy_call_window_start_ringing (EmpathyCallWindow *self,
+  TpyCallChannel *channel,
+  TpChannelDispatchOperation *dispatch_operation,
+  TpAddDispatchOperationContext *context);
 
 GtkUIManager *empathy_call_window_get_ui_manager (EmpathyCallWindow *window);
 

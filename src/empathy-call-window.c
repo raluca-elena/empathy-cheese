@@ -293,6 +293,8 @@ static gboolean empathy_call_window_video_output_motion_notify (
 static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
   guint button);
 
+static void empathy_call_window_connect_handler (EmpathyCallWindow *self);
+
 static void empathy_call_window_dialpad_cb (GtkToggleToolButton *button,
   EmpathyCallWindow *window);
 
@@ -2199,6 +2201,20 @@ empathy_call_window_new (EmpathyCallHandler *handler)
     g_object_new (EMPATHY_TYPE_CALL_WINDOW, "handler", handler, NULL));
 }
 
+void
+empathy_call_window_present (EmpathyCallWindow *self,
+    EmpathyCallHandler *handler)
+{
+  g_return_if_fail (EMPATHY_IS_CALL_HANDLER (handler));
+
+  tp_clear_object (&self->priv->handler);
+  self->priv->handler = g_object_ref (handler);
+  empathy_call_window_connect_handler (self);
+
+  empathy_window_present (GTK_WINDOW (self));
+  empathy_call_window_restart_call (self);
+}
+
 static void
 empathy_call_window_conference_added_cb (EmpathyCallHandler *handler,
   GstElement *conference, gpointer user_data)
@@ -3272,9 +3288,9 @@ call_handler_notify_call_cb (EmpathyCallHandler *handler,
 }
 
 static void
-empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
+empathy_call_window_connect_handler (EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
   gint width;
 
@@ -3283,24 +3299,24 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
   gtk_widget_set_size_request (priv->hangup_button, width * 2, -1);
 
   g_signal_connect (priv->handler, "state-changed",
-    G_CALLBACK (empathy_call_window_state_changed_cb), window);
+    G_CALLBACK (empathy_call_window_state_changed_cb), self);
   g_signal_connect (priv->handler, "conference-added",
-    G_CALLBACK (empathy_call_window_conference_added_cb), window);
+    G_CALLBACK (empathy_call_window_conference_added_cb), self);
   g_signal_connect (priv->handler, "conference-removed",
-    G_CALLBACK (empathy_call_window_conference_removed_cb), window);
+    G_CALLBACK (empathy_call_window_conference_removed_cb), self);
   g_signal_connect (priv->handler, "closed",
-    G_CALLBACK (empathy_call_window_channel_closed_cb), window);
+    G_CALLBACK (empathy_call_window_channel_closed_cb), self);
   g_signal_connect (priv->handler, "src-pad-added",
-    G_CALLBACK (empathy_call_window_src_added_cb), window);
+    G_CALLBACK (empathy_call_window_src_added_cb), self);
   g_signal_connect (priv->handler, "sink-pad-added",
-    G_CALLBACK (empathy_call_window_sink_added_cb), window);
+    G_CALLBACK (empathy_call_window_sink_added_cb), self);
   g_signal_connect (priv->handler, "sink-pad-removed",
-    G_CALLBACK (empathy_call_window_sink_removed_cb), window);
+    G_CALLBACK (empathy_call_window_sink_removed_cb), self);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
     {
-      call_handler_notify_call_cb (priv->handler, NULL, window);
+      call_handler_notify_call_cb (priv->handler, NULL, self);
       g_object_unref (call);
     }
   else
@@ -3308,10 +3324,17 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
       /* call-channel doesn't exist yet, we'll connect signals once it has been
        * set */
       g_signal_connect (priv->handler, "notify::call-channel",
-        G_CALLBACK (call_handler_notify_call_cb), window);
+        G_CALLBACK (call_handler_notify_call_cb), self);
     }
+}
 
-  gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
+static void
+empathy_call_window_realized_cb (GtkWidget *widget,
+    EmpathyCallWindow *self)
+{
+  empathy_call_window_connect_handler (self);
+
+  gst_element_set_state (self->priv->pipeline, GST_STATE_PAUSED);
 }
 
 static gboolean
