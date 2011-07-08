@@ -26,9 +26,9 @@
           </object>
         </child>
         <child>
-          <object class="GtkToggleAction" id="menudialpad">
-            <property name="name">menudialpad</property>
-            <property name="label" translatable="yes">_Dialpad</property>
+          <object class="GtkToggleAction" id="menusidebar">
+            <property name="name">menusidebar</property>
+            <property name="label" translatable="yes">_Sidebar</property>
           </object>
         </child>
         <child>
@@ -69,10 +69,10 @@
         <menu action="call">
           <menuitem action="menuhangup"/>
           <menuitem action="menuredial"/>
-          <menuitem action="menudialpad"/>
         </menu>
         <menu action="view">
           <menuitem action="menufullscreen"/>
+          <menuitem action="menusidebar"/>
         </menu>
       </menubar>
       <popup name="video-popup">
@@ -156,6 +156,17 @@
                 <property name="icon_name">camera-web</property>
                 <property name="sensitive">False</property>
                 <property name="tooltip_text" translatable="yes">Toggle video transmission</property>
+              </object>
+              <packing>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleToolButton" id="dialpad">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Show dialpad</property>
+                <property name="icon_name">accessories-calculator</property>
+                <property name="tooltip_text" translatable="yes">Display the dialpad</property>
               </object>
               <packing>
                 <property name="homogeneous">True</property>
