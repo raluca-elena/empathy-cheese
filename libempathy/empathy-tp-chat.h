@@ -93,9 +93,6 @@ GPtrArray *    empathy_tp_chat_get_properties       (EmpathyTpChat      *chat);
 const GList *  empathy_tp_chat_get_pending_messages (EmpathyTpChat *chat);
 void           empathy_tp_chat_acknowledge_message (EmpathyTpChat *chat,
 						     EmpathyMessage *message);
-void           empathy_tp_chat_acknowledge_messages (EmpathyTpChat *chat,
-						     const GSList *messages);
-void           empathy_tp_chat_acknowledge_all_messages (EmpathyTpChat *chat);
 
 gboolean       empathy_tp_chat_can_add_contact (EmpathyTpChat *self);
 

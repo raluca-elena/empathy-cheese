@@ -1496,41 +1496,6 @@ empathy_tp_chat_acknowledge_message (EmpathyTpChat *self,
 					   tp_msg, NULL, NULL);
 }
 
-void
-empathy_tp_chat_acknowledge_messages (EmpathyTpChat *self,
-				      const GSList *messages) {
-	const GSList *l;
-	GList *messages_to_ack = NULL;
-
-	g_return_if_fail (EMPATHY_IS_TP_CHAT (self));
-
-	if (messages == NULL)
-		return;
-
-	for (l = messages; l != NULL; l = g_slist_next (l)) {
-		EmpathyMessage *message = EMPATHY_MESSAGE (l->data);
-
-		if (empathy_message_is_incoming (message)) {
-			TpMessage *tp_msg = empathy_message_get_tp_message (message);
-			messages_to_ack = g_list_append (messages_to_ack, tp_msg);
-		}
-	}
-
-	if (messages_to_ack != NULL) {
-		tp_text_channel_ack_messages_async (TP_TEXT_CHANNEL (self),
-						    messages_to_ack, NULL, NULL);
-	}
-
-	g_list_free (messages_to_ack);
-}
-
-void
-empathy_tp_chat_acknowledge_all_messages (EmpathyTpChat *self)
-{
-  empathy_tp_chat_acknowledge_messages (self,
-    (GSList *) empathy_tp_chat_get_pending_messages (self));
-}
-
 /**
  * empathy_tp_chat_can_add_contact:
  *

@@ -4027,7 +4027,8 @@ empathy_chat_messages_read (EmpathyChat *self)
 		return;
 
 	if (priv->tp_chat != NULL) {
-		empathy_tp_chat_acknowledge_all_messages (priv->tp_chat);
+		tp_text_channel_ack_all_pending_messages_async (
+			TP_TEXT_CHANNEL (priv->tp_chat), NULL, NULL);
 	}
 
 	if (priv->unread_messages_when_offline > 0) {
