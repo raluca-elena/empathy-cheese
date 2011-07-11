@@ -2859,8 +2859,8 @@ empathy_call_window_show_sidebar (EmpathyCallWindow *window,
     gboolean active)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
-  int w, h, handle_size;
-  GtkAllocation allocation, sidebar_allocation;
+  int w, h, sidebar_width, handle_size;
+  GtkAllocation allocation;
   gchar *page;
   gboolean dialpad_shown;
 
@@ -2870,16 +2870,16 @@ empathy_call_window_show_sidebar (EmpathyCallWindow *window,
 
   gtk_widget_style_get (priv->pane, "handle_size", &handle_size, NULL);
 
-  gtk_widget_get_allocation (priv->sidebar, &sidebar_allocation);
+  gtk_widget_get_preferred_width (priv->sidebar, &sidebar_width, NULL);
 
   if (active)
     {
       gtk_widget_show (priv->sidebar);
-      w += sidebar_allocation.width + handle_size;
+      w += sidebar_width + handle_size;
     }
   else
     {
-      w -= sidebar_allocation.width + handle_size;
+      w -= sidebar_width + handle_size;
       gtk_widget_hide (priv->sidebar);
     }
 
