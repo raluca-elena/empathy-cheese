@@ -104,12 +104,12 @@ enum {
 };
 
 typedef enum {
-  RINGING,
-  CONNECTING,
-  CONNECTED,
-  HELD,
-  DISCONNECTED,
-  REDIALING
+  RINGING,       /* Incoming call */
+  CONNECTING,    /* Outgoing call */
+  CONNECTED,     /* Connected */
+  HELD,          /* Connected, but on hold */
+  DISCONNECTED,  /* Disconnected */
+  REDIALING      /* Redialing (special case of CONNECTING) */
 } CallState;
 
 typedef enum {
