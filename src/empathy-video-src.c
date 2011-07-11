@@ -143,12 +143,10 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
       g_message ("Couldn't add \"videomaxrate\" (gst-plugins-bad missing?)");
       element = element_back;
     }
-  else
-    {
-      gst_caps_set_simple (caps,
-        "framerate", GST_TYPE_FRACTION, 15, 1,
-        NULL);
-    }
+
+  gst_caps_set_simple (caps,
+      "framerate", GST_TYPE_FRACTION_RANGE, 1, 1, 30, 1,
+      NULL);
 
   str = gst_caps_to_string (caps);
   DEBUG ("Current video src caps are : %s", str);
