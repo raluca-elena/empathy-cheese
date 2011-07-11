@@ -1224,7 +1224,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
-  empathy_geometry_bind (GTK_WINDOW (self), "call-window");
+  empathy_geometry_bind (GTK_WINDOW (self), "av-window");
 }
 
 /* Instead of specifying a width and a height, we specify only one size. That's
