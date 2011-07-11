@@ -683,12 +683,15 @@ contact_is_tpl_entity (gpointer key,
 {
   EmpathyContact *contact = value;
   FindContactData *data = user_data;
+  TpAccount *account = empathy_contact_get_account (contact);
+  const gchar *path = NULL;
+
+  if (account != NULL)
+    path = tp_proxy_get_object_path (account);
 
   return !tp_strdiff (empathy_contact_get_id (contact),
               tpl_entity_get_identifier (data->entity)) &&
-         !tp_strdiff (tp_proxy_get_object_path (data->account),
-              tp_proxy_get_object_path (
-                  empathy_contact_get_account (contact)));
+         !tp_strdiff (tp_proxy_get_object_path (data->account), path);
 }
 
 EmpathyContact *
