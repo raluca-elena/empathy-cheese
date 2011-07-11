@@ -1947,8 +1947,9 @@ log_window_update_what_sensitivity (EmpathyLogWindow *self)
   GList *accounts, *targets, *acc, *targ;
   gboolean next;
 
-  log_window_get_selected (self, &accounts, &targets, NULL, NULL,
-      NULL, NULL);
+  if (!log_window_get_selected (self, &accounts, &targets, NULL, NULL,
+      NULL, NULL))
+    return;
 
   view = GTK_TREE_VIEW (self->priv->treeview_what);
   model = gtk_tree_view_get_model (view);
