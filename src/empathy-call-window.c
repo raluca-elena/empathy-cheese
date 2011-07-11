@@ -207,6 +207,9 @@ struct _EmpathyCallWindowPriv
   gint original_width_before_fs;
   gint original_height_before_fs;
 
+  gint x, y, w, h, sidebar_width;
+  gboolean maximized;
+
   /* TRUE if the call should be started when the pipeline is playing */
   gboolean start_call_when_playing;
   /* TRUE if we requested to set the pipeline in the playing state */
@@ -952,6 +955,41 @@ create_pipeline (EmpathyCallWindow *self)
   g_object_unref (bus);
 }
 
+static gboolean
+empathy_call_window_configure_event_cb (GtkWidget *widget,
+    GdkEvent  *event,
+    EmpathyCallWindow *self)
+{
+  GdkWindow *gdk_window;
+  GdkWindowState window_state;
+
+  gtk_window_get_position (GTK_WINDOW (self), &self->priv->x, &self->priv->y);
+  gtk_window_get_size (GTK_WINDOW (self), &self->priv->w, &self->priv->h);
+
+  gtk_widget_get_preferred_width (self->priv->sidebar,
+      &self->priv->sidebar_width, NULL);
+
+  gdk_window = gtk_widget_get_window (widget);
+  window_state = gdk_window_get_state (gdk_window);
+  self->priv->maximized = (window_state & GDK_WINDOW_STATE_MAXIMIZED);
+
+  return FALSE;
+}
+
+static void
+empathy_call_window_destroyed_cb (GtkWidget *object,
+    EmpathyCallWindow *self)
+{
+  if (gtk_widget_get_visible (self->priv->sidebar))
+    {
+      /* Save the geometry as if the sidebar was hidden. */
+      empathy_geometry_save_values (GTK_WINDOW (self),
+          self->priv->x, self->priv->y,
+          self->priv->w - self->priv->sidebar_width, self->priv->h,
+          self->priv->maximized);
+    }
+}
+
 static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
@@ -1152,6 +1190,15 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
   empathy_geometry_bind (GTK_WINDOW (self), "call-window");
+  /* These signals are used to track the window position and save it
+   * when the window is destroyed. We need to do this as we don't want
+   * the window geometry to be saved with the sidebar taken into account. */
+  g_signal_connect (self, "destroy",
+      G_CALLBACK (empathy_call_window_destroyed_cb), self);
+  g_signal_connect (self, "configure-event",
+      G_CALLBACK (empathy_call_window_configure_event_cb), self);
+  g_signal_connect (self, "window-state-event",
+      G_CALLBACK (empathy_call_window_configure_event_cb), self);
 }
 
 /* Instead of specifying a width and a height, we specify only one size. That's

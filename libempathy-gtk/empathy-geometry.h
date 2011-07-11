@@ -35,6 +35,13 @@ void empathy_geometry_bind (GtkWindow *window,
 void empathy_geometry_unbind (GtkWindow *window,
     const gchar *name);
 
+void empathy_geometry_save_values (GtkWindow *window,
+    gint x,
+    gint y,
+    gint w,
+    gint h,
+    gboolean maximized);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_GEOMETRY_H__ */

@@ -126,14 +126,15 @@ geometry_get_key_file (void)
   return key_file;
 }
 
-static void
-empathy_geometry_save (GtkWindow *window)
+void
+empathy_geometry_save_values (GtkWindow *window,
+    gint x,
+    gint y,
+    gint w,
+    gint h,
+    gboolean maximized)
 {
   GKeyFile *key_file;
-  GdkWindow *gdk_window;
-  GdkWindowState window_state;
-  gint x, y, w, h;
-  gboolean maximized;
   gchar *position_str = NULL;
   GHashTable *names;
   GHashTableIter iter;
@@ -143,16 +144,6 @@ empathy_geometry_save (GtkWindow *window)
 
   g_return_if_fail (GTK_IS_WINDOW (window));
   g_return_if_fail (names != NULL);
-
-  if (!gtk_widget_get_visible (GTK_WIDGET (window)))
-    return;
-
-  /* Get window geometry */
-  gtk_window_get_position (window, &x, &y);
-  gtk_window_get_size (window, &w, &h);
-  gdk_window = gtk_widget_get_window (GTK_WIDGET (window));
-  window_state = gdk_window_get_state (gdk_window);
-  maximized = (window_state & GDK_WINDOW_STATE_MAXIMIZED) != 0;
 
   /* Don't save off-screen positioning */
   if (!EMPATHY_RECT_IS_ON_SCREEN (x, y, w, h))
@@ -187,6 +178,30 @@ empathy_geometry_save (GtkWindow *window)
 
   geometry_schedule_store (key_file);
   g_free (position_str);
+}
+
+static void
+empathy_geometry_save (GtkWindow *window)
+{
+  GdkWindow *gdk_window;
+  GdkWindowState window_state;
+  gboolean maximized;
+  gint x, y, w, h;
+
+  g_return_if_fail (GTK_IS_WINDOW (window));
+
+  if (!gtk_widget_get_visible (GTK_WIDGET (window)))
+    return;
+
+  /* Get window geometry */
+  gtk_window_get_position (window, &x, &y);
+  gtk_window_get_size (window, &w, &h);
+
+  gdk_window = gtk_widget_get_window (GTK_WIDGET (window));
+  window_state = gdk_window_get_state (gdk_window);
+  maximized = (window_state & GDK_WINDOW_STATE_MAXIMIZED) != 0;
+
+  empathy_geometry_save_values (window, x, y, w, h, maximized);
 }
 
 static void
