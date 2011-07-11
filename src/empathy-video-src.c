@@ -426,6 +426,7 @@ empathy_video_src_set_resolution (GstElement *src,
 {
   EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
   GstCaps *caps;
+  GstClock *gst_clock;
 
   g_return_if_fail (priv->capsfilter != NULL);
 
@@ -441,6 +442,13 @@ empathy_video_src_set_resolution (GstElement *src,
       NULL);
 
   g_object_set (priv->capsfilter, "caps", caps, NULL);
+
+  /* Reset clock an base time, this is require for videotestsrc and hopefully
+   * has no side effect */
+  gst_clock = gst_element_get_clock (src);
+  gst_element_set_clock (priv->src, gst_clock);
+  gst_element_set_base_time (priv->src, gst_element_get_base_time (src));
+  gst_object_unref (gst_clock);
 
   gst_element_set_locked_state (priv->src, FALSE);
   gst_element_sync_state_with_parent (priv->src);
