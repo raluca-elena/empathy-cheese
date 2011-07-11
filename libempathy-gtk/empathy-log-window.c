@@ -1147,6 +1147,21 @@ log_window_append_call (TplEvent *event,
   GDateTime *started_date, *finished_date;
   GTimeSpan span;
 
+  /* If searching, only add the call if the search string appears anywhere */
+  if (!EMP_STR_EMPTY (log_window->priv->last_find))
+    {
+      if (strstr (tpl_entity_get_identifier (tpl_event_get_sender (event)),
+              log_window->priv->last_find) == NULL &&
+          strstr (tpl_entity_get_identifier (tpl_event_get_receiver (event)),
+              log_window->priv->last_find) == NULL &&
+          strstr (tpl_call_event_get_detailed_end_reason (call),
+              log_window->priv->last_find) == NULL)
+        {
+          DEBUG ("TplCallEvent doesn't match search string, ignoring");
+          return;
+        }
+    }
+
   started_date = g_date_time_new_from_unix_utc (
       tpl_event_get_timestamp (event));
 
