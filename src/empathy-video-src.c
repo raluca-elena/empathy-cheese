@@ -59,6 +59,7 @@ struct _EmpathyGstVideoSrcPrivate
   guint width;
   guint height;
   guint framerate;
+  gboolean has_videomaxrate;
 };
 
 #define EMPATHY_GST_VIDEO_SRC_GET_PRIVATE(o) \
@@ -142,6 +143,11 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
     {
       g_message ("Couldn't add \"videomaxrate\" (gst-plugins-bad missing?)");
       element = element_back;
+      priv->has_videomaxrate = TRUE;
+    }
+  else
+    {
+      priv->has_videomaxrate = TRUE;
     }
 
   gst_caps_set_simple (caps,
@@ -405,16 +411,19 @@ empathy_video_src_set_framerate (GstElement *src,
   EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
   GstCaps *caps;
 
-  g_return_if_fail (priv->capsfilter != NULL);
+  if (priv->has_videomaxrate)
+    {
+      g_return_if_fail (priv->capsfilter != NULL);
 
-  g_object_get (priv->capsfilter, "caps", &caps, NULL);
-  caps = gst_caps_make_writable (caps);
+      g_object_get (priv->capsfilter, "caps", &caps, NULL);
+      caps = gst_caps_make_writable (caps);
 
-  gst_caps_set_simple (caps,
-      "framerate", GST_TYPE_FRACTION, framerate, 1,
-      NULL);
+      gst_caps_set_simple (caps,
+          "framerate", GST_TYPE_FRACTION, framerate, 1,
+          NULL);
 
-  g_object_set (priv->capsfilter, "caps", caps, NULL);
+      g_object_set (priv->capsfilter, "caps", caps, NULL);
+    }
 }
 
 void
