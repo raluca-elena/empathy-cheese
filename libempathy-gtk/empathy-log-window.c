@@ -3136,7 +3136,10 @@ log_manager_got_dates_cb (GObject *manager,
   GError *error = NULL;
 
   if (log_window == NULL)
-    goto out;
+    {
+      ctx_free (ctx);
+      return;
+    }
 
   if (log_window->priv->count != ctx->count)
     goto out;
