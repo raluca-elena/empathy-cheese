@@ -161,9 +161,10 @@ class Project:
 		return translations
 
 	def get_bug_author(self, bug_number):
-		cmd = 'git log %s.. | grep -B 20 -E "(bug %s|#%s)"' \
+		cmd = 'git log %s.. | grep -B 20 -E \
+		      "(bug %s|#%s)|bugzilla.gnome.org/show_bug.cgi\?id=%s"' \
 		      ' | tac | grep ^Author: | head -1' \
-		      % (self.last_tag, bug_number, bug_number)
+		      % (self.last_tag, bug_number, bug_number, bug_number)
 		line = self.exec_cmd (cmd)
 		p1 = line.find(" ")
 		p2 = line.find("<")
