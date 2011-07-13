@@ -1226,7 +1226,7 @@ debug_window_save_clicked_cb (GtkToolButton *tool_button,
       GTK_FILE_CHOOSER (file_chooser), TRUE);
 
   gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser),
-      g_get_tmp_dir ());
+      g_get_home_dir ());
 
   name = get_active_service_name (debug_window);
 
