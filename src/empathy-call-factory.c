@@ -51,10 +51,18 @@ static void handle_channels (TpBaseClient *client,
     gint64 user_action_time,
     TpHandleChannelsContext *context);
 
+static void approve_channels (TpBaseClient *client,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context);
+
 /* signal enum */
 enum
 {
     NEW_CALL_HANDLER,
+    INCOMING_CALL,
     LAST_SIGNAL
 };
 
@@ -66,6 +74,13 @@ static void
 empathy_call_factory_init (EmpathyCallFactory *obj)
 {
   TpBaseClient *client = (TpBaseClient *) obj;
+
+  tp_base_client_take_approver_filter (client, tp_asv_new (
+        TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
+          TPY_IFACE_CHANNEL_TYPE_CALL,
+        TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
+          G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
+        NULL));
 
   tp_base_client_take_handler_filter (client, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
@@ -119,6 +134,7 @@ empathy_call_factory_class_init (EmpathyCallFactoryClass *klass)
   object_class->constructor = empathy_call_factory_constructor;
 
   base_clt_cls->handle_channels = handle_channels;
+  base_clt_cls->add_dispatch_operation = approve_channels;
 
   signals[NEW_CALL_HANDLER] =
     g_signal_new ("new-call-handler",
@@ -128,6 +144,17 @@ empathy_call_factory_class_init (EmpathyCallFactoryClass *klass)
       _src_marshal_VOID__OBJECT_BOOLEAN,
       G_TYPE_NONE,
       2, EMPATHY_TYPE_CALL_HANDLER, G_TYPE_BOOLEAN);
+
+  signals[INCOMING_CALL] =
+    g_signal_new ("incoming-call",
+      G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0,
+      NULL, NULL,
+      _src_marshal_BOOLEAN__UINT_OBJECT_OBJECT_OBJECT,
+      G_TYPE_BOOLEAN,
+      4, G_TYPE_UINT, TPY_TYPE_CALL_CHANNEL,
+      TP_TYPE_CHANNEL_DISPATCH_OPERATION,
+      TP_TYPE_ADD_DISPATCH_OPERATION_CONTEXT);
 }
 
 EmpathyCallFactory *
@@ -264,6 +291,77 @@ handle_channels (TpBaseClient *client,
     }
 
   tp_handle_channels_context_accept (context);
+}
+
+static TpyCallChannel *
+find_call_channel (GList *channels)
+{
+  GList *l;
+
+  for (l = channels; l != NULL; l = g_list_next (l))
+    {
+      TpChannel *channel = l->data;
+      GQuark channel_type;
+
+      if (tp_proxy_get_invalidated (channel) != NULL)
+        continue;
+
+      channel_type = tp_channel_get_channel_type_id (channel);
+
+      if (channel_type == TPY_IFACE_QUARK_CHANNEL_TYPE_CALL)
+        return TPY_CALL_CHANNEL (channel);
+    }
+
+  return NULL;
+}
+
+static void
+approve_channels (TpBaseClient *client,
+    TpAccount *account,
+    TpConnection *connection,
+    GList *channels,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context)
+{
+  EmpathyCallFactory *self = EMPATHY_CALL_FACTORY (client);
+  TpyCallChannel *channel;
+  guint handle;
+  GError error = { TP_ERRORS, TP_ERROR_INVALID_ARGUMENT, "" };
+  gboolean handled = FALSE;
+
+  channel = find_call_channel (channels);
+
+  if (channel == NULL)
+    {
+      DEBUG ("Failed to find the main channel; ignoring");
+      error.message = "Unknown channel";
+      goto out;
+    }
+
+  handle = tp_channel_get_handle (TP_CHANNEL (channel), NULL);
+
+  if (handle == 0)
+    {
+      DEBUG ("Unknown handle, ignoring");
+      error.code = TP_ERROR_INVALID_HANDLE;
+      error.message = "Unknown handle";
+      goto out;
+    }
+
+  g_signal_emit (self, signals[INCOMING_CALL], 0,
+      handle, channel, dispatch_operation, context,
+      &handled);
+
+  if (handled)
+    return;
+
+  /* There was no call window so the context wasn't handled. */
+  DEBUG ("Call with a contact for which there's no existing "
+    "call window, ignoring");
+  error.message = "No call window with this contact";
+
+ out:
+  tp_add_dispatch_operation_context_fail (context, &error);
 }
 
 gboolean
