@@ -149,6 +149,11 @@ struct _EmpathyChatPriv {
 	 * messages in tab will be properly shown */
 	gboolean           retrieving_backlogs;
 	gboolean           sms_channel;
+
+	/* we need to know whether populate-popup happened in response to
+	 * the keyboard or the mouse. We can't ask GTK for the most recent
+	 * event, because it will be a notify event. Instead we track it here */
+	GdkEventType       most_recent_event_type;
 };
 
 typedef struct {
@@ -1702,6 +1707,8 @@ chat_input_key_press_event_cb (GtkWidget   *widget,
 
 	priv = GET_PRIV (chat);
 
+	priv->most_recent_event_type = event->type;
+
 	/* Catch ctrl+up/down so we can traverse messages we sent */
 	if ((event->state & GDK_CONTROL_MASK) &&
 	    (event->keyval == GDK_KEY_Up ||
@@ -2157,11 +2164,24 @@ chat_text_send_cb (GtkMenuItem *menuitem,
 	chat_input_text_view_send (chat);
 }
 
+static gboolean
+chat_input_button_press_event_cb (GtkTextView    *view,
+				  GdkEventButton *event,
+				  EmpathyChat    *chat)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
+	priv->most_recent_event_type = event->type;
+
+	return FALSE;
+}
+
 static void
 chat_input_populate_popup_cb (GtkTextView *view,
 			      GtkMenu     *menu,
 			      EmpathyChat *chat)
 {
+	EmpathyChatPriv      *priv = GET_PRIV (chat);
 	GtkTextBuffer        *buffer;
 	GtkTextTagTable      *table;
 	GtkTextTag           *tag;
@@ -2212,12 +2232,29 @@ chat_input_populate_popup_cb (GtkTextView *view,
 	/* Add the spell check menu item. */
 	table = gtk_text_buffer_get_tag_table (buffer);
 	tag = gtk_text_tag_table_lookup (table, "misspelled");
-	gtk_widget_get_pointer (GTK_WIDGET (view), &x, &y);
-	gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (view),
-					       GTK_TEXT_WINDOW_WIDGET,
-					       x, y,
-					       &x, &y);
-	gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (view), &iter, x, y);
+
+	switch (priv->most_recent_event_type) {
+	    case GDK_BUTTON_PRESS:
+		/* get the location from the pointer */
+		gtk_widget_get_pointer (GTK_WIDGET (view), &x, &y);
+		gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (view),
+						       GTK_TEXT_WINDOW_WIDGET,
+						       x, y,
+						       &x, &y);
+		gtk_text_view_get_iter_at_location (GTK_TEXT_VIEW (view),
+						    &iter, x, y);
+		break;
+
+	    case GDK_KEY_PRESS:
+		/* get the location from the cursor */
+		gtk_text_buffer_get_iter_at_mark (buffer, &iter,
+				gtk_text_buffer_get_insert (buffer));
+		break;
+
+	    default:
+		break;
+	}
+
 	start = end = iter;
 	if (gtk_text_iter_backward_to_tag_toggle (&start, tag) &&
 	    gtk_text_iter_forward_to_tag_toggle (&end, tag)) {
@@ -2890,6 +2927,9 @@ chat_create_ui (EmpathyChat *chat)
 			  chat);
 	g_signal_connect (chat->input_text_view, "realize",
 			  G_CALLBACK (chat_input_realize_cb),
+			  chat);
+	g_signal_connect (chat->input_text_view, "button-press-event",
+			  G_CALLBACK (chat_input_button_press_event_cb),
 			  chat);
 	g_signal_connect (chat->input_text_view, "populate-popup",
 			  G_CALLBACK (chat_input_populate_popup_cb),
