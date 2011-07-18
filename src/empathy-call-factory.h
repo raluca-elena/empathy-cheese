@@ -29,12 +29,11 @@ typedef struct _EmpathyCallFactory EmpathyCallFactory;
 typedef struct _EmpathyCallFactoryClass EmpathyCallFactoryClass;
 
 struct _EmpathyCallFactoryClass {
-    GObjectClass parent_class;
+    TpBaseClientClass parent_class;
 };
 
 struct _EmpathyCallFactory {
-    GObject parent;
-    gpointer priv;
+    TpBaseClient parent;
 };
 
 GType empathy_call_factory_get_type (void);

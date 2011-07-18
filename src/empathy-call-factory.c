@@ -29,6 +29,7 @@
 
 #include <telepathy-yell/telepathy-yell.h>
 
+#include <libempathy/empathy-client-factory.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
@@ -40,16 +41,15 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
 
-G_DEFINE_TYPE(EmpathyCallFactory, empathy_call_factory, G_TYPE_OBJECT)
+G_DEFINE_TYPE(EmpathyCallFactory, empathy_call_factory, TP_TYPE_BASE_CLIENT)
 
-static void handle_channels_cb (TpSimpleHandler *handler,
+static void handle_channels (TpBaseClient *client,
     TpAccount *account,
     TpConnection *connection,
     GList *channels,
     GList *requests_satisfied,
     gint64 user_action_time,
-    TpHandleChannelsContext *context,
-    gpointer user_data);
+    TpHandleChannelsContext *context);
 
 /* signal enum */
 enum
@@ -60,38 +60,21 @@ enum
 
 static guint signals[LAST_SIGNAL] = {0};
 
-/* private structure */
-typedef struct {
-  TpBaseClient *handler;
-  gboolean dispose_has_run;
-} EmpathyCallFactoryPriv;
-
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyCallFactory)
-
 static GObject *call_factory = NULL;
 
 static void
 empathy_call_factory_init (EmpathyCallFactory *obj)
 {
-  EmpathyCallFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
-    EMPATHY_TYPE_CALL_FACTORY, EmpathyCallFactoryPriv);
-  TpAccountManager *am;
+  TpBaseClient *client = (TpBaseClient *) obj;
 
-  obj->priv = priv;
-
-  am = tp_account_manager_dup ();
-
-  priv->handler = tp_simple_handler_new_with_am (am, FALSE, FALSE,
-      EMPATHY_CALL_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, obj, NULL);
-
-  tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
+  tp_base_client_take_handler_filter (client, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
           G_TYPE_UINT, TP_HANDLE_TYPE_CONTACT,
         NULL));
 
-  tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
+  tp_base_client_take_handler_filter (client, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
@@ -99,7 +82,7 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
         TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_AUDIO, G_TYPE_BOOLEAN, TRUE,
         NULL));
 
-  tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
+  tp_base_client_take_handler_filter (client, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
           TPY_IFACE_CHANNEL_TYPE_CALL,
         TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
@@ -107,13 +90,11 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
         TPY_PROP_CHANNEL_TYPE_CALL_INITIAL_VIDEO, G_TYPE_BOOLEAN, TRUE,
         NULL));
 
-  tp_base_client_add_handler_capabilities_varargs (priv->handler,
+  tp_base_client_add_handler_capabilities_varargs (client,
     "org.freedesktop.Telepathy.Channel.Interface.MediaSignalling/ice-udp",
     "org.freedesktop.Telepathy.Channel.Interface.MediaSignalling/gtalk-p2p",
     "org.freedesktop.Telepathy.Channel.Interface.MediaSignalling/video/h264",
     NULL);
-
-  g_object_unref (am);
 }
 
 static GObject *
@@ -130,46 +111,18 @@ empathy_call_factory_constructor (GType type, guint n_construct_params,
 }
 
 static void
-empathy_call_factory_finalize (GObject *object)
+empathy_call_factory_class_init (EmpathyCallFactoryClass *klass)
 {
-  /* free any data held directly by the object here */
-
-  if (G_OBJECT_CLASS (empathy_call_factory_parent_class)->finalize)
-    G_OBJECT_CLASS (empathy_call_factory_parent_class)->finalize (object);
-}
-
-static void
-empathy_call_factory_dispose (GObject *object)
-{
-  EmpathyCallFactoryPriv *priv = GET_PRIV (object);
-
-  if (priv->dispose_has_run)
-    return;
-
-  priv->dispose_has_run = TRUE;
-
-  tp_clear_object (&priv->handler);
-
-  if (G_OBJECT_CLASS (empathy_call_factory_parent_class)->dispose)
-    G_OBJECT_CLASS (empathy_call_factory_parent_class)->dispose (object);
-}
-
-static void
-empathy_call_factory_class_init (
-  EmpathyCallFactoryClass *empathy_call_factory_class)
-{
-  GObjectClass *object_class = G_OBJECT_CLASS (empathy_call_factory_class);
-
-  g_type_class_add_private (empathy_call_factory_class,
-    sizeof (EmpathyCallFactoryPriv));
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  TpBaseClientClass *base_clt_cls = TP_BASE_CLIENT_CLASS (klass);
 
   object_class->constructor = empathy_call_factory_constructor;
-  object_class->dispose = empathy_call_factory_dispose;
-  object_class->finalize = empathy_call_factory_finalize;
+
+  base_clt_cls->handle_channels = handle_channels;
 
   signals[NEW_CALL_HANDLER] =
     g_signal_new ("new-call-handler",
-      G_TYPE_FROM_CLASS (empathy_call_factory_class),
+      G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
       _src_marshal_VOID__OBJECT_BOOLEAN,
@@ -180,9 +133,25 @@ empathy_call_factory_class_init (
 EmpathyCallFactory *
 empathy_call_factory_initialise (void)
 {
+  EmpathyCallFactory *self;
+  EmpathyClientFactory *factory;
+  TpAccountManager *am;
+
   g_return_val_if_fail (call_factory == NULL, NULL);
 
-  return EMPATHY_CALL_FACTORY (g_object_new (EMPATHY_TYPE_CALL_FACTORY, NULL));
+  am = tp_account_manager_dup ();
+  factory = empathy_client_factory_dup ();
+
+  self = EMPATHY_CALL_FACTORY (g_object_new (EMPATHY_TYPE_CALL_FACTORY,
+      "account-manager", am,
+      "factory", factory,
+      "name", EMPATHY_CALL_BUS_NAME_SUFFIX,
+      NULL));
+
+  g_object_unref (am);
+  g_object_unref (factory);
+
+  return self;
 }
 
 EmpathyCallFactory *
@@ -254,16 +223,15 @@ call_channel_ready_cb (TpyCallChannel *call,
 
 
 static void
-handle_channels_cb (TpSimpleHandler *handler,
+handle_channels (TpBaseClient *client,
     TpAccount *account,
     TpConnection *connection,
     GList *channels,
     GList *requests_satisfied,
     gint64 user_action_time,
-    TpHandleChannelsContext *context,
-    gpointer user_data)
+    TpHandleChannelsContext *context)
 {
-  EmpathyCallFactory *self = user_data;
+  EmpathyCallFactory *self = EMPATHY_CALL_FACTORY (client);
   GList *l;
 
   for (l = channels; l != NULL; l = g_list_next (l))
@@ -302,7 +270,5 @@ gboolean
 empathy_call_factory_register (EmpathyCallFactory *self,
     GError **error)
 {
-  EmpathyCallFactoryPriv *priv = GET_PRIV (self);
-
-  return tp_base_client_register (priv->handler, error);
+  return tp_base_client_register (TP_BASE_CLIENT (self), error);
 }
