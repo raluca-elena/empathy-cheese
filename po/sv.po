@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-07-15 13:06+0200\n"
-"PO-Revision-Date: 2011-07-15 13:13+0100\n"
+"POT-Creation-Date: 2011-07-18 22:57+0200\n"
+"PO-Revision-Date: 2011-07-18 23:09+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -49,9 +49,8 @@ msgid "Chat window theme"
 msgstr "Chattfönstertema"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:4
-#, fuzzy
 msgid "Chat window theme variant"
-msgstr "Chattfönstertema"
+msgstr "Temavariant för chattfönster"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:5
 msgid "Comma-separated list of spell checker languages to use (e.g. \"en, fr, nl\")."
@@ -210,9 +209,8 @@ msgid "Pop up notifications when a contact logs out"
 msgstr "Visa popupnotifieringar när en kontakt loggar ut"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:43
-#, fuzzy
 msgid "Show Balance in contact list"
-msgstr "Visa ko_mpakt kontaktlista"
+msgstr "Visa saldo i kontaktlista"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:44
 msgid "Show avatars"
@@ -259,9 +257,8 @@ msgid "The theme that is used to display the conversation in chat windows."
 msgstr "Det tema som används för att visa samtal i chattfönster."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:55
-#, fuzzy
 msgid "The theme variant that is used to display the conversation in chat windows."
-msgstr "Det tema som används för att visa samtal i chattfönster."
+msgstr "Den temavariant som används för att visa samtalet i chattfönster."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:56
 msgid "Use graphical smileys"
@@ -380,9 +377,8 @@ msgid "Whether to show a popup notification when receiving a new message."
 msgstr "Huruvida en popupnotifiering ska visas när ett nytt meddelande tas emot."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:85
-#, fuzzy
 msgid "Whether to show account balances in the contact list."
-msgstr "Huruvida protokoll för kontakter ska visas i kontaktlistan."
+msgstr "Huruvida kontosaldon ska visas i kontaktlistan."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:86
 msgid "Whether to show avatars for contacts in the contact list and chat windows."
@@ -1231,7 +1227,7 @@ msgstr "Det inträffade ett fel när samtalet startades"
 
 #: ../libempathy-gtk/empathy-call-utils.c:49
 msgid "The specified contact doesn't support calls"
-msgstr ""
+msgstr "Den angivna kontakten saknar stöd för röstsamtal"
 
 #: ../libempathy-gtk/empathy-call-utils.c:51
 msgid "The specified contact is offline"
@@ -1242,9 +1238,8 @@ msgid "The specified contact is not valid"
 msgstr "Den valda kontakten är inte giltig"
 
 #: ../libempathy-gtk/empathy-call-utils.c:55
-#, fuzzy
 msgid "Emergency calls are not supported on this protocol"
-msgstr "Ämne stöds inte för detta samtal"
+msgstr "Nödsamtal stöds inte med detta protokollet"
 
 #: ../libempathy-gtk/empathy-chat.c:697
 msgid "Failed to open private chat"
@@ -1259,9 +1254,9 @@ msgid "You are not allowed to change the topic"
 msgstr "Du tillåts inte att ändra ämnet"
 
 #: ../libempathy-gtk/empathy-chat.c:968
-#, fuzzy, c-format
+#, c-format
 msgid "“%s” is not a valid contact ID"
-msgstr "ogiltig kontakt"
+msgstr "\"%s\" är inte ett giltigt kontakt-id"
 
 #: ../libempathy-gtk/empathy-chat.c:1025
 msgid "/clear: clear all messages from the current conversation"
@@ -1305,7 +1300,7 @@ msgstr "/say <meddelande>: skicka <meddelande> till det aktuella samtalet. Detta
 
 #: ../libempathy-gtk/empathy-chat.c:1059
 msgid "/whois <contact ID>: display information about a contact"
-msgstr ""
+msgstr "/whois <kontakt-id>: visa information om en kontakt"
 
 #: ../libempathy-gtk/empathy-chat.c:1062
 msgid "/help [<command>]: show all supported commands. If <command> is defined, show its usage."
@@ -1327,14 +1322,12 @@ msgstr "Okänt kommando; se /help för tillgängliga kommandon"
 #. translators: error used when user doesn't have enough credit on his
 #. * account to send the message.
 #: ../libempathy-gtk/empathy-chat.c:1407
-#, fuzzy
 msgid "insufficient balance to send message"
-msgstr "Otillräckligt med ledigt utrymme för att spara filen"
+msgstr "otillräckliga medel på kontot för att skicka meddelande"
 
 #: ../libempathy-gtk/empathy-chat.c:1409
-#, fuzzy
 msgid "not capable"
-msgstr "Inte acceptabel"
+msgstr "inte kapabel"
 
 #: ../libempathy-gtk/empathy-chat.c:1416
 msgid "offline"
@@ -1366,9 +1359,9 @@ msgid "Error sending message '%s': %s"
 msgstr "Fel vid sändning av meddelandet \"%s\": %s"
 
 #: ../libempathy-gtk/empathy-chat.c:1442
-#, fuzzy, c-format
+#, c-format
 msgid "Error sending message: %s"
-msgstr "Fel vid sändning av meddelandet \"%s\": %s"
+msgstr "Fel vid sändning av meddelande: %s"
 
 #: ../libempathy-gtk/empathy-chat.c:1503
 #: ../src/empathy-chat-window.c:760
@@ -1809,9 +1802,8 @@ msgstr "Ansluten från:"
 #. * and should bin this.
 #.
 #: ../libempathy-gtk/empathy-contact-widget.c:353
-#, fuzzy
 msgid "Away message:"
-msgstr "Avslutningsmeddelande:"
+msgstr "Frånvaromeddelande:"
 
 #: ../libempathy-gtk/empathy-contact-widget.c:606
 msgid "Channels:"
@@ -2198,10 +2190,9 @@ msgstr "Chatt med %s"
 
 #: ../libempathy-gtk/empathy-log-window.c:998
 #: ../libempathy-gtk/empathy-log-window.c:1176
-#, fuzzy
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
-msgstr "%A %e %B %Y"
+msgstr "%A, %e %B %Y %X"
 
 #. Translators: this is an emote: '* Danielle waves'
 #: ../libempathy-gtk/empathy-log-window.c:1118
@@ -2237,10 +2228,9 @@ msgid "Yesterday"
 msgstr "Igår"
 
 #: ../libempathy-gtk/empathy-log-window.c:1556
-#, fuzzy
 msgctxt "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
-msgstr "%A %e %B %Y"
+msgstr "%e %B %Y"
 
 #: ../libempathy-gtk/empathy-log-window.c:1637
 #: ../libempathy-gtk/empathy-log-window.c:3203
@@ -2289,9 +2279,8 @@ msgid "What"
 msgstr "Vad"
 
 #: ../libempathy-gtk/empathy-log-window.c:3506
-#, fuzzy
 msgid "Are you sure you want to delete all logs of previous conversations?"
-msgstr "Är du säker på att du vill blockera \"%s\" från att kontakta dig igen?"
+msgstr "Är du säker på att du vill ta bort alla loggar för tidigare samtal?"
 
 #: ../libempathy-gtk/empathy-log-window.c:3510
 msgid "Clear All"
@@ -2500,9 +2489,9 @@ msgid "Remove"
 msgstr "Ta bort"
 
 #: ../libempathy-gtk/empathy-theme-adium.c:1121
-#, fuzzy, c-format
+#, c-format
 msgid "Message edited at %s"
-msgstr "Meddelande togs emot"
+msgstr "Meddelandet redigerat %s"
 
 #: ../libempathy-gtk/empathy-theme-adium.c:1943
 msgid "Normal"
@@ -3301,7 +3290,7 @@ msgstr "Inaktivera kamera"
 
 #: ../src/empathy-call-window.ui.h:5
 msgid "Display the dialpad"
-msgstr ""
+msgstr "Visa knappsatsen"
 
 #: ../src/empathy-call-window.ui.h:6
 #: ../src/empathy-streamed-media-window.ui.h:9
@@ -3775,17 +3764,16 @@ msgstr "Stäng"
 #: ../src/empathy-main-window.c:928
 #, c-format
 msgid "Top up %s (%s)..."
-msgstr ""
+msgstr "Fyll på %s (%s)..."
 
 #: ../src/empathy-main-window.c:975
-#, fuzzy
 msgid "Top up account credit"
-msgstr "Salut-konto har skapats"
+msgstr "Fyll på kontot"
 
 #. top up button
 #: ../src/empathy-main-window.c:1050
 msgid "Top Up..."
-msgstr ""
+msgstr "Fyll på..."
 
 #: ../src/empathy-main-window.c:1817
 msgid "Contact"
@@ -4000,27 +3988,27 @@ msgstr "Romeo"
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:722
 msgid "O Romeo, Romeo, wherefore art thou Romeo?"
-msgstr ""
+msgstr "Romeo, min Romeo, var är du Romeo?"
 
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:725
 msgid "Deny thy father and refuse thy name;"
-msgstr ""
+msgstr "Förneka din fader och vägra ditt namn;"
 
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:728
 msgid "Or if thou wilt not, be but sworn my love"
-msgstr ""
+msgstr "Eller om du icke, men var svurit min kärlek"
 
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:731
 msgid "And I'll no longer be a Capulet."
-msgstr ""
+msgstr "Och jag kommer inte längre att vara en Capulet."
 
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:734
 msgid "Shall I hear more, or shall I speak at this?"
-msgstr ""
+msgstr "Skall jag höra mer, eller ska jag tala?"
 
 #. translators: Quote from Romeo & Julier, for chat theme preview
 #: ../src/empathy-preferences.c:737
@@ -4350,9 +4338,8 @@ msgid "Accept"
 msgstr "Acceptera"
 
 #: ../src/empathy-notifications-approver.c:260
-#, fuzzy
 msgid "Provide"
-msgstr "Ange lösenord"
+msgstr "Tillhandahåll"
 
 #: ../src/empathy-call-observer.c:135
 #, c-format
@@ -4382,9 +4369,8 @@ msgid "On hold"
 msgstr "Väntar"
 
 #: ../libempathy-gtk/empathy-search-bar.c:243
-#, fuzzy
 msgid "_Match case"
-msgstr "Matcha skiftläge"
+msgstr "_Matcha skiftläge"
 
 #~ msgid "All"
 #~ msgstr "Alla"
