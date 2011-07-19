@@ -1290,6 +1290,12 @@ display_video_preview (EmpathyCallWindow *self,
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
 
+  if (priv->video_preview == NULL)
+    {
+      create_video_preview (self);
+      add_video_preview_to_pipeline (self);
+    }
+
   if (display)
     {
       /* Display the video preview */
