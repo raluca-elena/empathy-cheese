@@ -172,7 +172,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 /* Based on http://www.ietf.org/rfc/rfc2812.txt (section 2.3.1) */
 #define IRC_SPECIAL       "_\\[\\]{}\\\\|`^"
-#define IRC_USER_NAME     "(["ALPHA IRC_SPECIAL"]["ALPHADIGITDASH IRC_SPECIAL"]*)"
+#define IRC_NICK_NAME     "(["ALPHA IRC_SPECIAL"]["ALPHADIGITDASH IRC_SPECIAL"]*)"
 /* Based on http://www.ietf.org/rfc/rfc4622.txt (section 2.2)
  * We just exclude invalid characters to avoid ucschars and other redundant
  * complexity */
@@ -185,7 +185,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 #define YAHOO_USER_NAME   "(["ALPHA"]["ALPHADIGIT"_\\.]{3,31})"
 
 #define ACCOUNT_REGEX_ICQ      "^"ICQ_USER_NAME"$"
-#define ACCOUNT_REGEX_IRC      "^"IRC_USER_NAME"$"
+#define ACCOUNT_REGEX_IRC      "^"IRC_NICK_NAME"$"
 #define ACCOUNT_REGEX_JABBER   "^"JABBER_USER_NAME"@"HOST"$"
 #define ACCOUNT_REGEX_MSN      "^"MSN_USER_NAME"@"HOST"$"
 #define ACCOUNT_REGEX_YAHOO    "^"YAHOO_USER_NAME"$"
