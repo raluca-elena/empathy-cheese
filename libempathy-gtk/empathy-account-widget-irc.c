@@ -176,6 +176,7 @@ empathy_account_widget_irc_build (EmpathyAccountWidget *self,
       "entry_fullname", "fullname",
       "entry_password", "password",
       "entry_quit_message", "quit-message",
+      "entry_username", "username",
       NULL);
 
   empathy_builder_connect (self->ui_details->gui, settings,
