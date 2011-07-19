@@ -173,6 +173,15 @@ static guint signals[LAST_SIGNAL] = { 0 };
 /* Based on http://www.ietf.org/rfc/rfc2812.txt (section 2.3.1) */
 #define IRC_SPECIAL       "_\\[\\]{}\\\\|`^"
 #define IRC_NICK_NAME     "(["ALPHA IRC_SPECIAL"]["ALPHADIGITDASH IRC_SPECIAL"]*)"
+/*   user       =  1*( %x01-09 / %x0B-0C / %x0E-1F / %x21-3F / %x41-FF )
+ *                ; any octet except NUL, CR, LF, " " and "@"
+ *
+ * so technically, like so many other places in IRC, we should be using arrays
+ * of bytes here rather than UTF-8 strings. Life: too short. In practice this
+ * will always be ASCII.
+ */
+#define IRC_USER_NAME     "([^\r\n@ ])+"
+
 /* Based on http://www.ietf.org/rfc/rfc4622.txt (section 2.2)
  * We just exclude invalid characters to avoid ucschars and other redundant
  * complexity */
@@ -186,6 +195,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 #define ACCOUNT_REGEX_ICQ      "^"ICQ_USER_NAME"$"
 #define ACCOUNT_REGEX_IRC      "^"IRC_NICK_NAME"$"
+#define USERNAME_REGEX_IRC     "^"IRC_USER_NAME"$"
 #define ACCOUNT_REGEX_JABBER   "^"JABBER_USER_NAME"@"HOST"$"
 #define ACCOUNT_REGEX_MSN      "^"MSN_USER_NAME"@"HOST"$"
 #define ACCOUNT_REGEX_YAHOO    "^"YAHOO_USER_NAME"$"
@@ -1227,6 +1237,8 @@ account_widget_build_irc (EmpathyAccountWidget *self,
 
   empathy_account_settings_set_regex (priv->settings, "account",
       ACCOUNT_REGEX_IRC);
+  empathy_account_settings_set_regex (priv->settings, "username",
+      USERNAME_REGEX_IRC);
 
   if (priv->simple)
     {
