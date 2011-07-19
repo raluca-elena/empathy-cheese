@@ -113,7 +113,7 @@ empathy_call_create_streamed_media_request (const gchar *contact,
 }
 
 static void
-create_call_channel_cb (GObject *source,
+create_streamed_media_channel_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
@@ -124,28 +124,28 @@ create_call_channel_cb (GObject *source,
            result,
            &error))
     {
-      DEBUG ("Failed to create Call channel: %s", error->message);
+      DEBUG ("Failed to create StreamedMedia channel: %s", error->message);
       show_call_error (error);
       g_error_free (error);
     }
 }
 
 static void
-create_streamed_media_channel_cb (GObject *source,
+create_call_channel_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
-  TpAccountChannelRequest *call_req = user_data;
+  TpAccountChannelRequest *streamed_media_req = user_data;
   GError *error = NULL;
 
   if (tp_account_channel_request_create_channel_finish (
       TP_ACCOUNT_CHANNEL_REQUEST (source), result, &error))
     {
-      g_object_unref (call_req);
+      g_object_unref (streamed_media_req);
       return;
     }
 
-  DEBUG ("Failed to create StreamedMedia channel: %s", error->message);
+  DEBUG ("Failed to create Call channel: %s", error->message);
 
   if (error->code != TP_ERROR_NOT_IMPLEMENTED)
     {
@@ -153,11 +153,11 @@ create_streamed_media_channel_cb (GObject *source,
       return;
     }
 
-  DEBUG ("Let's try with a Call channel");
+  DEBUG ("Let's try with an StreamedMedia channel");
   g_error_free (error);
-  tp_account_channel_request_create_channel_async (call_req,
-      EMPATHY_CALL_BUS_NAME, NULL,
-      create_call_channel_cb,
+  tp_account_channel_request_create_channel_async (streamed_media_req,
+      EMPATHY_AV_BUS_NAME, NULL,
+      create_streamed_media_channel_cb,
       NULL);
 }
 
@@ -183,12 +183,12 @@ empathy_call_new_with_streams (const gchar *contact,
       streamed_media_request,
       timestamp);
 
-  tp_account_channel_request_create_channel_async (streamed_media_req,
-      EMPATHY_AV_BUS_NAME, NULL,
-      create_streamed_media_channel_cb,
-      call_req);
+  tp_account_channel_request_create_channel_async (call_req,
+      EMPATHY_CALL_BUS_NAME, NULL,
+      create_call_channel_cb,
+      streamed_media_req);
 
   g_hash_table_unref (call_request);
   g_hash_table_unref (streamed_media_request);
-  g_object_unref (streamed_media_req);
+  g_object_unref (call_req);
 }
