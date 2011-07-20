@@ -1172,10 +1172,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_widget_hide (priv->sidebar);
 
   priv->fullscreen = empathy_call_window_fullscreen_new (self);
-#if 0
+
   empathy_call_window_fullscreen_set_video_widget (priv->fullscreen,
-      priv->video_output);
-#endif
+      priv->video_container);
+
   g_signal_connect (G_OBJECT (priv->fullscreen->leave_fullscreen_button),
       "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
 
