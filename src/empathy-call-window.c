@@ -144,11 +144,6 @@ struct _EmpathyCallWindowPriv
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
 
-  /* This vbox is contained in the content_hbox and it contains the
-     sidebar button. When toggling fullscreen,
-     it needs to be repacked. We keep a reference on it for easier access. */
-  GtkWidget *vbox;
-
   gulong video_output_motion_handler_id;
   guint bus_message_source_id;
 
@@ -999,7 +994,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   EmpathyCallWindowPriv *priv;
   GtkBuilder *gui;
   GtkWidget *top_vbox;
-  GtkWidget *h;
   GtkWidget *page;
   gchar *filename;
   GtkWidget *scroll;
@@ -1126,14 +1120,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
 
-  priv->vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (priv->content_hbox), priv->vbox,
-      FALSE, FALSE, CONTENT_HBOX_CHILDREN_PACKING_PADDING);
-
   empathy_call_window_setup_toolbar (self);
-
-  h = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (priv->vbox), h, FALSE, FALSE, 3);
 
   priv->sidebar = ev_sidebar_new ();
   g_signal_connect (G_OBJECT (priv->sidebar),
@@ -2790,7 +2777,6 @@ show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
     {
       gtk_widget_hide (priv->sidebar);
       gtk_widget_hide (menu);
-      gtk_widget_hide (priv->vbox);
       gtk_widget_hide (priv->statusbar);
       gtk_widget_hide (priv->toolbar);
     }
@@ -2800,7 +2786,6 @@ show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
         gtk_widget_show (priv->sidebar);
 
       gtk_widget_show (menu);
-      gtk_widget_show (priv->vbox);
       gtk_widget_show (priv->statusbar);
       gtk_widget_show (priv->toolbar);
 
@@ -2828,11 +2813,6 @@ show_borders (EmpathyCallWindow *window, gboolean set_fullscreen)
           GTK_PACK_START);
 #endif
     }
-
-  gtk_box_set_child_packing (GTK_BOX (priv->content_hbox),
-      priv->vbox, TRUE, TRUE,
-      set_fullscreen ? 0 : CONTENT_HBOX_CHILDREN_PACKING_PADDING,
-      GTK_PACK_START);
 }
 
 static gboolean
