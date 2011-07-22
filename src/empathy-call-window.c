@@ -122,7 +122,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *sidebar;
   GtkWidget *statusbar;
-  GtkWidget *volume_button;
+  GtkWidget *volume_item;
   GtkWidget *redial_button;
   GtkWidget *mic_button;
   GtkWidget *camera_button;
@@ -289,27 +289,19 @@ static void
 empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GtkToolItem *tool_item;
+  GtkWidget *volume_button;
 
-  /* Add an empty expanded GtkToolItem so the volume button is at the end of
-   * the toolbar. */
-  tool_item = gtk_tool_item_new ();
-  gtk_tool_item_set_expand (tool_item, TRUE);
-  gtk_widget_show (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, -1);
-
-  priv->volume_button = gtk_volume_button_new ();
+  volume_button = gtk_volume_button_new ();
   /* FIXME listen to the audiosinks signals and update the button according to
    * that, for now starting out at 1.0 and assuming only the app changes the
    * volume will do */
-  gtk_scale_button_set_value (GTK_SCALE_BUTTON (priv->volume_button), 1.0);
-  g_signal_connect (G_OBJECT (priv->volume_button), "value-changed",
+  gtk_scale_button_set_value (GTK_SCALE_BUTTON (volume_button), 1.0);
+  g_signal_connect (G_OBJECT (volume_button), "value-changed",
     G_CALLBACK (empathy_call_window_volume_changed_cb), self);
 
-  tool_item = gtk_tool_item_new ();
-  gtk_container_add (GTK_CONTAINER (tool_item), priv->volume_button);
-  gtk_widget_show_all (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, -1);
+  gtk_container_add (GTK_CONTAINER (priv->volume_item),
+      volume_button);
+  gtk_widget_show (GTK_WIDGET (volume_button));
 }
 
 static void
@@ -979,6 +971,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "pane", &priv->pane,
     "statusbar", &priv->statusbar,
     "redial", &priv->redial_button,
+    "volume", &priv->volume_item,
     "microphone", &priv->mic_button,
     "camera", &priv->camera_button,
     "dialpad", &priv->dialpad_button,
