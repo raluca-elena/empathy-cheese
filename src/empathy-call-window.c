@@ -123,6 +123,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *remote_user_avatar_toolbar;
+  GtkWidget *remote_user_name_toolbar;
   GtkWidget *sidebar;
   GtkWidget *volume_item;
   GtkWidget *status_label;
@@ -297,6 +298,21 @@ empathy_call_window_setup_toolbars (EmpathyCallWindow *self)
   /* Add an empty expanded GtkToolItem to the top toolbar */
   tool_item = gtk_tool_item_new ();
   gtk_tool_item_set_expand (tool_item, TRUE);
+  gtk_widget_show (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
+
+  /* Set the remote name */
+  tool_item = gtk_tool_item_new ();
+  priv->remote_user_name_toolbar = gtk_label_new (NULL);
+  gtk_container_add (GTK_CONTAINER (tool_item),
+      priv->remote_user_name_toolbar);
+  gtk_widget_show_all (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
+
+  /* Add some space between the image and the name */
+  tool_item = gtk_separator_tool_item_new ();
+  gtk_separator_tool_item_set_draw (GTK_SEPARATOR_TOOL_ITEM (tool_item),
+      FALSE);
   gtk_widget_show (GTK_WIDGET (tool_item));
   gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
 
@@ -1239,10 +1255,34 @@ set_window_title (EmpathyCallWindow *self)
 }
 
 static void
+set_remote_user_name (EmpathyCallWindow *self,
+  EmpathyContact *contact)
+{
+  const gchar *alias = empathy_contact_get_alias (contact);
+  const gchar *status = empathy_contact_get_status (contact);
+  gchar *label;
+
+  label = g_strdup_printf ("%s\n<small>%s</small>", alias, status);
+  gtk_label_set_markup (GTK_LABEL (self->priv->remote_user_name_toolbar),
+      label);
+  g_free (label);
+}
+
+static void
 contact_name_changed_cb (EmpathyContact *contact,
-    GParamSpec *pspec, EmpathyCallWindow *self)
+    GParamSpec *pspec,
+    EmpathyCallWindow *self)
 {
   set_window_title (self);
+  set_remote_user_name (self, contact);
+}
+
+static void
+contact_presence_changed_cb (EmpathyContact *contact,
+    GParamSpec *pspec,
+    EmpathyCallWindow *self)
+{
+  set_remote_user_name (self, contact);
 }
 
 static void
@@ -1292,8 +1332,12 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
       G_CALLBACK (contact_name_changed_cb), self);
   g_signal_connect (priv->contact, "notify::avatar",
     G_CALLBACK (contact_avatar_changed_cb), self);
+  /* FIXME: There's no EmpathyContact::presence yet */
+  g_signal_connect (priv->contact, "notify::presence",
+      G_CALLBACK (contact_presence_changed_cb), self);
 
   set_window_title (self);
+  set_remote_user_name (self, priv->contact);
 
   init_contact_avatar_with_size (priv->contact,
       priv->remote_user_avatar_widget,
