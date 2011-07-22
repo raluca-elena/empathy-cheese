@@ -2376,8 +2376,11 @@ emapthy_call_window_show_video_output_cb (gpointer user_data)
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
 
-  gtk_widget_hide (self->priv->remote_user_avatar_widget);
-  clutter_actor_show (self->priv->video_output);
+  if (self->priv->video_output != NULL)
+    {
+      gtk_widget_hide (self->priv->remote_user_avatar_widget);
+      clutter_actor_show (self->priv->video_output);
+    }
 
   return FALSE;
 }
