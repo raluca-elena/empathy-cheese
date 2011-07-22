@@ -2372,7 +2372,7 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
 }
 
 static gboolean
-emapthy_call_window_show_video_output_cb (gpointer user_data)
+empathy_call_window_show_video_output_cb (gpointer user_data)
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
 
@@ -2416,7 +2416,7 @@ empathy_call_window_video_probe_cb (GstPad *pad,
     {
       /* show the remote video */
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
-          emapthy_call_window_show_video_output_cb,
+          empathy_call_window_show_video_output_cb,
           g_object_ref (self), g_object_unref);
 
       self->priv->got_video = TRUE;
@@ -2444,7 +2444,7 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
         pad = empathy_call_window_get_audio_sink_pad (self);
         break;
       case TP_MEDIA_STREAM_TYPE_VIDEO:
-        g_idle_add (emapthy_call_window_show_video_output_cb, self);
+        g_idle_add (empathy_call_window_show_video_output_cb, self);
         pad = empathy_call_window_get_video_sink_pad (self);
 
         gst_pad_add_data_probe (src,
