@@ -861,7 +861,7 @@ display_video_preview (EmpathyCallWindow *self,
 
   if (display)
     {
-      /* Display the preview and hide the self avatar */
+      /* Display the video preview */
       DEBUG ("Show video preview");
 
       play_camera (self, TRUE);
@@ -869,8 +869,8 @@ display_video_preview (EmpathyCallWindow *self,
     }
   else
     {
-      /* Display the self avatar and hide the preview */
-      DEBUG ("Show self avatar");
+      /* Hide the video preview */
+      DEBUG ("Hide video preview");
 
       if (priv->video_preview != NULL)
         {
