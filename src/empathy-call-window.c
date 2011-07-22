@@ -2408,6 +2408,10 @@ empathy_call_window_video_probe_cb (GstPad *pad,
     GstMiniObject *mini_obj,
     EmpathyCallWindow *self)
 {
+  /* Ignore events */
+  if (GST_IS_EVENT (mini_obj))
+    return TRUE;
+
   if (G_UNLIKELY (!self->priv->got_video))
     {
       /* show the remote video */
