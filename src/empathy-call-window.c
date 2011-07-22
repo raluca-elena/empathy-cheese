@@ -74,6 +74,8 @@
 #define REMOTE_CONTACT_AVATAR_DEFAULT_HEIGHT \
   EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT
 
+#define SMALL_TOOLBAR_SIZE 36
+
 /* If an video input error occurs, the error message will start with "v4l" */
 #define VIDEO_INPUT_ERROR_PREFIX "v4l"
 
@@ -120,6 +122,7 @@ struct _EmpathyCallWindowPriv
   ClutterActor *preview_hidden_button;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
+  GtkWidget *remote_user_avatar_toolbar;
   GtkWidget *sidebar;
   GtkWidget *volume_item;
   GtkWidget *status_label;
@@ -290,6 +293,20 @@ empathy_call_window_setup_toolbars (EmpathyCallWindow *self)
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GtkWidget *volume_button;
   GtkToolItem *tool_item;
+
+  /* Add an empty expanded GtkToolItem to the top toolbar */
+  tool_item = gtk_tool_item_new ();
+  gtk_tool_item_set_expand (tool_item, TRUE);
+  gtk_widget_show (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
+
+  /* Set the remote avatar */
+  tool_item = gtk_tool_item_new ();
+  priv->remote_user_avatar_toolbar = gtk_image_new ();
+  gtk_container_add (GTK_CONTAINER (tool_item),
+      priv->remote_user_avatar_toolbar);
+  gtk_widget_show_all (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
 
   /* Set the volume button */
   volume_button = gtk_volume_button_new ();
@@ -1230,10 +1247,14 @@ contact_name_changed_cb (EmpathyContact *contact,
 
 static void
 contact_avatar_changed_cb (EmpathyContact *contact,
-    GParamSpec *pspec, GtkWidget *avatar_widget)
+    GParamSpec *pspec,
+    EmpathyCallWindow *self)
 {
   int size;
   GtkAllocation allocation;
+  GtkWidget *avatar_widget;
+
+  avatar_widget = self->priv->remote_user_avatar_widget;
 
   gtk_widget_get_allocation (avatar_widget, &allocation);
   size = allocation.height;
@@ -1243,6 +1264,19 @@ contact_avatar_changed_cb (EmpathyContact *contact,
       /* the widget is not allocated yet, set a default size */
       size = MIN (REMOTE_CONTACT_AVATAR_DEFAULT_HEIGHT,
           REMOTE_CONTACT_AVATAR_DEFAULT_WIDTH);
+    }
+
+  init_contact_avatar_with_size (contact, avatar_widget, size);
+
+  avatar_widget = self->priv->remote_user_avatar_toolbar;
+
+  gtk_widget_get_allocation (avatar_widget, &allocation);
+  size = allocation.height;
+
+  if (size == 0)
+    {
+      /* the widget is not allocated yet, set a default size */
+      size = SMALL_TOOLBAR_SIZE;
     }
 
   init_contact_avatar_with_size (contact, avatar_widget, size);
@@ -1257,8 +1291,7 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
   g_signal_connect (priv->contact, "notify::name",
       G_CALLBACK (contact_name_changed_cb), self);
   g_signal_connect (priv->contact, "notify::avatar",
-    G_CALLBACK (contact_avatar_changed_cb),
-    priv->remote_user_avatar_widget);
+    G_CALLBACK (contact_avatar_changed_cb), self);
 
   set_window_title (self);
 
@@ -1266,6 +1299,10 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
       priv->remote_user_avatar_widget,
       MIN (REMOTE_CONTACT_AVATAR_DEFAULT_WIDTH,
           REMOTE_CONTACT_AVATAR_DEFAULT_HEIGHT));
+
+  init_contact_avatar_with_size (priv->contact,
+      priv->remote_user_avatar_toolbar,
+      SMALL_TOOLBAR_SIZE);
 
   /* The remote avatar is shown by default and will be hidden when we receive
      video from the remote side. */
