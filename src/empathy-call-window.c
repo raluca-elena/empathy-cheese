@@ -121,13 +121,14 @@ struct _EmpathyCallWindowPriv
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *sidebar;
-  GtkWidget *statusbar;
   GtkWidget *volume_item;
+  GtkWidget *status_label;
   GtkWidget *redial_button;
   GtkWidget *mic_button;
   GtkWidget *camera_button;
   GtkWidget *dialpad_button;
   GtkWidget *toolbar;
+  GtkWidget *bottom_toolbar;
   GtkWidget *pane;
   GtkAction *redial;
   GtkAction *menu_sidebar;
@@ -179,8 +180,6 @@ struct _EmpathyCallWindowPriv
   GstElement *funnel;
 
   GList *notifiers;
-
-  guint context_id;
 
   GTimer *timer;
   guint timer_id;
@@ -286,11 +285,13 @@ empathy_call_window_volume_changed_cb (GtkScaleButton *button,
   gdouble value, EmpathyCallWindow *window);
 
 static void
-empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
+empathy_call_window_setup_toolbars (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GtkWidget *volume_button;
+  GtkToolItem *tool_item;
 
+  /* Set the volume button */
   volume_button = gtk_volume_button_new ();
   /* FIXME listen to the audiosinks signals and update the button according to
    * that, for now starting out at 1.0 and assuming only the app changes the
@@ -302,6 +303,20 @@ empathy_call_window_setup_toolbar (EmpathyCallWindow *self)
   gtk_container_add (GTK_CONTAINER (priv->volume_item),
       volume_button);
   gtk_widget_show (GTK_WIDGET (volume_button));
+
+  /* Add an empty expanded GtkToolItem so the label is at the end */
+  tool_item = gtk_tool_item_new ();
+  gtk_tool_item_set_expand (tool_item, TRUE);
+  gtk_widget_show (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->bottom_toolbar), tool_item, -1);
+
+  /* Set the status label */
+  tool_item = gtk_tool_item_new ();
+  priv->status_label = gtk_label_new (NULL);
+  gtk_container_add (GTK_CONTAINER (tool_item),
+      priv->status_label);
+  gtk_widget_show_all (GTK_WIDGET (tool_item));
+  gtk_toolbar_insert (GTK_TOOLBAR (priv->bottom_toolbar), tool_item, -1);
 }
 
 static void
@@ -969,13 +984,13 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "call_window_vbox", &top_vbox,
     "errors_vbox", &priv->errors_vbox,
     "pane", &priv->pane,
-    "statusbar", &priv->statusbar,
     "redial", &priv->redial_button,
     "volume", &priv->volume_item,
     "microphone", &priv->mic_button,
     "camera", &priv->camera_button,
     "dialpad", &priv->dialpad_button,
     "toolbar", &priv->toolbar,
+    "bottom_toolbar", &priv->bottom_toolbar,
     "menuredial", &priv->redial,
     "menusidebar", &priv->menu_sidebar,
     "ui_manager", &priv->ui_manager,
@@ -1079,7 +1094,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
 
-  empathy_call_window_setup_toolbar (self);
+  empathy_call_window_setup_toolbars (self);
 
   priv->sidebar = ev_sidebar_new ();
   g_signal_connect (G_OBJECT (priv->sidebar),
@@ -2799,7 +2814,6 @@ show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
     {
       gtk_widget_hide (priv->sidebar);
       gtk_widget_hide (menu);
-      gtk_widget_hide (priv->statusbar);
       gtk_widget_hide (priv->toolbar);
     }
   else
@@ -2808,7 +2822,6 @@ show_controls (EmpathyCallWindow *window, gboolean set_fullscreen)
         gtk_widget_show (priv->sidebar);
 
       gtk_widget_show (menu);
-      gtk_widget_show (priv->statusbar);
       gtk_widget_show (priv->toolbar);
 
       gtk_window_resize (GTK_WINDOW (window), priv->original_width_before_fs,
@@ -3196,23 +3209,10 @@ empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
 }
 
 static void
-empathy_call_window_status_message (EmpathyCallWindow *window,
+empathy_call_window_status_message (EmpathyCallWindow *self,
   gchar *message)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-
-  if (priv->context_id == 0)
-    {
-      priv->context_id = gtk_statusbar_get_context_id (
-        GTK_STATUSBAR (priv->statusbar), "voip call status messages");
-    }
-  else
-    {
-      gtk_statusbar_pop (GTK_STATUSBAR (priv->statusbar), priv->context_id);
-    }
-
-  gtk_statusbar_push (GTK_STATUSBAR (priv->statusbar), priv->context_id,
-    message);
+  gtk_label_set_label (GTK_LABEL (self->priv->status_label), message);
 }
 
 static void
