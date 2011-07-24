@@ -526,13 +526,18 @@ typedef struct {
 	GSimpleAsyncResult *result;
 	guint width;
 	guint height;
+	struct SizeData size_data;
+	GdkPixbufLoader *loader;
+	GCancellable *cancellable;
+	guint8 data[512];
 } PixbufAvatarFromIndividualClosure;
 
 static PixbufAvatarFromIndividualClosure *
 pixbuf_avatar_from_individual_closure_new (FolksIndividual    *individual,
 					   GSimpleAsyncResult *result,
 					   gint                width,
-					   gint                height)
+					   gint                height,
+					   GCancellable       *cancellable)
 {
 	PixbufAvatarFromIndividualClosure *closure;
 
@@ -544,6 +549,7 @@ pixbuf_avatar_from_individual_closure_new (FolksIndividual    *individual,
 	closure->result = g_object_ref (result);
 	closure->width = width;
 	closure->height = height;
+	closure->cancellable = g_object_ref (cancellable);
 
 	return closure;
 }
@@ -552,65 +558,120 @@ static void
 pixbuf_avatar_from_individual_closure_free (
 		PixbufAvatarFromIndividualClosure *closure)
 {
+	g_object_unref (closure->cancellable);
+	tp_clear_object (&closure->loader);
 	g_object_unref (closure->individual);
 	g_object_unref (closure->result);
 	g_free (closure);
 }
 
 static void
-avatar_file_load_contents_cb (GObject      *object,
-			      GAsyncResult *result,
-			      gpointer      user_data)
+avatar_icon_load_read_cb (GObject      *object,
+                          GAsyncResult *result,
+                          gpointer      user_data)
 {
-	GFile *file = G_FILE (object);
+	GInputStream *stream = G_INPUT_STREAM (object);
 	PixbufAvatarFromIndividualClosure *closure = user_data;
-	char *data = NULL;
-	gsize data_size;
-	struct SizeData size_data;
+	gssize n_read;
 	GError *error = NULL;
-	GdkPixbufLoader *loader = NULL;
 
-	if (!g_file_load_contents_finish (file, result, &data, &data_size,
-				NULL, &error)) {
-		DEBUG ("failed to load avatar from file: %s",
-				error->message);
+	/* Finish reading this chunk from the stream */
+	n_read = g_input_stream_read_finish (stream, result, &error);
+	if (error != NULL) {
+		DEBUG ("Failed to finish read from pixbuf stream: %s",
+			error->message);
 		g_simple_async_result_set_from_error (closure->result, error);
-		goto out;
+		goto out_close;
 	}
 
-	size_data.width = closure->width;
-	size_data.height = closure->height;
-	size_data.preserve_aspect_ratio = TRUE;
-
-	loader = gdk_pixbuf_loader_new ();
-
-	g_signal_connect (loader, "size-prepared",
-			  G_CALLBACK (pixbuf_from_avatar_size_prepared_cb),
-			  &size_data);
-
-	if (!gdk_pixbuf_loader_write (loader, (guchar *) data, data_size,
-				&error)) {
+	/* Write the chunk to the pixbuf loader */
+	if (!gdk_pixbuf_loader_write (closure->loader, (guchar *) closure->data,
+			n_read, &error)) {
 		DEBUG ("Failed to write to pixbuf loader: %s",
 			error ? error->message : "No error given");
 		g_simple_async_result_set_from_error (closure->result, error);
-		goto out;
-	}
-	if (!gdk_pixbuf_loader_close (loader, &error)) {
-		DEBUG ("Failed to close pixbuf loader: %s",
-			error ? error->message : "No error given");
-		g_simple_async_result_set_from_error (closure->result, error);
-		goto out;
+		goto out_close;
 	}
 
-	g_simple_async_result_set_op_res_gpointer (closure->result,
-			avatar_pixbuf_from_loader (loader), g_object_unref);
+	if (n_read == 0) {
+		/* EOF? */
+		if (!gdk_pixbuf_loader_close (closure->loader, &error)) {
+			DEBUG ("Failed to close pixbuf loader: %s",
+				error ? error->message : "No error given");
+			g_simple_async_result_set_from_error (closure->result, error);
+			goto out;
+		}
+
+		/* We're done. */
+		g_simple_async_result_set_op_res_gpointer (closure->result,
+			avatar_pixbuf_from_loader (closure->loader),
+			g_object_unref);
+
+		goto out;
+	} else {
+		/* Loop round and read another chunk. */
+		g_input_stream_read_async (stream, closure->data,
+			G_N_ELEMENTS (closure->data),
+			G_PRIORITY_DEFAULT, closure->cancellable,
+			avatar_icon_load_read_cb, closure);
+
+		return;
+	}
+
+out_close:
+	/* We must close the pixbuf loader before unreffing it. */
+	gdk_pixbuf_loader_close (closure->loader, NULL);
 
 out:
 	g_simple_async_result_complete (closure->result);
 
 	g_clear_error (&error);
-	g_free (data);
-	tp_clear_object (&loader);
+	pixbuf_avatar_from_individual_closure_free (closure);
+}
+
+static void
+avatar_icon_load_cb (GObject      *object,
+                     GAsyncResult *result,
+                     gpointer      user_data)
+{
+	GLoadableIcon *icon = G_LOADABLE_ICON (object);
+	PixbufAvatarFromIndividualClosure *closure = user_data;
+	GInputStream *stream;
+	GError *error = NULL;
+
+	stream = g_loadable_icon_load_finish (icon, result, NULL, &error);
+	if (error != NULL) {
+		DEBUG ("Failed to open avatar stream: %s", error->message);
+		g_simple_async_result_set_from_error (closure->result, error);
+		goto out;
+	}
+
+	closure->size_data.width = closure->width;
+	closure->size_data.height = closure->height;
+	closure->size_data.preserve_aspect_ratio = TRUE;
+
+	/* Load the data into a pixbuf loader in chunks. */
+	closure->loader = gdk_pixbuf_loader_new ();
+
+	g_signal_connect (closure->loader, "size-prepared",
+			  G_CALLBACK (pixbuf_from_avatar_size_prepared_cb),
+	                  &(closure->size_data));
+
+	/* Begin to read the first chunk. */
+	g_input_stream_read_async (stream, closure->data,
+			G_N_ELEMENTS (closure->data),
+			G_PRIORITY_DEFAULT, closure->cancellable,
+			avatar_icon_load_read_cb, closure);
+
+	g_object_unref (stream);
+
+	return;
+
+out:
+	g_simple_async_result_complete (closure->result);
+
+	g_clear_error (&error);
+	tp_clear_object (&stream);
 	pixbuf_avatar_from_individual_closure_free (closure);
 }
 
@@ -623,7 +684,7 @@ empathy_pixbuf_avatar_from_individual_scaled_async (
 		GAsyncReadyCallback  callback,
 		gpointer             user_data)
 {
-	GFile *avatar_file;
+	GLoadableIcon *avatar_icon;
 	GSimpleAsyncResult *result;
 	PixbufAvatarFromIndividualClosure *closure;
 
@@ -631,18 +692,19 @@ empathy_pixbuf_avatar_from_individual_scaled_async (
 			callback, user_data,
 			empathy_pixbuf_avatar_from_individual_scaled_async);
 
-	avatar_file =
+	avatar_icon =
 		folks_avatar_details_get_avatar (FOLKS_AVATAR_DETAILS (individual));
-	if (avatar_file == NULL)
+	if (avatar_icon == NULL)
 		goto out;
 
 	closure = pixbuf_avatar_from_individual_closure_new (individual, result,
-							     width, height);
+							     width, height,
+							     cancellable);
 	if (closure == NULL)
 		goto out;
 
-	g_file_load_contents_async (avatar_file, cancellable,
-			avatar_file_load_contents_cb, closure);
+	g_loadable_icon_load_async (avatar_icon, width, cancellable,
+			avatar_icon_load_cb, closure);
 
 	g_object_unref (result);
 
