@@ -1,3 +1,44 @@
+NEW in 3.1.4 (26/07/2011)
+============
+
+Dependencies:
+
+ • telepathy-glib ≥ 0.15.3
+ • Optional gudev for camera monitoring
+ • clutter if building empathy-call
+
+Bugs fixed:
+ - Fixed #558942, Dragging whitespace reveals secret contacts (Danielle Madeley)
+ - Fixed #582442, Set video preview on top of remote video (Emilio Pozuelo Monfort)
+ - Fixed #593352, empathy always display scroll bar in conversation window
+ - Fixed #607557, Calls to bogus JIDs don't give useful error messages
+ - Fixed #611789, VoIP toolbar buttons and icons (Emilio Pozuelo Monfort)
+ - Fixed #634809, Call window size is saved with the sidebar but restored without it (Emilio Pozuelo Monfort)
+ - Fixed #639353, Empathy should mirror webcam video stream (Emilio Pozuelo Monfort)
+ - Fixed #652439, Can't open conversation tabs from the contact list if the conversation is open in the shell (Guillaume Desmottes)
+ - Fixed #653116, Display aliases in the Who column (Emilio Pozuelo Monfort)
+ - Fixed #653175, MUC chats show up as "Chat with <contact>" (Emilio Pozuelo Monfort)
+ - Fixed #653341, Expand events when clicking on them (Emilio Pozuelo Monfort)
+ - Fixed #653760, Refresh logs when new stuff happens
+ - Fixed #653803, EmpathyLogWindow should be a GtkWindow
+ - Fixed #654015, empathy-chat asserts with adium themes in tp_escape_as_identifier (Guillaume Desmottes)
+ - Fixed #654256, empathy crashed with SIGSEGV in tp_proxy_get_object_path() (Emilio Pozuelo Monfort)
+ - Fixed #654419, Chat history for Facebook lacks name of friend but shows ids
+ - Fixed #654541, Default save location for debug reports is /tmp (Rob Sharp)
+ - Fixed #654552, IRC configuration should expose 'username', and probably have an 'advanced' section. (Rob Sharp)
+ - Fixed #654611, Should request Call channels by default when built with Call support (Emilio Pozuelo Monfort)
+ - Fixed #654669, Spelling suggestions not offered from Menu key (Danielle Madeley)
+
+Translations:
+ - Updated es Translation (Jorge González, Daniel Mustieles)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated lv Translation (Rudolfs Mazurs)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pa Translation (A S Alam)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated sv Translation (Daniel Nylander)
+
 NEW in 3.1.3 (04/07/2011)
 ============
 
