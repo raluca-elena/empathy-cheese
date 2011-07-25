@@ -1219,6 +1219,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
+  empathy_call_window_show_hangup_button (self, TRUE);
+
   empathy_geometry_bind (GTK_WINDOW (self), "call-window");
   /* These signals are used to track the window position and save it
    * when the window is destroyed. We need to do this as we don't want
