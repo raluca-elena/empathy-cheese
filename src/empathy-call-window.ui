@@ -107,23 +107,31 @@
             <child>
               <object class="GtkToolButton" id="hangup">
                 <property name="visible">True</property>
-                <property name="is_important">True</property>
                 <property name="label" translatable="yes">Hang up</property>
                 <property name="icon_name">call-stop</property>
                 <property name="tooltip_text" translatable="yes">Hang up current call</property>
+              </object>
+              <packing>
+                <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="videocall">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Video call</property>
+                <property name="icon_name">camera-web</property>
+                <property name="tooltip_text" translatable="yes">Start a video call</property>
               </object>
               <packing>
                 <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="redial">
+              <object class="GtkToolButton" id="audiocall">
                 <property name="visible">True</property>
-                <property name="is_important">True</property>
-                <property name="label" translatable="yes">Redial</property>
-                <property name="stock_id">gtk-refresh</property>
-                <property name="sensitive">False</property>
-                <property name="tooltip_text" translatable="yes">Call the contact again</property>
+                <property name="label" translatable="yes">Call</property>
+                <property name="icon_name">call-start</property>
+                <property name="tooltip_text" translatable="yes">Start an audio call</property>
               </object>
               <packing>
                 <property name="homogeneous">True</property>

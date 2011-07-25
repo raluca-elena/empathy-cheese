@@ -391,7 +391,7 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
   param_spec = g_param_spec_boolean ("initial-video",
     "initial-video", "Whether the call should start with video",
     FALSE,
-    G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+    G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_INITIAL_VIDEO,
     param_spec);
 

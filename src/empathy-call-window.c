@@ -127,7 +127,9 @@ struct _EmpathyCallWindowPriv
   GtkWidget *sidebar;
   GtkWidget *volume_item;
   GtkWidget *status_label;
-  GtkWidget *redial_button;
+  GtkWidget *hangup_button;
+  GtkWidget *audio_call_button;
+  GtkWidget *video_call_button;
   GtkWidget *mic_button;
   GtkWidget *camera_button;
   GtkWidget *dialpad_button;
@@ -287,6 +289,32 @@ static gboolean empathy_call_window_bus_message (GstBus *bus,
 static void
 empathy_call_window_volume_changed_cb (GtkScaleButton *button,
   gdouble value, EmpathyCallWindow *window);
+
+static void
+empathy_call_window_show_hangup_button (EmpathyCallWindow *self,
+    gboolean show)
+{
+  gtk_widget_set_visible (self->priv->hangup_button, show);
+  gtk_widget_set_visible (self->priv->audio_call_button, !show);
+  gtk_widget_set_visible (self->priv->video_call_button, !show);
+}
+
+static void
+empathy_call_window_audio_call_cb (GtkToggleToolButton *button,
+    EmpathyCallWindow *self)
+{
+  g_object_set (self->priv->handler, "initial-video", FALSE, NULL);
+  empathy_call_window_restart_call (self);
+}
+
+static void
+empathy_call_window_video_call_cb (GtkToggleToolButton *button,
+    EmpathyCallWindow *self)
+{
+  empathy_call_window_set_send_video (self, CAMERA_STATE_ON);
+  g_object_set (self->priv->handler, "initial-video", TRUE, NULL);
+  empathy_call_window_restart_call (self);
+}
 
 static void
 empathy_call_window_setup_toolbars (EmpathyCallWindow *self)
@@ -1017,10 +1045,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "call_window_vbox", &top_vbox,
     "errors_vbox", &priv->errors_vbox,
     "pane", &priv->pane,
-    "redial", &priv->redial_button,
+    "audiocall", &priv->audio_call_button,
+    "videocall", &priv->video_call_button,
     "volume", &priv->volume_item,
     "microphone", &priv->mic_button,
     "camera", &priv->camera_button,
+    "hangup", &priv->hangup_button,
     "dialpad", &priv->dialpad_button,
     "toolbar", &priv->toolbar,
     "bottom_toolbar", &priv->bottom_toolbar,
@@ -1048,7 +1078,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "menuhangup", "activate", empathy_call_window_hangup_cb,
     "hangup", "clicked", empathy_call_window_hangup_cb,
     "menuredial", "activate", empathy_call_window_redial_cb,
-    "redial", "clicked", empathy_call_window_redial_cb,
+    "audiocall", "clicked", empathy_call_window_audio_call_cb,
+    "videocall", "clicked", empathy_call_window_video_call_cb,
     "menusidebar", "toggled", empathy_call_window_sidebar_cb,
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
@@ -1908,7 +1939,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
       empathy_call_window_status_message (self, _("Disconnected"));
 
       gtk_action_set_sensitive (priv->redial, TRUE);
-      gtk_widget_set_sensitive (priv->redial_button, TRUE);
+      empathy_call_window_show_hangup_button (self, FALSE);
 
       /* Unsensitive the camera and mic button */
       gtk_widget_set_sensitive (priv->camera_button, FALSE);
@@ -2394,7 +2425,7 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
   gtk_widget_set_sensitive (priv->camera_button, can_send_video);
 
   gtk_action_set_sensitive (priv->redial, FALSE);
-  gtk_widget_set_sensitive (priv->redial_button, FALSE);
+  empathy_call_window_show_hangup_button (self, TRUE);
 
   gtk_widget_set_sensitive (priv->mic_button, TRUE);
 
@@ -2826,6 +2857,11 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
   TpyCallChannel *call;
+  gint width;
+
+  /* Make the hangup button twice as wide */
+  width = gtk_widget_get_allocated_width (priv->hangup_button);
+  gtk_widget_set_size_request (priv->hangup_button, width * 2, -1);
 
   g_signal_connect (priv->handler, "state-changed",
     G_CALLBACK (empathy_call_window_state_changed_cb), window);
@@ -3168,11 +3204,10 @@ empathy_call_window_restart_call (EmpathyCallWindow *window)
     /* call will be started when the pipeline is ready */
     priv->start_call_when_playing = TRUE;
 
-
   empathy_call_window_setup_avatars (window, priv->handler);
 
   gtk_action_set_sensitive (priv->redial, FALSE);
-  gtk_widget_set_sensitive (priv->redial_button, FALSE);
+  empathy_call_window_show_hangup_button (window, TRUE);
 }
 
 static void
