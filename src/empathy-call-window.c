@@ -136,7 +136,6 @@ struct _EmpathyCallWindowPriv
   GtkWidget *toolbar;
   GtkWidget *bottom_toolbar;
   GtkWidget *pane;
-  GtkAction *redial;
   GtkAction *menu_sidebar;
   GtkAction *menu_fullscreen;
 
@@ -271,9 +270,6 @@ static gboolean empathy_call_window_video_output_motion_notify (
 
 static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
   guint button);
-
-static void empathy_call_window_redial_cb (gpointer object,
-  EmpathyCallWindow *window);
 
 static void empathy_call_window_dialpad_cb (GtkToggleToolButton *button,
   EmpathyCallWindow *window);
@@ -1054,7 +1050,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "dialpad", &priv->dialpad_button,
     "toolbar", &priv->toolbar,
     "bottom_toolbar", &priv->bottom_toolbar,
-    "menuredial", &priv->redial,
     "menusidebar", &priv->menu_sidebar,
     "ui_manager", &priv->ui_manager,
     "menufullscreen", &priv->menu_fullscreen,
@@ -1077,7 +1072,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   empathy_builder_connect (gui, self,
     "menuhangup", "activate", empathy_call_window_hangup_cb,
     "hangup", "clicked", empathy_call_window_hangup_cb,
-    "menuredial", "activate", empathy_call_window_redial_cb,
     "audiocall", "clicked", empathy_call_window_audio_call_cb,
     "videocall", "clicked", empathy_call_window_video_call_cb,
     "menusidebar", "toggled", empathy_call_window_sidebar_cb,
@@ -1938,7 +1932,6 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
       empathy_call_window_status_message (self, _("Disconnected"));
 
-      gtk_action_set_sensitive (priv->redial, TRUE);
       empathy_call_window_show_hangup_button (self, FALSE);
 
       /* Unsensitive the camera and mic button */
@@ -2424,7 +2417,6 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
 
   gtk_widget_set_sensitive (priv->camera_button, can_send_video);
 
-  gtk_action_set_sensitive (priv->redial, FALSE);
   empathy_call_window_show_hangup_button (self, TRUE);
 
   gtk_widget_set_sensitive (priv->mic_button, TRUE);
@@ -3206,23 +3198,7 @@ empathy_call_window_restart_call (EmpathyCallWindow *window)
 
   empathy_call_window_setup_avatars (window, priv->handler);
 
-  gtk_action_set_sensitive (priv->redial, FALSE);
   empathy_call_window_show_hangup_button (window, TRUE);
-}
-
-static void
-empathy_call_window_redial_cb (gpointer object,
-    EmpathyCallWindow *window)
-{
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-
-  if (priv->call_state == CONNECTED)
-    priv->call_state = REDIALING;
-
-  empathy_call_handler_stop_call (priv->handler);
-
-  if (priv->call_state != CONNECTED)
-    empathy_call_window_restart_call (window);
 }
 
 static void

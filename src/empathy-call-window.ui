@@ -18,14 +18,6 @@
           </object>
         </child>
         <child>
-          <object class="GtkAction" id="menuredial">
-            <property name="stock_id">gtk-refresh</property>
-            <property name="name">menuredial</property>
-            <property name="label" translatable="yes">Redial</property>
-            <property name="sensitive">False</property>
-          </object>
-        </child>
-        <child>
           <object class="GtkToggleAction" id="menusidebar">
             <property name="name">menusidebar</property>
             <property name="label" translatable="yes">_Sidebar</property>
@@ -68,7 +60,6 @@
       <menubar name="menubar1">
         <menu action="call">
           <menuitem action="menuhangup"/>
-          <menuitem action="menuredial"/>
         </menu>
         <menu action="view">
           <menuitem action="menufullscreen"/>
