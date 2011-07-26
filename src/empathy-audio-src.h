@@ -23,6 +23,7 @@
 
 #include <glib-object.h>
 #include <gst/gst.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -60,6 +61,17 @@ GstElement *empathy_audio_src_new (void);
 
 void empathy_audio_src_set_volume (EmpathyGstAudioSrc *src, gdouble volume);
 gdouble empathy_audio_src_get_volume (EmpathyGstAudioSrc *src);
+
+typedef struct
+{
+  guint index;
+  gchar *description;
+} EmpathyAudioSrcMicrophone;
+
+void empathy_audio_src_get_microphones_async (EmpathyGstAudioSrc *src,
+    GAsyncReadyCallback callback, gpointer user_data);
+const GList * empathy_audio_src_get_microphones_finish (EmpathyGstAudioSrc *src,
+    GAsyncResult *result, GError **error);
 
 G_END_DECLS
 

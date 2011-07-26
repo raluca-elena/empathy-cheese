@@ -22,6 +22,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <pulse/pulseaudio.h>
+#include <pulse/glib-mainloop.h>
+
+#include <libempathy/empathy-utils.h>
+
 #include "empathy-audio-src.h"
 
 G_DEFINE_TYPE(EmpathyGstAudioSrc, empathy_audio_src, GST_TYPE_BIN)
@@ -52,6 +57,10 @@ struct _EmpathyGstAudioSrcPrivate
   GstElement *volume;
   GstElement *level;
 
+  pa_glib_mainloop *loop;
+  pa_context *context;
+  GQueue *operations;
+
   gdouble peak_level;
   gdouble rms_level;
 
@@ -62,6 +71,135 @@ struct _EmpathyGstAudioSrcPrivate
 #define EMPATHY_GST_AUDIO_SRC_GET_PRIVATE(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_GST_AUDIO_SRC, \
   EmpathyGstAudioSrcPrivate))
+
+typedef void (*OperationFunc) (EmpathyGstAudioSrc *, GSimpleAsyncResult *);
+
+typedef struct
+{
+  OperationFunc func;
+  GSimpleAsyncResult *result;
+} Operation;
+
+static Operation *
+operation_new (OperationFunc func,
+    GSimpleAsyncResult *result)
+{
+  Operation *o = g_slice_new0 (Operation);
+
+  o->func = func;
+  o->result = result;
+
+  return o;
+}
+
+static void
+operation_free (Operation *o,
+    gboolean cancelled)
+{
+  if (cancelled)
+    {
+      g_simple_async_result_set_error (o->result,
+          G_IO_ERROR, G_IO_ERROR_CANCELLED,
+          "The audio source was disposed");
+      g_simple_async_result_complete (o->result);
+      g_object_unref (o->result);
+    }
+
+  g_slice_free (Operation, o);
+}
+
+static void
+operation_get_microphones_free (gpointer data)
+{
+  GQueue *queue = data;
+  GList *l;
+
+  for (l = queue->head; l != NULL; l = l->next)
+    {
+      EmpathyAudioSrcMicrophone *mic = l->data;
+
+      g_free (mic->description);
+      g_slice_free (EmpathyAudioSrcMicrophone, mic);
+    }
+
+  g_queue_free (queue);
+}
+
+static void
+operation_get_microphones_cb (pa_context *context,
+    const pa_source_info *info,
+    int eol,
+    void *userdata)
+{
+  GSimpleAsyncResult *result = userdata;
+  EmpathyAudioSrcMicrophone *mic;
+  GQueue *queue;
+
+  if (eol)
+    {
+      g_simple_async_result_complete (result);
+      g_object_unref (result);
+      return;
+    }
+
+  /* ignore monitors */
+  if (info->monitor_of_sink != PA_INVALID_INDEX)
+    return;
+
+  mic = g_slice_new0 (EmpathyAudioSrcMicrophone);
+  mic->index = info->index;
+  mic->description = g_strdup (info->description);
+
+  /* add it to the queue */
+  queue = g_simple_async_result_get_op_res_gpointer (result);
+  g_queue_push_tail (queue, mic);
+}
+
+static void
+operation_get_microphones (EmpathyGstAudioSrc *self,
+    GSimpleAsyncResult *result)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+
+  g_assert_cmpuint (pa_context_get_state (priv->context), ==, PA_CONTEXT_READY);
+
+  g_simple_async_result_set_op_res_gpointer (result, g_queue_new (),
+      operation_get_microphones_free);
+
+  pa_context_get_source_info_list (priv->context,
+      operation_get_microphones_cb, result);
+}
+
+static void
+operations_run (EmpathyGstAudioSrc *self)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  pa_context_state_t state = pa_context_get_state (priv->context);
+  GList *l;
+
+  if (state != PA_CONTEXT_READY)
+    return;
+
+  for (l = priv->operations->head; l != NULL; l = l->next)
+    {
+      Operation *o = l->data;
+
+      o->func (self, o->result);
+
+      operation_free (o, FALSE);
+    }
+
+  g_queue_clear (priv->operations);
+}
+
+static void
+empathy_audio_src_pa_state_change_cb (pa_context *c,
+    void *userdata)
+{
+  EmpathyGstAudioSrc *self = userdata;
+
+  operations_run (self);
+}
 
 static void
 empathy_audio_src_init (EmpathyGstAudioSrc *obj)
@@ -96,6 +234,16 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   gst_element_add_pad (GST_ELEMENT (obj), ghost);
 
   gst_object_unref (G_OBJECT (src));
+
+  priv->loop = pa_glib_mainloop_new (NULL);
+  priv->context = pa_context_new (pa_glib_mainloop_get_api (priv->loop),
+      "EmpathyAudioSrc");
+
+  pa_context_set_state_callback (priv->context,
+      empathy_audio_src_pa_state_change_cb, obj);
+  pa_context_connect (priv->context, NULL, 0, NULL);
+
+  priv->operations = g_queue_new ();
 }
 
 static void empathy_audio_src_dispose (GObject *object);
@@ -217,6 +365,14 @@ empathy_audio_src_dispose (GObject *object)
 
   priv->idle_id = 0;
 
+  if (priv->context != NULL)
+    pa_context_unref (priv->context);
+  priv->context = NULL;
+
+  if (priv->loop != NULL)
+    pa_glib_mainloop_free (priv->loop);
+  priv->loop = NULL;
+
   /* release any references held by the object here */
 
   if (G_OBJECT_CLASS (empathy_audio_src_parent_class)->dispose)
@@ -231,6 +387,10 @@ empathy_audio_src_finalize (GObject *object)
 
   /* free any data held directly by the object here */
   g_mutex_free (priv->lock);
+
+  g_queue_foreach (priv->operations, (GFunc) operation_free,
+      GUINT_TO_POINTER (TRUE));
+  g_queue_free (priv->operations);
 
   G_OBJECT_CLASS (empathy_audio_src_parent_class)->finalize (object);
 }
@@ -359,4 +519,41 @@ empathy_audio_src_get_volume (EmpathyGstAudioSrc *src)
   return volume;
 }
 
+void
+empathy_audio_src_get_microphones_async (EmpathyGstAudioSrc *src,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (src);
+  Operation *operation;
+  GSimpleAsyncResult *simple;
+
+  simple = g_simple_async_result_new (G_OBJECT (src), callback, user_data,
+      empathy_audio_src_get_microphones_async);
+
+  operation = operation_new (operation_get_microphones, simple);
+  g_queue_push_tail (priv->operations, operation);
+
+  /* gogogogo */
+  operations_run (src);
+}
+
+const GList *
+empathy_audio_src_get_microphones_finish (EmpathyGstAudioSrc *src,
+    GAsyncResult *result,
+    GError **error)
+{
+  GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (result);
+  GQueue *queue;
+
+  if (g_simple_async_result_propagate_error (simple, error))
+      return NULL;
+
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+          G_OBJECT (src), empathy_audio_src_get_microphones_async),
+      NULL);
+
+  queue = g_simple_async_result_get_op_res_gpointer (simple);
+  return queue->head;
+}
 
