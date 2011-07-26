@@ -100,7 +100,7 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   g_signal_connect (priv->notifier, "element-added",
     G_CALLBACK (empathy_audio_src_element_added_cb), obj);
 
-  priv->src = gst_element_factory_make ("gconfaudiosrc", NULL);
+  priv->src = gst_element_factory_make ("pulsesrc", NULL);
   gst_bin_add (GST_BIN (obj), priv->src);
 
   fs_element_added_notifier_add (priv->notifier, GST_BIN (priv->src));
