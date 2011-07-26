@@ -92,6 +92,7 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (obj);
   GstPad *ghost, *src;
+  const gchar *src_element;
 
   priv->peak_level = -G_MAXDOUBLE;
   priv->lock = g_mutex_new ();
@@ -100,7 +101,11 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   g_signal_connect (priv->notifier, "element-added",
     G_CALLBACK (empathy_audio_src_element_added_cb), obj);
 
-  priv->src = gst_element_factory_make ("pulsesrc", NULL);
+  src_element = g_getenv ("EMPATHY_AUDIO_SRC");
+  if (src_element == NULL)
+    src_element = "pulsesrc";
+
+  priv->src = gst_element_factory_make (src_element, NULL);
   gst_bin_add (GST_BIN (obj), priv->src);
 
   fs_element_added_notifier_add (priv->notifier, GST_BIN (priv->src));
