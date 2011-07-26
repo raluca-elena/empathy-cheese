@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gst/farsight/fs-element-added-notifier.h>
 #include "empathy-audio-src.h"
 
 G_DEFINE_TYPE(EmpathyGstAudioSrc, empathy_audio_src, GST_TYPE_BIN)
@@ -52,7 +51,6 @@ struct _EmpathyGstAudioSrcPrivate
   GstElement *src;
   GstElement *volume;
   GstElement *level;
-  FsElementAddedNotifier *notifier;
 
   gdouble peak_level;
   gdouble rms_level;
@@ -66,28 +64,6 @@ struct _EmpathyGstAudioSrcPrivate
   EmpathyGstAudioSrcPrivate))
 
 static void
-empathy_audio_src_element_added_cb (FsElementAddedNotifier *notifier,
-  GstBin *bin, GstElement *element, EmpathyGstAudioSrc *self)
-{
-  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
-
-  if (g_object_class_find_property (G_OBJECT_GET_CLASS (element), "volume"))
-    {
-      gdouble volume;
-
-      volume = empathy_audio_src_get_volume (self);
-      empathy_audio_src_set_volume (self, 1.0);
-
-      if (priv->volume != NULL)
-        g_object_unref (priv->volume);
-      priv->volume = g_object_ref (element);
-
-      if (volume != 1.0)
-        empathy_audio_src_set_volume (self, volume);
-    }
-}
-
-static void
 empathy_audio_src_init (EmpathyGstAudioSrc *obj)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (obj);
@@ -97,18 +73,12 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   priv->peak_level = -G_MAXDOUBLE;
   priv->lock = g_mutex_new ();
 
-  priv->notifier = fs_element_added_notifier_new ();
-  g_signal_connect (priv->notifier, "element-added",
-    G_CALLBACK (empathy_audio_src_element_added_cb), obj);
-
   src_element = g_getenv ("EMPATHY_AUDIO_SRC");
   if (src_element == NULL)
     src_element = "pulsesrc";
 
   priv->src = gst_element_factory_make (src_element, NULL);
   gst_bin_add (GST_BIN (obj), priv->src);
-
-  fs_element_added_notifier_add (priv->notifier, GST_BIN (priv->src));
 
   priv->volume = gst_element_factory_make ("volume", NULL);
   g_object_ref (priv->volume);
