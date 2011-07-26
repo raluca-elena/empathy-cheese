@@ -65,6 +65,7 @@ gdouble empathy_audio_src_get_volume (EmpathyGstAudioSrc *src);
 typedef struct
 {
   guint index;
+  gchar *name;
   gchar *description;
 } EmpathyAudioSrcMicrophone;
 

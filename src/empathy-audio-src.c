@@ -118,6 +118,7 @@ operation_get_microphones_free (gpointer data)
     {
       EmpathyAudioSrcMicrophone *mic = l->data;
 
+      g_free (mic->name);
       g_free (mic->description);
       g_slice_free (EmpathyAudioSrcMicrophone, mic);
     }
@@ -148,6 +149,7 @@ operation_get_microphones_cb (pa_context *context,
 
   mic = g_slice_new0 (EmpathyAudioSrcMicrophone);
   mic->index = info->index;
+  mic->name = g_strdup (info->name);
   mic->description = g_strdup (info->description);
 
   /* add it to the queue */
