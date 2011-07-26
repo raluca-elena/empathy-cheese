@@ -2013,12 +2013,25 @@ empathy_individual_match_string (FolksIndividual *individual,
   return retval;
 }
 
+static gboolean
+dtmf_dialpad_button_pressed_cb (GObject *button,
+    GtkEntry *entry)
+{
+  GtkEntryBuffer *buffer = gtk_entry_get_buffer (entry);
+  const gchar *label;
+
+  label = g_object_get_data (button, "label");
+  gtk_entry_buffer_insert_text (buffer, -1, label, -1);
+
+  return FALSE;
+}
+
 GtkWidget *
 empathy_create_dtmf_dialpad (GObject *self,
     GCallback dtmf_button_pressed_cb,
     GCallback dtmf_button_released_cb)
 {
-  GtkWidget *table;
+  GtkWidget *box, *entry, *table;
   int i;
   GQuark button_quark;
   struct {
@@ -2038,6 +2051,13 @@ empathy_create_dtmf_dialpad (GObject *self,
                       { "0", "",     TP_DTMF_EVENT_DIGIT_0 },
                       { "*", "",     TP_DTMF_EVENT_ASTERISK },
                       { NULL, } };
+
+  box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
+
+  entry = gtk_entry_new ();
+  gtk_editable_set_editable (GTK_EDITABLE (entry), FALSE);
+
+  gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 3);
 
   button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
 
@@ -2059,6 +2079,9 @@ empathy_create_dtmf_dialpad (GObject *self,
       gtk_label_set_markup (GTK_LABEL (label), str);
       g_free (str);
 
+      g_object_set_data (G_OBJECT (button), "label",
+          (gpointer) dtmfbuttons[i].label);
+
       gtk_box_pack_start (GTK_BOX (vbox), label, TRUE, TRUE, 3);
 
       /* sub label */
@@ -2077,11 +2100,17 @@ empathy_create_dtmf_dialpad (GObject *self,
       g_object_set_qdata (G_OBJECT (button), button_quark,
         GUINT_TO_POINTER (dtmfbuttons[i].event));
 
+      /* To update the GtkEntry */
+      g_signal_connect (G_OBJECT (button), "pressed",
+        G_CALLBACK (dtmf_dialpad_button_pressed_cb), entry);
+
       g_signal_connect (G_OBJECT (button), "pressed",
         dtmf_button_pressed_cb, self);
       g_signal_connect (G_OBJECT (button), "released",
         dtmf_button_released_cb, self);
     }
 
-  return table;
+  gtk_box_pack_start (GTK_BOX (box), table, FALSE, FALSE, 3);
+
+  return box;
 }
