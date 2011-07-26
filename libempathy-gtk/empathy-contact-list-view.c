@@ -697,13 +697,13 @@ contact_list_view_drag_begin (GtkWidget      *widget,
 
 	priv = GET_PRIV (widget);
 
-	GTK_WIDGET_CLASS (empathy_contact_list_view_parent_class)->drag_begin (widget,
-									      context);
-
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (widget));
 	if (!gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		return;
 	}
+
+	GTK_WIDGET_CLASS (empathy_contact_list_view_parent_class)->drag_begin (widget,
+									      context);
 
 	path = gtk_tree_model_get_path (model, &iter);
 	priv->drag_row = gtk_tree_row_reference_new (model, path);
