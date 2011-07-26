@@ -2245,14 +2245,16 @@ chat_input_populate_popup_cb (GtkTextView *view,
 						    &iter, x, y);
 		break;
 
+	    default:
+		g_warn_if_reached ();
+		/* assume the KEY_PRESS case */
+
 	    case GDK_KEY_PRESS:
 		/* get the location from the cursor */
 		gtk_text_buffer_get_iter_at_mark (buffer, &iter,
 				gtk_text_buffer_get_insert (buffer));
 		break;
 
-	    default:
-		break;
 	}
 
 	start = end = iter;
