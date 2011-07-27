@@ -29,6 +29,8 @@
 
 #include "empathy-audio-src.h"
 
+#include "src-marshal.h"
+
 G_DEFINE_TYPE(EmpathyGstAudioSrc, empathy_audio_src, GST_TYPE_BIN)
 
 /* signal enum */
@@ -36,6 +38,8 @@ enum
 {
     PEAK_LEVEL_CHANGED,
     RMS_LEVEL_CHANGED,
+    MICROPHONE_ADDED,
+    MICROPHONE_REMOVED,
     LAST_SIGNAL
 };
 
@@ -235,15 +239,6 @@ operations_run (EmpathyGstAudioSrc *self)
 }
 
 static void
-empathy_audio_src_pa_state_change_cb (pa_context *c,
-    void *userdata)
-{
-  EmpathyGstAudioSrc *self = userdata;
-
-  operations_run (self);
-}
-
-static void
 empathy_audio_src_source_output_info_cb (pa_context *context,
     const pa_source_output_info *info,
     int eol,
@@ -262,6 +257,84 @@ empathy_audio_src_source_output_info_cb (pa_context *context,
 
   priv->source_idx = info->source;
   g_object_notify (G_OBJECT (self), "microphone");
+}
+
+static void
+empathy_audio_src_source_info_cb (pa_context *context,
+    const pa_source_info *info,
+    int eol,
+    void *userdata)
+{
+  EmpathyGstAudioSrc *self = userdata;
+
+  if (eol)
+    return;
+
+  g_signal_emit (self, signals[MICROPHONE_ADDED], 0,
+      info->index, info->name, info->description);
+}
+
+static void
+empathy_audio_src_pa_event_cb (pa_context *context,
+    pa_subscription_event_type_t type,
+    uint32_t idx,
+    void *userdata)
+{
+  EmpathyGstAudioSrc *self = userdata;
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+
+  if ((type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) == PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT
+      && (type & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_CHANGE
+      && idx == priv->source_output_idx)
+    {
+      /* Microphone in the source output has changed */
+      pa_context_get_source_output_info (context, idx,
+          empathy_audio_src_source_output_info_cb, self);
+    }
+  else if ((type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) == PA_SUBSCRIPTION_EVENT_SOURCE
+      && (type & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
+    {
+      /* A mic has been removed */
+      g_signal_emit (self, signals[MICROPHONE_REMOVED], 0, idx);
+    }
+  else if ((type & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) == PA_SUBSCRIPTION_EVENT_SOURCE
+      && (type & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_NEW)
+    {
+      /* A mic has been plugged in */
+      pa_context_get_source_info_by_index (context, idx,
+          empathy_audio_src_source_info_cb, self);
+    }
+}
+
+static void
+empathy_audio_src_pa_subscribe_cb (pa_context *context,
+    int success,
+    void *userdata)
+{
+  if (!success)
+    g_debug ("Failed to subscribe to PulseAudio events");
+}
+
+static void
+empathy_audio_src_pa_state_change_cb (pa_context *context,
+    void *userdata)
+{
+  EmpathyGstAudioSrc *self = userdata;
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  pa_context_state_t state = pa_context_get_state (priv->context);
+
+  if (state == PA_CONTEXT_READY)
+    {
+      /* Listen to pulseaudio events so we know when sources are
+       * added and when the microphone is changed. */
+      pa_context_set_subscribe_callback (priv->context,
+          empathy_audio_src_pa_event_cb, self);
+      pa_context_subscribe (priv->context,
+          PA_SUBSCRIPTION_MASK_SOURCE | PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
+          empathy_audio_src_pa_subscribe_cb, NULL);
+    }
+
+  operations_run (self);
 }
 
 static void
@@ -327,17 +400,18 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   priv->context = pa_context_new (pa_glib_mainloop_get_api (priv->loop),
       "EmpathyAudioSrc");
 
-  /* Now listen for state changes so we know when we've connected. */
-  pa_context_set_state_callback (priv->context,
-      empathy_audio_src_pa_state_change_cb, obj);
-  pa_context_connect (priv->context, NULL, 0, NULL);
-
   /* Listen to changes to GstPulseSrc:stream-index so we know when
    * it's no longer G_MAXUINT (starting for the first time) or if it
    * changes (READY->NULL->READY...) */
   g_signal_connect (priv->src, "notify::stream-index",
       G_CALLBACK (empathy_audio_src_stream_index_notify),
       obj);
+
+  /* Finally listen for state changes so we know when we've
+   * connected. */
+  pa_context_set_state_callback (priv->context,
+      empathy_audio_src_pa_state_change_cb, obj);
+  pa_context_connect (priv->context, NULL, 0, NULL);
 
   priv->operations = g_queue_new ();
 }
@@ -451,6 +525,22 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     NULL, NULL,
     g_cclosure_marshal_VOID__DOUBLE,
     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
+
+  signals[MICROPHONE_ADDED] = g_signal_new ("microphone-added",
+    G_TYPE_FROM_CLASS (empathy_audio_src_class),
+    G_SIGNAL_RUN_LAST,
+    0,
+    NULL, NULL,
+    _src_marshal_VOID__UINT_STRING_STRING,
+    G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
+
+  signals[MICROPHONE_REMOVED] = g_signal_new ("microphone-removed",
+    G_TYPE_FROM_CLASS (empathy_audio_src_class),
+    G_SIGNAL_RUN_LAST,
+    0,
+    NULL, NULL,
+    g_cclosure_marshal_VOID__UINT,
+    G_TYPE_NONE, 1, G_TYPE_UINT);
 }
 
 void
