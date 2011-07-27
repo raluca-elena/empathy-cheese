@@ -66,7 +66,9 @@ struct _EmpathyGstAudioSrcPrivate
   pa_context *context;
   GQueue *operations;
 
+  /* 0 if not known yet */
   guint source_output_idx;
+  /* G_MAXUINT if not known yet */
   guint source_idx;
 
   gdouble peak_level;
