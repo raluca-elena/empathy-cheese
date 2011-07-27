@@ -497,7 +497,7 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
   param_spec = g_param_spec_double ("peak-level", "peak level", "peak level",
     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
     G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, PROP_VOLUME, param_spec);
+  g_object_class_install_property (object_class, PROP_PEAK_LEVEL, param_spec);
 
   param_spec = g_param_spec_uint ("microphone", "microphone", "microphone",
     0, G_MAXUINT, G_MAXUINT,
@@ -515,7 +515,7 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
   param_spec = g_param_spec_double ("rms-level", "RMS level", "RMS level",
     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
     G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-  g_object_class_install_property (object_class, PROP_VOLUME, param_spec);
+  g_object_class_install_property (object_class, PROP_RMS_LEVEL, param_spec);
 
 
   signals[RMS_LEVEL_CHANGED] = g_signal_new ("rms-level-changed",
