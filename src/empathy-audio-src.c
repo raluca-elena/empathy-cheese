@@ -45,6 +45,7 @@ enum {
     PROP_VOLUME = 1,
     PROP_RMS_LEVEL,
     PROP_PEAK_LEVEL,
+    PROP_MICROPHONE,
 };
 
 /* private structure */
@@ -60,6 +61,9 @@ struct _EmpathyGstAudioSrcPrivate
   pa_glib_mainloop *loop;
   pa_context *context;
   GQueue *operations;
+
+  guint source_output_idx;
+  guint source_idx;
 
   gdouble peak_level;
   gdouble rms_level;
@@ -240,6 +244,50 @@ empathy_audio_src_pa_state_change_cb (pa_context *c,
 }
 
 static void
+empathy_audio_src_source_output_info_cb (pa_context *context,
+    const pa_source_output_info *info,
+    int eol,
+    void *userdata)
+{
+  EmpathyGstAudioSrc *self = userdata;
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+
+  if (eol)
+    return;
+
+  /* There should only be one call here. */
+
+  if (priv->source_idx == info->source)
+    return;
+
+  priv->source_idx = info->source;
+  g_object_notify (G_OBJECT (self), "microphone");
+}
+
+static void
+empathy_audio_src_stream_index_notify (GObject *object,
+    GParamSpec *pspec,
+    EmpathyGstAudioSrc *self)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  guint stream_idx = G_MAXUINT;
+
+  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+
+  if (stream_idx == G_MAXUINT)
+    return;
+
+  if (priv->source_output_idx == stream_idx)
+    return;
+
+  /* It's actually changed. */
+  priv->source_output_idx = stream_idx;
+
+  pa_context_get_source_output_info (priv->context, stream_idx,
+      empathy_audio_src_source_output_info_cb, self);
+}
+
+static void
 empathy_audio_src_init (EmpathyGstAudioSrc *obj)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (obj);
@@ -280,6 +328,10 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   pa_context_set_state_callback (priv->context,
       empathy_audio_src_pa_state_change_cb, obj);
   pa_context_connect (priv->context, NULL, 0, NULL);
+
+  g_signal_connect (priv->src, "notify::stream-index",
+      G_CALLBACK (empathy_audio_src_stream_index_notify),
+      obj);
 
   priv->operations = g_queue_new ();
 }
@@ -329,6 +381,9 @@ empathy_audio_src_get_property (GObject *object,
         g_value_set_double (value, priv->rms_level);
         g_mutex_unlock (priv->lock);
         break;
+      case PROP_MICROPHONE:
+        g_value_set_uint (value, priv->source_idx);
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -363,6 +418,11 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
     G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_VOLUME, param_spec);
+
+  param_spec = g_param_spec_uint ("microphone", "microphone", "microphone",
+    0, G_MAXUINT, G_MAXUINT,
+    G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_MICROPHONE, param_spec);
 
   signals[PEAK_LEVEL_CHANGED] = g_signal_new ("peak-level-changed",
     G_TYPE_FROM_CLASS (empathy_audio_src_class),
@@ -593,6 +653,14 @@ empathy_audio_src_get_microphones_finish (EmpathyGstAudioSrc *src,
 
   queue = g_simple_async_result_get_op_res_gpointer (simple);
   return queue->head;
+}
+
+guint
+empathy_audio_src_get_microphone (EmpathyGstAudioSrc *src)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (src);
+
+  return priv->source_idx;
 }
 
 void
