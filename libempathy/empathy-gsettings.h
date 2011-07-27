@@ -51,6 +51,9 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_SOUNDS_CONTACT_LOGIN         "sounds-contact-login"
 #define EMPATHY_PREFS_SOUNDS_CONTACT_LOGOUT        "sounds-contact-logout"
 
+#define EMPATHY_PREFS_CALL_SCHEMA EMPATHY_PREFS_SCHEMA ".call"
+#define EMPATHY_PREFS_CALL_SOUND_VOLUME            "volume"
+
 #define EMPATHY_PREFS_CHAT_SCHEMA EMPATHY_PREFS_SCHEMA ".conversation"
 #define EMPATHY_PREFS_CHAT_SHOW_SMILEYS            "graphical-smileys"
 #define EMPATHY_PREFS_CHAT_SHOW_CONTACTS_IN_ROOMS  "show-contacts-in-rooms"

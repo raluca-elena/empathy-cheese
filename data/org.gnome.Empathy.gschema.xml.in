@@ -224,6 +224,14 @@ present them to the user immediately.</_description>
       <_description>Whether Empathy should use the avatar of the contact as the chat window icon.</_description>
     </key>
   </schema>
+  <schema id="org.gnome.Empathy.call" path="/org/gnome/empathy/call/">
+    <key name="volume" type="d">
+      <range min="0" max="150"/>
+      <default>100.0</default>
+      <_summary>Call volume</_summary>
+      <_description>Call volume, as a percentage.</_description>
+    </key>
+  </schema>
   <schema id="org.gnome.Empathy.hints" path="/org/gnome/empathy/hints/">
     <key name="close-main-window" type="b">
       <default>true</default>
