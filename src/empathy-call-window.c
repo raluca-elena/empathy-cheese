@@ -125,7 +125,6 @@ struct _EmpathyCallWindowPriv
   GtkWidget *remote_user_avatar_toolbar;
   GtkWidget *remote_user_name_toolbar;
   GtkWidget *sidebar;
-  GtkWidget *volume_item;
   GtkWidget *status_label;
   GtkWidget *hangup_button;
   GtkWidget *audio_call_button;
@@ -310,70 +309,6 @@ empathy_call_window_video_call_cb (GtkToggleToolButton *button,
   empathy_call_window_set_send_video (self, CAMERA_STATE_ON);
   g_object_set (self->priv->handler, "initial-video", TRUE, NULL);
   empathy_call_window_restart_call (self);
-}
-
-static void
-empathy_call_window_setup_toolbars (EmpathyCallWindow *self)
-{
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GtkWidget *volume_button;
-  GtkToolItem *tool_item;
-
-  /* Add an empty expanded GtkToolItem to the top toolbar */
-  tool_item = gtk_tool_item_new ();
-  gtk_tool_item_set_expand (tool_item, TRUE);
-  gtk_widget_show (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
-
-  /* Set the remote name */
-  tool_item = gtk_tool_item_new ();
-  priv->remote_user_name_toolbar = gtk_label_new (NULL);
-  gtk_container_add (GTK_CONTAINER (tool_item),
-      priv->remote_user_name_toolbar);
-  gtk_widget_show_all (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
-
-  /* Add some space between the image and the name */
-  tool_item = gtk_separator_tool_item_new ();
-  gtk_separator_tool_item_set_draw (GTK_SEPARATOR_TOOL_ITEM (tool_item),
-      FALSE);
-  gtk_widget_show (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
-
-  /* Set the remote avatar */
-  tool_item = gtk_tool_item_new ();
-  priv->remote_user_avatar_toolbar = gtk_image_new ();
-  gtk_container_add (GTK_CONTAINER (tool_item),
-      priv->remote_user_avatar_toolbar);
-  gtk_widget_show_all (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->toolbar), tool_item, 0);
-
-  /* Set the volume button */
-  volume_button = gtk_volume_button_new ();
-  /* FIXME listen to the audiosinks signals and update the button according to
-   * that, for now starting out at 1.0 and assuming only the app changes the
-   * volume will do */
-  gtk_scale_button_set_value (GTK_SCALE_BUTTON (volume_button), 1.0);
-  g_signal_connect (G_OBJECT (volume_button), "value-changed",
-    G_CALLBACK (empathy_call_window_volume_changed_cb), self);
-
-  gtk_container_add (GTK_CONTAINER (priv->volume_item),
-      volume_button);
-  gtk_widget_show (GTK_WIDGET (volume_button));
-
-  /* Add an empty expanded GtkToolItem so the label is at the end */
-  tool_item = gtk_tool_item_new ();
-  gtk_tool_item_set_expand (tool_item, TRUE);
-  gtk_widget_show (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->bottom_toolbar), tool_item, -1);
-
-  /* Set the status label */
-  tool_item = gtk_tool_item_new ();
-  priv->status_label = gtk_label_new (NULL);
-  gtk_container_add (GTK_CONTAINER (tool_item),
-      priv->status_label);
-  gtk_widget_show_all (GTK_WIDGET (tool_item));
-  gtk_toolbar_insert (GTK_TOOLBAR (priv->bottom_toolbar), tool_item, -1);
 }
 
 static void
@@ -1041,9 +976,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "call_window_vbox", &top_vbox,
     "errors_vbox", &priv->errors_vbox,
     "pane", &priv->pane,
+    "remote_user_name_toolbar", &priv->remote_user_name_toolbar,
+    "remote_user_avatar_toolbar", &priv->remote_user_avatar_toolbar,
+    "status_label", &priv->status_label,
     "audiocall", &priv->audio_call_button,
     "videocall", &priv->video_call_button,
-    "volume", &priv->volume_item,
     "microphone", &priv->mic_button,
     "camera", &priv->camera_button,
     "hangup", &priv->hangup_button,
@@ -1075,6 +1012,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "audiocall", "clicked", empathy_call_window_audio_call_cb,
     "videocall", "clicked", empathy_call_window_video_call_cb,
     "menusidebar", "toggled", empathy_call_window_sidebar_cb,
+    "volume", "value-changed", empathy_call_window_volume_changed_cb,
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
@@ -1151,8 +1089,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
-
-  empathy_call_window_setup_toolbars (self);
 
   priv->sidebar = ev_sidebar_new ();
   g_signal_connect (G_OBJECT (priv->sidebar),

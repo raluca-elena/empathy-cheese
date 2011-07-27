@@ -96,6 +96,43 @@
             	<class name="primary-toolbar"/>
             </style>
             <child>
+              <object class="GtkToolItem" id="toolitem1">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkImage" id="remote_user_avatar_toolbar">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolbutton1">
+                <property name="draw">False</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="toolitem2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="remote_user_name_toolbar">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="toolbar_space1">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolButton" id="hangup">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Hang up</property>
@@ -186,8 +223,14 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem" id="volume">
+              <object class="GtkToolItem" id="toolitem3">
                 <property name="visible">True</property>
+                <child>
+                  <object class="GtkVolumeButton" id="volume">
+                    <property name="visible">True</property>
+                    <property name="value">1.0</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="homogeneous">True</property>
@@ -204,6 +247,24 @@
               <packing>
                 <property name="homogeneous">True</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="toolbar_space2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="toolitem4">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="status_label">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
+              </object>
             </child>
           </object>
           <packing>
