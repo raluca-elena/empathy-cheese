@@ -173,6 +173,42 @@ operation_get_microphones (EmpathyGstAudioSrc *self,
 }
 
 static void
+operation_change_microphone_cb (pa_context *context,
+    int success,
+    void *userdata)
+{
+  GSimpleAsyncResult *result = userdata;
+
+  if (!success)
+    {
+      g_simple_async_result_set_error (result, G_IO_ERROR, G_IO_ERROR_FAILED,
+          "Failed to change microphone. Reason unknown.");
+    }
+
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+static void
+operation_change_microphone (EmpathyGstAudioSrc *self,
+    GSimpleAsyncResult *result)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  guint stream_idx, microphone;
+
+  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+
+  g_assert_cmpuint (pa_context_get_state (priv->context), ==, PA_CONTEXT_READY);
+  g_assert_cmpuint (stream_idx, !=, G_MAXUINT);
+
+  microphone = GPOINTER_TO_UINT (
+      g_simple_async_result_get_op_res_gpointer (result));
+
+  pa_context_move_source_output_by_index (priv->context, stream_idx, microphone,
+      operation_change_microphone_cb, result);
+}
+
+static void
 operations_run (EmpathyGstAudioSrc *self)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
@@ -559,3 +595,46 @@ empathy_audio_src_get_microphones_finish (EmpathyGstAudioSrc *src,
   return queue->head;
 }
 
+void
+empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
+    guint microphone,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (src);
+  guint stream_idx;
+  GSimpleAsyncResult *simple;
+  Operation *operation;
+
+  simple = g_simple_async_result_new (G_OBJECT (src), callback, user_data,
+      empathy_audio_src_change_microphone_async);
+
+  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+
+  if (stream_idx == G_MAXUINT)
+    {
+      g_simple_async_result_set_error (simple, G_IO_ERROR, G_IO_ERROR_FAILED,
+          "pulsesrc is not yet PLAYING");
+      g_simple_async_result_complete_in_idle (simple);
+      g_object_unref (simple);
+      return;
+    }
+
+  g_simple_async_result_set_op_res_gpointer (simple,
+      GUINT_TO_POINTER (microphone), NULL);
+
+  operation = operation_new (operation_change_microphone, simple);
+  g_queue_push_tail (priv->operations, operation);
+
+  /* gogogogo */
+  operations_run (src);
+}
+
+gboolean
+empathy_audio_src_change_microphone_finish (EmpathyGstAudioSrc *src,
+    GAsyncResult *result,
+    GError **error)
+{
+  empathy_implement_finish_void (src,
+      empathy_audio_src_change_microphone_async);
+}

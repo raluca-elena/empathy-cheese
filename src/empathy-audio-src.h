@@ -74,6 +74,11 @@ void empathy_audio_src_get_microphones_async (EmpathyGstAudioSrc *src,
 const GList * empathy_audio_src_get_microphones_finish (EmpathyGstAudioSrc *src,
     GAsyncResult *result, GError **error);
 
+void empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
+    guint microphone, GAsyncReadyCallback callback, gpointer user_data);
+gboolean empathy_audio_src_change_microphone_finish (EmpathyGstAudioSrc *src,
+    GAsyncResult *result, GError **error);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_GST_AUDIO_SRC_H__*/
