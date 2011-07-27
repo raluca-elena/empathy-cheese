@@ -75,6 +75,8 @@ struct _EmpathyPreferencesPriv {
 	GtkWidget *checkbutton_notifications_contact_signin;
 	GtkWidget *checkbutton_notifications_contact_signout;
 
+	GtkWidget *adj_call_volume;
+
 	GtkWidget *treeview_spell_checker;
 
 	GtkWidget *checkbutton_location_publish;
@@ -93,6 +95,7 @@ struct _EmpathyPreferencesPriv {
 
 	GSettings *gsettings;
 	GSettings *gsettings_chat;
+	GSettings *gsettings_call;
 	GSettings *gsettings_loc;
 	GSettings *gsettings_notify;
 	GSettings *gsettings_sound;
@@ -257,6 +260,12 @@ preferences_setup_widgets (EmpathyPreferences *preferences)
 			 EMPATHY_PREFS_CHAT_SHOW_CONTACTS_IN_ROOMS,
 			 priv->checkbutton_show_contacts_in_rooms,
 			 "active",
+			 G_SETTINGS_BIND_DEFAULT);
+
+	g_settings_bind (priv->gsettings_call,
+			 EMPATHY_PREFS_CALL_SOUND_VOLUME,
+			 priv->adj_call_volume,
+			 "value",
 			 G_SETTINGS_BIND_DEFAULT);
 
 	g_settings_bind (priv->gsettings,
@@ -1094,6 +1103,7 @@ empathy_preferences_finalize (GObject *self)
 
 	g_object_unref (priv->gsettings);
 	g_object_unref (priv->gsettings_chat);
+	g_object_unref (priv->gsettings_call);
 	g_object_unref (priv->gsettings_loc);
 	g_object_unref (priv->gsettings_notify);
 	g_object_unref (priv->gsettings_sound);
@@ -1166,6 +1176,7 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_location_resource_network", &priv->checkbutton_location_resource_network,
 		"checkbutton_location_resource_cell", &priv->checkbutton_location_resource_cell,
 		"checkbutton_location_resource_gps", &priv->checkbutton_location_resource_gps,
+		"call_volume_adjustment", &priv->adj_call_volume,
 		NULL);
 	g_free (filename);
 
@@ -1176,6 +1187,7 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 
 	priv->gsettings = g_settings_new (EMPATHY_PREFS_SCHEMA);
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+	priv->gsettings_call = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
 	priv->gsettings_loc = g_settings_new (EMPATHY_PREFS_LOCATION_SCHEMA);
 	priv->gsettings_notify = g_settings_new (EMPATHY_PREFS_NOTIFICATIONS_SCHEMA);
 	priv->gsettings_sound = g_settings_new (EMPATHY_PREFS_SOUNDS_SCHEMA);
