@@ -321,14 +321,20 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
 
   gst_object_unref (G_OBJECT (src));
 
+  /* PulseAudio stuff: We need to create a dummy pa_glib_mainloop* so
+   * Pulse can use the mainloop that GTK has created for us. */
   priv->loop = pa_glib_mainloop_new (NULL);
   priv->context = pa_context_new (pa_glib_mainloop_get_api (priv->loop),
       "EmpathyAudioSrc");
 
+  /* Now listen for state changes so we know when we've connected. */
   pa_context_set_state_callback (priv->context,
       empathy_audio_src_pa_state_change_cb, obj);
   pa_context_connect (priv->context, NULL, 0, NULL);
 
+  /* Listen to changes to GstPulseSrc:stream-index so we know when
+   * it's no longer G_MAXUINT (starting for the first time) or if it
+   * changes (READY->NULL->READY...) */
   g_signal_connect (priv->src, "notify::stream-index",
       G_CALLBACK (empathy_audio_src_stream_index_notify),
       obj);
