@@ -168,7 +168,9 @@ empathy_call_SOURCES = \
        empathy-video-widget.c \
        empathy-video-widget.h \
        ev-sidebar.c \
-       ev-sidebar.h
+       ev-sidebar.h \
+       empathy-mic-menu.c \
+       empathy-mic-menu.h
 
 nodist_empathy_call_SOURCES = $(BUILT_SOURCES)
 

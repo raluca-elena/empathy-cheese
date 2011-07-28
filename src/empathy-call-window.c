@@ -60,6 +60,7 @@
 #include "empathy-audio-sink.h"
 #include "empathy-video-src.h"
 #include "ev-sidebar.h"
+#include "empathy-mic-menu.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -218,6 +219,8 @@ struct _EmpathyCallWindowPriv
   gboolean pipeline_playing;
 
   EmpathySoundManager *sound_mgr;
+
+  EmpathyMicMenu *mic_menu;
 };
 
 #define GET_PRIV(o) (EMPATHY_CALL_WINDOW (o)->priv)
@@ -1154,6 +1157,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   g_object_unref (gui);
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
+  priv->mic_menu = empathy_mic_menu_new (self);
 
   empathy_call_window_show_hangup_button (self, TRUE);
 
@@ -1683,6 +1687,8 @@ empathy_call_window_dispose (GObject *object)
 
 
   tp_clear_object (&priv->sound_mgr);
+
+  tp_clear_object (&priv->mic_menu);
 
   G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose (object);
 }
