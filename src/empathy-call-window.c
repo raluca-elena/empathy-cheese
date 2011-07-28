@@ -146,6 +146,8 @@ struct _EmpathyCallWindowPriv
   GtkWidget *pane;
   GtkAction *menu_fullscreen;
 
+  ClutterState *transitions;
+
   /* The box that contains self and remote avatar and video
      input/output. When we redial, we destroy and re-create the box */
   ClutterActor *video_box;
@@ -203,6 +205,8 @@ struct _EmpathyCallWindowPriv
 
   gboolean got_video;
   guint got_video_src;
+
+  guint inactivity_src;
 
   /* Those fields represent the state of the window before it actually was in
      fullscreen mode. */
@@ -773,6 +777,32 @@ empathy_call_window_about_cb (GtkAction *action,
 }
 
 static gboolean
+empathy_call_window_toolbar_timeout (gpointer data)
+{
+  EmpathyCallWindow *self = data;
+
+  clutter_state_set_state (self->priv->transitions, "fade-out");
+
+  return TRUE;
+}
+
+static gboolean
+empathy_call_window_motion_notify_cb (GtkWidget *widget,
+    GdkEvent *event,
+    EmpathyCallWindow *self)
+{
+  clutter_state_set_state (self->priv->transitions, "fade-in");
+
+  if (self->priv->inactivity_src > 0)
+    g_source_remove (self->priv->inactivity_src);
+
+  self->priv->inactivity_src = g_timeout_add_seconds (3,
+      empathy_call_window_toolbar_timeout, self);
+
+  return FALSE;
+}
+
+static gboolean
 empathy_call_window_configure_event_cb (GtkWidget *widget,
     GdkEvent  *event,
     EmpathyCallWindow *self)
@@ -980,6 +1010,27 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   clutter_actor_raise_top (priv->floating_toolbar);
 
+  /* Transitions for the floating toolbar */
+  priv->transitions = clutter_state_new ();
+
+  /* all transitions last for 2s */
+  clutter_state_set_duration (priv->transitions, NULL, NULL, 2000);
+
+  /* transition from any state to "fade-out" state */
+  clutter_state_set (priv->transitions, NULL, "fade-out",
+      priv->floating_toolbar,
+      "opacity", CLUTTER_EASE_OUT_QUAD, 0,
+      NULL);
+
+  /* transition from any state to "fade-in" state */
+  clutter_state_set (priv->transitions, NULL, "fade-in",
+      priv->floating_toolbar,
+      "opacity", CLUTTER_EASE_OUT_QUAD, FLOATING_TOOLBAR_OPACITY,
+      NULL);
+
+  /* put the actor into the "fade-in" state with no animation */
+  clutter_state_warp_to_state (priv->transitions, "fade-in");
+
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
 
@@ -1005,6 +1056,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   empathy_call_window_fullscreen_set_video_widget (priv->fullscreen,
       priv->video_container);
 
+  /* We hide the bottom toolbar after 3s of inactivity and show it
+   * again on mouse movement */
+  priv->inactivity_src = g_timeout_add_seconds (3,
+      empathy_call_window_toolbar_timeout, self);
+
   g_signal_connect (G_OBJECT (priv->fullscreen->leave_fullscreen_button),
       "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
 
@@ -1019,6 +1075,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   g_signal_connect (G_OBJECT (self), "key-press-event",
       G_CALLBACK (empathy_call_window_key_press_cb), self);
+
+  g_signal_connect (self, "motion-notify-event",
+      G_CALLBACK (empathy_call_window_motion_notify_cb), self);
 
   priv->timer = g_timer_new ();
 
@@ -1539,6 +1598,12 @@ empathy_call_window_dispose (GObject *object)
       priv->got_video_src = 0;
     }
 
+  if (priv->inactivity_src > 0)
+    {
+      g_source_remove (priv->inactivity_src);
+      priv->inactivity_src = 0;
+    }
+
   tp_clear_object (&priv->pipeline);
   tp_clear_object (&priv->video_input);
   tp_clear_object (&priv->audio_input);
@@ -1547,6 +1612,7 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->fullscreen);
   tp_clear_object (&priv->camera_monitor);
   tp_clear_object (&priv->settings);
+  tp_clear_object (&priv->transitions);
 
   g_list_free_full (priv->notifiers, g_object_unref);
 
