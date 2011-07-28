@@ -903,11 +903,15 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->dtmf_panel,
       FALSE, FALSE, 0);
 
+  gtk_box_pack_start (GTK_BOX (priv->pane), priv->details_vbox,
+      FALSE, FALSE, 0);
+
   gtk_widget_set_sensitive (priv->dtmf_panel, FALSE);
 
   gtk_widget_show_all (top_vbox);
 
   gtk_widget_hide (priv->dtmf_panel);
+  gtk_widget_hide (priv->details_vbox);
 
   priv->fullscreen = empathy_call_window_fullscreen_new (self);
 
