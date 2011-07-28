@@ -2836,14 +2836,11 @@ empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
 
 static void
 empathy_call_window_hangup_cb (gpointer object,
-                               EmpathyCallWindow *window)
+    EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  empathy_call_handler_stop_call (self->priv->handler);
 
-  empathy_call_handler_stop_call (priv->handler);
-
-  if (empathy_call_window_disconnected (window, FALSE))
-    gtk_widget_destroy (GTK_WIDGET (window));
+  empathy_call_window_disconnected (self, TRUE);
 }
 
 static void
