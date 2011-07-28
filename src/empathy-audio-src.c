@@ -157,6 +157,7 @@ operation_get_microphones_cb (pa_context *context,
   mic->index = info->index;
   mic->name = g_strdup (info->name);
   mic->description = g_strdup (info->description);
+  mic->is_monitor = (info->monitor_of_sink != PA_INVALID_INDEX);
 
   /* add it to the queue */
   queue = g_simple_async_result_get_op_res_gpointer (result);
@@ -264,12 +265,15 @@ empathy_audio_src_source_info_cb (pa_context *context,
     void *userdata)
 {
   EmpathyGstAudioSrc *self = userdata;
+  gboolean is_monitor;
 
   if (eol)
     return;
 
+  is_monitor = (info->monitor_of_sink != PA_INVALID_INDEX);
+
   g_signal_emit (self, signals[MICROPHONE_ADDED], 0,
-      info->index, info->name, info->description);
+      info->index, info->name, info->description, is_monitor);
 }
 
 static void
@@ -529,8 +533,8 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    _src_marshal_VOID__UINT_STRING_STRING,
-    G_TYPE_NONE, 3, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
+    _src_marshal_VOID__UINT_STRING_STRING_BOOLEAN,
+    G_TYPE_NONE, 4, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
 
   signals[MICROPHONE_REMOVED] = g_signal_new ("microphone-removed",
     G_TYPE_FROM_CLASS (empathy_audio_src_class),

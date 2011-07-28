@@ -241,6 +241,7 @@ empathy_mic_menu_microphone_added_cb (EmpathyGstAudioSrc *audio,
     guint source_idx,
     const gchar *name,
     const gchar *description,
+    gboolean is_monitor,
     EmpathyMicMenu *self)
 {
   empathy_mic_menu_add_microphone (self, name, description, source_idx);

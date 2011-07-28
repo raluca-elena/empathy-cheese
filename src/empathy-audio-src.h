@@ -67,6 +67,7 @@ typedef struct
   guint index;
   gchar *name;
   gchar *description;
+  gboolean is_monitor;
 } EmpathyAudioSrcMicrophone;
 
 void empathy_audio_src_get_microphones_async (EmpathyGstAudioSrc *src,
