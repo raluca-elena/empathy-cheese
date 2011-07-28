@@ -51,6 +51,8 @@ struct _EmpathyMicMenuPrivate
 
 G_DEFINE_TYPE (EmpathyMicMenu, empathy_mic_menu, G_TYPE_OBJECT);
 
+#define MONITOR_KEY "empathy-mic-menu-is-monitor"
+
 enum
 {
   PROP_WINDOW = 1,
@@ -186,15 +188,27 @@ empathy_mic_menu_update (EmpathyMicMenu *self)
       GtkRadioAction *action = l->data;
       const gchar *name = gtk_action_get_name (GTK_ACTION (action));
       gint value;
+      gboolean active;
 
       g_object_get (action, "value", &value, NULL);
 
-      if (value == (gint) current_mic)
+      active = (value == (gint) current_mic);
+
+      if (active)
         {
           priv->in_update = TRUE;
           gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
           priv->in_update = FALSE;
         }
+
+      /* If action is a monitor then don't show it in the UI, BUT do
+       * display it regardless if it is the current device. This is so
+       * we don't have a rubbish UI by showing monitor devices in
+       * Empathy, but still show the correct device when someone plays
+       * with pavucontrol. */
+      if (g_object_get_data (G_OBJECT (action), MONITOR_KEY) != NULL
+          && !active)
+        continue;
 
       gtk_ui_manager_add_ui (ui_manager, priv->ui_id,
           /* TODO: this should probably be passed from the call
@@ -209,7 +223,8 @@ static void
 empathy_mic_menu_add_microphone (EmpathyMicMenu *self,
     const gchar *name,
     const gchar *description,
-    guint source_idx)
+    guint source_idx,
+    gboolean is_monitor)
 {
   EmpathyMicMenuPrivate *priv = self->priv;
   GtkRadioAction *action;
@@ -218,6 +233,14 @@ empathy_mic_menu_add_microphone (EmpathyMicMenu *self,
   action = gtk_radio_action_new (name, description, NULL, NULL, source_idx);
   gtk_action_group_add_action_with_accel (priv->action_group,
       GTK_ACTION (action), NULL);
+
+  /* Set MONITOR_KEY on the action to non-NULL if it's a monitor
+   * because we don't want to show monitors if we can help it. */
+  if (is_monitor)
+    {
+      g_object_set_data (G_OBJECT (action), MONITOR_KEY,
+          GUINT_TO_POINTER (TRUE));
+    }
 
   group = gtk_radio_action_get_group (GTK_RADIO_ACTION (priv->anchor_action));
   gtk_radio_action_set_group (GTK_RADIO_ACTION (action), group);
@@ -244,7 +267,8 @@ empathy_mic_menu_microphone_added_cb (EmpathyGstAudioSrc *audio,
     gboolean is_monitor,
     EmpathyMicMenu *self)
 {
-  empathy_mic_menu_add_microphone (self, name, description, source_idx);
+  empathy_mic_menu_add_microphone (self, name, description,
+      source_idx, is_monitor);
 
   empathy_mic_menu_update (self);
 }
@@ -305,7 +329,7 @@ empathy_mic_menu_get_microphones_cb (GObject *source_object,
       EmpathyAudioSrcMicrophone *mic = mics->data;
 
       empathy_mic_menu_add_microphone (self, mic->name,
-          mic->description, mic->index);
+          mic->description, mic->index, mic->is_monitor);
     }
 
   empathy_mic_menu_update (self);
