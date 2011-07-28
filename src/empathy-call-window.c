@@ -1904,14 +1904,23 @@ empathy_call_window_update_timer (gpointer user_data)
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  const gchar *status;
   gchar *str;
   gdouble time_;
 
   time_ = g_timer_elapsed (priv->timer, NULL);
 
+  if (priv->call_state == HELD)
+    status = _("On hold");
+  else if (!gtk_toggle_tool_button_get_active (
+      GTK_TOGGLE_TOOL_BUTTON (priv->mic_button)))
+    status = _("Mute");
+  else
+    status = _("Duration");
+
   /* Translators: 'status - minutes:seconds' the caller has been connected */
   str = g_strdup_printf (_("%s — %d:%02dm"),
-      priv->call_state == HELD ? _("On hold") : _("Connected"),
+      status,
       (int) time_ / 60, (int) time_ % 60);
   empathy_call_window_status_message (self, str);
   g_free (str);
