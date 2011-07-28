@@ -153,10 +153,6 @@ operation_get_microphones_cb (pa_context *context,
       return;
     }
 
-  /* ignore monitors */
-  if (info->monitor_of_sink != PA_INVALID_INDEX)
-    return;
-
   mic = g_slice_new0 (EmpathyAudioSrcMicrophone);
   mic->index = info->index;
   mic->name = g_strdup (info->name);
