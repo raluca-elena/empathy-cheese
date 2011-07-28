@@ -75,6 +75,7 @@ struct _EmpathyPreferencesPriv {
 	GtkWidget *checkbutton_notifications_contact_signin;
 	GtkWidget *checkbutton_notifications_contact_signout;
 
+	GtkWidget *scale_call_volume;
 	GtkWidget *adj_call_volume;
 
 	GtkWidget *treeview_spell_checker;
@@ -1087,6 +1088,13 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 			  preferences);
 }
 
+static gchar*
+preferences_call_format_volume_cb (GtkScale *scale,
+				   gdouble value)
+{
+	return g_strdup_printf ("%g%%", value);
+}
+
 static void
 empathy_preferences_response (GtkDialog *widget,
 			      gint response)
@@ -1176,6 +1184,7 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_location_resource_network", &priv->checkbutton_location_resource_network,
 		"checkbutton_location_resource_cell", &priv->checkbutton_location_resource_cell,
 		"checkbutton_location_resource_gps", &priv->checkbutton_location_resource_gps,
+		"call_volume_scale", &priv->scale_call_volume,
 		"call_volume_adjustment", &priv->adj_call_volume,
 		NULL);
 	g_free (filename);
@@ -1200,6 +1209,10 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 			  G_CALLBACK (preferences_preview_theme_changed_cb),
 			  preferences, 0);
 	preferences_preview_theme_changed_cb (priv->theme_manager, preferences);
+
+	g_signal_connect (priv->scale_call_volume, "format-value",
+			  G_CALLBACK (preferences_call_format_volume_cb),
+			  preferences);
 
 	preferences_themes_setup (preferences);
 
