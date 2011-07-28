@@ -1291,13 +1291,12 @@ empathy_call_window_setup_avatars (EmpathyCallWindow *self,
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
 
-  g_signal_connect (priv->contact, "notify::name",
-      G_CALLBACK (contact_name_changed_cb), self);
-  g_signal_connect (priv->contact, "notify::avatar",
-    G_CALLBACK (contact_avatar_changed_cb), self);
-  /* FIXME: There's no EmpathyContact::presence yet */
-  g_signal_connect (priv->contact, "notify::presence",
-      G_CALLBACK (contact_presence_changed_cb), self);
+  tp_g_signal_connect_object (priv->contact, "notify::name",
+      G_CALLBACK (contact_name_changed_cb), self, 0);
+  tp_g_signal_connect_object (priv->contact, "notify::avatar",
+    G_CALLBACK (contact_avatar_changed_cb), self, 0);
+  tp_g_signal_connect_object (priv->contact, "notify::presence",
+      G_CALLBACK (contact_presence_changed_cb), self, 0);
 
   set_window_title (self);
   set_remote_user_name (self, priv->contact);
