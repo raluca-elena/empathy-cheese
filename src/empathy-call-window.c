@@ -3092,6 +3092,9 @@ empathy_call_window_video_output_motion_notify (GtkWidget *widget,
   if (priv->is_fullscreen)
     {
       empathy_call_window_fullscreen_show_popup (priv->fullscreen);
+
+      /* Show the bottom toolbar */
+      empathy_call_window_motion_notify_cb (NULL, NULL, window);
       return TRUE;
     }
   return FALSE;
