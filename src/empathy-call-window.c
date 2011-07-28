@@ -3257,3 +3257,19 @@ empathy_call_window_volume_changed_cb (GtkScaleButton *button,
   empathy_audio_sink_set_volume (EMPATHY_GST_AUDIO_SINK (priv->audio_output),
     value);
 }
+
+GtkUIManager *
+empathy_call_window_get_ui_manager (EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  return priv->ui_manager;
+}
+
+EmpathyGstAudioSrc *
+empathy_call_window_get_audio_src (EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  return (EmpathyGstAudioSrc *) priv->audio_input;
+}
