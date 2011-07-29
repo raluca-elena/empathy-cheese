@@ -29,6 +29,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
+#include <webkit/webkit.h>
 
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/proxy-subclass.h>
@@ -83,6 +84,7 @@ struct _EmpathyLogWindowPriv
   GtkWidget *treeview_what;
   GtkWidget *treeview_when;
   GtkWidget *treeview_events;
+  GtkWidget *webview;
 
   GtkTreeStore *store_events;
 
@@ -360,6 +362,103 @@ toolbutton_av_clicked (GtkToolButton *toolbutton,
       TRUE, video, gtk_get_current_event_time ());
 }
 
+static void
+insert_or_change_row (EmpathyLogWindow *self,
+    const char *method,
+    GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script, *text;
+
+  gtk_tree_model_get (model, iter,
+      COL_EVENTS_TEXT, &text,
+      -1);
+
+  script = g_strdup_printf ("javascript:%s([%s], '%s');",
+      method,
+      g_strdelimit (str, ":", ','),
+      text);
+
+  // g_print ("%s\n", script);
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (text);
+  g_free (script);
+}
+
+static void
+store_events_row_inserted (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  insert_or_change_row (self, "insertRow", model, path, iter);
+}
+
+static void
+store_events_row_changed (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  insert_or_change_row (self, "changeRow", model, path, iter);
+}
+
+static void
+store_events_row_deleted (GtkTreeModel *model,
+    GtkTreePath *path,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script;
+
+  script = g_strdup_printf ("javascript:deleteRow([%s]);",
+      g_strdelimit (str, ":", ','));
+
+  // g_print ("%s\n", script);
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+}
+
+static void
+store_events_rows_reordered (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    int *new_order,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  int i, children = gtk_tree_model_iter_n_children (model, iter);
+  char **new_order_strv, *new_order_s;
+  char *script;
+
+  new_order_strv = g_new0 (char *, children + 1);
+
+  for (i = 0; i < children; i++)
+    new_order_strv[i] = g_strdup_printf ("%i", new_order[i]);
+
+  new_order_s = g_strjoinv (",", new_order_strv);
+
+  script = g_strdup_printf ("javascript:reorderRows([%s], [%s]);",
+      str == NULL ? "" : g_strdelimit (str, ":", ','),
+      new_order_s);
+
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+  g_free (new_order_s);
+  g_strfreev (new_order_strv);
+}
+
 static GObject *
 empathy_log_window_constructor (GType type,
     guint n_props,
@@ -444,7 +543,9 @@ empathy_log_window_init (EmpathyLogWindow *self)
   EmpathyAccountChooser *account_chooser;
   GtkBuilder *gui;
   gchar *filename;
+  GFile *gfile;
   GtkWidget *vbox, *accounts, *search, *label, *quit;
+  GtkWidget *sw;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_LOG_WINDOW, EmpathyLogWindowPriv);
@@ -563,6 +664,38 @@ empathy_log_window_init (EmpathyLogWindow *self)
   log_window_create_observer (self);
 
   log_window_who_populate (self);
+
+  /* events */
+  sw = gtk_scrolled_window_new (NULL, NULL);
+  self->priv->webview = webkit_web_view_new ();
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+      GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_container_add (GTK_CONTAINER (sw), self->priv->webview);
+
+  filename = empathy_file_lookup ("empathy-log-window.html", "data");
+  gfile = g_file_new_for_path (filename);
+  g_free (filename);
+
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->priv->webview),
+      g_file_get_uri (gfile));
+  g_object_unref (gfile);
+
+  gtk_notebook_append_page (GTK_NOTEBOOK (self->priv->notebook),
+      sw, gtk_label_new ("webview"));
+  gtk_widget_show_all (sw);
+
+  /* listen to changes to the treemodel */
+  g_signal_connect (self->priv->store_events, "row-inserted",
+      G_CALLBACK (store_events_row_inserted), self);
+  g_signal_connect (self->priv->store_events, "row-changed",
+      G_CALLBACK (store_events_row_changed), self);
+  g_signal_connect (self->priv->store_events, "row-deleted",
+      G_CALLBACK (store_events_row_deleted), self);
+  g_signal_connect (self->priv->store_events, "rows-reordered",
+      G_CALLBACK (store_events_rows_reordered), self);
+
+  // debug
+  gtk_notebook_set_show_tabs (GTK_NOTEBOOK (self->priv->notebook), TRUE);
 
   gtk_widget_show (GTK_WIDGET (self));
 }

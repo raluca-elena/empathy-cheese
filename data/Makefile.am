@@ -58,7 +58,10 @@ clientfile_DATA = \
 	Empathy.FileTransfer.client
 
 htmldir = $(datadir)/empathy
-html_DATA = Template.html
+html_DATA = \
+	Template.html \
+	empathy-log-window.html \
+	$(NULL)
 
 EXTRA_DIST = 				\
 	$(convert_DATA)			\
