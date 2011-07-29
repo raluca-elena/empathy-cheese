@@ -31,6 +31,9 @@
 
 #include "src-marshal.h"
 
+#define DEBUG_FLAG EMPATHY_DEBUG_VOIP
+#include <libempathy/empathy-debug.h>
+
 G_DEFINE_TYPE(EmpathyGstAudioSrc, empathy_audio_src, GST_TYPE_BIN)
 
 /* signal enum */
@@ -314,7 +317,7 @@ empathy_audio_src_pa_subscribe_cb (pa_context *context,
     void *userdata)
 {
   if (!success)
-    g_debug ("Failed to subscribe to PulseAudio events");
+    DEBUG ("Failed to subscribe to PulseAudio events");
 }
 
 static void

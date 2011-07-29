@@ -25,6 +25,9 @@
 
 #include "empathy-mic-menu.h"
 
+#define DEBUG_FLAG EMPATHY_DEBUG_VOIP
+#include <libempathy/empathy-debug.h>
+
 struct _EmpathyMicMenuPrivate
 {
   /* Borrowed ref; the call window actually owns us. */
@@ -134,7 +137,7 @@ empathy_mic_menu_change_mic_cb (GObject *source_object,
 
   if (!empathy_audio_src_change_microphone_finish (audio, result, &error))
     {
-      g_debug ("Failed to change microphone: %s", error->message);
+      DEBUG ("Failed to change microphone: %s", error->message);
       g_clear_error (&error);
 
       /* We call update here because if this change operation failed
@@ -319,7 +322,7 @@ empathy_mic_menu_get_microphones_cb (GObject *source_object,
 
   if (error != NULL)
     {
-      g_debug ("Failed to get microphone list: %s", error->message);
+      DEBUG ("Failed to get microphone list: %s", error->message);
       g_clear_error (&error);
       return;
     }
