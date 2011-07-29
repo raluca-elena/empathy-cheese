@@ -334,9 +334,9 @@ empathy_audio_src_pa_state_change_cb (pa_context *context,
       pa_context_subscribe (priv->context,
           PA_SUBSCRIPTION_MASK_SOURCE | PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
           empathy_audio_src_pa_subscribe_cb, NULL);
-    }
 
-  operations_run (self);
+      operations_run (self);
+    }
 }
 
 static void
