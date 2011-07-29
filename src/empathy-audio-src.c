@@ -85,6 +85,18 @@ struct _EmpathyGstAudioSrcPrivate
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_GST_AUDIO_SRC, \
   EmpathyGstAudioSrcPrivate))
 
+static gboolean
+empathy_audio_src_supports_changing_mic (EmpathyGstAudioSrc *self)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  GObjectClass *object_class;
+
+  object_class = G_OBJECT_GET_CLASS (priv->src);
+
+  return (g_object_class_find_property (object_class,
+          "source-output-index") != NULL);
+}
+
 typedef void (*OperationFunc) (EmpathyGstAudioSrc *, GSimpleAsyncResult *);
 
 typedef struct
@@ -730,6 +742,17 @@ empathy_audio_src_get_microphones_async (EmpathyGstAudioSrc *src,
   simple = g_simple_async_result_new (G_OBJECT (src), callback, user_data,
       empathy_audio_src_get_microphones_async);
 
+  /* If we can't change mic let's not pretend we can by returning the
+   * list of available mics. */
+  if (!empathy_audio_src_supports_changing_mic (src))
+    {
+      g_simple_async_result_set_error (simple, G_IO_ERROR, G_IO_ERROR_FAILED,
+          "pulsesrc is not new enough to support changing microphone");
+      g_simple_async_result_complete_in_idle (simple);
+      g_object_unref (simple);
+      return;
+    }
+
   operation = operation_new (operation_get_microphones, simple);
   g_queue_push_tail (priv->operations, operation);
 
@@ -777,6 +800,15 @@ empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
 
   simple = g_simple_async_result_new (G_OBJECT (src), callback, user_data,
       empathy_audio_src_change_microphone_async);
+
+  if (!empathy_audio_src_supports_changing_mic (src))
+    {
+      g_simple_async_result_set_error (simple, G_IO_ERROR, G_IO_ERROR_FAILED,
+          "pulsesrc is not new enough to support changing microphone");
+      g_simple_async_result_complete_in_idle (simple);
+      g_object_unref (simple);
+      return;
+    }
 
   g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
 
