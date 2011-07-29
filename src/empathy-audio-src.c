@@ -204,17 +204,17 @@ operation_change_microphone (EmpathyGstAudioSrc *self,
     GSimpleAsyncResult *result)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
-  guint stream_idx, microphone;
+  guint source_output_idx, microphone;
 
-  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+  g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
 
   g_assert_cmpuint (pa_context_get_state (priv->context), ==, PA_CONTEXT_READY);
-  g_assert_cmpuint (stream_idx, !=, G_MAXUINT);
+  g_assert_cmpuint (source_output_idx, !=, PA_INVALID_INDEX);
 
   microphone = GPOINTER_TO_UINT (
       g_simple_async_result_get_op_res_gpointer (result));
 
-  pa_context_move_source_output_by_index (priv->context, stream_idx, microphone,
+  pa_context_move_source_output_by_index (priv->context, source_output_idx, microphone,
       operation_change_microphone_cb, result);
 }
 
@@ -343,25 +343,25 @@ empathy_audio_src_pa_state_change_cb (pa_context *context,
 }
 
 static void
-empathy_audio_src_stream_index_notify (GObject *object,
+empathy_audio_src_source_output_index_notify (GObject *object,
     GParamSpec *pspec,
     EmpathyGstAudioSrc *self)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
-  guint stream_idx = G_MAXUINT;
+  guint source_output_idx = PA_INVALID_INDEX;
 
-  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+  g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
 
-  if (stream_idx == G_MAXUINT)
+  if (source_output_idx == PA_INVALID_INDEX)
     return;
 
-  if (priv->source_output_idx == stream_idx)
+  if (priv->source_output_idx == source_output_idx)
     return;
 
   /* It's actually changed. */
-  priv->source_output_idx = stream_idx;
+  priv->source_output_idx = source_output_idx;
 
-  pa_context_get_source_output_info (priv->context, stream_idx,
+  pa_context_get_source_output_info (priv->context, source_output_idx,
       empathy_audio_src_source_output_info_cb, self);
 }
 
@@ -405,11 +405,11 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   priv->context = pa_context_new (pa_glib_mainloop_get_api (priv->loop),
       "EmpathyAudioSrc");
 
-  /* Listen to changes to GstPulseSrc:stream-index so we know when
-   * it's no longer G_MAXUINT (starting for the first time) or if it
+  /* Listen to changes to GstPulseSrc:source-output-index so we know when
+   * it's no longer PA_INVALID_INDEX (starting for the first time) or if it
    * changes (READY->NULL->READY...) */
-  g_signal_connect (priv->src, "notify::stream-index",
-      G_CALLBACK (empathy_audio_src_stream_index_notify),
+  g_signal_connect (priv->src, "notify::source-output-index",
+      G_CALLBACK (empathy_audio_src_source_output_index_notify),
       obj);
 
   /* Finally listen for state changes so we know when we've
@@ -771,16 +771,16 @@ empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
     gpointer user_data)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (src);
-  guint stream_idx;
+  guint source_output_idx;
   GSimpleAsyncResult *simple;
   Operation *operation;
 
   simple = g_simple_async_result_new (G_OBJECT (src), callback, user_data,
       empathy_audio_src_change_microphone_async);
 
-  g_object_get (priv->src, "stream-index", &stream_idx, NULL);
+  g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
 
-  if (stream_idx == G_MAXUINT)
+  if (source_output_idx == PA_INVALID_INDEX)
     {
       g_simple_async_result_set_error (simple, G_IO_ERROR, G_IO_ERROR_FAILED,
           "pulsesrc is not yet PLAYING");
