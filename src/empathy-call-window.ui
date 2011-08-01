@@ -18,6 +18,19 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="edit">
+            <property name="name">edit</property>
+            <property name="label" translatable="yes">_Edit</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menumicrophone">
+            <property name="label" translatable="yes">_Microphone</property>
+            <property name="name">menumicrophone</property>
+            <property name="icon_name">gnome-stock-mic</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="view">
             <property name="name">view</property>
             <property name="label" translatable="yes">_View</property>
@@ -54,6 +67,9 @@
       <menubar name="menubar1">
         <menu action="call">
           <menuitem action="menuhangup"/>
+        </menu>
+        <menu action="edit">
+          <menu action="menumicrophone"/>
         </menu>
         <menu action="view">
           <menuitem action="menufullscreen"/>

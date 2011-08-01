@@ -168,7 +168,9 @@ empathy_call_SOURCES = \
        empathy-video-widget.c \
        empathy-video-widget.h \
        ev-sidebar.c \
-       ev-sidebar.h
+       ev-sidebar.h \
+       empathy-mic-menu.c \
+       empathy-mic-menu.h
 
 nodist_empathy_call_SOURCES = $(BUILT_SOURCES)
 
@@ -262,10 +264,10 @@ dist_man_MANS =			\
 	empathy.1 \
 	empathy-accounts.1
 
-src-marshal.list: $(empathy_SOURCES) Makefile.am
+src-marshal.list: $(empathy_SOURCES) $(empathy_call_SOURCES) Makefile.am
 	$(AM_V_GEN)( cd $(srcdir) && \
 	sed -n -e 's/.*src_marshal_\([[:upper:][:digit:]]*__[[:upper:][:digit:]_]*\).*/\1/p' \
-	$(empathy_SOURCES) $(empathy_av_SOURCES) ) \
+	$(empathy_SOURCES) $(empathy_av_SOURCES) $(empathy_call_SOURCES) ) \
 	| sed -e 's/__/:/' -e 'y/_/,/' | sort -u > $@.tmp
 	@if cmp -s $@.tmp $@; then \
 		rm $@.tmp; \

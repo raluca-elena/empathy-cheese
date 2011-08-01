@@ -174,6 +174,8 @@ PKG_CHECK_MODULES(EMPATHY,
    libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED
    libnotify >= $LIBNOTIFY_REQUIRED
    gcr-3 >= $GCR_REQUIRED
+   libpulse
+   libpulse-mainloop-glib
 ])
 
 PKG_CHECK_MODULES(YELL, [telepathy-yell])

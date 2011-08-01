@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 
 #include "empathy-call-handler.h"
+#include "empathy-audio-src.h"
 
 G_BEGIN_DECLS
 
@@ -61,6 +62,10 @@ GType empathy_call_window_get_type (void);
     EmpathyCallWindowClass))
 
 EmpathyCallWindow *empathy_call_window_new (EmpathyCallHandler *handler);
+
+GtkUIManager *empathy_call_window_get_ui_manager (EmpathyCallWindow *window);
+
+EmpathyGstAudioSrc *empathy_call_window_get_audio_src (EmpathyCallWindow *window);
 
 G_END_DECLS
 

@@ -61,6 +61,7 @@
 #include "empathy-audio-src.h"
 #include "empathy-audio-sink.h"
 #include "empathy-video-src.h"
+#include "empathy-mic-menu.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -212,6 +213,7 @@ struct _EmpathyCallWindowPriv
   EmpathySoundManager *sound_mgr;
 
   GSettings *settings;
+  EmpathyMicMenu *mic_menu;
 };
 
 #define GET_PRIV(o) (EMPATHY_CALL_WINDOW (o)->priv)
@@ -939,6 +941,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   g_object_unref (gui);
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
+  priv->mic_menu = empathy_mic_menu_new (self);
 
   empathy_call_window_show_hangup_button (self, TRUE);
 
@@ -1472,6 +1475,8 @@ empathy_call_window_dispose (GObject *object)
 
 
   tp_clear_object (&priv->sound_mgr);
+
+  tp_clear_object (&priv->mic_menu);
 
   G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose (object);
 }
@@ -2963,4 +2968,20 @@ empathy_call_window_volume_changed_cb (GtkScaleButton *button,
 
   empathy_audio_sink_set_volume (EMPATHY_GST_AUDIO_SINK (priv->audio_output),
     value);
+}
+
+GtkUIManager *
+empathy_call_window_get_ui_manager (EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  return priv->ui_manager;
+}
+
+EmpathyGstAudioSrc *
+empathy_call_window_get_audio_src (EmpathyCallWindow *window)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+
+  return (EmpathyGstAudioSrc *) priv->audio_input;
 }
