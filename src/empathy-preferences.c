@@ -1226,11 +1226,11 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	preferences_sound_load (preferences);
 
 	if (empathy_spell_supported ()) {
-		page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 2);
+		page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 5);
 		gtk_widget_show (page);
 	}
 
-	page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 3);
+	page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 4);
 #ifdef HAVE_GEOCLUE
 	gtk_widget_show (page);
 #else
