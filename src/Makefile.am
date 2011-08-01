@@ -173,6 +173,8 @@ empathy_call_SOURCES = \
        empathy-preferences.h \
        ev-sidebar.c \
        ev-sidebar.h \
+       empathy-camera-menu.c \
+       empathy-camera-menu.h \
        empathy-mic-menu.c \
        empathy-mic-menu.h \
        empathy-rounded-actor.c \

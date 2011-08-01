@@ -65,6 +65,7 @@
 #include "empathy-mic-menu.h"
 #include "empathy-preferences.h"
 #include "empathy-rounded-actor.h"
+#include "empathy-camera-menu.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -228,6 +229,7 @@ struct _EmpathyCallWindowPriv
 
   GSettings *settings;
   EmpathyMicMenu *mic_menu;
+  EmpathyCameraMenu *camera_menu;
 };
 
 #define GET_PRIV(o) (EMPATHY_CALL_WINDOW (o)->priv)
@@ -1094,6 +1096,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
   priv->mic_menu = empathy_mic_menu_new (self);
+  priv->camera_menu = empathy_camera_menu_new (self);
 
   empathy_call_window_show_hangup_button (self, TRUE);
 
@@ -1625,7 +1628,9 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->fullscreen);
   tp_clear_object (&priv->camera_monitor);
   tp_clear_object (&priv->settings);
-  tp_clear_object (&priv->transitions);
+  tp_clear_object (&priv->sound_mgr);
+  tp_clear_object (&priv->mic_menu);
+  tp_clear_object (&priv->camera_menu);
 
   g_list_free_full (priv->notifiers, g_object_unref);
 
@@ -1639,11 +1644,6 @@ empathy_call_window_dispose (GObject *object)
           contact_name_changed_cb, self);
       priv->contact = NULL;
     }
-
-
-  tp_clear_object (&priv->sound_mgr);
-
-  tp_clear_object (&priv->mic_menu);
 
   G_OBJECT_CLASS (empathy_call_window_parent_class)->dispose (object);
 }
@@ -3169,4 +3169,10 @@ empathy_call_window_get_audio_src (EmpathyCallWindow *window)
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
 
   return (EmpathyGstAudioSrc *) priv->audio_input;
+}
+
+EmpathyGstVideoSrc *
+empathy_call_window_get_video_src (EmpathyCallWindow *self)
+{
+  return EMPATHY_GST_VIDEO_SRC (self->priv->video_input);
 }

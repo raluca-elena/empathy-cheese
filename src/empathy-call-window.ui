@@ -31,10 +31,23 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menucamera">
+            <property name="label" translatable="yes">_Camera</property>
+            <property name="name">menucamera</property>
+            <property name="icon_name">camera-web</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menusettings">
             <property name="stock_id">gtk-preferences</property>
             <property name="name">menusettings</property>
             <property name="label" translatable="yes">_Settings</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="view">
+            <property name="name">view</property>
+            <property name="label" translatable="yes">_View</property>
           </object>
         </child>
         <child>
@@ -90,6 +103,7 @@
         </menu>
         <menu action="edit">
           <menu action="menumicrophone"/>
+          <menu action="menucamera"/>
           <menuitem name="menusettings" action="menusettings"/>
         </menu>
         <menu action="help">
