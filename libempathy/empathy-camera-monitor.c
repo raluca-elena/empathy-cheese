@@ -44,6 +44,15 @@ enum
   PROP_AVAILABLE,
 };
 
+enum
+{
+  CAMERA_ADDED,
+  CAMERA_REMOVED,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 G_DEFINE_TYPE (EmpathyCameraMonitor, empathy_camera_monitor, G_TYPE_OBJECT);
 
 static EmpathyCameraMonitor *manager_singleton = NULL;
@@ -114,6 +123,8 @@ on_camera_added (CheeseCameraDeviceMonitor *device,
 
   if (self->priv->num_cameras == 1)
     g_object_notify (G_OBJECT (self), "available");
+
+  g_signal_emit (self, signals[CAMERA_ADDED], 0, camera);
 }
 
 static void
@@ -136,6 +147,8 @@ on_camera_removed (CheeseCameraDeviceMonitor *device,
 
   if (self->priv->num_cameras == 0)
     g_object_notify (G_OBJECT (self), "available");
+
+  g_signal_emit (self, signals[CAMERA_REMOVED], 0, camera);
 
   empathy_camera_free (camera);
 }
@@ -226,6 +239,20 @@ empathy_camera_monitor_class_init (EmpathyCameraMonitorClass *klass)
   g_object_class_install_property (object_class, PROP_AVAILABLE,
       g_param_spec_boolean ("available", "Available",
       "Camera available", TRUE, G_PARAM_READABLE));
+
+  signals[CAMERA_ADDED] =
+      g_signal_new ("added", G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+          0, NULL, NULL,
+          g_cclosure_marshal_VOID__BOXED,
+          G_TYPE_NONE, 1, EMPATHY_TYPE_CAMERA);
+
+  signals[CAMERA_REMOVED] =
+      g_signal_new ("removed", G_OBJECT_CLASS_TYPE (klass),
+          G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+          0, NULL, NULL,
+          g_cclosure_marshal_VOID__BOXED,
+          G_TYPE_NONE, 1, EMPATHY_TYPE_CAMERA);
 
   g_type_class_add_private (object_class,
       sizeof (EmpathyCameraMonitorPrivate));
