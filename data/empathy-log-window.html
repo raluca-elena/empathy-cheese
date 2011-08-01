@@ -15,6 +15,16 @@ div.row p {
   display: inline;
   white-space: pre-wrap;
 }
+
+span.open:after {
+  content: "\25BE";
+  margin-right: 2px;
+}
+
+span.closed:after {
+  content: "\25B8";
+  margin-right: 2px;
+}
     </style>
     <script type="text/javascript">
 function filterNodes (node, tagName)
@@ -42,6 +52,11 @@ function getContent(node)
   return filterNodes(node, 'P')[0];
 }
 
+function getToggle(node)
+{
+  return filterNodes(node, 'SPAN')[0];
+}
+
 function insertRow (path, text)
 {
   var treeview = document.getElementById('treeview');
@@ -67,10 +82,44 @@ function insertRow (path, text)
     parentnode.appendChild(newnode);
   else
     parentnode.insertBefore(newnode, nodes[path[i]]);
+
+  // add an expander
+  var toggle = document.createElement('span');
+  newnode.appendChild(toggle);
+  toggle.setAttribute('class', 'closed');
+  toggle.style.display = 'none';
+
+  toggle.onclick = function (e)
+    {
+      var display;
+      var nodes;
+
+      if (toggle.getAttribute('class') == 'closed')
+        {
+          toggle.setAttribute('class', 'open');
+          display = 'block';
+        }
+      else
+        {
+          toggle.setAttribute('class', 'closed');
+          display = 'none';
+        }
+
+      // console.log("clicked: " + display);
+
+      nodes = getNodes(newnode);
+
+      for (var i = 0; i < nodes.length; i++)
+        nodes[i].style.display = display;
+    };
   
   var contents = document.createElement('p');
   newnode.appendChild(contents);
   contents.innerHTML = text;
+
+  // if the node is not a top-level node, hide it
+  if (parentnode != treeview)
+    newnode.style.display = 'none';
 }
 
 function changeRow (path, text)
@@ -120,6 +169,23 @@ function reorderRows (path, new_order)
   // For reference: new_order[new_pos] = old_pos
   for (var i = 0; i < nodes.length; i++)
     node.appendChild(nodes[new_order[i]]);
+}
+
+function hasChildRows (path, has_children)
+{
+  var treeview = document.getElementById('treeview');
+  var node = treeview;
+
+  // walk the tree
+  for (var i = 0; i < path.length; i++)
+    node = getNodes(node)[path[i]];
+
+  var toggle = getToggle(node);
+
+  if (has_children)
+    toggle.style.display = 'inline';
+  else
+    toggle.style.display = 'none';
 }
     </script>
   </head>

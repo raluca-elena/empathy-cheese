@@ -430,6 +430,27 @@ store_events_row_deleted (GtkTreeModel *model,
 }
 
 static void
+store_events_has_child_rows (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script;
+
+  script = g_strdup_printf ("javascript:hasChildRows([%s], %u);",
+      g_strdelimit (str, ":", ','),
+      gtk_tree_model_iter_has_child (model, iter));
+
+  // g_print ("%s\n", script);
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+}
+
+static void
 store_events_rows_reordered (GtkTreeModel *model,
     GtkTreePath *path,
     GtkTreeIter *iter,
@@ -695,6 +716,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
       G_CALLBACK (store_events_row_deleted), self);
   g_signal_connect (self->priv->store_events, "rows-reordered",
       G_CALLBACK (store_events_rows_reordered), self);
+  g_signal_connect (self->priv->store_events, "row-has-child-toggled",
+      G_CALLBACK (store_events_has_child_rows), self);
 
   // debug
   gtk_notebook_set_show_tabs (GTK_NOTEBOOK (self->priv->notebook), TRUE);
