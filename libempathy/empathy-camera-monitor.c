@@ -34,6 +34,7 @@
 struct _EmpathyCameraMonitorPrivate
 {
   CheeseCameraDeviceMonitor *cheese_monitor;
+  GQueue cameras;
   gint num_cameras;
 };
 
@@ -47,6 +48,47 @@ G_DEFINE_TYPE (EmpathyCameraMonitor, empathy_camera_monitor, G_TYPE_OBJECT);
 
 static EmpathyCameraMonitor *manager_singleton = NULL;
 
+static EmpathyCamera *
+empathy_camera_new (const gchar *id,
+    const gchar *device,
+    const gchar *name)
+{
+  EmpathyCamera *camera = g_slice_new (EmpathyCamera);
+
+  camera->id = g_strdup (id);
+  camera->device = g_strdup (device);
+  camera->name = g_strdup (name);
+
+  return camera;
+}
+
+static void
+empathy_camera_free (EmpathyCamera *camera)
+{
+  g_free (camera->id);
+  g_free (camera->device);
+  g_free (camera->name);
+
+  g_slice_free (EmpathyCamera, camera);
+}
+
+static gint
+empathy_camera_find (gconstpointer a,
+    gconstpointer b)
+{
+  const EmpathyCamera *camera = a;
+  const gchar *id = b;
+
+  return g_strcmp0 (camera->id, id);
+}
+
+static void
+empathy_camera_monitor_free_camera_foreach (gpointer data,
+    gpointer user_data)
+{
+  empathy_camera_free (data);
+}
+
 static void
 on_camera_added (CheeseCameraDeviceMonitor *device,
     gchar *id,
@@ -55,6 +97,10 @@ on_camera_added (CheeseCameraDeviceMonitor *device,
     gint api_version,
     EmpathyCameraMonitor *self)
 {
+  EmpathyCamera *camera = empathy_camera_new (id, filename, product_name);
+
+  g_queue_push_tail (&self->priv->cameras, camera);
+
   self->priv->num_cameras++;
 
   if (self->priv->num_cameras == 1)
@@ -66,10 +112,29 @@ on_camera_removed (CheeseCameraDeviceMonitor *device,
     gchar *id,
     EmpathyCameraMonitor *self)
 {
+  EmpathyCamera *camera;
+  GList *l;
+
+  l = g_queue_find_custom (&self->priv->cameras, id, empathy_camera_find);
+
+  g_return_if_fail (l != NULL);
+
+  camera = l->data;
+
+  g_queue_delete_link (&self->priv->cameras, l);
+
   self->priv->num_cameras--;
 
   if (self->priv->num_cameras == 0)
     g_object_notify (G_OBJECT (self), "available");
+
+  empathy_camera_free (camera);
+}
+
+const GList *
+empathy_camera_monitor_get_cameras (EmpathyCameraMonitor *self)
+{
+  return self->priv->cameras.head;
 }
 
 static void
@@ -97,6 +162,10 @@ empathy_camera_monitor_dispose (GObject *object)
   EmpathyCameraMonitor *self = EMPATHY_CAMERA_MONITOR (object);
 
   tp_clear_object (&self->priv->cheese_monitor);
+
+  g_queue_foreach (&self->priv->cameras,
+      empathy_camera_monitor_free_camera_foreach, NULL);
+  g_queue_clear (&self->priv->cameras);
 
   G_OBJECT_CLASS (empathy_camera_monitor_parent_class)->dispose (object);
 }
@@ -158,6 +227,8 @@ empathy_camera_monitor_init (EmpathyCameraMonitor *self)
 {
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_CAMERA_MONITOR, EmpathyCameraMonitorPrivate);
+
+  g_queue_init (&self->priv->cameras);
 
   self->priv->cheese_monitor = cheese_camera_device_monitor_new ();
 
