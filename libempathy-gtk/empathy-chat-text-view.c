@@ -453,7 +453,7 @@ chat_text_maybe_append_date_and_time (EmpathyChatTextView *view,
 	/* Get the date of the message we are appending */
 	date = g_date_time_new_from_unix_utc (timestamp);
 
-	delta = g_date_time_difference (last_date, date);
+	delta = g_date_time_difference (date, last_date);
 	/* If last message was from another day we append date and time */
 	if (delta >= G_TIME_SPAN_DAY) {
 		append_date = TRUE;
