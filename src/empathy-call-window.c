@@ -959,6 +959,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
       G_CALLBACK (empathy_call_window_configure_event_cb), self);
   g_signal_connect (self, "window-state-event",
       G_CALLBACK (empathy_call_window_configure_event_cb), self);
+
+  /* Don't display labels in both toolbars */
+  gtk_toolbar_set_style (GTK_TOOLBAR (priv->toolbar), GTK_TOOLBAR_ICONS);
+  gtk_toolbar_set_style (GTK_TOOLBAR (priv->bottom_toolbar), GTK_TOOLBAR_ICONS);
 }
 
 /* Instead of specifying a width and a height, we specify only one size. That's
