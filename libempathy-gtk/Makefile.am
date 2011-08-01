@@ -279,16 +279,23 @@ endif
 if HAVE_WEBKIT
 libempathy_gtk_handwritten_source +=		\
 	empathy-plist.c				\
-	empathy-theme-adium.c
+	empathy-theme-adium.c			\
+	empathy-webkit-utils.c			\
+	$(NULL)
 libempathy_gtk_headers +=			\
 	empathy-plist.h				\
-	empathy-theme-adium.h
+	empathy-theme-adium.h			\
+	empathy-webkit-utils.h			\
+	$(NULL)
 else
 EXTRA_DIST +=					\
 	empathy-plist.c				\
 	empathy-plist.h				\
 	empathy-theme-adium.c			\
-	empathy-theme-adium.h
+	empathy-theme-adium.h			\
+	empathy-webkit-utils.c			\
+	empathy-webkit-utils.h			\
+	$(NULL)
 endif
 
 CLEANFILES =				\

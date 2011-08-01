@@ -39,8 +39,8 @@
 #include "empathy-smiley-manager.h"
 #include "empathy-ui-utils.h"
 #include "empathy-plist.h"
-#include "empathy-string-parser.h"
 #include "empathy-images.h"
+#include "empathy-webkit-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CHAT
 #include <libempathy/empathy-debug.h>
@@ -293,65 +293,6 @@ theme_adium_load_template (EmpathyThemeAdium *theme)
 	g_free (template);
 }
 
-static void
-theme_adium_match_newline (const gchar *text,
-			   gssize len,
-			   EmpathyStringReplace replace_func,
-			   EmpathyStringParser *sub_parsers,
-			   gpointer user_data)
-{
-	GString *string = user_data;
-	gint i;
-	gint prev = 0;
-
-	if (len < 0) {
-		len = G_MAXSSIZE;
-	}
-
-	/* Replace \n by <br/> */
-	for (i = 0; i < len && text[i] != '\0'; i++) {
-		if (text[i] == '\n') {
-			empathy_string_parser_substr (text + prev,
-						      i - prev, sub_parsers,
-						      user_data);
-			g_string_append (string, "<br/>");
-			prev = i + 1;
-		}
-	}
-	empathy_string_parser_substr (text + prev, i - prev,
-				      sub_parsers, user_data);
-}
-
-static void
-theme_adium_replace_smiley (const gchar *text,
-			    gssize len,
-			    gpointer match_data,
-			    gpointer user_data)
-{
-	EmpathySmileyHit *hit = match_data;
-	GString *string = user_data;
-
-	/* Replace smiley by a <img/> tag */
-	g_string_append_printf (string,
-				"<img src=\"%s\" alt=\"%.*s\" title=\"%.*s\"/>",
-				hit->path, (int)len, text, (int)len, text);
-}
-
-static EmpathyStringParser string_parsers[] = {
-	{empathy_string_match_link, empathy_string_replace_link},
-	{theme_adium_match_newline, NULL},
-	{empathy_string_match_all, empathy_string_replace_escaped},
-	{NULL, NULL}
-};
-
-static EmpathyStringParser string_parsers_with_smiley[] = {
-	{empathy_string_match_link, empathy_string_replace_link},
-	{empathy_string_match_smiley, theme_adium_replace_smiley},
-	{theme_adium_match_newline, NULL},
-	{empathy_string_match_all, empathy_string_replace_escaped},
-	{NULL, NULL}
-};
-
 static gchar *
 theme_adium_parse_body (EmpathyThemeAdium *self,
 	const gchar *text,
@@ -362,11 +303,9 @@ theme_adium_parse_body (EmpathyThemeAdium *self,
 	GString *string;
 
 	/* Check if we have to parse smileys */
-	if (g_settings_get_boolean (priv->gsettings_chat,
-	  EMPATHY_PREFS_CHAT_SHOW_SMILEYS))
-		parsers = string_parsers_with_smiley;
-	else
-		parsers = string_parsers;
+	parsers = empathy_webkit_get_string_parser (
+		g_settings_get_boolean (priv->gsettings_chat,
+			EMPATHY_PREFS_CHAT_SHOW_SMILEYS));
 
 	/* Parse text and construct string with links and smileys replaced
 	 * by html tags. Also escape text to make sure html code is
