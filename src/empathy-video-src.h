@@ -81,6 +81,9 @@ void empathy_video_src_set_channel (GstElement *src,
 guint empathy_video_src_get_channel (GstElement *src,
   EmpathyGstVideoSrcChannel channel);
 
+void empathy_video_src_change_device (EmpathyGstVideoSrc *self,
+  const gchar *device);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_GST_VIDEO_SRC_H__*/

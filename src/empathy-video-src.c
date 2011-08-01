@@ -361,3 +361,16 @@ out:
   return result;
 }
 
+void
+empathy_video_src_change_device (EmpathyGstVideoSrc *self,
+    const gchar *device)
+{
+  EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (self);
+  GstState state;
+
+  gst_element_get_state (priv->src, &state, NULL, 0);
+
+  gst_element_set_state (priv->src, GST_STATE_NULL);
+  g_object_set (priv->src, "device", device, NULL);
+  gst_element_set_state (priv->src, state);
+}
