@@ -1700,15 +1700,15 @@ debug_window_dispose (GObject *object)
   if (priv->name_owner_changed_signal != NULL)
     tp_proxy_signal_connection_disconnect (priv->name_owner_changed_signal);
 
+  if (priv->new_debug_message_signal != NULL)
+    tp_proxy_signal_connection_disconnect (priv->new_debug_message_signal);
+
   if (priv->proxy != NULL)
     {
       debug_window_set_enabled (EMPATHY_DEBUG_WINDOW (object), FALSE);
       g_signal_handler_disconnect (priv->proxy, priv->invalid_signal_id);
       g_object_unref (priv->proxy);
     }
-
-  if (priv->new_debug_message_signal != NULL)
-    tp_proxy_signal_connection_disconnect (priv->new_debug_message_signal);
 
   if (priv->service_store != NULL)
     g_object_unref (priv->service_store);
