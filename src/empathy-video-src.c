@@ -374,3 +374,14 @@ empathy_video_src_change_device (EmpathyGstVideoSrc *self,
   g_object_set (priv->src, "device", device, NULL);
   gst_element_set_state (priv->src, state);
 }
+
+gchar *
+empathy_video_src_dup_device (EmpathyGstVideoSrc *self)
+{
+  EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (self);
+  gchar *device;
+
+  g_object_get (priv->src, "device", &device, NULL);
+
+  return device;
+}

@@ -83,6 +83,7 @@ guint empathy_video_src_get_channel (GstElement *src,
 
 void empathy_video_src_change_device (EmpathyGstVideoSrc *self,
   const gchar *device);
+gchar * empathy_video_src_dup_device (EmpathyGstVideoSrc *self);
 
 G_END_DECLS
 
