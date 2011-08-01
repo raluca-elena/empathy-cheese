@@ -123,8 +123,8 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
 
   /* allocate any data required by the object here */
   if ((element = empathy_gst_add_to_bin (GST_BIN (obj),
-      NULL, "gconfvideosrc")) == NULL)
-    g_error ("Couldn't add \"gconfvideosrc\" (gst-plugins-good missing?)");
+      NULL, "v4l2src")) == NULL)
+    g_error ("Couldn't add \"v4l2src\" (gst-plugins-good missing?)");
 
   /* we need to save our source to priv->src */
   priv->src = element;
