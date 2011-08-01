@@ -482,6 +482,21 @@ store_events_rows_reordered (GtkTreeModel *model,
   g_strfreev (new_order_strv);
 }
 
+static gboolean
+events_webview_handle_navigation (WebKitWebView *webview,
+    WebKitWebFrame *frame,
+    WebKitNetworkRequest *request,
+    WebKitWebNavigationAction *navigation_action,
+    WebKitWebPolicyDecision *policy_decision,
+    EmpathyLogWindow *window)
+{
+  empathy_url_show (GTK_WIDGET (webview),
+      webkit_network_request_get_uri (request));
+
+  webkit_web_policy_decision_ignore (policy_decision);
+  return TRUE;
+}
+
 static GObject *
 empathy_log_window_constructor (GType type,
     guint n_props,
@@ -702,6 +717,10 @@ empathy_log_window_init (EmpathyLogWindow *self)
   webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->priv->webview),
       g_file_get_uri (gfile));
   g_object_unref (gfile);
+
+  /* handle all navigation externally */
+  g_signal_connect (self->priv->webview, "navigation-policy-decision-requested",
+      G_CALLBACK (events_webview_handle_navigation), self);
 
   gtk_notebook_append_page (GTK_NOTEBOOK (self->priv->notebook),
       sw, gtk_label_new ("webview"));
