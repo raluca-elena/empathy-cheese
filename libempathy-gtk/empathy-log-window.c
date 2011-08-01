@@ -60,6 +60,8 @@
 #include "empathy-images.h"
 #include "empathy-theme-manager.h"
 #include "empathy-ui-utils.h"
+// FIXME: this work forces a dependency on webkit
+#include "empathy-webkit-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
@@ -1189,8 +1191,10 @@ log_window_append_chat_message (TplEvent *event,
 {
   GtkTreeStore *store = log_window->priv->store_events;
   GtkTreeIter iter, parent;
-  gchar *pretty_date, *alias, *body, *msg;
+  gchar *pretty_date, *alias, *body;
   GDateTime *date;
+  EmpathyStringParser *parsers;
+  GString *msg;
 
   date = g_date_time_new_from_unix_utc (
       tpl_event_get_timestamp (event));
@@ -1199,62 +1203,69 @@ log_window_append_chat_message (TplEvent *event,
 
   get_parent_iter_for_message (event, message, &parent);
 
-  msg = g_markup_escape_text (empathy_message_get_body (message), -1);
   alias = g_markup_escape_text (
       tpl_entity_get_alias (tpl_event_get_sender (event)), -1);
 
-  /* If the user is searching, highlight the matched text */
-  if (!EMP_STR_EMPTY (log_window->priv->last_find))
-    {
-      gchar *str = g_regex_escape_string (log_window->priv->last_find, -1);
-      gchar *replacement = g_markup_printf_escaped (
-          "<span background=\"yellow\">%s</span>",
-          log_window->priv->last_find);
-      GError *error = NULL;
-      GRegex *regex = g_regex_new (str, 0, 0, &error);
+  // /* If the user is searching, highlight the matched text */
+  // if (!EMP_STR_EMPTY (log_window->priv->last_find))
+  //   {
+  //     gchar *str = g_regex_escape_string (log_window->priv->last_find, -1);
+  //     gchar *replacement = g_markup_printf_escaped (
+  //         "<span background=\"yellow\">%s</span>",
+  //         log_window->priv->last_find);
+  //     GError *error = NULL;
+  //     GRegex *regex = g_regex_new (str, 0, 0, &error);
 
-      if (regex == NULL)
-        {
-          DEBUG ("Could not create regex: %s", error->message);
-          g_error_free (error);
-        }
-      else
-        {
-          gchar *new_msg = g_regex_replace_literal (regex,
-              empathy_message_get_body (message), -1, 0, replacement,
-              0, &error);
+  //     if (regex == NULL)
+  //       {
+  //         DEBUG ("Could not create regex: %s", error->message);
+  //         g_error_free (error);
+  //       }
+  //     else
+  //       {
+  //         gchar *new_msg = g_regex_replace_literal (regex,
+  //             empathy_message_get_body (message), -1, 0, replacement,
+  //             0, &error);
 
-          if (new_msg != NULL)
-            {
-              /* We pass ownership of new_msg to msg, which is freed later */
-              g_free (msg);
-              msg = new_msg;
-            }
-          else
-            {
-              DEBUG ("Error while performing string substitution: %s",
-                  error->message);
-              g_error_free (error);
-            }
-        }
+  //         if (new_msg != NULL)
+  //           {
+  //             /* We pass ownership of new_msg to msg, which is freed later */
+  //             g_free (msg);
+  //             msg = new_msg;
+  //           }
+  //         else
+  //           {
+  //             DEBUG ("Error while performing string substitution: %s",
+  //                 error->message);
+  //             g_error_free (error);
+  //           }
+  //       }
 
-      g_free (str);
-      g_free (replacement);
+  //     g_free (str);
+  //     g_free (replacement);
 
-      tp_clear_pointer (&regex, g_regex_unref);
-    }
+  //     tp_clear_pointer (&regex, g_regex_unref);
+  //   }
+
+  /* escape the text */
+  // FIXME: handle smileys
+  parsers = empathy_webkit_get_string_parser (FALSE);
+  msg = g_string_new ("");
+
+  empathy_string_parser_substr (empathy_message_get_body (message), -1,
+      parsers, msg);
 
   if (tpl_text_event_get_message_type (TPL_TEXT_EVENT (event))
       == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)
     {
       /* Translators: this is an emote: '* Danielle waves' */
-      body = g_strdup_printf (_("<i>* %s %s</i>"), alias, msg);
+      body = g_strdup_printf (_("<i>* %s %s</i>"), alias, msg->str);
     }
   else
     {
       /* Translators: this is a message: 'Danielle: hello'
        * The string in bold is the sender's name */
-      body = g_strdup_printf (_("<b>%s:</b> %s"), alias, msg);
+      body = g_strdup_printf (_("<b>%s:</b> %s"), alias, msg->str);
     }
 
   gtk_tree_store_append (store, &iter, &parent);
@@ -1268,7 +1279,7 @@ log_window_append_chat_message (TplEvent *event,
       COL_EVENTS_EVENT, event,
       -1);
 
-  g_free (msg);
+  g_string_free (msg, TRUE);
   g_free (body);
   g_free (alias);
   g_free (pretty_date);
