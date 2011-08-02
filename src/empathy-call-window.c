@@ -738,6 +738,51 @@ empathy_call_window_contents_cb (GtkAction *action,
 }
 
 static void
+empathy_call_window_debug_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  GdkDisplay *display;
+  GError *error = NULL;
+  gchar *path;
+  GAppInfo *app_info;
+  GdkAppLaunchContext *context = NULL;
+
+  /* Try to run from source directory if possible */
+  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
+      "empathy-debugger", NULL);
+
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_free (path);
+      path = g_build_filename (BIN_DIR, "empathy-debugger", NULL);
+    }
+
+  app_info = g_app_info_create_from_commandline (path, NULL, 0, &error);
+  if (app_info == NULL)
+    {
+      DEBUG ("Failed to create app info: %s", error->message);
+      g_error_free (error);
+      goto out;
+    }
+
+  display = gdk_display_get_default ();
+  context = gdk_display_get_app_launch_context (display);
+
+  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+      &error))
+    {
+      g_warning ("Failed to open debug window: %s", error->message);
+      g_error_free (error);
+      goto out;
+    }
+
+out:
+  tp_clear_object (&app_info);
+  tp_clear_object (&context);
+  g_free (path);
+}
+
+static void
 empathy_call_window_about_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
@@ -839,6 +884,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "menucontents", "activate", empathy_call_window_contents_cb,
+    "menudebug", "activate", empathy_call_window_debug_cb,
     "menuabout", "activate", empathy_call_window_about_cb,
     "menupreviewdisable", "activate", empathy_call_window_disable_camera_cb,
     "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,

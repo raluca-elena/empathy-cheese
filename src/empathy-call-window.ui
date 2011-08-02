@@ -45,6 +45,12 @@
           <accelerator key="F1" modifiers=""/>
         </child>
         <child>
+          <object class="GtkAction" id="menudebug">
+            <property name="name">menudebug</property>
+            <property name="label" translatable="yes">_Debug</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menuabout">
             <property name="stock_id">gtk-about</property>
             <property name="name">menuabout</property>
@@ -80,6 +86,7 @@
         </menu>
         <menu action="help">
           <menuitem name="menucontents" action="menucontents"/>
+          <menuitem name="menudebug" action="menudebug"/>
           <menuitem name="menuabout" action="menuabout"/>
         </menu>
       </menubar>
