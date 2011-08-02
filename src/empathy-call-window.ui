@@ -11,13 +11,6 @@
           </object>
         </child>
         <child>
-          <object class="GtkAction" id="menuhangup">
-            <property name="icon_name">call-stop</property>
-            <property name="name">menuhangup</property>
-            <property name="label" translatable="yes">Hang up</property>
-          </object>
-        </child>
-        <child>
           <object class="GtkAction" id="menufullscreen">
             <property name="stock_id">gtk-fullscreen</property>
             <property name="name">menufullscreen</property>
@@ -60,7 +53,6 @@
     <ui>
       <menubar name="menubar1">
         <menu action="call">
-          <menuitem action="menuhangup"/>
           <menuitem action="menufullscreen"/>
         </menu>
         <menu action="edit">

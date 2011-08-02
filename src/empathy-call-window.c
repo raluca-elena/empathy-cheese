@@ -815,7 +815,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   g_free (filename);
 
   empathy_builder_connect (gui, self,
-    "menuhangup", "activate", empathy_call_window_hangup_cb,
     "hangup", "clicked", empathy_call_window_hangup_cb,
     "audiocall", "clicked", empathy_call_window_audio_call_cb,
     "videocall", "clicked", empathy_call_window_video_call_cb,
