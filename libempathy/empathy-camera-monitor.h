@@ -53,6 +53,9 @@ typedef struct
   gchar *name;
 } EmpathyCamera;
 
+#define EMPATHY_TYPE_CAMERA (empathy_camera_get_type ())
+GType empathy_camera_get_type (void) G_GNUC_CONST;
+
 GType empathy_camera_monitor_get_type (void) G_GNUC_CONST;
 
 EmpathyCameraMonitor *empathy_camera_monitor_dup_singleton (void);

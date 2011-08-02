@@ -62,6 +62,12 @@ empathy_camera_new (const gchar *id,
   return camera;
 }
 
+static EmpathyCamera *
+empathy_camera_copy (EmpathyCamera *camera)
+{
+  return empathy_camera_new (camera->id, camera->device, camera->name);
+}
+
 static void
 empathy_camera_free (EmpathyCamera *camera)
 {
@@ -71,6 +77,9 @@ empathy_camera_free (EmpathyCamera *camera)
 
   g_slice_free (EmpathyCamera, camera);
 }
+
+G_DEFINE_BOXED_TYPE (EmpathyCamera, empathy_camera,
+    empathy_camera_copy, empathy_camera_free)
 
 static gint
 empathy_camera_find (gconstpointer a,
