@@ -286,6 +286,11 @@ empathy_camera_menu_get_cameras (EmpathyCameraMenu *self)
     }
 
   empathy_camera_menu_update (self);
+
+  /* Do as if the gsettings key had changed, so we select the key that
+   * was last set. */
+  empathy_camera_menu_prefs_camera_changed_cb (self->priv->settings,
+      EMPATHY_PREFS_CALL_CAMERA_DEVICE, self);
 }
 
 static void
