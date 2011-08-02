@@ -1732,6 +1732,7 @@ file_manager_send_file_response_cb (GtkDialog      *widget,
 		g_object_unref (file);
 	}
 
+	g_object_unref (contact);
 	gtk_widget_destroy (GTK_WIDGET (widget));
 }
 
@@ -1771,7 +1772,7 @@ empathy_send_file_with_file_chooser (EmpathyContact *contact)
 
 	g_signal_connect (widget, "response",
 			  G_CALLBACK (file_manager_send_file_response_cb),
-			  contact);
+			  g_object_ref (contact));
 
 	gtk_widget_show (widget);
 }
