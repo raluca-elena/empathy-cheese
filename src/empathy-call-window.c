@@ -148,6 +148,7 @@ struct _EmpathyCallWindowPriv
   ClutterActor *floating_toolbar;
   GtkWidget *pane;
   GtkAction *menu_fullscreen;
+  GtkAction *menu_swap_camera;
 
   ClutterState *transitions;
 
@@ -496,6 +497,67 @@ empathy_call_window_maximise_camera_cb (GtkAction *action,
 {
   clutter_actor_show (self->priv->video_preview);
   clutter_actor_hide (self->priv->preview_hidden_button);
+}
+
+static void
+empathy_call_window_swap_camera_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  const GList *cameras, *l;
+  gchar *current_cam;
+
+  DEBUG ("Swapping the camera");
+
+  cameras = empathy_camera_monitor_get_cameras (self->priv->camera_monitor);
+  current_cam = empathy_video_src_dup_device (
+      EMPATHY_GST_VIDEO_SRC (self->priv->video_input));
+
+  for (l = cameras; l != NULL; l = l->next)
+    {
+      EmpathyCamera *camera = l->data;
+
+      if (!tp_strdiff (camera->device, current_cam))
+        {
+          EmpathyCamera *next;
+
+          if (l->next != NULL)
+            next = l->next->data;
+          else
+            next = cameras->data;
+
+          /* EmpathyCameraMenu will update itself and do the actual change
+           * for us */
+          g_settings_set_string (self->priv->settings,
+              EMPATHY_PREFS_CALL_CAMERA_DEVICE,
+              next->device);
+
+          break;
+        }
+    }
+
+  g_free (current_cam);
+}
+
+static void
+empathy_call_window_camera_added_cb (EmpathyCameraMonitor *monitor,
+    EmpathyCamera *camera,
+    EmpathyCallWindow *self)
+{
+  const GList *cameras = empathy_camera_monitor_get_cameras (monitor);
+
+  gtk_action_set_visible (self->priv->menu_swap_camera,
+      g_list_length ((GList *) cameras) >= 2);
+}
+
+static void
+empathy_call_window_camera_removed_cb (EmpathyCameraMonitor *monitor,
+    EmpathyCamera *camera,
+    EmpathyCallWindow *self)
+{
+  const GList *cameras = empathy_camera_monitor_get_cameras (monitor);
+
+  gtk_action_set_visible (self->priv->menu_swap_camera,
+      g_list_length ((GList *) cameras) >= 2);
 }
 
 static void
@@ -892,6 +954,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "bottom_toolbar", &priv->bottom_toolbar,
     "ui_manager", &priv->ui_manager,
     "menufullscreen", &priv->menu_fullscreen,
+    "menupreviewswap", &priv->menu_swap_camera,
     "details_vbox",  &priv->details_vbox,
     "vcodec_encoding_label", &priv->vcodec_encoding_label,
     "acodec_encoding_label", &priv->acodec_encoding_label,
@@ -924,6 +987,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "menupreviewdisable", "activate", empathy_call_window_disable_camera_cb,
     "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,
     "menupreviewmaximise", "activate", empathy_call_window_maximise_camera_cb,
+    "menupreviewswap", "activate", empathy_call_window_swap_camera_cb,
     NULL);
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
@@ -933,6 +997,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   g_object_bind_property (priv->camera_monitor, "available",
       priv->camera_button, "sensitive",
       G_BINDING_SYNC_CREATE);
+
+  g_signal_connect (priv->camera_monitor, "added",
+      G_CALLBACK (empathy_call_window_camera_added_cb), self);
+  g_signal_connect (priv->camera_monitor, "removed",
+      G_CALLBACK (empathy_call_window_camera_removed_cb), self);
 
   priv->lock = g_mutex_new ();
 
