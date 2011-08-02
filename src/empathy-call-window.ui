@@ -45,6 +45,12 @@
           <accelerator key="F1" modifiers=""/>
         </child>
         <child>
+          <object class="GtkAction" id="menuabout">
+            <property name="stock_id">gtk-about</property>
+            <property name="name">menuabout</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menupreviewminimise">
             <property name="name">menupreviewminimise</property>
             <property name="label" translatable="yes">Minimise me</property>
@@ -74,6 +80,7 @@
         </menu>
         <menu action="help">
           <menuitem name="menucontents" action="menucontents"/>
+          <menuitem name="menuabout" action="menuabout"/>
         </menu>
       </menubar>
       <popup name="video-popup">

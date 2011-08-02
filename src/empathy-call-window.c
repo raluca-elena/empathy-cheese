@@ -58,6 +58,7 @@
 #include "empathy-call-window-fullscreen.h"
 #include "empathy-call-factory.h"
 #include "empathy-video-widget.h"
+#include "empathy-about-dialog.h"
 #include "empathy-audio-src.h"
 #include "empathy-audio-sink.h"
 #include "empathy-video-src.h"
@@ -736,6 +737,13 @@ empathy_call_window_contents_cb (GtkAction *action,
   empathy_url_show (GTK_WIDGET (self), "ghelp:empathy?audio-video");
 }
 
+static void
+empathy_call_window_about_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  empathy_about_dialog_new (GTK_WINDOW (self));
+}
+
 static gboolean
 empathy_call_window_configure_event_cb (GtkWidget *widget,
     GdkEvent  *event,
@@ -831,6 +839,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "menucontents", "activate", empathy_call_window_contents_cb,
+    "menuabout", "activate", empathy_call_window_about_cb,
     "menupreviewdisable", "activate", empathy_call_window_disable_camera_cb,
     "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,
     "menupreviewmaximise", "activate", empathy_call_window_maximise_camera_cb,

@@ -159,6 +159,8 @@ empathy_call_SOURCES = \
        empathy-call-window.h \
        empathy-call-window-fullscreen.c \
        empathy-call-window-fullscreen.h \
+       empathy-about-dialog.c \
+       empathy-about-dialog.h \
        empathy-audio-sink.c \
        empathy-audio-sink.h \
        empathy-audio-src.c \
