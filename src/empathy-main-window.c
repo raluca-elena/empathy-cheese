@@ -1875,9 +1875,8 @@ main_window_edit_blocked_contacts_cb (GtkAction         *action,
 			G_CALLBACK (gtk_widget_destroy), NULL);
 }
 
-static void
-main_window_edit_preferences_cb (GtkAction         *action,
-				 EmpathyMainWindow *window)
+void
+empathy_main_window_show_preferences (EmpathyMainWindow *window)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 
@@ -1890,6 +1889,13 @@ main_window_edit_preferences_cb (GtkAction         *action,
 	} else {
 		gtk_window_present (GTK_WINDOW (priv->preferences));
 	}
+}
+
+static void
+main_window_edit_preferences_cb (GtkAction         *action,
+				 EmpathyMainWindow *window)
+{
+	empathy_main_window_show_preferences (window);
 }
 
 static void
