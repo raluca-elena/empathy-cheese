@@ -31,6 +31,20 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="help">
+            <property name="name">help</property>
+            <property name="label" translatable="yes">_Help</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menucontents">
+            <property name="stock_id">gtk-help</property>
+            <property name="name">menucontents</property>
+            <property name="label" translatable="yes">_Contents</property>
+          </object>
+          <accelerator key="F1" modifiers=""/>
+        </child>
+        <child>
           <object class="GtkAction" id="menupreviewminimise">
             <property name="name">menupreviewminimise</property>
             <property name="label" translatable="yes">Minimise me</property>
@@ -57,6 +71,9 @@
         </menu>
         <menu action="edit">
           <menu action="menumicrophone"/>
+        </menu>
+        <menu action="help">
+          <menuitem name="menucontents" action="menucontents"/>
         </menu>
       </menubar>
       <popup name="video-popup">

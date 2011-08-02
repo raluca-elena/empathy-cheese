@@ -729,6 +729,13 @@ create_pipeline (EmpathyCallWindow *self)
   g_object_unref (bus);
 }
 
+static void
+empathy_call_window_contents_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+  empathy_url_show (GTK_WIDGET (self), "ghelp:empathy?audio-video");
+}
+
 static gboolean
 empathy_call_window_configure_event_cb (GtkWidget *widget,
     GdkEvent  *event,
@@ -823,6 +830,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
+    "menucontents", "activate", empathy_call_window_contents_cb,
     "menupreviewdisable", "activate", empathy_call_window_disable_camera_cb,
     "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,
     "menupreviewmaximise", "activate", empathy_call_window_maximise_camera_cb,
