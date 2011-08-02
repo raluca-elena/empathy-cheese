@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 
 #include <libempathy/empathy-camera-monitor.h>
+#include <libempathy/empathy-gsettings.h>
 
 #include "empathy-camera-menu.h"
 
@@ -54,6 +55,8 @@ struct _EmpathyCameraMenuPrivate
   GQueue *cameras;
 
   EmpathyCameraMonitor *camera_monitor;
+
+  GSettings *settings;
 };
 
 G_DEFINE_TYPE (EmpathyCameraMenu, empathy_camera_menu, G_TYPE_OBJECT);
@@ -238,6 +241,37 @@ empathy_camera_menu_camera_removed_cb (EmpathyCameraMonitor *monitor,
 }
 
 static void
+empathy_camera_menu_prefs_camera_changed_cb (GSettings *settings,
+    gchar *key,
+    EmpathyCameraMenu *self)
+{
+  gchar *device = g_settings_get_string (settings, key);
+  GList *l;
+
+  for (l = self->priv->cameras->head; l != NULL; l = g_list_next (l))
+    {
+      GtkRadioAction *action = l->data;
+      const gchar *name = gtk_action_get_name (GTK_ACTION (action));
+
+      if (!tp_strdiff (device, name))
+        {
+          if (!gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)))
+            {
+              g_signal_handlers_block_by_func (settings,
+                  empathy_camera_menu_prefs_camera_changed_cb, self);
+              gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
+              g_signal_handlers_unblock_by_func (settings,
+                  empathy_camera_menu_prefs_camera_changed_cb, self);
+            }
+
+          break;
+        }
+    }
+
+  g_free (device);
+}
+
+static void
 empathy_camera_menu_get_cameras (EmpathyCameraMenu *self)
 {
   const GList *cameras;
@@ -287,6 +321,11 @@ empathy_camera_menu_constructed (GObject *obj)
   tp_g_signal_connect_object (self->priv->camera_monitor, "removed",
       G_CALLBACK (empathy_camera_menu_camera_removed_cb), self, 0);
 
+  self->priv->settings = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
+  g_signal_connect (self->priv->settings,
+      "changed::"EMPATHY_PREFS_CALL_CAMERA_DEVICE,
+      G_CALLBACK (empathy_camera_menu_prefs_camera_changed_cb), self);
+
   self->priv->cameras = g_queue_new ();
 
   empathy_camera_menu_get_cameras (self);
@@ -300,6 +339,7 @@ empathy_camera_menu_dispose (GObject *obj)
   tp_clear_pointer (&self->priv->cameras, g_queue_free);
 
   tp_clear_object (&self->priv->camera_monitor);
+  tp_clear_object (&self->priv->settings);
 
   G_OBJECT_CLASS (empathy_camera_menu_parent_class)->dispose (obj);
 }
