@@ -288,7 +288,7 @@ empathy_server_sasl_handler_class_init (EmpathyServerSASLHandlerClass *klass)
   oclass->get_property = empathy_server_sasl_handler_get_property;
   oclass->set_property = empathy_server_sasl_handler_set_property;
   oclass->dispose = empathy_server_sasl_handler_dispose;
-  oclass->dispose = empathy_server_sasl_handler_finalize;
+  oclass->finalize = empathy_server_sasl_handler_finalize;
 
   g_type_class_add_private (klass, sizeof (EmpathyServerSASLHandlerPriv));
 
