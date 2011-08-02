@@ -18,6 +18,13 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menufullscreen">
+            <property name="stock_id">gtk-fullscreen</property>
+            <property name="name">menufullscreen</property>
+          </object>
+          <accelerator key="F11"/>
+        </child>
+        <child>
           <object class="GtkAction" id="edit">
             <property name="name">edit</property>
             <property name="label" translatable="yes">_Edit</property>
@@ -29,19 +36,6 @@
             <property name="name">menumicrophone</property>
             <property name="icon_name">gnome-stock-mic</property>
           </object>
-        </child>
-        <child>
-          <object class="GtkAction" id="view">
-            <property name="name">view</property>
-            <property name="label" translatable="yes">_View</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkAction" id="menufullscreen">
-            <property name="stock_id">gtk-fullscreen</property>
-            <property name="name">menufullscreen</property>
-          </object>
-          <accelerator key="F11"/>
         </child>
         <child>
           <object class="GtkAction" id="menupreviewminimise">
@@ -67,12 +61,10 @@
       <menubar name="menubar1">
         <menu action="call">
           <menuitem action="menuhangup"/>
+          <menuitem action="menufullscreen"/>
         </menu>
         <menu action="edit">
           <menu action="menumicrophone"/>
-        </menu>
-        <menu action="view">
-          <menuitem action="menufullscreen"/>
         </menu>
       </menubar>
       <popup name="video-popup">
