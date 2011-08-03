@@ -734,7 +734,7 @@ static void
 empathy_call_window_settings_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  empathy_launch_program (BIN_DIR, "empathy", "-p");
+  empathy_launch_program (BIN_DIR, "empathy", "-p 3");
 }
 
 static void
