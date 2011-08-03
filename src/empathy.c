@@ -106,6 +106,7 @@ struct _EmpathyApp
   /* Properties */
   gboolean no_connect;
   gboolean start_hidden;
+  gboolean show_preferences;
 
   gboolean activated;
 
@@ -230,11 +231,31 @@ new_ft_handler_cb (EmpathyFTFactory *factory,
   g_object_unref (handler);
 }
 
+static gboolean
+empathy_app_local_command_line (GApplication *app,
+    gchar ***arguments,
+    gint *exit_status);
+
 static int
 empathy_app_command_line (GApplication *app,
     GApplicationCommandLine *cmdline)
 {
   EmpathyApp *self = (EmpathyApp *) app;
+  gchar **args, **argv;
+  gint argc, exit_status, i;
+
+  args = g_application_command_line_get_arguments (cmdline, &argc);
+  /* We have to make an extra copy of the array, since g_option_context_parse()
+   * assumes that it can remove strings from the array without freeing them. */
+  argv = g_new (gchar*, argc + 1);
+  for (i = 0; i <= argc; i++)
+    argv[i] = args[i];
+
+  if (empathy_app_local_command_line (app, &argv, &exit_status))
+    DEBUG ("failed to parse command line!");
+
+  g_free (argv);
+  g_strfreev (args);
 
   if (!self->activated)
     {
@@ -273,6 +294,9 @@ empathy_app_command_line (GApplication *app,
       self->start_hidden = FALSE;
     }
 
+  if (self->show_preferences)
+    empathy_main_window_show_preferences (EMPATHY_MAIN_WINDOW (self->window));
+
   if (!self->start_hidden)
     empathy_window_present (GTK_WINDOW (self->window));
 
@@ -301,6 +325,7 @@ empathy_app_local_command_line (GApplication *app,
   gboolean retval = FALSE;
   GError *error = NULL;
   gboolean no_connect = FALSE, start_hidden = FALSE;
+  gboolean show_preferences = FALSE;
 
   GOptionContext *optcontext;
   GOptionEntry options[] = {
@@ -312,6 +337,9 @@ empathy_app_local_command_line (GApplication *app,
         0, G_OPTION_ARG_NONE, &start_hidden,
         N_("Don't display the contact list or any other dialogs on startup"),
         NULL },
+      { "show-preferences", 'p',
+        0, G_OPTION_ARG_NONE, &show_preferences,
+        NULL, NULL },
       { "version", 'v',
         G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, show_version_cb,
         NULL, NULL },
@@ -322,9 +350,14 @@ empathy_app_local_command_line (GApplication *app,
   g_option_context_add_group (optcontext, gtk_get_option_group (TRUE));
   g_option_context_add_main_entries (optcontext, options, GETTEXT_PACKAGE);
 
-  argv = *arguments;
-  for (i = 0; argv[i] != NULL; i++)
-    argc++;
+  argc = g_strv_length (*arguments);
+
+  /* We dup the args because g_option_context_parse() sets things to NULL,
+   * but we want to parse all the command line to the primary instance
+   * if necessary. */
+  argv = g_new (gchar*, argc + 1);
+  for (i = 0; i <= argc; i++)
+    argv[i] = (*arguments)[i];
 
   if (!g_option_context_parse (optcontext, &argc, &argv, &error))
     {
@@ -337,10 +370,13 @@ empathy_app_local_command_line (GApplication *app,
       retval = TRUE;
     }
 
+  g_free (argv);
+
   g_option_context_free (optcontext);
 
   self->no_connect = no_connect;
   self->start_hidden = start_hidden;
+  self->show_preferences = show_preferences;
 
   return retval;
 }
