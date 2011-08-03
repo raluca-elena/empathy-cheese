@@ -31,6 +31,13 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menusettings">
+            <property name="stock_id">gtk-preferences</property>
+            <property name="name">menusettings</property>
+            <property name="label" translatable="yes">_Settings</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="help">
             <property name="name">help</property>
             <property name="label" translatable="yes">_Help</property>
@@ -83,6 +90,7 @@
         </menu>
         <menu action="edit">
           <menu action="menumicrophone"/>
+          <menuitem name="menusettings" action="menusettings"/>
         </menu>
         <menu action="help">
           <menuitem name="menucontents" action="menucontents"/>
