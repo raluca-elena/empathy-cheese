@@ -748,7 +748,7 @@ static void
 empathy_call_window_debug_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  empathy_launch_program (BIN_DIR, "empathy-debugger", NULL);
+  empathy_launch_program (BIN_DIR, "empathy-debugger", "-s Empathy.Call");
 }
 
 static void
