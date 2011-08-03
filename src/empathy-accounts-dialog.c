@@ -2517,68 +2517,30 @@ empathy_accounts_dialog_show_application (GdkScreen *screen,
     gboolean if_needed,
     gboolean hidden)
 {
-  GError *error = NULL;
-  GdkDisplay *display;
-  GString *cmd;
-  gchar *path;
-  GAppInfo *app_info;
-  GdkAppLaunchContext *context = NULL;
+  GString *args;
 
-  g_return_if_fail (GDK_IS_SCREEN (screen));
   g_return_if_fail (!selected_account || TP_IS_ACCOUNT (selected_account));
 
-  /* Try to run from source directory if possible */
-  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
-      "empathy-accounts", NULL);
-
-  if (!g_file_test (path, G_FILE_TEST_EXISTS))
-    {
-      g_free (path);
-      path = g_build_filename (BIN_DIR, "empathy-accounts", NULL);
-    }
-
-  cmd = g_string_new (path);
-  g_free (path);
+  args = g_string_new (NULL);
 
   if (selected_account != NULL)
-    {
-      g_string_append_printf (cmd, " --select-account=%s",
-          tp_account_get_path_suffix (selected_account));
-    }
+    g_string_append_printf (args, " --select-account=%s",
+        tp_account_get_path_suffix (selected_account));
 
   if (if_needed)
-    g_string_append_printf (cmd, " --if-needed");
+    g_string_append_printf (args, " --if-needed");
 
   if (hidden)
-    g_string_append_printf (cmd, " --hidden");
+    g_string_append_printf (args, " --hidden");
 
   DEBUG ("Launching empathy-accounts (if_needed: %d, hidden: %d, account: %s)",
     if_needed, hidden,
     selected_account == NULL ? "<none selected>" :
       tp_proxy_get_object_path (TP_PROXY (selected_account)));
 
-  app_info = g_app_info_create_from_commandline (cmd->str, NULL, 0, &error);
-  if (app_info == NULL)
-    {
-      DEBUG ("Failed to create app info: %s", error->message);
-      g_error_free (error);
-      goto out;
-    }
+  empathy_launch_program (BIN_DIR, "empathy-accounts", args->str);
 
-  display = gdk_screen_get_display (screen);
-  context = gdk_display_get_app_launch_context (display);
-
-  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
-        &error))
-    {
-      g_warning ("Failed to open accounts dialog: %s", error->message);
-      g_error_free (error);
-    }
-
-out:
-  tp_clear_object (&app_info);
-  tp_clear_object (&context);
-  g_string_free (cmd, TRUE);
+  g_string_free (args, TRUE);
 }
 
 gboolean

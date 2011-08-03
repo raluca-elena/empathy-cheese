@@ -2114,3 +2114,55 @@ empathy_create_dtmf_dialpad (GObject *self,
 
   return box;
 }
+
+void
+empathy_launch_program (const gchar *dir,
+    const gchar *name,
+    const gchar *args)
+{
+  GdkDisplay *display;
+  GError *error = NULL;
+  gchar *path, *cmd;
+  GAppInfo *app_info;
+  GdkAppLaunchContext *context = NULL;
+
+  /* Try to run from source directory if possible */
+  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
+      name, NULL);
+
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_free (path);
+      path = g_build_filename (dir, name, NULL);
+    }
+
+  if (args != NULL)
+    cmd = g_strconcat (path, " ", args, NULL);
+  else
+    cmd = g_strdup (path);
+
+  app_info = g_app_info_create_from_commandline (cmd, NULL, 0, &error);
+  if (app_info == NULL)
+    {
+      DEBUG ("Failed to create app info: %s", error->message);
+      g_error_free (error);
+      goto out;
+    }
+
+  display = gdk_display_get_default ();
+  context = gdk_display_get_app_launch_context (display);
+
+  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
+      &error))
+    {
+      g_warning ("Failed to launch %s: %s", name, error->message);
+      g_error_free (error);
+      goto out;
+    }
+
+out:
+  tp_clear_object (&app_info);
+  tp_clear_object (&context);
+  g_free (path);
+  g_free (cmd);
+}

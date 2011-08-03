@@ -159,6 +159,10 @@ gboolean empathy_individual_match_string (
     const gchar *text,
     GPtrArray *words);
 
+void empathy_launch_program (const gchar *dir,
+    const gchar *name,
+    const gchar *args);
+
 G_END_DECLS
 
 #endif /*  __EMPATHY_UI_UTILS_H__ */

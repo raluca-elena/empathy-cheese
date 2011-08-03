@@ -734,48 +734,7 @@ static void
 empathy_call_window_settings_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  GdkDisplay *display;
-  GError *error = NULL;
-  gchar *path, *cmd;
-  GAppInfo *app_info;
-  GdkAppLaunchContext *context = NULL;
-
-  /* Try to run from source directory if possible */
-  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
-      "empathy", NULL);
-
-  if (!g_file_test (path, G_FILE_TEST_EXISTS))
-    {
-      g_free (path);
-      path = g_build_filename (BIN_DIR, "empathy", NULL);
-    }
-
-  cmd = g_strconcat (path, " -p", NULL);
-
-  app_info = g_app_info_create_from_commandline (cmd, NULL, 0, &error);
-  if (app_info == NULL)
-    {
-      DEBUG ("Failed to create app info: %s", error->message);
-      g_error_free (error);
-      goto out;
-    }
-
-  display = gdk_display_get_default ();
-  context = gdk_display_get_app_launch_context (display);
-
-  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
-      &error))
-    {
-      g_warning ("Failed to open debug window: %s", error->message);
-      g_error_free (error);
-      goto out;
-    }
-
-out:
-  tp_clear_object (&app_info);
-  tp_clear_object (&context);
-  g_free (path);
-  g_free (cmd);
+  empathy_launch_program (BIN_DIR, "empathy", "-p");
 }
 
 static void
@@ -789,45 +748,7 @@ static void
 empathy_call_window_debug_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  GdkDisplay *display;
-  GError *error = NULL;
-  gchar *path;
-  GAppInfo *app_info;
-  GdkAppLaunchContext *context = NULL;
-
-  /* Try to run from source directory if possible */
-  path = g_build_filename (g_getenv ("EMPATHY_SRCDIR"), "src",
-      "empathy-debugger", NULL);
-
-  if (!g_file_test (path, G_FILE_TEST_EXISTS))
-    {
-      g_free (path);
-      path = g_build_filename (BIN_DIR, "empathy-debugger", NULL);
-    }
-
-  app_info = g_app_info_create_from_commandline (path, NULL, 0, &error);
-  if (app_info == NULL)
-    {
-      DEBUG ("Failed to create app info: %s", error->message);
-      g_error_free (error);
-      goto out;
-    }
-
-  display = gdk_display_get_default ();
-  context = gdk_display_get_app_launch_context (display);
-
-  if (!g_app_info_launch (app_info, NULL, (GAppLaunchContext *) context,
-      &error))
-    {
-      g_warning ("Failed to open debug window: %s", error->message);
-      g_error_free (error);
-      goto out;
-    }
-
-out:
-  tp_clear_object (&app_info);
-  tp_clear_object (&context);
-  g_free (path);
+  empathy_launch_program (BIN_DIR, "empathy-debugger", NULL);
 }
 
 static void
