@@ -30,6 +30,7 @@
 #define EMPATHY_DEBUGGER_DBUS_NAME "org.gnome.Empathy.Debugger"
 
 static GtkWidget *window = NULL;
+static gchar *service = NULL;
 
 static void
 activate_cb (GApplication *app)
@@ -46,6 +47,52 @@ activate_cb (GApplication *app)
     {
       gtk_window_present (GTK_WINDOW (window));
     }
+
+  if (service != NULL)
+    empathy_debug_window_show (EMPATHY_DEBUG_WINDOW (window),
+        service);
+}
+
+static gint
+command_line_cb (GApplication *application,
+    GApplicationCommandLine *command_line,
+    gpointer user_data)
+{
+  GError *error = NULL;
+  gchar **argv;
+  gint argc;
+  gint retval = 0;
+
+  GOptionContext *optcontext;
+  GOptionEntry options[] = {
+      { "show-service", 's',
+        0, G_OPTION_ARG_STRING, &service,
+        N_("Show a particular service"),
+        NULL },
+      { NULL }
+  };
+
+  optcontext = g_option_context_new (N_("- Empathy Debugger"));
+  g_option_context_add_group (optcontext, gtk_get_option_group (TRUE));
+  g_option_context_add_main_entries (optcontext, options, GETTEXT_PACKAGE);
+
+  argv = g_application_command_line_get_arguments (command_line, &argc);
+
+  if (!g_option_context_parse (optcontext, &argc, &argv, &error))
+    {
+      g_print ("%s\nRun '%s --help' to see a full list of available command "
+          "line options.\n",
+          error->message, argv[0]);
+
+      retval = 1;
+    }
+
+  g_option_context_free (optcontext);
+  g_strfreev (argv);
+
+  g_application_activate (application);
+
+  return retval;
 }
 
 int
@@ -60,8 +107,9 @@ main (int argc,
   empathy_gtk_init ();
 
   app = gtk_application_new (EMPATHY_DEBUGGER_DBUS_NAME,
-      G_APPLICATION_FLAGS_NONE);
+      G_APPLICATION_HANDLES_COMMAND_LINE);
   g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
+  g_signal_connect (app, "command-line", G_CALLBACK (command_line_cb), NULL);
 
   g_set_application_name (_("Empathy Debugger"));
 
