@@ -107,6 +107,7 @@ struct _EmpathyApp
   gboolean no_connect;
   gboolean start_hidden;
   gboolean show_preferences;
+  gint preferences_tab;
 
   gboolean activated;
 
@@ -295,7 +296,8 @@ empathy_app_command_line (GApplication *app,
     }
 
   if (self->show_preferences)
-    empathy_main_window_show_preferences (EMPATHY_MAIN_WINDOW (self->window));
+    empathy_main_window_show_preferences (EMPATHY_MAIN_WINDOW (self->window),
+        self->preferences_tab);
 
   if (!self->start_hidden)
     empathy_window_present (GTK_WINDOW (self->window));
@@ -305,6 +307,24 @@ empathy_app_command_line (GApplication *app,
       account_manager_ready_cb, self);
 
   return 0;
+}
+
+static gboolean
+preferences_cb (const char *option_name,
+    const char *value,
+    gpointer data,
+    GError **error)
+{
+  EmpathyApp *self = data;
+
+  self->show_preferences = TRUE;
+
+  self->preferences_tab = -1;
+
+  if (value != NULL)
+    self->preferences_tab = atoi (value);
+
+  return TRUE;
 }
 
 static gboolean
@@ -325,9 +345,9 @@ empathy_app_local_command_line (GApplication *app,
   gboolean retval = FALSE;
   GError *error = NULL;
   gboolean no_connect = FALSE, start_hidden = FALSE;
-  gboolean show_preferences = FALSE;
 
   GOptionContext *optcontext;
+  GOptionGroup *group;
   GOptionEntry options[] = {
       { "no-connect", 'n',
         0, G_OPTION_ARG_NONE, &no_connect,
@@ -338,7 +358,7 @@ empathy_app_local_command_line (GApplication *app,
         N_("Don't display the contact list or any other dialogs on startup"),
         NULL },
       { "show-preferences", 'p',
-        0, G_OPTION_ARG_NONE, &show_preferences,
+        G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, &preferences_cb,
         NULL, NULL },
       { "version", 'v',
         G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, show_version_cb,
@@ -346,9 +366,14 @@ empathy_app_local_command_line (GApplication *app,
       { NULL }
   };
 
+  /* We create a group so that GOptionArgFuncs get the user data */
+  group = g_option_group_new ("empathy", NULL, NULL, app, NULL);
+  g_option_group_add_entries (group, options);
+
   optcontext = g_option_context_new (N_("- Empathy IM Client"));
   g_option_context_add_group (optcontext, gtk_get_option_group (TRUE));
-  g_option_context_add_main_entries (optcontext, options, GETTEXT_PACKAGE);
+  g_option_context_set_main_group (optcontext, group);
+  g_option_context_set_translation_domain (optcontext, GETTEXT_PACKAGE);
 
   argc = g_strv_length (*arguments);
 
@@ -376,7 +401,6 @@ empathy_app_local_command_line (GApplication *app,
 
   self->no_connect = no_connect;
   self->start_hidden = start_hidden;
-  self->show_preferences = show_preferences;
 
   return retval;
 }

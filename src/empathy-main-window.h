@@ -53,7 +53,8 @@ GType empathy_main_window_get_type (void);
 
 GtkWidget *empathy_main_window_dup (void);
 
-void empathy_main_window_show_preferences (EmpathyMainWindow *window);
+void empathy_main_window_show_preferences (EmpathyMainWindow *window,
+    gint tab);
 
 G_END_DECLS
 
