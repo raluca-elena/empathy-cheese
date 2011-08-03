@@ -54,6 +54,9 @@ GType empathy_preferences_get_type (void);
 
 GtkWidget *empathy_preferences_new (GtkWindow *parent);
 
+void empathy_preferences_show_tab (EmpathyPreferences *self,
+    gint tab);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_PREFERENCES_H__ */

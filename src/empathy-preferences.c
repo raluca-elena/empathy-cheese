@@ -1254,3 +1254,12 @@ empathy_preferences_new (GtkWindow *parent)
 
 	return self;
 }
+
+void
+empathy_preferences_show_tab (EmpathyPreferences *self,
+			      gint tab)
+{
+	EmpathyPreferencesPriv *priv = GET_PRIV (self);
+
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook), tab);
+}
