@@ -115,6 +115,9 @@ typedef struct
   /* Service (CM, Client) chooser store */
   GtkListStore *service_store;
 
+  /* Debug to show upon creation */
+  gchar *select_name;
+
   /* Misc. */
   gboolean dispose_run;
   TpAccountManager *am;
@@ -696,6 +699,13 @@ debug_window_get_name_owner_cb (TpDBusDaemon *proxy,
           COL_NAME, name,
           COL_UNIQUE_NAME, out,
           -1);
+
+      if (priv->select_name != NULL &&
+          !tp_strdiff (name, priv->select_name))
+        {
+          gtk_combo_box_set_active_iter (GTK_COMBO_BOX (priv->chooser), &iter);
+          tp_clear_pointer (&priv->select_name, g_free);
+        }
 
       g_free (name);
     }
@@ -1369,6 +1379,37 @@ tree_view_search_equal_func_cb (GtkTreeModel *model,
 }
 
 static void
+empathy_debug_window_select_name (EmpathyDebugWindow *self,
+    const gchar *name)
+{
+  EmpathyDebugWindowPriv *priv = GET_PRIV (self);
+  GtkTreeModel *model = GTK_TREE_MODEL (priv->service_store);
+  GtkTreeIter iter;
+  gchar *iter_name;
+  gboolean valid, found = FALSE;
+
+  for (valid = gtk_tree_model_get_iter_first (model, &iter);
+       valid;
+       valid = gtk_tree_model_iter_next (model, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+          COL_NAME, &iter_name,
+          -1);
+
+      if (!tp_strdiff (name, iter_name))
+        found = TRUE;
+
+      g_free (iter_name);
+
+      if (found)
+        break;
+    }
+
+  if (found)
+    gtk_combo_box_set_active_iter (GTK_COMBO_BOX (priv->chooser), &iter);
+}
+
+static void
 am_prepared_cb (GObject *am,
     GAsyncResult *res,
     gpointer user_data)
@@ -1670,6 +1711,8 @@ debug_window_finalize (GObject *object)
   char *key;
   GList *values;
 
+  g_free (priv->select_name);
+
   g_hash_table_iter_init (&iter, priv->cache);
 
   while (g_hash_table_iter_next (&iter, (gpointer *) &key,
@@ -1746,4 +1789,21 @@ empathy_debug_window_new (GtkWindow *parent)
 
   return GTK_WIDGET (g_object_new (EMPATHY_TYPE_DEBUG_WINDOW,
       "transient-for", parent, NULL));
+}
+
+void
+empathy_debug_window_show (EmpathyDebugWindow *self,
+    const gchar *name)
+{
+  EmpathyDebugWindowPriv *priv = GET_PRIV (self);
+
+  if (priv->service_store != NULL)
+    {
+      empathy_debug_window_select_name (self, name);
+    }
+  else
+    {
+      g_free (priv->select_name);
+      priv->select_name = g_strdup (name);
+    }
 }

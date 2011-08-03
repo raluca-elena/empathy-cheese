@@ -58,6 +58,9 @@ GType empathy_debug_window_get_type (void) G_GNUC_CONST;
 
 GtkWidget * empathy_debug_window_new (GtkWindow *parent);
 
+void empathy_debug_window_show (EmpathyDebugWindow *self,
+  const gchar *name);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_DEBUG_WINDOW_H__ */
