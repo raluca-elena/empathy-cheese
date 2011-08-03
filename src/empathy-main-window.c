@@ -1877,7 +1877,7 @@ main_window_edit_blocked_contacts_cb (GtkAction         *action,
 
 void
 empathy_main_window_show_preferences (EmpathyMainWindow *window,
-    gint tab)
+    const gchar *tab)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 
@@ -1891,7 +1891,7 @@ empathy_main_window_show_preferences (EmpathyMainWindow *window,
 		gtk_window_present (GTK_WINDOW (priv->preferences));
 	}
 
-	if (tab != -1)
+	if (tab != NULL)
 		empathy_preferences_show_tab (
 			EMPATHY_PREFERENCES (priv->preferences), tab);
 }
@@ -1900,7 +1900,7 @@ static void
 main_window_edit_preferences_cb (GtkAction         *action,
 				 EmpathyMainWindow *window)
 {
-	empathy_main_window_show_preferences (window, -1);
+	empathy_main_window_show_preferences (window, NULL);
 }
 
 static void

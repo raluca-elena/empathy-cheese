@@ -1226,16 +1226,38 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	preferences_sound_load (preferences);
 
 	if (empathy_spell_supported ()) {
-		page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 5);
+		page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), EMPATHY_PREFERENCES_TAB_SPELL);
 		gtk_widget_show (page);
 	}
 
-	page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), 4);
+	page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook), EMPATHY_PREFERENCES_TAB_LOCATION);
 #ifdef HAVE_GEOCLUE
 	gtk_widget_show (page);
 #else
 	gtk_widget_hide (page);
 #endif
+}
+
+static EmpathyPreferencesTab
+empathy_preferences_tab_from_string (const gchar *str)
+{
+  if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_GENERAL))
+    return EMPATHY_PREFERENCES_TAB_GENERAL;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_NOTIFICATIONS))
+    return EMPATHY_PREFERENCES_TAB_NOTIFICATIONS;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_SOUNDS))
+    return EMPATHY_PREFERENCES_TAB_SOUNDS;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_CALLS))
+    return EMPATHY_PREFERENCES_TAB_CALLS;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_LOCATION))
+    return EMPATHY_PREFERENCES_TAB_LOCATION;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_SPELL))
+    return EMPATHY_PREFERENCES_TAB_SPELL;
+  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_THEMES))
+    return EMPATHY_PREFERENCES_TAB_THEMES;
+
+  g_warn_if_reached ();
+  return -1;
 }
 
 GtkWidget *
@@ -1257,9 +1279,10 @@ empathy_preferences_new (GtkWindow *parent)
 
 void
 empathy_preferences_show_tab (EmpathyPreferences *self,
-			      gint tab)
+			      const gchar *page)
 {
 	EmpathyPreferencesPriv *priv = GET_PRIV (self);
 
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook), tab);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook),
+				       empathy_preferences_tab_from_string (page));
 }

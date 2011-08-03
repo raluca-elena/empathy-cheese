@@ -107,7 +107,7 @@ struct _EmpathyApp
   gboolean no_connect;
   gboolean start_hidden;
   gboolean show_preferences;
-  gint preferences_tab;
+  gchar *preferences_tab;
 
   gboolean activated;
 
@@ -172,6 +172,8 @@ empathy_app_finalize (GObject *object)
   EmpathyApp *self = EMPATHY_APP (object);
   void (*finalize) (GObject *) =
     G_OBJECT_CLASS (empathy_app_parent_class)->finalize;
+
+  g_free (self->preferences_tab);
 
   if (self->window != NULL)
     gtk_widget_destroy (self->window);
@@ -319,10 +321,8 @@ preferences_cb (const char *option_name,
 
   self->show_preferences = TRUE;
 
-  self->preferences_tab = -1;
-
-  if (value != NULL)
-    self->preferences_tab = atoi (value);
+  g_free (self->preferences_tab);
+  self->preferences_tab = g_strdup (value);
 
   return TRUE;
 }

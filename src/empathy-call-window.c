@@ -63,6 +63,7 @@
 #include "empathy-audio-sink.h"
 #include "empathy-video-src.h"
 #include "empathy-mic-menu.h"
+#include "empathy-preferences.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -734,7 +735,8 @@ static void
 empathy_call_window_settings_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  empathy_launch_program (BIN_DIR, "empathy", "-p 3");
+  empathy_launch_program (BIN_DIR, "empathy",
+      "-p " EMPATHY_PREFERENCES_STR_TAB_CALLS);
 }
 
 static void
