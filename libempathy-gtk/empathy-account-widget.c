@@ -190,8 +190,10 @@ static guint signals[LAST_SIGNAL] = { 0 };
  * http://www.hypothetic.org/docs/msn/general/names.php */
 #define MSN_USER_NAME     EMAIL_LOCALPART
 /* Based on the official help:
- * http://help.yahoo.com/l/us/yahoo/edit/registration/edit-01.html */
-#define YAHOO_USER_NAME   "(["ALPHA"]["ALPHADIGIT"_\\.]{3,31})"
+ * http://help.yahoo.com/l/us/yahoo/edit/registration/edit-01.html
+ * Looks like an email address can be used as well (bgo #655959)
+ * */
+#define YAHOO_USER_NAME   "(["ALPHA"]["ALPHADIGIT"_\\.]{3,31})|("EMAIL_LOCALPART"@"HOST")"
 
 #define ACCOUNT_REGEX_ICQ      "^"ICQ_USER_NAME"$"
 #define ACCOUNT_REGEX_IRC      "^"IRC_NICK_NAME"$"
