@@ -47,6 +47,7 @@
 #include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
+#include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-message.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
@@ -121,6 +122,8 @@ struct _EmpathyLogWindowPriv
   TpAccount *selected_account;
   gchar *selected_chat_id;
   gboolean selected_is_chatroom;
+
+  GSettings *gsettings_chat;
 };
 
 static void log_window_search_entry_changed_cb   (GtkWidget        *entry,
@@ -546,6 +549,7 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
   tp_clear_object (&self->priv->camera_monitor);
+  tp_clear_object (&self->priv->gsettings_chat);
 
   G_OBJECT_CLASS (empathy_log_window_parent_class)->dispose (object);
 }
@@ -593,6 +597,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
   self->priv->camera_monitor = empathy_camera_monitor_dup_singleton ();
 
   self->priv->log_manager = tpl_log_manager_dup_singleton ();
+
+  self->priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 
   gtk_window_set_title (GTK_WINDOW (self), _("History"));
   gtk_widget_set_can_focus (GTK_WIDGET (self), FALSE);
@@ -1290,8 +1296,9 @@ log_window_append_chat_message (TplEvent *event,
   //   }
 
   /* escape the text */
-  // FIXME: handle smileys
-  parsers = empathy_webkit_get_string_parser (FALSE);
+  parsers = empathy_webkit_get_string_parser (
+      g_settings_get_boolean (log_window->priv->gsettings_chat,
+        EMPATHY_PREFS_CHAT_SHOW_SMILEYS));
   msg = g_string_new ("");
 
   empathy_string_parser_substr (empathy_message_get_body (message), -1,
