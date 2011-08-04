@@ -50,6 +50,7 @@ struct _EmpathyPreferencesClass {
 	GtkDialogClass parent_class;
 };
 
+/* Keep this enum and the array in empathy-preferences.c in sync */
 typedef enum
 {
   EMPATHY_PREFERENCES_TAB_GENERAL,
@@ -61,20 +62,15 @@ typedef enum
   EMPATHY_PREFERENCES_TAB_THEMES,
 } EmpathyPreferencesTab;
 
-#define EMPATHY_PREFERENCES_STR_TAB_GENERAL "general"
-#define EMPATHY_PREFERENCES_STR_TAB_NOTIFICATIONS "notifications"
-#define EMPATHY_PREFERENCES_STR_TAB_SOUNDS "sounds"
-#define EMPATHY_PREFERENCES_STR_TAB_CALLS "calls"
-#define EMPATHY_PREFERENCES_STR_TAB_LOCATION "location"
-#define EMPATHY_PREFERENCES_STR_TAB_SPELL "spell"
-#define EMPATHY_PREFERENCES_STR_TAB_THEMES "themes"
-
 GType empathy_preferences_get_type (void);
 
 GtkWidget *empathy_preferences_new (GtkWindow *parent);
 
 void empathy_preferences_show_tab (EmpathyPreferences *self,
     const gchar *tab);
+
+const gchar *
+empathy_preferences_tab_to_string (EmpathyPreferencesTab tab);
 
 G_END_DECLS
 

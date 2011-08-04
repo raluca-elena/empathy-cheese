@@ -55,6 +55,17 @@ G_DEFINE_TYPE (EmpathyPreferences, empathy_preferences, GTK_TYPE_DIALOG);
 
 #define GET_PRIV(self) ((EmpathyPreferencesPriv *)((EmpathyPreferences *) self)->priv)
 
+static const gchar * empathy_preferences_tabs[] =
+{
+  "general",
+  "notifications",
+  "sounds",
+  "calls",
+  "location",
+  "spell",
+  "themes",
+};
+
 struct _EmpathyPreferencesPriv {
 	GtkWidget *notebook;
 
@@ -1241,23 +1252,24 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 static EmpathyPreferencesTab
 empathy_preferences_tab_from_string (const gchar *str)
 {
-  if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_GENERAL))
-    return EMPATHY_PREFERENCES_TAB_GENERAL;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_NOTIFICATIONS))
-    return EMPATHY_PREFERENCES_TAB_NOTIFICATIONS;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_SOUNDS))
-    return EMPATHY_PREFERENCES_TAB_SOUNDS;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_CALLS))
-    return EMPATHY_PREFERENCES_TAB_CALLS;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_LOCATION))
-    return EMPATHY_PREFERENCES_TAB_LOCATION;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_SPELL))
-    return EMPATHY_PREFERENCES_TAB_SPELL;
-  else if (!tp_strdiff (str, EMPATHY_PREFERENCES_STR_TAB_THEMES))
-    return EMPATHY_PREFERENCES_TAB_THEMES;
+  guint i;
+
+  for (i = 0; i < G_N_ELEMENTS (empathy_preferences_tabs); i++)
+    {
+      if (!tp_strdiff (str, empathy_preferences_tabs[i]))
+        return i;
+    }
 
   g_warn_if_reached ();
   return -1;
+}
+
+const gchar *
+empathy_preferences_tab_to_string (EmpathyPreferencesTab tab)
+{
+  g_return_val_if_fail (tab < G_N_ELEMENTS (empathy_preferences_tabs), NULL);
+
+  return empathy_preferences_tabs[tab];
 }
 
 GtkWidget *

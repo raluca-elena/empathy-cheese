@@ -735,8 +735,12 @@ static void
 empathy_call_window_settings_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
-  empathy_launch_program (BIN_DIR, "empathy",
-      "-p " EMPATHY_PREFERENCES_STR_TAB_CALLS);
+  gchar *args = g_strdup_printf ("-p %s",
+      empathy_preferences_tab_to_string (EMPATHY_PREFERENCES_TAB_CALLS));
+
+  empathy_launch_program (BIN_DIR, "empathy", args);
+
+  g_free (args);
 }
 
 static void
