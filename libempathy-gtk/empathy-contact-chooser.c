@@ -20,11 +20,6 @@
 G_DEFINE_TYPE (EmpathyContactChooser,
     empathy_contact_chooser, GTK_TYPE_BOX);
 
-enum
-{
-  PROP_TP_CHAT = 1
-};
-
 enum {
   SIG_SELECTION_CHANGED,
   LAST_SIGNAL
@@ -36,7 +31,6 @@ typedef struct _AddTemporaryIndividualCtx AddTemporaryIndividualCtx;
 
 struct _EmpathyContactChooserPrivate
 {
-  EmpathyTpChat *tp_chat;
   TpAccountManager *account_mgr;
 
   EmpathyIndividualStore *store;
@@ -52,47 +46,6 @@ struct _EmpathyContactChooserPrivate
   EmpathyContactChooserFilterFunc filter_func;
   gpointer filter_data;
 };
-
-static void
-contact_chooser_get_property (GObject *object,
-    guint param_id,
-    GValue *value,
-    GParamSpec *pspec)
-{
-  EmpathyContactChooser *self = (EmpathyContactChooser *)
-    object;
-
-  switch (param_id)
-    {
-    case PROP_TP_CHAT:
-      g_value_set_object (value, self->priv->tp_chat);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-      break;
-    };
-}
-
-static void
-contact_chooser_set_property (GObject *object,
-    guint param_id,
-    const GValue *value,
-    GParamSpec *pspec)
-{
-  EmpathyContactChooser *self = (EmpathyContactChooser *)
-    object;
-
-  switch (param_id)
-    {
-    case PROP_TP_CHAT:
-      g_assert (self->priv->tp_chat == NULL); /* construct-only */
-      self->priv->tp_chat = g_value_dup_object (value);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-      break;
-    };
-}
 
 struct _AddTemporaryIndividualCtx
 {
@@ -139,7 +92,6 @@ contact_chooser_dispose (GObject *object)
   tp_clear_pointer (&self->priv->add_temp_ctx,
       add_temporary_individual_ctx_free);
 
-  tp_clear_object (&self->priv->tp_chat);
   tp_clear_object (&self->priv->store);
   tp_clear_pointer (&self->priv->search_words, g_ptr_array_unref);
   tp_clear_pointer (&self->priv->search_str, g_free);
@@ -156,18 +108,10 @@ empathy_contact_chooser_class_init (
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->get_property = contact_chooser_get_property;
-  object_class->set_property = contact_chooser_set_property;
   object_class->dispose = contact_chooser_dispose;
 
   g_type_class_add_private (object_class,
       sizeof (EmpathyContactChooserPrivate));
-
-  g_object_class_install_property (object_class,
-      PROP_TP_CHAT,
-      g_param_spec_object ("tp-chat", "EmpathyTpChat", "EmpathyTpChat",
-          EMPATHY_TYPE_TP_CHAT,
-          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
   signals[SIG_SELECTION_CHANGED] = g_signal_new ("selection-changed",
             G_TYPE_FROM_CLASS (klass),
@@ -395,13 +339,10 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 }
 
 GtkWidget *
-empathy_contact_chooser_new (EmpathyTpChat *tp_chat)
+empathy_contact_chooser_new (void)
 {
-  g_return_val_if_fail (EMPATHY_IS_TP_CHAT (tp_chat), NULL);
-
   return g_object_new (EMPATHY_TYPE_CONTACT_CHOOSER,
       "orientation", GTK_ORIENTATION_VERTICAL,
-      "tp-chat", tp_chat,
       NULL);
 }
 

@@ -213,7 +213,7 @@ invite_participant_dialog_constructed (GObject *object)
   gtk_dialog_add_button (dialog, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
 
   /* contact chooser */
-  self->priv->chooser = empathy_contact_chooser_new (self->priv->tp_chat);
+  self->priv->chooser = empathy_contact_chooser_new ();
 
   empathy_contact_chooser_set_filter_func (
       EMPATHY_CONTACT_CHOOSER (self->priv->chooser), filter_individual, self);

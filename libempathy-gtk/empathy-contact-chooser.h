@@ -52,7 +52,7 @@ struct _EmpathyContactChooserClass
 
 GType empathy_contact_chooser_get_type (void);
 
-GtkWidget * empathy_contact_chooser_new (EmpathyTpChat *tp_chat);
+GtkWidget * empathy_contact_chooser_new (void);
 
 FolksIndividual * empathy_contact_chooser_dup_selected (
     EmpathyContactChooser *self);
