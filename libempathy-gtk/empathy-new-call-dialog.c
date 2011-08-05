@@ -211,7 +211,7 @@ empathy_new_call_dialog_init (EmpathyNewCallDialog *dialog)
 
   gtk_widget_show (priv->check_video);
 
-  /* add chat button */
+  /* add call button */
   parent->button_action = gtk_button_new_with_mnemonic (_("C_all"));
   image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_VOIP,
       GTK_ICON_SIZE_BUTTON);
