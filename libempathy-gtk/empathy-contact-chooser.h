@@ -31,6 +31,13 @@ typedef struct _EmpathyContactChooser EmpathyContactChooser;
 typedef struct _EmpathyContactChooserClass EmpathyContactChooserClass;
 typedef struct _EmpathyContactChooserPrivate EmpathyContactChooserPrivate;
 
+typedef gboolean (*EmpathyContactChooserFilterFunc) (
+    EmpathyContactChooser *self,
+    FolksIndividual *individual,
+    gboolean is_online,
+    gboolean searching,
+    gpointer user_data);
+
 struct _EmpathyContactChooser
 {
   GtkBox parent;
@@ -49,6 +56,10 @@ GtkWidget * empathy_contact_chooser_new (EmpathyTpChat *tp_chat);
 
 TpContact * empathy_contact_chooser_get_selected (
     EmpathyContactChooser *self);
+
+void empathy_contact_chooser_set_filter_func (EmpathyContactChooser *self,
+    EmpathyContactChooserFilterFunc func,
+    gpointer user_data);
 
 G_END_DECLS
 

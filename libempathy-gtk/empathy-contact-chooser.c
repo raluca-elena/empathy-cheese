@@ -48,6 +48,9 @@ struct _EmpathyContactChooserPrivate
   /* Context representing the FolksIndividual which are added because of the
    * current search from the user. */
   AddTemporaryIndividualCtx *add_temp_ctx;
+
+  EmpathyContactChooserFilterFunc filter_func;
+  gpointer filter_data;
 };
 
 static void
@@ -237,10 +240,9 @@ filter_func (GtkTreeModel *model,
 {
   EmpathyContactChooser *self = user_data;
   FolksIndividual *individual;
-  TpContact *contact;
   gboolean is_online;
-  GList *members, *l;
   gboolean display = FALSE;
+  gboolean searching = FALSE;
 
   gtk_tree_model_get (model, iter,
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, &individual,
@@ -250,53 +252,21 @@ filter_func (GtkTreeModel *model,
   if (individual == NULL)
     goto out;
 
-  if (self->priv->search_words == NULL)
+  if (self->priv->search_words != NULL)
     {
-      /* Not searching, display online contacts */
-      if (!is_online)
-        goto out;
-    }
-  else
-    {
+      searching = TRUE;
+
+      /* Filter out the contact if we are searching and it doesn't match */
       if (!empathy_individual_match_string (individual,
             self->priv->search_str, self->priv->search_words))
         goto out;
     }
 
-  /* Filter out individuals not having a persona on the same connection as the
-   * EmpathyTpChat. */
-  contact = get_tp_contact_for_chat (self, individual);
-
-  if (contact == NULL)
-    goto out;
-
-  /* Filter out contacts which are already in the chat */
-  members = empathy_contact_list_get_members (EMPATHY_CONTACT_LIST (
-        self->priv->tp_chat));
-
-  display = TRUE;
-
-  for (l = members; l != NULL; l = g_list_next (l))
-    {
-      EmpathyContact *member = l->data;
-      TpHandle handle;
-
-      /* Try to get the non-channel specific handle. */
-      handle = tp_channel_group_get_handle_owner (
-          TP_CHANNEL (self->priv->tp_chat),
-          empathy_contact_get_handle (member));
-      if (handle == 0)
-        handle = empathy_contact_get_handle (member);
-
-      if (handle == tp_contact_get_handle (contact))
-        {
-          display = FALSE;
-          break;
-        }
-    }
-
-  g_list_free_full (members, g_object_unref);
-
+  if (self->priv->filter_func == NULL)
+    display = TRUE;
+  else
+    display = self->priv->filter_func (self, individual, is_online, searching,
+      self->priv->filter_data);
 out:
   tp_clear_object (&individual);
   return display;
@@ -490,4 +460,15 @@ empathy_contact_chooser_get_selected (EmpathyContactChooser *self)
 
   g_object_unref (individual);
   return contact;
+}
+
+void
+empathy_contact_chooser_set_filter_func (EmpathyContactChooser *self,
+    EmpathyContactChooserFilterFunc func,
+    gpointer user_data)
+{
+  g_assert (self->priv->filter_func == NULL);
+
+  self->priv->filter_func = func;
+  self->priv->filter_data = user_data;
 }

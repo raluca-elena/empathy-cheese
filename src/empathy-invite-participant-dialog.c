@@ -95,6 +95,98 @@ selection_changed_cb (GtkWidget *treeview,
   gtk_widget_set_sensitive (self->priv->invite_button, selected != NULL);
 }
 
+/* Return the TpContact of @individual which is on the same connection as the
+ * EmpathyTpChat */
+static TpContact *
+get_tp_contact_for_chat (EmpathyInviteParticipantDialog *self,
+    FolksIndividual *individual)
+{
+  TpContact *contact = NULL;
+  TpConnection *chat_conn;
+  GeeSet *personas;
+  GeeIterator *iter;
+
+  chat_conn = tp_channel_borrow_connection (TP_CHANNEL (self->priv->tp_chat));
+
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (contact == FALSE && gee_iterator_next (iter))
+    {
+      TpfPersona *persona = gee_iterator_get (iter);
+      TpConnection *contact_conn;
+      TpContact *contact_cur = NULL;
+
+      if (TPF_IS_PERSONA (persona))
+        {
+          contact_cur = tpf_persona_get_contact (persona);
+          if (contact_cur != NULL)
+            {
+              contact_conn = tp_contact_get_connection (contact_cur);
+
+              if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
+                    tp_proxy_get_object_path (chat_conn)))
+                contact = contact_cur;
+            }
+        }
+
+      g_clear_object (&persona);
+    }
+  g_clear_object (&iter);
+
+  return contact;
+}
+
+static gboolean
+filter_individual (EmpathyContactChooser *chooser,
+    FolksIndividual *individual,
+    gboolean is_online,
+    gboolean searching,
+    gpointer user_data)
+{
+  EmpathyInviteParticipantDialog *self = user_data;
+  GList *members, *l;
+  TpContact *contact;
+  gboolean display = TRUE;
+
+  /* Filter out offline contacts if we are not searching */
+  if (!searching && !is_online)
+    return FALSE;
+
+  /* Filter out individuals not having a persona on the same connection as the
+   * EmpathyTpChat. */
+  contact = get_tp_contact_for_chat (self, individual);
+
+  if (contact == NULL)
+    return FALSE;
+
+  /* Filter out contacts which are already in the chat */
+  members = empathy_contact_list_get_members (EMPATHY_CONTACT_LIST (
+        self->priv->tp_chat));
+
+  for (l = members; l != NULL; l = g_list_next (l))
+    {
+      EmpathyContact *member = l->data;
+      TpHandle handle;
+
+      /* Try to get the non-channel specific handle. */
+      handle = tp_channel_group_get_handle_owner (
+          TP_CHANNEL (self->priv->tp_chat),
+          empathy_contact_get_handle (member));
+      if (handle == 0)
+        handle = empathy_contact_get_handle (member);
+
+      if (handle == tp_contact_get_handle (contact))
+        {
+          display = FALSE;
+          break;
+        }
+    }
+
+  g_list_free_full (members, g_object_unref);
+
+  return display;
+}
+
 static void
 invite_participant_dialog_constructed (GObject *object)
 {
@@ -122,6 +214,10 @@ invite_participant_dialog_constructed (GObject *object)
 
   /* contact chooser */
   self->priv->chooser = empathy_contact_chooser_new (self->priv->tp_chat);
+
+  empathy_contact_chooser_set_filter_func (
+      EMPATHY_CONTACT_CHOOSER (self->priv->chooser), filter_individual, self);
+
   gtk_box_pack_start (GTK_BOX (content), self->priv->chooser, TRUE, TRUE, 6);
   gtk_widget_show (self->priv->chooser);
 
