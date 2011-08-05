@@ -72,6 +72,11 @@
 #define SELF_VIDEO_SECTION_WIDTH 120
 #define SELF_VIDEO_SECTION_HEIGTH 90
 
+#define FLOATING_TOOLBAR_OPACITY 192
+#define FLOATING_TOOLBAR_WIDTH 280
+#define FLOATING_TOOLBAR_HEIGHT 36
+#define FLOATING_TOOLBAR_SPACING 20
+
 /* The avatar's default width and height are set to the same value because we
    want a square icon. */
 #define REMOTE_CONTACT_AVATAR_DEFAULT_WIDTH EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT
@@ -137,6 +142,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *dialpad_button;
   GtkWidget *toolbar;
   GtkWidget *bottom_toolbar;
+  ClutterActor *floating_toolbar;
   GtkWidget *pane;
   GtkAction *menu_fullscreen;
 
@@ -369,6 +375,8 @@ empathy_call_window_show_video_output (EmpathyCallWindow *self,
     g_object_set (self->priv->video_output, "visible", show, NULL);
 
   gtk_widget_set_visible (self->priv->remote_user_avatar_widget, !show);
+
+  clutter_actor_raise_top (self->priv->floating_toolbar);
 }
 
 static void
@@ -800,13 +808,27 @@ empathy_call_window_destroyed_cb (GtkWidget *object,
 }
 
 static void
+empathy_call_window_video_box_allocation_changed_cb (ClutterActor *video_box,
+    GParamSpec *pspec,
+    ClutterBindConstraint *constraint)
+{
+  ClutterActorBox allocation;
+
+  clutter_actor_get_allocation_box (video_box, &allocation);
+
+  clutter_bind_constraint_set_offset (constraint,
+      allocation.y2 - allocation.y1 -
+      FLOATING_TOOLBAR_SPACING - FLOATING_TOOLBAR_HEIGHT);
+}
+
+static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv;
   GtkBuilder *gui;
   GtkWidget *top_vbox;
   gchar *filename;
-  ClutterConstraint *size_constraint;
+  ClutterConstraint *constraint;
   ClutterActor *remote_avatar;
   GtkStyleContext *context;
   GdkRGBA rgba;
@@ -912,10 +934,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
       priv->video_box,
       NULL);
 
-  size_constraint = clutter_bind_constraint_new (
+  constraint = clutter_bind_constraint_new (
       gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
       CLUTTER_BIND_SIZE, 0);
-  clutter_actor_add_constraint (priv->video_box, size_constraint);
+  clutter_actor_add_constraint (priv->video_box, constraint);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
   remote_avatar = gtk_clutter_actor_new_with_contents (
@@ -932,6 +954,31 @@ empathy_call_window_init (EmpathyCallWindow *self)
   create_video_output_widget (self);
   create_audio_input (self);
   create_video_input (self);
+
+  priv->floating_toolbar = gtk_clutter_actor_new ();
+
+  gtk_widget_reparent (priv->bottom_toolbar,
+      gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (priv->floating_toolbar)));
+
+  constraint = clutter_bind_constraint_new (priv->video_box,
+      CLUTTER_BIND_Y, 0);
+
+  clutter_actor_add_constraint (priv->floating_toolbar, constraint);
+
+  g_signal_connect (priv->video_box, "notify::allocation",
+      G_CALLBACK (empathy_call_window_video_box_allocation_changed_cb),
+      constraint);
+
+  clutter_actor_set_size (priv->floating_toolbar,
+      FLOATING_TOOLBAR_WIDTH, FLOATING_TOOLBAR_HEIGHT);
+  clutter_actor_set_opacity (priv->floating_toolbar, FLOATING_TOOLBAR_OPACITY);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
+      priv->floating_toolbar,
+      CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_END);
+
+  clutter_actor_raise_top (priv->floating_toolbar);
 
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
@@ -1000,7 +1047,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   /* Don't display labels in both toolbars */
   gtk_toolbar_set_style (GTK_TOOLBAR (priv->toolbar), GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_style (GTK_TOOLBAR (priv->bottom_toolbar), GTK_TOOLBAR_ICONS);
 }
 
 /* Instead of specifying a width and a height, we specify only one size. That's
@@ -2224,6 +2270,7 @@ empathy_call_window_show_video_output_cb (gpointer user_data)
     {
       gtk_widget_hide (self->priv->remote_user_avatar_widget);
       clutter_actor_show (self->priv->video_output);
+      clutter_actor_raise_top (self->priv->floating_toolbar);
     }
 
   return FALSE;

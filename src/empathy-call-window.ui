@@ -231,11 +231,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToolbar" id="bottom_toolbar">
+          <object class="GtkHBox" id="bottom_toolbar">
             <property name="visible">True</property>
-            <style>
-              <class name="bottom-toolbar"/>
-            </style>
+            <property name="homogeneous">False</property>
             <child>
               <object class="GtkToggleToolButton" id="camera">
                 <property name="visible">True</property>
@@ -245,7 +243,8 @@
                 <property name="tooltip_text" translatable="yes">Toggle video transmission</property>
               </object>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
               </packing>
             </child>
             <child>
@@ -259,7 +258,8 @@
                 </child>
               </object>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
               </packing>
             </child>
             <child>
@@ -271,7 +271,8 @@
                 <property name="tooltip_text" translatable="yes">Toggle audio transmission</property>
               </object>
               <packing>
-                <property name="homogeneous">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
               </packing>
             </child>
             <child>
@@ -291,6 +292,10 @@
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+              </packing>
             </child>
           </object>
           <packing>
