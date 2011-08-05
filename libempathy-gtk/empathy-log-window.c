@@ -1254,47 +1254,6 @@ log_window_append_chat_message (TplEvent *event,
   alias = g_markup_escape_text (
       tpl_entity_get_alias (tpl_event_get_sender (event)), -1);
 
-  // /* If the user is searching, highlight the matched text */
-  // if (!EMP_STR_EMPTY (log_window->priv->last_find))
-  //   {
-  //     gchar *str = g_regex_escape_string (log_window->priv->last_find, -1);
-  //     gchar *replacement = g_markup_printf_escaped (
-  //         "<span background=\"yellow\">%s</span>",
-  //         log_window->priv->last_find);
-  //     GError *error = NULL;
-  //     GRegex *regex = g_regex_new (str, 0, 0, &error);
-
-  //     if (regex == NULL)
-  //       {
-  //         DEBUG ("Could not create regex: %s", error->message);
-  //         g_error_free (error);
-  //       }
-  //     else
-  //       {
-  //         gchar *new_msg = g_regex_replace_literal (regex,
-  //             empathy_message_get_body (message), -1, 0, replacement,
-  //             0, &error);
-
-  //         if (new_msg != NULL)
-  //           {
-  //             /* We pass ownership of new_msg to msg, which is freed later */
-  //             g_free (msg);
-  //             msg = new_msg;
-  //           }
-  //         else
-  //           {
-  //             DEBUG ("Error while performing string substitution: %s",
-  //                 error->message);
-  //             g_error_free (error);
-  //           }
-  //       }
-
-  //     g_free (str);
-  //     g_free (replacement);
-
-  //     tp_clear_pointer (&regex, g_regex_unref);
-  //   }
-
   /* escape the text */
   parsers = empathy_webkit_get_string_parser (
       g_settings_get_boolean (log_window->priv->gsettings_chat,
@@ -1977,6 +1936,8 @@ log_window_find_populate (EmpathyLogWindow *self,
   if (EMP_STR_EMPTY (search_criteria))
     {
       tp_clear_pointer (&self->priv->hits, tpl_log_manager_search_free);
+      webkit_web_view_set_highlight_text_matches (
+          WEBKIT_WEB_VIEW (self->priv->webview), FALSE);
       log_window_who_populate (self);
       return;
     }
@@ -1984,6 +1945,10 @@ log_window_find_populate (EmpathyLogWindow *self,
   g_signal_handlers_block_by_func (selection,
       log_window_when_changed_cb,
       self);
+
+  /* highlight the search text */
+  webkit_web_view_mark_text_matches (WEBKIT_WEB_VIEW (self->priv->webview),
+      search_criteria, FALSE, 0);
 
   tpl_log_manager_search_async (self->priv->log_manager,
       search_criteria, TPL_EVENT_MASK_ANY,
