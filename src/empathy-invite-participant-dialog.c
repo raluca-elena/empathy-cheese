@@ -284,6 +284,16 @@ TpContact *
 empathy_invite_participant_dialog_get_selected (
     EmpathyInviteParticipantDialog *self)
 {
-  return empathy_contact_chooser_get_selected (
+  FolksIndividual *individual;
+  TpContact *contact;
+
+  individual = empathy_contact_chooser_dup_selected (
       EMPATHY_CONTACT_CHOOSER (self->priv->chooser));
+  if (individual == NULL)
+    return NULL;
+
+  contact = get_tp_contact_for_chat (self, individual);
+
+  g_object_unref (individual);
+  return contact;
 }

@@ -192,47 +192,6 @@ view_selection_changed_cb (GtkWidget *treeview,
   tp_clear_object (&individual);
 }
 
-/* Return the TpContact of @individual which is on the same connection as the
- * EmpathyTpChat */
-static TpContact *
-get_tp_contact_for_chat (EmpathyContactChooser *self,
-    FolksIndividual *individual)
-{
-  TpContact *contact = NULL;
-  TpConnection *chat_conn;
-  GeeSet *personas;
-  GeeIterator *iter;
-
-  chat_conn = tp_channel_borrow_connection (TP_CHANNEL (self->priv->tp_chat));
-
-  personas = folks_individual_get_personas (individual);
-  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
-  while (contact == FALSE && gee_iterator_next (iter))
-    {
-      TpfPersona *persona = gee_iterator_get (iter);
-      TpConnection *contact_conn;
-      TpContact *contact_cur = NULL;
-
-      if (TPF_IS_PERSONA (persona))
-        {
-          contact_cur = tpf_persona_get_contact (persona);
-          if (contact_cur != NULL)
-            {
-              contact_conn = tp_contact_get_connection (contact_cur);
-
-              if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
-                    tp_proxy_get_object_path (chat_conn)))
-                contact = contact_cur;
-            }
-        }
-
-      g_clear_object (&persona);
-    }
-  g_clear_object (&iter);
-
-  return contact;
-}
-
 static gboolean
 filter_func (GtkTreeModel *model,
     GtkTreeIter *iter,
@@ -446,20 +405,10 @@ empathy_contact_chooser_new (EmpathyTpChat *tp_chat)
       NULL);
 }
 
-TpContact *
-empathy_contact_chooser_get_selected (EmpathyContactChooser *self)
+FolksIndividual *
+empathy_contact_chooser_dup_selected (EmpathyContactChooser *self)
 {
-  FolksIndividual *individual;
-  TpContact *contact;
-
-  individual = empathy_individual_view_dup_selected (self->priv->view);
-  if (individual == NULL)
-    return NULL;
-
-  contact = get_tp_contact_for_chat (self, individual);
-
-  g_object_unref (individual);
-  return contact;
+  return empathy_individual_view_dup_selected (self->priv->view);
 }
 
 void
