@@ -113,6 +113,11 @@ gboolean empathy_account_has_uri_scheme_tel (TpAccount *account);
 TpContact * empathy_get_tp_contact_for_individual (FolksIndividual *individual,
     TpConnection *conn);
 
+void empathy_individual_can_audio_video_call (FolksIndividual *individual,
+    gboolean *can_audio_call,
+    gboolean *can_video_call,
+    EmpathyContact **out_contact);
+
 /* Copied from wocky/wocky-utils.h */
 
 #define empathy_implement_finish_void(source, tag) \

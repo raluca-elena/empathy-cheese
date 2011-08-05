@@ -105,55 +105,6 @@ static void individual_store_contact_update (EmpathyIndividualStore *self,
 G_DEFINE_TYPE (EmpathyIndividualStore, empathy_individual_store,
     GTK_TYPE_TREE_STORE);
 
-/* Calculate whether the Individual can do audio or video calls.
- * FIXME: We can remove this once libfolks has grown capabilities support
- * again: bgo#626179. */
-static void
-individual_can_audio_video_call (FolksIndividual *individual,
-    gboolean *can_audio_call,
-    gboolean *can_video_call)
-{
-  GeeSet *personas;
-  GeeIterator *iter;
-  gboolean can_audio = FALSE, can_video = FALSE;
-
-  personas = folks_individual_get_personas (individual);
-  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
-  while (gee_iterator_next (iter))
-    {
-      FolksPersona *persona = gee_iterator_get (iter);
-      TpContact *tp_contact;
-
-      if (!empathy_folks_persona_is_interesting (persona))
-        goto while_finish;
-
-      tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
-      if (tp_contact != NULL)
-        {
-          EmpathyContact *contact;
-
-          contact = empathy_contact_dup_from_tp_contact (tp_contact);
-          empathy_contact_set_persona (contact, persona);
-
-          can_audio = can_audio || empathy_contact_get_capabilities (contact) &
-              EMPATHY_CAPABILITIES_AUDIO;
-          can_video = can_video || empathy_contact_get_capabilities (contact) &
-              EMPATHY_CAPABILITIES_VIDEO;
-
-          g_object_unref (contact);
-        }
-while_finish:
-      g_clear_object (&persona);
-
-      if (can_audio && can_video)
-        break;
-    }
-  g_clear_object (&iter);
-
-  *can_audio_call = can_audio;
-  *can_video_call = can_video;
-}
-
 static const gchar * const *
 individual_get_client_types (FolksIndividual *individual)
 {
@@ -207,8 +158,8 @@ add_individual_to_store (GtkTreeStore *self,
   const gchar * const *types;
   GQueue *queue;
 
-  individual_can_audio_video_call (individual, &can_audio_call,
-      &can_video_call);
+  empathy_individual_can_audio_video_call (individual, &can_audio_call,
+      &can_video_call, NULL);
 
   types = individual_get_client_types (individual);
 
@@ -770,8 +721,8 @@ individual_store_contact_update (EmpathyIndividualStore *self,
       gboolean can_audio_call, can_video_call;
       const gchar * const *types;
 
-      individual_can_audio_video_call (individual, &can_audio_call,
-          &can_video_call);
+      empathy_individual_can_audio_video_call (individual, &can_audio_call,
+          &can_video_call, NULL);
 
       types = individual_get_client_types (individual);
 

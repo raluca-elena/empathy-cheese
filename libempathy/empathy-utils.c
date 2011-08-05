@@ -1090,3 +1090,61 @@ out:
   g_clear_object (&persona_store);
   return retval;
 }
+
+/* Calculate whether the Individual can do audio or video calls.
+ * FIXME: We can remove this once libfolks has grown capabilities support
+ * again: bgo#626179. */
+void
+empathy_individual_can_audio_video_call (FolksIndividual *individual,
+    gboolean *can_audio_call,
+    gboolean *can_video_call,
+    EmpathyContact **out_contact)
+{
+  GeeSet *personas;
+  GeeIterator *iter;
+  gboolean can_audio = FALSE, can_video = FALSE;
+
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
+    {
+      FolksPersona *persona = gee_iterator_get (iter);
+      TpContact *tp_contact;
+
+      if (!empathy_folks_persona_is_interesting (persona))
+        goto while_finish;
+
+      tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
+      if (tp_contact != NULL)
+        {
+          EmpathyContact *contact;
+
+          contact = empathy_contact_dup_from_tp_contact (tp_contact);
+          empathy_contact_set_persona (contact, persona);
+
+          can_audio = can_audio || empathy_contact_get_capabilities (contact) &
+              EMPATHY_CAPABILITIES_AUDIO;
+          can_video = can_video || empathy_contact_get_capabilities (contact) &
+              EMPATHY_CAPABILITIES_VIDEO;
+
+          if (out_contact != NULL)
+            *out_contact = g_object_ref (contact);
+
+          g_object_unref (contact);
+        }
+
+while_finish:
+      g_clear_object (&persona);
+
+      if (can_audio && can_video)
+        break;
+    }
+
+  g_clear_object (&iter);
+
+  if (can_audio_call != NULL)
+    *can_audio_call = can_audio;
+
+  if (can_video_call != NULL)
+    *can_video_call = can_video;
+}
