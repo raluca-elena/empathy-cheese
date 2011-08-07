@@ -86,7 +86,6 @@ struct _EmpathyLogWindowPriv
   GtkWidget *treeview_who;
   GtkWidget *treeview_what;
   GtkWidget *treeview_when;
-  GtkWidget *treeview_events;
   GtkWidget *webview;
 
   GtkTreeStore *store_events;
@@ -551,6 +550,8 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->camera_monitor);
   tp_clear_object (&self->priv->gsettings_chat);
 
+  tp_clear_object (&self->priv->store_events);
+
   G_OBJECT_CLASS (empathy_log_window_parent_class)->dispose (object);
 }
 
@@ -587,7 +588,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
   gchar *filename;
   GFile *gfile;
   GtkWidget *vbox, *accounts, *search, *label, *quit;
-  GtkWidget *sw;
+  GtkWidget *scrolledwindow_events;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_LOG_WINDOW, EmpathyLogWindowPriv);
@@ -617,7 +618,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
       "treeview_who", &self->priv->treeview_who,
       "treeview_what", &self->priv->treeview_what,
       "treeview_when", &self->priv->treeview_when,
-      "treeview_events", &self->priv->treeview_events,
+      "scrolledwindow_events", &scrolledwindow_events,
       "notebook", &self->priv->notebook,
       "spinner", &self->priv->spinner,
       NULL);
@@ -710,11 +711,12 @@ empathy_log_window_init (EmpathyLogWindow *self)
   log_window_who_populate (self);
 
   /* events */
-  sw = gtk_scrolled_window_new (NULL, NULL);
   self->priv->webview = webkit_web_view_new ();
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_events),
       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-  gtk_container_add (GTK_CONTAINER (sw), self->priv->webview);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow_events),
+      self->priv->webview);
+  gtk_widget_show (self->priv->webview);
 
   filename = empathy_file_lookup ("empathy-log-window.html", "data");
   gfile = g_file_new_for_path (filename);
@@ -728,10 +730,6 @@ empathy_log_window_init (EmpathyLogWindow *self)
   g_signal_connect (self->priv->webview, "navigation-policy-decision-requested",
       G_CALLBACK (events_webview_handle_navigation), self);
 
-  gtk_notebook_append_page (GTK_NOTEBOOK (self->priv->notebook),
-      sw, gtk_label_new ("webview"));
-  gtk_widget_show_all (sw);
-
   /* listen to changes to the treemodel */
   g_signal_connect (self->priv->store_events, "row-inserted",
       G_CALLBACK (store_events_row_inserted), self);
@@ -743,9 +741,6 @@ empathy_log_window_init (EmpathyLogWindow *self)
       G_CALLBACK (store_events_rows_reordered), self);
   g_signal_connect (self->priv->store_events, "row-has-child-toggled",
       G_CALLBACK (store_events_has_child_rows), self);
-
-  // debug
-  gtk_notebook_set_show_tabs (GTK_NOTEBOOK (self->priv->notebook), TRUE);
 
   gtk_widget_show (GTK_WIDGET (self));
 }
@@ -2066,15 +2061,16 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   /* If the Who pane doesn't contain a contact (e.g. it has many
    * selected, or has 'Anyone', let's try to get the contact from
    * the selected event. */
-  view = GTK_TREE_VIEW (self->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
-  selection = gtk_tree_view_get_selection (view);
+  goto out; // FIXME: reimplement
+  // view = GTK_TREE_VIEW (self->priv->treeview_events);
+  // model = gtk_tree_view_get_model (view);
+  // selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_count_selected_rows (selection) != 1)
-    goto out;
+  // if (gtk_tree_selection_count_selected_rows (selection) != 1)
+  //   goto out;
 
-  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
-    goto out;
+  // if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
+  //   goto out;
 
   gtk_tree_model_get (model, &iter,
       COL_EVENTS_ACCOUNT, &account,
@@ -2482,40 +2478,33 @@ who_row_is_separator (GtkTreeModel *model,
   return (type == COL_TYPE_SEPARATOR);
 }
 
-static void
-log_window_events_changed_cb (GtkTreeSelection *selection,
-    EmpathyLogWindow *self)
-{
-  DEBUG ("log_window_events_changed_cb");
+// static void
+// log_window_events_changed_cb (GtkTreeSelection *selection,
+//     EmpathyLogWindow *self)
+// {
+//   DEBUG ("log_window_events_changed_cb");
+// 
+//   log_window_update_buttons_sensitivity (self);
+// }
 
-  log_window_update_buttons_sensitivity (self);
-}
-
-static void
-log_window_events_row_activated_cb (GtkTreeView *view,
-    GtkTreePath *path,
-    GtkTreeViewColumn *column,
-    EmpathyLogWindow *self)
-{
-  if (gtk_tree_view_row_expanded (view, path))
-    gtk_tree_view_collapse_row (view, path);
-  else
-    gtk_tree_view_expand_row (view, path, FALSE);
-}
+// static void
+// log_window_events_row_activated_cb (GtkTreeView *view,
+//     GtkTreePath *path,
+//     GtkTreeViewColumn *column,
+//     EmpathyLogWindow *self)
+// {
+//   if (gtk_tree_view_row_expanded (view, path))
+//     gtk_tree_view_collapse_row (view, path);
+//   else
+//     gtk_tree_view_expand_row (view, path, FALSE);
+// }
 
 static void
 log_window_events_setup (EmpathyLogWindow *self)
 {
-  GtkTreeView       *view;
   GtkTreeModel      *model;
-  GtkTreeSelection  *selection;
   GtkTreeSortable   *sortable;
-  GtkTreeViewColumn *column;
   GtkTreeStore      *store;
-  GtkCellRenderer   *cell;
-
-  view = GTK_TREE_VIEW (self->priv->treeview_events);
-  selection = gtk_tree_view_get_selection (view);
 
   /* new store */
   self->priv->store_events = store = gtk_tree_store_new (COL_EVENTS_COUNT,
@@ -2531,49 +2520,9 @@ log_window_events_setup (EmpathyLogWindow *self)
   model = GTK_TREE_MODEL (store);
   sortable = GTK_TREE_SORTABLE (store);
 
-  gtk_tree_view_set_model (view, model);
-
-  /* new column */
-  column = gtk_tree_view_column_new ();
-
-  cell = gtk_cell_renderer_pixbuf_new ();
-  gtk_tree_view_column_pack_start (column, cell, FALSE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "icon-name", COL_EVENTS_ICON);
-
-  cell = gtk_cell_renderer_text_new ();
-  gtk_tree_view_column_pack_start (column, cell, TRUE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "markup", COL_EVENTS_TEXT);
-
-  cell = gtk_cell_renderer_text_new ();
-  g_object_set (cell, "xalign", 1.0, NULL);
-  gtk_tree_view_column_pack_end (column, cell, FALSE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "text", COL_EVENTS_PRETTY_DATE);
-
-  gtk_tree_view_append_column (view, column);
-
-  /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-  gtk_tree_view_set_headers_visible (view, FALSE);
-
   gtk_tree_sortable_set_sort_column_id (sortable,
       COL_EVENTS_TS,
       GTK_SORT_ASCENDING);
-
-  gtk_tree_view_set_enable_search (view, FALSE);
-
-  /* set up signals */
-  g_signal_connect (selection, "changed",
-      G_CALLBACK (log_window_events_changed_cb),
-      self);
-
-  g_signal_connect (view, "row-activated",
-      G_CALLBACK (log_window_events_row_activated_cb),
-      self);
-
-  g_object_unref (store);
 }
 
 static void
@@ -3033,15 +2982,16 @@ log_window_what_setup (EmpathyLogWindow *self)
 static void
 log_window_maybe_expand_events (void)
 {
-  GtkTreeView       *view;
-  GtkTreeModel      *model;
+  // GtkTreeView       *view;
+  // GtkTreeModel      *model;
 
-  view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
+  // FIXME: reimplement
+  // view = GTK_TREE_VIEW (log_window->priv->treeview_events);
+  // model = gtk_tree_view_get_model (view);
 
-  /* If there's only one result, expand it */
-  if (gtk_tree_model_iter_n_children (model, NULL) == 1)
-    gtk_tree_view_expand_all (view);
+  // /* If there's only one result, expand it */
+  // if (gtk_tree_model_iter_n_children (model, NULL) == 1)
+  //   gtk_tree_view_expand_all (view);
 }
 
 static gboolean
@@ -3090,13 +3040,13 @@ log_window_got_messages_for_date_cb (GObject *manager,
     gpointer user_data)
 {
   Ctx *ctx = user_data;
-  GtkTreeView *view;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
+  // GtkTreeView *view;
+  // GtkTreeModel *model;
+  // GtkTreeIter iter;
   GList *events;
   GList *l;
   GError *error = NULL;
-  gint n;
+  // gint n;
 
   if (log_window == NULL)
     {
@@ -3170,18 +3120,18 @@ log_window_got_messages_for_date_cb (GObject *manager,
     }
   g_list_free (events);
 
-  view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
-  n = gtk_tree_model_iter_n_children (model, NULL) - 1;
+  // view = GTK_TREE_VIEW (log_window->priv->treeview_events);
+  // model = gtk_tree_view_get_model (view);
+  // n = gtk_tree_model_iter_n_children (model, NULL) - 1;
 
-  if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
-    {
-      GtkTreePath *path;
+  // if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
+  //   {
+  //     GtkTreePath *path;
 
-      path = gtk_tree_model_get_path (model, &iter);
-      gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
-      gtk_tree_path_free (path);
-    }
+  //     path = gtk_tree_model_get_path (model, &iter);
+  //     gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
+  //     gtk_tree_path_free (path);
+  //   }
 
  out:
   ctx_free (ctx);
