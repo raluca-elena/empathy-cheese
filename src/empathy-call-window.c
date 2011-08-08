@@ -1489,7 +1489,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
       G_CALLBACK (dtmf_button_released_cb));
 
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->dtmf_panel,
-      FALSE, FALSE, 0);
+      FALSE, FALSE, 6);
 
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->details_vbox,
       FALSE, FALSE, 0);
