@@ -64,6 +64,7 @@
 #include "empathy-video-src.h"
 #include "empathy-mic-menu.h"
 #include "empathy-preferences.h"
+#include "empathy-rounded-actor.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -985,7 +986,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   create_audio_input (self);
   create_video_input (self);
 
-  priv->floating_toolbar = gtk_clutter_actor_new ();
+  priv->floating_toolbar = empathy_rounded_actor_new ();
 
   gtk_widget_reparent (priv->bottom_toolbar,
       gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (priv->floating_toolbar)));
