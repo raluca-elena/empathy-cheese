@@ -2586,7 +2586,7 @@ when_row_is_separator (GtkTreeModel *model,
       COL_WHEN_TEXT, &when,
       -1);
 
-  ret = g_str_equal (when, "separator");
+  ret = !tp_strdiff (when, "separator");
   g_free (when);
   return ret;
 }
