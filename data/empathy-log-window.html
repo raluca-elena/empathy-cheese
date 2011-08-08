@@ -57,6 +57,29 @@ function getToggle(node)
   return filterNodes(node, 'SPAN')[0];
 }
 
+function toggleExpander(node, open)
+{
+  var toggle = getToggle(node);
+  var display;
+  var nodes;
+
+  if (open)
+    {
+      toggle.setAttribute('class', 'open');
+      display = 'block';
+    }
+  else
+    {
+      toggle.setAttribute('class', 'closed');
+      display = 'none';
+    }
+
+  nodes = getNodes(node);
+
+  for (var i = 0; i < nodes.length; i++)
+    nodes[i].style.display = display;
+}
+
 function insertRow (path, text)
 {
   var treeview = document.getElementById('treeview');
@@ -91,26 +114,10 @@ function insertRow (path, text)
 
   toggle.onclick = function (e)
     {
-      var display;
-      var nodes;
-
       if (toggle.getAttribute('class') == 'closed')
-        {
-          toggle.setAttribute('class', 'open');
-          display = 'block';
-        }
+        toggleExpander(newnode, true);
       else
-        {
-          toggle.setAttribute('class', 'closed');
-          display = 'none';
-        }
-
-      // console.log("clicked: " + display);
-
-      nodes = getNodes(newnode);
-
-      for (var i = 0; i < nodes.length; i++)
-        nodes[i].style.display = display;
+        toggleExpander(newnode, false);
     };
   
   var contents = document.createElement('p');
