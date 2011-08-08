@@ -79,6 +79,8 @@
 #define FLOATING_TOOLBAR_HEIGHT 36
 #define FLOATING_TOOLBAR_SPACING 20
 
+#define SELF_VIDEO_MARGIN 10
+
 /* The avatar's default width and height are set to the same value because we
    want a square icon. */
 #define REMOTE_CONTACT_AVATAR_DEFAULT_WIDTH EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT
@@ -111,6 +113,14 @@ typedef enum {
   CAMERA_STATE_OFF = 0,
   CAMERA_STATE_ON,
 } CameraState;
+
+typedef enum {
+  PREVIEW_POS_NONE,
+  PREVIEW_POS_TOP_LEFT,
+  PREVIEW_POS_TOP_RIGHT,
+  PREVIEW_POS_BOTTOM_LEFT,
+  PREVIEW_POS_BOTTOM_RIGHT,
+} PreviewPosition;
 
 struct _EmpathyCallWindowPriv
 {
@@ -523,6 +533,91 @@ empathy_call_window_preview_hidden_button_clicked_cb (GtkButton *button,
 }
 
 static void
+empathy_call_window_move_video_preview (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterBinLayout *layout = CLUTTER_BIN_LAYOUT (self->priv->video_layout);
+
+  DEBUG ("moving the video preview to %d", pos);
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_START,
+            CLUTTER_BIN_ALIGNMENT_START);
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_END,
+            CLUTTER_BIN_ALIGNMENT_START);
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_START,
+            CLUTTER_BIN_ALIGNMENT_END);
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_END,
+            CLUTTER_BIN_ALIGNMENT_END);
+        break;
+      default:
+        g_warn_if_reached ();
+    }
+}
+
+static void
+empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat event_x,
+    gfloat event_y,
+    ClutterModifierType modifiers,
+    EmpathyCallWindow *self)
+{
+  ClutterGeometry box;
+  PreviewPosition pos = PREVIEW_POS_NONE;
+
+  clutter_actor_get_geometry (self->priv->video_box, &box);
+
+  if (0 + SELF_VIDEO_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_RIGHT;
+    }
+  else if (0 + SELF_VIDEO_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_MARGIN >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_MARGIN >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_RIGHT;
+    }
+
+  if (pos != PREVIEW_POS_NONE)
+    empathy_call_window_move_video_preview (self, pos);
+}
+
+static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
@@ -530,6 +625,7 @@ create_video_preview (EmpathyCallWindow *self)
   ClutterActor *preview;
   ClutterActor *box;
   ClutterActor *b;
+  ClutterAction *action;
   GtkWidget *button;
 
   g_assert (priv->video_preview == NULL);
@@ -606,6 +702,13 @@ create_video_preview (EmpathyCallWindow *self)
       priv->video_preview,
       CLUTTER_BIN_ALIGNMENT_START,
       CLUTTER_BIN_ALIGNMENT_END);
+
+  action = clutter_drag_action_new ();
+  g_signal_connect (action, "drag-end",
+      G_CALLBACK (empathy_call_window_preview_on_drag_end_cb), self);
+
+  clutter_actor_add_action (preview, action);
+  clutter_actor_set_reactive (preview, TRUE);
 }
 
 static void
