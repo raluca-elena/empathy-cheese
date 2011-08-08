@@ -41,15 +41,8 @@ main (int argc,
     manager = empathy_contact_manager_dup_singleton ();
     dialog = empathy_contact_blocking_dialog_new (NULL);
 
-    g_signal_connect_swapped (dialog, "response",
-        G_CALLBACK (gtk_main_quit), NULL);
+    gtk_dialog_run (GTK_DIALOG (dialog));
 
-    gtk_widget_show (dialog);
-
-    gtk_main ();
-
-    gtk_widget_destroy (dialog);
     g_object_unref (manager);
-
     return 0;
   }
