@@ -2982,16 +2982,13 @@ log_window_what_setup (EmpathyLogWindow *self)
 static void
 log_window_maybe_expand_events (void)
 {
-  // GtkTreeView       *view;
-  // GtkTreeModel      *model;
+  GtkTreeModel      *model = GTK_TREE_MODEL (log_window->priv->store_events);
 
-  // FIXME: reimplement
-  // view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  // model = gtk_tree_view_get_model (view);
-
-  // /* If there's only one result, expand it */
-  // if (gtk_tree_model_iter_n_children (model, NULL) == 1)
-  //   gtk_tree_view_expand_all (view);
+  /* If there's only one result, expand it */
+  if (gtk_tree_model_iter_n_children (model, NULL) == 1)
+    webkit_web_view_execute_script (
+        WEBKIT_WEB_VIEW (log_window->priv->webview),
+        "javascript:expandAll()");
 }
 
 static gboolean

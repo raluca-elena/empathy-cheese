@@ -80,6 +80,25 @@ function toggleExpander(node, open)
     nodes[i].style.display = display;
 }
 
+function expandAll()
+{
+  function expandAllRecurse(node)
+    {
+      var nodes = getNodes(node);
+
+      for (var i = 0; i < nodes.length; i++)
+        {
+          toggleExpander(nodes[i], true);
+
+          expandAllRecurse(nodes[i]);
+        }
+    }
+
+  var treeview = document.getElementById('treeview');
+
+  expandAllRecurse(treeview);
+}
+
 function insertRow (path, text)
 {
   var treeview = document.getElementById('treeview');
