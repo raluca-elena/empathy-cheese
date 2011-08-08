@@ -1047,7 +1047,7 @@ set_window_title (EmpathyCallWindow *self)
     }
   else
     {
-      gtk_window_set_title (GTK_WINDOW (self), _("Call with %d participants"));
+      g_warning ("Unknown remote contact!");
     }
 }
 
