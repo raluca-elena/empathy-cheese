@@ -549,12 +549,12 @@ create_video_preview (EmpathyCallWindow *self)
       0.0);
 
   /* Add a little offset to the video preview */
-  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
-      CLUTTER_BIN_ALIGNMENT_START);
+  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
-      SELF_VIDEO_SECTION_WIDTH + SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN +
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
