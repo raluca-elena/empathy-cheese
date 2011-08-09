@@ -404,7 +404,6 @@ insert_or_change_row (EmpathyLogWindow *self,
       icon != NULL ? icon: "",
       date);
 
-  // g_print ("%s\n", script);
   webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
       script);
 
@@ -445,7 +444,6 @@ store_events_row_deleted (GtkTreeModel *model,
   script = g_strdup_printf ("javascript:deleteRow([%s]);",
       g_strdelimit (str, ":", ','));
 
-  // g_print ("%s\n", script);
   webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
       script);
 
@@ -466,7 +464,6 @@ store_events_has_child_rows (GtkTreeModel *model,
       g_strdelimit (str, ":", ','),
       gtk_tree_model_iter_has_child (model, iter));
 
-  // g_print ("%s\n", script);
   webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
       script);
 
@@ -2515,18 +2512,6 @@ who_row_is_separator (GtkTreeModel *model,
 //   DEBUG ("log_window_events_changed_cb");
 // 
 //   log_window_update_buttons_sensitivity (self);
-// }
-
-// static void
-// log_window_events_row_activated_cb (GtkTreeView *view,
-//     GtkTreePath *path,
-//     GtkTreeViewColumn *column,
-//     EmpathyLogWindow *self)
-// {
-//   if (gtk_tree_view_row_expanded (view, path))
-//     gtk_tree_view_collapse_row (view, path);
-//   else
-//     gtk_tree_view_expand_row (view, path, FALSE);
 // }
 
 static void
