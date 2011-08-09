@@ -21,11 +21,15 @@
 #ifndef _EMPATHY_WEBKIT_UTILS__H_
 #define _EMPATHY_WEBKIT_UTILS__H_
 
+#include <webkit/webkit.h>
+
 #include "empathy-string-parser.h"
 
 G_BEGIN_DECLS
 
 EmpathyStringParser *empathy_webkit_get_string_parser (gboolean smileys);
+void empathy_webkit_bind_font_setting (WebKitWebView *webview,
+    GSettings *gsettings, const char *key);
 
 G_END_DECLS
 

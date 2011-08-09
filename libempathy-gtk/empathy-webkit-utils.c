@@ -21,6 +21,8 @@
 #include "empathy-webkit-utils.h"
 #include "empathy-smiley-manager.h"
 
+#define BORING_DPI_DEFAULT 96
+
 static void
 empathy_webkit_match_newline (const gchar *text,
     gssize len,
@@ -88,4 +90,75 @@ empathy_webkit_get_string_parser (gboolean smileys)
     return string_parsers_with_smiley;
   else
     return string_parsers;
+}
+
+static gboolean
+webkit_get_font_family (GValue *value,
+    GVariant *variant,
+    gpointer user_data)
+{
+  PangoFontDescription *font = pango_font_description_from_string (
+      g_variant_get_string (variant, NULL));
+
+  if (font == NULL)
+    return FALSE;
+
+  g_value_set_string (value, pango_font_description_get_family (font));
+  pango_font_description_free (font);
+
+  return TRUE;
+}
+
+static gboolean
+webkit_get_font_size (GValue *value,
+    GVariant *variant,
+    gpointer user_data)
+{
+  PangoFontDescription *font = pango_font_description_from_string (
+      g_variant_get_string (variant, NULL));
+  int size;
+
+  if (font == NULL)
+    return FALSE;
+
+  size = pango_font_description_get_size (font) / PANGO_SCALE;
+
+  if (pango_font_description_get_size_is_absolute (font))
+    {
+      GdkScreen *screen = gdk_screen_get_default ();
+      double dpi;
+
+      if (screen != NULL)
+        dpi = gdk_screen_get_resolution (screen);
+      else
+        dpi = BORING_DPI_DEFAULT;
+
+      size = (gint) (size / (dpi / 72));
+    }
+
+  g_value_set_int (value, size);
+  pango_font_description_free (font);
+
+  return TRUE;
+}
+
+void
+empathy_webkit_bind_font_setting (WebKitWebView *webview,
+    GSettings *gsettings,
+    const char *key)
+{
+  WebKitWebSettings *settings = webkit_web_view_get_settings (webview);
+
+  g_settings_bind_with_mapping (gsettings, key,
+      settings, "default-font-family",
+      G_SETTINGS_BIND_GET,
+      webkit_get_font_family,
+      NULL,
+      NULL, NULL);
+  g_settings_bind_with_mapping (gsettings, key,
+      settings, "default-font-size",
+      G_SETTINGS_BIND_GET,
+      webkit_get_font_size,
+      NULL,
+      NULL, NULL);
 }
