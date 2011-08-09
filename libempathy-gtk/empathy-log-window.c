@@ -375,17 +375,33 @@ insert_or_change_row (EmpathyLogWindow *self,
     GtkTreeIter *iter)
 {
   char *str = gtk_tree_path_to_string (path);
-  char *script, *text, *date;
+  char *script, *text, *date, *stock_icon;
+  char *icon = NULL;
 
   gtk_tree_model_get (model, iter,
       COL_EVENTS_TEXT, &text,
       COL_EVENTS_PRETTY_DATE, &date,
+      COL_EVENTS_ICON, &stock_icon,
       -1);
 
-  script = g_strdup_printf ("javascript:%s([%s], '%s', '%s');",
+  if (!tp_str_empty (stock_icon))
+    {
+      GtkIconInfo *icon_info = gtk_icon_theme_lookup_icon (
+          gtk_icon_theme_get_default (),
+          stock_icon,
+          GTK_ICON_SIZE_MENU, 0);
+
+      if (icon_info != NULL)
+        icon = g_strdup (gtk_icon_info_get_filename (icon_info));
+
+      gtk_icon_info_free (icon_info);
+    }
+
+  script = g_strdup_printf ("javascript:%s([%s], '%s', '%s', '%s');",
       method,
       g_strdelimit (str, ":", ','),
       text,
+      icon != NULL ? icon: "",
       date);
 
   // g_print ("%s\n", script);
@@ -395,6 +411,8 @@ insert_or_change_row (EmpathyLogWindow *self,
   g_free (str);
   g_free (text);
   g_free (date);
+  g_free (stock_icon);
+  g_free (icon);
   g_free (script);
 }
 

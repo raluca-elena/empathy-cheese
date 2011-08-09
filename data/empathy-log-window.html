@@ -34,6 +34,11 @@ span.date {
   float: right;
   color: gray;
 }
+
+img.icon {
+  vertical-align: middle;
+  padding-right: 1px;
+}
     </style>
     <script type="text/javascript">
 function filterNodes (node, tagName)
@@ -108,7 +113,20 @@ function expandAll()
   expandAllRecurse(treeview);
 }
 
-function insertRow (path, text, date_)
+function setContent (contents, text, icon, date_)
+{
+  contents.innerHTML = "";
+
+  if (icon != "")
+    {
+      contents.innerHTML += '<img class="icon" src="' + icon + '"/>';
+    }
+
+  contents.innerHTML += text;
+  contents.innerHTML += '<span class="date">' + date_ + '</span>';
+}
+
+function insertRow (path, text, icon, date_)
 {
   var treeview = document.getElementById('treeview');
   var parentnode = treeview;
@@ -150,14 +168,14 @@ function insertRow (path, text, date_)
   
   var contents = document.createElement('p');
   newnode.appendChild(contents);
-  contents.innerHTML = text + '<span class="date">' + date_ + '</span>';
+  setContent(contents, text, icon, date_);
 
   // if the node is not a top-level node, hide it
   if (parentnode != treeview)
     newnode.style.display = 'none';
 }
 
-function changeRow (path, text, date_)
+function changeRow (path, text, icon, date_)
 {
   var treeview = document.getElementById('treeview');
   var node = treeview;
@@ -170,7 +188,7 @@ function changeRow (path, text, date_)
 
   // set the contents
   var contents = getContent(node);
-  contents.innerHTML = text + '<span class="date">' + date_ + '</span>';
+  setContent(contents, text, icon, date_);
 }
 
 function deleteRow (path)
