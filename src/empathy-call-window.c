@@ -650,13 +650,10 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
   empathy_call_window_show_preview_rectangles (self, TRUE);
 }
 
-static void
-empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
-    ClutterActor *actor,
+static PreviewPosition
+empathy_call_window_get_preview_position (EmpathyCallWindow *self,
     gfloat event_x,
-    gfloat event_y,
-    ClutterModifierType modifiers,
-    EmpathyCallWindow *self)
+    gfloat event_y)
 {
   ClutterGeometry box;
   PreviewPosition pos = PREVIEW_POS_NONE;
@@ -691,6 +688,21 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     {
       pos = PREVIEW_POS_BOTTOM_RIGHT;
     }
+
+  return pos;
+}
+
+static void
+empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat event_x,
+    gfloat event_y,
+    ClutterModifierType modifiers,
+    EmpathyCallWindow *self)
+{
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self, event_x, event_y);
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
