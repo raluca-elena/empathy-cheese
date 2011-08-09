@@ -123,6 +123,7 @@ struct _EmpathyLogWindowPriv
   gboolean selected_is_chatroom;
 
   GSettings *gsettings_chat;
+  GSettings *gsettings_desktop;
 };
 
 static void log_window_search_entry_changed_cb   (GtkWidget        *entry,
@@ -548,7 +549,9 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
   tp_clear_object (&self->priv->camera_monitor);
+
   tp_clear_object (&self->priv->gsettings_chat);
+  tp_clear_object (&self->priv->gsettings_desktop);
 
   tp_clear_object (&self->priv->store_events);
 
@@ -600,6 +603,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
   self->priv->log_manager = tpl_log_manager_dup_singleton ();
 
   self->priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+  self->priv->gsettings_desktop = g_settings_new (
+      EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
 
   gtk_window_set_title (GTK_WINDOW (self), _("History"));
   gtk_widget_set_can_focus (GTK_WIDGET (self), FALSE);
@@ -717,6 +722,10 @@ empathy_log_window_init (EmpathyLogWindow *self)
   gtk_container_add (GTK_CONTAINER (scrolledwindow_events),
       self->priv->webview);
   gtk_widget_show (self->priv->webview);
+
+  empathy_webkit_bind_font_setting (WEBKIT_WEB_VIEW (self->priv->webview),
+      self->priv->gsettings_desktop,
+      EMPATHY_PREFS_DESKTOP_INTERFACE_FONT_NAME);
 
   filename = empathy_file_lookup ("empathy-log-window.html", "data");
   gfile = g_file_new_for_path (filename);
