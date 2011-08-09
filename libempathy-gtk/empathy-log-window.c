@@ -375,16 +375,18 @@ insert_or_change_row (EmpathyLogWindow *self,
     GtkTreeIter *iter)
 {
   char *str = gtk_tree_path_to_string (path);
-  char *script, *text;
+  char *script, *text, *date;
 
   gtk_tree_model_get (model, iter,
       COL_EVENTS_TEXT, &text,
+      COL_EVENTS_PRETTY_DATE, &date,
       -1);
 
-  script = g_strdup_printf ("javascript:%s([%s], '%s');",
+  script = g_strdup_printf ("javascript:%s([%s], '%s', '%s');",
       method,
       g_strdelimit (str, ":", ','),
-      text);
+      text,
+      date);
 
   // g_print ("%s\n", script);
   webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
@@ -392,6 +394,7 @@ insert_or_change_row (EmpathyLogWindow *self,
 
   g_free (str);
   g_free (text);
+  g_free (date);
   g_free (script);
 }
 
