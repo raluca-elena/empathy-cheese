@@ -169,6 +169,10 @@ struct _EmpathyCallWindowPriv
   ClutterActor *video_box;
   ClutterLayoutManager *video_layout;
 
+  /* Coordinates of the preview drag event's start. */
+  gfloat event_x;
+  gfloat event_y;
+
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
@@ -640,6 +644,64 @@ empathy_call_window_move_video_preview (EmpathyCallWindow *self,
 }
 
 static void
+empathy_call_window_highlight_preview_rectangle (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterActor *rectangle;
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        rectangle = self->priv->preview_rectangle1;
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        rectangle = self->priv->preview_rectangle3;
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        rectangle = self->priv->preview_rectangle2;
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        rectangle = self->priv->preview_rectangle4;
+        break;
+      default:
+        g_warn_if_reached ();
+        rectangle = NULL;
+    }
+
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 3);
+  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
+      CLUTTER_COLOR_Red);
+}
+
+static void
+empathy_call_window_darken_preview_rectangles (EmpathyCallWindow *self)
+{
+  clutter_rectangle_set_border_width (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle1), 1);
+  clutter_rectangle_set_border_color (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle1),
+      CLUTTER_COLOR_Black);
+
+  clutter_rectangle_set_border_width (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle2), 1);
+  clutter_rectangle_set_border_color (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle2),
+      CLUTTER_COLOR_Black);
+
+  clutter_rectangle_set_border_width (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle3), 1);
+  clutter_rectangle_set_border_color (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle3),
+      CLUTTER_COLOR_Black);
+
+  clutter_rectangle_set_border_width (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle4), 1);
+  clutter_rectangle_set_border_color (
+      CLUTTER_RECTANGLE (self->priv->preview_rectangle4),
+      CLUTTER_COLOR_Black);
+}
+
+static void
 empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
     ClutterActor *actor,
     gfloat event_x,
@@ -648,6 +710,9 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
     EmpathyCallWindow *self)
 {
   empathy_call_window_show_preview_rectangles (self, TRUE);
+
+  self->priv->event_x = event_x;
+  self->priv->event_y = event_y;
 }
 
 static PreviewPosition
@@ -708,6 +773,24 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     empathy_call_window_move_video_preview (self, pos);
 
   empathy_call_window_show_preview_rectangles (self, FALSE);
+}
+
+static void
+empathy_call_window_preview_on_drag_motion_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat delta_x,
+    gfloat delta_y,
+    EmpathyCallWindow *self)
+{
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self,
+      self->priv->event_x - delta_x, self->priv->event_y + delta_y);
+
+  if (pos != PREVIEW_POS_NONE)
+    empathy_call_window_highlight_preview_rectangle (self, pos);
+  else
+    empathy_call_window_darken_preview_rectangles (self);
 }
 
 static void
@@ -801,6 +884,8 @@ create_video_preview (EmpathyCallWindow *self)
       G_CALLBACK (empathy_call_window_preview_on_drag_begin_cb), self);
   g_signal_connect (action, "drag-end",
       G_CALLBACK (empathy_call_window_preview_on_drag_end_cb), self);
+  g_signal_connect (action, "drag-motion",
+      G_CALLBACK (empathy_call_window_preview_on_drag_motion_cb), self);
 
   clutter_actor_add_action (preview, action);
   clutter_actor_set_reactive (preview, TRUE);
