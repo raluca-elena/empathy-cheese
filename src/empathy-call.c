@@ -121,6 +121,9 @@ main (int argc,
   /* Init */
   g_thread_init (NULL);
 
+  /* Clutter needs this */
+  gdk_disable_multidevice ();
+
   optcontext = g_option_context_new (N_("- Empathy Audio/Video Client"));
   g_option_context_add_group (optcontext, gst_init_get_option_group ());
   g_option_context_add_group (optcontext, gtk_get_option_group (TRUE));
