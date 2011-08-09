@@ -141,6 +141,10 @@ struct _EmpathyCallWindowPriv
   ClutterActor *video_output;
   ClutterActor *video_preview;
   ClutterActor *preview_hidden_button;
+  ClutterActor *preview_rectangle1;
+  ClutterActor *preview_rectangle2;
+  ClutterActor *preview_rectangle3;
+  ClutterActor *preview_rectangle4;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *remote_user_avatar_toolbar;
@@ -532,6 +536,70 @@ empathy_call_window_preview_hidden_button_clicked_cb (GtkButton *button,
   gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
 }
 
+static ClutterActor *
+empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
+    ClutterBinAlignment x,
+    ClutterBinAlignment y)
+{
+  ClutterLayoutManager *layout;
+  ClutterActor *rectangle;
+  ClutterActor *box;
+
+  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
+
+  box = clutter_box_new (layout);
+
+  rectangle = clutter_rectangle_new_with_color (
+      CLUTTER_COLOR_Transparent);
+
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle),
+      1);
+
+  clutter_actor_set_size (box,
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN);
+
+  clutter_actor_set_size (rectangle,
+      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (box), rectangle);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (self->priv->video_layout),
+      box, x, y);
+
+  clutter_actor_hide (rectangle);
+
+  return rectangle;
+}
+
+static void
+empathy_call_window_create_preview_rectangles (EmpathyCallWindow *self)
+{
+  self->priv->preview_rectangle1 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_START);
+  self->priv->preview_rectangle2 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_END);
+  self->priv->preview_rectangle3 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_START);
+  self->priv->preview_rectangle4 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_END);
+}
+
+static void
+empathy_call_window_show_preview_rectangles (EmpathyCallWindow *self,
+    gboolean show)
+{
+  g_object_set (self->priv->preview_rectangle1, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle2, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle3, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle4, "visible", show, NULL);
+}
+
 static void
 empathy_call_window_move_video_preview (EmpathyCallWindow *self,
     PreviewPosition pos)
@@ -569,6 +637,17 @@ empathy_call_window_move_video_preview (EmpathyCallWindow *self,
       default:
         g_warn_if_reached ();
     }
+}
+
+static void
+empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat event_x,
+    gfloat event_y,
+    ClutterModifierType modifiers,
+    EmpathyCallWindow *self)
+{
+  empathy_call_window_show_preview_rectangles (self, TRUE);
 }
 
 static void
@@ -615,6 +694,8 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
+
+  empathy_call_window_show_preview_rectangles (self, FALSE);
 }
 
 static void
@@ -704,6 +785,8 @@ create_video_preview (EmpathyCallWindow *self)
       CLUTTER_BIN_ALIGNMENT_END);
 
   action = clutter_drag_action_new ();
+  g_signal_connect (action, "drag-begin",
+      G_CALLBACK (empathy_call_window_preview_on_drag_begin_cb), self);
   g_signal_connect (action, "drag-end",
       G_CALLBACK (empathy_call_window_preview_on_drag_end_cb), self);
 
@@ -1050,6 +1133,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
       CLUTTER_BIN_ALIGNMENT_CENTER);
 
   priv->video_box = clutter_box_new (priv->video_layout);
+
+  empathy_call_window_create_preview_rectangles (self);
 
   priv->video_container = gtk_clutter_embed_new ();
 
