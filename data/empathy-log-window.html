@@ -71,7 +71,7 @@ function getToggle(node)
   return filterNodes(node, 'SPAN')[0];
 }
 
-function toggleExpander(node, open)
+function setExpander(node, open)
 {
   var toggle = getToggle(node);
   var display;
@@ -102,7 +102,7 @@ function expandAll()
 
       for (var i = 0; i < nodes.length; i++)
         {
-          toggleExpander(nodes[i], true);
+          setExpander(nodes[i], true);
 
           expandAllRecurse(nodes[i]);
         }
@@ -158,17 +158,20 @@ function insertRow (path, text, icon, date_)
   toggle.setAttribute('class', 'closed');
   toggle.style.display = 'none';
 
-  toggle.onclick = function (e)
-    {
-      if (toggle.getAttribute('class') == 'closed')
-        toggleExpander(newnode, true);
-      else
-        toggleExpander(newnode, false);
-    };
-  
   var contents = document.createElement('p');
   newnode.appendChild(contents);
   setContent(contents, text, icon, date_);
+
+  function toggleExpander (e)
+    {
+      if (toggle.getAttribute('class') == 'closed')
+        setExpander(newnode, true);
+      else
+        setExpander(newnode, false);
+    };
+  
+  toggle.onclick = toggleExpander;
+  contents.ondblclick = toggleExpander;
 
   // if the node is not a top-level node, hide it
   if (parentnode != treeview)
