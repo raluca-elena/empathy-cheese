@@ -774,6 +774,7 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
     EmpathyCallWindow *self)
 {
   empathy_call_window_show_preview_rectangles (self, TRUE);
+  empathy_call_window_darken_preview_rectangles (self);
 
   self->priv->event_x = event_x;
   self->priv->event_y = event_y;
