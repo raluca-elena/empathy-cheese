@@ -646,6 +646,33 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
   return pos;
 }
 
+static ClutterActor *
+empathy_call_window_get_preview_rectangle (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterActor *rectangle;
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        rectangle = self->priv->preview_rectangle1;
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        rectangle = self->priv->preview_rectangle3;
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        rectangle = self->priv->preview_rectangle2;
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        rectangle = self->priv->preview_rectangle4;
+        break;
+      default:
+        rectangle = NULL;
+    }
+
+  return rectangle;
+}
+
 static void
 empathy_call_window_move_video_preview (EmpathyCallWindow *self,
     PreviewPosition pos)
@@ -691,24 +718,7 @@ empathy_call_window_highlight_preview_rectangle (EmpathyCallWindow *self,
 {
   ClutterActor *rectangle;
 
-  switch (pos)
-    {
-      case PREVIEW_POS_TOP_LEFT:
-        rectangle = self->priv->preview_rectangle1;
-        break;
-      case PREVIEW_POS_TOP_RIGHT:
-        rectangle = self->priv->preview_rectangle3;
-        break;
-      case PREVIEW_POS_BOTTOM_LEFT:
-        rectangle = self->priv->preview_rectangle2;
-        break;
-      case PREVIEW_POS_BOTTOM_RIGHT:
-        rectangle = self->priv->preview_rectangle4;
-        break;
-      default:
-        g_warn_if_reached ();
-        rectangle = NULL;
-    }
+  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
 
   clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 3);
   clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
