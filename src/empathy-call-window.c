@@ -170,6 +170,7 @@ struct _EmpathyCallWindowPriv
   ClutterLayoutManager *video_layout;
 
   /* Coordinates of the preview drag event's start. */
+  PreviewPosition preview_pos;
   gfloat event_x;
   gfloat event_y;
 
@@ -681,6 +682,8 @@ empathy_call_window_move_video_preview (EmpathyCallWindow *self,
 
   DEBUG ("moving the video preview to %d", pos);
 
+  self->priv->preview_pos = pos;
+
   switch (pos)
     {
       case PREVIEW_POS_TOP_LEFT:
@@ -737,17 +740,29 @@ empathy_call_window_darken_preview_rectangle (EmpathyCallWindow *self,
 static void
 empathy_call_window_darken_preview_rectangles (EmpathyCallWindow *self)
 {
-  empathy_call_window_darken_preview_rectangle (self,
-      self->priv->preview_rectangle1);
+  ClutterActor *rectangle;
 
-  empathy_call_window_darken_preview_rectangle (self,
-      self->priv->preview_rectangle2);
+  rectangle = empathy_call_window_get_preview_rectangle (self,
+      self->priv->preview_pos);
 
-  empathy_call_window_darken_preview_rectangle (self,
-      self->priv->preview_rectangle3);
+  /* We don't want to darken the rectangle where the preview
+   * currently is. */
 
-  empathy_call_window_darken_preview_rectangle (self,
-      self->priv->preview_rectangle4);
+  if (self->priv->preview_rectangle1 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle1);
+
+  if (self->priv->preview_rectangle2 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle2);
+
+  if (self->priv->preview_rectangle3 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle3);
+
+  if (self->priv->preview_rectangle4 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle4);
 }
 
 static void
@@ -910,6 +925,8 @@ create_video_preview (EmpathyCallWindow *self)
       priv->preview_hidden_button,
       CLUTTER_BIN_ALIGNMENT_START,
       CLUTTER_BIN_ALIGNMENT_END);
+
+  self->priv->preview_pos = PREVIEW_POS_BOTTOM_LEFT;
 
   clutter_actor_hide (priv->preview_hidden_button);
 
