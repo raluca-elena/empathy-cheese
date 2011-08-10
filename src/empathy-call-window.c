@@ -604,6 +604,48 @@ empathy_call_window_show_preview_rectangles (EmpathyCallWindow *self,
   g_object_set (self->priv->preview_rectangle4, "visible", show, NULL);
 }
 
+static PreviewPosition
+empathy_call_window_get_preview_position (EmpathyCallWindow *self,
+    gfloat event_x,
+    gfloat event_y)
+{
+  ClutterGeometry box;
+  PreviewPosition pos = PREVIEW_POS_NONE;
+
+  clutter_actor_get_geometry (self->priv->video_box, &box);
+
+  if (0 + SELF_VIDEO_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_RIGHT;
+    }
+  else if (0 + SELF_VIDEO_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_MARGIN >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_MARGIN >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_RIGHT;
+    }
+
+  return pos;
+}
+
 static void
 empathy_call_window_move_video_preview (EmpathyCallWindow *self,
     PreviewPosition pos)
@@ -713,48 +755,6 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
 
   self->priv->event_x = event_x;
   self->priv->event_y = event_y;
-}
-
-static PreviewPosition
-empathy_call_window_get_preview_position (EmpathyCallWindow *self,
-    gfloat event_x,
-    gfloat event_y)
-{
-  ClutterGeometry box;
-  PreviewPosition pos = PREVIEW_POS_NONE;
-
-  clutter_actor_get_geometry (self->priv->video_box, &box);
-
-  if (0 + SELF_VIDEO_MARGIN <= event_x &&
-      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      0 + SELF_VIDEO_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
-    {
-      pos = PREVIEW_POS_TOP_LEFT;
-    }
-  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
-      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      0 + SELF_VIDEO_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
-    {
-      pos = PREVIEW_POS_TOP_RIGHT;
-    }
-  else if (0 + SELF_VIDEO_MARGIN <= event_x &&
-      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
-    {
-      pos = PREVIEW_POS_BOTTOM_LEFT;
-    }
-  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
-      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
-    {
-      pos = PREVIEW_POS_BOTTOM_RIGHT;
-    }
-
-  return pos;
 }
 
 static void
