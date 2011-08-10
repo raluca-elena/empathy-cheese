@@ -565,7 +565,7 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
       SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN);
 
   clutter_actor_set_size (rectangle,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+      SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGTH + 5);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), rectangle);
 
@@ -800,6 +800,42 @@ empathy_call_window_preview_on_drag_motion_cb (ClutterDragAction *action,
     empathy_call_window_darken_preview_rectangles (self);
 }
 
+static gboolean
+empathy_call_window_preview_enter_event_cb (ClutterActor *actor,
+    ClutterCrossingEvent *event,
+    EmpathyCallWindow *self)
+{
+  ClutterActor *rectangle;
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self, event->x, event->y);
+  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
+
+  empathy_call_window_highlight_preview_rectangle (self, pos);
+
+  clutter_actor_show (rectangle);
+
+  return FALSE;
+}
+
+static gboolean
+empathy_call_window_preview_leave_event_cb (ClutterActor *actor,
+    ClutterCrossingEvent *event,
+    EmpathyCallWindow *self)
+{
+  ClutterActor *rectangle;
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self, event->x, event->y);
+  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
+
+  empathy_call_window_darken_preview_rectangle (self, rectangle);
+
+  clutter_actor_hide (rectangle);
+
+  return FALSE;
+}
+
 static void
 create_video_preview (EmpathyCallWindow *self)
 {
@@ -893,6 +929,11 @@ create_video_preview (EmpathyCallWindow *self)
       G_CALLBACK (empathy_call_window_preview_on_drag_end_cb), self);
   g_signal_connect (action, "drag-motion",
       G_CALLBACK (empathy_call_window_preview_on_drag_motion_cb), self);
+
+  g_signal_connect (preview, "enter-event",
+      G_CALLBACK (empathy_call_window_preview_enter_event_cb), self);
+  g_signal_connect (preview, "leave-event",
+      G_CALLBACK (empathy_call_window_preview_leave_event_cb), self);
 
   clutter_actor_add_action (preview, action);
   clutter_actor_set_reactive (preview, TRUE);
