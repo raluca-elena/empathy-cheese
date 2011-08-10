@@ -726,31 +726,28 @@ empathy_call_window_highlight_preview_rectangle (EmpathyCallWindow *self,
 }
 
 static void
+empathy_call_window_darken_preview_rectangle (EmpathyCallWindow *self,
+    ClutterActor *rectangle)
+{
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 1);
+  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
+      CLUTTER_COLOR_Black);
+}
+
+static void
 empathy_call_window_darken_preview_rectangles (EmpathyCallWindow *self)
 {
-  clutter_rectangle_set_border_width (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle1), 1);
-  clutter_rectangle_set_border_color (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle1),
-      CLUTTER_COLOR_Black);
+  empathy_call_window_darken_preview_rectangle (self,
+      self->priv->preview_rectangle1);
 
-  clutter_rectangle_set_border_width (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle2), 1);
-  clutter_rectangle_set_border_color (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle2),
-      CLUTTER_COLOR_Black);
+  empathy_call_window_darken_preview_rectangle (self,
+      self->priv->preview_rectangle2);
 
-  clutter_rectangle_set_border_width (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle3), 1);
-  clutter_rectangle_set_border_color (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle3),
-      CLUTTER_COLOR_Black);
+  empathy_call_window_darken_preview_rectangle (self,
+      self->priv->preview_rectangle3);
 
-  clutter_rectangle_set_border_width (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle4), 1);
-  clutter_rectangle_set_border_color (
-      CLUTTER_RECTANGLE (self->priv->preview_rectangle4),
-      CLUTTER_COLOR_Black);
+  empathy_call_window_darken_preview_rectangle (self,
+      self->priv->preview_rectangle4);
 }
 
 static void
