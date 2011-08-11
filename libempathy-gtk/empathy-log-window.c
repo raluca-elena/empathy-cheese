@@ -2517,7 +2517,6 @@ who_row_is_separator (GtkTreeModel *model,
 static void
 log_window_events_setup (EmpathyLogWindow *self)
 {
-  GtkTreeModel      *model;
   GtkTreeSortable   *sortable;
   GtkTreeStore      *store;
 
@@ -2532,7 +2531,6 @@ log_window_events_setup (EmpathyLogWindow *self)
       TPL_TYPE_ENTITY,      /* target */
       TPL_TYPE_EVENT);      /* event */
 
-  model = GTK_TREE_MODEL (store);
   sortable = GTK_TREE_SORTABLE (store);
 
   gtk_tree_sortable_set_sort_column_id (sortable,
