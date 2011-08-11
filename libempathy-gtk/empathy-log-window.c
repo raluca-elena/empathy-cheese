@@ -401,7 +401,7 @@ insert_or_change_row (EmpathyLogWindow *self,
       method,
       g_strdelimit (str, ":", ','),
       text,
-      icon != NULL ? icon: "",
+      icon != NULL ? icon : "",
       date);
 
   webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
