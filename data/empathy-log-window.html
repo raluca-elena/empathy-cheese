@@ -143,10 +143,6 @@ function insertRow (path, text, icon, date_)
   // insert the new node into the tree
   var nodes = getNodes(parentnode);
 
-  // console.log("path = " + path);
-  // console.log("i = " + i + ", path[i] = " + path[i] + ", nodes.length = " +
-  //    nodes.length);
-
   if (path[i] >= nodes.length)
     parentnode.appendChild(newnode);
   else
@@ -182,8 +178,6 @@ function changeRow (path, text, icon, date_)
 {
   var treeview = document.getElementById('treeview');
   var node = treeview;
-
-  // console.log("path = " + path + ", text = '" + text + "'");
 
   // walk the tree
   for (var i = 0; i < path.length; i++)
