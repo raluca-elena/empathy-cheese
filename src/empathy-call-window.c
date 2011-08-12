@@ -647,6 +647,7 @@ display_video_preview (EmpathyCallWindow *self,
 
       play_camera (self, TRUE);
       clutter_actor_show (priv->video_preview);
+      clutter_actor_raise_top (priv->floating_toolbar);
     }
   else
     {
