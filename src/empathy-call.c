@@ -127,6 +127,10 @@ main (int argc,
   optcontext = g_option_context_new (N_("- Empathy Audio/Video Client"));
   g_option_context_add_group (optcontext, gst_init_get_option_group ());
   g_option_context_add_group (optcontext, gtk_get_option_group (TRUE));
+  g_option_context_add_group (optcontext, cogl_get_option_group ());
+  g_option_context_add_group (optcontext,
+      clutter_get_option_group_without_init ());
+  g_option_context_add_group (optcontext, gtk_clutter_get_option_group ());
   g_option_context_add_main_entries (optcontext, options, GETTEXT_PACKAGE);
 
   if (!g_option_context_parse (optcontext, &argc, &argv, &error)) {
