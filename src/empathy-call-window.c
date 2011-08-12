@@ -2848,12 +2848,17 @@ empathy_call_window_set_send_video (EmpathyCallWindow *window,
 
 static void
 empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *window)
+  EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
   gboolean active;
 
   active = (gtk_toggle_tool_button_get_active (toggle));
+
+  /* We don't want the settings callback to react to this change to avoid
+   * a loop. */
+  g_signal_handlers_block_by_func (priv->settings,
+      empathy_call_window_prefs_volume_changed_cb, self);
 
   if (active)
     {
@@ -2870,6 +2875,9 @@ empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
       g_settings_set_double (priv->settings, EMPATHY_PREFS_CALL_SOUND_VOLUME,
           0);
     }
+
+    g_signal_handlers_unblock_by_func (priv->settings,
+      empathy_call_window_prefs_volume_changed_cb, self);
 }
 
 static void
