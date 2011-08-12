@@ -787,6 +787,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	gint64 timestamp;
 	gint64 original_timestamp;
 	const GHashTable *part = tp_message_peek (tp_msg, 0);
+	gboolean is_backlog;
 
 	g_return_val_if_fail (TP_IS_MESSAGE (tp_msg), NULL);
 
@@ -799,6 +800,9 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 	original_timestamp = tp_asv_get_int64 (part,
 		"original-message-received", NULL);
 
+	is_backlog = (flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK) ==
+		TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK;
+
 	message = g_object_new (EMPATHY_TYPE_MESSAGE,
 		"body", body,
 		"token", tp_message_get_token (tp_msg),
@@ -807,7 +811,7 @@ empathy_message_new_from_tp_message (TpMessage *tp_msg,
 		"timestamp", timestamp,
 		"original-timestamp", original_timestamp,
 		"flags", flags,
-		"is-backlog", flags & TP_CHANNEL_TEXT_MESSAGE_FLAG_SCROLLBACK,
+		"is-backlog", is_backlog,
 		"incoming", incoming,
 		"tp-message", tp_msg,
 		NULL);
