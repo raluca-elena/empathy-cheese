@@ -72,6 +72,7 @@
 
 #define SELF_VIDEO_SECTION_WIDTH 120
 #define SELF_VIDEO_SECTION_HEIGTH 90
+#define SELF_VIDEO_SECTION_MARGIN 10
 
 #define FLOATING_TOOLBAR_OPACITY 192
 #define FLOATING_TOOLBAR_WIDTH 280
@@ -552,8 +553,8 @@ create_video_preview (EmpathyCallWindow *self)
       CLUTTER_BIN_ALIGNMENT_START);
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
-      SELF_VIDEO_SECTION_WIDTH + 10,
-      SELF_VIDEO_SECTION_HEIGTH + 10 +
+      SELF_VIDEO_SECTION_WIDTH + SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
