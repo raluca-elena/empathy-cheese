@@ -843,13 +843,13 @@ empathy_call_window_destroyed_cb (GtkWidget *object,
 }
 
 static void
-empathy_call_window_video_box_allocation_changed_cb (ClutterActor *video_box,
+empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
     GParamSpec *pspec,
     ClutterBindConstraint *constraint)
 {
   ClutterActorBox allocation;
 
-  clutter_actor_get_allocation_box (video_box, &allocation);
+  clutter_actor_get_allocation_box (stage, &allocation);
 
   clutter_bind_constraint_set_offset (constraint,
       allocation.y2 - allocation.y1 -
@@ -995,13 +995,16 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_widget_reparent (priv->bottom_toolbar,
       gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (priv->floating_toolbar)));
 
-  constraint = clutter_bind_constraint_new (priv->video_box,
+  constraint = clutter_bind_constraint_new (
+      gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
       CLUTTER_BIND_Y, 0);
 
   clutter_actor_add_constraint (priv->floating_toolbar, constraint);
 
-  g_signal_connect (priv->video_box, "notify::allocation",
-      G_CALLBACK (empathy_call_window_video_box_allocation_changed_cb),
+  g_signal_connect (
+      gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
+      "notify::allocation",
+      G_CALLBACK (empathy_call_window_stage_allocation_changed_cb),
       constraint);
 
   clutter_actor_set_size (priv->floating_toolbar,
