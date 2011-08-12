@@ -1296,8 +1296,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   priv->video_box = clutter_box_new (priv->video_layout);
 
-  empathy_call_window_create_preview_rectangles (self);
-
   priv->video_container = gtk_clutter_embed_new ();
 
   /* Set the background color to that of the rest of the window */
@@ -1330,6 +1328,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_box),
       remote_avatar);
+
+  empathy_call_window_create_preview_rectangles (self);
 
   gtk_box_pack_start (GTK_BOX (priv->content_hbox),
       priv->video_container, TRUE, TRUE,
