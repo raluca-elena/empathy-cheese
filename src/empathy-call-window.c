@@ -984,6 +984,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   empathy_call_window_show_hangup_button (self, TRUE);
 
   priv->settings = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
+
+  /* Retrieve initial volume */
+  priv->volume = g_settings_get_double (priv->settings,
+      EMPATHY_PREFS_CALL_SOUND_VOLUME) / 100.0;
+
   g_signal_connect (priv->settings, "changed::"EMPATHY_PREFS_CALL_SOUND_VOLUME,
       G_CALLBACK (empathy_call_window_prefs_volume_changed_cb), self);
 
