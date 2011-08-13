@@ -180,6 +180,8 @@ struct _EmpathyCallWindowPriv
 
   ClutterState *transitions;
 
+  /* The box that contains the video_box and the effects_box */
+  ClutterActor *root_box;
   /* The box that contains self and remote avatar and video
      input/output. When we redial, we destroy and re-create the box */
   ClutterActor *video_box;
@@ -1741,6 +1743,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->content_hbox,
       TRUE, TRUE, 0);
 
+  /* root box: contains the avatar/video box and the effects box */
+  priv->root_box = clutter_box_new (clutter_bin_layout_new (
+      CLUTTER_BIN_ALIGNMENT_FILL, CLUTTER_BIN_ALIGNMENT_FILL));
+
   /* avatar/video box */
   priv->video_layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -1765,16 +1771,19 @@ empathy_call_window_init (EmpathyCallWindow *self)
           GTK_CLUTTER_EMBED (priv->video_container))),
       &bg);
 
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->root_box),
+      priv->video_box);
+
   clutter_container_add (
       CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
           GTK_CLUTTER_EMBED (priv->video_container))),
-      priv->video_box,
+      priv->root_box,
       NULL);
 
   constraint = clutter_bind_constraint_new (
       gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
       CLUTTER_BIND_SIZE, 0);
-  clutter_actor_add_constraint (priv->video_box, constraint);
+  clutter_actor_add_constraint (priv->root_box, constraint);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
   remote_avatar = gtk_clutter_actor_new_with_contents (
