@@ -182,6 +182,8 @@ struct _EmpathyCallWindowPriv
 
   /* The box that contains the video_box and the effects_box */
   ClutterActor *root_box;
+  /* The box that contains the video effect previews */
+  ClutterActor *effects_box;
   /* The box that contains self and remote avatar and video
      input/output. When we redial, we destroy and re-create the box */
   ClutterActor *video_box;
@@ -1383,6 +1385,7 @@ empathy_call_window_video_effects_cb (GtkAction *action,
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
 
   clutter_actor_hide (priv->video_box);
+  clutter_actor_show (priv->effects_box);
 }
 
 #else /* HAVE_VIDEO_EFFECT */
@@ -1747,6 +1750,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->root_box = clutter_box_new (clutter_bin_layout_new (
       CLUTTER_BIN_ALIGNMENT_FILL, CLUTTER_BIN_ALIGNMENT_FILL));
 
+  /* root effects box: will contain boxes with 3x3 tables of effect previews */
+  priv->effects_box = clutter_box_new (clutter_bin_layout_new (
+      CLUTTER_BIN_ALIGNMENT_FILL, CLUTTER_BIN_ALIGNMENT_FILL));
+  clutter_actor_hide (priv->effects_box);
+
   /* avatar/video box */
   priv->video_layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -1773,6 +1781,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->root_box),
       priv->video_box);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->root_box),
+      priv->effects_box);
 
   clutter_container_add (
       CLUTTER_CONTAINER (gtk_clutter_embed_get_stage (
