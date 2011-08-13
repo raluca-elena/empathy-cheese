@@ -83,6 +83,12 @@
           </object>
         </child>
         <child>
+          <object class="GtkAction" id="menupreviewvideoeffects">
+            <property name="name">menupreviewvideoeffects</property>
+            <property name="label" translatable="yes">Video effects</property>
+          </object>
+        </child>
+        <child>
           <object class="GtkAction" id="menupreviewminimise">
             <property name="name">menupreviewminimise</property>
             <property name="label" translatable="yes">Minimise me</property>
@@ -123,11 +129,13 @@
       </popup>
       <popup name="preview-menu">
           <menuitem name="menupreviewswap" action="menupreviewswap"/>
+          <menuitem name="menupreviewvideoeffects" action="menupreviewvideoeffects"/>
           <menuitem name="menupreviewminimise" action="menupreviewminimise"/>
           <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
       </popup>
       <popup name="preview-hidden-menu">
           <menuitem name="menupreviewswap" action="menupreviewswap"/>
+          <menuitem name="menupreviewvideoeffects" action="menupreviewvideoeffects"/>
           <menuitem name="menupreviewmaximise" action="menupreviewmaximise"/>
           <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
       </popup>
