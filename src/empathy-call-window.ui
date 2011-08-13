@@ -100,6 +100,12 @@
             <property name="label" translatable="yes">Disable camera</property>
           </object>
         </child>
+        <child>
+          <object class="GtkAction" id="menuvideoeffects">
+            <property name="name">menuvideoeffects</property>
+            <property name="label" translatable="yes">Video effects</property>
+          </object>
+        </child>
       </object>
     </child>
     <ui>
@@ -123,11 +129,13 @@
       </popup>
       <popup name="preview-menu">
           <menuitem name="menupreviewswap" action="menupreviewswap"/>
+          <menuitem name="menuvideoeffects" action="menuvideoeffects"/>
           <menuitem name="menupreviewminimise" action="menupreviewminimise"/>
           <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
       </popup>
       <popup name="preview-hidden-menu">
           <menuitem name="menupreviewswap" action="menupreviewswap"/>
+          <menuitem name="menuvideoeffects" action="menuvideoeffects"/>
           <menuitem name="menupreviewmaximise" action="menupreviewmaximise"/>
           <menuitem name="menupreviewdisable" action="menupreviewdisable"/>
       </popup>
