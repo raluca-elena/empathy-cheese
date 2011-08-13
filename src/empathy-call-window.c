@@ -176,6 +176,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *pane;
   GtkAction *menu_fullscreen;
   GtkAction *menu_swap_camera;
+  GtkAction *menu_video_effects;
 
   ClutterState *transitions;
 
@@ -622,6 +623,8 @@ empathy_call_window_camera_added_cb (EmpathyCameraMonitor *monitor,
 
   gtk_action_set_visible (self->priv->menu_swap_camera,
       g_list_length ((GList *) cameras) >= 2);
+  gtk_action_set_visible (self->priv->menu_video_effects,
+      g_list_length ((GList *) cameras) >= 1);
 }
 
 static void
@@ -633,6 +636,8 @@ empathy_call_window_camera_removed_cb (EmpathyCameraMonitor *monitor,
 
   gtk_action_set_visible (self->priv->menu_swap_camera,
       g_list_length ((GList *) cameras) >= 2);
+  gtk_action_set_visible (self->priv->menu_video_effects,
+      g_list_length ((GList *) cameras) >= 1);
 }
 
 static void
@@ -1367,6 +1372,24 @@ enable_camera (EmpathyCallWindow *self)
   priv->camera_state = CAMERA_STATE_ON;
 }
 
+#ifdef HAVE_VIDEO_EFFECT
+
+static void
+empathy_call_window_video_effects_cb (GtkAction *action,
+    EmpathyCallWindow *self)
+{
+}
+
+#else /* HAVE_VIDEO_EFFECT */
+
+static void
+empathy_call_window_video_effects_cb (GtkAction *action,
+  EmpathyCallWindow *self)
+{
+}
+
+#endif /* HAVE_VIDEO_EFFECT */
+
 static void
 empathy_call_window_camera_toggled_cb (GtkToggleToolButton *toggle,
   EmpathyCallWindow *self)
@@ -1650,6 +1673,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "ui_manager", &priv->ui_manager,
     "menufullscreen", &priv->menu_fullscreen,
     "menupreviewswap", &priv->menu_swap_camera,
+    "menuvideoeffects", &priv->menu_video_effects,
     "details_vbox",  &priv->details_vbox,
     "vcodec_encoding_label", &priv->vcodec_encoding_label,
     "acodec_encoding_label", &priv->acodec_encoding_label,
@@ -1681,6 +1705,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "menupreviewminimise", "activate", empathy_call_window_minimise_camera_cb,
     "menupreviewmaximise", "activate", empathy_call_window_maximise_camera_cb,
     "menupreviewswap", "activate", empathy_call_window_swap_camera_cb,
+    "menuvideoeffects", "activate", empathy_call_window_video_effects_cb,
     NULL);
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
