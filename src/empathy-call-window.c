@@ -1199,8 +1199,19 @@ static void
 empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
   EmpathyCallWindow *self)
 {
-  DEBUG ("Starting video effects state=%d",
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+
+  DEBUG ("Toggle video effects: active=%d",
     gtk_toggle_tool_button_get_active (toggle));
+
+  if (gtk_toggle_tool_button_get_active (toggle))
+  {
+    clutter_actor_hide (priv->video_box);
+  }
+  else
+  {
+    clutter_actor_show (priv->video_box);
+  }
 }
 
 #else /* HAVE_VIDEO_EFFECT */
