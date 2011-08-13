@@ -1378,6 +1378,9 @@ static void
 empathy_call_window_video_effects_cb (GtkAction *action,
     EmpathyCallWindow *self)
 {
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+
+  clutter_actor_hide (priv->video_box);
 }
 
 #else /* HAVE_VIDEO_EFFECT */
