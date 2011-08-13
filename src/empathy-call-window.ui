@@ -270,6 +270,19 @@
               </packing>
             </child>
             <child>
+              <object class="GtkToggleToolButton" id="video-effects">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Effects</property>
+                <!-- TODO: We need a better icon for video effects. -->
+                <property name="icon_name">emblem-new</property>
+                <property name="sensitive">False</property>
+                <property name="tooltip_text" translatable="yes">Toggle video effects</property>
+              </object>
+              <packing>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolItem" id="toolitem3">
                 <property name="visible">True</property>
                 <child>

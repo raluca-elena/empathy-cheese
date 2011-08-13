@@ -161,6 +161,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *video_call_button;
   GtkWidget *mic_button;
   GtkWidget *camera_button;
+  GtkWidget *video_effects_button;
   GtkWidget *dialpad_button;
   GtkWidget *toolbar;
   GtkWidget *bottom_toolbar;
@@ -1192,6 +1193,24 @@ enable_camera (EmpathyCallWindow *self)
   priv->camera_state = CAMERA_STATE_ON;
 }
 
+#ifdef HAVE_VIDEO_EFFECT
+
+static void
+empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
+  EmpathyCallWindow *self)
+{
+  DEBUG ("Starting video effects state=%d",
+    gtk_toggle_tool_button_get_active (toggle));
+}
+
+#else /* HAVE_VIDEO_EFFECT */
+
+static void
+empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
+  EmpathyCallWindow *self) { }
+
+#endif /* HAVE_VIDEO_EFFECT */
+
 static void
 empathy_call_window_camera_toggled_cb (GtkToggleToolButton *toggle,
   EmpathyCallWindow *self)
@@ -1366,6 +1385,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "videocall", &priv->video_call_button,
     "microphone", &priv->mic_button,
     "camera", &priv->camera_button,
+    "video-effects", &priv->video_effects_button,
     "hangup", &priv->hangup_button,
     "dialpad", &priv->dialpad_button,
     "toolbar", &priv->toolbar,
@@ -1396,6 +1416,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "volume", "value-changed", empathy_call_window_volume_changed_cb,
     "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
+    "video-effects", "clicked", empathy_call_window_video_effects_cb,
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
     "menusettings", "activate", empathy_call_window_settings_cb,
@@ -1414,6 +1435,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   g_object_bind_property (priv->camera_monitor, "available",
       priv->camera_button, "sensitive",
+      G_BINDING_SYNC_CREATE);
+  g_object_bind_property (priv->camera_monitor, "available",
+      priv->video_effects_button, "sensitive",
       G_BINDING_SYNC_CREATE);
 
   g_signal_connect (priv->camera_monitor, "added",
@@ -3058,6 +3082,7 @@ empathy_call_window_remove_video_input (EmpathyCallWindow *self)
   priv->video_preview = NULL;
 
   gtk_widget_set_sensitive (priv->camera_button, FALSE);
+  gtk_widget_set_sensitive (priv->video_effects_button, FALSE);
 }
 
 static void
