@@ -226,6 +226,7 @@ struct _EmpathyCallWindowPriv
   gboolean call_started;
   gboolean sending_video;
   CameraState camera_state;
+  gboolean video_effects_on;
 
   EmpathyCallWindowFullscreen *fullscreen;
   gboolean is_fullscreen;
@@ -1196,10 +1197,26 @@ enable_camera (EmpathyCallWindow *self)
 #ifdef HAVE_VIDEO_EFFECT
 
 static void
+empathy_call_window_video_effects_toggle (EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  priv->video_effects_on = !priv->video_effects_on;
+
+  if (priv->video_effects_on)
+  {
+    clutter_actor_hide (priv->video_box);
+  }
+  else
+  {
+    clutter_actor_show (priv->video_box);
+  }
+}
+
+static void
 empathy_call_window_video_effects_cb (GtkAction *action,
   EmpathyCallWindow *self)
 {
-  DEBUG ("video effects button clicked");
+  empathy_call_window_video_effects_toggle (self);
 }
 
 #else /* HAVE_VIDEO_EFFECT */
