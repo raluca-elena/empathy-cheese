@@ -198,7 +198,7 @@ struct _EmpathyCallWindowPriv
   CheeseEffect **cheese_effects;
   gint         cheese_effects_count;
   ClutterActor **effect_pages;
-  gint         effect_pages_count;
+  gint         effect_pages_count, curr_effect_page;
   #endif /* HAVE_VIDEO_EFFECT */
 
   /* We keep a reference on the hbox which contains the main content so we can
@@ -1217,6 +1217,35 @@ enable_camera (EmpathyCallWindow *self)
 #ifdef HAVE_VIDEO_EFFECT
 
 static void
+container_remove_all_children (ClutterContainer *c)
+{
+  GList *chld, *l;
+  chld = clutter_container_get_children (c);
+  for (l = chld; l; l = g_list_next (l))
+    clutter_container_remove_actor (c, CLUTTER_ACTOR (l->data));
+  g_list_free (chld);
+}
+
+static void
+empathy_call_window_activate_effect_page (EmpathyCallWindow *self, int page_id)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  ClutterActor          *eff_page;
+
+  container_remove_all_children (CLUTTER_CONTAINER (priv->effects_box));
+  priv->curr_effect_page = page_id;
+  eff_page = priv->effect_pages[page_id];
+
+  /* keep a reference so it won't die when we'll remove it
+   * in later call of container_remove_all_children () */
+  g_object_ref (eff_page);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->effects_box), eff_page);
+
+  g_object_set (G_OBJECT (eff_page), "opacity", 0, NULL);
+  clutter_actor_animate (eff_page, CLUTTER_LINEAR, 1000, "opacity", 255, NULL);
+}
+
+static void
 empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
   EmpathyCallWindow *self)
 {
@@ -1228,6 +1257,7 @@ empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
   if (gtk_toggle_tool_button_get_active (toggle))
   {
     clutter_actor_hide (priv->video_box);
+    empathy_call_window_activate_effect_page (self, priv->curr_effect_page);
     clutter_actor_show (priv->effects_box);
   }
   else
@@ -1524,6 +1554,7 @@ empathy_call_window_init_video_effects (EmpathyCallWindow *self)
                                (i % EFFECTS_PER_PAGE) / EFFECT_ROWS);
     clutter_table_layout_set_expand (table_layout, CLUTTER_ACTOR (box), FALSE, FALSE);
   }
+  priv->curr_effect_page = 0;
 }
 
 #else /* HAVE_VIDEO_EFFECT */
