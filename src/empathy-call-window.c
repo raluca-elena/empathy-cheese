@@ -57,6 +57,10 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
 
+#ifdef HAVE_VIDEO_EFFECT
+#include <cheese/cheese-effect.h>
+#endif /* HAVE_VIDEO_EFFECT */
+
 #include "empathy-call-window.h"
 #include "empathy-call-window-fullscreen.h"
 #include "empathy-call-factory.h"
@@ -98,6 +102,11 @@
 
 /* The time interval in milliseconds between 2 outgoing rings */
 #define MS_BETWEEN_RING 500
+
+/* display 3x3 effects per page in the video effect preview pages */
+#define EFFECT_ROWS  3
+#define EFFECT_COLS  3
+#define EFFECTS_PER_PAGE (EFFECT_ROWS * EFFECT_COLS)
 
 G_DEFINE_TYPE(EmpathyCallWindow, empathy_call_window, GTK_TYPE_WINDOW)
 
@@ -191,6 +200,14 @@ struct _EmpathyCallWindowPriv
 
   /* Coordinates of the preview drag event's start. */
   PreviewPosition preview_pos;
+
+#ifdef HAVE_VIDEO_EFFECT
+  /* array of CheeseEffect objects, sorted by name. First element=identity */
+  CheeseEffect **cheese_effects;
+  gint         cheese_effects_count;
+  ClutterActor **effect_pages;
+  gint         effect_pages_count;
+#endif /* HAVE_VIDEO_EFFECT */
 
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
@@ -1530,6 +1547,159 @@ empathy_call_window_destroyed_cb (GtkWidget *object,
     }
 }
 
+#ifdef HAVE_VIDEO_EFFECT
+static gint
+sort_effects_by_name (gconstpointer pa, gconstpointer pb)
+{
+  gint cmp;
+  gchar *a, *b;
+
+  g_object_get (G_OBJECT (pa), "name", &a, NULL);
+  g_object_get (G_OBJECT (pb), "name", &b, NULL);
+  cmp = g_strcmp0 (a, b);
+  g_free (a);
+  g_free (b);
+  return cmp;
+}
+
+static void
+empathy_call_window_load_video_effects (EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  CheeseEffect          *identity;
+  GList                 *list, *l;
+  int i;
+
+  list = cheese_effect_load_effects ();
+  if (!list)
+    return;
+
+  if (g_list_length (list) == 0)
+    {
+      g_list_free (list);
+      return;
+    }
+
+  identity = cheese_effect_new (_("No effect"), "identity");
+
+  priv->cheese_effects_count = g_list_length (list) + 1;
+  priv->cheese_effects =
+    g_malloc (sizeof (CheeseEffect*) * priv->cheese_effects_count);
+  priv->cheese_effects[0] = identity;
+
+  list = g_list_sort (list, sort_effects_by_name);
+
+  for (l = list, i = 1; l != NULL; l = g_list_next(l), i++)
+    priv->cheese_effects[i] = (CheeseEffect*) l->data;
+
+  g_list_free (list);
+}
+
+
+static gboolean
+empathy_call_window_on_selected_effect_change_cb (ClutterActor *sender,
+    ClutterButtonEvent *event, gpointer self)
+{
+  return FALSE;
+}
+
+
+static void
+empathy_call_window_init_video_effects (EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  int i;
+
+  empathy_call_window_load_video_effects (self);
+
+  priv->effect_pages_count =
+    (priv->cheese_effects_count + EFFECTS_PER_PAGE - 1) / EFFECTS_PER_PAGE;
+  priv->effect_pages =
+    g_malloc (sizeof (ClutterActor*) * priv->effect_pages_count);
+
+  for (i = 0; i < priv->effect_pages_count; i++)
+    {
+      ClutterTableLayout* table_layout;
+      ClutterBox* grid;
+
+      table_layout = (ClutterTableLayout*) clutter_table_layout_new ();
+      clutter_table_layout_set_column_spacing (table_layout, (guint) 10);
+      clutter_table_layout_set_row_spacing (table_layout, (guint) 10);
+
+      grid = (ClutterBox*) clutter_box_new ((ClutterLayoutManager*) table_layout);
+      priv->effect_pages[i] = CLUTTER_ACTOR (grid);
+    }
+
+  for (i = 0; i < priv->cheese_effects_count; i++)
+    {
+      CheeseEffect         *effect;
+      gchar                *effect_name = NULL;
+      ClutterTexture       *texture;
+      ClutterLayoutManager *layout;
+      ClutterBox           *box;
+      ClutterText          *text;
+      ClutterRectangle     *rect;
+      ClutterTableLayout   *table_layout;
+      ClutterColor         rect_color, text_color;
+      gfloat               text_height;
+      int                  effect_page_nr;
+      ClutterBox           *effect_page;
+
+      effect = priv->cheese_effects[i];
+
+      texture = CLUTTER_TEXTURE (clutter_texture_new ());
+      clutter_texture_set_keep_aspect_ratio (texture, TRUE);
+
+      layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+          CLUTTER_BIN_ALIGNMENT_CENTER);
+      box = CLUTTER_BOX (clutter_box_new ((ClutterLayoutManager*) layout));
+      clutter_box_pack (box, CLUTTER_ACTOR (texture), NULL, NULL, NULL);
+      clutter_actor_set_reactive (CLUTTER_ACTOR (box), TRUE);
+      g_signal_connect (CLUTTER_ACTOR (box), "button-press-event",
+          G_CALLBACK (empathy_call_window_on_selected_effect_change_cb), self);
+
+      g_object_set_data (G_OBJECT (box), "effect", effect);
+      g_object_set_data (G_OBJECT (effect), "texture", texture);
+
+      rect = CLUTTER_RECTANGLE (clutter_rectangle_new ());
+      clutter_actor_set_opacity ((ClutterActor*) rect, (guint) 128);
+      clutter_color_from_string (&rect_color, "black");
+      clutter_rectangle_set_color (rect, &rect_color);
+
+      text = CLUTTER_TEXT (clutter_text_new ());
+      g_object_get (effect, "name", &effect_name, NULL);
+      clutter_text_set_text (text, effect_name);
+      g_free (effect_name);
+      clutter_color_from_string (&text_color, "white");
+      clutter_text_set_color (text, &text_color);
+
+      text_height = clutter_actor_get_height ((ClutterActor*) text);
+
+      clutter_actor_set_height (CLUTTER_ACTOR (rect), text_height + 5);
+      clutter_box_pack (box, CLUTTER_ACTOR (rect),
+          "x-align", CLUTTER_BIN_ALIGNMENT_FILL,
+          "y-align", CLUTTER_BIN_ALIGNMENT_END,
+          NULL, NULL);
+      clutter_box_pack (box, CLUTTER_ACTOR (text),
+          "x-align", CLUTTER_BIN_ALIGNMENT_CENTER,
+          "y-align", CLUTTER_BIN_ALIGNMENT_END,
+          NULL, NULL);
+
+      effect_page_nr = i / EFFECTS_PER_PAGE;
+      effect_page = CLUTTER_BOX (priv->effect_pages[effect_page_nr]);
+      table_layout = CLUTTER_TABLE_LAYOUT (
+          clutter_box_get_layout_manager (effect_page));
+
+      clutter_table_layout_pack (table_layout, CLUTTER_ACTOR (box),
+          (i % EFFECTS_PER_PAGE) % EFFECT_COLS,
+          (i % EFFECTS_PER_PAGE) / EFFECT_ROWS);
+      clutter_table_layout_set_expand (table_layout, CLUTTER_ACTOR (box),
+          FALSE, FALSE);
+    }
+}
+
+#endif /* HAVE_VIDEO_EFFECT */
+
 static void
 empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
     GParamSpec *pspec,
@@ -1812,6 +1982,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
   create_video_output_widget (self);
   create_audio_input (self);
   create_video_input (self);
+
+#ifdef HAVE_VIDEO_EFFECT
+  empathy_call_window_init_video_effects (self);
+#endif /* HAVE_VIDEO_EFFECT */
 
   priv->floating_toolbar = empathy_rounded_actor_new ();
 
