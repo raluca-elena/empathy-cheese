@@ -1160,6 +1160,8 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	GtkBuilder                *gui;
 	gchar                     *filename;
 	GtkWidget                 *page;
+	GtkWidget                 *call_volume_scale_box;
+	GtkWidget                 *call_volume_bar_box;
 
 	priv = preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE (preferences,
 			EMPATHY_TYPE_PREFERENCES, EmpathyPreferencesPriv);
@@ -1202,6 +1204,8 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_location_resource_network", &priv->checkbutton_location_resource_network,
 		"checkbutton_location_resource_cell", &priv->checkbutton_location_resource_cell,
 		"checkbutton_location_resource_gps", &priv->checkbutton_location_resource_gps,
+		"call_volume_scale_box", &call_volume_scale_box,
+		"call_volume_bar_box", &call_volume_bar_box,
 		"call_volume_scale", &priv->scale_call_volume,
 		"call_volume_adjustment", &priv->adj_call_volume,
 		"call_echo_cancellation", &priv->echo_cancellation,
@@ -1232,6 +1236,11 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	g_signal_connect (priv->scale_call_volume, "format-value",
 			  G_CALLBACK (preferences_call_format_volume_cb),
 			  preferences);
+
+#ifndef HAVE_CALL
+	gtk_widget_hide (call_volume_scale_box);
+	gtk_widget_hide (call_volume_bar_box);
+#endif
 
 	preferences_themes_setup (preferences);
 
