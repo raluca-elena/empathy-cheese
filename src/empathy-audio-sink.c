@@ -25,6 +25,8 @@
 #include <gst/audio/audio.h>
 #include <telepathy-glib/telepathy-glib.h>
 
+#include <libempathy-gtk/empathy-call-utils.h>
+
 #include "empathy-audio-sink.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
@@ -187,6 +189,35 @@ empathy_audio_sink_get_volume (EmpathyGstAudioSink *sink)
   return volume;
 }
 
+static GstElement *
+create_sink (const gchar *description)
+{
+  GstElement *sink;
+
+  if (description != NULL)
+    {
+      GError *error = NULL;
+
+      sink = gst_parse_bin_from_description (description, TRUE, &error);
+      if (sink == NULL)
+        {
+          DEBUG ("Failed to create bin %s: %s", description, error->message);
+          g_error_free (error);
+        }
+
+      return sink;
+    }
+
+  /* Use pulsesink as default */
+  sink = gst_element_factory_make ("pulsesink", NULL);
+  if (sink == NULL)
+    return NULL;
+
+  empathy_call_set_stream_properties (sink);
+
+  return sink;
+}
+
 static GstPad *
 empathy_audio_sink_request_new_pad (GstElement *element,
   GstPadTemplate *templ,
@@ -196,7 +227,6 @@ empathy_audio_sink_request_new_pad (GstElement *element,
   GstElement *bin, *volume, *resample, *audioconvert0, *audioconvert1;
   GstPad *pad = NULL;
   GstPad *subpad, *filterpad;
-  const gchar *sink_element;
 
   bin = gst_bin_new (NULL);
 
@@ -224,22 +254,9 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   gst_bin_add (GST_BIN (bin), volume);
 
-  sink_element = g_getenv ("EMPATHY_AUDIO_SINK");
-  if (sink_element == NULL)
-    sink_element = "pulsesink";
-
-  self->priv->sink = gst_element_factory_make (sink_element, NULL);
+  self->priv->sink = create_sink (g_getenv ("EMPATHY_AUDIO_SINK"));
   if (self->priv->sink == NULL)
     goto error;
-
-  if (!tp_strdiff (sink_element, "pulsesink"))
-    {
-      GstStructure *props;
-
-      props = gst_structure_from_string ("props,media.role=phone", NULL);
-      g_object_set (self->priv->sink, "stream-properties", props, NULL);
-      gst_structure_free (props);
-    }
 
   gst_bin_add (GST_BIN (bin), self->priv->sink);
 

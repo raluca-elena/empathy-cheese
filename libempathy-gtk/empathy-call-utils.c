@@ -192,3 +192,14 @@ empathy_call_new_with_streams (const gchar *contact,
   g_hash_table_unref (streamed_media_request);
   g_object_unref (call_req);
 }
+
+void
+empathy_call_set_stream_properties (GstElement *element)
+{
+  GstStructure *props;
+
+  props = gst_structure_from_string (
+      "props,media.role=phone", NULL);
+  g_object_set (element, "stream-properties", props, NULL);
+  gst_structure_free (props);
+}

@@ -21,6 +21,8 @@
 #ifndef __EMPATHY_CALL_UTILS_H__
 #define __EMPATHY_CALL_UTILS_H__
 
+#include <gst/gst.h>
+
 G_BEGIN_DECLS
 
 /* Calls */
@@ -37,6 +39,8 @@ GHashTable * empathy_call_create_call_request (const gchar *contact,
 GHashTable * empathy_call_create_streamed_media_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video);
+
+void empathy_call_set_stream_properties (GstElement *element);
 
 G_END_DECLS
 

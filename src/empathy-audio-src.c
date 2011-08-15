@@ -26,6 +26,7 @@
 #include <pulse/glib-mainloop.h>
 
 #include <libempathy/empathy-utils.h>
+#include <libempathy-gtk/empathy-call-utils.h>
 
 #include "empathy-audio-src.h"
 
@@ -377,31 +378,49 @@ empathy_audio_src_source_output_index_notify (GObject *object,
       empathy_audio_src_source_output_info_cb, self);
 }
 
+static GstElement *
+create_src (const gchar *description)
+{
+  GstElement *src;
+
+  if (description != NULL)
+    {
+      GError *error = NULL;
+
+      src = gst_parse_bin_from_description (description, TRUE, &error);
+      if (src == NULL)
+        {
+          DEBUG ("Failed to create bin %s: %s", description, error->message);
+          g_error_free (error);
+        }
+
+      return src;
+    }
+
+  /* Use pulsesrc as default */
+  src = gst_element_factory_make ("pulsesrc", NULL);
+  if (src == NULL)
+    return NULL;
+
+  empathy_call_set_stream_properties (src);
+
+  return src;
+}
+
 static void
 empathy_audio_src_init (EmpathyGstAudioSrc *obj)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (obj);
   GstPad *ghost, *src;
-  const gchar *src_element;
 
   priv->peak_level = -G_MAXDOUBLE;
   priv->lock = g_mutex_new ();
 
-  src_element = g_getenv ("EMPATHY_AUDIO_SRC");
-  if (src_element == NULL)
-    src_element = "pulsesrc";
+  priv->src = create_src (g_getenv ("EMPATHY_AUDIO_SRC"));
+  if (priv->src == NULL)
+    return;
 
-  priv->src = gst_element_factory_make (src_element, NULL);
   gst_bin_add (GST_BIN (obj), priv->src);
-
-  if (!tp_strdiff (src_element, "pulsesrc"))
-    {
-      GstStructure *props;
-
-      props = gst_structure_from_string ("props,media.role=phone", NULL);
-      g_object_set (priv->src, "stream-properties", props, NULL);
-      gst_structure_free (props);
-    }
 
   priv->volume = gst_element_factory_make ("volume", NULL);
   g_object_ref (priv->volume);
