@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 
 #include <gtk/gtk.h>
+#include <pulse/pulseaudio.h>
 
 #include <telepathy-glib/telepathy-glib.h>
 
@@ -200,20 +201,25 @@ empathy_call_set_stream_properties (GstElement *element)
   GstStructure *props;
   GSettings *gsettings_call;
   gboolean echo_cancellation;
-  gchar *tmp;
 
   gsettings_call = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
 
   echo_cancellation = g_settings_get_boolean (gsettings_call,
       EMPATHY_PREFS_CALL_ECHO_CANCELLATION);
 
-  tmp = g_strdup_printf ("props,media.role=phone%s", echo_cancellation ?
-      ",filter.want=echo-cancel": "");
+  props = gst_structure_new ("props",
+      PA_PROP_MEDIA_ROLE, G_TYPE_STRING, "phone",
+      NULL);
 
-  props = gst_structure_from_string (tmp, NULL);
+  if (echo_cancellation)
+    {
+      gst_structure_set (props,
+          "filter.want", G_TYPE_STRING, "echo-cancel",
+          NULL);
+    }
+
   g_object_set (element, "stream-properties", props, NULL);
   gst_structure_free (props);
 
-  g_free (tmp);
   g_object_unref (gsettings_call);
 }
