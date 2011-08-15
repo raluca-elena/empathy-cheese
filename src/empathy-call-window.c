@@ -546,14 +546,14 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
     ClutterBinAlignment x,
     ClutterBinAlignment y)
 {
-  ClutterLayoutManager *layout;
+  ClutterLayoutManager *layout1, *layout2;
   ClutterActor *rectangle;
-  ClutterActor *box;
+  ClutterActor *box1, *box2;
 
-  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
-      CLUTTER_BIN_ALIGNMENT_CENTER);
+  layout1 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_START);
 
-  box = clutter_box_new (layout);
+  box1 = clutter_box_new (layout1);
 
   rectangle = clutter_rectangle_new_with_color (
       CLUTTER_COLOR_Transparent);
@@ -561,17 +561,31 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
   clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle),
       1);
 
-  clutter_actor_set_size (box,
+  clutter_actor_set_size (box1,
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN +
+      FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
+
+  layout2 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
+
+  /* We have a box with the margins and the video in the middle inside
+   * a bigger box with an extra bottom margin so we're not on top of
+   * the floating toolbar. */
+  box2 = clutter_box_new (layout2);
+
+  clutter_actor_set_size (box2,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_MARGIN,
       SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN);
 
   clutter_actor_set_size (rectangle,
       SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGTH + 5);
 
-  clutter_container_add_actor (CLUTTER_CONTAINER (box), rectangle);
+  clutter_container_add_actor (CLUTTER_CONTAINER (box1), box2);
+  clutter_container_add_actor (CLUTTER_CONTAINER (box2), rectangle);
 
   clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (self->priv->video_layout),
-      box, x, y);
+      box1, x, y);
 
   clutter_actor_hide (rectangle);
 
@@ -631,15 +645,15 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
     }
   else if (0 + SELF_VIDEO_MARGIN <= event_x &&
       event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+      box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_BOTTOM_LEFT;
     }
   else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
       event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_HEIGTH))
+      box.height - SELF_VIDEO_MARGIN - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_BOTTOM_RIGHT;
     }
@@ -880,18 +894,22 @@ create_video_preview (EmpathyCallWindow *self)
 
   /* Add a little offset to the video preview */
   layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
-      CLUTTER_BIN_ALIGNMENT_CENTER);
+      CLUTTER_BIN_ALIGNMENT_START);
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
       SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
+  /* We have a box with the margins and the video in the middle inside
+   * a bigger box with an extra bottom margin so we're not on top of
+   * the floating toolbar. */
   layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_CENTER);
   box = clutter_box_new (layout_center);
   clutter_actor_set_size (box,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), preview);
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
