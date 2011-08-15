@@ -34,7 +34,7 @@
 struct _EmpathyCameraMonitorPrivate
 {
   CheeseCameraDeviceMonitor *cheese_monitor;
-  GQueue cameras;
+  GQueue *cameras;
   gint num_cameras;
 };
 
@@ -117,7 +117,10 @@ on_camera_added (CheeseCameraDeviceMonitor *device,
 {
   EmpathyCamera *camera = empathy_camera_new (id, filename, product_name);
 
-  g_queue_push_tail (&self->priv->cameras, camera);
+  if (self->priv->cameras == NULL)
+    return;
+
+  g_queue_push_tail (self->priv->cameras, camera);
 
   self->priv->num_cameras++;
 
@@ -135,13 +138,16 @@ on_camera_removed (CheeseCameraDeviceMonitor *device,
   EmpathyCamera *camera;
   GList *l;
 
-  l = g_queue_find_custom (&self->priv->cameras, id, empathy_camera_find);
+  if (self->priv->cameras == NULL)
+    return;
+
+  l = g_queue_find_custom (self->priv->cameras, id, empathy_camera_find);
 
   g_return_if_fail (l != NULL);
 
   camera = l->data;
 
-  g_queue_delete_link (&self->priv->cameras, l);
+  g_queue_delete_link (self->priv->cameras, l);
 
   self->priv->num_cameras--;
 
@@ -156,7 +162,10 @@ on_camera_removed (CheeseCameraDeviceMonitor *device,
 const GList *
 empathy_camera_monitor_get_cameras (EmpathyCameraMonitor *self)
 {
-  return self->priv->cameras.head;
+  if (self->priv->cameras != NULL)
+    return self->priv->cameras->head;
+  else
+    return NULL;
 }
 
 static void
@@ -185,9 +194,9 @@ empathy_camera_monitor_dispose (GObject *object)
 
   tp_clear_object (&self->priv->cheese_monitor);
 
-  g_queue_foreach (&self->priv->cameras,
+  g_queue_foreach (self->priv->cameras,
       empathy_camera_monitor_free_camera_foreach, NULL);
-  g_queue_clear (&self->priv->cameras);
+  tp_clear_pointer (&self->priv->cameras, g_queue_free);
 
   G_OBJECT_CLASS (empathy_camera_monitor_parent_class)->dispose (object);
 }
@@ -264,7 +273,7 @@ empathy_camera_monitor_init (EmpathyCameraMonitor *self)
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_CAMERA_MONITOR, EmpathyCameraMonitorPrivate);
 
-  g_queue_init (&self->priv->cameras);
+  self->priv->cameras = g_queue_new ();
 
   self->priv->cheese_monitor = cheese_camera_device_monitor_new ();
 
