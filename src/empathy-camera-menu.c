@@ -246,26 +246,36 @@ empathy_camera_menu_prefs_camera_changed_cb (GSettings *settings,
     EmpathyCameraMenu *self)
 {
   gchar *device = g_settings_get_string (settings, key);
+  GtkRadioAction *action;
+  gboolean found = FALSE;
   GList *l;
 
   for (l = self->priv->cameras->head; l != NULL; l = g_list_next (l))
     {
-      GtkRadioAction *action = l->data;
-      const gchar *name = gtk_action_get_name (GTK_ACTION (action));
+      const gchar *name;
+
+      action = l->data;
+      name = gtk_action_get_name (GTK_ACTION (action));
 
       if (!tp_strdiff (device, name))
         {
-          if (!gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)))
-            {
-              g_signal_handlers_block_by_func (settings,
-                  empathy_camera_menu_prefs_camera_changed_cb, self);
-              gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
-              g_signal_handlers_unblock_by_func (settings,
-                  empathy_camera_menu_prefs_camera_changed_cb, self);
-            }
-
+          found = TRUE;
           break;
         }
+    }
+
+  /* If the selected camera isn't found, we connect the first
+   * available one */
+  if (!found)
+    action = self->priv->cameras->head->data;
+
+  if (!gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)))
+    {
+      g_signal_handlers_block_by_func (settings,
+          empathy_camera_menu_prefs_camera_changed_cb, self);
+      gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (action), TRUE);
+      g_signal_handlers_unblock_by_func (settings,
+          empathy_camera_menu_prefs_camera_changed_cb, self);
     }
 
   g_free (device);
