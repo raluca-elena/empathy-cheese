@@ -246,7 +246,7 @@ empathy_camera_menu_prefs_camera_changed_cb (GSettings *settings,
     EmpathyCameraMenu *self)
 {
   gchar *device = g_settings_get_string (settings, key);
-  GtkRadioAction *action;
+  GtkRadioAction *action = NULL;
   gboolean found = FALSE;
   GList *l;
 
@@ -266,10 +266,11 @@ empathy_camera_menu_prefs_camera_changed_cb (GSettings *settings,
 
   /* If the selected camera isn't found, we connect the first
    * available one */
-  if (!found)
+  if (!found && self->priv->cameras->head != NULL)
     action = self->priv->cameras->head->data;
 
-  if (!gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)))
+  if (action != NULL &&
+      !gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)))
     {
       g_signal_handlers_block_by_func (settings,
           empathy_camera_menu_prefs_camera_changed_cb, self);
