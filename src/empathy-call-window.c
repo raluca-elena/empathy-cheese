@@ -201,6 +201,8 @@ struct _EmpathyCallWindowPriv
   gint         effect_pages_count, curr_effect_page;
   #endif /* HAVE_VIDEO_EFFECT */
 
+  GstElement   *effects_tee, *effects_valve;
+
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
@@ -1129,6 +1131,8 @@ empathy_call_window_play_camera (EmpathyCallWindow *window,
   gst_element_set_state (preview, state);
   gst_element_set_state (priv->video_input, state);
   gst_element_set_state (priv->video_tee, state);
+  gst_element_set_state (priv->effects_valve, state);
+  gst_element_set_state (priv->effects_tee, state);
 }
 
 static void
@@ -1227,10 +1231,116 @@ container_remove_all_children (ClutterContainer *c)
 }
 
 static void
+free_request_pad (GstPad *pad)
+{
+  GstElement *parent = gst_pad_get_parent_element (pad);
+  gst_element_release_request_pad (parent, pad);
+  /* gst_element_release_request_pad does not unref the pad. */
+  gst_object_unref (pad);
+  gst_object_unref (parent);
+}
+
+static gboolean
+empathy_call_window_connect_effect_texture (EmpathyCallWindow *self,
+                                            CheeseEffect       *effect)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  ClutterTexture        *texture;
+  GstElement            *eff_valve, *eff_csp1, *eff_filter, *eff_csp2,
+                        *eff_queue, *eff_sink;
+  GstPad                *src_pad, *sink_pad;
+  gchar                 *eff_name, *eff_desc;
+  GError                *err = NULL;
+  GstPadLinkReturn      gstret;
+  gboolean              ok;
+
+  g_object_get (G_OBJECT (effect), "name", &eff_name, NULL);
+  g_object_get (G_OBJECT (effect), "pipeline_desc", &eff_desc, NULL);
+
+  texture = g_object_get_data (G_OBJECT (effect), "texture");
+  src_pad = g_object_get_data (G_OBJECT (effect), "src-pad");
+  if (src_pad == NULL)
+  {
+    src_pad = gst_element_get_request_pad (priv->effects_tee, "src%d");
+    g_object_set_data_full (G_OBJECT (effect), "src-pad", src_pad,
+                            (GDestroyNotify) free_request_pad);
+  }
+
+  eff_filter = gst_parse_bin_from_description (eff_desc, TRUE, &err);
+  if (err != NULL)
+  {
+    g_warning ("Error parsing effect name=%s err=%s", eff_name, err->message);
+    g_clear_error (&err);
+    goto err_parsing_descr;
+  }
+
+  eff_valve = gst_element_factory_make ("valve", NULL);
+  eff_csp1  = gst_element_factory_make ("ffmpegcolorspace", NULL);
+  eff_csp2  = gst_element_factory_make ("ffmpegcolorspace", NULL);
+  eff_queue = gst_element_factory_make ("queue", NULL);
+  eff_sink  = clutter_gst_video_sink_new (texture);
+  if (!eff_valve || !eff_csp1 || !eff_csp2 || !eff_queue || !eff_sink)
+  {
+    g_warning ("Error creating effect elements. Effect name=%s", eff_name);
+    goto err_creating_gst_elems;
+  }
+
+
+  gst_bin_add_many (GST_BIN (priv->pipeline), eff_valve, eff_csp1,
+                    eff_filter, eff_csp2, eff_queue, eff_sink, NULL);
+  ok = gst_element_link_many (eff_valve, eff_csp1, eff_filter, eff_csp2,
+                              eff_queue, eff_sink, NULL);
+  if (!ok)
+  {
+    g_warning ("Error linking effect elements. Effect name=%s", eff_name);
+    goto err_linking_gst_elems;
+  }
+
+  sink_pad = gst_element_get_static_pad (eff_valve, "sink");
+  gstret = gst_pad_link (src_pad, sink_pad);
+  gst_object_unref (sink_pad);
+  if (GST_PAD_LINK_FAILED (gstret))
+  {
+    g_warning ("Error linking pads: %d. Effect name=%s", gstret, eff_name);
+    goto err_linking_pads;
+  }
+
+  g_object_set (G_OBJECT (effect), "control_valve", eff_valve, NULL);
+  g_object_set (G_OBJECT (eff_sink), "async", FALSE, NULL);
+
+  gst_element_set_state (eff_valve,  GST_STATE_PLAYING);
+  gst_element_set_state (eff_csp1,   GST_STATE_PLAYING);
+  gst_element_set_state (eff_filter, GST_STATE_PLAYING);
+  gst_element_set_state (eff_csp2,   GST_STATE_PLAYING);
+  gst_element_set_state (eff_queue,  GST_STATE_PLAYING);
+  gst_element_set_state (eff_sink,   GST_STATE_PLAYING);
+  return TRUE;
+
+err_linking_pads:
+  gst_element_unlink_many (eff_valve, eff_csp1, eff_filter, eff_csp2,
+                           eff_queue, eff_sink, NULL);
+err_linking_gst_elems:
+  gst_bin_remove_many (GST_BIN (priv->pipeline), eff_valve, eff_csp1,
+                       eff_filter, eff_csp2, eff_queue, eff_sink, NULL);
+err_creating_gst_elems:
+  if (eff_valve)  gst_object_unref (eff_valve);
+  if (eff_csp1)   gst_object_unref (eff_csp1);
+  if (eff_csp2)   gst_object_unref (eff_csp2);
+  if (eff_queue)  gst_object_unref (eff_queue);
+  if (eff_sink)   gst_object_unref (eff_sink);
+  if (eff_filter) gst_object_unref (eff_filter);
+err_parsing_descr:
+  g_free (eff_name);
+  g_free (eff_desc);
+  return FALSE;
+}
+
+static void
 empathy_call_window_activate_effect_page (EmpathyCallWindow *self, int page_id)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   ClutterActor          *eff_page;
+  int i;
 
   container_remove_all_children (CLUTTER_CONTAINER (priv->effects_box));
   priv->curr_effect_page = page_id;
@@ -1243,6 +1353,15 @@ empathy_call_window_activate_effect_page (EmpathyCallWindow *self, int page_id)
 
   g_object_set (G_OBJECT (eff_page), "opacity", 0, NULL);
   clutter_actor_animate (eff_page, CLUTTER_LINEAR, 1000, "opacity", 255, NULL);
+
+  for (i = page_id * EFFECTS_PER_PAGE; i < priv->cheese_effects_count && i < (page_id + 1) * EFFECTS_PER_PAGE; i++)
+  {
+    CheeseEffect *effect = priv->cheese_effects[i];
+    if (!cheese_effect_is_preview_connected (effect))
+    {
+      empathy_call_window_connect_effect_texture (self, effect);
+    }
+  }
 }
 
 static void
@@ -1251,17 +1370,16 @@ empathy_call_window_video_effects_cb (GtkToggleToolButton *toggle,
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
 
-  DEBUG ("Toggle video effects: active=%d",
-    gtk_toggle_tool_button_get_active (toggle));
-
   if (gtk_toggle_tool_button_get_active (toggle))
   {
     clutter_actor_hide (priv->video_box);
     empathy_call_window_activate_effect_page (self, priv->curr_effect_page);
     clutter_actor_show (priv->effects_box);
+    g_object_set (G_OBJECT (priv->effects_valve), "drop", FALSE, NULL);
   }
   else
   {
+    g_object_set (G_OBJECT (priv->effects_valve), "drop", TRUE, NULL);
     clutter_actor_hide (priv->effects_box);
     clutter_actor_show (priv->video_box);
   }
@@ -1290,6 +1408,7 @@ create_pipeline (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GstBus *bus;
+  gboolean ok;
 
   g_assert (priv->pipeline == NULL);
 
@@ -1297,10 +1416,20 @@ create_pipeline (EmpathyCallWindow *self)
   priv->pipeline_playing = FALSE;
 
   priv->video_tee = gst_element_factory_make ("tee", NULL);
+  priv->effects_valve = gst_element_factory_make ("valve", "effects_valve");
+  g_object_set (G_OBJECT (priv->effects_valve), "drop", TRUE, NULL);
+  priv->effects_tee = gst_element_factory_make ("tee", "effects_tee");
+
   gst_object_ref (priv->video_tee);
   gst_object_sink (priv->video_tee);
 
-  gst_bin_add (GST_BIN (priv->pipeline), priv->video_tee);
+  gst_bin_add_many (GST_BIN (priv->pipeline), priv->video_tee,
+                    priv->effects_valve, priv->effects_tee, NULL);
+
+  ok = gst_element_link_many (priv->video_tee, priv->effects_valve,
+                              priv->effects_tee, NULL);
+  if (!ok)
+    g_error ("Unable to link effect preview elements");
 
   bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
   priv->bus_message_source_id = gst_bus_add_watch (bus,
