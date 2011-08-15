@@ -379,9 +379,12 @@ empathy_audio_src_source_output_index_notify (GObject *object,
 }
 
 static GstElement *
-create_src (const gchar *description)
+create_src (void)
 {
   GstElement *src;
+  const gchar *description;
+
+  description = g_getenv ("EMPATHY_AUDIO_SRC");
 
   if (description != NULL)
     {
@@ -416,7 +419,7 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   priv->peak_level = -G_MAXDOUBLE;
   priv->lock = g_mutex_new ();
 
-  priv->src = create_src (g_getenv ("EMPATHY_AUDIO_SRC"));
+  priv->src = create_src ();
   if (priv->src == NULL)
     return;
 

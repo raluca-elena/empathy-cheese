@@ -190,9 +190,12 @@ empathy_audio_sink_get_volume (EmpathyGstAudioSink *sink)
 }
 
 static GstElement *
-create_sink (const gchar *description)
+create_sink (void)
 {
   GstElement *sink;
+  const gchar *description;
+
+  description = g_getenv ("EMPATHY_AUDIO_SINK");
 
   if (description != NULL)
     {
@@ -254,7 +257,7 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   gst_bin_add (GST_BIN (bin), volume);
 
-  self->priv->sink = create_sink (g_getenv ("EMPATHY_AUDIO_SINK"));
+  self->priv->sink = create_sink ();
   if (self->priv->sink == NULL)
     goto error;
 
