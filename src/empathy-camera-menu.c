@@ -329,7 +329,7 @@ empathy_camera_menu_constructed (GObject *obj)
       self->priv->anchor_action);
   g_object_unref (self->priv->anchor_action);
 
-  self->priv->camera_monitor = empathy_camera_monitor_dup_singleton ();
+  self->priv->camera_monitor = empathy_camera_monitor_new ();
 
   tp_g_signal_connect_object (self->priv->camera_monitor, "added",
       G_CALLBACK (empathy_camera_menu_camera_added_cb), self, 0);
