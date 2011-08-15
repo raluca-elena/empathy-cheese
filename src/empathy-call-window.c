@@ -113,6 +113,14 @@ typedef enum {
   CAMERA_STATE_ON,
 } CameraState;
 
+typedef enum {
+  PREVIEW_POS_NONE,
+  PREVIEW_POS_TOP_LEFT,
+  PREVIEW_POS_TOP_RIGHT,
+  PREVIEW_POS_BOTTOM_LEFT,
+  PREVIEW_POS_BOTTOM_RIGHT,
+} PreviewPosition;
+
 struct _EmpathyCallWindowPriv
 {
   gboolean dispose_has_run;
@@ -132,6 +140,10 @@ struct _EmpathyCallWindowPriv
   ClutterActor *video_output;
   ClutterActor *video_preview;
   ClutterActor *preview_hidden_button;
+  ClutterActor *preview_rectangle1;
+  ClutterActor *preview_rectangle2;
+  ClutterActor *preview_rectangle3;
+  ClutterActor *preview_rectangle4;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *remote_user_avatar_toolbar;
@@ -156,6 +168,11 @@ struct _EmpathyCallWindowPriv
      input/output. When we redial, we destroy and re-create the box */
   ClutterActor *video_box;
   ClutterLayoutManager *video_layout;
+
+  /* Coordinates of the preview drag event's start. */
+  PreviewPosition preview_pos;
+  gfloat event_x;
+  gfloat event_y;
 
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
@@ -586,6 +603,330 @@ empathy_call_window_preview_hidden_button_clicked_cb (GtkButton *button,
   gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
 }
 
+static ClutterActor *
+empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
+    ClutterBinAlignment x,
+    ClutterBinAlignment y)
+{
+  ClutterLayoutManager *layout1, *layout2;
+  ClutterActor *rectangle;
+  ClutterActor *box1, *box2;
+
+  layout1 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_START);
+
+  box1 = clutter_box_new (layout1);
+
+  rectangle = clutter_rectangle_new_with_color (
+      CLUTTER_COLOR_Transparent);
+
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle),
+      1);
+
+  clutter_actor_set_size (box1,
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
+      FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
+
+  layout2 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_CENTER);
+
+  /* We have a box with the margins and the video in the middle inside
+   * a bigger box with an extra bottom margin so we're not on top of
+   * the floating toolbar. */
+  box2 = clutter_box_new (layout2);
+
+  clutter_actor_set_size (box2,
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
+
+  clutter_actor_set_size (rectangle,
+      SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGTH + 5);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (box1), box2);
+  clutter_container_add_actor (CLUTTER_CONTAINER (box2), rectangle);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (self->priv->video_layout),
+      box1, x, y);
+
+  clutter_actor_hide (rectangle);
+
+  return rectangle;
+}
+
+static void
+empathy_call_window_create_preview_rectangles (EmpathyCallWindow *self)
+{
+  self->priv->preview_rectangle1 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_START);
+  self->priv->preview_rectangle2 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_END);
+  self->priv->preview_rectangle3 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_START);
+  self->priv->preview_rectangle4 =
+      empathy_call_window_create_preview_rectangle (self,
+          CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_END);
+}
+
+static void
+empathy_call_window_show_preview_rectangles (EmpathyCallWindow *self,
+    gboolean show)
+{
+  g_object_set (self->priv->preview_rectangle1, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle2, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle3, "visible", show, NULL);
+  g_object_set (self->priv->preview_rectangle4, "visible", show, NULL);
+}
+
+static PreviewPosition
+empathy_call_window_get_preview_position (EmpathyCallWindow *self,
+    gfloat event_x,
+    gfloat event_y)
+{
+  ClutterGeometry box;
+  PreviewPosition pos = PREVIEW_POS_NONE;
+
+  clutter_actor_get_geometry (self->priv->video_box, &box);
+
+  if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_TOP_RIGHT;
+    }
+  else if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_LEFT;
+    }
+  else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_SECTION_MARGIN - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+    {
+      pos = PREVIEW_POS_BOTTOM_RIGHT;
+    }
+
+  return pos;
+}
+
+static ClutterActor *
+empathy_call_window_get_preview_rectangle (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterActor *rectangle;
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        rectangle = self->priv->preview_rectangle1;
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        rectangle = self->priv->preview_rectangle3;
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        rectangle = self->priv->preview_rectangle2;
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        rectangle = self->priv->preview_rectangle4;
+        break;
+      default:
+        rectangle = NULL;
+    }
+
+  return rectangle;
+}
+
+static void
+empathy_call_window_move_video_preview (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterBinLayout *layout = CLUTTER_BIN_LAYOUT (self->priv->video_layout);
+
+  DEBUG ("moving the video preview to %d", pos);
+
+  self->priv->preview_pos = pos;
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_START,
+            CLUTTER_BIN_ALIGNMENT_START);
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_END,
+            CLUTTER_BIN_ALIGNMENT_START);
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_START,
+            CLUTTER_BIN_ALIGNMENT_END);
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        clutter_bin_layout_set_alignment (layout,
+            self->priv->video_preview,
+            CLUTTER_BIN_ALIGNMENT_END,
+            CLUTTER_BIN_ALIGNMENT_END);
+        break;
+      default:
+        g_warn_if_reached ();
+    }
+}
+
+static void
+empathy_call_window_highlight_preview_rectangle (EmpathyCallWindow *self,
+    PreviewPosition pos)
+{
+  ClutterActor *rectangle;
+
+  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
+
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 3);
+  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
+      CLUTTER_COLOR_Red);
+}
+
+static void
+empathy_call_window_darken_preview_rectangle (EmpathyCallWindow *self,
+    ClutterActor *rectangle)
+{
+  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 1);
+  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
+      CLUTTER_COLOR_Black);
+}
+
+static void
+empathy_call_window_darken_preview_rectangles (EmpathyCallWindow *self)
+{
+  ClutterActor *rectangle;
+
+  rectangle = empathy_call_window_get_preview_rectangle (self,
+      self->priv->preview_pos);
+
+  /* We don't want to darken the rectangle where the preview
+   * currently is. */
+
+  if (self->priv->preview_rectangle1 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle1);
+
+  if (self->priv->preview_rectangle2 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle2);
+
+  if (self->priv->preview_rectangle3 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle3);
+
+  if (self->priv->preview_rectangle4 != rectangle)
+    empathy_call_window_darken_preview_rectangle (self,
+        self->priv->preview_rectangle4);
+}
+
+static void
+empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat event_x,
+    gfloat event_y,
+    ClutterModifierType modifiers,
+    EmpathyCallWindow *self)
+{
+  empathy_call_window_show_preview_rectangles (self, TRUE);
+  empathy_call_window_darken_preview_rectangles (self);
+
+  self->priv->event_x = event_x;
+  self->priv->event_y = event_y;
+}
+
+static void
+empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat event_x,
+    gfloat event_y,
+    ClutterModifierType modifiers,
+    EmpathyCallWindow *self)
+{
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self, event_x, event_y);
+
+  if (pos != PREVIEW_POS_NONE)
+    empathy_call_window_move_video_preview (self, pos);
+
+  empathy_call_window_show_preview_rectangles (self, FALSE);
+}
+
+static void
+empathy_call_window_preview_on_drag_motion_cb (ClutterDragAction *action,
+    ClutterActor *actor,
+    gfloat delta_x,
+    gfloat delta_y,
+    EmpathyCallWindow *self)
+{
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self,
+      self->priv->event_x - delta_x, self->priv->event_y + delta_y);
+
+  if (pos != PREVIEW_POS_NONE)
+    empathy_call_window_highlight_preview_rectangle (self, pos);
+  else
+    empathy_call_window_darken_preview_rectangles (self);
+}
+
+static gboolean
+empathy_call_window_preview_enter_event_cb (ClutterActor *actor,
+    ClutterCrossingEvent *event,
+    EmpathyCallWindow *self)
+{
+  ClutterActor *rectangle;
+  PreviewPosition pos;
+
+  pos = empathy_call_window_get_preview_position (self, event->x, event->y);
+  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
+
+  empathy_call_window_highlight_preview_rectangle (self, pos);
+
+  clutter_actor_show (rectangle);
+
+  return FALSE;
+}
+
+static gboolean
+empathy_call_window_preview_leave_event_cb (ClutterActor *actor,
+    ClutterCrossingEvent *event,
+    EmpathyCallWindow *self)
+{
+  ClutterActor *rectangle;
+
+  rectangle = empathy_call_window_get_preview_rectangle (self,
+      self->priv->preview_pos);
+
+  empathy_call_window_darken_preview_rectangle (self, rectangle);
+
+  clutter_actor_hide (rectangle);
+
+  return FALSE;
+}
+
 static void
 create_video_preview (EmpathyCallWindow *self)
 {
@@ -594,6 +935,7 @@ create_video_preview (EmpathyCallWindow *self)
   ClutterActor *preview;
   ClutterActor *box;
   ClutterActor *b;
+  ClutterAction *action;
   GtkWidget *button;
 
   g_assert (priv->video_preview == NULL);
@@ -613,19 +955,23 @@ create_video_preview (EmpathyCallWindow *self)
       0.0);
 
   /* Add a little offset to the video preview */
-  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
+  layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_START);
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
-      SELF_VIDEO_SECTION_WIDTH + SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN +
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
+  /* We have a box with the margins and the video in the middle inside
+   * a bigger box with an extra bottom margin so we're not on top of
+   * the floating toolbar. */
   layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_CENTER);
   box = clutter_box_new (layout_center);
   clutter_actor_set_size (box,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), preview);
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
@@ -660,6 +1006,8 @@ create_video_preview (EmpathyCallWindow *self)
       CLUTTER_BIN_ALIGNMENT_START,
       CLUTTER_BIN_ALIGNMENT_END);
 
+  self->priv->preview_pos = PREVIEW_POS_BOTTOM_LEFT;
+
   clutter_actor_hide (priv->preview_hidden_button);
 
   g_signal_connect (button, "clicked",
@@ -670,6 +1018,22 @@ create_video_preview (EmpathyCallWindow *self)
       priv->video_preview,
       CLUTTER_BIN_ALIGNMENT_START,
       CLUTTER_BIN_ALIGNMENT_END);
+
+  action = clutter_drag_action_new ();
+  g_signal_connect (action, "drag-begin",
+      G_CALLBACK (empathy_call_window_preview_on_drag_begin_cb), self);
+  g_signal_connect (action, "drag-end",
+      G_CALLBACK (empathy_call_window_preview_on_drag_end_cb), self);
+  g_signal_connect (action, "drag-motion",
+      G_CALLBACK (empathy_call_window_preview_on_drag_motion_cb), self);
+
+  g_signal_connect (preview, "enter-event",
+      G_CALLBACK (empathy_call_window_preview_enter_event_cb), self);
+  g_signal_connect (preview, "leave-event",
+      G_CALLBACK (empathy_call_window_preview_leave_event_cb), self);
+
+  clutter_actor_add_action (preview, action);
+  clutter_actor_set_reactive (preview, TRUE);
 }
 
 static void
@@ -1051,6 +1415,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_box),
       remote_avatar);
+
+  empathy_call_window_create_preview_rectangles (self);
 
   gtk_box_pack_start (GTK_BOX (priv->content_hbox),
       priv->video_container, TRUE, TRUE,
