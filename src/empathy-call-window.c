@@ -64,6 +64,7 @@
 #include "empathy-video-src.h"
 #include "empathy-mic-menu.h"
 #include "empathy-preferences.h"
+#include "empathy-rounded-actor.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
 #define CONTENT_HBOX_SPACING 3
@@ -71,6 +72,12 @@
 
 #define SELF_VIDEO_SECTION_WIDTH 120
 #define SELF_VIDEO_SECTION_HEIGTH 90
+#define SELF_VIDEO_SECTION_MARGIN 10
+
+#define FLOATING_TOOLBAR_OPACITY 192
+#define FLOATING_TOOLBAR_WIDTH 280
+#define FLOATING_TOOLBAR_HEIGHT 36
+#define FLOATING_TOOLBAR_SPACING 20
 
 /* The avatar's default width and height are set to the same value because we
    want a square icon. */
@@ -137,8 +144,11 @@ struct _EmpathyCallWindowPriv
   GtkWidget *dialpad_button;
   GtkWidget *toolbar;
   GtkWidget *bottom_toolbar;
+  ClutterActor *floating_toolbar;
   GtkWidget *pane;
   GtkAction *menu_fullscreen;
+
+  ClutterState *transitions;
 
   /* The box that contains self and remote avatar and video
      input/output. When we redial, we destroy and re-create the box */
@@ -197,6 +207,8 @@ struct _EmpathyCallWindowPriv
 
   gboolean got_video;
   guint got_video_src;
+
+  guint inactivity_src;
 
   /* Those fields represent the state of the window before it actually was in
      fullscreen mode. */
@@ -369,6 +381,8 @@ empathy_call_window_show_video_output (EmpathyCallWindow *self,
     g_object_set (self->priv->video_output, "visible", show, NULL);
 
   gtk_widget_set_visible (self->priv->remote_user_avatar_widget, !show);
+
+  clutter_actor_raise_top (self->priv->floating_toolbar);
 }
 
 static void
@@ -539,7 +553,9 @@ create_video_preview (EmpathyCallWindow *self)
       CLUTTER_BIN_ALIGNMENT_START);
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
-      SELF_VIDEO_SECTION_WIDTH + 10, SELF_VIDEO_SECTION_HEIGTH + 10);
+      SELF_VIDEO_SECTION_WIDTH + SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN +
+      FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   layout_center = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_CENTER);
@@ -631,6 +647,7 @@ display_video_preview (EmpathyCallWindow *self,
 
       play_camera (self, TRUE);
       clutter_actor_show (priv->video_preview);
+      clutter_actor_raise_top (priv->floating_toolbar);
     }
   else
     {
@@ -765,6 +782,32 @@ empathy_call_window_about_cb (GtkAction *action,
 }
 
 static gboolean
+empathy_call_window_toolbar_timeout (gpointer data)
+{
+  EmpathyCallWindow *self = data;
+
+  clutter_state_set_state (self->priv->transitions, "fade-out");
+
+  return TRUE;
+}
+
+static gboolean
+empathy_call_window_motion_notify_cb (GtkWidget *widget,
+    GdkEvent *event,
+    EmpathyCallWindow *self)
+{
+  clutter_state_set_state (self->priv->transitions, "fade-in");
+
+  if (self->priv->inactivity_src > 0)
+    g_source_remove (self->priv->inactivity_src);
+
+  self->priv->inactivity_src = g_timeout_add_seconds (3,
+      empathy_call_window_toolbar_timeout, self);
+
+  return FALSE;
+}
+
+static gboolean
 empathy_call_window_configure_event_cb (GtkWidget *widget,
     GdkEvent  *event,
     EmpathyCallWindow *self)
@@ -800,13 +843,27 @@ empathy_call_window_destroyed_cb (GtkWidget *object,
 }
 
 static void
+empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
+    GParamSpec *pspec,
+    ClutterBindConstraint *constraint)
+{
+  ClutterActorBox allocation;
+
+  clutter_actor_get_allocation_box (stage, &allocation);
+
+  clutter_bind_constraint_set_offset (constraint,
+      allocation.y2 - allocation.y1 -
+      FLOATING_TOOLBAR_SPACING - FLOATING_TOOLBAR_HEIGHT);
+}
+
+static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv;
   GtkBuilder *gui;
   GtkWidget *top_vbox;
   gchar *filename;
-  ClutterConstraint *size_constraint;
+  ClutterConstraint *constraint;
   ClutterActor *remote_avatar;
   GtkStyleContext *context;
   GdkRGBA rgba;
@@ -912,10 +969,10 @@ empathy_call_window_init (EmpathyCallWindow *self)
       priv->video_box,
       NULL);
 
-  size_constraint = clutter_bind_constraint_new (
+  constraint = clutter_bind_constraint_new (
       gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
       CLUTTER_BIND_SIZE, 0);
-  clutter_actor_add_constraint (priv->video_box, size_constraint);
+  clutter_actor_add_constraint (priv->video_box, constraint);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
   remote_avatar = gtk_clutter_actor_new_with_contents (
@@ -932,6 +989,55 @@ empathy_call_window_init (EmpathyCallWindow *self)
   create_video_output_widget (self);
   create_audio_input (self);
   create_video_input (self);
+
+  priv->floating_toolbar = empathy_rounded_actor_new ();
+
+  gtk_widget_reparent (priv->bottom_toolbar,
+      gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (priv->floating_toolbar)));
+
+  constraint = clutter_bind_constraint_new (
+      gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
+      CLUTTER_BIND_Y, 0);
+
+  clutter_actor_add_constraint (priv->floating_toolbar, constraint);
+
+  g_signal_connect (
+      gtk_clutter_embed_get_stage (GTK_CLUTTER_EMBED (priv->video_container)),
+      "notify::allocation",
+      G_CALLBACK (empathy_call_window_stage_allocation_changed_cb),
+      constraint);
+
+  clutter_actor_set_size (priv->floating_toolbar,
+      FLOATING_TOOLBAR_WIDTH, FLOATING_TOOLBAR_HEIGHT);
+  clutter_actor_set_opacity (priv->floating_toolbar, FLOATING_TOOLBAR_OPACITY);
+
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
+      priv->floating_toolbar,
+      CLUTTER_BIN_ALIGNMENT_CENTER,
+      CLUTTER_BIN_ALIGNMENT_END);
+
+  clutter_actor_raise_top (priv->floating_toolbar);
+
+  /* Transitions for the floating toolbar */
+  priv->transitions = clutter_state_new ();
+
+  /* all transitions last for 2s */
+  clutter_state_set_duration (priv->transitions, NULL, NULL, 2000);
+
+  /* transition from any state to "fade-out" state */
+  clutter_state_set (priv->transitions, NULL, "fade-out",
+      priv->floating_toolbar,
+      "opacity", CLUTTER_EASE_OUT_QUAD, 0,
+      NULL);
+
+  /* transition from any state to "fade-in" state */
+  clutter_state_set (priv->transitions, NULL, "fade-in",
+      priv->floating_toolbar,
+      "opacity", CLUTTER_EASE_OUT_QUAD, FLOATING_TOOLBAR_OPACITY,
+      NULL);
+
+  /* put the actor into the "fade-in" state with no animation */
+  clutter_state_warp_to_state (priv->transitions, "fade-in");
 
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
@@ -958,6 +1064,11 @@ empathy_call_window_init (EmpathyCallWindow *self)
   empathy_call_window_fullscreen_set_video_widget (priv->fullscreen,
       priv->video_container);
 
+  /* We hide the bottom toolbar after 3s of inactivity and show it
+   * again on mouse movement */
+  priv->inactivity_src = g_timeout_add_seconds (3,
+      empathy_call_window_toolbar_timeout, self);
+
   g_signal_connect (G_OBJECT (priv->fullscreen->leave_fullscreen_button),
       "clicked", G_CALLBACK (empathy_call_window_fullscreen_cb), self);
 
@@ -972,6 +1083,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   g_signal_connect (G_OBJECT (self), "key-press-event",
       G_CALLBACK (empathy_call_window_key_press_cb), self);
+
+  g_signal_connect (self, "motion-notify-event",
+      G_CALLBACK (empathy_call_window_motion_notify_cb), self);
 
   priv->timer = g_timer_new ();
 
@@ -1005,7 +1119,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   /* Don't display labels in both toolbars */
   gtk_toolbar_set_style (GTK_TOOLBAR (priv->toolbar), GTK_TOOLBAR_ICONS);
-  gtk_toolbar_set_style (GTK_TOOLBAR (priv->bottom_toolbar), GTK_TOOLBAR_ICONS);
 }
 
 /* Instead of specifying a width and a height, we specify only one size. That's
@@ -1498,6 +1611,12 @@ empathy_call_window_dispose (GObject *object)
       priv->got_video_src = 0;
     }
 
+  if (priv->inactivity_src > 0)
+    {
+      g_source_remove (priv->inactivity_src);
+      priv->inactivity_src = 0;
+    }
+
   tp_clear_object (&priv->pipeline);
   tp_clear_object (&priv->video_input);
   tp_clear_object (&priv->audio_input);
@@ -1506,6 +1625,7 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->fullscreen);
   tp_clear_object (&priv->camera_monitor);
   tp_clear_object (&priv->settings);
+  tp_clear_object (&priv->transitions);
 
   g_list_free_full (priv->notifiers, g_object_unref);
 
@@ -2229,6 +2349,7 @@ empathy_call_window_show_video_output_cb (gpointer user_data)
     {
       gtk_widget_hide (self->priv->remote_user_avatar_widget);
       clutter_actor_show (self->priv->video_output);
+      clutter_actor_raise_top (self->priv->floating_toolbar);
     }
 
   return FALSE;
@@ -2992,6 +3113,9 @@ empathy_call_window_video_output_motion_notify (GtkWidget *widget,
   if (priv->is_fullscreen)
     {
       empathy_call_window_fullscreen_show_popup (priv->fullscreen);
+
+      /* Show the bottom toolbar */
+      empathy_call_window_motion_notify_cb (NULL, NULL, window);
       return TRUE;
     }
   return FALSE;
