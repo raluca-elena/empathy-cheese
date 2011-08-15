@@ -931,7 +931,7 @@ static void
 create_video_preview (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  ClutterLayoutManager *layout, *layout_center;
+  ClutterLayoutManager *layout, *layout_center, *layout_end;
   ClutterActor *preview;
   ClutterActor *box;
   ClutterActor *b;
@@ -986,10 +986,15 @@ create_video_preview (EmpathyCallWindow *self)
   button = gtk_button_new_with_label (_("i"));
   b = gtk_clutter_actor_new_with_contents (button);
 
-  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (layout_center),
-      b,
-      CLUTTER_BIN_ALIGNMENT_END,
+  layout_end = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
       CLUTTER_BIN_ALIGNMENT_END);
+  box = clutter_box_new (layout_end);
+  clutter_actor_set_size (box,
+      SELF_VIDEO_SECTION_WIDTH,
+      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (box), b);
+  clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
 
   g_signal_connect (button, "clicked",
       G_CALLBACK (empathy_call_window_preview_button_clicked_cb),
