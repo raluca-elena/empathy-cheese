@@ -201,30 +201,6 @@ empathy_camera_monitor_dispose (GObject *object)
   G_OBJECT_CLASS (empathy_camera_monitor_parent_class)->dispose (object);
 }
 
-static GObject *
-empathy_camera_monitor_constructor (GType type,
-    guint n_props,
-    GObjectConstructParam *props)
-{
-  GObject *retval;
-
-  if (manager_singleton)
-    {
-      retval = g_object_ref (manager_singleton);
-    }
-  else
-    {
-      retval =
-          G_OBJECT_CLASS (empathy_camera_monitor_parent_class)->
-          constructor (type, n_props, props);
-
-      manager_singleton = EMPATHY_CAMERA_MONITOR (retval);
-      g_object_add_weak_pointer (retval, (gpointer) & manager_singleton);
-    }
-
-  return retval;
-}
-
 static void
 empathy_camera_monitor_constructed (GObject *object)
 {
@@ -241,7 +217,6 @@ empathy_camera_monitor_class_init (EmpathyCameraMonitorClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->dispose = empathy_camera_monitor_dispose;
-  object_class->constructor = empathy_camera_monitor_constructor;
   object_class->constructed = empathy_camera_monitor_constructed;
   object_class->get_property = empathy_camera_monitor_get_property;
 
@@ -291,7 +266,28 @@ empathy_camera_monitor_init (EmpathyCameraMonitor *self)
 EmpathyCameraMonitor *
 empathy_camera_monitor_dup_singleton (void)
 {
-  return g_object_new (EMPATHY_TYPE_CAMERA_MONITOR, NULL);
+  GObject *retval;
+
+  if (manager_singleton)
+    {
+      retval = g_object_ref (manager_singleton);
+    }
+  else
+    {
+      retval = g_object_new (EMPATHY_TYPE_CAMERA_MONITOR, NULL);
+
+      manager_singleton = EMPATHY_CAMERA_MONITOR (retval);
+      g_object_add_weak_pointer (retval, (gpointer) &manager_singleton);
+    }
+
+  return EMPATHY_CAMERA_MONITOR (retval);
+}
+
+EmpathyCameraMonitor *
+empathy_camera_monitor_new (void)
+{
+  return EMPATHY_CAMERA_MONITOR (
+      g_object_new (EMPATHY_TYPE_CAMERA_MONITOR, NULL));
 }
 
 gboolean empathy_camera_monitor_get_available (EmpathyCameraMonitor *self)

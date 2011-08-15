@@ -59,6 +59,7 @@ GType empathy_camera_get_type (void) G_GNUC_CONST;
 GType empathy_camera_monitor_get_type (void) G_GNUC_CONST;
 
 EmpathyCameraMonitor *empathy_camera_monitor_dup_singleton (void);
+EmpathyCameraMonitor *empathy_camera_monitor_new (void);
 
 gboolean empathy_camera_monitor_get_available (EmpathyCameraMonitor *self);
 
