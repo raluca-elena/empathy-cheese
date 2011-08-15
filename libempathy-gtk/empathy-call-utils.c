@@ -30,6 +30,7 @@
 
 #include "empathy-call-utils.h"
 
+#include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-request-util.h>
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -197,9 +198,22 @@ void
 empathy_call_set_stream_properties (GstElement *element)
 {
   GstStructure *props;
+  GSettings *gsettings_call;
+  gboolean echo_cancellation;
+  gchar *tmp;
 
-  props = gst_structure_from_string (
-      "props,media.role=phone", NULL);
+  gsettings_call = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
+
+  echo_cancellation = g_settings_get_boolean (gsettings_call,
+      EMPATHY_PREFS_CALL_ECHO_CANCELLATION);
+
+  tmp = g_strdup_printf ("props,media.role=phone%s", echo_cancellation ?
+      ",filter.want=echo-cancel": "");
+
+  props = gst_structure_from_string (tmp, NULL);
   g_object_set (element, "stream-properties", props, NULL);
   gst_structure_free (props);
+
+  g_free (tmp);
+  g_object_unref (gsettings_call);
 }
