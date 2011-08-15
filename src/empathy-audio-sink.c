@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include <gst/audio/audio.h>
+#include <telepathy-glib/telepathy-glib.h>
 
 #include "empathy-audio-sink.h"
 
@@ -230,6 +231,15 @@ empathy_audio_sink_request_new_pad (GstElement *element,
   self->priv->sink = gst_element_factory_make (sink_element, NULL);
   if (self->priv->sink == NULL)
     goto error;
+
+  if (!tp_strdiff (sink_element, "pulsesink"))
+    {
+      GstStructure *props;
+
+      props = gst_structure_from_string ("props,media.role=phone", NULL);
+      g_object_set (self->priv->sink, "stream-properties", props, NULL);
+      gst_structure_free (props);
+    }
 
   gst_bin_add (GST_BIN (bin), self->priv->sink);
 

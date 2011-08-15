@@ -132,7 +132,6 @@ main (int argc,
 
   empathy_gtk_init ();
   g_set_application_name (_("Empathy Audio/Video Client"));
-  g_setenv ("PULSE_PROP_media.role", "phone", TRUE);
 
   /* Make empathy and empathy-av appear as the same app in gnome-shell */
   gdk_set_program_class ("Empathy");

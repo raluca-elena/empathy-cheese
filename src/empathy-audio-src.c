@@ -394,6 +394,15 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   priv->src = gst_element_factory_make (src_element, NULL);
   gst_bin_add (GST_BIN (obj), priv->src);
 
+  if (!tp_strdiff (src_element, "pulsesrc"))
+    {
+      GstStructure *props;
+
+      props = gst_structure_from_string ("props,media.role=phone", NULL);
+      g_object_set (priv->src, "stream-properties", props, NULL);
+      gst_structure_free (props);
+    }
+
   priv->volume = gst_element_factory_make ("volume", NULL);
   g_object_ref (priv->volume);
 
