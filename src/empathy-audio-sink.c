@@ -23,6 +23,8 @@
 #include <stdlib.h>
 
 #include <gst/audio/audio.h>
+#include <gst/interfaces/streamvolume.h>
+
 #include <telepathy-glib/telepathy-glib.h>
 
 #include <libempathy-gtk/empathy-call-utils.h>
@@ -154,8 +156,7 @@ check_volume_support (EmpathyGstAudioSink *self)
 {
   gchar *name;
 
-  if (g_object_class_find_property (G_OBJECT_GET_CLASS (self->priv->sink),
-        "volume"))
+  if (GST_IS_STREAM_VOLUME (self->priv->sink))
     return TRUE;
 
   name = gst_element_get_name (self->priv->sink);
