@@ -79,8 +79,6 @@
 #define FLOATING_TOOLBAR_HEIGHT 36
 #define FLOATING_TOOLBAR_SPACING 20
 
-#define SELF_VIDEO_MARGIN 10
-
 /* The avatar's default width and height are set to the same value because we
    want a square icon. */
 #define REMOTE_CONTACT_AVATAR_DEFAULT_WIDTH EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT
@@ -562,8 +560,8 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
       1);
 
   clutter_actor_set_size (box1,
-      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN +
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   layout2 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
@@ -575,8 +573,8 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
   box2 = clutter_box_new (layout2);
 
   clutter_actor_set_size (box2,
-      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_MARGIN);
+      SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
+      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_actor_set_size (rectangle,
       SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGTH + 5);
@@ -629,31 +627,31 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
 
   clutter_actor_get_geometry (self->priv->video_box, &box);
 
-  if (0 + SELF_VIDEO_MARGIN <= event_x &&
-      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      0 + SELF_VIDEO_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+  if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_TOP_LEFT;
     }
-  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
-      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      0 + SELF_VIDEO_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+  else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_TOP_RIGHT;
     }
-  else if (0 + SELF_VIDEO_MARGIN <= event_x &&
-      event_x <= (0 + SELF_VIDEO_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+  else if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
+      event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_BOTTOM_LEFT;
     }
-  else if (box.width - SELF_VIDEO_MARGIN >= event_x &&
-      event_x >= (box.width - SELF_VIDEO_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
-      box.height - SELF_VIDEO_MARGIN - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+  else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
+      event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
+      box.height - SELF_VIDEO_SECTION_MARGIN - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
     {
       pos = PREVIEW_POS_BOTTOM_RIGHT;
     }
