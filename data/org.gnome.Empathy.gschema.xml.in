@@ -236,6 +236,11 @@ present them to the user immediately.</_description>
       <_summary>Camera device</_summary>
       <_description>Default camera device to use in video calls, e.g. /dev/video0.</_description>
     </key>
+    <key name="echo-cancellation" type="b">
+      <default>true</default>
+      <_summary>Echo cancellation support</_summary>
+      <_description>Whether to enable Pulseaudio's echo cancellation filter.</_description>
+    </key>
   </schema>
   <schema id="org.gnome.Empathy.hints" path="/org/gnome/empathy/hints/">
     <key name="close-main-window" type="b">

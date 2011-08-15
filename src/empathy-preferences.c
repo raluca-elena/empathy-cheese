@@ -88,6 +88,7 @@ struct _EmpathyPreferencesPriv {
 
 	GtkWidget *scale_call_volume;
 	GtkWidget *adj_call_volume;
+	GtkWidget *echo_cancellation;
 
 	GtkWidget *treeview_spell_checker;
 
@@ -278,6 +279,12 @@ preferences_setup_widgets (EmpathyPreferences *preferences)
 			 EMPATHY_PREFS_CALL_SOUND_VOLUME,
 			 priv->adj_call_volume,
 			 "value",
+			 G_SETTINGS_BIND_DEFAULT);
+
+	g_settings_bind (priv->gsettings_call,
+			 EMPATHY_PREFS_CALL_ECHO_CANCELLATION,
+			 priv->echo_cancellation,
+			 "active",
 			 G_SETTINGS_BIND_DEFAULT);
 
 	g_settings_bind (priv->gsettings,
@@ -1197,6 +1204,7 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_location_resource_gps", &priv->checkbutton_location_resource_gps,
 		"call_volume_scale", &priv->scale_call_volume,
 		"call_volume_adjustment", &priv->adj_call_volume,
+		"call_echo_cancellation", &priv->echo_cancellation,
 		NULL);
 	g_free (filename);
 

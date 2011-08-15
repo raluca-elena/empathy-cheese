@@ -54,6 +54,7 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_CALL_SCHEMA EMPATHY_PREFS_SCHEMA ".call"
 #define EMPATHY_PREFS_CALL_SOUND_VOLUME            "volume"
 #define EMPATHY_PREFS_CALL_CAMERA_DEVICE           "camera-device"
+#define EMPATHY_PREFS_CALL_ECHO_CANCELLATION       "echo-cancellation"
 
 #define EMPATHY_PREFS_CHAT_SCHEMA EMPATHY_PREFS_SCHEMA ".conversation"
 #define EMPATHY_PREFS_CHAT_SHOW_SMILEYS            "graphical-smileys"
