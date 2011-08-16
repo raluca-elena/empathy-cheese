@@ -189,11 +189,11 @@ PKG_CHECK_MODULES(EMPATHY_AV,
 # -----------------------------------------------------------
 # Call interface
 # -----------------------------------------------------------
-AC_ARG_WITH(call,
-            AC_HELP_STRING([--enable-call=@<:@no/yes/auto@:>@],
+AC_ARG_ENABLE(call,
+            AS_HELP_STRING([--enable-call=@<:@no/yes/auto@:>@],
             [build with Call interface support]),,
-            [with_call=auto])
-if test "x$with_call" != "xno" ; then
+            [enable_call=auto])
+if test "x$enable_call" != "xno" ; then
    PKG_CHECK_MODULES(EMPATHY_CALL,
    [
       farsight2-0.10
@@ -210,7 +210,7 @@ else
   have_call=no
 fi
 
-if test "x$with_call" = "xyes" -a "x$have_call" != "xyes"; then
+if test "x$enable_call" = "xyes" -a "x$have_call" != "xyes"; then
    AC_MSG_ERROR([Could not find Call handler dependencies.])
 fi
 AM_CONDITIONAL(HAVE_CALL, test "x$have_call" = "xyes")
@@ -219,11 +219,11 @@ AM_CONDITIONAL(HAVE_CALL, test "x$have_call" = "xyes")
 # -----------------------------------------------------------
 # Call support in tp-logger
 # -----------------------------------------------------------
-AC_ARG_WITH(call-logs,
-            AC_HELP_STRING([--enable-call-logs=@<:@no/yes/auto@:>@],
+AC_ARG_ENABLE(call-logs,
+            AS_HELP_STRING([--enable-call-logs=@<:@no/yes/auto@:>@],
             [build with call logs support]),,
-            [with_call_logs=auto])
-if test "x$with_call_logs" != "xno" ; then
+            [enable_call_logs=auto])
+if test "x$enable_call_logs" != "xno" ; then
    SAVE_CFLAGS=$CFLAGS
    SAVE_CPPFLAGS=$CPPFLAGS
    CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
@@ -242,7 +242,7 @@ else
   have_call_logs=no
 fi
 
-if test "x$with_call_logs" = "xyes" -a "x$have_call_logs" != "xyes"; then
+if test "x$enable_call_logs" = "xyes" -a "x$have_call_logs" != "xyes"; then
    AC_MSG_ERROR([Call logs support requested but telepathy-logger wasn't
                  built with --enable-call])
 fi
