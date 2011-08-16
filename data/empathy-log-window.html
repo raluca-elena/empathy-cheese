@@ -1,4 +1,7 @@
-<html>
+<?xml version="1.0">
+<html
+ xmlns="http://www.w3.org/TR/html4/"
+ xmlns:empathy="http://live.gnome.org/Empathy">
   <head>
     <style type="text/css">
 html, body, div, p {
@@ -41,6 +44,8 @@ img.icon {
 }
     </style>
     <script type="text/javascript">
+var EMPATHY_NS='http://live.gnome.org/Empathy';
+
 function filterNodes (node, tagName)
 {
   var out = new Array();
@@ -148,6 +153,9 @@ function insertRow (path, text, icon, date_)
   else
     parentnode.insertBefore(newnode, nodes[path[i]]);
 
+  // set the path
+  newnode.setAttributeNS(EMPATHY_NS, 'path', path.join(':'));
+
   // add an expander
   var toggle = document.createElement('span');
   newnode.appendChild(toggle);
@@ -219,6 +227,22 @@ function reorderRows (path, new_order)
   // For reference: new_order[new_pos] = old_pos
   for (var i = 0; i < nodes.length; i++)
     node.appendChild(nodes[new_order[i]]);
+
+  // recursively update the path
+  function updatePaths(path, node)
+    {
+      var nodes = getNodes(node);
+
+      for (var i = 0; i < nodes.length; i++)
+        {
+          var newpath = path.concat([i]);
+
+          nodes[i].setAttributeNS(EMPATHY_NS, 'path', newpath.join(':'));
+          updatePaths(newpath, nodes[i]);
+        }
+    }
+
+  updatePaths(path, node);
 }
 
 function hasChildRows (path, has_children)

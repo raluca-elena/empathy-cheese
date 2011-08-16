@@ -66,6 +66,8 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
 
+#define EMPATHY_NS "http://live.gnome.org/Empathy"
+
 G_DEFINE_TYPE (EmpathyLogWindow, empathy_log_window, GTK_TYPE_WINDOW);
 
 struct _EmpathyLogWindowPriv
@@ -105,6 +107,7 @@ struct _EmpathyLogWindowPriv
   TpBaseClient *observer;
 
   EmpathyContact *selected_contact;
+  EmpathyContact *events_contact;
 
   EmpathyCameraMonitor *camera_monitor;
   GBinding *button_video_binding;
@@ -150,6 +153,9 @@ static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
 static void start_spinner                        (void);
 
 static void log_window_create_observer           (EmpathyLogWindow *window);
+static gboolean log_window_events_button_press_event (GtkWidget *webview,
+    GdkEventButton *event, EmpathyLogWindow *self);
+static void log_window_update_buttons_sensitivity (EmpathyLogWindow *self);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -565,6 +571,7 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->log_manager);
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
+  tp_clear_object (&self->priv->events_contact);
   tp_clear_object (&self->priv->camera_monitor);
 
   tp_clear_object (&self->priv->gsettings_chat);
@@ -768,6 +775,11 @@ empathy_log_window_init (EmpathyLogWindow *self)
   g_signal_connect (self->priv->store_events, "row-has-child-toggled",
       G_CALLBACK (store_events_has_child_rows), self);
 
+  /* track clicked row */
+  g_signal_connect (self->priv->webview, "button-press-event",
+      G_CALLBACK (log_window_events_button_press_event), self);
+
+  log_window_update_buttons_sensitivity (self);
   gtk_widget_show (GTK_WIDGET (self));
 }
 
@@ -2039,8 +2051,10 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   GtkTreePath *path;
   gboolean profile, chat, call, video;
 
-  tp_clear_object (&self->priv->selected_contact);
+  profile = chat = call = video = FALSE;
+
   tp_clear_object (&self->priv->button_video_binding);
+  tp_clear_object (&self->priv->selected_contact);
 
   view = GTK_TREE_VIEW (self->priv->treeview_who);
   model = gtk_tree_view_get_model (view);
@@ -2087,27 +2101,11 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   /* If the Who pane doesn't contain a contact (e.g. it has many
    * selected, or has 'Anyone', let's try to get the contact from
    * the selected event. */
-  goto out; // FIXME: reimplement
-  // view = GTK_TREE_VIEW (self->priv->treeview_events);
-  // model = gtk_tree_view_get_model (view);
-  // selection = gtk_tree_view_get_selection (view);
 
-  // if (gtk_tree_selection_count_selected_rows (selection) != 1)
-  //   goto out;
-
-  // if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
-  //   goto out;
-
-  gtk_tree_model_get (model, &iter,
-      COL_EVENTS_ACCOUNT, &account,
-      COL_EVENTS_TARGET, &target,
-      -1);
-
-  self->priv->selected_contact = empathy_contact_from_tpl_contact (account,
-      target);
-
-  g_object_unref (account);
-  g_object_unref (target);
+  if (self->priv->events_contact != NULL)
+    self->priv->selected_contact = g_object_ref (self->priv->events_contact);
+  else
+    goto out;
 
   capabilities = empathy_contact_get_capabilities (self->priv->selected_contact);
 
@@ -2504,14 +2502,70 @@ who_row_is_separator (GtkTreeModel *model,
   return (type == COL_TYPE_SEPARATOR);
 }
 
-// static void
-// log_window_events_changed_cb (GtkTreeSelection *selection,
-//     EmpathyLogWindow *self)
-// {
-//   DEBUG ("log_window_events_changed_cb");
-// 
-//   log_window_update_buttons_sensitivity (self);
-// }
+static gboolean
+log_window_events_button_press_event (GtkWidget *webview,
+    GdkEventButton *event,
+    EmpathyLogWindow *self)
+{
+  WebKitHitTestResult *hit = webkit_web_view_get_hit_test_result (
+      WEBKIT_WEB_VIEW (webview), event);
+  WebKitDOMNode *inner_node;
+
+  tp_clear_object (&self->priv->events_contact);
+
+  g_object_get (hit,
+      "inner-node", &inner_node,
+      NULL);
+
+  if (inner_node != NULL)
+    {
+      GtkTreeModel *model = GTK_TREE_MODEL (self->priv->store_events);
+      WebKitDOMNode *node;
+      const char *path = NULL;
+      GtkTreeIter iter;
+
+      /* walk back up the DOM tree looking for a node with empathy:path set */
+      for (node = inner_node; node != NULL;
+           node = webkit_dom_node_get_parent_node (node))
+        {
+          if (!WEBKIT_DOM_IS_ELEMENT (node))
+            continue;
+
+          path = webkit_dom_element_get_attribute_ns (
+              WEBKIT_DOM_ELEMENT (node), EMPATHY_NS, "path");
+
+          if (!tp_str_empty (path))
+            break;
+        }
+
+      /* look up the contact for this path */
+      if (!tp_str_empty (path) &&
+          gtk_tree_model_get_iter_from_string (model, &iter, path))
+        {
+          TpAccount *account;
+          TplEntity *target;
+
+          gtk_tree_model_get (model, &iter,
+              COL_EVENTS_ACCOUNT, &account,
+              COL_EVENTS_TARGET, &target,
+              -1);
+
+          self->priv->events_contact = empathy_contact_from_tpl_contact (
+              account, target);
+
+          g_object_unref (account);
+          g_object_unref (target);
+        }
+
+      g_object_unref (inner_node);
+    }
+
+  g_object_unref (hit);
+
+  log_window_update_buttons_sensitivity (self);
+
+  return FALSE;
+}
 
 static void
 log_window_events_setup (EmpathyLogWindow *self)
