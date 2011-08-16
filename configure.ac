@@ -80,12 +80,12 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR(.)
 
-AM_INIT_AUTOMAKE(1.9 dist-bzip2 no-define -Wno-portability)
+AM_INIT_AUTOMAKE([1.11 no-define -Wno-portability tar-ustar no-dist-gzip dist-xz])
 
-# Support silent build rules, requires at least automake-1.11. Disable
+# Support silent build rules. Disable
 # by either passing --disable-silent-rules to configure or passing V=1
 # to make
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AM_SILENT_RULES([yes])
 
 # Check for programs
 AC_PROG_CC

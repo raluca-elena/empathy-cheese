@@ -88,11 +88,8 @@ class Project:
 	def get_md5sums(self):
 		md5sums = ''
 
-		cmd = 'md5sum %s-%s.tar.gz' % (self.package_name.lower(), self.package_version)
+		cmd = 'md5sum %s-%s.tar.xz' % (self.package_name.lower(), self.package_version)
 		md5sums += self.exec_cmd(cmd)
-
-		cmd = 'md5sum %s-%s.tar.bz2' % (self.package_name.lower(), self.package_version)
-		md5sums += self.exec_cmd(cmd).strip()
 
 		return md5sums
 
@@ -259,7 +256,7 @@ class Project:
 
 	def upload_tarball(self):
 		username = self._get_username()
-		tarball = '%s-%s.tar.gz' % (self.package_name.lower(), self.package_version)
+		tarball = '%s-%s.tar.xz' % (self.package_name.lower(), self.package_version)
 
 		cmd = 'scp %s %s@%s:' % (tarball, username, upload_server)
 		self.exec_cmd(cmd)
