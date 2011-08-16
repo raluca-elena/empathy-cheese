@@ -898,12 +898,12 @@ empathy_call_window_preview_enter_event_cb (ClutterActor *actor,
     EmpathyCallWindow *self)
 {
   ClutterActor *rectangle;
-  PreviewPosition pos;
 
-  pos = empathy_call_window_get_preview_position (self, event->x, event->y);
-  rectangle = empathy_call_window_get_preview_rectangle (self, pos);
+  rectangle = empathy_call_window_get_preview_rectangle (self,
+      self->priv->preview_pos);
 
-  empathy_call_window_highlight_preview_rectangle (self, pos);
+  empathy_call_window_highlight_preview_rectangle (self,
+      self->priv->preview_pos);
 
   clutter_actor_show (rectangle);
 
