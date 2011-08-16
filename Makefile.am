@@ -9,7 +9,7 @@ if HAVE_NST
 SUBDIRS += $(NST_SUBDIRS)
 endif
 
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 DISTCHECK_CONFIGURE_FLAGS =		\
 	--disable-scrollkeeper		\

@@ -19,10 +19,13 @@ m4_define(empathy_maybe_datestamp,
 m4_define(empathy_version, empathy_full_version[]empathy_maybe_datestamp)
 
 
-AC_INIT(Empathy, empathy_version, http://bugzilla.gnome.org/browse.cgi?product=empathy)
+AC_INIT([Empathy],
+        [empathy_version],
+        [http://bugzilla.gnome.org/browse.cgi?product=empathy],
+        [empathy],
+        [https://live.gnome.org/Empathy])
 
-
-AC_PREREQ(2.59)
+AC_PREREQ([2.64])
 AC_COPYRIGHT([
   Copyright (C) 2003-2007 Imendio AB
   Copyright (C) 2007-2010 Collabora Ltd.
@@ -77,8 +80,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR(.)
 
-GNOME_COMMON_INIT
-
 AM_INIT_AUTOMAKE(1.9 dist-bzip2 no-define -Wno-portability)
 
 # Support silent build rules, requires at least automake-1.11. Disable
@@ -86,14 +87,17 @@ AM_INIT_AUTOMAKE(1.9 dist-bzip2 no-define -Wno-portability)
 # to make
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-AC_ISC_POSIX
+# Check for programs
 AC_PROG_CC
 AC_HEADER_STDC
-AM_PROG_LIBTOOL
 AM_PROG_MKDIR_P
 AM_PATH_GLIB_2_0
 AC_PATH_XTRA
-IT_PROG_INTLTOOL([0.35.0])
+
+# Initialize libtool
+LT_PREREQ([2.2])
+LT_INIT
+
 GNOME_DOC_INIT([0.17.3])
 AC_PATH_PROG(DBUS_BINDING_TOOL, dbus-binding-tool)
 GLIB_GSETTINGS
@@ -116,7 +120,8 @@ AS_COMPILER_FLAG(-Wall, ERROR_CFLAGS="-Wall", ERROR_CFLAGS="")
 AS_COMPILER_FLAG(-Werror, werror=yes, werror=no)
 
 AC_ARG_ENABLE(Werror,
-  AC_HELP_STRING([--disable-Werror],[compile without -Werror (normally enabled in development builds)]),
+  AS_HELP_STRING([--disable-Werror],
+                 [compile without -Werror (normally enabled in development builds)]),
     werror=$enableval, :)
 
 AS_COMPILER_FLAG(-Wextra, wextra=yes, wextra=no)
@@ -251,7 +256,8 @@ fi
 # evolution-data-server (about-me)
 # -----------------------------------------------------------
 AC_ARG_WITH(eds,
-            AC_HELP_STRING([--with-eds], [build with evolution-data-server support]),,
+            AS_HELP_STRING([--with-eds],
+                           [build with evolution-data-server support]),,
             [with_eds=yes])
 if test x"$with_eds" = x"yes" ; then
    PKG_CHECK_MODULES(EDS, [libebook-1.2])
@@ -263,7 +269,8 @@ fi
 # -----------------------------------------------------------
 
 AC_ARG_ENABLE(debug,
-  AC_HELP_STRING([--disable-debug],[compile without debug code]),
+  AS_HELP_STRING([--disable-debug],
+                 [compile without debug code]),
     enable_debug=$enableval, enable_debug=yes )
 
 if test x$enable_debug = xyes; then
@@ -273,6 +280,7 @@ fi
 # -----------------------------------------------------------
 # Language Support
 # -----------------------------------------------------------
+IT_PROG_INTLTOOL([0.40.0])
 
 GETTEXT_PACKAGE=empathy
 AC_SUBST(GETTEXT_PACKAGE)
@@ -595,7 +603,8 @@ AC_SUBST(CONTROL_CENTER_EMBEDDING_LIBS)
 
 # Optional dependency for avatar selection
 AC_ARG_WITH([cheese],
-            AS_HELP_STRING([--with-cheese], [enable cheese webcam support]),,
+            AS_HELP_STRING([--with-cheese],
+                           [enable cheese webcam support]),,
             with_cheese=auto)
 
 if test x"$with_cheese" != x"no" ; then
@@ -616,14 +625,15 @@ AM_CONDITIONAL(BUILD_CHEESE, test x${have_cheese} = xyes)
 # Coding style checks
 # -----------------------------------------------------------
 AC_ARG_ENABLE(coding-style-checks,
-  AC_HELP_STRING([--disable-coding-style-checks],
+  AS_HELP_STRING([--disable-coding-style-checks],
                  [do not check coding style using grep]),
-    [ENABLE_CODING_STYLE_CHECKS=$enableval], [ENABLE_CODING_STYLE_CHECKS=yes])
+    [ENABLE_CODING_STYLE_CHECKS=$enableval],
+    [ENABLE_CODING_STYLE_CHECKS=yes])
 
 AC_SUBST([ENABLE_CODING_STYLE_CHECKS])
 # -----------------------------------------------------------
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
    Makefile
    data/Makefile
    data/empathy.desktop.in
@@ -641,6 +651,7 @@ AC_OUTPUT([
    tests/xml/Makefile
    tools/Makefile
 ])
+AC_OUTPUT
 
 echo "
 Configure summary:
