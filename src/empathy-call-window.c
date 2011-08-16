@@ -72,7 +72,7 @@
 #define CONTENT_HBOX_CHILDREN_PACKING_PADDING 3
 
 #define SELF_VIDEO_SECTION_WIDTH 120
-#define SELF_VIDEO_SECTION_HEIGTH 90
+#define SELF_VIDEO_SECTION_HEIGHT 90
 #define SELF_VIDEO_SECTION_MARGIN 10
 
 #define FLOATING_TOOLBAR_OPACITY 192
@@ -625,7 +625,7 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
 
   clutter_actor_set_size (box1,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
+      SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   layout2 = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,
@@ -638,10 +638,10 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
 
   clutter_actor_set_size (box2,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
+      SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_actor_set_size (rectangle,
-      SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGTH + 5);
+      SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGHT + 5);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box1), box2);
   clutter_container_add_actor (CLUTTER_CONTAINER (box2), rectangle);
@@ -694,28 +694,28 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
   if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
       event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
       0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGHT))
     {
       pos = PREVIEW_POS_TOP_LEFT;
     }
   else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
       event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
       0 + SELF_VIDEO_SECTION_MARGIN <= event_y &&
-      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGTH))
+      event_y <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_HEIGHT))
     {
       pos = PREVIEW_POS_TOP_RIGHT;
     }
   else if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
       event_x <= (0 + SELF_VIDEO_SECTION_MARGIN + (gint) SELF_VIDEO_SECTION_WIDTH) &&
       box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGHT))
     {
       pos = PREVIEW_POS_BOTTOM_LEFT;
     }
   else if (box.width - SELF_VIDEO_SECTION_MARGIN >= event_x &&
       event_x >= (box.width - SELF_VIDEO_SECTION_MARGIN - (gint) SELF_VIDEO_SECTION_WIDTH) &&
       box.height - SELF_VIDEO_SECTION_MARGIN - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING >= event_y &&
-      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGTH))
+      event_y >= (box.height - SELF_VIDEO_SECTION_MARGIN - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING - (gint) SELF_VIDEO_SECTION_HEIGHT))
     {
       pos = PREVIEW_POS_BOTTOM_RIGHT;
     }
@@ -942,7 +942,7 @@ create_video_preview (EmpathyCallWindow *self)
 
   preview = clutter_texture_new ();
   clutter_actor_set_size (preview,
-      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
+      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGHT);
   priv->video_preview_sink = clutter_gst_video_sink_new (
       CLUTTER_TEXTURE (preview));
 
@@ -960,7 +960,7 @@ create_video_preview (EmpathyCallWindow *self)
   priv->video_preview = clutter_box_new (layout);
   clutter_actor_set_size (priv->video_preview,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN +
+      SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
   /* We have a box with the margins and the video in the middle inside
@@ -971,7 +971,7 @@ create_video_preview (EmpathyCallWindow *self)
   box = clutter_box_new (layout_center);
   clutter_actor_set_size (box,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
-      SELF_VIDEO_SECTION_HEIGTH + 2 * SELF_VIDEO_SECTION_MARGIN);
+      SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), preview);
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
@@ -991,7 +991,7 @@ create_video_preview (EmpathyCallWindow *self)
   box = clutter_box_new (layout_end);
   clutter_actor_set_size (box,
       SELF_VIDEO_SECTION_WIDTH,
-      SELF_VIDEO_SECTION_HEIGTH + SELF_VIDEO_SECTION_MARGIN);
+      SELF_VIDEO_SECTION_HEIGHT + SELF_VIDEO_SECTION_MARGIN);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), b);
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
