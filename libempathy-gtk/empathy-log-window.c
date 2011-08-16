@@ -3049,13 +3049,12 @@ log_window_got_messages_for_date_cb (GObject *manager,
     gpointer user_data)
 {
   Ctx *ctx = user_data;
-  // GtkTreeView *view;
-  // GtkTreeModel *model;
-  // GtkTreeIter iter;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
   GList *events;
   GList *l;
   GError *error = NULL;
-  // gint n;
+  gint n;
 
   if (log_window == NULL)
     {
@@ -3129,18 +3128,28 @@ log_window_got_messages_for_date_cb (GObject *manager,
     }
   g_list_free (events);
 
-  // view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  // model = gtk_tree_view_get_model (view);
-  // n = gtk_tree_model_iter_n_children (model, NULL) - 1;
+  model = GTK_TREE_MODEL (log_window->priv->store_events);
+  n = gtk_tree_model_iter_n_children (model, NULL) - 1;
 
-  // if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
-  //   {
-  //     GtkTreePath *path;
+  if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
+    {
+      GtkTreePath *path;
+      char *str, *script;
 
-  //     path = gtk_tree_model_get_path (model, &iter);
-  //     gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
-  //     gtk_tree_path_free (path);
-  //   }
+      path = gtk_tree_model_get_path (model, &iter);
+      str = gtk_tree_path_to_string (path);
+
+      script = g_strdup_printf ("javascript:scrollToRow([%s]);",
+          g_strdelimit (str, ":", ','));
+
+      webkit_web_view_execute_script (
+          WEBKIT_WEB_VIEW (log_window->priv->webview),
+          script);
+
+      gtk_tree_path_free (path);
+      g_free (str);
+      g_free (script);
+    }
 
  out:
   ctx_free (ctx);

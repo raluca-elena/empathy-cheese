@@ -237,6 +237,31 @@ function hasChildRows (path, has_children)
   else
     toggle.style.display = 'none';
 }
+
+function getOffset (node)
+{
+  var y = 0;
+
+  while (node != null && !isNaN(node.offsetTop))
+    {
+      y += node.offsetTop - node.scrollTop;
+      node = node.offsetParent;
+    }
+
+  return y;
+}
+
+function scrollToRow (path)
+{
+  var treeview = document.getElementById('treeview');
+  var node = treeview;
+
+  // walk the tree
+  for (var i = 0; i < path.length; i++)
+    node = getNodes(node)[path[i]];
+
+  window.scrollTo(0, getOffset(node));
+}
     </script>
   </head>
 
