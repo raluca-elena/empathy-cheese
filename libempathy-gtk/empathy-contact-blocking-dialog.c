@@ -758,9 +758,11 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   GtkBuilder *gui;
   char *filename;
   GtkWidget *contents;
-  GtkWidget *account_hbox, *blocked_contacts_view;
+  GtkWidget *account_hbox, *blocked_contacts_view, *blocked_contacts_sw,
+      *remove_toolbar;
   GtkEntryCompletion *completion;
   TpAccountManager *am;
+  GtkStyleContext *context;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_CONTACT_BLOCKING_DIALOG,
@@ -782,8 +784,10 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       "add-button", &self->priv->add_button,
       "add-contact-entry", &self->priv->add_contact_entry,
       "blocked-contacts", &self->priv->blocked_contacts,
+      "blocked-contacts-sw", &blocked_contacts_sw,
       "blocked-contacts-view", &blocked_contacts_view,
       "remove-button", &self->priv->remove_button,
+      "remove-toolbar", &remove_toolbar,
       NULL);
 
   empathy_builder_connect (gui, self,
@@ -791,6 +795,12 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
       "add-contact-entry", "activate", contact_blocking_dialog_add_contact,
       "remove-button", "clicked", contact_blocking_dialog_remove_contacts,
       NULL);
+
+  /* join the remove toolbar to the treeview */
+  context = gtk_widget_get_style_context (blocked_contacts_sw);
+  gtk_style_context_set_junction_sides (context, GTK_JUNCTION_BOTTOM);
+  context = gtk_widget_get_style_context (remove_toolbar);
+  gtk_style_context_set_junction_sides (context, GTK_JUNCTION_TOP);
 
   /* add the contents to the dialog */
   gtk_container_add (

@@ -821,7 +821,19 @@ list_get_contact_blocking_capabilities_cb (TpProxy *conn,
 	EmpathyTpContactListPriv *priv = GET_PRIV (list);
 	TpContactBlockingCapabilities caps;
 
-	g_return_if_fail (G_VALUE_HOLDS_UINT (value));
+	if (in_error != NULL) {
+		DEBUG ("Get(Blocking, ContactBlockingCapabilities) on %s failed: %s",
+		       tp_proxy_get_object_path (conn),
+		       in_error->message);
+		return;
+	}
+
+	if (!G_VALUE_HOLDS_UINT (value)) {
+		DEBUG ("Get(Blocking, ContactBlockingCapabilities) on %s returned a %s, not a uint",
+		       tp_proxy_get_object_path (conn),
+		       G_VALUE_TYPE_NAME (value));
+		return;
+	}
 
 	caps = g_value_get_uint (value);
 
