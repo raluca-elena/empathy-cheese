@@ -144,6 +144,10 @@ struct _EmpathyCallWindowPriv
   ClutterActor *preview_rectangle2;
   ClutterActor *preview_rectangle3;
   ClutterActor *preview_rectangle4;
+  ClutterActor *preview_rectangle_box1;
+  ClutterActor *preview_rectangle_box2;
+  ClutterActor *preview_rectangle_box3;
+  ClutterActor *preview_rectangle_box4;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *remote_user_avatar_toolbar;
@@ -394,6 +398,17 @@ empathy_call_window_prefs_volume_changed_cb (GSettings *settings,
 }
 
 static void
+empathy_call_window_raise_actors (EmpathyCallWindow *self)
+{
+  clutter_actor_raise_top (self->priv->floating_toolbar);
+
+  clutter_actor_raise_top (self->priv->preview_rectangle_box1);
+  clutter_actor_raise_top (self->priv->preview_rectangle_box2);
+  clutter_actor_raise_top (self->priv->preview_rectangle_box3);
+  clutter_actor_raise_top (self->priv->preview_rectangle_box4);
+}
+
+static void
 empathy_call_window_show_video_output (EmpathyCallWindow *self,
     gboolean show)
 {
@@ -402,7 +417,7 @@ empathy_call_window_show_video_output (EmpathyCallWindow *self,
 
   gtk_widget_set_visible (self->priv->remote_user_avatar_widget, !show);
 
-  clutter_actor_raise_top (self->priv->floating_toolbar);
+  empathy_call_window_raise_actors (self);
 }
 
 static void
@@ -605,6 +620,7 @@ empathy_call_window_preview_hidden_button_clicked_cb (GtkButton *button,
 
 static ClutterActor *
 empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
+    ClutterActor **box,
     ClutterBinAlignment x,
     ClutterBinAlignment y)
 {
@@ -616,6 +632,8 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
       CLUTTER_BIN_ALIGNMENT_START);
 
   box1 = clutter_box_new (layout1);
+
+  *box = box1;
 
   rectangle = clutter_rectangle_new_with_color (
       CLUTTER_COLOR_Transparent);
@@ -659,15 +677,19 @@ empathy_call_window_create_preview_rectangles (EmpathyCallWindow *self)
 {
   self->priv->preview_rectangle1 =
       empathy_call_window_create_preview_rectangle (self,
+          &self->priv->preview_rectangle_box1,
           CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_START);
   self->priv->preview_rectangle2 =
       empathy_call_window_create_preview_rectangle (self,
+          &self->priv->preview_rectangle_box2,
           CLUTTER_BIN_ALIGNMENT_START, CLUTTER_BIN_ALIGNMENT_END);
   self->priv->preview_rectangle3 =
       empathy_call_window_create_preview_rectangle (self,
+          &self->priv->preview_rectangle_box3,
           CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_START);
   self->priv->preview_rectangle4 =
       empathy_call_window_create_preview_rectangle (self,
+          &self->priv->preview_rectangle_box4,
           CLUTTER_BIN_ALIGNMENT_END, CLUTTER_BIN_ALIGNMENT_END);
 }
 
@@ -2789,7 +2811,7 @@ empathy_call_window_show_video_output_cb (gpointer user_data)
     {
       gtk_widget_hide (self->priv->remote_user_avatar_widget);
       clutter_actor_show (self->priv->video_output);
-      clutter_actor_raise_top (self->priv->floating_toolbar);
+      empathy_call_window_raise_actors (self);
     }
 
   return FALSE;
