@@ -1,3 +1,63 @@
+NEW in 3.1.5 (16/08/2011)
+============
+
+The "kangaroo currywurst" release.
+
+Empathy now depends on PulseAudio to place calls. When using recent versions of
+PulseAudio (≥ 0.99.2), Empathy now has echo cancellation support.
+
+The new, experimental, call UI gained some new calls features such as
+UI to choose the audio and video device used, a new floating toolbar and the
+ability to move the video preview using drag & drop.
+Empathy and Gabble have to be built with Call support to use this new UI.
+
+
+Dependencies:
+
+ • folks ≥ 0.6.0
+ • libpulse and libpulse-mainloop-glib
+
+Bugs fixed:
+ - Fixed #590048, Change audio input device used in calls (Jonny Lamb)
+ - Fixed #599167, Change video input device (Emilio Pozuelo Monfort)
+ - Fixed #632874, VoIP Dialpad should show letters (Danielle Madeley)
+ - Fixed #654914, empathy-debugger crashed with SIGSEGV in g_type_check_instance() (Danielle Madeley)
+ - Fixed #654958, Missing 5min-timestamps (Guillaume Desmottes)
+ - Fixed #655212, Update for libfolks API changes to AvatarDetails (Philip Withnall)
+ - Fixed #655478, Plural forms (Emilio Pozuelo Monfort)
+ - Fixed #655788, empathy-auth-client crashed with SIGABRT in __kernel_vsyscall() (Alexey Fisher)
+ - Fixed #655884, [New Call UI] Menus (Emilio Pozuelo Monfort)
+ - Fixed #655959, Yahoo not accessible with @rocketmail.com address (Guillaume Desmottes)
+ - Fixed #656020, Factor out EmpathyContactChooser from EmpathyInviteParticipantDialog (Guillaume Desmottes)
+ - Fixed #656065, empathy crashed with SIGSEGV in __strcmp_ssse3() (Press F3 -> Windows for search text) (Emilio Pozuelo Monfort)
+ - Fixed #656150, Floating bottom toolbar (Emilio Pozuelo Monfort)
+ - Fixed #656268, Move video preview (Emilio Pozuelo Monfort)
+ - Fixed #656415, Muting microphone issues (Emilio Pozuelo Monfort)
+ - Fixed #656572, Call window asserts when you try to move the preview (Emilio Pozuelo Monfort)
+ - Fixed #656582, "Input volume" should be hidden if empathy-call isn't enabled (Emilio Pozuelo Monfort)
+
+Translations:
+ - Updated cs Translation (Marek Černocký)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated fa Translation (Arash Mousavi)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated hu Translation (Gabor Kelemen)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pt_BR Translation (Felipe Borges)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated uk Translation (Daniel Korostil)
+ - Updated vi Translation (Ngô Chin, Nguyễn Thái Ngọc Duy)
+ - Updated zh_CN Translation (Aron Xu)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+ - Updated zu Translation (Abel Motha)
+
+Documentation translations:
+ - Updated eu Documentation translation (Inaki Larranaga Murgoitio)
+ - Updated sl Documentation translation (Andrej Žnidaršič)
+ - Updated zh_CN Documentation translation (lainme)
+
 NEW in 3.1.4 (26/07/2011)
 ============
 
