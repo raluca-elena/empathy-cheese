@@ -14,7 +14,6 @@ AM_CPPFLAGS =                                           \
 	$(GEOCLUE_CFLAGS)				\
 	$(GEOCODE_CFLAGS)				\
 	$(MEEGO_CFLAGS)					\
-	$(WEBKIT_CFLAGS)				\
 	$(CHEESE_CFLAGS)				\
 	$(WARN_CFLAGS)					\
 	$(DISABLE_DEPRECATED)
@@ -88,7 +87,11 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-theme-irc.c			\
 	empathy-theme-manager.c			\
 	empathy-tls-dialog.c			\
-	empathy-ui-utils.c
+	empathy-ui-utils.c			\
+	empathy-plist.c				\
+	empathy-theme-adium.c			\
+	empathy-webkit-utils.c			\
+	$(NULL)
 
 libempathy_gtk_headers =			\
 	empathy-account-chooser.h		\
@@ -150,7 +153,12 @@ libempathy_gtk_headers =			\
 	empathy-theme-irc.h			\
 	empathy-theme-manager.h			\
 	empathy-tls-dialog.h			\
-	empathy-ui-utils.h
+	empathy-ui-utils.h			\
+	empathy-plist.h				\
+	empathy-theme-adium.h			\
+	empathy-webkit-utils.h			\
+	$(NULL)
+
 
 libempathy_gtk_la_SOURCES =			\
 	$(libempathy_gtk_handwritten_source)	\
@@ -173,7 +181,6 @@ libempathy_gtk_la_LIBADD =			\
 	$(GEOCODE_LIBS)				\
 	$(GCR_LIBS)				\
 	$(MEEGO_LIBS)				\
-	$(WEBKIT_LIBS)				\
 	$(CHEESE_LIBS)				\
 	$(top_builddir)/libempathy/libempathy.la
 
@@ -274,28 +281,6 @@ else
 EXTRA_DIST +=					\
 	empathy-location-manager.c		\
 	empathy-location-manager.h
-endif
-
-if HAVE_WEBKIT
-libempathy_gtk_handwritten_source +=		\
-	empathy-plist.c				\
-	empathy-theme-adium.c			\
-	empathy-webkit-utils.c			\
-	$(NULL)
-libempathy_gtk_headers +=			\
-	empathy-plist.h				\
-	empathy-theme-adium.h			\
-	empathy-webkit-utils.h			\
-	$(NULL)
-else
-EXTRA_DIST +=					\
-	empathy-plist.c				\
-	empathy-plist.h				\
-	empathy-theme-adium.c			\
-	empathy-theme-adium.h			\
-	empathy-webkit-utils.c			\
-	empathy-webkit-utils.h			\
-	$(NULL)
 endif
 
 CLEANFILES =				\

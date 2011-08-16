@@ -61,7 +61,6 @@
 #include "empathy-images.h"
 #include "empathy-theme-manager.h"
 #include "empathy-ui-utils.h"
-// FIXME: this work forces a dependency on webkit
 #include "empathy-webkit-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER

@@ -43,6 +43,7 @@ LIBNOTIFY_REQUIRED=0.7.0
 TELEPATHY_FARSIGHT_REQUIRED=0.0.14
 TELEPATHY_GLIB_REQUIRED=0.15.3
 TELEPATHY_LOGGER=0.2.10
+WEBKIT_REQUIRED=1.3.13
 
 # Optional deps
 CLUTTER_GTK_REQUIRED=0.90.3
@@ -53,7 +54,6 @@ LIBCHAMPLAIN_GTK_REQUIRED=0.7.1
 LIBCHAMPLAIN_REQUIRED=0.9
 NAUTILUS_SENDTO_REQUIRED=2.90.0
 NETWORK_MANAGER_REQUIRED=0.7.0
-WEBKIT_REQUIRED=1.3.13
 GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 
 # Use --enable-maintainer-mode to disable deprecated symbols,
@@ -174,6 +174,7 @@ PKG_CHECK_MODULES(EMPATHY,
    libcanberra-gtk3 >= $LIBCANBERRA_GTK_REQUIRED
    libnotify >= $LIBNOTIFY_REQUIRED
    gcr-3 >= $GCR_REQUIRED
+   webkitgtk-3.0 >= $WEBKIT_REQUIRED
 ])
 
 PKG_CHECK_MODULES(YELL, [telepathy-yell])
@@ -325,30 +326,6 @@ fi
 
 AM_CONDITIONAL(HAVE_NM, test "x$have_nm" = "xyes")
 AM_CONDITIONAL(HAVE_CONNMAN, test "x$have_connman" = "xyes")
-
-# -----------------------------------------------------------
-# Webkit
-# -----------------------------------------------------------
-AC_ARG_ENABLE(webkit,
-              AS_HELP_STRING([--enable-webkit=@<:@no/yes/auto@:>@],
-                             [build with webkit support]), ,
-                             enable_webkit=auto)
-
-if test "x$enable_webkit" != "xno"; then
-   PKG_CHECK_MODULES(WEBKIT, [webkitgtk-3.0 >= $WEBKIT_REQUIRED],
-        have_webkit="yes", have_webkit="no")
-
-   if test "x$have_webkit" = "xyes"; then
-      AC_DEFINE(HAVE_WEBKIT, 1, [Define if you have libwebkitgtk])
-   fi
-else
-   have_webkit=no
-fi
-
-if test "x$enable_webkit" = "xyes" -a "x$have_webkit" != "xyes"; then
-   AC_MSG_ERROR([Could not find webkit dependencies.])
-fi
-AM_CONDITIONAL(HAVE_WEBKIT, test "x$have_webkit" = "xyes")
 
 # -----------------------------------------------------------
 # gudev
@@ -653,7 +630,6 @@ Configure summary:
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
 	Geocode support (Geoclue)...:  ${have_geocode}
-	Adium themes (Webkit).......:  ${have_webkit}
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
