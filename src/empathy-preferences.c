@@ -1106,7 +1106,7 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 			  preferences);
 }
 
-static gchar*
+static gchar *
 preferences_call_format_volume_cb (GtkScale *scale,
 				   gdouble value)
 {
