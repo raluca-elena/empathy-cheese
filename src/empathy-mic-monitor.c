@@ -622,3 +622,67 @@ empathy_mic_monitor_get_default_finish (EmpathyMicMonitor *self,
   empathy_implement_finish_return_pointer (self,
       empathy_mic_monitor_get_default_async);
 }
+
+/* operation: set default */
+static void
+empathy_mic_monitor_set_default_cb (pa_context *c,
+    int success,
+    void *userdata)
+{
+  GSimpleAsyncResult *result = userdata;
+
+  if (!success)
+    {
+      g_simple_async_result_set_error (result,
+          G_IO_ERROR, G_IO_ERROR_FAILED,
+          "The operation failed for an unknown reason");
+    }
+
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+static void
+operation_set_default (EmpathyMicMonitor *self,
+    GSimpleAsyncResult *result)
+{
+  EmpathyMicMonitorPrivate *priv = self->priv;
+  gchar *name;
+
+  g_assert_cmpuint (pa_context_get_state (priv->context), ==, PA_CONTEXT_READY);
+
+  name = g_simple_async_result_get_op_res_gpointer (result);
+
+  pa_context_set_default_source (priv->context, name,
+      empathy_mic_monitor_set_default_cb, result);
+}
+
+void
+empathy_mic_monitor_set_default_async (EmpathyMicMonitor *self,
+    const gchar *name,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  EmpathyMicMonitorPrivate *priv = self->priv;
+  Operation *operation;
+  GSimpleAsyncResult *simple;
+
+  simple = g_simple_async_result_new (G_OBJECT (self), callback, user_data,
+      empathy_mic_monitor_set_default_async);
+
+  g_simple_async_result_set_op_res_gpointer (simple, g_strdup (name), g_free);
+
+  operation = operation_new (operation_set_default, simple);
+  g_queue_push_tail (priv->operations, operation);
+
+  operations_run (self);
+}
+
+gboolean
+empathy_mic_monitor_set_default_finish (EmpathyMicMonitor *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  empathy_implement_finish_void (self,
+      empathy_mic_monitor_set_default_async);
+}
