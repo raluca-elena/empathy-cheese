@@ -175,8 +175,6 @@ struct _EmpathyCallWindowPriv
 
   /* Coordinates of the preview drag event's start. */
   PreviewPosition preview_pos;
-  gfloat event_x;
-  gfloat event_y;
 
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
@@ -711,6 +709,9 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
   ClutterGeometry box;
   PreviewPosition pos = PREVIEW_POS_NONE;
 
+  g_return_val_if_fail (clutter_actor_has_allocation (self->priv->video_box),
+      pos);
+
   clutter_actor_get_geometry (self->priv->video_box, &box);
 
   if (0 + SELF_VIDEO_SECTION_MARGIN <= event_x &&
@@ -871,11 +872,16 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
     ClutterModifierType modifiers,
     EmpathyCallWindow *self)
 {
+  ClutterActor *stage = clutter_actor_get_stage (actor);
+  ClutterActor *preview = clutter_clone_new (actor);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (stage), preview);
+  clutter_actor_set_position (preview, event_x, event_y);
+
+  clutter_drag_action_set_drag_handle (action, preview);
+
   empathy_call_window_show_preview_rectangles (self, TRUE);
   empathy_call_window_darken_preview_rectangles (self);
-
-  self->priv->event_x = event_x;
-  self->priv->event_y = event_y;
 }
 
 static void
@@ -886,9 +892,16 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     ClutterModifierType modifiers,
     EmpathyCallWindow *self)
 {
+  ClutterActor *preview = clutter_drag_action_get_drag_handle (action);
   PreviewPosition pos;
 
+  /* Get the position before destroying the drag actor, otherwise the
+   * preview_box allocation won't be valid and we won't be able to
+   * calculate the position. */
   pos = empathy_call_window_get_preview_position (self, event_x, event_y);
+
+  /* Destroy the video preview copy that we were dragging */
+  clutter_actor_destroy (preview);
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
@@ -904,9 +917,11 @@ empathy_call_window_preview_on_drag_motion_cb (ClutterDragAction *action,
     EmpathyCallWindow *self)
 {
   PreviewPosition pos;
+  gfloat event_x, event_y;
 
-  pos = empathy_call_window_get_preview_position (self,
-      self->priv->event_x - delta_x, self->priv->event_y + delta_y);
+  clutter_drag_action_get_motion_coords (action, &event_x, &event_y);
+
+  pos = empathy_call_window_get_preview_position (self, event_x, event_y);
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_highlight_preview_rectangle (self, pos);
