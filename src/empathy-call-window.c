@@ -1788,7 +1788,68 @@ static gboolean
 empathy_call_window_on_selected_effect_change_cb (ClutterActor *sender,
     ClutterButtonEvent *event, gpointer self)
 {
-  return FALSE;
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  const gchar *eff_name, *eff_desc;
+  GstElement *new_filter;
+  CheeseEffect *effect;
+  GError *err = NULL;
+  gboolean ok;
+
+  effect = g_object_get_data (G_OBJECT (sender), "effect");
+  eff_name = cheese_effect_get_name (effect);
+  eff_desc = cheese_effect_get_pipeline_desc (effect);
+  new_filter = gst_parse_bin_from_description (eff_desc, TRUE, &err);
+  if (err != NULL)
+    {
+      g_warning ("Error parsing effect name=%s err=%s", eff_name, err->message);
+      g_clear_error (&err);
+      goto err_new_filter;
+    }
+
+  g_object_set (G_OBJECT (priv->video_preview_valve), "drop", TRUE, NULL);
+  gst_element_set_state (priv->video_preview_csp1, GST_STATE_NULL);
+  gst_element_set_state (priv->video_preview_filter, GST_STATE_NULL);
+  gst_element_set_state (priv->video_preview_csp2, GST_STATE_NULL);
+
+  gst_element_unlink_many (priv->video_preview_csp1, priv->video_preview_filter,
+      priv->video_preview_csp2, NULL);
+
+  ok = gst_bin_remove (GST_BIN (priv->pipeline), priv->video_preview_filter);
+  if (!ok)
+    {
+      g_warning ("Error removing previous filter. Discarding new %s.", eff_name);
+      gst_object_unref (GST_OBJECT (new_filter));
+      new_filter = priv->video_preview_filter;
+    }
+  else
+    {
+      priv->video_preview_filter = new_filter;
+      gst_bin_add (GST_BIN (priv->pipeline), priv->video_preview_filter);
+    }
+  ok = gst_element_link_many (priv->video_preview_csp1,
+      priv->video_preview_filter, priv->video_preview_csp2, NULL);
+  if (!ok)
+    {
+      g_warning ("Error linking effect name=%s. Trying without it.", eff_name);
+      gst_bin_remove (GST_BIN (priv->pipeline), priv->video_preview_filter);
+      new_filter = gst_element_factory_make ("identity", NULL);
+      priv->video_preview_filter = new_filter;
+      gst_bin_add (GST_BIN (priv->pipeline), priv->video_preview_filter);
+      gst_element_link_many (priv->video_preview_csp1,
+          priv->video_preview_filter, priv->video_preview_csp2, NULL);
+  }
+
+  g_object_set (G_OBJECT (priv->effects_valve), "drop", TRUE, NULL);
+  clutter_actor_hide (priv->effects_box);
+  clutter_actor_show (priv->video_box);
+
+  gst_element_set_state (priv->video_preview_csp2, GST_STATE_PLAYING);
+  gst_element_set_state (priv->video_preview_filter, GST_STATE_PLAYING);
+  gst_element_set_state (priv->video_preview_csp1, GST_STATE_PLAYING);
+  g_object_set (G_OBJECT (priv->video_preview_valve), "drop", FALSE, NULL);
+
+err_new_filter:
+  return TRUE;
 }
 
 
@@ -2946,8 +3007,8 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       priv->audio_output = NULL;
       priv->audio_output_added = FALSE;
 
-      g_object_clear(&priv->video_input_tee);
-      g_object_clear(&priv->video_preview_tee);
+      g_clear_object (&priv->video_input_tee);
+      g_clear_object (&priv->video_preview_tee);
 
       if (priv->video_preview != NULL)
         clutter_actor_destroy (priv->video_preview);
