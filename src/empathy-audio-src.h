@@ -64,6 +64,8 @@ gdouble empathy_audio_src_get_volume (EmpathyGstAudioSrc *src);
 
 guint empathy_audio_src_get_microphone (EmpathyGstAudioSrc *src);
 
+gboolean empathy_audio_src_supports_changing_mic (EmpathyGstAudioSrc *self);
+
 void empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
     guint microphone, GAsyncReadyCallback callback, gpointer user_data);
 gboolean empathy_audio_src_change_microphone_finish (EmpathyGstAudioSrc *src,

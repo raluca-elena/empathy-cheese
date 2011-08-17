@@ -80,7 +80,7 @@ struct _EmpathyGstAudioSrcPrivate
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_GST_AUDIO_SRC, \
   EmpathyGstAudioSrcPrivate))
 
-static gboolean
+gboolean
 empathy_audio_src_supports_changing_mic (EmpathyGstAudioSrc *self)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
