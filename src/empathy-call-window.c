@@ -65,6 +65,7 @@
 #include "empathy-mic-menu.h"
 #include "empathy-preferences.h"
 #include "empathy-rounded-actor.h"
+#include "empathy-rounded-texture.h"
 #include "empathy-camera-menu.h"
 
 #define CONTENT_HBOX_BORDER_WIDTH 6
@@ -995,7 +996,7 @@ create_video_preview (EmpathyCallWindow *self)
 
   g_assert (priv->video_preview == NULL);
 
-  preview = clutter_texture_new ();
+  preview = empathy_rounded_texture_new ();
   clutter_actor_set_size (preview,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGHT);
   priv->video_preview_sink = clutter_gst_video_sink_new (
