@@ -2092,6 +2092,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
   GtkStyleContext *context;
   GdkRGBA rgba;
   ClutterColor bg;
+  ClutterLayoutManager *root_binlayout;
 
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_CALL_WINDOW, EmpathyCallWindowPriv);
@@ -2184,8 +2185,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
       TRUE, TRUE, 0);
 
   /* root box: contains the avatar/video box and the effects box */
-  priv->root_box = clutter_box_new (clutter_bin_layout_new (
-      CLUTTER_BIN_ALIGNMENT_FILL, CLUTTER_BIN_ALIGNMENT_FILL));
+  root_binlayout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_FILL,
+      CLUTTER_BIN_ALIGNMENT_FILL);
+  priv->root_box = clutter_box_new (root_binlayout);
 
   /* root effects box: will contain boxes with 3x3 tables of effect previews */
   priv->effects_box = clutter_box_new (clutter_bin_layout_new (
@@ -2275,7 +2277,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
       FLOATING_TOOLBAR_WIDTH, FLOATING_TOOLBAR_HEIGHT);
   clutter_actor_set_opacity (priv->floating_toolbar, FLOATING_TOOLBAR_OPACITY);
 
-  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
+  clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (root_binlayout),
       priv->floating_toolbar,
       CLUTTER_BIN_ALIGNMENT_CENTER,
       CLUTTER_BIN_ALIGNMENT_END);
