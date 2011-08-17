@@ -2502,13 +2502,12 @@ who_row_is_separator (GtkTreeModel *model,
   return (type == COL_TYPE_SEPARATOR);
 }
 
-static gboolean
-log_window_events_button_press_event (GtkWidget *webview,
-    GdkEventButton *event,
-    EmpathyLogWindow *self)
+static void
+log_window_find_row (EmpathyLogWindow *self,
+    GdkEventButton *event)
 {
   WebKitHitTestResult *hit = webkit_web_view_get_hit_test_result (
-      WEBKIT_WEB_VIEW (webview), event);
+      WEBKIT_WEB_VIEW (self->priv->webview), event);
   WebKitDOMNode *inner_node;
 
   tp_clear_object (&self->priv->events_contact);
@@ -2563,6 +2562,27 @@ log_window_events_button_press_event (GtkWidget *webview,
   g_object_unref (hit);
 
   log_window_update_buttons_sensitivity (self);
+}
+
+static gboolean
+log_window_events_button_press_event (GtkWidget *webview,
+    GdkEventButton *event,
+    EmpathyLogWindow *self)
+{
+  switch (event->button)
+    {
+      case 1:
+        log_window_find_row (self, event);
+        break;
+
+      case 3:
+        empathy_webkit_context_menu_for_event (
+            WEBKIT_WEB_VIEW (webview), event, 0);
+        return TRUE;
+
+      default:
+        break;
+    }
 
   return FALSE;
 }
