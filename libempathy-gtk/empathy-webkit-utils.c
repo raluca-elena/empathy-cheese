@@ -18,8 +18,13 @@
  * Authors: Xavier Claessens <xclaesse@gmail.com>
  */
 
+#include "config.h"
+
+#include <glib/gi18n.h>
+
 #include "empathy-webkit-utils.h"
 #include "empathy-smiley-manager.h"
+#include "empathy-ui-utils.h"
 
 #define BORING_DPI_DEFAULT 96
 
@@ -162,3 +167,134 @@ empathy_webkit_bind_font_setting (WebKitWebView *webview,
       NULL,
       NULL, NULL);
 }
+
+static void
+empathy_webkit_copy_address_cb (GtkMenuItem *menuitem,
+    gpointer     user_data)
+{
+  WebKitHitTestResult   *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
+  gchar                 *uri;
+  GtkClipboard          *clipboard;
+
+  g_object_get (G_OBJECT (hit_test_result),
+      "link-uri", &uri,
+      NULL);
+
+  clipboard = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
+  gtk_clipboard_set_text (clipboard, uri, -1);
+
+  clipboard = gtk_clipboard_get (GDK_SELECTION_PRIMARY);
+  gtk_clipboard_set_text (clipboard, uri, -1);
+
+  g_free (uri);
+}
+
+static void
+empathy_webkit_open_address_cb (GtkMenuItem *menuitem,
+    gpointer     user_data)
+{
+  WebKitHitTestResult   *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
+  gchar                 *uri;
+
+  g_object_get (G_OBJECT (hit_test_result),
+      "link-uri", &uri,
+      NULL);
+
+  empathy_url_show (GTK_WIDGET (menuitem), uri);
+
+  g_free (uri);
+}
+
+static void
+empathy_webkit_context_menu_selection_done_cb (GtkMenuShell *menu,
+    gpointer user_data)
+{
+  WebKitHitTestResult *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
+
+  g_object_unref (hit_test_result);
+}
+
+void
+empathy_webkit_context_menu_for_event (WebKitWebView *view,
+    GdkEventButton *event,
+    EmpathyWebKitMenuFlags flags)
+{
+  WebKitHitTestResult        *hit_test_result;
+  WebKitHitTestResultContext  context;
+  GtkWidget                  *menu;
+  GtkWidget                  *item;
+
+  hit_test_result = webkit_web_view_get_hit_test_result (view, event);
+  g_object_get (G_OBJECT (hit_test_result),
+      "context", &context,
+      NULL);
+
+  /* The menu */
+  menu = empathy_context_menu_new (GTK_WIDGET (view));
+
+  /* Select all item */
+  item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_ALL, NULL);
+  gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+  g_signal_connect_swapped (item, "activate",
+      G_CALLBACK (webkit_web_view_select_all),
+      view);
+
+  /* Copy menu item */
+  if (webkit_web_view_can_copy_clipboard (view))
+    {
+      item = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, NULL);
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+      g_signal_connect_swapped (item, "activate",
+          G_CALLBACK (webkit_web_view_copy_clipboard),
+          view);
+    }
+
+  /* Clear menu item */
+  if (flags & EMPATHY_WEBKIT_MENU_CLEAR)
+    {
+      item = gtk_separator_menu_item_new ();
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+      item = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLEAR, NULL);
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+      g_signal_connect_swapped (item, "activate",
+          G_CALLBACK (empathy_chat_view_clear),
+          view);
+    }
+
+  /* We will only add the following menu items if we are
+   * right-clicking a link */
+  if (context & WEBKIT_HIT_TEST_RESULT_CONTEXT_LINK)
+    {
+      /* Separator */
+      item = gtk_separator_menu_item_new ();
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+      /* Copy Link Address menu item */
+      item = gtk_menu_item_new_with_mnemonic (_("_Copy Link Address"));
+      g_signal_connect (item, "activate",
+          G_CALLBACK (empathy_webkit_copy_address_cb),
+          hit_test_result);
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+
+      /* Open Link menu item */
+      item = gtk_menu_item_new_with_mnemonic (_("_Open Link"));
+      g_signal_connect (item, "activate",
+          G_CALLBACK (empathy_webkit_open_address_cb),
+          hit_test_result);
+      gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
+    }
+
+  g_signal_connect (GTK_MENU_SHELL (menu), "selection-done",
+      G_CALLBACK (empathy_webkit_context_menu_selection_done_cb),
+      hit_test_result);
+
+  /* Display the menu */
+  gtk_widget_show_all (menu);
+  gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
+      event->button, event->time);
+}
+
