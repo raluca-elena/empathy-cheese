@@ -1040,8 +1040,11 @@ create_video_preview (EmpathyCallWindow *self)
   /* Translators: this is an "Info" label. It should be as short
    * as possible. */
   button = gtk_button_new_with_label (_("i"));
-  priv->preview_shown_button = b =
-      gtk_clutter_actor_new_with_contents (button);
+  priv->preview_shown_button = b = empathy_rounded_actor_new ();
+  gtk_container_add (
+      GTK_CONTAINER (gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (b))),
+      button);
+  clutter_actor_set_size (b, 24, 24);
 
   layout_end = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
       CLUTTER_BIN_ALIGNMENT_END);
@@ -1060,8 +1063,12 @@ create_video_preview (EmpathyCallWindow *self)
   /* Translators: this is an "Info" label. It should be as short
    * as possible. */
   button = gtk_button_new_with_label (_("i"));
-  priv->preview_hidden_button =
-      gtk_clutter_actor_new_with_contents (button);
+  b = empathy_rounded_actor_new ();
+  gtk_container_add (
+      GTK_CONTAINER (gtk_clutter_actor_get_widget (GTK_CLUTTER_ACTOR (b))),
+      button);
+  clutter_actor_set_size (b, 24, 24);
+  priv->preview_hidden_button = b;
 
   clutter_bin_layout_add (CLUTTER_BIN_LAYOUT (priv->video_layout),
       priv->preview_hidden_button,
