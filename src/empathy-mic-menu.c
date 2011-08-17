@@ -372,14 +372,20 @@ empathy_mic_menu_constructed (GObject *obj)
   gtk_action_group_add_action (priv->action_group, priv->anchor_action);
   g_object_unref (priv->anchor_action);
 
+  priv->microphones = g_queue_new ();
+
+  /* Don't bother with any of this if we don't support changing
+   * microphone, so don't listen for microphone changes or enumerate
+   * the available microphones. */
+  if (!empathy_audio_src_supports_changing_mic (audio))
+    return;
+
   tp_g_signal_connect_object (audio, "notify::microphone",
       G_CALLBACK (empathy_mic_menu_notify_microphone_cb), self, 0);
   tp_g_signal_connect_object (priv->mic_monitor, "microphone-added",
       G_CALLBACK (empathy_mic_menu_microphone_added_cb), self, 0);
   tp_g_signal_connect_object (priv->mic_monitor, "microphone-removed",
       G_CALLBACK (empathy_mic_menu_microphone_removed_cb), self, 0);
-
-  priv->microphones = g_queue_new ();
 
   empathy_mic_monitor_list_microphones_async (priv->mic_monitor,
       empathy_mic_menu_list_microphones_cb, self);
