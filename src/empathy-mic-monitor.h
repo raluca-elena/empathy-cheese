@@ -75,6 +75,11 @@ void empathy_mic_monitor_get_current_mic_async (EmpathyMicMonitor *self,
 guint empathy_mic_monitor_get_current_mic_finish (EmpathyMicMonitor *self,
     GAsyncResult *result, GError **error);
 
+void empathy_mic_monitor_get_default_async (EmpathyMicMonitor *self,
+    GAsyncReadyCallback callback, gpointer user_data);
+const gchar * empathy_mic_monitor_get_default_finish (EmpathyMicMonitor *self,
+    GAsyncResult *result, GError **error);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_MIC_MONITOR_H__ */

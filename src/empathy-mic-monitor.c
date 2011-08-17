@@ -564,3 +564,61 @@ empathy_mic_monitor_get_current_mic_finish (EmpathyMicMonitor *self,
   return GPOINTER_TO_UINT (
       g_simple_async_result_get_op_res_gpointer (simple));
 }
+
+/* operation: get default */
+static void
+empathy_mic_monitor_get_default_cb (pa_context *context,
+    const pa_server_info *info,
+    void *userdata)
+{
+  GSimpleAsyncResult *result = userdata;
+
+  /* TODO: it would be nice in future, for consistency, if this gave
+   * the source idx instead of the name. */
+  g_simple_async_result_set_op_res_gpointer (result,
+      g_strdup (info->default_source_name), g_free);
+  g_simple_async_result_complete (result);
+  g_object_unref (result);
+}
+
+static void
+operation_get_default (EmpathyMicMonitor *self,
+    GSimpleAsyncResult *result)
+{
+  EmpathyMicMonitorPrivate *priv = self->priv;
+
+  g_assert_cmpuint (pa_context_get_state (priv->context), ==, PA_CONTEXT_READY);
+
+  /* unset this so we can use it in the cb */
+  g_simple_async_result_set_op_res_gpointer (result, NULL, NULL);
+
+  pa_context_get_server_info (priv->context, empathy_mic_monitor_get_default_cb,
+      result);
+}
+
+void
+empathy_mic_monitor_get_default_async (EmpathyMicMonitor *self,
+    GAsyncReadyCallback callback,
+    gpointer user_data)
+{
+  EmpathyMicMonitorPrivate *priv = self->priv;
+  Operation *operation;
+  GSimpleAsyncResult *simple;
+
+  simple = g_simple_async_result_new (G_OBJECT (self), callback, user_data,
+      empathy_mic_monitor_get_default_async);
+
+  operation = operation_new (operation_get_default, simple);
+  g_queue_push_tail (priv->operations, operation);
+
+  operations_run (self);
+}
+
+const gchar *
+empathy_mic_monitor_get_default_finish (EmpathyMicMonitor *self,
+    GAsyncResult *result,
+    GError **error)
+{
+  empathy_implement_finish_return_pointer (self,
+      empathy_mic_monitor_get_default_async);
+}
