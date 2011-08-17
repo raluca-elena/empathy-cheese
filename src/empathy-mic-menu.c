@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 
 #include "empathy-mic-menu.h"
+#include "empathy-mic-monitor.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -50,6 +51,8 @@ struct _EmpathyMicMenuPrivate
 
   /* Queue of GtkRadioActions. */
   GQueue *microphones;
+
+  EmpathyMicMonitor *mic_monitor;
 };
 
 G_DEFINE_TYPE (EmpathyMicMenu, empathy_mic_menu, G_TYPE_OBJECT);
@@ -263,7 +266,7 @@ empathy_mic_menu_notify_microphone_cb (EmpathyGstAudioSrc *audio,
 }
 
 static void
-empathy_mic_menu_microphone_added_cb (EmpathyGstAudioSrc *audio,
+empathy_mic_menu_microphone_added_cb (EmpathyMicMonitor *monitor,
     guint source_idx,
     const gchar *name,
     const gchar *description,
@@ -277,7 +280,7 @@ empathy_mic_menu_microphone_added_cb (EmpathyGstAudioSrc *audio,
 }
 
 static void
-empathy_mic_menu_microphone_removed_cb (EmpathyGstAudioSrc *audio,
+empathy_mic_menu_microphone_removed_cb (EmpathyMicMonitor *monitor,
     guint source_idx,
     EmpathyMicMenu *self)
 {
@@ -309,16 +312,16 @@ empathy_mic_menu_microphone_removed_cb (EmpathyGstAudioSrc *audio,
 }
 
 static void
-empathy_mic_menu_get_microphones_cb (GObject *source_object,
+empathy_mic_menu_list_microphones_cb (GObject *source_object,
     GAsyncResult *result,
     gpointer user_data)
 {
-  EmpathyGstAudioSrc *audio = EMPATHY_GST_AUDIO_SRC (source_object);
+  EmpathyMicMonitor *monitor = EMPATHY_MIC_MONITOR (source_object);
   EmpathyMicMenu *self = user_data;
   GError *error = NULL;
   const GList *mics = NULL;
 
-  mics = empathy_audio_src_get_microphones_finish (audio, result, &error);
+  mics = empathy_mic_monitor_list_microphones_finish (monitor, result, &error);
 
   if (error != NULL)
     {
@@ -329,7 +332,7 @@ empathy_mic_menu_get_microphones_cb (GObject *source_object,
 
   for (; mics != NULL; mics = mics->next)
     {
-      EmpathyAudioSrcMicrophone *mic = mics->data;
+      EmpathyMicrophone *mic = mics->data;
 
       empathy_mic_menu_add_microphone (self, mic->name,
           mic->description, mic->index, mic->is_monitor);
@@ -356,6 +359,8 @@ empathy_mic_menu_constructed (GObject *obj)
 
   /* Okay let's go go go. */
 
+  priv->mic_monitor = empathy_mic_monitor_new ();
+
   priv->action_group = gtk_action_group_new ("EmpathyMicMenu");
   gtk_ui_manager_insert_action_group (ui_manager, priv->action_group, -1);
   /* the UI manager now owns this */
@@ -369,15 +374,15 @@ empathy_mic_menu_constructed (GObject *obj)
 
   tp_g_signal_connect_object (audio, "notify::microphone",
       G_CALLBACK (empathy_mic_menu_notify_microphone_cb), self, 0);
-  tp_g_signal_connect_object (audio, "microphone-added",
+  tp_g_signal_connect_object (priv->mic_monitor, "microphone-added",
       G_CALLBACK (empathy_mic_menu_microphone_added_cb), self, 0);
-  tp_g_signal_connect_object (audio, "microphone-removed",
+  tp_g_signal_connect_object (priv->mic_monitor, "microphone-removed",
       G_CALLBACK (empathy_mic_menu_microphone_removed_cb), self, 0);
 
   priv->microphones = g_queue_new ();
 
-  empathy_audio_src_get_microphones_async (audio,
-      empathy_mic_menu_get_microphones_cb, self);
+  empathy_mic_monitor_list_microphones_async (priv->mic_monitor,
+      empathy_mic_menu_list_microphones_cb, self);
 }
 
 static void
@@ -389,6 +394,8 @@ empathy_mic_menu_dispose (GObject *obj)
   if (priv->microphones != NULL)
     g_queue_free (priv->microphones);
   priv->microphones = NULL;
+
+  tp_clear_object (&priv->mic_monitor);
 
   G_OBJECT_CLASS (empathy_mic_menu_parent_class)->dispose (obj);
 }

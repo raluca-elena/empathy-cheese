@@ -123,6 +123,8 @@ empathy_av_SOURCES = \
 	empathy-video-widget.h \
 	ev-sidebar.c \
 	ev-sidebar.h \
+	empathy-mic-monitor.c \
+	empathy-mic-monitor.h
 	$(NULL)
 
 nodist_empathy_av_SOURCES = $(BUILT_SOURCES)
@@ -176,7 +178,9 @@ empathy_call_SOURCES = \
        empathy-mic-menu.c \
        empathy-mic-menu.h \
        empathy-rounded-actor.c \
-       empathy-rounded-actor.h
+       empathy-rounded-actor.h \
+       empathy-mic-monitor.c \
+       empathy-mic-monitor.h
 
 nodist_empathy_call_SOURCES = $(BUILT_SOURCES)
 
