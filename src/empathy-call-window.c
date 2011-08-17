@@ -65,6 +65,7 @@
 #include "empathy-mic-menu.h"
 #include "empathy-preferences.h"
 #include "empathy-rounded-actor.h"
+#include "empathy-rounded-rectangle.h"
 #include "empathy-rounded-texture.h"
 #include "empathy-camera-menu.h"
 
@@ -635,11 +636,9 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
 
   *box = box1;
 
-  rectangle = clutter_rectangle_new_with_color (
-      CLUTTER_COLOR_Transparent);
-
-  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle),
-      1);
+  rectangle = empathy_rounded_rectangle_new (
+      SELF_VIDEO_SECTION_WIDTH + 5,
+      SELF_VIDEO_SECTION_HEIGHT + 5);
 
   clutter_actor_set_size (box1,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
@@ -657,9 +656,6 @@ empathy_call_window_create_preview_rectangle (EmpathyCallWindow *self,
   clutter_actor_set_size (box2,
       SELF_VIDEO_SECTION_WIDTH + 2 * SELF_VIDEO_SECTION_MARGIN,
       SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN);
-
-  clutter_actor_set_size (rectangle,
-      SELF_VIDEO_SECTION_WIDTH + 5, SELF_VIDEO_SECTION_HEIGHT + 5);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box1), box2);
   clutter_container_add_actor (CLUTTER_CONTAINER (box2), rectangle);
@@ -824,18 +820,20 @@ empathy_call_window_highlight_preview_rectangle (EmpathyCallWindow *self,
 
   rectangle = empathy_call_window_get_preview_rectangle (self, pos);
 
-  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 3);
-  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
-      CLUTTER_COLOR_Red);
+  empathy_rounded_rectangle_set_border_width (
+      EMPATHY_ROUNDED_RECTANGLE (rectangle), 5);
+  empathy_rounded_rectangle_set_border_color (
+      EMPATHY_ROUNDED_RECTANGLE (rectangle), CLUTTER_COLOR_Red);
 }
 
 static void
 empathy_call_window_darken_preview_rectangle (EmpathyCallWindow *self,
     ClutterActor *rectangle)
 {
-  clutter_rectangle_set_border_width (CLUTTER_RECTANGLE (rectangle), 1);
-  clutter_rectangle_set_border_color (CLUTTER_RECTANGLE (rectangle),
-      CLUTTER_COLOR_Black);
+  empathy_rounded_rectangle_set_border_width (
+      EMPATHY_ROUNDED_RECTANGLE (rectangle), 1);
+  empathy_rounded_rectangle_set_border_color (
+      EMPATHY_ROUNDED_RECTANGLE (rectangle), CLUTTER_COLOR_Black);
 }
 
 static void
