@@ -179,6 +179,8 @@ empathy_call_SOURCES = \
        empathy-mic-menu.h \
        empathy-rounded-actor.c \
        empathy-rounded-actor.h \
+       empathy-rounded-rectangle.c \
+       empathy-rounded-rectangle.h \
        empathy-rounded-texture.c \
        empathy-rounded-texture.h \
        empathy-mic-monitor.c \
