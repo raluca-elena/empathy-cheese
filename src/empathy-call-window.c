@@ -445,8 +445,6 @@ create_video_output_widget (EmpathyCallWindow *self)
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_box),
       priv->video_output);
 
-  gtk_widget_add_events (priv->video_container,
-      GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect (G_OBJECT (priv->video_container), "button-press-event",
       G_CALLBACK (empathy_call_window_video_button_press_cb), self);
 }
