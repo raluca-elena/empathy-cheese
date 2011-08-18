@@ -4459,6 +4459,12 @@ empathy_call_window_set_send_video (EmpathyCallWindow *window,
 
   priv->sending_video = (state == CAMERA_STATE_ON);
 
+#ifdef HAVE_VIDEO_EFFECT
+  /* drop frames so that we don't run the filter uselessly */
+  g_object_set (G_OBJECT (priv->video_preview_valve),
+                "drop", !priv->sending_video, NULL);
+#endif
+
   if (state == CAMERA_STATE_ON)
     {
       /* When we start sending video, we want to show the video preview by
