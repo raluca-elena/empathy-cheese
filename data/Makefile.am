@@ -29,8 +29,12 @@ servicefile_in_files = \
 	org.freedesktop.Telepathy.Client.Empathy.Chat.service.in \
 	org.freedesktop.Telepathy.Client.Empathy.AudioVideo.service.in \
 	org.freedesktop.Telepathy.Client.Empathy.Auth.service.in \
-	org.freedesktop.Telepathy.Client.Empathy.Call.service.in \
 	org.freedesktop.Telepathy.Client.Empathy.FileTransfer.service.in
+
+if HAVE_CALL
+servicefile_in_files += \
+	org.freedesktop.Telepathy.Client.Empathy.Call.service.in
+endif
 
 servicefile_DATA = $(servicefile_in_files:.service.in=.service)
 
@@ -54,8 +58,12 @@ clientfile_DATA = \
 	Empathy.Chat.client \
 	Empathy.AudioVideo.client \
 	Empathy.Auth.client \
-	Empathy.Call.client \
 	Empathy.FileTransfer.client
+
+if HAVE_CALL
+clientfile_DATA += \
+	Empathy.Call.client
+endif
 
 htmldir = $(datadir)/empathy
 html_DATA = \
