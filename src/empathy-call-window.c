@@ -891,6 +891,8 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
 
   clutter_drag_action_set_drag_handle (action, preview);
 
+  clutter_actor_set_opacity (actor, 0);
+
   empathy_call_window_show_preview_rectangles (self, TRUE);
   empathy_call_window_darken_preview_rectangles (self);
 }
@@ -913,6 +915,8 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
 
   /* Destroy the video preview copy that we were dragging */
   clutter_actor_destroy (preview);
+
+  clutter_actor_set_opacity (actor, 255);
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
