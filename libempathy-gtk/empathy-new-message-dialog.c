@@ -42,11 +42,6 @@
 #include "empathy-new-message-dialog.h"
 #include "empathy-account-chooser.h"
 
-typedef struct {
-  EmpathyAccountChooserFilterResultCallback callback;
-  gpointer                                  user_data;
-} FilterCallbackData;
-
 static EmpathyNewMessageDialog *dialog_singleton = NULL;
 
 G_DEFINE_TYPE(EmpathyNewMessageDialog, empathy_new_message_dialog,
@@ -102,56 +97,28 @@ out:
 }
 
 static void
-conn_prepared_cb (GObject *conn,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  FilterCallbackData *data = user_data;
-  GError *myerr = NULL;
-  TpCapabilities *caps;
-
-  if (!tp_proxy_prepare_finish (conn, result, &myerr))
-    {
-      data->callback (FALSE, data->user_data);
-      g_slice_free (FilterCallbackData, data);
-    }
-
-  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
-  data->callback (tp_capabilities_supports_text_chats (caps),
-      data->user_data);
-
-  g_slice_free (FilterCallbackData, data);
-}
-
-static void
 empathy_new_message_account_filter (EmpathyContactSelectorDialog *dialog,
     EmpathyAccountChooserFilterResultCallback callback,
     gpointer callback_data,
     TpAccount *account)
 {
   TpConnection *connection;
-  FilterCallbackData *cb_data;
-  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
-
-  if (tp_account_get_connection_status (account, NULL) !=
-      TP_CONNECTION_STATUS_CONNECTED)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
+  gboolean supported = FALSE;
+  TpCapabilities *caps;
 
   /* check if CM supports 1-1 text chat */
   connection = tp_account_get_connection (account);
   if (connection == NULL)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
+      goto out;
 
-  cb_data = g_slice_new0 (FilterCallbackData);
-  cb_data->callback = callback;
-  cb_data->user_data = callback_data;
-  tp_proxy_prepare_async (connection, features, conn_prepared_cb, cb_data);
+  caps = tp_connection_get_capabilities (connection);
+  if (caps == NULL)
+      goto out;
+
+  supported = tp_capabilities_supports_text_chats (caps);
+
+out:
+  callback (supported, callback_data);
 }
 
 static void
