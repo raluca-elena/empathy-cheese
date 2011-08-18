@@ -114,6 +114,21 @@ empathy_client_factory_dup_channel_features (TpSimpleClientFactory *factory,
 }
 
 static GArray *
+empathy_client_factory_dup_account_features (TpSimpleClientFactory *factory,
+    TpAccount *account)
+{
+  GArray *features;
+  GQuark feature;
+
+  features = chainup->dup_account_features (factory, account);
+
+  feature = TP_ACCOUNT_FEATURE_CONNECTION;
+  g_array_append_val (features, feature);
+
+  return features;
+}
+
+static GArray *
 empathy_client_factory_dup_connection_features (TpSimpleClientFactory *factory,
     TpConnection *connection)
 {
@@ -136,6 +151,9 @@ empathy_client_factory_class_init (EmpathyClientFactoryClass *cls)
   simple_class->create_channel = empathy_client_factory_create_channel;
   simple_class->dup_channel_features =
     empathy_client_factory_dup_channel_features;
+
+  simple_class->dup_account_features =
+    empathy_client_factory_dup_account_features;
 
   simple_class->dup_connection_features =
     empathy_client_factory_dup_connection_features;
