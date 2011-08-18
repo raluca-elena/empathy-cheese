@@ -210,7 +210,6 @@ static void
 chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
     xmlNodePtr node)
 {
-  EmpathyChatroomManagerPriv *priv;
   EmpathyChatroom *chatroom;
   TpAccount *account;
   xmlNodePtr child;
@@ -222,8 +221,6 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
   gboolean always_urgent;
   EmpathyClientFactory *factory;
   GError *error = NULL;
-
-  priv = GET_PRIV (manager);
 
   /* default values. */
   name = NULL;
