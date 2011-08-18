@@ -34,6 +34,7 @@
 #include <telepathy-glib/account-manager.h>
 #include <telepathy-glib/util.h>
 
+#include <libempathy/empathy-client-factory.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-contact-groups.h>
@@ -382,7 +383,7 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 					 GtkSelectionData  *selection)
 {
 	EmpathyContactListViewPriv *priv;
-	TpAccountManager           *account_manager;
+	EmpathyClientFactory       *factory;
 	TpConnection               *connection = NULL;
 	TpAccount                  *account = NULL;
 	DndGetContactData          *data;
@@ -423,12 +424,14 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 		return FALSE;
 	}
 
-	account_manager = tp_account_manager_dup ();
+	factory = empathy_client_factory_dup ();
 	strv = g_strsplit (sel_data, ":", 2);
 	if (g_strv_length (strv) == 2) {
 		account_id = strv[0];
 		contact_id = strv[1];
-		account = tp_account_manager_ensure_account (account_manager, account_id);
+		account = tp_simple_client_factory_ensure_account (
+				TP_SIMPLE_CLIENT_FACTORY (factory),
+				account_id, NULL, NULL);
 	}
 	if (account) {
 		connection = tp_account_get_connection (account);
@@ -438,7 +441,7 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 		DEBUG ("Failed to get connection for account '%s'", account_id);
 		g_free (new_group);
 		g_free (old_group);
-		g_object_unref (account_manager);
+		g_object_unref (factory);
 		return FALSE;
 	}
 
@@ -454,7 +457,7 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 						data, (GDestroyNotify) contact_list_view_dnd_get_contact_free,
 						G_OBJECT (view));
 	g_strfreev (strv);
-	g_object_unref (account_manager);
+	g_object_unref (factory);
 
 	return TRUE;
 }

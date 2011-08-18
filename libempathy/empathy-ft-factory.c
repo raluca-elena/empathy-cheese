@@ -206,20 +206,13 @@ empathy_ft_factory_init (EmpathyFTFactory *self)
 {
   EmpathyFTFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_FT_FACTORY, EmpathyFTFactoryPriv);
-  TpDBusDaemon *dbus;
-  GError *error = NULL;
+  TpAccountManager *am;
 
   self->priv = priv;
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      g_warning ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+  am = tp_account_manager_dup ();
 
-  priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
+  priv->handler = tp_simple_handler_new_with_am (am, FALSE, FALSE,
       EMPATHY_FT_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, self, NULL);
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
@@ -231,7 +224,7 @@ empathy_ft_factory_init (EmpathyFTFactory *self)
         TP_PROP_CHANNEL_REQUESTED, G_TYPE_BOOLEAN, FALSE,
         NULL));
 
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 static void

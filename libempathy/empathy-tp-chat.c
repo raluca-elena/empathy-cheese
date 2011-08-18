@@ -1399,7 +1399,9 @@ tp_chat_iface_init (EmpathyContactListIface *iface)
 }
 
 EmpathyTpChat *
-empathy_tp_chat_new (TpAccount *account,
+empathy_tp_chat_new (
+		     TpSimpleClientFactory *factory,
+		     TpAccount *account,
 		     TpConnection *conn,
 		     const gchar *object_path,
 		     const GHashTable *immutable_properties)
@@ -1411,6 +1413,7 @@ empathy_tp_chat_new (TpAccount *account,
 	g_return_val_if_fail (immutable_properties != NULL, NULL);
 
 	return g_object_new (EMPATHY_TYPE_TP_CHAT,
+			     "factory", factory,
 			     "account", account,
 			     "connection", conn,
 			     "dbus-daemon", conn_proxy->dbus_daemon,

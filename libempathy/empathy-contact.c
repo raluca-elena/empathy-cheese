@@ -940,7 +940,7 @@ empathy_contact_get_account (EmpathyContact *contact)
       /* FIXME: This assume the account manager already exists */
       connection = tp_contact_get_connection (priv->tp_contact);
       priv->account =
-        g_object_ref (empathy_get_account_for_connection (connection));
+        g_object_ref (tp_connection_get_account (connection));
     }
 
   return priv->account;

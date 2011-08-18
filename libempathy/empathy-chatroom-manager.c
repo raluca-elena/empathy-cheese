@@ -35,9 +35,9 @@
 #include <telepathy-glib/simple-observer.h>
 #include <telepathy-glib/util.h>
 
+#include "empathy-client-factory.h"
 #include "empathy-tp-chat.h"
 #include "empathy-chatroom-manager.h"
-#include "empathy-channel-factory.h"
 #include "empathy-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
@@ -220,6 +220,8 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
   gchar *account_id;
   gboolean auto_connect;
   gboolean always_urgent;
+  EmpathyClientFactory *factory;
+  GError *error = NULL;
 
   priv = GET_PRIV (manager);
 
@@ -270,10 +272,17 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
       xmlFree (str);
     }
 
-  account = tp_account_manager_ensure_account (priv->account_manager,
-    account_id);
+  factory = empathy_client_factory_dup ();
+
+  account = tp_simple_client_factory_ensure_account (
+          TP_SIMPLE_CLIENT_FACTORY (factory), account_id, NULL, &error);
+  g_object_unref (factory);
+
   if (account == NULL)
     {
+      DEBUG ("Failed to create account: %s", error->message);
+      g_error_free (error);
+
       g_free (name);
       g_free (room);
       g_free (account_id);
@@ -545,8 +554,6 @@ empathy_chatroom_manager_constructor (GType type,
   EmpathyChatroomManager *self;
   EmpathyChatroomManagerPriv *priv;
   GError *error = NULL;
-  TpDBusDaemon *dbus;
-  EmpathyChannelFactory *factory;
 
   if (chatroom_manager_singleton != NULL)
     return g_object_ref (chatroom_manager_singleton);
@@ -581,20 +588,9 @@ empathy_chatroom_manager_constructor (GType type,
       g_free (dir);
     }
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      g_warning ("Failed to get TpDBusDaemon: %s", error->message);
-
-      g_error_free (error);
-      return obj;
-    }
-
   /* Setup a room observer */
-  priv->observer = tp_simple_observer_new (dbus, TRUE,
+  priv->observer = tp_simple_observer_new_with_am (priv->account_manager, TRUE,
       "Empathy.ChatroomManager", TRUE, observe_channels_cb, self, NULL);
-
-  g_object_unref (dbus);
 
   tp_base_client_take_observer_filter (priv->observer, tp_asv_new (
       TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
@@ -603,14 +599,6 @@ empathy_chatroom_manager_constructor (GType type,
         TP_HANDLE_TYPE_ROOM,
       NULL));
 
-  tp_base_client_add_connection_features_varargs (priv->observer,
-      TP_CONNECTION_FEATURE_CAPABILITIES, NULL);
-
-  factory = empathy_channel_factory_dup ();
-
-  tp_base_client_set_channel_factory (priv->observer,
-      TP_CLIENT_CHANNEL_FACTORY (factory));
-
   if (!tp_base_client_register (priv->observer, &error))
     {
       g_critical ("Failed to register Observer: %s", error->message);
@@ -618,7 +606,6 @@ empathy_chatroom_manager_constructor (GType type,
       g_error_free (error);
     }
 
-  g_object_unref (factory);
   return obj;
 }
 

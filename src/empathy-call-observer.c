@@ -28,7 +28,6 @@
 
 #include <libnotify/notification.h>
 
-#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-images.h>
@@ -349,30 +348,18 @@ empathy_call_observer_init (EmpathyCallObserver *self)
 {
   EmpathyCallObserverPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_CALL_OBSERVER, EmpathyCallObserverPriv);
-  TpDBusDaemon *dbus;
-  EmpathyChannelFactory *factory;
+  TpAccountManager *am;
   GError *error = NULL;
 
   self->priv = priv;
 
   self->priv->notify_mgr = empathy_notify_manager_dup_singleton ();
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      DEBUG ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+  am = tp_account_manager_dup ();
 
-  self->priv->observer = tp_simple_observer_new (dbus, TRUE,
+  self->priv->observer = tp_simple_observer_new_with_am (am, TRUE,
       "Empathy.CallObserver", FALSE,
       observe_channels, self, NULL);
-
-  factory = empathy_channel_factory_dup ();
-  tp_base_client_set_channel_factory (self->priv->observer,
-      TP_CLIENT_CHANNEL_FACTORY (factory));
-  g_object_unref (factory);
 
   /* Observe Call and StreamedMedia channels */
   tp_base_client_take_observer_filter (self->priv->observer,
@@ -398,7 +385,7 @@ empathy_call_observer_init (EmpathyCallObserver *self)
       g_error_free (error);
     }
 
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 EmpathyCallObserver *

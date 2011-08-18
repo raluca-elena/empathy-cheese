@@ -46,6 +46,7 @@
 #include <telepathy-glib/dbus.h>
 #include <telepathy-glib/util.h>
 
+#include "empathy-client-factory.h"
 #include "empathy-utils.h"
 #include "empathy-contact-manager.h"
 #include "empathy-individual-manager.h"
@@ -83,6 +84,8 @@ void
 empathy_init (void)
 {
   static gboolean initialized = FALSE;
+  TpAccountManager *am;
+  EmpathyClientFactory *factory;
 
   if (initialized)
     return;
@@ -103,6 +106,13 @@ empathy_init (void)
   emp_cli_init ();
 
   initialized = TRUE;
+
+  factory = empathy_client_factory_dup ();
+  am = tp_account_manager_new_with_factory (TP_SIMPLE_CLIENT_FACTORY (factory));
+  tp_account_manager_set_default (am);
+
+  g_object_unref (factory);
+  g_object_unref (am);
 }
 
 gboolean
@@ -557,36 +567,6 @@ empathy_service_name_to_display_name (const gchar *service_name)
     }
 
   return service_name;
-}
-
-/* Note: this function depends on the account manager having its core feature
- * prepared. */
-TpAccount *
-empathy_get_account_for_connection (TpConnection *connection)
-{
-  TpAccountManager *manager;
-  TpAccount *account = NULL;
-  GList *accounts, *l;
-
-  manager = tp_account_manager_dup ();
-
-  accounts = tp_account_manager_get_valid_accounts (manager);
-
-  for (l = accounts; l != NULL; l = l->next)
-    {
-      TpAccount *a = l->data;
-
-      if (tp_account_get_connection (a) == connection)
-        {
-          account = a;
-          break;
-        }
-    }
-
-  g_list_free (accounts);
-  g_object_unref (manager);
-
-  return account;
 }
 
 gboolean

@@ -38,6 +38,7 @@
 
 #include <telepathy-glib/telepathy-glib.h>
 
+#include <libempathy/empathy-client-factory.h>
 #include <libempathy/empathy-contact.h>
 #include <libempathy/empathy-message.h>
 #include <libempathy/empathy-chatroom-manager.h>
@@ -1827,7 +1828,7 @@ chat_window_drag_data_received (GtkWidget        *widget,
 		EmpathyChat           *chat = NULL;
 		EmpathyChatWindow     *old_window;
 		TpAccount             *account = NULL;
-		TpAccountManager      *account_manager;
+		EmpathyClientFactory  *factory;
 		const gchar           *id;
 		gchar                **strv;
 		const gchar           *account_id;
@@ -1835,9 +1836,7 @@ chat_window_drag_data_received (GtkWidget        *widget,
 
 		id = (const gchar*) gtk_selection_data_get_data (selection);
 
-		/* FIXME: Perhaps should be sure that the account manager is
-		 * prepared before calling _ensure_account on it. */
-		account_manager = tp_account_manager_dup ();
+		factory = empathy_client_factory_dup ();
 
 		DEBUG ("DND contact from roster with id:'%s'", id);
 
@@ -1846,7 +1845,11 @@ chat_window_drag_data_received (GtkWidget        *widget,
 			account_id = strv[0];
 			contact_id = strv[1];
 			account =
-				tp_account_manager_ensure_account (account_manager, account_id);
+				tp_simple_client_factory_ensure_account (
+				TP_SIMPLE_CLIENT_FACTORY (factory), account_id,
+				 NULL, NULL);
+
+			g_object_unref (factory);
 			if (account != NULL)
 				chat = empathy_chat_window_find_chat (account, contact_id, FALSE);
 		}
@@ -1864,7 +1867,6 @@ chat_window_drag_data_received (GtkWidget        *widget,
 			g_strfreev (strv);
 			return;
 		}
-		g_object_unref (account_manager);
 		g_strfreev (strv);
 
 		old_window = chat_window_find_chat (chat);

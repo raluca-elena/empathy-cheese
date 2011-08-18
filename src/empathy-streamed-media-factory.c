@@ -72,20 +72,13 @@ empathy_streamed_media_factory_init (EmpathyStreamedMediaFactory *obj)
 {
   EmpathyStreamedMediaFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
     EMPATHY_TYPE_STREAMED_MEDIA_FACTORY, EmpathyStreamedMediaFactoryPriv);
-  TpDBusDaemon *dbus;
-  GError *error = NULL;
+  TpAccountManager *am;
 
   obj->priv = priv;
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      g_warning ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+  am = tp_account_manager_dup ();
 
-  priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
+  priv->handler = tp_simple_handler_new_with_am (am, FALSE, FALSE,
       EMPATHY_AV_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, obj, NULL);
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
@@ -114,7 +107,7 @@ empathy_streamed_media_factory_init (EmpathyStreamedMediaFactory *obj)
     "org.freedesktop.Telepathy.Channel.Interface.MediaSignalling/video/h264",
     NULL);
 
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 static GObject *

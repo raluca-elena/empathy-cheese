@@ -30,7 +30,6 @@
 
 #include <telepathy-farstream/telepathy-farstream.h>
 
-#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 
@@ -944,7 +943,6 @@ empathy_call_handler_start_call (EmpathyCallHandler *handler,
     gint64 timestamp)
 {
   EmpathyCallHandlerPriv *priv = GET_PRIV (handler);
-  EmpathyChannelFactory *channel_factory;
   TpAccountChannelRequest *req;
   TpAccount *account;
   GHashTable *request;
@@ -965,11 +963,6 @@ empathy_call_handler_start_call (EmpathyCallHandler *handler,
       priv->initial_audio, priv->initial_video);
 
   req = tp_account_channel_request_new (account, request, timestamp);
-
-  channel_factory = empathy_channel_factory_dup ();
-  tp_account_channel_request_set_channel_factory (req,
-      TP_CLIENT_CHANNEL_FACTORY (channel_factory));
-  g_object_unref (channel_factory);
 
   tp_account_channel_request_create_and_handle_channel_async (req, NULL,
       empathy_call_handler_request_cb, handler);

@@ -31,7 +31,6 @@
 
 #include <telepathy-yell/telepathy-yell.h>
 
-#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-contact-manager.h>
@@ -1371,9 +1370,8 @@ empathy_event_manager_init (EmpathyEventManager *manager)
 {
   EmpathyEventManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
     EMPATHY_TYPE_EVENT_MANAGER, EmpathyEventManagerPriv);
-  TpDBusDaemon *dbus;
   GError *error = NULL;
-  EmpathyChannelFactory *factory;
+  TpAccountManager *am;
 
   manager->priv = priv;
 
@@ -1389,20 +1387,10 @@ empathy_event_manager_init (EmpathyEventManager *manager)
   g_signal_connect (priv->contact_manager, "members-changed",
     G_CALLBACK (event_manager_members_changed_cb), manager);
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      DEBUG ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+   am = tp_account_manager_dup ();
 
-  priv->approver = tp_simple_approver_new (dbus, "Empathy.EventManager", FALSE,
-      approve_channels, manager, NULL);
-
-  /* EmpathyTpChat relies on this feature being prepared */
-  tp_base_client_add_connection_features_varargs (priv->approver,
-    TP_CONNECTION_FEATURE_CAPABILITIES, 0);
+  priv->approver = tp_simple_approver_new_with_am (am, "Empathy.EventManager",
+      FALSE, approve_channels, manager, NULL);
 
   /* Private text channels */
   tp_base_client_take_approver_filter (priv->approver,
@@ -1449,7 +1437,7 @@ empathy_event_manager_init (EmpathyEventManager *manager)
    * EmpathyTpChat and its users to not depend on the connection being
    * prepared with capabilities. I chose the former, obviously. :-) */
 
-  priv->auth_approver = tp_simple_approver_new (dbus,
+  priv->auth_approver = tp_simple_approver_new_with_am (am,
       "Empathy.AuthEventManager", FALSE, approve_channels, manager,
       NULL);
 
@@ -1463,11 +1451,6 @@ empathy_event_manager_init (EmpathyEventManager *manager)
           TP_IFACE_CHANNEL_INTERFACE_SASL_AUTHENTICATION,
         NULL));
 
-  factory = empathy_channel_factory_dup ();
-
-  tp_base_client_set_channel_factory (priv->approver,
-      TP_CLIENT_CHANNEL_FACTORY (factory));
-
   if (!tp_base_client_register (priv->approver, &error))
     {
       DEBUG ("Failed to register Approver: %s", error->message);
@@ -1480,8 +1463,7 @@ empathy_event_manager_init (EmpathyEventManager *manager)
       g_error_free (error);
     }
 
-  g_object_unref (factory);
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 EmpathyEventManager *

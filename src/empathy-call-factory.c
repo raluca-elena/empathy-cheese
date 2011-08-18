@@ -29,7 +29,6 @@
 
 #include <telepathy-yell/telepathy-yell.h>
 
-#include <libempathy/empathy-channel-factory.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
@@ -76,27 +75,14 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
 {
   EmpathyCallFactoryPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (obj,
     EMPATHY_TYPE_CALL_FACTORY, EmpathyCallFactoryPriv);
-  TpDBusDaemon *dbus;
-  EmpathyChannelFactory *factory;
-  GError *error = NULL;
+  TpAccountManager *am;
 
   obj->priv = priv;
 
-  dbus = tp_dbus_daemon_dup (&error);
-  if (dbus == NULL)
-    {
-      g_warning ("Failed to get TpDBusDaemon: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+  am = tp_account_manager_dup ();
 
-  priv->handler = tp_simple_handler_new (dbus, FALSE, FALSE,
+  priv->handler = tp_simple_handler_new_with_am (am, FALSE, FALSE,
       EMPATHY_CALL_BUS_NAME_SUFFIX, FALSE, handle_channels_cb, obj, NULL);
-
-  factory = empathy_channel_factory_new ();
-  tp_base_client_set_channel_factory (priv->handler,
-      TP_CLIENT_CHANNEL_FACTORY (factory));
-  g_object_unref (factory);
 
   tp_base_client_take_handler_filter (priv->handler, tp_asv_new (
         TP_PROP_CHANNEL_CHANNEL_TYPE, G_TYPE_STRING,
@@ -127,7 +113,7 @@ empathy_call_factory_init (EmpathyCallFactory *obj)
     "org.freedesktop.Telepathy.Channel.Interface.MediaSignalling/video/h264",
     NULL);
 
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 static GObject *

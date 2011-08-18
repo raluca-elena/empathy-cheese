@@ -1041,21 +1041,14 @@ observe_channels (TpSimpleObserver *observer,
 static void
 log_window_create_observer (EmpathyLogWindow *self)
 {
-  TpDBusDaemon *dbus;
-  GError *error = NULL;
+  TpAccountManager *am;
 
-  dbus = tp_dbus_daemon_dup (&error);
+  am = tp_account_manager_dup ();
 
-  if (dbus == NULL)
-    {
-      DEBUG ("Could not connect to the bus: %s", error->message);
-      g_error_free (error);
-      return;
-    }
-
-  self->priv->observer = tp_simple_observer_new (dbus, TRUE, "LogWindow",
+  self->priv->observer = tp_simple_observer_new_with_am (am, TRUE, "LogWindow",
       TRUE, observe_channels,
       g_object_ref (self), g_object_unref);
+
   self->priv->channels = g_hash_table_new_full (g_direct_hash, g_direct_equal,
       g_object_unref, g_object_unref);
 
@@ -1077,7 +1070,7 @@ log_window_create_observer (EmpathyLogWindow *self)
 
   tp_base_client_register (self->priv->observer, NULL);
 
-  g_object_unref (dbus);
+  g_object_unref (am);
 }
 
 static TplEntity *

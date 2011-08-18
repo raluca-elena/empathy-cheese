@@ -33,9 +33,9 @@ libempathy_headers =				\
 	empathy-account-settings.h		\
 	empathy-auth-factory.h			\
 	empathy-camera-monitor.h		\
-	empathy-channel-factory.h		\
 	empathy-chatroom-manager.h		\
 	empathy-chatroom.h			\
+	empathy-client-factory.h \
 	empathy-connection-managers.h		\
 	empathy-connectivity.h			\
 	empathy-contact-groups.h		\
@@ -76,9 +76,9 @@ libempathy_handwritten_source =				\
 	empathy-account-settings.c			\
 	empathy-auth-factory.c				\
 	empathy-camera-monitor.c			\
-	empathy-channel-factory.c			\
 	empathy-chatroom-manager.c			\
 	empathy-chatroom.c				\
+	empathy-client-factory.c \
 	empathy-connection-managers.c			\
 	empathy-connectivity.c				\
 	empathy-contact-groups.c			\

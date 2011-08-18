@@ -109,7 +109,7 @@ START_TEST (test_empathy_chatroom_manager_dup_singleton)
         { "name1", "room1", TRUE, TRUE },
         { "name2", "room2", FALSE, TRUE }};
 
-  account_manager = empathy_account_manager_dup_singleton ();
+  account_manager = tp_account_manager_dup ();
   account = get_test_account ();
 
   copy_xml_file (CHATROOM_SAMPLE, CHATROOM_FILE);
@@ -143,7 +143,7 @@ START_TEST (test_empathy_chatroom_manager_add)
         { "name4", "room4", FALSE, FALSE }};
   EmpathyChatroom *chatroom;
 
-  account_manager = empathy_account_manager_dup_singleton ();
+  account_manager = tp_account_manager_dup ();
 
   account = get_test_account ();
 
@@ -203,7 +203,7 @@ START_TEST (test_empathy_chatroom_manager_remove)
   EmpathyChatroom *chatroom;
   EmpathyAccountManager *account_mgr;
 
-  account_mgr = empathy_account_manager_dup_singleton ();
+  account_mgr = tp_account_manager_dup ();
   account = get_test_account ();
 
   copy_xml_file (CHATROOM_SAMPLE, CHATROOM_FILE);
@@ -260,7 +260,7 @@ START_TEST (test_empathy_chatroom_manager_change_favorite)
         { "name2", "room2", FALSE, FALSE }};
   EmpathyChatroom *chatroom;
 
-  account_manager = empathy_account_manager_dup_singleton ();
+  account_manager = tp_account_manager_dup ();
   account = get_test_account ();
 
   copy_xml_file (CHATROOM_SAMPLE, CHATROOM_FILE);
@@ -324,7 +324,7 @@ START_TEST (test_empathy_chatroom_manager_change_chatroom)
         { "name2", "room2", FALSE, TRUE }};
   EmpathyChatroom *chatroom;
 
-  account_manager = empathy_account_manager_dup_singleton ();
+  account_manager = tp_account_manager_dup ();
   account = get_test_account ();
 
   copy_xml_file (CHATROOM_SAMPLE, "foo.xml");

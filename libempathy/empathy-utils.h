@@ -80,8 +80,6 @@ const gchar *empathy_service_name_to_display_name (const gchar *proto_name);
 #define EMPATHY_ARRAY_TYPE_OBJECT (empathy_type_dbus_ao ())
 GType empathy_type_dbus_ao (void);
 
-TpAccount * empathy_get_account_for_connection (TpConnection *connection);
-
 gboolean empathy_account_manager_get_accounts_connected (gboolean *connecting);
 
 void empathy_connect_new_account (TpAccount *account,

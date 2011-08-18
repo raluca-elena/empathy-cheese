@@ -39,6 +39,7 @@
 # include <telepathy-logger/call-event.h>
 #endif
 
+#include "empathy-client-factory.h"
 #include "empathy-message.h"
 #include "empathy-utils.h"
 #include "empathy-enum-types.h"
@@ -352,7 +353,7 @@ EmpathyMessage *
 empathy_message_from_tpl_log_event (TplEvent *logevent)
 {
 	EmpathyMessage *retval = NULL;
-	TpAccountManager *acc_man = NULL;
+	EmpathyClientFactory *factory;
 	TpAccount *account = NULL;
 	TplEntity *receiver = NULL;
 	TplEntity *sender = NULL;
@@ -364,7 +365,7 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 
 	g_return_val_if_fail (TPL_IS_EVENT (logevent), NULL);
 
-	acc_man = tp_account_manager_dup ();
+	factory = empathy_client_factory_dup ();
 	/* FIXME Currently Empathy shows in the log viewer only valid accounts, so it
 	 * won't be selected any non-existing (ie removed) account.
 	 * When #610455 will be fixed, calling tp_account_manager_ensure_account ()
@@ -376,9 +377,10 @@ empathy_message_from_tpl_log_event (TplEvent *logevent)
 	 * If the way EmpathyContact stores the avatar is changes, it might not be
 	 * needed anymore any TpAccount passing and the following call will be
 	 * useless */
-	account = tp_account_manager_ensure_account (acc_man,
-			tpl_event_get_account_path (logevent));
-	g_object_unref (acc_man);
+	account = tp_simple_client_factory_ensure_account (
+			TP_SIMPLE_CLIENT_FACTORY (factory),
+			tpl_event_get_account_path (logevent), NULL, NULL);
+	g_object_unref (factory);
 
 	if (TPL_IS_TEXT_EVENT (logevent)) {
 		TplTextEvent *textevent = TPL_TEXT_EVENT (logevent);
