@@ -209,8 +209,6 @@ struct _EmpathyCallWindowPriv
   gint         effect_pages_count, curr_effect_page;
 #endif /* HAVE_VIDEO_EFFECT */
 
-  GstElement   *effects_tee, *effects_valve;
-
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
@@ -247,14 +245,20 @@ struct _EmpathyCallWindowPriv
   GtkWidget *audio_remote_candidate_info_img;
   GtkWidget *audio_local_candidate_info_img;
 
+  /* Pipeline structure:
+   input ! input_tee ! preview_valve ! csp1 ! filter ! csp2 ! preview_tee ! sink
+   input_tee ! effects_valve ! effects_tee
+   preview_tee is also used to dynamically connect the network sink. */
   GstElement *video_input;
+  GstElement *video_input_tee, *video_preview_valve, *video_preview_csp1,
+             *video_preview_filter, *video_preview_csp2, *video_preview_tee;
+  GstElement *effects_tee, *effects_valve;
   GstElement *video_preview_sink;
   GstElement *video_output_sink;
   GstElement *audio_input;
   GstElement *audio_output;
   gboolean audio_output_added;
   GstElement *pipeline;
-  GstElement *video_tee;
 
   GstElement *funnel;
 
@@ -543,7 +547,8 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
   g_assert (priv->video_preview != NULL);
   g_assert (priv->pipeline != NULL);
   g_assert (priv->video_input != NULL);
-  g_assert (priv->video_tee != NULL);
+  g_assert (priv->video_input_tee != NULL);
+  g_assert (priv->video_preview_tee != NULL);
 
   preview = priv->video_preview_sink;
 
@@ -559,13 +564,13 @@ add_video_preview_to_pipeline (EmpathyCallWindow *self)
       return;
     }
 
-  if (!gst_element_link (priv->video_input, priv->video_tee))
+  if (!gst_element_link (priv->video_input, priv->video_input_tee))
     {
       g_warning ("Could not link video input to video tee");
       return;
     }
 
-  if (!gst_element_link (priv->video_tee, preview))
+  if (!gst_element_link (priv->video_preview_tee, preview))
     {
       g_warning ("Could not link video tee to video preview");
       return;
@@ -1283,7 +1288,6 @@ empathy_call_window_play_camera (EmpathyCallWindow *self,
     gboolean play)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstElement *preview;
   GstState state;
 
   if (priv->video_preview == NULL)
@@ -1302,11 +1306,15 @@ empathy_call_window_play_camera (EmpathyCallWindow *self,
       state = GST_STATE_NULL;
     }
 
-  preview = priv->video_preview_sink;
-
-  gst_element_set_state (preview, state);
-  gst_element_set_state (priv->video_tee, state);
   gst_element_set_state (priv->video_input, state);
+  gst_element_set_state (priv->video_input_tee, state);
+  gst_element_set_state (priv->video_preview_valve, state);
+  gst_element_set_state (priv->video_preview_csp1, state);
+  gst_element_set_state (priv->video_preview_filter, state);
+  gst_element_set_state (priv->video_preview_csp2, state);
+  gst_element_set_state (priv->video_preview_tee, state);
+  gst_element_set_state (priv->video_preview_sink, state);
+
   gst_element_set_state (priv->effects_valve, state);
   gst_element_set_state (priv->effects_tee, state);
 }
@@ -1600,21 +1608,40 @@ create_pipeline (EmpathyCallWindow *self)
   priv->pipeline = gst_pipeline_new (NULL);
   priv->pipeline_playing = FALSE;
 
-  priv->video_tee = gst_element_factory_make ("tee", NULL);
+  priv->video_input_tee = gst_element_factory_make ("tee", "input_tee");
+  priv->video_preview_valve = gst_element_factory_make ("valve", "preview_valve");
+  priv->video_preview_csp1 = gst_element_factory_make ("ffmpegcolorspace", "preview_csp1");
+  priv->video_preview_filter = gst_element_factory_make ("identity", "preview_filter");
+  priv->video_preview_csp2 = gst_element_factory_make ("ffmpegcolorspace", "preview_csp2");
+  priv->video_preview_tee = gst_element_factory_make ("tee", "preview_tee");
+
   priv->effects_valve = gst_element_factory_make ("valve", "effects_valve");
   g_object_set (G_OBJECT (priv->effects_valve), "drop", TRUE, NULL);
   priv->effects_tee = gst_element_factory_make ("tee", "effects_tee");
 
-  gst_object_ref (priv->video_tee);
-  gst_object_sink (priv->video_tee);
+  gst_object_ref (priv->video_input_tee);
+  gst_object_sink (priv->video_input_tee);
 
-  gst_bin_add_many (GST_BIN (priv->pipeline), priv->video_tee,
-      priv->effects_valve, priv->effects_tee, NULL);
+  gst_object_ref (priv->video_preview_tee);
+  gst_object_sink (priv->video_preview_tee);
 
-  ok = gst_element_link_many (priv->video_tee, priv->effects_valve,
+  gst_bin_add_many (GST_BIN (priv->pipeline), priv->video_input_tee,
+      priv->video_preview_valve, priv->video_preview_csp1,
+      priv->video_preview_filter, priv->video_preview_csp2,
+      priv->video_preview_tee, priv->effects_valve,
+      priv->effects_tee, NULL);
+
+  ok = gst_element_link_many (priv->video_input_tee, priv->effects_valve,
       priv->effects_tee, NULL);
   if (!ok)
     g_error ("Unable to link effect preview elements");
+
+  ok = gst_element_link_many (priv->video_input_tee, priv->video_preview_valve,
+      priv->video_preview_csp1, priv->video_preview_filter,
+      priv->video_preview_csp2, priv->video_preview_tee, NULL);
+  if (!ok)
+    g_error ("Unable to link preview elements");
+
 
   bus = gst_pipeline_get_bus (GST_PIPELINE (priv->pipeline));
   priv->bus_message_source_id = gst_bus_add_watch (bus,
@@ -2792,7 +2819,8 @@ empathy_call_window_dispose (GObject *object)
   tp_clear_object (&priv->pipeline);
   tp_clear_object (&priv->video_input);
   tp_clear_object (&priv->audio_input);
-  tp_clear_object (&priv->video_tee);
+  tp_clear_object (&priv->video_input_tee);
+  tp_clear_object (&priv->video_preview_tee);
   tp_clear_object (&priv->ui_manager);
   tp_clear_object (&priv->fullscreen);
   tp_clear_object (&priv->camera_monitor);
@@ -2936,9 +2964,13 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       priv->audio_output = NULL;
       priv->audio_output_added = FALSE;
 
-      if (priv->video_tee != NULL)
-        g_object_unref (priv->video_tee);
-      priv->video_tee = NULL;
+      if (priv->video_input_tee != NULL)
+        g_object_unref (priv->video_input_tee);
+      priv->video_input_tee = NULL;
+
+      if (priv->video_preview_tee != NULL)
+        g_object_unref (priv->video_preview_tee);
+      priv->video_preview_tee = NULL;
 
       if (priv->video_preview != NULL)
         clutter_actor_destroy (priv->video_preview);
@@ -3936,9 +3968,9 @@ empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
         retval = TRUE;
         break;
       case FS_MEDIA_TYPE_VIDEO:
-        if (priv->video_tee != NULL)
+        if (priv->video_preview_tee != NULL)
           {
-            pad = gst_element_get_request_pad (priv->video_tee, "src%d");
+            pad = gst_element_get_request_pad (priv->video_preview_tee, "src%d");
             if (GST_PAD_LINK_FAILED (gst_pad_link (pad, sink)))
               {
                 g_warning ("Could not link video source input pipeline");
@@ -3961,24 +3993,25 @@ static void
 empathy_call_window_remove_video_input (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstElement *preview;
 
   disable_camera (self);
 
   DEBUG ("remove video input");
-  preview = priv->video_preview_sink;
 
   gst_element_set_state (priv->video_input, GST_STATE_NULL);
-  gst_element_set_state (priv->video_tee, GST_STATE_NULL);
-  gst_element_set_state (preview, GST_STATE_NULL);
+  gst_element_set_state (priv->video_input_tee, GST_STATE_NULL);
+  gst_element_set_state (priv->video_preview_tee, GST_STATE_NULL);
+  gst_element_set_state (priv->video_preview_sink, GST_STATE_NULL);
 
   gst_bin_remove_many (GST_BIN (priv->pipeline), priv->video_input,
-    preview, NULL);
+    priv->video_preview_sink, NULL);
 
   g_object_unref (priv->video_input);
   priv->video_input = NULL;
-  g_object_unref (priv->video_tee);
-  priv->video_tee = NULL;
+  g_object_unref (priv->video_preview_tee);
+  priv->video_preview_tee = NULL;
+  g_object_unref (priv->video_input_tee);
+  priv->video_input_tee = NULL;
   clutter_actor_destroy (priv->video_preview);
   priv->video_preview = NULL;
 
