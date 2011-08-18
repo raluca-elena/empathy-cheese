@@ -139,6 +139,7 @@ struct _EmpathyCallWindowPriv
    * alive only during call. */
   ClutterActor *video_output;
   ClutterActor *video_preview;
+  ClutterActor *preview_shown_button;
   ClutterActor *preview_hidden_button;
   ClutterActor *preview_rectangle1;
   ClutterActor *preview_rectangle2;
@@ -892,6 +893,7 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
   clutter_drag_action_set_drag_handle (action, preview);
 
   clutter_actor_set_opacity (actor, 0);
+  clutter_actor_hide (self->priv->preview_shown_button);
 
   empathy_call_window_show_preview_rectangles (self, TRUE);
   empathy_call_window_darken_preview_rectangles (self);
@@ -917,6 +919,7 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
   clutter_actor_destroy (preview);
 
   clutter_actor_set_opacity (actor, 255);
+  clutter_actor_show (self->priv->preview_shown_button);
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
@@ -1036,7 +1039,8 @@ create_video_preview (EmpathyCallWindow *self)
   /* Translators: this is an "Info" label. It should be as short
    * as possible. */
   button = gtk_button_new_with_label (_("i"));
-  b = gtk_clutter_actor_new_with_contents (button);
+  priv->preview_shown_button = b =
+      gtk_clutter_actor_new_with_contents (button);
 
   layout_end = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_END,
       CLUTTER_BIN_ALIGNMENT_END);
