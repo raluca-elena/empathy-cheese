@@ -266,23 +266,6 @@ update_weak_contact (EmpathyIndividualWidget *self)
     }
 }
 
-typedef struct {
-  EmpathyIndividualWidget *widget; /* weak */
-  TpContact *contact; /* owned */
-} DetailsData;
-
-static void
-details_data_free (DetailsData *data)
-{
-  if (data->widget != NULL)
-    {
-      g_object_remove_weak_pointer (G_OBJECT (data->widget),
-          (gpointer *) &data->widget);
-    }
-  g_object_unref (data->contact);
-  g_slice_free (DetailsData, data);
-}
-
 static guint
 details_update_show (EmpathyIndividualWidget *self,
     TpContact *contact)
@@ -373,54 +356,57 @@ details_notify_cb (TpContact *contact,
 }
 
 static void
-details_request_cb (TpContact *contact,
+details_request_cb (GObject *source,
     GAsyncResult *res,
-    DetailsData *data)
+    gpointer user_data)
 {
-  EmpathyIndividualWidget *self = data->widget;
+  EmpathyIndividualWidget *self = user_data;
+  EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+  TpContact *contact = (TpContact *) source;
   gboolean hide_widget = FALSE;
   GError *error = NULL;
 
   if (tp_contact_request_contact_info_finish (contact, res, &error) == TRUE)
-    details_notify_cb (contact, NULL, self);
-  else
-    hide_widget = TRUE;
-
-  g_clear_error (&error);
-
-  if (self != NULL)
     {
-      EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+      details_notify_cb (contact, NULL, self);
+    }
+  else
+    {
+      /* If the request got cancelled it could mean the contact widget is
+       * destroyed, so we should not dereference information */
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        {
+            g_error_free (error);
+            return;
+        }
 
-      if (hide_widget == TRUE)
-        gtk_widget_hide (GET_PRIV (self)->vbox_details);
-
-      tp_clear_object (&priv->details_cancellable);
-
-      tp_g_signal_connect_object (contact, "notify::contact-info",
-          (GCallback) details_notify_cb, self, 0);
+      hide_widget = TRUE;
+      g_error_free (error);
     }
 
-  details_data_free (data);
+  if (hide_widget == TRUE)
+    gtk_widget_hide (GET_PRIV (self)->vbox_details);
+
+  tp_clear_object (&priv->details_cancellable);
+
+  tp_g_signal_connect_object (contact, "notify::contact-info",
+      (GCallback) details_notify_cb, self, 0);
 }
 
 static void
-details_feature_prepared_cb (TpConnection *connection,
-    GAsyncResult *res,
-    DetailsData *data)
+fetch_contact_information (EmpathyIndividualWidget *self)
 {
-  EmpathyIndividualWidget *self = data->widget;
-  EmpathyIndividualWidgetPriv *priv = NULL;
+  EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
+  TpConnection *connection;
 
-  if (tp_proxy_prepare_finish (connection, res, NULL) == FALSE || self == NULL)
+  connection = tp_contact_get_connection (priv->contact);
+
+  if (!tp_proxy_has_interface_by_id (connection,
+          TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_INFO))
     {
-      if (self != NULL)
-        gtk_widget_hide (GET_PRIV (self)->vbox_details);
-      details_data_free (data);
+      gtk_widget_hide (GET_PRIV (self)->vbox_details);
       return;
     }
-
-  priv = GET_PRIV (self);
 
   /* Request the Individual's info */
   gtk_widget_show (priv->vbox_details);
@@ -431,9 +417,9 @@ details_feature_prepared_cb (TpConnection *connection,
   if (priv->details_cancellable == NULL)
     {
       priv->details_cancellable = g_cancellable_new ();
-      tp_contact_request_contact_info_async (data->contact,
-          priv->details_cancellable, (GAsyncReadyCallback) details_request_cb,
-          data);
+
+      tp_contact_request_contact_info_async (priv->contact,
+          priv->details_cancellable, details_request_cb, self);
     }
 }
 
@@ -452,19 +438,7 @@ details_update (EmpathyIndividualWidget *self)
 
   if (priv->contact != NULL)
     {
-      GQuark features[] = { TP_CONNECTION_FEATURE_CONTACT_INFO, 0 };
-      TpConnection *connection;
-      DetailsData *data;
-
-      data = g_slice_new (DetailsData);
-      data->widget = self;
-      g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &data->widget);
-      data->contact = g_object_ref (priv->contact);
-
-      /* First, make sure the CONTACT_INFO feature is ready on the connection */
-      connection = tp_contact_get_connection (priv->contact);
-      tp_proxy_prepare_async (connection, features,
-          (GAsyncReadyCallback) details_feature_prepared_cb, data);
+      fetch_contact_information (self);
     }
 }
 
