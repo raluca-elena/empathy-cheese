@@ -106,20 +106,26 @@ out:
 }
 
 static void
-conn_prepared_cb (GObject *conn,
-    GAsyncResult *result,
-    gpointer user_data)
+empathy_new_call_dialog_account_filter (EmpathyContactSelectorDialog *dialog,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    TpAccount *account)
 {
-  FilterCallbackData *data = user_data;
-  GError *myerr = NULL;
+  TpConnection *connection;
+  gboolean supported = FALSE;
+  guint i;
   TpCapabilities *caps;
   GPtrArray *classes;
-  guint i;
 
-  if (!tp_proxy_prepare_finish (conn, result, &myerr))
+  /* check if CM supports calls */
+  connection = tp_account_get_connection (account);
+  if (connection == NULL)
       goto out;
 
-  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
+  caps = tp_connection_get_capabilities (connection);
+  if (caps == NULL)
+      goto out;
+
   classes = tp_capabilities_get_channel_classes (caps);
 
   for (i = 0; i < classes->len; i++)
@@ -141,45 +147,12 @@ conn_prepared_cb (GObject *conn,
           TP_HANDLE_TYPE_CONTACT)
         continue;
 
-      data->callback (TRUE, data->user_data);
-      g_slice_free (FilterCallbackData, data);
-      return;
+      supported = TRUE;
+      break;
     }
 
 out:
-  data->callback (FALSE, data->user_data);
-  g_slice_free (FilterCallbackData, data);
-}
-
-static void
-empathy_new_call_dialog_account_filter (EmpathyContactSelectorDialog *dialog,
-    EmpathyAccountChooserFilterResultCallback callback,
-    gpointer callback_data,
-    TpAccount *account)
-{
-  TpConnection *connection;
-  FilterCallbackData *cb_data;
-  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
-
-  if (tp_account_get_connection_status (account, NULL) !=
-      TP_CONNECTION_STATUS_CONNECTED)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
-
-  /* check if CM supports calls */
-  connection = tp_account_get_connection (account);
-  if (connection == NULL)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
-
-  cb_data = g_slice_new0 (FilterCallbackData);
-  cb_data->callback = callback;
-  cb_data->user_data = callback_data;
-  tp_proxy_prepare_async (connection, features, conn_prepared_cb, cb_data);
+  callback (supported, callback_data);
 }
 
 static void
