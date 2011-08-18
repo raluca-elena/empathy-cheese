@@ -39,8 +39,8 @@
 #include "empathy-smiley-manager.h"
 #include "empathy-ui-utils.h"
 #include "empathy-plist.h"
-#include "empathy-string-parser.h"
 #include "empathy-images.h"
+#include "empathy-webkit-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CHAT
 #include <libempathy/empathy-debug.h>
@@ -65,7 +65,10 @@ typedef struct {
 	 * marker for when we lose focus. */
 	GQueue                acked_messages;
 	GtkWidget            *inspector_window;
+
 	GSettings            *gsettings_chat;
+	GSettings            *gsettings_desktop;
+
 	gboolean              has_focus;
 	gboolean              has_unread_message;
 	gboolean              allow_scrolling;
@@ -209,39 +212,6 @@ theme_adium_navigation_policy_decision_requested_cb (WebKitWebView             *
 	return TRUE;
 }
 
-static void
-theme_adium_copy_address_cb (GtkMenuItem *menuitem,
-			     gpointer     user_data)
-{
-	WebKitHitTestResult   *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
-	gchar                 *uri;
-	GtkClipboard          *clipboard;
-
-	g_object_get (G_OBJECT (hit_test_result), "link-uri", &uri, NULL);
-
-	clipboard = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
-	gtk_clipboard_set_text (clipboard, uri, -1);
-
-	clipboard = gtk_clipboard_get (GDK_SELECTION_PRIMARY);
-	gtk_clipboard_set_text (clipboard, uri, -1);
-
-	g_free (uri);
-}
-
-static void
-theme_adium_open_address_cb (GtkMenuItem *menuitem,
-			     gpointer     user_data)
-{
-	WebKitHitTestResult   *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
-	gchar                 *uri;
-
-	g_object_get (G_OBJECT (hit_test_result), "link-uri", &uri, NULL);
-
-	empathy_url_show (GTK_WIDGET (menuitem), uri);
-
-	g_free (uri);
-}
-
 /* Replace each %@ in format with string passed in args */
 static gchar *
 string_with_format (const gchar *format,
@@ -293,65 +263,6 @@ theme_adium_load_template (EmpathyThemeAdium *theme)
 	g_free (template);
 }
 
-static void
-theme_adium_match_newline (const gchar *text,
-			   gssize len,
-			   EmpathyStringReplace replace_func,
-			   EmpathyStringParser *sub_parsers,
-			   gpointer user_data)
-{
-	GString *string = user_data;
-	gint i;
-	gint prev = 0;
-
-	if (len < 0) {
-		len = G_MAXSSIZE;
-	}
-
-	/* Replace \n by <br/> */
-	for (i = 0; i < len && text[i] != '\0'; i++) {
-		if (text[i] == '\n') {
-			empathy_string_parser_substr (text + prev,
-						      i - prev, sub_parsers,
-						      user_data);
-			g_string_append (string, "<br/>");
-			prev = i + 1;
-		}
-	}
-	empathy_string_parser_substr (text + prev, i - prev,
-				      sub_parsers, user_data);
-}
-
-static void
-theme_adium_replace_smiley (const gchar *text,
-			    gssize len,
-			    gpointer match_data,
-			    gpointer user_data)
-{
-	EmpathySmileyHit *hit = match_data;
-	GString *string = user_data;
-
-	/* Replace smiley by a <img/> tag */
-	g_string_append_printf (string,
-				"<img src=\"%s\" alt=\"%.*s\" title=\"%.*s\"/>",
-				hit->path, (int)len, text, (int)len, text);
-}
-
-static EmpathyStringParser string_parsers[] = {
-	{empathy_string_match_link, empathy_string_replace_link},
-	{theme_adium_match_newline, NULL},
-	{empathy_string_match_all, empathy_string_replace_escaped},
-	{NULL, NULL}
-};
-
-static EmpathyStringParser string_parsers_with_smiley[] = {
-	{empathy_string_match_link, empathy_string_replace_link},
-	{empathy_string_match_smiley, theme_adium_replace_smiley},
-	{theme_adium_match_newline, NULL},
-	{empathy_string_match_all, empathy_string_replace_escaped},
-	{NULL, NULL}
-};
-
 static gchar *
 theme_adium_parse_body (EmpathyThemeAdium *self,
 	const gchar *text,
@@ -362,11 +273,9 @@ theme_adium_parse_body (EmpathyThemeAdium *self,
 	GString *string;
 
 	/* Check if we have to parse smileys */
-	if (g_settings_get_boolean (priv->gsettings_chat,
-	  EMPATHY_PREFS_CHAT_SHOW_SMILEYS))
-		parsers = string_parsers_with_smiley;
-	else
-		parsers = string_parsers;
+	parsers = empathy_webkit_get_string_parser (
+		g_settings_get_boolean (priv->gsettings_chat,
+			EMPATHY_PREFS_CHAT_SHOW_SMILEYS));
 
 	/* Parse text and construct string with links and smileys replaced
 	 * by html tags. Also escape text to make sure html code is
@@ -1354,90 +1263,6 @@ theme_adium_message_acknowledged (EmpathyChatView *view,
 	theme_adium_remove_mark_from_message (self, id);
 }
 
-static void
-theme_adium_context_menu_selection_done_cb (GtkMenuShell *menu, gpointer user_data)
-{
-	WebKitHitTestResult *hit_test_result = WEBKIT_HIT_TEST_RESULT (user_data);
-
-	g_object_unref (hit_test_result);
-}
-
-static void
-theme_adium_context_menu_for_event (EmpathyThemeAdium *theme, GdkEventButton *event)
-{
-	WebKitWebView              *view = WEBKIT_WEB_VIEW (theme);
-	WebKitHitTestResult        *hit_test_result;
-	WebKitHitTestResultContext  context;
-	GtkWidget                  *menu;
-	GtkWidget                  *item;
-
-	hit_test_result = webkit_web_view_get_hit_test_result (view, event);
-	g_object_get (G_OBJECT (hit_test_result), "context", &context, NULL);
-
-	/* The menu */
-	menu = empathy_context_menu_new (GTK_WIDGET (view));
-
-	/* Select all item */
-	item = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_ALL, NULL);
-	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-	g_signal_connect_swapped (item, "activate",
-				  G_CALLBACK (webkit_web_view_select_all),
-				  view);
-
-	/* Copy menu item */
-	if (webkit_web_view_can_copy_clipboard (view)) {
-		item = gtk_image_menu_item_new_from_stock (GTK_STOCK_COPY, NULL);
-		gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-		g_signal_connect_swapped (item, "activate",
-					  G_CALLBACK (webkit_web_view_copy_clipboard),
-					  view);
-	}
-
-	/* Clear menu item */
-	item = gtk_separator_menu_item_new ();
-	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-	item = gtk_image_menu_item_new_from_stock (GTK_STOCK_CLEAR, NULL);
-	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-	g_signal_connect_swapped (item, "activate",
-				  G_CALLBACK (empathy_chat_view_clear),
-				  view);
-
-	/* We will only add the following menu items if we are
-	 * right-clicking a link */
-	if (context & WEBKIT_HIT_TEST_RESULT_CONTEXT_LINK) {
-		/* Separator */
-		item = gtk_separator_menu_item_new ();
-		gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-		/* Copy Link Address menu item */
-		item = gtk_menu_item_new_with_mnemonic (_("_Copy Link Address"));
-		g_signal_connect (item, "activate",
-				  G_CALLBACK (theme_adium_copy_address_cb),
-				  hit_test_result);
-		gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-
-		/* Open Link menu item */
-		item = gtk_menu_item_new_with_mnemonic (_("_Open Link"));
-		g_signal_connect (item, "activate",
-				  G_CALLBACK (theme_adium_open_address_cb),
-				  hit_test_result);
-		gtk_menu_shell_prepend (GTK_MENU_SHELL (menu), item);
-	}
-
-	g_signal_connect (GTK_MENU_SHELL (menu), "selection-done",
-			  G_CALLBACK (theme_adium_context_menu_selection_done_cb),
-			  hit_test_result);
-
-	/* Display the menu */
-	gtk_widget_show_all (menu);
-	gtk_menu_popup (GTK_MENU (menu), NULL, NULL, NULL, NULL,
-			event->button, event->time);
-}
-
 static gboolean
 theme_adium_button_press_event (GtkWidget *widget, GdkEventButton *event)
 {
@@ -1451,7 +1276,9 @@ theme_adium_button_press_event (GtkWidget *widget, GdkEventButton *event)
 		 * item ourselves, so we disable our customized menu
 		 * if the developer extras are enabled. */
 		if (!developer_tools_enabled) {
-			theme_adium_context_menu_for_event (EMPATHY_THEME_ADIUM (widget), event);
+			empathy_webkit_context_menu_for_event (
+				WEBKIT_WEB_VIEW (widget), event,
+				EMPATHY_WEBKIT_MENU_CLEAR);
 			return TRUE;
 		}
 	}
@@ -1524,7 +1351,9 @@ theme_adium_finalize (GObject *object)
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (object);
 
 	empathy_adium_data_unref (priv->data);
+
 	g_object_unref (priv->gsettings_chat);
+	g_object_unref (priv->gsettings_desktop);
 
 	G_OBJECT_CLASS (empathy_theme_adium_parent_class)->finalize (object);
 }
@@ -1621,64 +1450,6 @@ theme_adium_inspect_web_view_cb (WebKitWebInspector *inspector,
 	return NULL;
 }
 
-static PangoFontDescription *
-theme_adium_get_default_font (void)
-{
-	GSettings *gsettings;
-	PangoFontDescription *pango_fd;
-	gchar *font_family;
-
-	gsettings = g_settings_new (EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
-
-	font_family = g_settings_get_string (gsettings,
-		     EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME);
-
-	if (font_family == NULL)
-		return NULL;
-
-	pango_fd = pango_font_description_from_string (font_family);
-	g_free (font_family);
-	g_object_unref (gsettings);
-	return pango_fd;
-}
-
-static void
-theme_adium_set_webkit_font (WebKitWebSettings *w_settings,
-			     const gchar *name,
-			     gint size)
-{
-	g_object_set (w_settings, "default-font-family", name, NULL);
-	g_object_set (w_settings, "default-font-size", size, NULL);
-}
-
-static void
-theme_adium_set_default_font (WebKitWebSettings *w_settings)
-{
-	PangoFontDescription *default_font_desc;
-	GdkScreen *current_screen;
-	gdouble dpi = 0;
-	gint pango_font_size = 0;
-
-	default_font_desc = theme_adium_get_default_font ();
-	if (default_font_desc == NULL)
-		return ;
-	pango_font_size = pango_font_description_get_size (default_font_desc)
-		/ PANGO_SCALE ;
-	if (pango_font_description_get_size_is_absolute (default_font_desc)) {
-		current_screen = gdk_screen_get_default ();
-		if (current_screen != NULL) {
-			dpi = gdk_screen_get_resolution (current_screen);
-		} else {
-			dpi = BORING_DPI_DEFAULT;
-		}
-		pango_font_size = (gint) (pango_font_size / (dpi / 72));
-	}
-	theme_adium_set_webkit_font (w_settings,
-		pango_font_description_get_family (default_font_desc),
-		pango_font_size);
-	pango_font_description_free (default_font_desc);
-}
-
 static void
 theme_adium_constructed (GObject *object)
 {
@@ -1686,18 +1457,21 @@ theme_adium_constructed (GObject *object)
 	const gchar           *font_family = NULL;
 	gint                   font_size = 0;
 	WebKitWebView         *webkit_view = WEBKIT_WEB_VIEW (object);
-	WebKitWebSettings     *webkit_settings;
 	WebKitWebInspector    *webkit_inspector;
 
 	/* Set default settings */
 	font_family = tp_asv_get_string (priv->data->info, "DefaultFontFamily");
 	font_size = tp_asv_get_int32 (priv->data->info, "DefaultFontSize", NULL);
-	webkit_settings = webkit_web_view_get_settings (webkit_view);
 
 	if (font_family && font_size) {
-		theme_adium_set_webkit_font (webkit_settings, font_family, font_size);
+		g_object_set (webkit_web_view_get_settings (webkit_view),
+			"default-font-family", font_family,
+			"default-font-size", font_size,
+			NULL);
 	} else {
-		theme_adium_set_default_font (webkit_settings);
+		empathy_webkit_bind_font_setting (webkit_view,
+			priv->gsettings_desktop,
+			EMPATHY_PREFS_DESKTOP_INTERFACE_DOCUMENT_FONT_NAME);
 	}
 
 	/* Setup webkit inspector */
@@ -1819,6 +1593,9 @@ empathy_theme_adium_init (EmpathyThemeAdium *theme)
 			  NULL);
 
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+	priv->gsettings_desktop = g_settings_new (
+		EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
+
 	g_signal_connect (priv->gsettings_chat,
 		"changed::" EMPATHY_PREFS_CHAT_WEBKIT_DEVELOPER_TOOLS,
 		G_CALLBACK (theme_adium_notify_enable_webkit_developer_tools_cb),

@@ -41,10 +41,7 @@
 #include <libempathy-gtk/empathy-spell.h>
 #include <libempathy-gtk/empathy-contact-list-store.h>
 #include <libempathy-gtk/empathy-gtk-enum-types.h>
-
-#ifdef HAVE_WEBKIT
 #include <libempathy-gtk/empathy-theme-adium.h>
-#endif
 
 #include "empathy-preferences.h"
 
@@ -856,17 +853,14 @@ preferences_theme_variants_fill (EmpathyPreferences *preferences,
 	EmpathyPreferencesPriv *priv = GET_PRIV (preferences);
 	GtkTreeModel *model;
 	GtkListStore *store;
-#ifdef HAVE_WEBKIT
 	GPtrArray    *variants;
 	const gchar  *default_variant;
 	guint         i;
-#endif /* HAVE_WEBKIT */
 
 	model = gtk_combo_box_get_model (GTK_COMBO_BOX (priv->combobox_chat_theme_variant));
 	store = GTK_LIST_STORE (model);
 	gtk_list_store_clear (store);
 
-#ifdef HAVE_WEBKIT
 	variants = empathy_adium_info_get_available_variants (info);
 	default_variant = empathy_adium_info_get_default_variant (info);
 	for (i = 0; i < variants->len; i++) {
@@ -877,7 +871,6 @@ preferences_theme_variants_fill (EmpathyPreferences *preferences,
 			COL_VARIANT_DEFAULT, !tp_strdiff (name, default_variant),
 			-1);
 	}
-#endif /* HAVE_WEBKIT */
 
 	/* Select the variant from the GSetting key */
 	preferences_theme_variant_notify_cb (priv->gsettings_chat,

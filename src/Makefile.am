@@ -16,7 +16,6 @@ AM_LDFLAGS = -lm
 AM_CPPFLAGS =						\
 	$(CPPFLAGS_COMMON)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
-	$(WEBKIT_CFLAGS)				\
 	$(NULL)
 
 LDADD =								\
@@ -27,7 +26,7 @@ LDADD =								\
 	$(EMPATHY_LIBS)						\
 	$(YELL_LIBS)						\
 	$(LIBCHAMPLAIN_LIBS)					\
-	$(WEBKIT_LIBS)
+	$(NULL)
 
 noinst_LTLIBRARIES = libempathy-accounts-common.la
 
@@ -47,7 +46,6 @@ libempathy_accounts_common_la_LIBADD =					\
 	$(EDS_LIBS)							\
         $(EMPATHY_LIBS)							\
         $(LIBCHAMPLAIN_LIBS)						\
-        $(WEBKIT_LIBS)							\
 	$(NULL)
 
 if HAVE_CONTROL_CENTER_EMBEDDING
@@ -216,7 +214,6 @@ empathy_LDADD =								\
         $(top_builddir)/extensions/libemp-extensions.la			\
         $(EMPATHY_LIBS)							\
         $(LIBCHAMPLAIN_LIBS)						\
-        $(WEBKIT_LIBS)							\
 	$(NULL)
 
 nodist_empathy_SOURCES = $(BUILT_SOURCES)

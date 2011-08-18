@@ -29,6 +29,7 @@
 
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
+#include <webkit/webkit.h>
 
 #include <telepathy-glib/telepathy-glib.h>
 #include <telepathy-glib/proxy-subclass.h>
@@ -46,6 +47,7 @@
 #include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-chatroom.h>
+#include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-message.h>
 #include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
@@ -59,9 +61,12 @@
 #include "empathy-images.h"
 #include "empathy-theme-manager.h"
 #include "empathy-ui-utils.h"
+#include "empathy-webkit-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
+
+#define EMPATHY_NS "http://live.gnome.org/Empathy"
 
 G_DEFINE_TYPE (EmpathyLogWindow, empathy_log_window, GTK_TYPE_WINDOW);
 
@@ -82,7 +87,7 @@ struct _EmpathyLogWindowPriv
   GtkWidget *treeview_who;
   GtkWidget *treeview_what;
   GtkWidget *treeview_when;
-  GtkWidget *treeview_events;
+  GtkWidget *webview;
 
   GtkTreeStore *store_events;
 
@@ -102,6 +107,7 @@ struct _EmpathyLogWindowPriv
   TpBaseClient *observer;
 
   EmpathyContact *selected_contact;
+  EmpathyContact *events_contact;
 
   EmpathyCameraMonitor *camera_monitor;
   GBinding *button_video_binding;
@@ -117,6 +123,9 @@ struct _EmpathyLogWindowPriv
   TpAccount *selected_account;
   gchar *selected_chat_id;
   gboolean selected_is_chatroom;
+
+  GSettings *gsettings_chat;
+  GSettings *gsettings_desktop;
 };
 
 static void log_window_search_entry_changed_cb   (GtkWidget        *entry,
@@ -144,6 +153,9 @@ static void log_window_delete_menu_clicked_cb    (GtkMenuItem      *menuitem,
 static void start_spinner                        (void);
 
 static void log_window_create_observer           (EmpathyLogWindow *window);
+static gboolean log_window_events_button_press_event (GtkWidget *webview,
+    GdkEventButton *event, EmpathyLogWindow *self);
+static void log_window_update_buttons_sensitivity (EmpathyLogWindow *self);
 
 static void
 empathy_account_chooser_filter_has_logs (TpAccount *account,
@@ -360,6 +372,157 @@ toolbutton_av_clicked (GtkToolButton *toolbutton,
       TRUE, video, gtk_get_current_event_time ());
 }
 
+static void
+insert_or_change_row (EmpathyLogWindow *self,
+    const char *method,
+    GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script, *text, *date, *stock_icon;
+  char *icon = NULL;
+
+  gtk_tree_model_get (model, iter,
+      COL_EVENTS_TEXT, &text,
+      COL_EVENTS_PRETTY_DATE, &date,
+      COL_EVENTS_ICON, &stock_icon,
+      -1);
+
+  if (!tp_str_empty (stock_icon))
+    {
+      GtkIconInfo *icon_info = gtk_icon_theme_lookup_icon (
+          gtk_icon_theme_get_default (),
+          stock_icon,
+          GTK_ICON_SIZE_MENU, 0);
+
+      if (icon_info != NULL)
+        icon = g_strdup (gtk_icon_info_get_filename (icon_info));
+
+      gtk_icon_info_free (icon_info);
+    }
+
+  script = g_strdup_printf ("javascript:%s([%s], '%s', '%s', '%s');",
+      method,
+      g_strdelimit (str, ":", ','),
+      text,
+      icon != NULL ? icon : "",
+      date);
+
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (text);
+  g_free (date);
+  g_free (stock_icon);
+  g_free (icon);
+  g_free (script);
+}
+
+static void
+store_events_row_inserted (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  insert_or_change_row (self, "insertRow", model, path, iter);
+}
+
+static void
+store_events_row_changed (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  insert_or_change_row (self, "changeRow", model, path, iter);
+}
+
+static void
+store_events_row_deleted (GtkTreeModel *model,
+    GtkTreePath *path,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script;
+
+  script = g_strdup_printf ("javascript:deleteRow([%s]);",
+      g_strdelimit (str, ":", ','));
+
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+}
+
+static void
+store_events_has_child_rows (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  char *script;
+
+  script = g_strdup_printf ("javascript:hasChildRows([%s], %u);",
+      g_strdelimit (str, ":", ','),
+      gtk_tree_model_iter_has_child (model, iter));
+
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+}
+
+static void
+store_events_rows_reordered (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    int *new_order,
+    EmpathyLogWindow *self)
+{
+  char *str = gtk_tree_path_to_string (path);
+  int i, children = gtk_tree_model_iter_n_children (model, iter);
+  char **new_order_strv, *new_order_s;
+  char *script;
+
+  new_order_strv = g_new0 (char *, children + 1);
+
+  for (i = 0; i < children; i++)
+    new_order_strv[i] = g_strdup_printf ("%i", new_order[i]);
+
+  new_order_s = g_strjoinv (",", new_order_strv);
+
+  script = g_strdup_printf ("javascript:reorderRows([%s], [%s]);",
+      str == NULL ? "" : g_strdelimit (str, ":", ','),
+      new_order_s);
+
+  webkit_web_view_execute_script (WEBKIT_WEB_VIEW (self->priv->webview),
+      script);
+
+  g_free (str);
+  g_free (script);
+  g_free (new_order_s);
+  g_strfreev (new_order_strv);
+}
+
+static gboolean
+events_webview_handle_navigation (WebKitWebView *webview,
+    WebKitWebFrame *frame,
+    WebKitNetworkRequest *request,
+    WebKitWebNavigationAction *navigation_action,
+    WebKitWebPolicyDecision *policy_decision,
+    EmpathyLogWindow *window)
+{
+  empathy_url_show (GTK_WIDGET (webview),
+      webkit_network_request_get_uri (request));
+
+  webkit_web_policy_decision_ignore (policy_decision);
+  return TRUE;
+}
+
 static GObject *
 empathy_log_window_constructor (GType type,
     guint n_props,
@@ -408,7 +571,13 @@ empathy_log_window_dispose (GObject *object)
   tp_clear_object (&self->priv->log_manager);
   tp_clear_object (&self->priv->selected_account);
   tp_clear_object (&self->priv->selected_contact);
+  tp_clear_object (&self->priv->events_contact);
   tp_clear_object (&self->priv->camera_monitor);
+
+  tp_clear_object (&self->priv->gsettings_chat);
+  tp_clear_object (&self->priv->gsettings_desktop);
+
+  tp_clear_object (&self->priv->store_events);
 
   G_OBJECT_CLASS (empathy_log_window_parent_class)->dispose (object);
 }
@@ -444,7 +613,9 @@ empathy_log_window_init (EmpathyLogWindow *self)
   EmpathyAccountChooser *account_chooser;
   GtkBuilder *gui;
   gchar *filename;
+  GFile *gfile;
   GtkWidget *vbox, *accounts, *search, *label, *quit;
+  GtkWidget *scrolledwindow_events;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_LOG_WINDOW, EmpathyLogWindowPriv);
@@ -454,6 +625,10 @@ empathy_log_window_init (EmpathyLogWindow *self)
   self->priv->camera_monitor = empathy_camera_monitor_dup_singleton ();
 
   self->priv->log_manager = tpl_log_manager_dup_singleton ();
+
+  self->priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+  self->priv->gsettings_desktop = g_settings_new (
+      EMPATHY_PREFS_DESKTOP_INTERFACE_SCHEMA);
 
   gtk_window_set_title (GTK_WINDOW (self), _("History"));
   gtk_widget_set_can_focus (GTK_WIDGET (self), FALSE);
@@ -472,7 +647,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
       "treeview_who", &self->priv->treeview_who,
       "treeview_what", &self->priv->treeview_what,
       "treeview_when", &self->priv->treeview_when,
-      "treeview_events", &self->priv->treeview_events,
+      "scrolledwindow_events", &scrolledwindow_events,
       "notebook", &self->priv->notebook,
       "spinner", &self->priv->spinner,
       NULL);
@@ -564,6 +739,47 @@ empathy_log_window_init (EmpathyLogWindow *self)
 
   log_window_who_populate (self);
 
+  /* events */
+  self->priv->webview = webkit_web_view_new ();
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_events),
+      GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow_events),
+      self->priv->webview);
+  gtk_widget_show (self->priv->webview);
+
+  empathy_webkit_bind_font_setting (WEBKIT_WEB_VIEW (self->priv->webview),
+      self->priv->gsettings_desktop,
+      EMPATHY_PREFS_DESKTOP_INTERFACE_FONT_NAME);
+
+  filename = empathy_file_lookup ("empathy-log-window.html", "data");
+  gfile = g_file_new_for_path (filename);
+  g_free (filename);
+
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->priv->webview),
+      g_file_get_uri (gfile));
+  g_object_unref (gfile);
+
+  /* handle all navigation externally */
+  g_signal_connect (self->priv->webview, "navigation-policy-decision-requested",
+      G_CALLBACK (events_webview_handle_navigation), self);
+
+  /* listen to changes to the treemodel */
+  g_signal_connect (self->priv->store_events, "row-inserted",
+      G_CALLBACK (store_events_row_inserted), self);
+  g_signal_connect (self->priv->store_events, "row-changed",
+      G_CALLBACK (store_events_row_changed), self);
+  g_signal_connect (self->priv->store_events, "row-deleted",
+      G_CALLBACK (store_events_row_deleted), self);
+  g_signal_connect (self->priv->store_events, "rows-reordered",
+      G_CALLBACK (store_events_rows_reordered), self);
+  g_signal_connect (self->priv->store_events, "row-has-child-toggled",
+      G_CALLBACK (store_events_has_child_rows), self);
+
+  /* track clicked row */
+  g_signal_connect (self->priv->webview, "button-press-event",
+      G_CALLBACK (log_window_events_button_press_event), self);
+
+  log_window_update_buttons_sensitivity (self);
   gtk_widget_show (GTK_WIDGET (self));
 }
 
@@ -1056,8 +1272,10 @@ log_window_append_chat_message (TplEvent *event,
 {
   GtkTreeStore *store = log_window->priv->store_events;
   GtkTreeIter iter, parent;
-  gchar *pretty_date, *alias, *body, *msg;
+  gchar *pretty_date, *alias, *body;
   GDateTime *date;
+  EmpathyStringParser *parsers;
+  GString *msg;
 
   date = g_date_time_new_from_unix_utc (
       tpl_event_get_timestamp (event));
@@ -1066,62 +1284,29 @@ log_window_append_chat_message (TplEvent *event,
 
   get_parent_iter_for_message (event, message, &parent);
 
-  msg = g_markup_escape_text (empathy_message_get_body (message), -1);
   alias = g_markup_escape_text (
       tpl_entity_get_alias (tpl_event_get_sender (event)), -1);
 
-  /* If the user is searching, highlight the matched text */
-  if (!EMP_STR_EMPTY (log_window->priv->last_find))
-    {
-      gchar *str = g_regex_escape_string (log_window->priv->last_find, -1);
-      gchar *replacement = g_markup_printf_escaped (
-          "<span background=\"yellow\">%s</span>",
-          log_window->priv->last_find);
-      GError *error = NULL;
-      GRegex *regex = g_regex_new (str, 0, 0, &error);
+  /* escape the text */
+  parsers = empathy_webkit_get_string_parser (
+      g_settings_get_boolean (log_window->priv->gsettings_chat,
+        EMPATHY_PREFS_CHAT_SHOW_SMILEYS));
+  msg = g_string_new ("");
 
-      if (regex == NULL)
-        {
-          DEBUG ("Could not create regex: %s", error->message);
-          g_error_free (error);
-        }
-      else
-        {
-          gchar *new_msg = g_regex_replace_literal (regex,
-              empathy_message_get_body (message), -1, 0, replacement,
-              0, &error);
-
-          if (new_msg != NULL)
-            {
-              /* We pass ownership of new_msg to msg, which is freed later */
-              g_free (msg);
-              msg = new_msg;
-            }
-          else
-            {
-              DEBUG ("Error while performing string substitution: %s",
-                  error->message);
-              g_error_free (error);
-            }
-        }
-
-      g_free (str);
-      g_free (replacement);
-
-      tp_clear_pointer (&regex, g_regex_unref);
-    }
+  empathy_string_parser_substr (empathy_message_get_body (message), -1,
+      parsers, msg);
 
   if (tpl_text_event_get_message_type (TPL_TEXT_EVENT (event))
       == TP_CHANNEL_TEXT_MESSAGE_TYPE_ACTION)
     {
       /* Translators: this is an emote: '* Danielle waves' */
-      body = g_strdup_printf (_("<i>* %s %s</i>"), alias, msg);
+      body = g_strdup_printf (_("<i>* %s %s</i>"), alias, msg->str);
     }
   else
     {
       /* Translators: this is a message: 'Danielle: hello'
        * The string in bold is the sender's name */
-      body = g_strdup_printf (_("<b>%s:</b> %s"), alias, msg);
+      body = g_strdup_printf (_("<b>%s:</b> %s"), alias, msg->str);
     }
 
   gtk_tree_store_append (store, &iter, &parent);
@@ -1135,7 +1320,7 @@ log_window_append_chat_message (TplEvent *event,
       COL_EVENTS_EVENT, event,
       -1);
 
-  g_free (msg);
+  g_string_free (msg, TRUE);
   g_free (body);
   g_free (alias);
   g_free (pretty_date);
@@ -1784,6 +1969,8 @@ log_window_find_populate (EmpathyLogWindow *self,
   if (EMP_STR_EMPTY (search_criteria))
     {
       tp_clear_pointer (&self->priv->hits, tpl_log_manager_search_free);
+      webkit_web_view_set_highlight_text_matches (
+          WEBKIT_WEB_VIEW (self->priv->webview), FALSE);
       log_window_who_populate (self);
       return;
     }
@@ -1791,6 +1978,10 @@ log_window_find_populate (EmpathyLogWindow *self,
   g_signal_handlers_block_by_func (selection,
       log_window_when_changed_cb,
       self);
+
+  /* highlight the search text */
+  webkit_web_view_mark_text_matches (WEBKIT_WEB_VIEW (self->priv->webview),
+      search_criteria, FALSE, 0);
 
   tpl_log_manager_search_async (self->priv->log_manager,
       search_criteria, TPL_EVENT_MASK_ANY,
@@ -1860,8 +2051,10 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   GtkTreePath *path;
   gboolean profile, chat, call, video;
 
-  tp_clear_object (&self->priv->selected_contact);
+  profile = chat = call = video = FALSE;
+
   tp_clear_object (&self->priv->button_video_binding);
+  tp_clear_object (&self->priv->selected_contact);
 
   view = GTK_TREE_VIEW (self->priv->treeview_who);
   model = gtk_tree_view_get_model (view);
@@ -1908,26 +2101,11 @@ log_window_update_buttons_sensitivity (EmpathyLogWindow *self)
   /* If the Who pane doesn't contain a contact (e.g. it has many
    * selected, or has 'Anyone', let's try to get the contact from
    * the selected event. */
-  view = GTK_TREE_VIEW (self->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
-  selection = gtk_tree_view_get_selection (view);
 
-  if (gtk_tree_selection_count_selected_rows (selection) != 1)
+  if (self->priv->events_contact != NULL)
+    self->priv->selected_contact = g_object_ref (self->priv->events_contact);
+  else
     goto out;
-
-  if (!gtk_tree_selection_get_selected (selection, NULL, &iter))
-    goto out;
-
-  gtk_tree_model_get (model, &iter,
-      COL_EVENTS_ACCOUNT, &account,
-      COL_EVENTS_TARGET, &target,
-      -1);
-
-  self->priv->selected_contact = empathy_contact_from_tpl_contact (account,
-      target);
-
-  g_object_unref (account);
-  g_object_unref (target);
 
   capabilities = empathy_contact_get_capabilities (self->priv->selected_contact);
 
@@ -2325,39 +2503,95 @@ who_row_is_separator (GtkTreeModel *model,
 }
 
 static void
-log_window_events_changed_cb (GtkTreeSelection *selection,
-    EmpathyLogWindow *self)
+log_window_find_row (EmpathyLogWindow *self,
+    GdkEventButton *event)
 {
-  DEBUG ("log_window_events_changed_cb");
+  WebKitHitTestResult *hit = webkit_web_view_get_hit_test_result (
+      WEBKIT_WEB_VIEW (self->priv->webview), event);
+  WebKitDOMNode *inner_node;
+
+  tp_clear_object (&self->priv->events_contact);
+
+  g_object_get (hit,
+      "inner-node", &inner_node,
+      NULL);
+
+  if (inner_node != NULL)
+    {
+      GtkTreeModel *model = GTK_TREE_MODEL (self->priv->store_events);
+      WebKitDOMNode *node;
+      const char *path = NULL;
+      GtkTreeIter iter;
+
+      /* walk back up the DOM tree looking for a node with empathy:path set */
+      for (node = inner_node; node != NULL;
+           node = webkit_dom_node_get_parent_node (node))
+        {
+          if (!WEBKIT_DOM_IS_ELEMENT (node))
+            continue;
+
+          path = webkit_dom_element_get_attribute_ns (
+              WEBKIT_DOM_ELEMENT (node), EMPATHY_NS, "path");
+
+          if (!tp_str_empty (path))
+            break;
+        }
+
+      /* look up the contact for this path */
+      if (!tp_str_empty (path) &&
+          gtk_tree_model_get_iter_from_string (model, &iter, path))
+        {
+          TpAccount *account;
+          TplEntity *target;
+
+          gtk_tree_model_get (model, &iter,
+              COL_EVENTS_ACCOUNT, &account,
+              COL_EVENTS_TARGET, &target,
+              -1);
+
+          self->priv->events_contact = empathy_contact_from_tpl_contact (
+              account, target);
+
+          g_object_unref (account);
+          g_object_unref (target);
+        }
+
+      g_object_unref (inner_node);
+    }
+
+  g_object_unref (hit);
 
   log_window_update_buttons_sensitivity (self);
 }
 
-static void
-log_window_events_row_activated_cb (GtkTreeView *view,
-    GtkTreePath *path,
-    GtkTreeViewColumn *column,
+static gboolean
+log_window_events_button_press_event (GtkWidget *webview,
+    GdkEventButton *event,
     EmpathyLogWindow *self)
 {
-  if (gtk_tree_view_row_expanded (view, path))
-    gtk_tree_view_collapse_row (view, path);
-  else
-    gtk_tree_view_expand_row (view, path, FALSE);
+  switch (event->button)
+    {
+      case 1:
+        log_window_find_row (self, event);
+        break;
+
+      case 3:
+        empathy_webkit_context_menu_for_event (
+            WEBKIT_WEB_VIEW (webview), event, 0);
+        return TRUE;
+
+      default:
+        break;
+    }
+
+  return FALSE;
 }
 
 static void
 log_window_events_setup (EmpathyLogWindow *self)
 {
-  GtkTreeView       *view;
-  GtkTreeModel      *model;
-  GtkTreeSelection  *selection;
   GtkTreeSortable   *sortable;
-  GtkTreeViewColumn *column;
   GtkTreeStore      *store;
-  GtkCellRenderer   *cell;
-
-  view = GTK_TREE_VIEW (self->priv->treeview_events);
-  selection = gtk_tree_view_get_selection (view);
 
   /* new store */
   self->priv->store_events = store = gtk_tree_store_new (COL_EVENTS_COUNT,
@@ -2370,52 +2604,11 @@ log_window_events_setup (EmpathyLogWindow *self)
       TPL_TYPE_ENTITY,      /* target */
       TPL_TYPE_EVENT);      /* event */
 
-  model = GTK_TREE_MODEL (store);
   sortable = GTK_TREE_SORTABLE (store);
-
-  gtk_tree_view_set_model (view, model);
-
-  /* new column */
-  column = gtk_tree_view_column_new ();
-
-  cell = gtk_cell_renderer_pixbuf_new ();
-  gtk_tree_view_column_pack_start (column, cell, FALSE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "icon-name", COL_EVENTS_ICON);
-
-  cell = gtk_cell_renderer_text_new ();
-  gtk_tree_view_column_pack_start (column, cell, TRUE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "markup", COL_EVENTS_TEXT);
-
-  cell = gtk_cell_renderer_text_new ();
-  g_object_set (cell, "xalign", 1.0, NULL);
-  gtk_tree_view_column_pack_end (column, cell, FALSE);
-  gtk_tree_view_column_add_attribute (column, cell,
-      "text", COL_EVENTS_PRETTY_DATE);
-
-  gtk_tree_view_append_column (view, column);
-
-  /* set up treeview properties */
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-  gtk_tree_view_set_headers_visible (view, FALSE);
 
   gtk_tree_sortable_set_sort_column_id (sortable,
       COL_EVENTS_TS,
       GTK_SORT_ASCENDING);
-
-  gtk_tree_view_set_enable_search (view, FALSE);
-
-  /* set up signals */
-  g_signal_connect (selection, "changed",
-      G_CALLBACK (log_window_events_changed_cb),
-      self);
-
-  g_signal_connect (view, "row-activated",
-      G_CALLBACK (log_window_events_row_activated_cb),
-      self);
-
-  g_object_unref (store);
 }
 
 static void
@@ -2875,15 +3068,13 @@ log_window_what_setup (EmpathyLogWindow *self)
 static void
 log_window_maybe_expand_events (void)
 {
-  GtkTreeView       *view;
-  GtkTreeModel      *model;
-
-  view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
+  GtkTreeModel      *model = GTK_TREE_MODEL (log_window->priv->store_events);
 
   /* If there's only one result, expand it */
   if (gtk_tree_model_iter_n_children (model, NULL) == 1)
-    gtk_tree_view_expand_all (view);
+    webkit_web_view_execute_script (
+        WEBKIT_WEB_VIEW (log_window->priv->webview),
+        "javascript:expandAll()");
 }
 
 static gboolean
@@ -2932,7 +3123,6 @@ log_window_got_messages_for_date_cb (GObject *manager,
     gpointer user_data)
 {
   Ctx *ctx = user_data;
-  GtkTreeView *view;
   GtkTreeModel *model;
   GtkTreeIter iter;
   GList *events;
@@ -3012,17 +3202,27 @@ log_window_got_messages_for_date_cb (GObject *manager,
     }
   g_list_free (events);
 
-  view = GTK_TREE_VIEW (log_window->priv->treeview_events);
-  model = gtk_tree_view_get_model (view);
+  model = GTK_TREE_MODEL (log_window->priv->store_events);
   n = gtk_tree_model_iter_n_children (model, NULL) - 1;
 
   if (n >= 0 && gtk_tree_model_iter_nth_child (model, &iter, NULL, n))
     {
       GtkTreePath *path;
+      char *str, *script;
 
       path = gtk_tree_model_get_path (model, &iter);
-      gtk_tree_view_scroll_to_cell (view, path, NULL, FALSE, 0, 0);
+      str = gtk_tree_path_to_string (path);
+
+      script = g_strdup_printf ("javascript:scrollToRow([%s]);",
+          g_strdelimit (str, ":", ','));
+
+      webkit_web_view_execute_script (
+          WEBKIT_WEB_VIEW (log_window->priv->webview),
+          script);
+
       gtk_tree_path_free (path);
+      g_free (str);
+      g_free (script);
     }
 
  out:
