@@ -69,6 +69,9 @@ GtkUIManager *empathy_call_window_get_ui_manager (EmpathyCallWindow *window);
 EmpathyGstAudioSrc *empathy_call_window_get_audio_src (EmpathyCallWindow *window);
 EmpathyGstVideoSrc *empathy_call_window_get_video_src (EmpathyCallWindow *window);
 
+void empathy_call_window_play_camera (EmpathyCallWindow *self,
+    gboolean play);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_CALL_WINDOW_H__*/

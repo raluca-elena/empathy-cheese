@@ -1103,8 +1103,8 @@ create_video_preview (EmpathyCallWindow *self)
   clutter_actor_set_reactive (preview, TRUE);
 }
 
-static void
-play_camera (EmpathyCallWindow *window,
+void
+empathy_call_window_play_camera (EmpathyCallWindow *window,
     gboolean play)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (window);
@@ -1140,7 +1140,7 @@ display_video_preview (EmpathyCallWindow *self,
       /* Display the video preview */
       DEBUG ("Show video preview");
 
-      play_camera (self, TRUE);
+      empathy_call_window_play_camera (self, TRUE);
       clutter_actor_show (priv->video_preview);
       clutter_actor_raise_top (priv->floating_toolbar);
     }
@@ -1152,7 +1152,7 @@ display_video_preview (EmpathyCallWindow *self,
       if (priv->video_preview != NULL)
         {
           clutter_actor_hide (priv->video_preview);
-          play_camera (self, FALSE);
+          empathy_call_window_play_camera (self, FALSE);
         }
     }
 }
