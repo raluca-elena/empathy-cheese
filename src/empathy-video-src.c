@@ -370,9 +370,9 @@ empathy_video_src_change_device (EmpathyGstVideoSrc *self,
 
   gst_element_get_state (priv->src, &state, NULL, 0);
 
-  gst_element_set_state (priv->src, GST_STATE_NULL);
+  g_return_if_fail (state == GST_STATE_NULL);
+
   g_object_set (priv->src, "device", device, NULL);
-  gst_element_set_state (priv->src, state);
 }
 
 gchar *

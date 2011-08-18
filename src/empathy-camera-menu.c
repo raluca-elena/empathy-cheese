@@ -140,7 +140,9 @@ empathy_camera_menu_activate_cb (GtkAction *action,
 
   device = gtk_action_get_name (action);
 
+  empathy_call_window_play_camera (self->priv->window, FALSE);
   empathy_video_src_change_device (video, device);
+  empathy_call_window_play_camera (self->priv->window, TRUE);
 }
 
 static void
