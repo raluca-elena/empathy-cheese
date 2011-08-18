@@ -792,16 +792,14 @@ contact_widget_details_request_cb (GObject *object,
 }
 
 static void
-contact_widget_details_feature_prepared_cb (GObject *object,
-    GAsyncResult *res,
-    gpointer user_data)
+fetch_contact_information (EmpathyContactWidget *information,
+        TpConnection *connection)
 {
-  TpConnection *connection = TP_CONNECTION (object);
-  EmpathyContactWidget *information = user_data;
   TpContact *contact;
   TpContactInfoFlags flags;
 
-  if (!tp_proxy_prepare_finish (connection, res, NULL))
+  if (!tp_proxy_has_interface_by_id (connection,
+          TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_INFO))
     {
       gtk_widget_hide (information->vbox_details);
       return;
@@ -846,13 +844,11 @@ contact_widget_details_update (EmpathyContactWidget *information)
 
   if (tp_contact != NULL)
     {
-      GQuark features[] = { TP_CONNECTION_FEATURE_CONTACT_INFO, 0 };
       TpConnection *connection;
 
-      /* First, make sure the CONTACT_INFO feature is ready on the connection */
       connection = tp_contact_get_connection (tp_contact);
-      tp_proxy_prepare_async (connection, features,
-          contact_widget_details_feature_prepared_cb, information);
+
+      fetch_contact_information (information, connection);
     }
 }
 
