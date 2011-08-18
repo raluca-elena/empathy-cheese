@@ -143,11 +143,7 @@ avatar_chooser_set_connection (EmpathyAvatarChooser *self,
   tp_clear_object (&self->priv->connection);
 
   if (connection != NULL)
-    {
-      GQuark features[] = { TP_CONNECTION_FEATURE_AVATAR_REQUIREMENTS, 0 };
-      self->priv->connection = g_object_ref (connection);
-      tp_proxy_prepare_async (self->priv->connection, features, NULL, NULL);
-    }
+    self->priv->connection = g_object_ref (connection);
 }
 
 static void
