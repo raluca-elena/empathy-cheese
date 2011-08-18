@@ -146,6 +146,9 @@ empathy_client_factory_dup_connection_features (TpSimpleClientFactory *factory,
   feature = TP_CONNECTION_FEATURE_CONTACT_INFO;
   g_array_append_val (features, feature);
 
+  feature = TP_CONNECTION_FEATURE_BALANCE;
+  g_array_append_val (features, feature);
+
   return features;
 }
 

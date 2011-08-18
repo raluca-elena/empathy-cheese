@@ -1063,24 +1063,20 @@ main_window_setup_balance_create_widget (EmpathyMainWindow *window,
 }
 
 static void
-main_window_setup_balance_conn_ready (GObject      *source,
-				      GAsyncResult *result,
-				      gpointer      user_data)
+main_window_setup_balance (EmpathyMainWindow *window,
+			   TpAccount         *account)
 {
-	EmpathyMainWindow *window = user_data;
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-	TpConnection *conn = TP_CONNECTION (source);
-	TpAccount *account = g_object_get_data (source, "account");
+	TpConnection *conn = tp_account_get_connection (account);
 	GtkAction *action;
-	GError *error = NULL;
 	const gchar *uri;
 
-	if (!tp_proxy_prepare_finish (conn, result, &error)) {
-		DEBUG ("Failed to prepare connection: %s", error->message);
-
-		g_error_free (error);
+	if (conn == NULL)
 		return;
-	}
+
+	/* need to prepare the connection:
+	 * store the account on the connection */
+	g_object_set_data (G_OBJECT (conn), "account", account);
 
 	if (!tp_proxy_is_prepared (conn, TP_CONNECTION_FEATURE_BALANCE))
 		return;
@@ -1110,23 +1106,7 @@ main_window_setup_balance_conn_ready (GObject      *source,
 
 	g_signal_connect (conn, "balance-changed",
 		G_CALLBACK (main_window_balance_changed_cb), action);
-}
 
-static void
-main_window_setup_balance (EmpathyMainWindow *window,
-			   TpAccount         *account)
-{
-	TpConnection *conn = tp_account_get_connection (account);
-	GQuark features[] = { TP_CONNECTION_FEATURE_BALANCE, 0 };
-
-	if (conn == NULL)
-		return;
-
-	/* need to prepare the connection:
-	 * store the account on the connection */
-	g_object_set_data (G_OBJECT (conn), "account", account);
-	tp_proxy_prepare_async (conn, features,
-		main_window_setup_balance_conn_ready, window);
 }
 
 static void
