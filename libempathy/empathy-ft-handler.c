@@ -1083,26 +1083,24 @@ out:
 }
 
 static void
-conn_prepared_cb (GObject *conn,
-    GAsyncResult *result,
-    gpointer user_data)
+check_hashing (CallbacksData *data)
 {
-  CallbacksData *data = user_data;
   EmpathyFTHandler *handler = data->handler;
   EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
   GError *myerr = NULL;
   TpCapabilities *caps;
   GPtrArray *classes;
+  TpConnection *conn;
 
-  if (!tp_proxy_prepare_finish (conn, result, &myerr))
+  conn = empathy_contact_get_connection (priv->contact);
+
+  caps = tp_connection_get_capabilities (conn);
+  if (caps == NULL)
     {
-      DEBUG ("Failed to prepare connection: %s", myerr->message);
-
-      data->callback (handler, myerr, data->user_data);
+      data->callback (handler, NULL, data->user_data);
       goto out;
     }
 
-  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
   classes = tp_capabilities_get_channel_classes (caps);
 
   /* set whether we support hash and the type of it */
@@ -1202,14 +1200,7 @@ out:
   else
     {
       /* see if FT/hashing are allowed */
-      TpConnection *connection;
-      GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
-
-      connection = empathy_contact_get_connection (priv->contact);
-      g_assert (connection != NULL);
-
-      tp_proxy_prepare_async (connection, features,
-          conn_prepared_cb, cb_data);
+      check_hashing (cb_data);
     }
 }
 
