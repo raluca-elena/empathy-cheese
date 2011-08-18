@@ -1,3706 +1,1671 @@
-#
-# Fran Diéguez <frandieguez@ubuntu.com>, 2010.
+# Galician translation for tomboy.
+# Copyright (C) 2011 tomboy's COPYRIGHT HOLDER
+# This file is distributed under the same license as the tomboy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Fran Diéguez <frandieguez@gnome.org>, 2011.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: empathy.help.master\n"
-"POT-Creation-Date: 2010-11-15 10:00+0000\n"
-"PO-Revision-Date: 2010-11-15 12:52+0100\n"
-"Last-Translator: Fran Diéguez <frandieguez@ubuntu.com>\n"
-"Language-Team: Galician <gnome-gl-list@gnome.org>\n"
+"Project-Id-Version: tomboy gnome-2-28\n"
+"POT-Creation-Date: 2010-03-24 15:06+0000\n"
+"PO-Revision-Date: 2011-08-18 02:00+0200\n"
+"Last-Translator: Fran Diéguez <frandieguez@gnome.org>\n"
+"Language-Team: Galician <gnome-l10n-gl@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: C/legal.xml:2(para)
+msgid ""
+"Permission is granted to copy, distribute and/or modify this document under "
+"the terms of the GNU Free Documentation License (GFDL), Version 1.1 or any "
+"later version published by the Free Software Foundation with no Invariant "
+"Sections, no Front-Cover Texts, and no Back-Cover Texts. You can find a copy "
+"of the GFDL at this <ulink type=\"help\" url=\"ghelp:fdl\">link</ulink> or "
+"in the file COPYING-DOCS distributed with this manual."
+msgstr ""
+
+#: C/legal.xml:12(para)
+msgid ""
+"This manual is part of a collection of GNOME manuals distributed under the "
+"GFDL. If you want to distribute this manual separately from the collection, "
+"you can do so by adding a copy of the license to the manual, as described in "
+"section 6 of the license."
+msgstr ""
+
+#: C/legal.xml:19(para)
+msgid ""
+"Many of the names used by companies to distinguish their products and "
+"services are claimed as trademarks. Where those names appear in any GNOME "
+"documentation, and the members of the GNOME Documentation Project are made "
+"aware of those trademarks, then the names are in capital letters or initial "
+"capital letters."
+msgstr ""
+
+#: C/legal.xml:35(para)
+msgid ""
+"DOCUMENT IS PROVIDED ON AN \"AS IS\" BASIS, WITHOUT WARRANTY OF ANY KIND, "
+"EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT "
+"THE DOCUMENT OR MODIFIED VERSION OF THE DOCUMENT IS FREE OF DEFECTS "
+"MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE "
+"RISK AS TO THE QUALITY, ACCURACY, AND PERFORMANCE OF THE DOCUMENT OR "
+"MODIFIED VERSION OF THE DOCUMENT IS WITH YOU. SHOULD ANY DOCUMENT OR "
+"MODIFIED VERSION PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL "
+"WRITER, AUTHOR OR ANY CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY "
+"SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN "
+"ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY DOCUMENT OR MODIFIED VERSION "
+"OF THE DOCUMENT IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER; AND "
+"UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER IN TORT (INCLUDING "
+"NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL THE AUTHOR, INITIAL WRITER, ANY "
+"CONTRIBUTOR, OR ANY DISTRIBUTOR OF THE DOCUMENT OR MODIFIED VERSION OF THE "
+"DOCUMENT, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON "
+"FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF "
+"ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, "
+"WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER DAMAGES "
+"OR LOSSES ARISING OUT OF OR RELATING TO USE OF THE DOCUMENT AND MODIFIED "
+"VERSIONS OF THE DOCUMENT, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE "
+"POSSIBILITY OF SUCH DAMAGES."
+msgstr ""
+
+#: C/legal.xml:28(para)
+msgid ""
+"DOCUMENT AND MODIFIED VERSIONS OF THE DOCUMENT ARE PROVIDED UNDER THE TERMS "
+"OF THE GNU FREE DOCUMENTATION LICENSE WITH THE FURTHER UNDERSTANDING THAT: "
+"<placeholder-1/>"
+msgstr ""
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/video-call.page:38(None) C/audio-video.page:70(None)
-#: C/audio-call.page:36(None)
-msgid "@@image: 'figures/camera-web.png'; md5=8166b4372f25b78cbf5a64fe2eac2ce5"
-msgstr ""
-"@@image: 'figures/camera-web.png'; md5=8166b4372f25b78cbf5a64fe2eac2ce5"
-
-#: C/video-call.page:10(desc)
-msgid "Start a video conversation with one of your contacts."
-msgstr "Comezar unha conversa de vídeo con un dos seus contactos."
-
-#: C/video-call.page:21(name) C/status-icons.page:16(name)
-#: C/share-desktop.page:13(name) C/set-custom-status.page:19(name)
-#: C/send-file.page:21(name) C/salut-protocol.page:18(name)
-#: C/remove-account.page:18(name) C/prob-conn-neterror.page:18(name)
-#: C/prob-conn-name.page:17(name) C/prob-conn-auth.page:21(name)
-#: C/prob-conn-acctdisabled.page:18(name) C/prev-conv.page:16(name)
-#: C/link-contacts.page:15(name) C/irc-start-conversation.page:15(name)
-#: C/irc-send-file.page:16(name) C/irc-nick-password.page:18(name)
-#: C/irc-manage.page:19(name) C/irc-join-room.page:16(name)
-#: C/irc-join-pwd.page:17(name) C/irc-commands.page:10(name)
-#: C/introduction.page:13(name) C/index.page:19(name)
-#: C/import-account.page:23(name) C/hide-contacts.page:11(name)
-#: C/group-conversations.page:19(name) C/geolocation-what-is.page:18(name)
-#: C/geolocation-turn.page:18(name) C/geolocation-supported.page:16(name)
-#: C/geolocation-privacy.page:17(name) C/geolocation-not-showing.page:17(name)
-#: C/geolocation.page:17(name) C/favorite-rooms.page:14(name)
-#: C/disable-account.page:20(name) C/create-account.page:19(name)
-#: C/audio-video.page:17(name) C/audio-call.page:19(name)
-#: C/add-account.page:20(name)
-msgid "Milo Casagrande"
-msgstr "Milo Casagrande"
-
-#: C/video-call.page:22(email) C/status-icons.page:17(email)
-#: C/share-desktop.page:14(email) C/set-custom-status.page:20(email)
-#: C/send-file.page:22(email) C/salut-protocol.page:19(email)
-#: C/remove-account.page:19(email) C/prob-conn-neterror.page:19(email)
-#: C/prob-conn-name.page:18(email) C/prob-conn-auth.page:22(email)
-#: C/prob-conn-acctdisabled.page:19(email) C/prev-conv.page:17(email)
-#: C/link-contacts.page:16(email) C/irc-start-conversation.page:16(email)
-#: C/irc-send-file.page:17(email) C/irc-nick-password.page:19(email)
-#: C/irc-manage.page:20(email) C/irc-join-room.page:17(email)
-#: C/irc-join-pwd.page:18(email) C/irc-commands.page:11(email)
-#: C/introduction.page:14(email) C/index.page:20(email)
-#: C/import-account.page:24(email) C/hide-contacts.page:12(email)
-#: C/group-conversations.page:20(email) C/geolocation-what-is.page:19(email)
-#: C/geolocation-turn.page:19(email) C/geolocation-supported.page:17(email)
-#: C/geolocation-privacy.page:18(email)
-#: C/geolocation-not-showing.page:18(email) C/geolocation.page:18(email)
-#: C/favorite-rooms.page:15(email) C/disable-account.page:21(email)
-#: C/create-account.page:20(email) C/audio-video.page:18(email)
-#: C/audio-call.page:20(email) C/add-account.page:21(email)
-msgid "milo@ubuntu.com"
-msgstr "milo@ubuntu.com"
-
-#: C/video-call.page:25(p) C/status-icons.page:24(p)
-#: C/share-desktop.page:17(p) C/set-custom-status.page:23(p)
-#: C/send-message.page:21(p) C/send-file.page:25(p)
-#: C/salut-protocol.page:22(p) C/remove-account.page:22(p)
-#: C/prob-conn.page:18(p) C/prob-conn-neterror.page:22(p)
-#: C/prob-conn-name.page:21(p) C/prob-conn-auth.page:25(p)
-#: C/prob-conn-acctdisabled.page:22(p) C/prev-conv.page:24(p)
-#: C/link-contacts.page:19(p) C/irc-start-conversation.page:19(p)
-#: C/irc-send-file.page:20(p) C/irc-nick-password.page:22(p)
-#: C/irc-manage.page:23(p) C/irc-join-room.page:20(p)
-#: C/irc-join-pwd.page:21(p) C/irc-commands.page:14(p)
-#: C/introduction.page:17(p) C/index.page:23(p) C/import-account.page:31(p)
-#: C/hide-contacts.page:15(p) C/group-conversations.page:23(p)
-#: C/geolocation-what-is.page:22(p) C/geolocation-turn.page:22(p)
-#: C/geolocation-supported.page:20(p) C/geolocation-privacy.page:21(p)
-#: C/geolocation-not-showing.page:21(p) C/geolocation.page:21(p)
-#: C/favorite-rooms.page:18(p) C/disable-account.page:28(p)
-#: C/create-account.page:23(p) C/change-status.page:23(p)
-#: C/audio-video.page:21(p) C/audio-call.page:23(p) C/add-contact.page:22(p)
-#: C/add-account.page:28(p) C/accounts-window.page:22(p)
-#: C/account-jabber.page:18(p) C/account-irc.page:20(p)
-msgid "Creative Commons Share Alike 3.0"
-msgstr "Creative Commons Compartir Igual 3.0"
-
-#: C/video-call.page:28(title)
-msgid "Start a video conversation"
-msgstr "Comezar unha conversa de vídeo"
-
-#: C/video-call.page:30(p)
+#: C/tomboy.xml:257(None)
 msgid ""
-"If you have a webcam, you can call your contacts and have a video "
-"conversation with them. This features only works with certain types of "
-"accounts, and it requires the other person to have an application that "
-"supports video calls."
+"@@image: 'figures/tomboy-panel.png'; md5=37fb8231c5dece7539e3471b76ec0d00"
 msgstr ""
-"Se ten unha cámara web poderá facer chamadas aos seus contactos e ter unha "
-"conversa con vídeo con eles. Estas funcionalidades só funcionarán con certos "
-"tipos de contas, e require que outra persoa teña un aplicativo que admita as "
-"videochamadas."
-
-#: C/video-call.page:37(p)
-msgid ""
-"From the <gui>Contact List</gui> window, click the <media type=\"image\" "
-"mime=\"image/png\" src=\"figures/camera-web.png\">video call</media> icon "
-"next to the name of the contact you wish to call and choose <gui style="
-"\"menuitem\">Video Call</gui>."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema a icona <media type="
-"\"image\" mime=\"image/png\" src=\"figures/camera-web.png\">videochamada</"
-"media> ao lado do nome do contacto ao que quere chamar e seleccione <gui "
-"style=\"menuitem\">Videochamada</gui>."
-
-#: C/video-call.page:43(p) C/audio-call.page:42(p)
-msgid ""
-"A new window will open. When the connection is established, you will see "
-"<gui>Connected</gui> at the bottom of the window, along with the total "
-"conversation time."
-msgstr ""
-"Abrirase unha nova xanela. Cando a conexión se estabeleza verá "
-"<placeholder-2/> na parte inferior da xanela, ao carón do tempo de conversa "
-"total."
-
-#: C/video-call.page:48(p) C/audio-call.page:48(p)
-msgid "To end the conversation, click on <gui style=\"button\">Hang up</gui>."
-msgstr "Para rematar a conversa, prema sobre <placeholder-1/>"
-
-#: C/video-call.page:54(p)
-msgid ""
-"To turn a video conversation into an audio conversation, choose <guiseq><gui "
-"style=\"menu\">Video</gui><gui style=\"menuitem\">Video Off</gui></guiseq>."
-msgstr ""
-"Para trocar unha conversa de vídeo nunha conversa de son, seleccione "
-"<guiseq><gui style=\"menu\">Vídeo</gui><gui style=\"menuitem\">Desactivar "
-"vídeo</gui></guiseq>."
-
-#: C/video-call.page:60(title)
-msgid "Start a video conversation with a meta-contact"
-msgstr "Comezar unha conversa de vídeo con un metacontacto."
-
-#: C/video-call.page:63(p) C/send-message.page:53(p) C/audio-call.page:66(p)
-msgid ""
-"From the <gui>Contact List</gui> window, right-click on the meta-contact."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema co botón dereito sobre "
-"un metacontacto."
-
-#: C/video-call.page:68(p)
-msgid ""
-"Select the contact you want to have the conversation, and from the menu "
-"select <gui style=\"menuitem\">Video Call</gui>."
-msgstr ""
-"Seleccione o contacto co que desexe ter unha conversa e desde o menú "
-"seleccione <gui style=\"menuitem\">Vídeochamada</gui>."
-
-#: C/video-call.page:75(p) C/send-message.page:65(p) C/audio-call.page:78(p)
-msgid ""
-"To recognize if a contact is a <em>meta-contact</em>, move your mouse on a "
-"contact in the <gui>Contact List</gui> window, and stop over it for a "
-"second: a small pop-up message will appear showing the number of the "
-"contacts that form the meta-contact."
-msgstr ""
-"Para recoñecer se un contacto é un <em>metacontacto</em>, mova o rato sobre "
-"o contacto na xanela <gui>Lista de contactos</gui> e deteñase sobre el un "
-"segundo: aparecerá unha pequena mensaxe emerxente que mostra o número de "
-"contactos que forman o metacontacto."
+"@@image: 'figures/tomboy-panel.png'; md5=37fb8231c5dece7539e3471b76ec0d00"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/status-icons.page:39(None)
-msgid "@@image: 'figures/available.png'; md5=1952a8952efbe87e84b21e09e0587e71"
-msgstr "@@image: 'figures/available.png'; md5=1952a8952efbe87e84b21e09e0587e71"
+#: C/tomboy.xml:386(None)
+msgid ""
+"@@image: 'figures/tomboy-new-note.png'; md5=ba337ad3ae256f3fdf79afeef82d7883"
+msgstr ""
+"@@image: 'figures/tomboy-new-note.png'; md5=ba337ad3ae256f3fdf79afeef82d7883"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/status-icons.page:45(None)
-msgid "@@image: 'figures/busy.png'; md5=6cab57171fb6d732a85ace48f11cf207"
-msgstr "@@image: 'figures/busy.png'; md5=6cab57171fb6d732a85ace48f11cf207"
+#: C/tomboy.xml:785(None)
+msgid ""
+"@@image: 'figures/tomboy-main-menu.png'; md5=420af676a38a074abd5431e7a07d1fec"
+msgstr ""
+"@@image: 'figures/tomboy-main-menu.png'; md5=420af676a38a074abd5431e7a07d1fec"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/status-icons.page:53(None)
-msgid "@@image: 'figures/away.png'; md5=9a93ccca527af39cbe11db5c9d915ca0"
-msgstr "@@image: 'figures/away.png'; md5=9a93ccca527af39cbe11db5c9d915ca0"
+#: C/tomboy.xml:941(None)
+msgid ""
+"@@image: 'figures/new-notebook.png'; md5=b5645185d7fed6183b550c0dab7b72cb"
+msgstr ""
+"@@image: 'figures/new-notebook.png'; md5=b5645185d7fed6183b550c0dab7b72cb"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/status-icons.page:62(None) C/status-icons.page:69(None)
-msgid "@@image: 'figures/offline.png'; md5=565ba82fbedd22e4eb5b810750199527"
-msgstr "@@image: 'figures/offline.png'; md5=565ba82fbedd22e4eb5b810750199527"
-
-#: C/status-icons.page:7(desc)
-msgid "Understanding the various statuses and status icons."
-msgstr "Entendendo os diferentes estados e iconas de estado."
-
-#: C/status-icons.page:20(name) C/salut-protocol.page:36(cite)
-#: C/prev-conv.page:20(name) C/prev-conv.page:38(cite)
-#: C/import-account.page:27(name) C/disable-account.page:24(name)
-#: C/audio-video.page:109(cite) C/audio-video.page:117(cite)
-#: C/add-account.page:24(name) C/accounts-window.page:18(name)
-#: C/account-jabber.page:14(name) C/account-irc.page:16(name)
-msgid "Shaun McCance"
-msgstr "Shaun McCance"
-
-#: C/status-icons.page:21(email) C/prev-conv.page:21(email)
-#: C/import-account.page:28(email) C/disable-account.page:25(email)
-#: C/add-account.page:25(email) C/accounts-window.page:19(email)
-#: C/account-jabber.page:15(email) C/account-irc.page:17(email)
-msgid "shaunm@gnome.org"
-msgstr "shaunm@gnome.org"
-
-#: C/status-icons.page:35(title)
-msgid "Status Types and Icons"
-msgstr "Tipos de estados e iconas"
-
-#: C/status-icons.page:39(media)
-msgid "Available icon"
-msgstr "Icona de dispoñíbel"
-
-#: C/status-icons.page:40(gui)
-msgid "Available"
-msgstr "Dispoñíbel"
-
-#: C/status-icons.page:41(p)
+#: C/tomboy.xml:979(None)
 msgid ""
-"Use the <em>Available</em> status when you are at your computer and able to "
-"chat with your contacts. You can set a custom message for this status."
+"@@image: 'figures/add-notebook-search.png'; "
+"md5=8a98d72edc3c4351a632889c5edbb81f"
 msgstr ""
-"Use o estado <em>Dispoñíbel</em> cando está no seu computador e pode falar "
-"cos seus contactos. Vostede pode estabelecer unha mensaxe personalizada para "
-"este estado."
-
-#: C/status-icons.page:45(media)
-msgid "Busy icon"
-msgstr "Icona de ocupado"
-
-#: C/status-icons.page:46(gui)
-msgid "Busy"
-msgstr "Ocupado"
-
-#: C/status-icons.page:47(p)
-msgid ""
-"Use the <em>Busy</em> status to let your contacts know that you don’t want "
-"to chat right now. They can still contact you, for instance if they have "
-"something urgent they need to discuss. By default, <app>Empathy</app> will "
-"not use notification bubbles and sounds when you are busy. You can set a "
-"custom message for this status."
-msgstr "Use o estado <em>Ocupado</em> para dicirlle aos seus contactos"
-
-#: C/status-icons.page:53(media)
-msgid "Away icon"
-msgstr "Icona de ausente"
-
-#: C/status-icons.page:54(gui)
-msgid "Away"
-msgstr "Ausente"
-
-#: C/status-icons.page:55(p)
-msgid ""
-"Use the <em>Away</em> status when you are going away from your computer. "
-"<app>Empathy</app> automatically sets your status to Away if you do not use "
-"your computer for a while, or if your screensaver is on. By default, "
-"<app>Empathy</app> will not use notification bubbles and sounds when you are "
-"away. You can set a custom message for this status."
-msgstr ""
-"Use o estado <em>Ausente</em> cando non está no seu computador. "
-"<app>Empathy</app> automaticamente estabelecer o seu estado a Ausente se non "
-"usa o seu computador por un anaco, ou se o seu protector de pantalla está "
-"activado. Por omisión, <app>Empathy</app> non usa as notificacións e sons "
-"cando está Ausente. Vostede pode estabelecer unha mensaxe personalizada para "
-"este estado."
-
-#: C/status-icons.page:62(media) C/status-icons.page:69(media)
-msgid "Offline icon"
-msgstr "Icona de desconectado"
-
-#: C/status-icons.page:63(gui)
-msgid "Invisible"
-msgstr "Invisíbel"
-
-#: C/status-icons.page:64(p)
-msgid ""
-"When you set your status to <em>Invisible</em>, you will appear as offline "
-"to your contacts. You will still be connected to your accounts, and you "
-"still see your contacts’ statuses and start conversations with them."
-msgstr ""
-"Ao estabelecer o seu estado <em>Invisíbel</em>, aparecerá como desconectado "
-"para os seus contactos. Aínda así vostede estará conectado aos seus "
-"contactos e poderá ver os estados dos seus contactos e iniciar unha conversa "
-"con eles."
-
-#: C/status-icons.page:70(gui)
-msgid "Offline"
-msgstr "Desconectado"
-
-#: C/status-icons.page:71(p)
-msgid ""
-"Setting your status to <em>Offline</em> disconnects you from all of your "
-"accounts."
-msgstr ""
-"Estabelecer o seu estado a <em>Desconectado</em> desconectaralle de todas as "
-"súas contas."
-
-#: C/share-desktop.page:7(desc)
-msgid "Share the desktop with your contacts."
-msgstr "Compartir o escritorio cos seus contactos."
-
-#: C/share-desktop.page:28(title)
-msgid "Share your desktop"
-msgstr "Compartir o seu escritorio"
-
-#: C/share-desktop.page:30(p)
-msgid ""
-"It is possible, with some of your contacts, to share your desktop with them, "
-"or to start using your contacts desktop. You can use this functionality to "
-"show your desktop to your contacts, to ask for help or to help your contacts "
-"resolve a problem."
-msgstr ""
-"É posíbel, con algúns dos seus contactos, compartir o escritorio con eles, "
-"ou usar o escritorio dos seus contactos. Pode usar esta funcionalidade para "
-"mostrar o seu escritorio aos seus contactos, para pedirlle axuda ou axudar "
-"aos seus contactos a solucionar un problema."
-
-#: C/share-desktop.page:38(p)
-msgid ""
-"In order to be able to share your desktop or to remotely use your contacts "
-"desktop, it is necessary to have a remote desktop viewer application "
-"installed in your system."
-msgstr ""
-"Para poder compartir o seu escritorio ou usar remotamente o escritorio dos "
-"seus contactos é necesario ter un aplicativo de visión remota de escritorios "
-"instalada no seu sistema."
-
-#: C/share-desktop.page:46(p) C/send-file.page:40(p)
-#: C/favorite-rooms.page:66(p)
-msgid "From the <gui>Contact List</gui> window, perform one of the following:"
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui> leve a cabo unha das seguintes "
-"opcións:"
-
-#: C/share-desktop.page:51(p)
-msgid ""
-"Select the contact you want to share your desktop with, and choose "
-"<guiseq><gui>Edit</gui><gui>Contact</gui><gui>Share my desktop</gui></"
-"guiseq>."
-msgstr ""
-"Seleccione o contacto co que quere compartir o seu escritorio e prema "
-"<guiseq><gui>Editar</gui><gui>Contacto</gui><gui>Compartir o meu escritorio</"
-"gui></guiseq>."
-
-#: C/share-desktop.page:57(p)
-msgid ""
-"Right-click on the name of the contact you want to share your desktop with, "
-"and select <gui>Share my desktop</gui>."
-msgstr ""
-"Prema co botón dereito sobre o nome do contacto co que quere manter unha "
-"conversa e seleccione <gui>Compartir o meu escritorio</gui>."
-
-#: C/share-desktop.page:65(p)
-msgid ""
-"A request will be sent to the contact you want to share your desktop with. "
-"If they accept, the default remote desktop viewer application will be "
-"launched in order to permit you to disconnect the user that is controlling "
-"your desktop."
-msgstr ""
-"Enviarase unha solicitude ao contacto co que quere compartir o seu "
-"escritorio. Se acepta, lanzarase o aplicativo de visión remota de "
-"escritorios para permitirlle desconectar ao usuario que está controlando o "
-"seu escritorio."
-
-#: C/share-desktop.page:70(p)
-msgid ""
-"For more information about how to use the remote desktop viewer application, "
-"refer to its help."
-msgstr ""
-"Para obter máis información sobre como usar o aplicativo de visión de "
-"escritorios remotos consulte a axuda."
-
-#: C/share-desktop.page:77(p)
-msgid ""
-"When you share your desktop with someone else, it is possible to experience "
-"system performance slowdown and low Internet speed."
-msgstr ""
-"Cando comparte o seu escritorio con outros, e posíbel que experimente unha "
-"ralentización de rendemento de sistema e unha baixa velocidade de Internet."
-
-#: C/share-desktop.page:83(p)
-msgid ""
-"Not all your contacts might be able to support this functionality. It is "
-"necessary for them to have at least the 2.28 version of <app>Empathy</app> "
-"and a remote desktop viewer application installed in their system."
-msgstr ""
-"Para poder compartir o seu escritorio ou usar remotamente o escritorio dos "
-"seus contactos é necesario ter un aplicativo de visión remota de escritorios "
-"instalada no seu sistema."
-
-#: C/set-custom-status.page:9(desc)
-msgid "Add, edit or delete personal messages for your status."
-msgstr "Engadir, editar e borrar un mensaxe persoal para o seu estado."
-
-#: C/set-custom-status.page:15(name)
-msgid "Jim Campbell"
-msgstr "Jim Campbell"
-
-#: C/set-custom-status.page:16(email)
-msgid "jwcampbell@gmail.com"
-msgstr "jwcampbell@gmail.com"
-
-#: C/set-custom-status.page:34(title)
-msgid "Set a custom message"
-msgstr "Estabelecer unha mensaxe personalizada"
-
-#: C/set-custom-status.page:36(p)
-msgid ""
-"Sometimes you may want to set a custom message for your status, for example "
-"to let people know that you will be unavailable for a certain period of time."
-msgstr ""
-"En ocasións pode querer usar unha mensaxe persoal para o seu escritorio, por "
-"exemplo, para facer saber aos seus contactos que non estará dispoñíbel por "
-"un período de tempo."
-
-#: C/set-custom-status.page:40(p)
-msgid ""
-"It is possible to set a custom message based on the different statuses "
-"available."
-msgstr ""
-"É posíbel estabelecer unha mensaxe personalizada baseada nos diferentes "
-"estados dispoñíbeis."
-
-#: C/set-custom-status.page:46(p) C/set-custom-status.page:82(p)
-msgid ""
-"From the <gui>Contact List</gui> window, click on the drop-down list at the "
-"top."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema na lista despregábel na "
-"parte superior."
-
-#: C/set-custom-status.page:52(p)
-msgid ""
-"Select the status you want to add a custom message to. You have to select "
-"the one identified with the label <gui>Custom Message</gui>."
-msgstr ""
-"Seleccione un estado ao que quere engadir a mensaxe personalizada. Ten que "
-"seleccionar o identificado coa etiqueta <gui>Mensaxe personalizada</gui>."
-
-#: C/set-custom-status.page:58(p)
-msgid ""
-"Enter your custom message in the text box at the top of the window, and "
-"press <key>Enter</key> to set the message."
-msgstr ""
-"Introduza a súa mensaxe personalizada na caixa de texto da parte superior da "
-"xanela e prema <key>Intro</key> para estabelecer a mensaxe."
-
-#: C/set-custom-status.page:64(p)
-msgid ""
-"If you want to set the custom message as a favorite, saving it in order to "
-"use it again, click on the little star on the right of the text box where "
-"you wrote your custom message."
-msgstr ""
-"Se quere estabelecer a mensaxe personalizada como un favorito, gardándoo "
-"para usalo de novo, prema na pequena estrela á dereita da caixa de texto "
-"onde escribiu a súa mensaxe personalizada."
-
-#: C/set-custom-status.page:69(p)
-msgid ""
-"If you do not do it, the custom message will not be available the next time "
-"you use <app>Empathy</app>. It will be saved only for the current session."
-msgstr ""
-"Se non o fai a mensaxe personalizada non estará dispoñíbel a próxima vez que "
-"use <app>Empathy</app>. Só se gardará durante a sesión actual."
-
-#: C/set-custom-status.page:78(title)
-msgid "Edit, remove and add a custom message"
-msgstr "Editar, quitar e engadir unha mensaxe personalizada"
-
-#: C/set-custom-status.page:88(p)
-msgid "Select <gui>Edit Custom Message</gui>."
-msgstr "Editar a mensaxe personalizada"
-
-#: C/set-custom-status.page:95(p)
-msgid "To edit a custom message:"
-msgstr "Para editar unha mensaxe personalizada:"
-
-#: C/set-custom-status.page:100(p)
-msgid ""
-"From the <gui>Saved Presets</gui> box, select the status message you want to "
-"edit and double-click on it."
-msgstr ""
-"Desde a caixa <gui>Estados gardados</gui>, seleccione a mensaxe de estado "
-"que quere editar e prema dúas veces sobre el."
-
-#: C/set-custom-status.page:106(p)
-msgid "Type the new custom message and press <key>Enter</key> to modify it."
-msgstr ""
-"Escriba a mensaxe personalizada nova e prema <key>Intro</key> para "
-"modificalo."
-
-#: C/set-custom-status.page:113(p)
-msgid "To remove a custom message:"
-msgstr "Para eliminar unha mensaxe personalizada:"
-
-#: C/set-custom-status.page:118(p)
-msgid ""
-"From the <gui>Saved Presets</gui> box, select the status message you want to "
-"remove."
-msgstr ""
-"Desde a caixa <gui>Estados gardados</gui>, seleccione a mensaxe de estado "
-"que quere editar."
-
-#: C/set-custom-status.page:124(p)
-msgid "Click on the <gui>Remove</gui> button."
-msgstr "Prema sobre o botón <placeholder-1/>"
-
-#: C/set-custom-status.page:131(p)
-msgid ""
-"To add a new custom message, from the <gui>Add New Preset</gui> section:"
-msgstr ""
-"Para engadir unha mensaxe personalizada nova, desde a sección <gui>Engadir "
-"estado gardado</gui>."
-
-#: C/set-custom-status.page:136(p)
-msgid ""
-"Click on the drop-down list to select the status you want to set a custom "
-"message to."
-msgstr ""
-"Prema na lista despregábel para seleccionar o estado no que quere "
-"estabelecer unha mensaxe personalizada."
-
-#: C/set-custom-status.page:142(p)
-msgid "Click on the text box, and type the new custom message."
-msgstr "Prema sobre a caixa de texto e escriba a nova mensaxe personalizada."
-
-#: C/set-custom-status.page:147(p)
-msgid "Click on <gui>Add</gui> to add the new message to the presets ones."
-msgstr "Prema <gui>Engadir</gui> para engadir unha mensaxe nova aos gardados."
-
-#: C/set-custom-status.page:156(p)
-msgid "When finished, click on <gui>Close</gui>."
-msgstr "Ao rematar, prema en <placeholder-/>"
-
-#: C/set-custom-status.page:163(p)
-msgid ""
-"When you edit or add a new custom message, it will not be set as the current "
-"status message. You will need to select it from the <gui>Contact List</gui> "
-"window."
-msgstr ""
-"Cando edita ou engade unha mensaxe personalizada nova non se estabelece como "
-"a mensaxe de estado actual. Ten que seleccionalo na xanela <gui>Lista de "
-"contactos</gui>."
-
-#: C/send-message.page:8(desc)
-msgid "Send a message to one of your contacts."
-msgstr "Enviar unha mensaxe a un dos seus contactos."
-
-#: C/send-message.page:17(name) C/send-file.page:17(name)
-#: C/prob-conn.page:14(name) C/prob-conn-neterror.page:14(name)
-#: C/prob-conn-auth.page:17(name) C/prob-conn-acctdisabled.page:14(name)
-#: C/change-status.page:19(name) C/add-contact.page:18(name)
-msgid "Phil Bull"
-msgstr "Phil Bull"
-
-#: C/send-message.page:18(email) C/send-file.page:18(email)
-#: C/prob-conn.page:15(email) C/prob-conn-neterror.page:15(email)
-#: C/prob-conn-auth.page:18(email) C/prob-conn-acctdisabled.page:15(email)
-#: C/change-status.page:20(email) C/add-contact.page:19(email)
-msgid "philbull@gmail.com"
-msgstr "philbull@gmail.com"
-
-#: C/send-message.page:32(title)
-msgid "Send a message to someone"
-msgstr "Enviar unha mensaxe a alguén"
-
-#: C/send-message.page:36(p)
-msgid ""
-"From the <gui>Contact List</gui> window, double-click the name of the "
-"contact that you want to have a conversation with."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema dúas veces sobre o nome "
-"do contacto co que quere ter unha conversa."
-
-#: C/send-message.page:42(p)
-msgid ""
-"A new window will open. Type a message into the box at the bottom of the "
-"window and press <key>Enter</key> to send it."
-msgstr ""
-"Abrirase unha nova xanela. Escriba a mensaxe na caixa na parte inferior da "
-"xanela e prema <placeholder-1/> para enviala."
-
-#: C/send-message.page:50(title)
-msgid "Send a message to a meta-contact"
-msgstr "Enviar unha mensaxe a un metacontacto"
-
-#: C/send-message.page:58(p)
-msgid ""
-"Select the contact you want to have the conversation, and from the menu "
-"select <gui style=\"menuitem\">Chat</gui>."
-msgstr ""
-"Prema co botón dereito sobre o nome do contacto co que quere manter unha "
-"conversa e desde o menú seleccione <gui style=\"menuitem\">Conversa</gui>."
-
-#: C/send-file.page:8(desc)
-msgid "Send a file from your computer to one of your contacts."
-msgstr "Enviar un ficheiro desde o seu computador a un dos seus contactos."
-
-#: C/send-file.page:36(title)
-msgid "Send files"
-msgstr "Enviar ficheiros"
-
-#: C/send-file.page:45(p)
-msgid ""
-"Right click on the contact you want to send a file to, and choose <gui>Send "
-"file</gui>."
-msgstr ""
-"Prema co botón dereito sobre o nome do contacto co que quere manter unha "
-"conversa e seleccione <placeholder-1/>."
-
-#: C/send-file.page:50(p)
-msgid ""
-"Click on the contact you want to send a file, and choose <guiseq><gui>Edit</"
-"gui><gui>Contact</gui><gui>Send file</gui></guiseq>."
-msgstr ""
-"Prema sobre o contacto ao que quere enviar un ficheiro e elixa "
-"<guiseq><gui>Editar</gui><gui>Contacto</gui><gui>Enviar ficheiro</gui></"
-"guiseq>."
-
-#: C/send-file.page:58(p)
-msgid "Select the file to send, and click on <gui>Send</gui>."
-msgstr "Seleccione o ficheiro para enviar e prema <gui>Enviar</gui>."
-
-#: C/send-file.page:63(p)
-msgid "The <gui>File Transfers</gui> window will appear."
-msgstr "Aparecerá a xanela <gui>Transferencia de ficheiros</gui>."
-
-#: C/send-file.page:66(p)
-msgid ""
-"Wait for your contact to accept the file transfer, or click <gui>Stop</gui> "
-"to halt the transfer."
-msgstr ""
-"Agarde a que o seu contacto acepte a transferencia de ficheiro e prema "
-"<gui>Deter</gui> para deter a transferencia."
-
-#: C/send-file.page:72(p)
-msgid ""
-"Once the transfer is finished, it is possible to close the <gui>File "
-"Transfers</gui> window."
-msgstr ""
-"Cano remate a transferencia é posíbel pechar a xanela <gui>Transferencia de "
-"ficheiro</gui>."
-
-#: C/send-file.page:80(p)
-msgid ""
-"If you have multiple finished transfers listed in the window, click on "
-"<gui>Clear</gui> to empty the list. This will only remove the files from the "
-"list and will not delete them from your computer."
-msgstr ""
-"Se ten múltiples transferencias finalizadas listas na xanela prema "
-"<gui>Limpar</gui> para baleirar a lista. Isto só quitará os ficheiros da "
-"lista e non os borrará do computador."
-
-#: C/send-file.page:87(p)
-msgid ""
-"It is possible to send files only using the following services: <em>Jabber</"
-"em>, <em>Google Talk</em> and <em>People Nearby</em>."
-msgstr ""
-"So é posíbel enviar ficheiros ao usar os seguintes servizos: <em>Jabber</"
-"em>, <em>Google Talk</em> e <em>Personas próximas</em>."
-
-#: C/send-file.page:93(p)
-msgid ""
-"In order to send a file to someone, you need to be connected to the "
-"Internet, or to a local area network."
-msgstr ""
-"Para enviarlle un ficheiro a unha persoa debe estar conectado a Internet ou "
-"á rede local."
-
-#: C/salut-protocol.page:8(desc)
-msgid "Understanding the People Nearby feature."
-msgstr "Entender a característica de Persoas próximas."
-
-#: C/salut-protocol.page:33(title)
-msgid "What is People Nearby?"
-msgstr "Que é Persoas próximas"
-
-#: C/salut-protocol.page:37(p)
-msgid "I'd like to see this played up a bit more."
-msgstr "Gustaríame ver isto explicado un pouco máis."
-
-#: C/salut-protocol.page:40(p)
-msgid ""
-"The People Nearby service is a serverless communication service: you do not "
-"need to connect and authenticate to a central server in order to use it."
-msgstr ""
-"O servizo de Xente próxima é un servizo de comunicación sen servidores: non "
-"precisa conectarse e autenticarse contra un servidor central para poder "
-"usalo."
-
-#: C/salut-protocol.page:45(p)
-msgid ""
-"This kind of serverless messaging system is restricted to a local area "
-"network and an active Internet connection is not necessary."
-msgstr ""
-"Este tipo de sistemas de mensaxería sen servidores está restrinxido a redes "
-"de área local e non se necesita unha conexión activa con Internet."
-
-#: C/salut-protocol.page:49(p)
-msgid ""
-"The people that use this service inside the same local area network will be "
-"auto-discovered, and it will be possible to send them messages and files as "
-"with other services."
-msgstr ""
-"A xente que usa o servizo dentro da mesma rede de área local autodestruirase "
-"e será posíbel enviarlles mensaxes e ficheiros ao igual que con outros "
-"servizos"
-
-#: C/salut-protocol.page:54(p)
-msgid ""
-"All the modern local area networks should be able to support this kind of "
-"service."
-msgstr ""
-"Todas as redes modernas de área local deberían poder admitir este tipo de "
-"servizos."
-
-#: C/remove-account.page:8(desc)
-msgid "Completely remove an account from <app>Empathy</app>."
-msgstr "Quitar completamente unha conta en <app>Empathy</app>."
-
-#: C/remove-account.page:33(title)
-msgid "Remove an account"
-msgstr "Eliminar unha conta"
-
-#: C/remove-account.page:35(p)
-msgid ""
-"You can completely remove an account from <app>Empathy</app> if you no "
-"longer wish to use the account. If you wish to use the account in "
-"<app>Empathy</app> again in the future, you will have to add your account "
-"details again."
-msgstr ""
-"Pode quitar completamente unha conta de <app>Empathy</app> se non quere "
-"seguir usándoa. Se quere usar de novo a conta en <app>Empathy</app> no "
-"futuro, deberá engadir os detalles da conta de novo."
-
-#: C/remove-account.page:42(p) C/irc-nick-password.page:50(p)
-#: C/disable-account.page:48(p) C/add-account.page:48(p)
-msgid ""
-"From the <gui>Contact List</gui> window, choose <guiseq><gui>Edit</"
-"gui><gui>Accounts</gui></guiseq>, or press <key>F4</key>."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui> seleccione <guiseq><gui>Editar</"
-"gui><gui>Contas</gui></guiseq> ou prema <key>F4</key>."
-
-#: C/remove-account.page:46(p)
-msgid ""
-"Select the account you wish to remove from the accounts list on the left "
-"side of the window."
-msgstr ""
-"Seleccione a conta que desexa eliminar desde a lista de contas na parte "
-"esquerda da xanela."
-
-#: C/remove-account.page:50(p)
-msgid "Click on <gui style=\"button\">Remove</gui>."
-msgstr "Prema <gui style=\"button\">Quitar</gui>."
-
-#: C/remove-account.page:53(p)
-msgid ""
-"A dialog will be shown asking for confirmation. Click the <gui>Remove</gui> "
-"button to permanently remove the account."
-msgstr ""
-"Mostrarase un diálogo preguntando por unha confirmación. Prema no botón "
-"<gui>Eliminar</gui> para quitar a conta permanentemente."
-
-#: C/remove-account.page:59(p)
-msgid ""
-"Even after removing an account, <app>Empathy</app> does not delete your "
-"conversation history for that account."
-msgstr ""
-"Incluso despois de eliminar unha conta <app>Empathy</app> non borra o seu "
-"historial de conversas para esa conta."
-
-#: C/prob-conn.page:7(desc)
-msgid "Diagnose common problems connecting to an instant messaging service."
-msgstr ""
-"Diagnosticar problemas comúns ao conectarse a un servizo de mensaxaría "
-"instantánea."
-
-#: C/prob-conn.page:29(title)
-msgid "Problems connecting to an instant messaging service"
-msgstr "Problemas ao conectarse a un servizo de mensaxaría instantánea"
+"@@image: 'figures/add-notebook-search.png'; "
+"md5=8a98d72edc3c4351a632889c5edbb81f"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/prob-conn-neterror.page:58(None) C/prob-conn-name.page:43(None)
-#: C/prob-conn-auth.page:58(None) C/account-irc.page:109(None)
-msgid "@@image: 'figures/gtk-edit.png'; md5=4f21b451732817be0604fe3e2c8da98b"
-msgstr "@@image: 'figures/gtk-edit.png'; md5=4f21b451732817be0604fe3e2c8da98b"
-
-#: C/prob-conn-neterror.page:7(desc)
+#: C/tomboy.xml:1016(None)
 msgid ""
-"An error message which says “<gui>Network error</gui>” appears in the main "
-"window."
+"@@image: 'figures/add-to-notebook.png'; md5=03469ddb5137f525ac4f8318caed5532"
 msgstr ""
-"Aparecerá a mensaxe de erro «<gui>Erro de rede</gui>» na xanela principal."
-
-#: C/prob-conn-neterror.page:33(title)
-msgid "I get a message that says “Network error”"
-msgstr "Obteño unha mensaxe que mostra «Erro de rede»"
-
-#: C/prob-conn-neterror.page:36(cite)
-msgid "shaunm"
-msgstr "shaunm"
-
-#: C/prob-conn-neterror.page:37(p)
-msgid ""
-"Empathy no longer allows you to create an IRC account without a valid nick. "
-"I've removed the guide link. Remove the text."
-msgstr ""
-"Empathy xa non lle permite crear unha conta de IRC sen un alcume válido. "
-"Quitouse a ligazón da guía. Quitar o texto."
-
-#: C/prob-conn-neterror.page:41(p)
-msgid ""
-"This kind of error happens when <app>Empathy</app> cannot communicate with "
-"the instant messaging service for some reason."
-msgstr ""
-"Este tipo de mensaxe sucede cando <app>Empathy</app> non se pode comunicar "
-"co servizo de mensaxaría instantánea por algunha razón."
-
-#: C/prob-conn-neterror.page:45(p)
-msgid ""
-"Also, this kind of error happens when you try to use an IRC account without "
-"setting a nickname."
-msgstr ""
-"Este tipo de erro tamén sucede cando intenta usar unha conta de IRC sen ter "
-"configurado o alcume"
-
-#: C/prob-conn-neterror.page:52(p) C/prob-conn-auth.page:45(p)
-#: C/prob-conn-acctdisabled.page:43(p)
-msgid ""
-"Make sure that you are connected to the Internet, or to a local area network."
-msgstr ""
-"Asegúrese de que está conectado a Internet ou a unha rede de área local."
-
-#: C/prob-conn-neterror.page:57(p) C/prob-conn-name.page:42(p)
-#: C/prob-conn-auth.page:57(p)
-msgid ""
-"Click the <media type=\"image\" mime=\"image/png\" src=\"figures/gtk-edit.png"
-"\">edit</media> icon in the error message."
-msgstr ""
-"<media type=\"image\" mime=\"image/png\" src=\"figures/empathy-logo.png"
-"\">Logotipo da mensaxaría instantánea Empathy</media>Mensaxaría instantánea "
-"Empathy"
-
-#: C/prob-conn-neterror.page:65(p) C/prob-conn-acctdisabled.page:59(p)
-msgid ""
-"Check in the <gui>Advanced</gui> section that all the details are correct. "
-"You should be able to find these details from the website of the messaging "
-"service."
-msgstr ""
-"Comprobe na sección <placeholder-1/> que todos os detalles son correctos. "
-"Vostede poderá encontrar estes detalles no sitio web do seu servizo de "
-"mensaxería."
-
-#: C/prob-conn-neterror.page:82(p) C/prob-conn-auth.page:68(p)
-msgid ""
-"Deselect the <gui>Enabled</gui>, and then select it again to try to "
-"reconnect to the service."
-msgstr ""
-"Deseleccione <placeholder-1/>, e seleccióneo de novo para tentar "
-"reconectarse ao servizo."
-
-#: C/prob-conn-neterror.page:90(title)
-msgid "Proxy support"
-msgstr "Compatibilidade de proxy"
-
-#: C/prob-conn-neterror.page:91(p)
-msgid ""
-"At the moment <app>Empathy</app> can not be configured to work with a proxy."
-msgstr ""
-"Polo momento <app>Empathy</app> non se pode configurar para que funcione cun "
-"proxy."
-
-#: C/prob-conn-name.page:9(title)
-msgid "“Name in use”"
-msgstr "\"Nome en uso\""
-
-#: C/prob-conn-name.page:10(desc)
-msgid ""
-"An error message which says “<gui>Name in use</gui>” appears in the main "
-"window."
-msgstr ""
-"Aparecen na xanela principal unha mensaxe de erro que dice «<gui>Nome en "
-"uso</gui>»"
-
-#: C/prob-conn-name.page:32(title)
-msgid "I get a message that says “Name in use”"
-msgstr "Obteño unha mensaxe de erro que mostra «Nome en uso»"
-
-#: C/prob-conn-name.page:34(p)
-msgid ""
-"This kind of error happens when you try to connect to your IRC account and "
-"you are using a nickname that is already being used by someone else on that "
-"particular network."
-msgstr ""
-"Este tipo de erro sucede cando tenta conectarse á súa conta de IRC e está "
-"usando un alcume que xa está usando outra persoa nesa rede en particular."
-
-#: C/prob-conn-name.page:50(p)
-msgid "In the <gui>Nickname</gui> text box, type a new nickname."
-msgstr "Na caixa de texto <gui>Alcume</gui> escriba un alcume novo."
-
-#: C/prob-conn-name.page:55(p)
-msgid ""
-"If you have registered that nickname within the network you are using, set "
-"the password for that nickname. For more information, see <link xref=\"irc-"
-"nick-password\"/>."
-msgstr ""
-"Se rexistrou ese alcume na rede que está usando, estabeleza o contrasinal "
-"para ese alcume. Para obter máis información consulte a <link xref=\"irc-"
-"nick-password\"/>."
-
-#: C/prob-conn-name.page:64(p)
-msgid ""
-"Deselect the <gui>Enabled</gui> check-box next to the name of your account, "
-"and then select it again to try to reconnect to the service."
-msgstr ""
-"Deseleccione <placeholder-1/>, e seleccióneo de novo para tentar "
-"reconectarse ao servizo."
-
-#: C/prob-conn-auth.page:8(desc)
-msgid ""
-"An error message which says “<gui>Authentication failed</gui>” appears in "
-"the main window."
-msgstr ""
-"Aparece unha mensaxe de erro na xanela principal que mostra «<gui>Fallo de "
-"autenticación</gui>»."
-
-#: C/prob-conn-auth.page:36(title)
-msgid "I get a message that says “Authentication failed”"
-msgstr "Obteño unha mensaxe que di «Produciuse un fallo na autenticación»"
-
-#: C/prob-conn-auth.page:38(p)
-msgid ""
-"This kind of error happens when your instant messaging service is not "
-"allowing you to connect because it does not recognize your username or "
-"password for some reason."
-msgstr ""
-"Este tipo de erro prodúcese cando o seu servizo de mensaxaría intantánea non "
-"lle está permitindo conectar porque por algunha razón non recoñece o seu "
-"nome de usuario ou contrasinal."
-
-#: C/prob-conn-auth.page:50(p)
-msgid ""
-"Make sure that you have registered an account with the service you are "
-"trying to connect to. If you do not have an account, most services will not "
-"allow you to connect."
-msgstr ""
-"Asegúrese de que rexistrou unha conta co servizo ao que está tentando "
-"conectarse. Se non ten unha conta a maioría dos servizos non lle permitirán "
-"que se conecte."
-
-#: C/prob-conn-auth.page:63(p) C/prob-conn-acctdisabled.page:54(p)
-msgid ""
-"Type your username and password again to make sure that they are correct."
-msgstr ""
-"Escriba o seu nome de usuario e contrasinal de novo e asegúrese de que son "
-"correctos."
-
-#: C/prob-conn-acctdisabled.page:7(desc)
-msgid ""
-"The instant messaging account that you want to use is not enabled in the "
-"list of accounts."
-msgstr ""
-"A conta de mensaxaría instantánea que quere usar non está activada na lista "
-"de contas."
-
-#: C/prob-conn-acctdisabled.page:33(title)
-msgid "My account is not enabled"
-msgstr "A miña conta non está activada"
-
-#: C/prob-conn-acctdisabled.page:35(p)
-msgid ""
-"If the instant messaging account that you want to use is not enabled in the "
-"drop-down account list when you try to start a new conversation or join a "
-"room, your account details may not be correct."
-msgstr ""
-"Se a conta de mensaxaría instantánea que quere usar non está activada na "
-"lista despregábel de contas, cando tenta iniciar unha conversa nova ou "
-"unirse a unha charla, pode que os detalles da súa conta non sexa correctos."
-
-#: C/prob-conn-acctdisabled.page:48(p)
-msgid ""
-"Choose <guiseq><gui>Edit</gui><gui>Accounts</gui></guiseq> and select the "
-"account that is not working."
-msgstr ""
-"Elixa <guiseq><gui>Editar</gui><gui>Contas</gui></guiseq> e seleccione a "
-"conta que non está funcionando."
-
-#: C/prob-conn-acctdisabled.page:65(p)
-msgid ""
-"Check that the <gui style=\"checkbox\">Enabled</gui> check-box is selected. "
-"If it is not, select the check-box to enable the account."
-msgstr ""
-"Comprobe que a casilla de verificación <gui style=\"checkbox\">Activada</"
-"gui> está seleccionada. Se non o está marque a casilla de verificación para "
-"activar a conta."
-
-#: C/prev-conv.page:8(desc)
-msgid "Browse or search your previous conversations."
-msgstr "Explorar ou buscar nas súas mensaxes anteriores."
-
-#: C/prev-conv.page:35(title)
-msgid "View previous conversations"
-msgstr "Ver as conversas anteriores"
-
-#: C/prev-conv.page:39(p)
-msgid ""
-"Highlighting text is quirky: <link href=\"http://bugzilla.gnome.org/show_bug."
-"cgi?id=593733\">#593733</link>. If there's an actual highlighting going on, "
-"independent of the selection (like in yellow or something), we can use the "
-"term \"highlight\". Otherwise we need to use the term \"select\". Watch that "
-"bug."
-msgstr ""
-"Resaltar texto é estraño <link href=\"http://bugzilla.gnome.org/show_bug.cgi?"
-"id=593733\">#59733</link>. Se existe un resaltado actualmente, independente "
-"da selección (en amarelo, por exemplo), pódese usar o termo «resaltar». De "
-"outra forma débese usar o termo «seleccionado». Siga o proceso do erro."
-
-#: C/prev-conv.page:46(p)
-msgid ""
-"<app>Empathy</app> automatically saves all your text conversations you have "
-"with your contacts. You can <link xref=\"#search\">search through all of "
-"your previous conversations</link> or <link xref=\"#browse\">browse previous "
-"conversations</link> by contact and date."
-msgstr ""
-"<app>Empathy</app> garda automaticamente todas as conversas de texto que ten "
-"cos seus contactos. Pode <link xref=\"#search\">buscar a través de todas as "
-"súas conversas anteriores</link> ou <link xref=\"#browse\">buscar conversas "
-"anteriores</link> por contacto e data."
-
-#: C/prev-conv.page:54(p)
-msgid ""
-"You do not need to be connected to the Internet to view and search your "
-"previous conversations."
-msgstr ""
-"Non necesita estar conectado a Internet para ver e buscar nas súas conversas "
-"anteriores."
-
-#: C/prev-conv.page:61(title)
-msgid "Search previous conversations"
-msgstr "Buscar conversas anteriores"
-
-#: C/prev-conv.page:63(p)
-msgid ""
-"You can perform a full-text search through all of your previous "
-"conversations."
-msgstr ""
-"Pode realizar unha busca de texto completo sobre todas as súas conversas "
-"anteriores."
-
-#: C/prev-conv.page:67(p) C/prev-conv.page:96(p)
-msgid ""
-"From the <gui>Contact List</gui> window, choose <guiseq><gui>View</"
-"gui><gui>Previous Conversations</gui></guiseq>. Alternatively, press "
-"<key>F3</key>."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui> seleccione <guiseq><gui>Ver</"
-"gui><gui>Conversas previas</gui></guiseq>. De forma alternativa prema "
-"<key>F3</key>."
-
-#: C/prev-conv.page:71(p)
-msgid "Select the <gui>Search</gui> tab."
-msgstr "Seleccione o separador <gui>Buscar</gui>."
-
-#: C/prev-conv.page:74(p)
-msgid ""
-"In the <gui>For</gui> field, type the text you want to search for. Click "
-"<gui>Find</gui> or press <key>Enter</key>."
-msgstr ""
-"No campo <gui>Para</gui> escriba o texto que quere buscar. Prema "
-"<gui>Buscar</gui> ou prema <key>Intro</key>."
-
-#: C/prev-conv.page:78(p)
-msgid ""
-"Any conversations that matched your search terms will be shown in the list "
-"below the search field. By default, conversations are ordered by date."
-msgstr ""
-"Mostrarase na lista baixo o campo de busca calquera conversa que coincida "
-"cos seus termos de busca. As conversas ordénanse por data de forma "
-"predefinida."
-
-#: C/prev-conv.page:82(p)
-msgid ""
-"Click on a conversation to view it. <app>Empathy</app> will select the text "
-"in the conversation that matched your search terms."
-msgstr ""
-"Prema sobre unha conversa para vela. <app>Empathy</app> seleccionará o texto "
-"na conversa que coincida cos seus termos de busca."
-
-#: C/prev-conv.page:89(title)
-msgid "Browse previous conversations"
-msgstr "Explorar as conversas anteriores"
-
-#: C/prev-conv.page:91(p)
-msgid ""
-"You can browse your previous conversations with your contacts or in chat "
-"rooms by date."
-msgstr ""
-"Pode examinar por data as conversas previas cos seus contactos ou en salas "
-"de conversa."
-
-#: C/prev-conv.page:100(p)
-msgid "Select the <gui>Conversations</gui> tab."
-msgstr "Seleccione o separador <gui>Conversas</gui>."
-
-#: C/prev-conv.page:103(p)
-msgid ""
-"Select an account from the drop-down list in the top left. A list of "
-"contacts and chat room for that account will be shown below."
-msgstr ""
-"Seleccione unha conta desde a lista despregábel na parte superior esquerda. "
-"Mostrarase unha lista de contactos e salas de conversa para dita conta."
-
-#: C/prev-conv.page:107(p)
-msgid ""
-"Select a contact or chat room to view your previous conversations from. By "
-"default the most recent conversation will be shown."
-msgstr ""
-"Seleccione un contacto ou sala de conversa desde a que ver as anteriores "
-"conversas. Por omisión mostrarase a conversa máis recente."
-
-#: C/prev-conv.page:111(p)
-msgid ""
-"You can browse your conversations by date. Days on which you had a "
-"conversation with the selected contact will be shown in bold text. Click a "
-"date to select it. Click the arrows next to the month and year to browse "
-"earlier dates."
-msgstr ""
-"Pode explorar as súas conversas por data. Mostraranse os días nos que tipo "
-"unha conversa co contacto seleccionado en texto en negriña. Prema na data "
-"para seleccionala e prema nas frechas ao lado do mes e ano para explorar as "
-"datas máis cercanas."
-
-#: C/prev-conv.page:117(p)
-msgid ""
-"You can search for text in the displayed conversation by typing into the "
-"search field at the top. The matching text will be highlighted."
-msgstr ""
-"Pode buscar dentro do texto das conversas mostradas escribindo na caixa de "
-"busca na parte superior. O texto coincidente resaltarase."
-
-#: C/prev-conv.page:121(p)
-msgid ""
-"You can quickly view the previous conversations with one of your contacts "
-"from the <gui>Contact List</gui> window. Simply right click the contact and "
-"choose <gui>View Previous Conversations</gui>. The <gui>Previous "
-"Conversations</gui> window will open with that contact already selected."
-msgstr ""
-"Pode ver rapidamente as conversas anteriores con un dos seus contactos desde "
-"a xanela <gui>Lista de contactos</gui>. Simplemente prema co botón dereito "
-"do rato sobre o contacto e seleccione <gui>Conversas anteriores</gui>. "
-"Abrirase a xanela <gui>Ver conversas previas</gui> co contacto seleccionado."
-
-#: C/link-contacts.page:11(desc)
-msgid "Merge and separate different contacts into a single one."
-msgstr "Unir e separar diferentes contactos nun só."
-
-#: C/link-contacts.page:25(title)
-msgid "Combine and separate contacts"
-msgstr "Combinar e separar contactos"
-
-#: C/link-contacts.page:26(p)
-msgid ""
-"If one, or more, of your contacts has multiple accounts with different "
-"messaging services, you can combine these contacts into a single one."
-msgstr ""
-"Se un, ou máis, dos seus contactos ten múltiples contas con diferentes "
-"servizos de mensaxaría, pode combinar estes contactos nun único."
-
-#: C/link-contacts.page:30(p)
-msgid ""
-"The resulting contact is called a <em>meta-contact</em>: a contact composed "
-"from different single contacts."
-msgstr ""
-"O contacto resultante chámase un <em>meta-contacto</em>: un contacto "
-"composto por diferentes contactos sinxelos."
-
-#: C/link-contacts.page:34(p)
-msgid ""
-"If you have a Jane Smith contact that is using three different messaging "
-"services like:"
-msgstr ""
-"Se ten un contacto Xoán Souto que está usando tres servizos de mensaxaría "
-"como:"
-
-#: C/link-contacts.page:40(p)
-msgid "janes@facebook"
-msgstr "xoan@facebook"
-
-#: C/link-contacts.page:45(p)
-msgid "jane.smith@gmail"
-msgstr "xoan.souto@gmail"
-
-#: C/link-contacts.page:50(p)
-msgid "jane_smith@hotmail"
-msgstr "xoan_souto@hotmail"
-
-#: C/link-contacts.page:55(p)
-msgid "You can combine these contacts into a single Jane Smith one."
-msgstr "Pode combinar estes contactos nun só Xoán Souto"
-
-#: C/link-contacts.page:60(title)
-msgid "Combining contacts"
-msgstr "Combinar contactos"
-
-#: C/link-contacts.page:63(p)
-msgid ""
-"From the <gui>Contact List</gui> window, right-click one of the contact that "
-"has different accounts, and select <gui style=\"menuitem\">Link Contacts...</"
-"gui>."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema co botón dereito un dos "
-"contactos que ten diferentes contas, e seleccione <gui style=\"menuitem"
-"\">Ligar contactos...</gui>."
-
-#: C/link-contacts.page:70(p)
-msgid ""
-"From the left pane in the <gui>Link Contacts</gui> window, select the "
-"contacts you want to combine."
-msgstr ""
-"Desde o panel lateral na xanela <gui>Contactos ligados</gui> seleccione os "
-"contactos que quere combinar."
-
-#: C/link-contacts.page:76(p)
-msgid "Click <gui style=\"button\">Link</gui>."
-msgstr "Prema <gui style=\"button\">Ligar</gui>."
-
-#: C/link-contacts.page:82(p)
-msgid ""
-"When a meta-contact has been created, the default contact that will be used "
-"to have a conversation with when you double-click on it, is the contact with "
-"the highest presence on-line."
-msgstr ""
-"Cando se cree un meta-contacto, o contacto predeterminado usarase para ter "
-"unha conversa con el ao premer dúas veces sobre el, este contacto terá a "
-"presencia en liña máis alta."
-
-#: C/link-contacts.page:91(title)
-msgid "Separating contacts"
-msgstr "Separar contactos"
-
-#: C/link-contacts.page:94(p)
-msgid ""
-"From the <gui>Contact List</gui>, right-click the contact to separate, and "
-"select <gui style=\"menuitem\">Link Contacts...</gui>."
-msgstr ""
-"Desde a <gui>Lista de contactos</gui>, prema co botón dereito para contactar "
-"con el de forma separada, e seleccione <gui style=\"menuitem\">Ligar "
-"contactos...</gui>."
-
-#: C/link-contacts.page:100(p)
-msgid "Click <gui style=\"button\">Unlink</gui>."
-msgstr "Prema <gui style=\"button\">Desligar</gui>."
-
-#: C/license.page:8(desc)
-msgid "Legal information."
-msgstr "Información legal."
-
-#: C/license.page:11(title)
-msgid "License"
-msgstr "Licenza"
-
-#: C/license.page:12(p)
-msgid ""
-"This work is distributed under a CreativeCommons Attribution-Share Alike 3.0 "
-"Unported license."
-msgstr ""
-"Este traballo está licenciado baixo una Licenza Creative Commons Atribución "
-"- Compartir igual 3.0 sen asistencia."
-
-#: C/license.page:20(p)
-msgid "You are free:"
-msgstr "É libre de:"
-
-#: C/license.page:25(em)
-msgid "To share"
-msgstr "Compartir"
-
-#: C/license.page:26(p)
-msgid "To copy, distribute and transmit the work."
-msgstr "Copiar, distribuír e comunicar publicamente a obra"
-
-#: C/license.page:29(em)
-msgid "To remix"
-msgstr "Facer obras derivadas"
-
-#: C/license.page:30(p)
-msgid "To adapt the work."
-msgstr "Adaptar o traballo."
-
-#: C/license.page:33(p)
-msgid "Under the following conditions:"
-msgstr "Baixo as seguintes condicións:"
-
-#: C/license.page:38(em)
-msgid "Attribution"
-msgstr "Atribución"
-
-#: C/license.page:39(p)
-msgid ""
-"You must attribute the work in the manner specified by the author or "
-"licensor (but not in any way that suggests that they endorse you or your use "
-"of the work)."
-msgstr ""
-"Debe recoñecer os créditos da obra da maneira especificada polo autor ou o "
-"licenciatario (pero non dunha maneira que suxira que ten o seu apoio ou "
-"apoian o uso que fai da súa obra)."
-
-#: C/license.page:46(em)
-msgid "Share Alike"
-msgstr "Compartir igual"
-
-#: C/license.page:47(p)
-msgid ""
-"If you alter, transform, or build upon this work, you may distribute the "
-"resulting work only under the same, similar or a compatible license."
-msgstr ""
-"Se modifica, transforma ou constrúe sobre este traballo debe distribuír o "
-"traballo resultando baixo unha licenza igual, similar ou compatíbel."
-
-#: C/license.page:53(p)
-msgid ""
-"For the full text of the license, see the <link href=\"http://"
-"creativecommons.org/licenses/by-sa/3.0/legalcode\">CreativeCommons website</"
-"link>, or read the full <link href=\"http://creativecommons.org/licenses/by-"
-"sa/3.0/\">Commons Deed</link>."
-msgstr ""
-"Pode encontrar o texto completo da licenza vexa o <link href=\"http://"
-"creativecommons.org/licenses/by-sa/3.0/legalcode\">sitio web de "
-"CreativeCommons</link>, ou lea o <link href=\"http://creativecommons.org/"
-"licenses/by-sa/3.0/\">Escrito de Commons</link> completo."
-
-#: C/irc-start-conversation.page:8(desc)
-#| msgid "Start a conversation witn an IRC contact."
-msgid "Start a conversation with an IRC contact."
-msgstr "Iniciar unha conversa con un contacto do IRC."
-
-#: C/irc-start-conversation.page:30(title)
-msgid "Chat with somebody on IRC"
-msgstr "Conversar con alguén no IRC"
-
-#: C/irc-start-conversation.page:32(p)
-msgid ""
-"You can hold private conversations with other IRC users, outside of the "
-"public IRC chat rooms. To start a conversation with another IRC user:"
-msgstr ""
-"Pode manter conversas privadas con outros usuarios do IRC, fora das salas "
-"públicas do IRC. Para iniciar unha conversa con outro usuario do IRC:"
-
-#: C/irc-start-conversation.page:37(p)
-msgid ""
-"In the contact list for an IRC chat room, double click the name of the user "
-"you want to chat with. Alternatively, right click the name of the user and "
-"choose <gui>Chat</gui>."
-msgstr ""
-"Na lista de contactos para a sala de chat do IRC, prema dúas veces no nome "
-"do usuario co que quere falar. De forma alternativa, prema co botón dereito "
-"sobre o nome de usuario e elixa <gui>Conversa</gui>."
-
-#: C/irc-start-conversation.page:45(p)
-msgid ""
-"The IRC room contact list is not the same as <app>Empathy</app> contact "
-"list. It contains a list of users in the IRC chat room you joined. Different "
-"rooms can have different contacts listed."
-msgstr ""
-"A lista de contactos da sala IRC non é igual que a lista de contactos de "
-"<app>Empathy</app>. Contén unha lista de usuarios na sala de chat do IRC á "
-"que se uniu. Salas diferentes poden ter diferentes listados de contactos."
-
-#: C/irc-start-conversation.page:52(p)
-msgid ""
-"The IRC room contact list is usually on the right side of the IRC room "
-"window. If you do not see it, choose <guiseq><gui>Conversation</"
-"gui><gui>Show Contact List</gui></guiseq>."
-msgstr ""
-"A lista de contactos dunha sala de IRC xeralmente está na parte dereita da "
-"xanela da sala de IRC. Se non a ve elixa <guiseq><gui>Conversa</"
-"gui><gui>Mostrar a lista de contactos</gui></guiseq>."
-
-#: C/irc-send-file.page:9(desc)
-msgid "<app>Empathy</app> does not currently support sending files using IRC."
-msgstr "Actualmente non é posíbel enviar ficheiros mediante o IRC."
-
-#: C/irc-send-file.page:31(title)
-msgid "Send files over IRC"
-msgstr "Enviar ficheiros mediante o IRC"
-
-#: C/irc-send-file.page:33(p)
-msgid "It is not currently possible to send files using IRC."
-msgstr "Actualmente non é posíbel enviar ficheiros mediante o IRC."
-
-#: C/irc-nick-password.page:10(desc)
-msgid "Protect your nickname to prevent other IRC users from using it."
-msgstr "Protexa o seu alcume para previr que outros usuarios do IRC o usen."
-
-#: C/irc-nick-password.page:33(title)
-msgid "Use a nickname password on IRC"
-msgstr "Usar un contrasinal para un alcume no IRC"
-
-#: C/irc-nick-password.page:35(p)
-msgid ""
-"On some IRC networks, you can register your nickname with a service called "
-"NickServ. By sending special messages to NickServ, you can set your password "
-"and identify yourself. Some IRC chat rooms may not allow you to join without "
-"a registered nickname."
-msgstr ""
-"Nalgunhas redes IRC pode rexistrar o seu alcume con un servizo chamado "
-"NickServ. Enviando mensaxes especiais a NickServ pode configurar o seu "
-"contrasinal e identificarse. Pode que algunhas salas de conversa IRC non lle "
-"permitan unirse sen un nome rexistrado."
-
-#: C/irc-nick-password.page:40(p)
-msgid ""
-"<app>Empathy</app> does not currently support nickname registration. Some "
-"IRC networks, however, will automatically forward a <em>server password</em> "
-"to NickServ. On these networks, you can use the IRC password in "
-"<app>Empathy</app> to identify yourself to NickServ. The popular freenode "
-"network is known to have this feature."
-msgstr ""
-"Actualmente <app>Empathy</app> non é compatíbel co rexistro de alcumes. "
-"Porén algúns servidores de IRC reenviarán automaticamente un <em>contrasinal "
-"de servidor</em> a NickServ. Nesas redes poderá usar contrasinais de IRC en "
-"<app>Empathy</app> para identificarse contra NickServ. É coñecido que a "
-"popular rede freenode dispón desta característica."
-
-#: C/irc-nick-password.page:46(p)
-msgid "To set an IRC server password:"
-msgstr "Para estabelecer un contrasinal de servidor de IRC:"
-
-#: C/irc-nick-password.page:54(p)
-msgid "Select the IRC account from the list on the left of the dialog."
-msgstr "Seleccione a conta de IRC da lista na parte esquerda do diálogo."
-
-#: C/irc-nick-password.page:57(p)
-msgid ""
-"In the <gui>Password</gui> field, type the password you used to register "
-"your nikcname."
-msgstr ""
-"Na caixa de texto <gui>Contrasinal</gui> escriba o contrasinal que quere "
-"usar para rexistrar o seu alcume."
-
-#: C/irc-nick-password.page:63(p) C/import-account.page:61(p)
-msgid "Click <gui style=\"button\">Apply</gui>."
-msgstr "Prema <gui style=\"button\">Aplicar</gui>."
-
-#: C/irc-nick-password.page:69(p)
-msgid ""
-"These instructions only allow you to use a password-protected nickname on "
-"certain IRC networks. It is not currently possible to register an IRC "
-"nickname or change your nickname password using <app>Empathy</app>."
-msgstr ""
-"Estas instrucións só lle permiten usar un alcume protexido por contrasinal "
-"en certas redes IRC. Actualmente non é posíbel rexistrar un alcume IRC ou "
-"cambiar o seu contrasinal de alcume usando <placeholder-1/>."
-
-#: C/irc-manage.page:9(desc)
-msgid "How to use IRC with <app>Empathy</app>."
-msgstr "Como usar IRC con <placeholder-1/>."
-
-#: C/irc-manage.page:34(title)
-msgid "Internet Relay Chat (IRC)"
-msgstr "Internet Relay Chat (IRC)"
-
-#: C/irc-manage.page:37(p) C/account-irc.page:39(p)
-msgid ""
-"You must have the <sys>telepathy-idle</sys> package installed to use IRC in "
-"<app>Empathy</app>."
-msgstr ""
-"Vostede debe ter instalado o paquete <placeholder-1/> para usar o IRC en "
-"<placeholder-2/>."
-
-#: C/irc-manage.page:43(title)
-msgid "IRC Chat Rooms and Conversations"
-msgstr "Salas de chat e conversa no IRC."
-
-#: C/irc-manage.page:45(title)
-msgid "Chat Rooms and Conversations"
-msgstr "Salas de char e conversas"
-
-#: C/irc-manage.page:50(title)
-msgid "Common IRC Problems"
-msgstr "Problemas comúns no IRC"
-
-#: C/irc-manage.page:52(title) C/index.page:55(title)
-msgid "Common Problems"
-msgstr "Problemas comúns"
-
-#: C/irc-join-room.page:8(desc)
-msgid "Join an IRC channel."
-msgstr "Entrar nunha canle IRC."
-
-#: C/irc-join-room.page:31(title)
-msgid "Join an IRC chat room"
-msgstr "Unirse a unha sala de conversa IRC"
-
-#: C/irc-join-room.page:33(p)
-msgid ""
-"You can join IRC chat rooms (also known as IRC channels) on any IRC network "
-"you’re connected to. To connect to an IRC network, see <link xref=\"add-"
-"account\"/> and <link xref=\"account-irc\"/>."
-msgstr ""
-"Pode unirse a salas de chat IRC (tamén coñecidas como canles de IRC) en "
-"calquera rede de IRC á que estea conectado. Para conectarse a unha rede de "
-"IRC consulte a <link xref=\"add-account\"/> e a <link xref=\"account-irc\"/>."
-
-#: C/irc-join-room.page:39(p) C/group-conversations.page:58(p)
-#: C/group-conversations.page:122(p)
-msgid ""
-"From the <gui>Contact List</gui> window, choose <guiseq><gui>Room</"
-"gui><gui>Join</gui></guiseq>."
-msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui> elixa <guiseq><gui>Sala</"
-"gui><gui>Unirse</gui></guiseq>."
-
-#: C/irc-join-room.page:45(p)
-msgid ""
-"From the <gui>Account</gui> drop-down list, select the IRC account that "
-"corresponds to the network you want to use."
-msgstr ""
-"Desde a lista despregábel <gui>Conta</gui> elixa a conta IRC que corresponda "
-"coa rede que quere usar."
-
-#: C/irc-join-room.page:51(p)
-msgid ""
-"In the <gui>Room</gui> text box, type the name of the channel you want to "
-"join. IRC channel names start with the hash character (<sys>#</sys>)."
-msgstr ""
-"Na caixa de texto <gui>Sala</gui>, escriba o nome da canle de IRC á que "
-"quere unirse. Preceda o nome co carácter almohadilla (<sys>#</sys>)."
-
-#: C/irc-join-room.page:57(p)
-msgid "Click <gui>Join</gui> to enter the room."
-msgstr "Prema <gui>Unirse</gui> para entrar na sala."
-
-#: C/irc-join-room.page:64(p)
-msgid ""
-"To join multiple rooms, you need to repeat the steps above for each room."
-msgstr ""
-"Para entrar en varias salas, debe repetir os pasos anteriores para cada sala."
-
-#: C/irc-join-pwd.page:9(desc)
-msgid "Enter password-protected IRC chat rooms."
-msgstr "Introduza o contrasinal para as salas de char IRC protexidas."
-
-#: C/irc-join-pwd.page:25(title)
-msgid "Join a protected IRC chat room"
-msgstr "Unirse a unha sala de chat IRC protexida"
-
-#: C/irc-join-pwd.page:27(p)
-msgid ""
-"On some IRC networks, private IRC rooms may be protected with a password. If "
-"you know the password, use the following steps to join:"
-msgstr ""
-"Nalgunhas redes IRC as salas privadas de IRC poden estar protexidas por "
-"contrasinal. Se sabe o contrasinal, realice os seguintes pasos para unirse:"
-
-#: C/irc-join-pwd.page:33(p)
-msgid "<link xref=\"irc-join-room\">Join the room</link> as normal."
-msgstr "<link xref=\"irc-join-room\">Unirse á sala</link> de forma normal."
-
-#: C/irc-join-pwd.page:38(p)
-msgid ""
-"Empathy will prompt you for a password. Enter the password for the IRC chat "
-"room and click <gui style=\"button\">Join</gui>."
-msgstr ""
-"Empathy preguntaralle o contrasinal. Introduza o contrasinal para a sala de "
-"conversa IRC e prema <gui style=\"button\">Unirse</gui>."
-
-#: C/irc-commands.page:7(desc)
-msgid "The supported IRC commands."
-msgstr "As ordes de IRC admitidas."
-
-#: C/irc-commands.page:18(title)
-msgid "Supported IRC commands"
-msgstr "Ordes IRC admitidas"
-
-#: C/irc-commands.page:19(p)
-msgid ""
-"To see the list of the supported IRC commands, in a chat room type <input>/"
-"help</input> and press <key>Enter</key>."
-msgstr ""
-"Para ver unha lista de ordes de IRC admitidos, nunha sala de conversa "
-"escriba <input>/help</input> e prema <key>Intro</key>."
-
-#: C/irc-commands.page:24(p)
-msgid "All commands available have a small description on their usage."
-msgstr ""
-"Todos as ordes dispoñíbeis teñen unha pequena descrición sobre o se uso."
+"@@image: 'figures/add-to-notebook.png'; md5=03469ddb5137f525ac4f8318caed5532"
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
-#: C/introduction.page:41(None)
+#: C/tomboy.xml:1056(None)
 msgid ""
-"@@image: 'figures/empathy-main-window.png'; "
-"md5=489ba00b0fc377aba4c691210b6e0650"
+"@@image: 'figures/note-template.png'; md5=49ee364d7e060de4e7a583e49a2f7db7"
 msgstr ""
-"@@image: 'figures/empathy-main-window.png'; "
-"md5=489ba00b0fc377aba4c691210b6e0650"
+"@@image: 'figures/note-template.png'; md5=49ee364d7e060de4e7a583e49a2f7db7"
 
-#: C/introduction.page:9(desc)
-msgid "Introduction to the <app>Empathy</app> instant messenger."
-msgstr "Introdución ao programa de mensaxaría instantánea <app>Empathy</app>."
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/tomboy.xml:1092(None)
+msgid ""
+"@@image: 'figures/delete-notebook.png'; md5=f1b41a9034715d6314ee36b66389c897"
+msgstr ""
+"@@image: 'figures/delete-notebook.png'; md5=f1b41a9034715d6314ee36b66389c897"
 
-#: C/introduction.page:21(title)
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/tomboy.xml:1139(None)
+msgid ""
+"@@image: 'figures/tomboy-preferences-synchronization.png'; "
+"md5=68e7a980720d8e9e1384cab9960a7adc"
+msgstr ""
+"@@image: 'figures/tomboy-preferences-synchronization.png'; "
+"md5=68e7a980720d8e9e1384cab9960a7adc"
+
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/tomboy.xml:1302(None)
+msgid ""
+"@@image: 'figures/tomboy-preferences-editing.png'; "
+"md5=288184a8d9645881eaf3173892583d73"
+msgstr ""
+"@@image: 'figures/tomboy-preferences-editing.png'; "
+"md5=288184a8d9645881eaf3173892583d73"
+
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/tomboy.xml:1361(None)
+msgid ""
+"@@image: 'figures/tomboy-preferences-hotkeys.png'; "
+"md5=57510249057a144dbb81ae35e15c694c"
+msgstr ""
+"@@image: 'figures/tomboy-preferences-hotkeys.png'; "
+"md5=57510249057a144dbb81ae35e15c694c"
+
+#. When image changes, this message will be marked fuzzy or untranslated for you.
+#. It doesn't matter what you translate it to: it's not used at all.
+#: C/tomboy.xml:1394(None)
+msgid ""
+"@@image: 'figures/tomboy-preferences-add-ins.png'; "
+"md5=bb3114a219b8bfdf31549fced9618245"
+msgstr ""
+"@@image: 'figures/tomboy-preferences-add-ins.png'; "
+"md5=bb3114a219b8bfdf31549fced9618245"
+
+#: C/tomboy.xml:23(title)
+msgid "Tomboy Notes Manual"
+msgstr "Manual de Notas de Tomboy"
+
+#: C/tomboy.xml:26(para)
+msgid ""
+"Tomboy is a simple desktop note-taking application, with many features "
+"designed to help organize ideas, such as spell checking, highlighting, auto-"
+"linking URLs, lists, font stylizing, quick access with a table of contents "
+"for notes, and add-ins to extend Tomboy's capabilities. ."
+msgstr ""
+"Tomboy é un aplicativo de escritorio sinxelo de creación de notas, con "
+"algunhas funcionalidades deseñadas para axudarlle a organizar ideas, como a "
+"corrección ortográfica, realzado, autoligado de URL, listas, estilos de "
+"tipos de letra, acceso rápido  con unha táboa de contidos para as notas e "
+"engadidos para extender as capacidades de Tomboy."
+
+#: C/tomboy.xml:34(year) C/tomboy.xml:40(year) C/tomboy.xml:46(year)
+#: C/tomboy.xml:52(year) C/tomboy.xml:58(year) C/tomboy.xml:64(year)
+msgid "2009"
+msgstr "2009"
+
+#: C/tomboy.xml:36(holder)
+msgid "Alex Graveley"
+msgstr "Alex Graveley"
+
+#: C/tomboy.xml:42(holder)
+msgid "Brent Smith"
+msgstr "Brent Smith"
+
+#: C/tomboy.xml:48(holder)
+msgid "Free Software Foundation"
+msgstr "Free Software Foundation"
+
+#: C/tomboy.xml:54(holder) C/tomboy.xml:214(para)
+msgid "Boyd Timothy"
+msgstr "Boyd Timothy"
+
+#: C/tomboy.xml:60(holder) C/tomboy.xml:202(para)
+msgid "Sandy Armstrong"
+msgstr "Sandy Armstrong"
+
+#: C/tomboy.xml:66(holder) C/tomboy.xml:178(para) C/tomboy.xml:190(para)
+msgid "Paul Cutler"
+msgstr "Paul Cutler"
+
+#: C/tomboy.xml:77(publishername) C/tomboy.xml:93(orgname)
+#: C/tomboy.xml:105(orgname) C/tomboy.xml:117(orgname)
+#: C/tomboy.xml:129(orgname) C/tomboy.xml:141(orgname) C/tomboy.xml:180(para)
+#: C/tomboy.xml:192(para) C/tomboy.xml:204(para) C/tomboy.xml:216(para)
+msgid "GNOME Documentation Project"
+msgstr "Proxecto de documentación de GNOME"
+
+#: C/tomboy.xml:88(firstname)
+msgid "Alex"
+msgstr "Alex"
+
+#: C/tomboy.xml:90(surname)
+msgid "Graveley"
+msgstr "Agraveley"
+
+#: C/tomboy.xml:95(email)
+msgid "alex@beatniksoftware.com"
+msgstr "alex@beatniksoftware.com"
+
+#: C/tomboy.xml:100(firstname)
+msgid "Brent"
+msgstr "Brent"
+
+#: C/tomboy.xml:102(surname)
+msgid "Smith"
+msgstr "Smith"
+
+#: C/tomboy.xml:107(email)
+msgid "gnome@nextreality.net"
+msgstr "gnome@nextreality.net"
+
+#: C/tomboy.xml:112(firstname)
+msgid "Boyd"
+msgstr "Boyd"
+
+#: C/tomboy.xml:114(surname)
+msgid "Timothy"
+msgstr "Timothy"
+
+#: C/tomboy.xml:119(email)
+msgid "btimothy@gmail.com"
+msgstr "btimothy@gmail.com"
+
+#: C/tomboy.xml:124(firstname)
+msgid "Sandy"
+msgstr "Sandy"
+
+#: C/tomboy.xml:126(surname)
+msgid "Armstrong"
+msgstr "Armstrong"
+
+#: C/tomboy.xml:131(email)
+msgid "sanfordarmstrong@gmail.com"
+msgstr "sanfordarmstrong@gmail.com"
+
+#: C/tomboy.xml:136(firstname)
+msgid "Paul"
+msgstr "Paul"
+
+#: C/tomboy.xml:138(surname)
+msgid "Cutler"
+msgstr "Cutler"
+
+#: C/tomboy.xml:143(email)
+msgid "pcutler@foresightlinux.org"
+msgstr "pcutler@foresightlinux.org"
+
+#: C/tomboy.xml:173(revnumber)
+msgid "Tomboy Manual 2.1"
+msgstr "Manual de Tomboy 2.1"
+
+#: C/tomboy.xml:175(date)
+msgid "2009-03-23"
+msgstr "23-03-2009"
+
+#: C/tomboy.xml:185(revnumber)
+msgid "Tomboy Manual 4.0"
+msgstr "Manual de Tomboy 4.0"
+
+#: C/tomboy.xml:187(date)
+msgid "2008-03-07"
+msgstr "07-03-2008"
+
+#: C/tomboy.xml:197(revnumber)
+msgid "Tomboy Manual 3.0"
+msgstr "Manual de Tomboy 3.0"
+
+#: C/tomboy.xml:199(date)
+msgid "2007-09-13"
+msgstr "13-09-2007"
+
+#: C/tomboy.xml:209(revnumber)
+msgid "Tomboy Manual 2.0"
+msgstr "Manual de Tomboy 2.0"
+
+#: C/tomboy.xml:211(date)
+msgid "2007-02-28"
+msgstr "28-02-2007"
+
+#: C/tomboy.xml:221(releaseinfo)
+msgid "This manual describes version 0.14.0 of Tomboy"
+msgstr "Este manual describe a versión 0.14.0 de Tomboy"
+
+#: C/tomboy.xml:224(title)
+msgid "Feedback"
+msgstr "Comentarios e suxestións"
+
+#: C/tomboy.xml:226(para)
+msgid ""
+"To report a bug or make a suggestion regarding the Tomboy application or "
+"this manual, follow the directions in the <ulink type=\"help\" url=\"ghelp:"
+"gnome-feedback\">GNOME Feedback Page</ulink>."
+msgstr ""
+"Para informar dun erro ou facer unha suxestión sobre o aplicativo "
+"<application>Brasero</application> ou este manual, siga os consellos da "
+"<ulink url=\"ghelp:gnome-feedback\" type=\"help\">Páxina de Feedback de "
+"GNOME</ulink>."
+
+#: C/tomboy.xml:236(primary)
+msgid "Tomboy Notes"
+msgstr "Notas de Tomboy"
+
+#: C/tomboy.xml:240(primary)
+msgid "Tomboy"
+msgstr "Tomboy"
+
+#: C/tomboy.xml:244(primary)
+msgid "notes"
+msgstr "notas"
+
+#: C/tomboy.xml:250(title)
 msgid "Introduction"
 msgstr "Introdución"
 
-#: C/introduction.page:23(p)
-msgid ""
-"<app>Empathy</app> is an instant messaging application for the GNOME "
-"Desktop. It supports text messaging, voice &amp; video calls, file "
-"transfers, and all the most used messaging systems such as MSN and Google "
-"Talk."
-msgstr ""
-"<app>Empathy</app> é un aplicativo de mensaxaría instantánea para o "
-"Escritorio GNOME. É compatíbel con mensaxes de texto, chamas de voz e "
-"vídeochamadas, transferencia de ficheiro e os sistemas de mensaxaría máis "
-"populares como MSN e Google Talk."
+#: C/tomboy.xml:253(title)
+msgid "Notes Application"
+msgstr "Notas do aplicativo"
 
-#: C/introduction.page:28(p)
+#: C/tomboy.xml:262(para)
 msgid ""
-"<app>Empathy</app> includes features that help you better collaborate while "
-"at work, and that let you easily keep in touch with your friends."
+"Tomboy is a desktop note-taking application for GNOME, Microsoft Windows, "
+"and Mac OS X. It is simple and easy to use, and allows you to organize the "
+"ideas and information you deal with every day. Tomboy has some very useful "
+"editing features to help you customize your notes, including:"
 msgstr ""
-"<app>Empathy</app> inclúe características que lle axudarán a colaborar "
-"mellor no traballo e permitiranlle manterse en contacto cos seus amigos de "
-"forma sinxela."
+"Tomboy é un aplicativo de creación de notas para o escritorio GNOME, "
+"Microsoft Windows e Mac OS X. É moi sinxelo e doado de usar e permítelle "
+"organizar as súas ideas e información que xestiona cada día. Tomoby ten "
+"algunhas características de edición moi útiles para axudarlle a personalizar "
+"as súas notas, incluíndo:"
 
-#: C/introduction.page:32(p)
-msgid ""
-"Using <app>Empathy</app>, you can group all the conversations in a single "
-"window, have multiple windows for different kind of conversations, easily "
-"search through your previous conversations, and share your desktop in just "
-"two clicks."
-msgstr ""
-"Usando <app>Empathy</app> pode agrupar as conversas nunha única xanela ou "
-"ter múltiples xanelas para os diferentes tipos de conversas; busca sinxela "
-"das súas conversas anteriores e compartición do seu escritorio con un só un "
-"par de clics de rato."
+#: C/tomboy.xml:269(para)
+msgid "Highlighting Search Text"
+msgstr "Busca de texto con realce"
 
-#: C/introduction.page:39(title)
-msgid "<gui>Contact List</gui> window"
-msgstr "Xanela de <gui>Lista de contactos</gui>"
+#: C/tomboy.xml:273(para)
+msgid "Inline Spell Checking"
+msgstr "Comprobación ortográfica en liña"
 
-#: C/introduction.page:40(desc)
-msgid "<app>Empathy</app> main window"
-msgstr "Xanela principal de <placeholder-1/>"
+#: C/tomboy.xml:277(para)
+msgid "Auto-linking Web &amp; Email Addresses"
+msgstr "Autoligado de enderezos web e correo electrónico"
 
-#: C/introduction.page:42(p)
-msgid "<app>Empathy</app> main window."
-msgstr "Xanela principal de <placeholder-1/>."
+#: C/tomboy.xml:281(para)
+msgid "Undo/Redo Support"
+msgstr "Compatibilidade para desfacer/refacer"
 
-#. When image changes, this message will be marked fuzzy or untranslated for you.
-#. It doesn't matter what you translate it to: it's not used at all.
-#: C/index.page:28(None)
-msgid ""
-"@@image: 'figures/empathy-logo.png'; md5=14568248b11d2cfe7992c5edd7e157e8"
-msgstr ""
-"@@image: 'figures/empathy-logo.png'; md5=14568248b11d2cfe7992c5edd7e157e8"
+#: C/tomboy.xml:285(para)
+msgid "Font Styling &amp; Sizing"
+msgstr "Estilos de tipo de letra e tamaño"
 
-#: C/index.page:7(title) C/index.page:8(title)
-msgid "Empathy Internet Messenger"
-msgstr "Mensaxeiro da Internet Empathy"
+#: C/tomboy.xml:289(para) C/tomboy.xml:795(title)
+msgid "Bulleted Lists"
+msgstr ""
 
-#: C/index.page:27(title)
+#: C/tomboy.xml:293(para)
 msgid ""
-"<media type=\"image\" mime=\"image/png\" src=\"figures/empathy-logo.png\"> "
-"Empathy Internet Messenger logo </media> Empathy Internet Messenger"
+"Tomboy is accessed through the GNOME panel, the taskbar in Microsoft "
+"Windows, or the dock in Mac OS X. To startup Tomboy automatically when you "
+"log into GNOME, see <xref linkend=\"add-to-panel\"/>."
 msgstr ""
-"<media type=\"image\" mime=\"image/png\" src=\"figures/empathy-logo.png"
-"\">Logotipo da mensaxaría instantánea Empathy</media>Mensaxeiro da Internet "
-"Empathy"
-
-#: C/index.page:35(title)
-msgid "Account Management"
-msgstr "Xestión de contas"
+"Pode acceder a Tomboy dese o panel de GNOME, a barra de tarefas de Microsoft "
+"Windows ou o Dock en Mac OS X. Para iniciar automaticamente Tomboy ao "
+"iniciar sesión en GNOME vexa <xref linkend=\"add-to-panel\"/>."
 
-#: C/index.page:39(title)
-msgid "Contact Management"
-msgstr "Xestión de contactos"
+#: C/tomboy.xml:301(title)
+msgid "Getting Started"
+msgstr "Comezando"
 
-#: C/index.page:43(title)
-msgid "Text Conversations"
-msgstr "Conversas de texto"
+#: C/tomboy.xml:304(title)
+msgid "Adding Tomboy to the GNOME Panel"
+msgstr "Engadir Tomboy ao panel de GNOME"
 
-#: C/index.page:47(title)
-msgid "Audio and Video Conversations"
-msgstr "Conversas de son e vídeo"
-
-#: C/index.page:51(title)
-msgid "Advanced Actions"
-msgstr "Accións avanzadas"
-
-#: C/import-account.page:10(desc)
-msgid "Import an account from another instant messaging application."
-msgstr "Importar unha conta de outro aplicativo de mensaxaría instantánea."
-
-#: C/import-account.page:19(name)
-msgid "Peter Haslam"
-msgstr "Peter Haslam"
+#: C/tomboy.xml:306(para)
+msgid ""
+"To add Tomboy to a panel in GNOME, right-click on the panel, then choose "
+"<menuchoice><guimenuitem>Add to Panel</guimenuitem></menuchoice>. Select "
+"Tomboy Notes in the Add to the panel dialog, then click "
+"<menuchoice><guibutton>Add</guibutton></menuchoice>. You should see a yellow "
+"note icon appear in the panel, representing Tomboy. The panel icon is "
+"illustrated in <xref linkend=\"tomboy-panel\"/>."
+msgstr ""
 
-#: C/import-account.page:20(email)
-msgid "peter.haslam@freenet.de"
-msgstr "peter.haslam@freenet.de"
+#: C/tomboy.xml:315(para)
+msgid ""
+"Tomboy is automatically added to the taskbar when run on Microsoft Windows, "
+"or the dock when run on Mac OS X."
+msgstr ""
 
-#: C/import-account.page:42(title)
-msgid "Import an existing account"
-msgstr "Importar unha conta existente"
+#: C/tomboy.xml:319(title)
+msgid "Creating Notes"
+msgstr "Crear notas"
 
-#: C/import-account.page:44(p)
+#: C/tomboy.xml:321(para)
 msgid ""
-"The first time you run <app>Empathy</app>, it will offer to import your "
-"accounts from other instant messaging applications. Currently, the only "
-"supported application is <app>Pidgin</app>."
+"Once you have successfully added Tomboy to the panel, you can create new "
+"notes using one of the following methods."
 msgstr ""
-"A primeira vez que executa <app>Empathy</app> ofreceráselle importar as súas "
-"contas de outros aplicativos de mensaxaría instantánea. Actualmente a única "
-"aplicación compatíbel é <app>Pidgin</app>."
 
-#: C/import-account.page:50(p)
+#: C/tomboy.xml:324(para)
+msgid "To create a new note using the mouse:"
+msgstr "Para crear unha nova usando o rato:"
+
+#: C/tomboy.xml:328(para)
 msgid ""
-"Run <app>Empathy</app> for the first time. An assistant will offer you a "
-"number of options to create new accounts."
+"Click on the Tomboy note icon present in the GNOME Panel or Windows taskbar. "
+"A menu will appear."
 msgstr ""
-"Execute <app>Empathy</app> por primeira vez. Aparecerá un asistente que lle "
-"permitirá crear novas contas de distintos servizos."
+"Prema na icona de nota de Tomboy presente no panel de GNOME ou na barra de "
+"tarefas de Windows e aparecerá un menú."
 
-#: C/import-account.page:54(p)
+#: C/tomboy.xml:333(para)
 msgid ""
-"Select <gui>Yes, import my account details from</gui> and click "
-"<gui>Forward</gui>."
+"Select the <menuchoice><guimenuitem>Create New Note</guimenuitem></"
+"menuchoice> option in the menu."
 msgstr ""
-"Seleccione <gui>Si, importar os detalles da miña conta desde </gui>e prema "
-"en <gui>Seguinte</gui>."
+"Seleccione a opción <menuchoice><guimenuitem>Crear nova nota</guimenuitem></"
+"menuchoice> desde o menú."
 
-#: C/import-account.page:58(p)
-msgid "Select the check box next to each account you wish to import."
-msgstr "Marque a caixa de verificación xunto a cada conta que queira importar"
+#: C/tomboy.xml:339(para)
+msgid "To create a new note using the keyboard:"
+msgstr "Para crear unha nota usando o teclado:"
 
-#: C/import-account.page:66(p)
+#: C/tomboy.xml:343(para)
 msgid ""
-"It is not currently possible to import accounts after you have completed the "
-"first-run assistant."
+"Open the Tomboy menu using the key combination <keycombo><keycap>Alt</"
+"keycap><keycap>F12</keycap></keycombo>."
 msgstr ""
-"Actualmente non é posíbel importar contas despois de ter completado o "
-"asistente de primeira execución."
+"Abra o menú de Tomboy usando a combinación de teclas <keycombo><keycap>Alt</"
+"keycap><keycap>F12</keycap></keycombo>."
 
-#: C/hide-contacts.page:8(desc)
-msgid "Hide the offline contacts from your <gui>Contact List</gui>."
+#: C/tomboy.xml:351(para)
+msgid ""
+"Use the <keycap>N</keycap> key to select the menu option "
+"<menuchoice><guimenuitem>Create New Note</guimenuitem></menuchoice>."
 msgstr ""
-"Ocultar os contactos desconectados da súa <gui>Lista de contactos</gui>."
+"Use a tecla <keycap>N</keycap> para seleccionar a opción de menú "
+"<menuchoice><guimenuitem>Crear nova nota</guimenuitem></menuchoice>."
 
-#: C/hide-contacts.page:19(title)
-msgid "Hide offline contacts"
-msgstr "Ocultar os contactos desconectados"
+#: C/tomboy.xml:360(title)
+msgid "Editing Notes"
+msgstr "Editar notas"
 
-#: C/hide-contacts.page:21(p)
+#: C/tomboy.xml:362(para)
 msgid ""
-"Normally, <app>Empathy</app> shows all your contacts: those that are online, "
-"with which you can have a conversation, and also those that are offline."
+"After creating a new note, a new window will appear with the title "
+"<literal>New Note <replaceable>N</replaceable></literal>. At the top of the "
+"note is a toolbar with several buttons and text. Directly below this toolbar "
+"is the content area of the note. This is illustrated in <xref linkend=\"new-"
+"note\"/>."
 msgstr ""
-"Normalmente <app>Empathy</app> mostra todos os contactos: os que están "
-"conectados, cos que pode estabelecer unha conversa, e tamén os que están "
-"desconectados."
+"Logo de crear unha nova nota, aparecerá unha nova xanela co título "
+"<literal>Nova nota <replaceable>N</replaceable></literal>. Na parte superior "
+"da nota está a barra de ferramentas con varios botóns e texto. Xusto embaixo "
+"da barra de ferramentas está a área de contido da nota. Isto está ilustrado "
+"en <xref linkend=\"new-note\"/>."
 
-#: C/hide-contacts.page:25(p)
-msgid "To hide the contacts that are offline:"
-msgstr "Para agochar os contactos desconectados."
-
-#: C/hide-contacts.page:31(p)
+#: C/tomboy.xml:368(para)
 msgid ""
-"From the <gui>Contact List</gui> window, choose <guiseq><gui>View</"
-"gui><gui>Offline Contacts</gui></guiseq>, or press <keyseq><key>Ctrl</"
-"key><key>H</key></keyseq>."
+"The note can be edited by clicking in the content area and using the "
+"keyboard to add and remove content. The first line is considered the title "
+"of the note. By default this is populated with the text <quote><literal>New "
+"Note <replaceable>N</replaceable></literal></quote>. The title is changed by "
+"clicking in the content area on the first line and using the keyboard to "
+"change the title. By default, focus is given to the content area upon "
+"creation of a new note, so you can immediately start editing the note "
+"without the need to click on the content area with the mouse."
 msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui> elixa <guiseq><gui>Ver</"
-"gui><gui>Contactos desconectados</gui></guiseq> ou prema <keyseq><key>Ctrl</"
-"key><key>H</key></keyseq>."
 
-#: C/hide-contacts.page:36(p)
-msgid "To show the offline contacts again, repeat the same procedure above."
+#: C/tomboy.xml:378(para)
+msgid ""
+"Using the toolbar available on each note is discussed in <xref linkend="
+"\"working-with-notes\"/>."
 msgstr ""
-"Para mostrar os contactos desconectados de novo, repita o mesmo proceso."
 
-#: C/group-conversations.page:8(desc)
-msgid "Start or join a group conversation with your contacts."
-msgstr "Iniciar ou unirse a un grupo de conversa cos seus contactos."
+#: C/tomboy.xml:382(title)
+msgid "The default window for a New Note"
+msgstr "A xanela predeterminada para a Nova nota"
 
-#: C/group-conversations.page:34(title)
-msgid "Group conversations"
-msgstr "Conversas en grupo"
+#: C/tomboy.xml:393(title)
+msgid "Table of Contents"
+msgstr "Táboa de contidos"
 
-#: C/group-conversations.page:36(p)
+#: C/tomboy.xml:395(para)
 msgid ""
-"Group conversations permits you to have text conversations with more than "
-"one contact at the same time."
+"To get an overview of all the notes managed by Tomboy, select the "
+"<menuchoice><guimenuitem>Search All Notes</guimenuitem></menuchoice> menu "
+"item from the panel menu. By default, the <interface>Search All Notes</"
+"interface> dialog will display the notes in the order that they were last "
+"modified. Click the <guilabel>Note</guilabel> or <guilabel>Last Changed</"
+"guilabel> column headings to change the sort order. Click the column heading "
+"a second time to toggle between ascending and descending order."
 msgstr ""
-"As conversas en grupo permítenlle manter conversas de texto con máis dun "
-"contacto ao mesmo tempo."
 
-#: C/group-conversations.page:40(p)
+#: C/tomboy.xml:405(para)
 msgid ""
-"To have a group conversation you need to have a registered account with "
-"either Jabber or Google Talk, or a People Nearby account."
+"You can find specific notes by entering text into the search field in the "
+"<interface>Search All Notes</interface> dialog. The list of notes will "
+"automatically update to list only the notes which have matching text."
 msgstr ""
-"Para ter unha conversa en grupo debe ter rexistrado unha conta en Jabber ou "
-"Google Talk, ou en Persoas próximas."
 
-#: C/group-conversations.page:46(p)
+#: C/tomboy.xml:410(para)
 msgid ""
-"You can have a group conversation only with the contacts that are using the "
-"same service as yours."
+"To open a note in the <interface>Search All Notes</interface> dialog, do one "
+"of the following:"
 msgstr ""
-"Pode ter conversas en grupo só cos contactos que usan o mesmo servizo que o "
-"seu."
 
-#: C/group-conversations.page:54(title)
-msgid "Start a group conversation"
-msgstr "Iniciar unha conversa en grupo"
+#: C/tomboy.xml:415(para)
+msgid "Double-click on a note."
+msgstr "Prema dúas veces sobre unha nota."
 
-#: C/group-conversations.page:63(p)
+#: C/tomboy.xml:419(para)
 msgid ""
-"From the <gui>Account</gui> drop-down list, select the account you want to "
-"use for the group conversation."
+"Highlight a note by selecting it and then select "
+"<menuchoice><guimenuitem>Open</guimenuitem></menuchoice> from the "
+"<guimenuitem>File</guimenuitem> menu."
 msgstr ""
-"Desde a lista despregábel <gui>Conta</gui> seleccione a conta que queira "
-"usar para a conversa en grupo."
 
-#: C/group-conversations.page:69(p)
+#: C/tomboy.xml:425(para)
 msgid ""
-"In the <gui>Server</gui> text box, type the name of server in which the "
-"conversation will be hosted."
+"Right-click on a note and select <menuchoice><guimenuitem>Open</"
+"guimenuitem></menuchoice> from the context menu that appears."
 msgstr ""
-"Na caixa de texto <gui>Servidor</gui> escriba o nome do servidor no que se "
-"hospedará a conversa."
 
-#: C/group-conversations.page:73(p)
-msgid "Leave it empty if it will be on the current server."
-msgstr "Déixeo baleiro se será no servidor actual."
-
-#: C/group-conversations.page:78(p)
+#: C/tomboy.xml:431(para)
 msgid ""
-"In the <gui>Room</gui> text box, type the name you want to give to the "
-"conversation."
+"Highlight a note by selecting it and then press the key combination "
+"<keycombo><keycap>Ctrl</keycap><keycap>O</keycap></keycombo>."
 msgstr ""
-"Na caixa de texto <gui>Sala</gui> escriba o nome que quere darlle á conversa."
+
+#: C/tomboy.xml:445(title)
+msgid "Working With Notes"
+msgstr "Traballar con notas"
 
-#: C/group-conversations.page:82(p)
+#: C/tomboy.xml:447(para)
 msgid ""
-"This will be the name of the room you are going to have a conversation. This "
-"name will be publicly available for other people to join. It is not possible "
-"to create a private room."
+"Notes are modified and edited through the main window for each note. The "
+"toolbar at the top of each note allows you to stylize the note and perform "
+"other note-related functions. We discuss the functions of each item on the "
+"toolbar in the following sections."
 msgstr ""
-"Este será o nome da sala na que vai ter unha conversa. Este nome estará "
-"publicamente dispoñíbel para que outras persoas poidan unirse. Non é posíbel "
-"crear unha sala privada."
 
-#: C/group-conversations.page:90(p)
+#: C/tomboy.xml:453(title)
+msgid "Search"
+msgstr "Buscar"
+
+#: C/tomboy.xml:455(para)
 msgid ""
-"To invite other contacts to join the group conversation, from the "
-"<gui>Contact List</gui> window, select the contact you want to invite, and "
-"perform one of the following:"
+"Clicking the <guibutton>Search</guibutton> button will open the "
+"<interface>Search All Notes</interface> dialog described earlier (<xref "
+"linkend=\"search-all-notes\"/>.)"
 msgstr ""
-"Para invitar a outros contactos a unirse á conversa en grupo, desde a xanela "
-"<gui>Lista de contactos</gui> seleccione o contacto que quere invitar e "
-"realice unha das seguintes accións:"
 
-#: C/group-conversations.page:97(p)
-msgid "Right-click on the contact and choose <gui>Invite to chatroom</gui>."
-msgstr ""
-"Prema co botón dereito do rato sobre o contacto e elixa <gui>Invitar á sala "
-"de conversa</gui>."
+#: C/tomboy.xml:461(title)
+msgid "Link"
+msgstr "Ligazón"
 
-#: C/group-conversations.page:102(p)
+#: C/tomboy.xml:463(para)
 msgid ""
-"Choose <guiseq><gui>Edit</gui><gui>Contact</gui><gui>Invite to chatroom</"
-"gui></guiseq>."
+"The <guibutton>Link</guibutton> button allows you to create a link to a new "
+"note from within the current note. For example, if your note contains the "
+"phrase <quote>FinalExam</quote>, you can select this text with the mouse and "
+"click the <guibutton>Link</guibutton> button to create a new note with the "
+"title <quote>FinalExam</quote>. A link will also be created in the current "
+"note that can be clicked to open the new <quote>FinalExam</quote> note."
 msgstr ""
-"Seleccione <guiseq><gui>Editar</gui><gui>Contacto</gui><gui>Invitar á sala "
-"de conversa</gui></guiseq>."
 
-#: C/group-conversations.page:107(p)
+#: C/tomboy.xml:472(para)
 msgid ""
-"If you have more than one group conversation open, select the one you want "
-"to invite your contacts."
+"Changing the title of a note will update links present in other notes. This "
+"prevents broken links from occurring when a note is renamed."
 msgstr ""
-"Se ten máis dunha conversa en grupo aberta seleccione na que quere invitar "
-"aos seus contactos."
 
-#: C/group-conversations.page:118(title)
-msgid "Join a group conversation"
-msgstr "Unirse a unha conversa en grupo"
+#: C/tomboy.xml:479(title)
+msgid "Text"
+msgstr "Texto"
 
-#: C/group-conversations.page:128(p)
-msgid "Expand the <gui>Room List</gui> section to see all the existing rooms."
+#: C/tomboy.xml:481(para)
+msgid ""
+"Formatting text within your notes can be done using the <guibutton>Text</"
+"guibutton> button. The <guibutton>Text</guibutton> button will display a "
+"menu with several options from which you can choose. Each menu item is "
+"explained next."
 msgstr ""
-"Expanda a sección <gui>Lista de salas</gui> para ver todas as salas "
-"existentes."
 
-#: C/group-conversations.page:133(p)
-msgid "Double-click on the name of a room to join it."
-msgstr "Prema dúas veces sobre o nome dunha sala á que queira unirse."
+#: C/tomboy.xml:488(term)
+msgid "Undo"
+msgstr "Desfacer"
 
-#: C/group-conversations.page:139(p)
+#: C/tomboy.xml:491(para)
 msgid ""
-"It is not possible to join all existing rooms. Some of the rooms might "
-"require a password, or might be invitation only. <app>Empathy</app> does not "
-"support these kind of rooms."
+"Support for <quote>Undo</quote> is available in Tomboy through this menu "
+"item. The Undo function allows you to revert previous changes made to your "
+"note during the current session. To undo your last change using the "
+"keyboard, use the standard keybinding, <keycombo><keycap>Ctrl</"
+"keycap><keycap>Z</keycap></keycombo>."
 msgstr ""
-"Non é posíbel unirse a todas as salas existentes. Algunhas salas poden "
-"requirir un contrasinal ou poden ser de só invitación. <app>Empathy</app> "
-"non é compatíbel este tipo de salas."
 
-#: C/geolocation-what-is.page:9(desc)
-msgid "Understanding geolocation."
-msgstr "Entender a xeolocalización."
+#: C/tomboy.xml:504(term)
+msgid "Redo"
+msgstr "Refacer"
 
-#: C/geolocation-what-is.page:33(title)
-msgid "What is geolocation"
-msgstr "Que é a xeolocalización"
-
-#: C/geolocation-what-is.page:35(p)
+#: C/tomboy.xml:507(para)
 msgid ""
-"Geolocation allows you to identify the real geographical location of a "
-"computer or a device connected to the Internet."
+"The <quote>Redo</quote> function is used to put back changes that were "
+"removed using the <quote>Undo</quote> feature. To redo your last change "
+"using the keyboard, use the standard keybinding, <keycombo><keycap>Shift</"
+"keycap><keycap>Ctrl</keycap><keycap>Z</keycap></keycombo>."
 msgstr ""
-"A xeolocalización permítelle identificar a localización xeográfica real dun "
-"equipo ou un dispositivo conectado a Internet."
-
-#: C/geolocation-what-is.page:37(p)
-msgid "With geolocation in <app>Empathy</app> you can:"
-msgstr "Coa xeolocalización en <app>Empathy</app> vostede pode:"
 
-#: C/geolocation-what-is.page:42(p)
-msgid "Publish your geographical location to your contacts."
-msgstr "Publicar a súa información xeográfica aos seus contactos."
+#: C/tomboy.xml:521(term)
+msgid "Bold"
+msgstr "Negra"
 
-#: C/geolocation-what-is.page:47(p)
-msgid "See your contacts’ geographical location and quickly contact them."
-msgstr ""
-"Vexa a localización xeográfica dos seus contactos e contacte con eles "
-"rapidamente."
-
-#: C/geolocation-what-is.page:52(p)
+#: C/tomboy.xml:524(para)
 msgid ""
-"Set the accuracy of your location and the device used to discover your "
-"location."
+"To make text within your note bold, first select the text you want to "
+"modify. Then select the <menuchoice><guimenuitem>Bold</guimenuitem></"
+"menuchoice> option from the <guibutton>Text</guibutton> menu. You may also "
+"use the keybinding <keycombo><keycap>Ctrl</keycap><keycap>B</keycap></"
+"keycombo> after selecting the text."
 msgstr ""
-"Estabeleza a precisión da súa localización e o dispositivo que usar para "
-"descubrir a súa localización."
 
-#: C/geolocation-what-is.page:60(p)
+#: C/tomboy.xml:537(term)
+msgid "Italic"
+msgstr "Cursiva"
+
+#: C/tomboy.xml:540(para)
 msgid ""
-"In order to see your contacts’ geographical locations, they need to use a "
-"service and an application that supports geolocation."
+"To make text within your note italic, first select the text you want to "
+"modify. Then select the <menuchoice><guimenuitem>Italic</guimenuitem></"
+"menuchoice> option from the <guibutton>Text</guibutton> menu. You may also "
+"use the keybinding <keycombo><keycap>Ctrl</keycap><keycap>I</keycap></"
+"keycombo> after selecting the text."
 msgstr ""
-"Para poder ver as localizacións xeográficas dos seus contactos, estes deben "
-"usan un servizo e un aplicativo que admita a xeolocalización."
-
-#: C/geolocation-turn.page:9(desc)
-msgid "How to activate and deactivate geolocation in <app>Empathy</app>."
-msgstr "Como activar e desactivar a xeolocalización en <placeholder-1/>."
 
-#: C/geolocation-turn.page:33(title)
-msgid "Activate/Deactivate geolocation"
-msgstr "Activar e desactivar a xeolocalización"
+#: C/tomboy.xml:553(term)
+msgid "Strikeout"
+msgstr "Riscado"
 
-#: C/geolocation-turn.page:37(p)
-msgid "Choose <guiseq><gui>Edit</gui><gui>Preferences</gui></guiseq>."
-msgstr "Elixa <guiseq><gui>Editar</gui><gui>Preferencias</gui></guiseq>."
+#: C/tomboy.xml:556(para)
+msgid ""
+"The strikeout style will put a line through the selected text. To add a "
+"strikeout, select the text and then select the "
+"<menuchoice><guimenuitem>Strikeout</guimenuitem></menuchoice> option from "
+"the <guibutton>Text</guibutton> menu. You may also use the keybinding "
+"<keycombo><keycap>Ctrl</keycap><keycap>S</keycap></keycombo> after selecting "
+"the text."
+msgstr ""
 
-#: C/geolocation-turn.page:42(p)
-msgid "Select the <gui>Location</gui> tab."
-msgstr "Seleccione o separador <gui>Localización</gui>."
+#: C/tomboy.xml:570(term)
+msgid "Highlight"
+msgstr "Realzar"
 
-#: C/geolocation-turn.page:47(p)
+#: C/tomboy.xml:573(para)
 msgid ""
-"Select <gui>Publish location to my contacts</gui> to activate geolocation."
+"The highlight style will put a yellow background around the selected text. "
+"To add a highlight, select the text and then select the "
+"<menuchoice><guimenuitem>Highlight</guimenuitem></menuchoice> option from "
+"the <guibutton>Text</guibutton> menu. You may also use the keybinding "
+"<keycombo><keycap>Ctrl</keycap><keycap>H</keycap></keycombo> after selecting "
+"the text."
 msgstr ""
-"Seleccione <gui>Publicar a miña localización aos meus contactos</gui> para "
-"activar a xeolocalización."
 
-#: C/geolocation-turn.page:50(p)
-msgid "To deactivate geolocation, deselect it."
-msgstr "Para desactivar a xeolocalización, deselecciónea."
+#: C/tomboy.xml:587(term) C/tomboy.xml:1414(member) C/tomboy.xml:1499(term)
+msgid "Fixed Width"
+msgstr "Largura fixa"
 
-#: C/geolocation-turn.page:55(p)
+#: C/tomboy.xml:590(para)
 msgid ""
-"To increase the accuracy of your position, deselect <gui>Reduce location "
-"accuracy</gui>."
+"The fixed width style allows text to use a fixed width font. To change "
+"existing text, first select the text you want to modify. Then select the "
+"<menuchoice><guimenuitem>Fixed Width</guimenuitem></menuchoice> option from "
+"the <guibutton>Text</guibutton> menu. You can also select the "
+"<menuchoice><guimenuitem>Fixed Width</guimenuitem></menuchoice> option from "
+"the <guibutton>Text</guibutton> before you start typing to have the text you "
+"type be in a fixed width style."
 msgstr ""
-"Para aumentar a precisión da súa posición, deseleccione <gui>Reducir a "
-"precisión da localización</gui>."
 
-#: C/geolocation-turn.page:61(p)
-#| msgid ""
-#| "If you have an external device like a GPS or want to send a more accurate "
-#| "position, select the appropriate option in the <gui>Geoclue Settings</"
-#| "gui> section."
+#: C/tomboy.xml:601(para)
 msgid ""
-"If you have an external device like a GPS or want to send a more accurate "
-"position, select the appropriate option in the <gui>Location sources</gui> "
-"section."
+"The <menuchoice><guimenuitem>Fixed Width</guimenuitem></menuchoice> option "
+"is a feature provided by the Fixed Width Add-in. For more information on add-"
+"ins, see <xref linkend=\"plugins\"/>."
 msgstr ""
-"Se ten un dispositivo externo como un GPS e quere enviar unha posición máis "
-"exacta, seleccione a opción axeitada na sección <gui>Orixes das "
-"localizacións</gui>."
 
-#: C/geolocation-supported.page:7(desc)
-msgid "Services that supports geolocation and compatibility."
-msgstr "Servizos que admiten xeolocalización e compatibilidade."
+#: C/tomboy.xml:610(term)
+msgid "Font size"
+msgstr "Tamaño do tipo de letra"
 
-#: C/geolocation-supported.page:31(title)
-msgid "Supported services"
-msgstr "Servizos admitidos"
+#: C/tomboy.xml:615(guilabel) C/tomboy.xml:625(guilabel)
+msgid "Small"
+msgstr "Pequeno"
 
-#: C/geolocation-supported.page:33(p)
-msgid ""
-"The geolocation feature at the moment is compatible only with the Jabber "
-"service. In order to use it, you and your contacts need to have a Jabber "
-"account."
-msgstr ""
-"Polo momento a opción de xeolocalización só'é compatíbel co servizo Jabber. "
-"Para poder usala, vostede e os seus contactos deben ter unha conta de Jabber."
+#: C/tomboy.xml:617(guilabel) C/tomboy.xml:627(guilabel)
+msgid "Normal"
+msgstr "Normal"
 
-#: C/geolocation-supported.page:39(p)
-msgid ""
-"It is necessary that also the server you are using supports the geolocation "
-"feature. Most of the Jabber servers support it. See your service website "
-"documentation for more information."
-msgstr ""
-"Tamén é necesario que o servidor que está usando sexa compatíbel coa opción "
-"de xeolocalización. A maioría dos servidores teñen compatibilidade. Vexa a "
-"páxina web de documentación do seu servizo para obter máis información."
+#: C/tomboy.xml:619(guilabel) C/tomboy.xml:629(guilabel)
+msgid "Large"
+msgstr "Grande"
 
-#: C/geolocation-supported.page:47(title)
-msgid "Compatibility"
-msgstr "Compatibilidade"
+#: C/tomboy.xml:621(guilabel) C/tomboy.xml:631(guilabel)
+msgid "Huge"
+msgstr "Enorme"
 
-#: C/geolocation-supported.page:49(p)
+#: C/tomboy.xml:613(para)
 msgid ""
-"<app>Empathy</app> geolocation feature is not compatible with other "
-"geographical position services such as <em>Google Latitude</em>, <em>Yahoo "
-"Fire Eagle</em> or <em>Brightkite</em>."
+"There are actually four options in this part of the menu: <placeholder-1/>. "
+"Each one of these options represents a font size to use for the selected "
+"text in the note. To modify the font size, select the text and then select "
+"one of <placeholder-2/> options from the <guibutton>Text</guibutton> menu."
 msgstr ""
-"A característica de xeolocalización de <app>Empathy</app> non é compatíbel "
-"con outros servizos de posición xeográfica tales como <em>Google Latitude</"
-"em>, <em>Yahoo Fire Eagle</em> ou <em>Brightkite</em>."
 
-#: C/geolocation-privacy.page:8(desc)
-msgid "What information are sent and to who."
-msgstr "Que información se envía e a quén."
+#: C/tomboy.xml:638(term)
+msgid "Bullets"
+msgstr "Viñetas"
 
-#: C/geolocation-privacy.page:32(title)
-msgid "Geolocation Privacy"
-msgstr "Privacidade na xeolocalización"
+#: C/tomboy.xml:646(guilabel)
+msgid "Increase Indent"
+msgstr "Aumentar sangría"
 
-#: C/geolocation-privacy.page:35(title)
-msgid "What information is sent"
-msgstr "Que información se envía"
+#: C/tomboy.xml:648(guilabel)
+msgid "Decrease Indent"
+msgstr "Diminuír sangría"
 
-#: C/geolocation-privacy.page:36(p)
+#: C/tomboy.xml:641(para)
 msgid ""
-"What is possible to send is: your country, region, locality, area, street, "
-"building, floor, room, and postal code, longitude, latitude and altitude, "
-"speed and bearing."
+"Select the <menuchoice><guimenuitem>Bullets</guimenuitem></menuchoice> "
+"option from the <guibutton>Text</guibutton> menu to begin or end a bulleted "
+"list. If the cursor is inside a bulleted list, the <placeholder-1/> options "
+"will be enabled."
 msgstr ""
-"É posíbel enviar: o seu país, rexión, localidade, área, calle, edificio, "
-"planta, habitación, código postal, lonxitude e latitude, velocidade e "
-"orientación."
 
-#: C/geolocation-privacy.page:40(p)
+#: C/tomboy.xml:651(para)
 msgid ""
-"The accuracy and the quantity of information about your geographical "
-"position are based on the software or on the infrastructure used to discover "
-"your position."
+"With the cursor on a bulleted list line, select the "
+"<menuchoice><guimenuitem>Increase Indent</guimenuitem></menuchoice> option "
+"to shift the current line to the right or the "
+"<menuchoice><guimenuitem>Decrease Indent</guimenuitem></menuchoice> option "
+"to shift the current line to the left."
 msgstr ""
-"A precisión e cantidade de información sobre a súa posición xeográfica "
-"basease no software ou na infraestrutura usada para descubrir a súa posición."
 
-#: C/geolocation-privacy.page:44(p)
-msgid ""
-"Different kind of networks may have different accuracy settings, and may "
-"send different information. The use of external devices such as GPS or "
-"mobile phone will increase the accuracy of the information sent."
+#: C/tomboy.xml:660(para)
+msgid "For more information on bullets, see <xref linkend=\"bullets\"/>."
 msgstr ""
-"Diferentes tipos de redes poden ter diferentes axustes de precisión e poden "
-"enviar información diferente. O uso de dispositivos externos tales como un "
-"GPS ou teléfono móbil pode incrementar a precisión da información enviada."
 
-#: C/geolocation-privacy.page:49(p)
+#: C/tomboy.xml:666(term)
+msgid "Find in This Note"
+msgstr "Buscar nesta nota"
+
+#: C/tomboy.xml:669(para)
 msgid ""
-"When the privacy mode is enabled, nothing more precise than your city will "
-"be sent, even if you are using an external device."
+"Use this to search for text within the current note. A small find bar will "
+"open up at the bottom of the note. To open the find bar using the keyboard, "
+"use the standard keybinding, <keycombo><keycap>Ctrl</keycap><keycap>F</"
+"keycap></keycombo>."
 msgstr ""
-"Cando o modo de privacidade está activo non se enviará nada máis preciso que "
-"a súa cidade, incluso se está usando un dispositivo externo."
-
-#: C/geolocation-privacy.page:56(title)
-msgid "Who can see the information sent"
-msgstr "Quen pode ver a información enviada"
 
-#: C/geolocation-privacy.page:57(p)
-msgid "Only your contacts can see your geographical position."
-msgstr "Só os seus contactos poden ver a súa posición xeográfica."
-
-#: C/geolocation-privacy.page:63(title)
-msgid "What is the privacy mode"
-msgstr "Que é o modo de privacidade"
-
-#: C/geolocation-privacy.page:64(p)
+#: C/tomboy.xml:677(para)
 msgid ""
-"The privacy mode, enabled by default, is a reduced accuracy mode that will "
-"decrease the accuracy of the geographical position sent to your contacts."
+"Enter text to find. After entering text, the matches will be highlighted. "
+"Click <guibutton>Find Next</guibutton> to highlight the next match and place "
+"the cursor there. Click <guibutton>Previous</guibutton> to move to the "
+"previous match."
 msgstr ""
-"O modo de privacidade, activado por omisión, é un modo de precisión reducida "
-"da información de posición xeográfica enviada aos seus contactos."
 
-#: C/geolocation-privacy.page:71(title)
-msgid "Privacy overview"
-msgstr "Vista previa da privacidade"
-
-#: C/geolocation-privacy.page:72(p)
+#: C/tomboy.xml:683(para)
 msgid ""
-"Overview of the various geolocation privacy settings in <app>Empathy</app>."
+"To close the find bar, click <guibutton>X</guibutton> (Close Button) on the "
+"far left or press the <keycap>Escape</keycap> key."
 msgstr ""
-"Visión xeral dos axustes de privacidade na xeolocalización de <app>Empathy</"
-"app>."
+"Para pechar a barra de busca, prema <guibutton>X</guibutton> (botón de "
+"pechar) na parte esquerda ou prema a tecla <keycap>Escape</keycap>."
 
-#: C/geolocation-privacy.page:77(p)
-msgid "Geolocation is not enabled by default."
-msgstr "De forma predefinida a xeolocalización non está activada."
-
-#: C/geolocation-privacy.page:82(p)
-msgid "Privacy mode is enabled by default."
-msgstr "De forma predefinida o modo de privacidade está activado."
+#: C/tomboy.xml:692(title)
+msgid "Tools (gear icon)"
+msgstr ""
 
-#: C/geolocation-privacy.page:87(p)
+#: C/tomboy.xml:694(para)
 msgid ""
-"Privacy mode prevails even when using external and more precise devices."
+"The <guibutton>Tools</guibutton> button is represented by the <inlinegraphic "
+"fileref=\"figures/tomboy-tools.png\"/> icon. When you click the "
+"<guiicon>Tools</guiicon> icon on the toolbar present on your note, a menu "
+"will appear with the following items:"
 msgstr ""
-"O modo de privacidade prevalece incluso cando se está usando dispositivos "
-"externos máis precisos."
 
-#: C/geolocation-privacy.page:92(p)
-msgid "Only your contacts can see your position."
-msgstr "Só os seus contactos poden ver a súa posición."
+#: C/tomboy.xml:701(term)
+msgid "Synchronize Notes"
+msgstr "Sincronizar notas"
 
-#: C/geolocation-not-showing.page:8(desc)
-msgid "<app>Empathy</app> does not publish my geographical position."
-msgstr "<app>Empathy</app> non publica a miña posición xeográfica."
+#: C/tomboy.xml:704(para)
+msgid ""
+"Select this option to synchronize your notes with a central server. For more "
+"information on note synchronization, see <xref linkend=\"synchronization\"/>."
+msgstr ""
 
-#: C/geolocation-not-showing.page:32(title)
-msgid "Geographical position not published"
-msgstr "Posición xeográfica non publicada"
+#: C/tomboy.xml:710(term)
+msgid "What links here?"
+msgstr "Que liga aquí?"
 
-#: C/geolocation-not-showing.page:34(p)
+#: C/tomboy.xml:713(para)
 msgid ""
-"If your contacts cannot see your location, <app>Empathy</app> might not be "
-"able to discover with a good margin of precision your geographical position."
+"This option allows you to quickly see what other notes link to the current "
+"note. This feature is provided by the Backlinks Add-in. For more information "
+"on add-ins, see <xref linkend=\"plugins\"/>."
 msgstr ""
-"Se os contactos non poden ver a súa posición, <app>Empathy</app> pode non "
-"ser capaz de descubrir a súa posición xeográfica con unha boa marxe de "
-"precisión."
 
-#: C/geolocation-not-showing.page:38(p)
+#: C/tomboy.xml:721(term) C/tomboy.xml:1412(member) C/tomboy.xml:1479(term)
+msgid "Export to HTML"
+msgstr "Exportar a HTML"
+
+#: C/tomboy.xml:724(para)
 msgid ""
-"In this case, your position will not be published, but you are still able to "
-"see the location of your contacts."
+"You can create an <acronym>HTML</acronym> (Hypertext Markup Language) "
+"document from one or more notes by selecting this option. For more "
+"information, please see <xref linkend=\"plugins\"/>."
 msgstr ""
-"Neste caso non se publicará a súa posición pero aínda así poderá ver a "
-"posición dos seus contactos."
+
+#: C/tomboy.xml:732(term)
+msgid "Print"
+msgstr "Imprimir"
 
-#: C/geolocation-not-showing.page:42(p)
+#: C/tomboy.xml:735(para) C/tomboy.xml:1538(para)
 msgid ""
-"If you want to publish your geographical position, you can try to use an "
-"external device such as a GPS."
+"Select this option to print the current note. You will be presented with the "
+"standard GNOME print dialog."
 msgstr ""
-"Se quere publicar a súa posición xeográfica pode intentar usar un "
-"dispositivo externo tal como un GPS."
+"Seleccione esta opción para imprimir a nota actual. Mostraráselle o diálogo "
+"estándar de impresión de GNOME."
 
-#: C/geolocation-not-showing.page:48(p)
+#: C/tomboy.xml:742(para)
 msgid ""
-"In order to publish your geographical location, your Jabber server needs to "
-"support the Personal Eventing Protocal (PEP). A list of <link href=\"http://"
-"coccinella.im/servers/servers_by_pubsub_pep.html\">servers which support "
-"PEP</link> is maintained online. Google Talk does not support this feature "
-"at this time."
+"Depending on the add-ins that you have installed for Tomboy, you may have "
+"more or less items available in the <guimenu>Tools</guimenu> menu."
 msgstr ""
-"Para publicar a súa localización xeográfica o seu servidor Jabber debe ser "
-"compatíbel co protocolo de eventos persoais (PEP). Mantense en liña unha "
-"lista dos <link href=\"http://coccinella.im/servers/servers_by_pubsub_pep."
-"html\">servidores que admiten PEP</link>. Polo momento Google Talk non é "
-"compatíbel con esta característica."
 
-#: C/geolocation.page:8(desc)
-msgid "Use and understand geolocation in <app>Empathy</app>."
-msgstr "Usar e entender a xeolocalizacón en <app>Empathy</app>."
+#: C/tomboy.xml:749(title)
+msgid "Delete"
+msgstr "Borrar"
 
-#: C/geolocation.page:32(title)
-msgid "Geographical position"
-msgstr "Posición xeográfica"
+#: C/tomboy.xml:751(para)
+msgid ""
+"The <guibutton>Delete</guibutton> button will pop up a dialog box asking if "
+"you want to permanently delete the note and its contents. Click the "
+"<guibutton>Delete</guibutton> button to discard the note permanently, or "
+"<guibutton>Cancel</guibutton> to abort the process. Links to this note from "
+"other notes will still exist, but will re-create the note upon activation."
+msgstr ""
 
-#: C/geolocation.page:35(title)
-msgid "Geolocation"
-msgstr "Xeolocalización"
+#: C/tomboy.xml:763(title)
+msgid "Panel Menu"
+msgstr "Panel de menú"
 
-#: C/geolocation.page:39(title)
-msgid "Fix common problems"
-msgstr "Solucionar problemas comúns"
+#: C/tomboy.xml:765(para)
+msgid ""
+"Tomboy keeps the most recently used notes quickly available to you in a menu "
+"that appears when you click on the Tomboy Icon in the GNOME Panel, the "
+"taskbar in Microsoft Windows, or the dock in Mac OS X."
+msgstr ""
 
-#: C/favorite-rooms.page:10(desc)
-msgid "Set, join and manage favorite rooms."
-msgstr "Configurar, unirse e xestionar salas favoritas."
+#: C/tomboy.xml:770(title)
+msgid "Note Pinning"
+msgstr ""
 
-#: C/favorite-rooms.page:29(title)
-msgid "Favorite rooms"
-msgstr "Salas favoritas"
+#: C/tomboy.xml:772(para)
+msgid ""
+"To force a note to always be in the panel menu regardless of when you last "
+"accessed it, click the thumbtack icon to \"pin\" it to the menu. Notes that "
+"are pinned to the panel menu will have a thumbtack icons that look like "
+"this: <inlinegraphic fileref=\"figures/tomboy-pindown.png\"/>. Notes that "
+"are not pinned to the panel menu will have thumbtack icons that look like "
+"this: <inlinegraphic fileref=\"figures/tomboy-pinup.png\"/>."
+msgstr ""
 
-#: C/favorite-rooms.page:32(title)
-msgid "Set a room as a favorite"
-msgstr "Estabelecer unha sala como favorita"
+#: C/tomboy.xml:781(title)
+msgid "Tomboy Panel Menu"
+msgstr "Menú do panel de Tomboy"
 
-#: C/favorite-rooms.page:35(p)
-msgid "Join a room."
-msgstr "Unirse a unha sala."
+#: C/tomboy.xml:798(title)
+msgid "Begin a bulleted list"
+msgstr "Iniciar unha lista con viñetas"
 
-#: C/favorite-rooms.page:40(p)
-msgid ""
-"See <link xref=\"irc-join-room\"/> for more information on how to join an "
-"IRC room."
+#: C/tomboy.xml:800(para)
+msgid "You may begin a bulleted list by using one of the following methods:"
 msgstr ""
-"Para obter máis información sobre como unirse a unha sala de chat IRC, "
-"consulte a <link xref=\"irc-join-room\"/>."
 
-#: C/favorite-rooms.page:46(p)
+#: C/tomboy.xml:805(para) C/tomboy.xml:826(para)
 msgid ""
-"See <link xref=\"group-conversations\"/> for more information on how to "
-"start or join a group conversation."
+"Select <menuchoice><guimenuitem>Bullets</guimenuitem></menuchoice> from the "
+"<guibutton>Text</guibutton> menu."
 msgstr ""
-"Para obter máis información sobre como unirse a unha conversa en grupo, "
-"consulte a <link xref=\"group-conversations\"/>."
 
-#: C/favorite-rooms.page:54(p)
+#: C/tomboy.xml:812(para)
 msgid ""
-"From the conversation window, choose <guiseq><gui>Conversation</"
-"gui><gui>Favorite Chat Room</gui></guiseq>."
+"Begin a line with a single dash character (-), type some text immediately "
+"following the dash, and press <keycap>Enter</keycap>."
 msgstr ""
-"Desde a xanela de conversa, elixa <guiseq><gui>Conversa</gui><gui>Sala de "
-"chat favorita</gui></guiseq>."
-
-#: C/favorite-rooms.page:63(title)
-msgid "Join favorite rooms"
-msgstr "Unirse ás salas favoritas"
 
-#: C/favorite-rooms.page:71(p)
-msgid "Press <key>F5</key>."
-msgstr "Prema <key>F5</key>."
+#: C/tomboy.xml:820(title)
+msgid "End a bulleted list"
+msgstr "Rematar unha lista con viñetas"
 
-#: C/favorite-rooms.page:76(p)
-msgid ""
-"Choose <guiseq><gui>Room</gui><gui>Join Favorites</gui></guiseq>, to join "
-"all your favorite rooms."
+#: C/tomboy.xml:822(para)
+msgid "End a bulleted list by doing one of the following:"
 msgstr ""
-"Seleccione <guiseq><gui>Salas</gui><gui>Unirse ás favoritas</gui></guiseq> "
-"para unirse a todas as súas salas favoritas."
-
-#: C/favorite-rooms.page:82(p)
-msgid "Choose <gui>Room</gui>, and select the favorite room you want to join."
-msgstr "Seleccione a sala favorita que quere xestionar:"
 
-#: C/favorite-rooms.page:90(p)
-msgid ""
-"To join a favorite room, you need to be connected to the Internet and to "
-"your account."
+#: C/tomboy.xml:833(para)
+msgid "Press <keycap>Enter</keycap> on a blank bulleted line."
 msgstr ""
-"Para unirse a unha sala favorita debe estar conectado a Internet e coa conta."
 
-#: C/favorite-rooms.page:98(title)
-msgid "Manage favorite rooms"
-msgstr "Xestionar as salas favoritas"
-
-#: C/favorite-rooms.page:101(p)
+#: C/tomboy.xml:837(para)
 msgid ""
-"From the <gui>Contact List</gui> window, choose <guiseq><gui>Room</"
-"gui><gui>Manage Favorites</gui></guiseq>."
+"Select <menuchoice><guimenuitem>Decrease Indent</guimenuitem></menuchoice> "
+"from the <guibutton>Text</guibutton> menu in succession until the current "
+"line is no longer part of the bulleted list."
 msgstr ""
-"Dese a xanela <gui>Lista de contactos</gui> elixa <guiseq><gui>Sala</"
-"gui><gui>Xestionar salas favoritas</gui></guiseq>."
 
-#: C/favorite-rooms.page:107(p)
+#: C/tomboy.xml:845(para)
 msgid ""
-"From the <gui>Account</gui> drop-down list, select the account you want to "
-"manage the favorite rooms of."
+"Using the key combination <keycombo><keycap>Shift</keycap><keycap>Tab</"
+"keycap></keycombo> in succession until the current line is no longer part of "
+"the bulleted list."
 msgstr ""
-"Desde a lista despregábel <gui>Conta</gui> seleccione a conta da que quere "
-"xestionar as salas favoritas."
 
-#: C/favorite-rooms.page:111(p)
-msgid "Select <gui>All</gui> to see all you favorite rooms."
-msgstr "Seleccione <placeholder-1/> para ver todas as súas salas favoritas."
+#: C/tomboy.xml:856(title)
+msgid "Increase Indentation"
+msgstr "Aumentar a sangría"
 
-#: C/favorite-rooms.page:116(p)
-msgid "Select the favorite room you want to manage:"
-msgstr "Seleccione a sala favorita que quere xestionar:"
+#: C/tomboy.xml:858(para)
+msgid "To increase the line indentation in a bulleted list with the mouse:"
+msgstr "Para incrementar a sangría da liña nunha lista de viñetas co rato:"
 
-#: C/favorite-rooms.page:121(p)
+#: C/tomboy.xml:863(para)
 msgid ""
-"Select the <gui>Auto-Connect</gui> check-box in order to automatically join "
-"that room when you connect to your account."
+"Select <menuchoice><guimenuitem>Increase Indent</guimenuitem></menuchoice> "
+"from the <guibutton>Text</guibutton> menu."
 msgstr ""
-"Seleccione a caixa de verificación <gui>Autoconectar</gui> para unirse a esa "
-"sala automaticamente ao conectarse coa conta."
+"Seleccione <menuchoice><guimenuitem>Incrementar sangría</guimenuitem></"
+"menuchoice> desde o menú <guibutton>Texto</guibutton>."
 
-#: C/favorite-rooms.page:127(p)
-msgid "Click on <gui>Remove</gui> to remove the room from your favorites."
-msgstr "Prema <gui>Eliminar</gui> para elimianr a sala das súas favoritas."
+#: C/tomboy.xml:870(para)
+msgid "To increase the line indentation in a bulleted list with the keyboard:"
+msgstr "Para incrementar a sangría da liña nunha lista de viñetas co rato:"
 
-#: C/favorite-rooms.page:134(p)
-msgid "When done, click <gui>Close</gui>."
-msgstr "Cando remate prema <placeholder-1/>."
+#: C/tomboy.xml:875(para)
+msgid "Press the <keycap>Tab</keycap> key."
+msgstr "Prema a tecla <keycap>Tab</keycap>."
 
-#: C/disable-account.page:9(desc)
-msgid "Prevent <app>Empathy</app> from automatically logging in to an account."
-msgstr "Evitar que <app>Empathy</app> inicie sesión automaticamente na conta."
+#: C/tomboy.xml:881(title)
+msgid "Decrease Indentation"
+msgstr "Diminuír a sangría"
 
-#: C/disable-account.page:39(title)
-msgid "Disable an account"
-msgstr "Desactivar unha conta"
+#: C/tomboy.xml:883(para)
+msgid "To decrease the line indentation in a bulleted list with the mouse:"
+msgstr "Para reducir a sangría da liña nunha lista de viñetas co rato:"
 
-#: C/disable-account.page:41(p)
+#: C/tomboy.xml:888(para)
 msgid ""
-"You can disable an account to prevent <app>Empathy</app> from logging in to "
-"it without removing the account entirely. You may wish to disable and re-"
-"enable an account if you only want to be logged in to the account at certain "
-"times, but you still want to use <app>Empathy</app> for other accounts."
+"Select <menuchoice><guimenuitem>Decrease Indent</guimenuitem></menuchoice> "
+"from the <guibutton>Text</guibutton> menu."
 msgstr ""
-"Pode desactivar unha conta para evitar que <app>Empathy</app> inicie sesión "
-"nela, sen ter que quitar a conta completamente. Pode querer desactivar unha "
-"conta e reactivala se só quere iniciar sesión na conta de vez en cando, pero "
-"segue querendo usar <app>Empathy</app> para outras contas."
 
-#: C/disable-account.page:52(p)
-msgid ""
-"Select the account you wish to disable from the accounts list on the left "
-"side of the window."
+#: C/tomboy.xml:895(para)
+msgid "To decrease the line indentation in a bulleted list with the keyboard:"
 msgstr ""
-"Seleccione a conta que quere desactivar desde a lista de contas na parte "
-"esquerda da xanela."
 
-#: C/disable-account.page:56(p)
+#: C/tomboy.xml:900(para)
 msgid ""
-"Deselect <gui style=\"checkbox\">Enabled</gui> on the right side of the "
-"window."
+"Press the key combination <keycombo><keycap>Shift</keycap><keycap>Tab</"
+"keycap></keycombo>."
 msgstr ""
-"Deseleccione <gui style=\"checkbox\">Activada</gui> na parte dereita da "
-"xanela."
 
-#: C/disable-account.page:62(p)
-msgid ""
-"To re-enable the account, simply select <gui style=\"checkbox\">Enabled</"
-"gui>."
-msgstr "Para reactivar a conta simplemente seleccione <placeholder-1/>."
-
-#: C/create-account.page:9(desc)
-msgid "Register for an account with one of the supported messaging services."
-msgstr "Rexistre unha conta con un dos servizos de mensaxería admitidos."
+#: C/tomboy.xml:913(title)
+msgid "Working with Notebooks"
+msgstr "Traballar con cadernos"
 
-#: C/create-account.page:34(title)
-msgid "Register for a new account"
-msgstr "Rexistrar unha nova conta"
-
-#: C/create-account.page:36(p)
+#: C/tomboy.xml:915(para)
 msgid ""
-"Most account types require you to create an account with a account provider "
-"before you can connect using instant messaging applications like "
-"<app>Empathy</app>. With some account providers, you can use <app>Empathy</"
-"app> to register for a new account, using the same steps as you would to "
-"<link xref=\"add-account\">add an account</link>."
+"Notebooks allow you to group related notes together. You can add a note to a "
+"notebook in the Search All Notes window or directly inside of a Note."
 msgstr ""
-"Moitos tipos de conta requiren que cree unha conta cun fornecedor de contas "
-"antes de poder conectarse e usar aplicativos de mensaxaría instantánea como "
-"<app>Empathy</app>. Con algúns fornecedores de contas pode usar "
-"<app>Empathy</app> para rexistrar una nova conta, usando os mesmos pasos que "
-"seguiría en <link xref=\"add-account\">engadir unha conta</link>."
+"Os cadernos de notas permítenlle agrupar notas relacionadas. Pode engadir "
+"unha nota a un caderno de notas na xanela Buscar en todas as notas ou "
+"directamente dentro dunha nota."
 
-#: C/create-account.page:42(p)
-msgid ""
-"This page provides information on creating a new account for various types "
-"of accounts. Your account provider should give you a login ID and a "
-"password, as well as any additional information you need to connect using "
-"<app>Empathy</app>."
-msgstr ""
-"Esta páxina fornece información sobre crear unha nova conta para varios "
-"tipos de conta. O seu fornecedor de contas debería fornecerlle un ID de "
-"inicio de sesión e un contrasinal, así como outra información adicional que "
-"pode necesitar para conectarse con <app>Empathy</app>."
+#: C/tomboy.xml:919(title)
+msgid "Creating Notebooks"
+msgstr "Crear cadernos"
 
-#: C/create-account.page:47(title)
-msgid "Facebook"
-msgstr "Facebook"
+#: C/tomboy.xml:921(para)
+msgid "You can create new notebooks using one of the following methods:"
+msgstr "Pode crear novos cadernos usando un dos seguintes métodos:"
 
-#: C/create-account.page:48(p)
+#: C/tomboy.xml:925(para)
 msgid ""
-"Facebook is one of the most-used social networks. It allows users to create "
-"their own profile and to communicate with their friends."
+"Click on the Tomboy note icon present in the GNOME Panel, the taskbar in "
+"Microsoft Windows, or the dock in Mac OS X. A menu will appear"
 msgstr ""
-"Facebook é unha das redes sociais máis usadas. Permite aos usuarios crear o "
-"seu propio perfil e comunicarse cos seus amigos."
 
-#: C/create-account.page:52(p)
+#: C/tomboy.xml:929(para)
 msgid ""
-"To use Facebook to communicate with your friends, you will need to create a "
-"new account from the website: <link href=\"http://www.facebook.com\">www."
-"facebook.com</link>."
+"Select <menuchoice><guimenuitem>Notebooks</guimenuitem><guimenuitem>New "
+"Notebook</guimenuitem></menuchoice>."
 msgstr ""
-"Para usar Facebook para comunicarse cos seus amigos necesita crear unha nova "
-"conta desde o sitio web: <link href=\"http://www.facebook.com\">www.facebook."
-"com</link>."
 
-#: C/create-account.page:60(title) C/audio-video.page:170(p)
-msgid "Jabber"
-msgstr "Jabber"
+#: C/tomboy.xml:932(para) C/tomboy.xml:961(para) C/tomboy.xml:969(para)
+msgid "Enter a name for the new notebook."
+msgstr "Escriba un nome para o novo caderno."
 
-#: C/create-account.page:62(p)
+#: C/tomboy.xml:937(title)
 msgid ""
-"Jabber is an open instant messaging system. Like email, Jabber allows you to "
-"choose your account provider and communicate with all other Jabber users, "
-"regardless of their account provider."
+"Create a new notebook from the Tomboy note icon on the GNOME Panel, the "
+"taskbar in Microsoft Windows, or the dock in Mac OS X"
 msgstr ""
-"Jabber é un sistema de mensaxaría instantánea abeto. Como o correo "
-"electrónico, Jabber permítelle seleccionar o seu fornecedor de conta e "
-"comunicarse cos ouros usuarios de Jabber, independentemente do fornecedor da "
-"conta."
+
+#: C/tomboy.xml:946(para)
+msgid "To create a new notebook from the Search All Notes dialog:"
+msgstr "Para crear un novo caderno desde o diálogo Buscar en tódalas notas:"
 
-#: C/create-account.page:66(p)
+#: C/tomboy.xml:950(para) C/tomboy.xml:996(para) C/tomboy.xml:1033(para)
+#: C/tomboy.xml:1077(para)
 msgid ""
-"You will need to create a new account with a Jabber provider. There are many "
-"free providers; one popular provider is <link href=\"http://register.jabber."
-"org/\">Jabber.org</link>."
+"Open <menuchoice><guimenuitem>Search All Notes</guimenuitem></menuchoice> by "
+"choosing it from the Tomboy icon on the GNOME Panel, the taskbar in "
+"Microsoft Windows, or the dock in Mac OS X, or click on Search from an open "
+"note."
 msgstr ""
-"Deberá crear unha nova conta con un fornecedor Jabber. Existen moitos "
-"fornecedores libres; un fornecedor popular é <link href=\"http://register."
-"jabber.org/\">Jabber.org</link>."
 
-#: C/create-account.page:71(p)
+#: C/tomboy.xml:956(para)
 msgid ""
-"If you use Google Mail or Google Talk, you already have a Jabber account. "
-"Google Talk is a Jabber service. Simply use your Google Mail address and "
-"password in <app>Empathy</app> to connect."
+"Using your mouse, right click in the left hand box and choose "
+"<menuchoice><guimenuitem>New Notebook</guimenuitem></menuchoice>."
 msgstr ""
-"Se usa Google Mail ou Google Talk xa ten unha conta Jabber. Talk é un "
-"servizo Jabber. Simplemente use o seu enderezo de Google Mail e o seu "
-"contrasinal para conectarse."
 
-#: C/create-account.page:78(title) C/audio-video.page:190(p)
-msgid "People Nearby"
-msgstr "Persoas próximas"
-
-#: C/create-account.page:80(p)
+#: C/tomboy.xml:964(para)
 msgid ""
-"You do not need to create an account with a service provider to use this "
-"feature. This service works whenever you are connected to a local network, "
-"such as a wireless hotspot. It automatically finds all other users on the "
-"network who are also using this service."
+"With <guilabel>Search All Notes</guilabel> open, choose "
+"<menuchoice><guimenuitem>File</guimenuitem><guimenuitem>Notebooks</"
+"guimenuitem><guimenuitem>New Notebook</guimenuitem></menuchoice>."
 msgstr ""
-"Para usar esta característica non precisa crear unha conta con un fornecedor "
-"de servizos. Este servizo funciona sempre que esté conectado a unha rede "
-"local, tal como un punto sen fíos. Automaticamente encontra outros usuarios "
-"na rede que estean usando este servizo."
 
-#: C/create-account.page:85(p)
-msgid "For more information, see <link xref=\"salut-protocol\"/>."
-msgstr ""
-"Para obter máis información consulte a <link xref=\"salut-protocol\"/>."
+#: C/tomboy.xml:975(title)
+msgid "Create a new notebook from Search All Notes"
+msgstr "Crear un novo caderno desde Buscar en tódalas notas"
 
-#: C/create-account.page:89(title) C/audio-video.page:205(p)
-msgid "SIP"
-msgstr "SIP"
+#: C/tomboy.xml:987(title)
+msgid "Adding Notes to a Notebook"
+msgstr "Engadir notas a un caderno"
 
-#: C/create-account.page:91(p)
+#: C/tomboy.xml:989(para)
 msgid ""
-"SIP is an open system which allows users to have audio and video "
-"conversations over the Internet. You need to create an account with a SIP "
-"provider. You can communicate with all other SIP users, regardless of which "
-"SIP provider they use."
+"To add notes to a notebook, you can add a note from the <guilabel>Search All "
+"Notes</guilabel> dialog or directly within a note."
 msgstr ""
-"SIP é un sistema aberto que permite aos usuarios realizar conversas de son e "
-"vídeo en Internet. Debe crear unha conta cun fornecedor SIP. Pode "
-"comunicarse con tódolos usuarios SIP, independentemente do fornecedor SIP "
-"que usen."
+"Para engadir notas a un caderno, pode engadir unha nota desde o diálogo "
+"<guilabel>Buscar en tódalas notas</guilabel> ou directamente na mesma nota."
 
-#: C/create-account.page:97(p)
-msgid ""
-"Due to technical differences, the free <link href=\"https://www.ekiga.net/"
-"index.php?page=register\">Ekiga.net</link> service does not currently work "
-"with <app>Empathy</app>."
+#: C/tomboy.xml:992(para)
+msgid "To move an existing note from the Search All Notes dialog:"
 msgstr ""
-"Debido a algunhas diferencias técnicas, actualmente o servizo libre <link "
-"href=\"https://www.ekiga.net/index.php?page=register\">Ekiga.net</link> non "
-"funciona con <app>Empathy</app>."
+"Para mover unha nova existente desde o diálogo Buscar en tódalas notas:"
 
-#: C/create-account.page:102(p)
+#: C/tomboy.xml:1001(para)
+msgid "Using your mouse, drag the note(s) onto a notebook on the left."
+msgstr "Usando o seu rato, arrastre a(s) nota(s) sobre o caderno na esquerda."
+
+#: C/tomboy.xml:1006(para)
 msgid ""
-"Some SIP providers allow you to call normal phones from your computer. "
-"Generally, you will need to subscribe to a paid service for this feature."
+"As you type a note, you can add the note directly to an existing notebook "
+"using the <guimenu>Notebook</guimenu> button. The <guimenu>Notebook</"
+"guimenu> button is represented by the <inlinegraphic fileref=\"figures/"
+"notebook-icon.png\"/> icon."
 msgstr ""
-"Algúns fornecedores SIP permítenlle chamar a teléfonos normais desde o seu "
-"equipo. Xeralmente deberá subscribirse a un servizo de pago para usar esta "
-"característica."
 
-#: C/create-account.page:107(title) C/audio-video.page:165(p)
-msgid "IRC"
-msgstr "IRC"
+#: C/tomboy.xml:1012(title)
+msgid "Adding a note to a notebook"
+msgstr "Engadir unha nota a un caderno"
 
-#: C/create-account.page:109(p)
-msgid ""
-"You do not need to register for an account to use IRC. Although you specify "
-"a nickname when you add an IRC account to <app>Empathy</app>, this nickname "
-"is only established each time you connect. If another user is using the "
-"nickname, you will need to choose a new nickname."
-msgstr ""
-"Non necesita rexistrar unha conta para usar o IRC. Aínda que especifique un "
-"alcume ao engadir unha conta IRC en <app>Empathy</app>, este alcume só se "
-"estabelece cada vez que se conecta. Se outro usuario está usando o nome, "
-"deberá elixir un alcume novo."
+#: C/tomboy.xml:1025(title)
+msgid "Creating Notebook Templates"
+msgstr "Crear plantillas de caderno"
 
-#: C/create-account.page:114(p)
+#: C/tomboy.xml:1027(para)
 msgid ""
-"Some IRC networks use a service called NickServ to allow users to protect "
-"their nicknames. See <link xref=\"irc-nick-password\"/> for more information."
+"After you create a notebook, you can create a template for each new note "
+"that you create in a specific notebook."
 msgstr ""
-"Algunhas redes IRC usan un servizo chamado NickServ para permitir aos "
-"usuarios protexer os seus alcumes. Para obter máis información consulte a "
-"<link xref=\"irc-nick-password\"/>."
 
-#: C/create-account.page:117(p)
+#: C/tomboy.xml:1038(para)
 msgid ""
-"Some IRC servers are password protected. You will need to know the password "
-"to connect to these servers. Generally, these are private IRC networks."
+"Using your mouse, right click on a Notebook that you have created and choose "
+"<menuchoice><guimenuitem>Open Template Note</guimenuitem></menuchoice>."
 msgstr ""
-"Algúns servidores de IRC están protexidos con contrasinal. Necesitará "
-"coñecer o contrasinal para conectarse a eses servidores. Xeralmente son "
-"redes de IRC privadas."
-
-#: C/create-account.page:122(title)
-msgid "Proprietary Services"
-msgstr "Servizos privativos"
 
-#: C/create-account.page:124(p)
+#: C/tomboy.xml:1043(para)
 msgid ""
-"There are many proprietary instant messaging services that have been "
-"developed by different companies or organizations. <app>Empathy</app> allows "
-"you to connect to an existing account for most popular services. To create a "
-"new account with one of these services, you will need to visit the service’s "
-"web site and agree to its terms of use."
+"This will open a new note that will be used as the template. Any text typed "
+"in this note will appear in all notes created in this Notebook. Create a new "
+"note in the notebook by using your mouse, right click on a notebook and "
+"select <menuchoice><guimenuitem>New Note</guimenuitem></menuchoice>."
 msgstr ""
-"Existen moitos servizos privativos de mensaxaría instantánea desenvolvidos "
-"por diferentes empresas e organizacións, <app>Empathy</app> permítelle "
-"conectarse a unha conta existente dos servizos máis populares. Para crear "
-"unha nova conta con un destes servizos, debe visitar a páxina web do servizo "
-"e aceptar os termos de uso."
-
-#: C/create-account.page:133(link) C/audio-video.page:135(p)
-msgid "AIM"
-msgstr "AIM"
-
-#: C/create-account.page:138(link) C/audio-video.page:160(p)
-msgid "ICQ"
-msgstr "ICQ"
-
-#: C/create-account.page:143(link) C/audio-video.page:175(p)
-msgid "MSN"
-msgstr "MSN"
-
-#: C/create-account.page:148(link) C/audio-video.page:210(p)
-msgid "Yahoo!"
-msgstr "Yahoo!"
 
-#: C/change-status.page:9(desc)
-msgid "Change your status to advertise your availability to your contacts."
-msgstr ""
-"Cambie o seu estado para avisar da súa dispoñibilidade aos seus contactos."
+#: C/tomboy.xml:1052(title)
+msgid "Creating a Notebook Template"
+msgstr "Crear unha plantilla de caderno"
 
-#: C/change-status.page:34(title)
-msgid "Change your status"
-msgstr "Cambiar o seu estado"
+#: C/tomboy.xml:1065(title) C/tomboy.xml:1088(title)
+msgid "Deleting a Notebook"
+msgstr "Eliminar un caderno"
 
-#: C/change-status.page:36(p)
+#: C/tomboy.xml:1066(para)
 msgid ""
-"You can set your status to indicate your availability to your contacts. "
-"<app>Empathy</app> allows you to select from a list of defined statuses."
+"Deleting a notebook will not delete any of the notes which are currently "
+"inside the notebook. After deleting a notebook, the notes will not be "
+"associated with any notebook and can be seen by highlighting "
+"<menuchoice><guimenuitem>Unfiled Notes</guimenuitem></menuchoice> in the "
+"<menuchoice><guimenuitem>Search All Notes</guimenuitem></menuchoice> window."
 msgstr ""
-"Pode estabelecer o seu estado para indicar a súa dispoñibilidade aos seus "
-"contactos <app>Empathy</app> permítelle seleccionar unha lista de estados "
-"predefinidos."
 
-#: C/change-status.page:41(p)
-msgid ""
-"Click on the drop-down list at the top of the <gui>Contact List</gui> window."
+#: C/tomboy.xml:1072(para)
+msgid "You can delete a notebook you have created by one of two methods:"
 msgstr ""
-"Prema na lista despregábel na parte superior da xanela da <gui>Lista de "
-"contactos</gui>."
 
-#: C/change-status.page:46(p)
-msgid "Select a status from the list."
-msgstr "Seleccione o estado desde a lista."
+#: C/tomboy.xml:1074(para)
+msgid "To delete a notebook using your mouse:"
+msgstr "Para eliminar un caderno usando o seu rato:"
 
-#: C/change-status.page:52(p)
+#: C/tomboy.xml:1082(para)
 msgid ""
-"See <link xref=\"status-icons\"/> for a list of the built-in statuses and "
-"what they mean. You can also <link xref=\"set-custom-message\">add custom "
-"status messages</link> to provide more information about your availability "
-"to your contacts."
+"Using your mouse, right click on a Notebook that you have created and choose "
+"<menuchoice><guimenuitem>Delete Notebook</guimenuitem></menuchoice>."
 msgstr ""
-"Consulte a <link xref=\"status-icons\"/> para obter unha lista de estados "
-"predefinidos e o que significan. Tamén pode <link xref=\"set-custom-message"
-"\"> engadir mensaxes de estado personalizados</link> para fornecerlle aos "
-"seus contactos máis información sobre a súa dispoñibilidade."
+"Usando o seu rato, prema co botón dereito sobre un caderno que teña creado e "
+"seleccione <menuchoice><guimenuitem>Eliminar caderno</guimenuitem></"
+"menuchoice>."
 
-#: C/change-status.page:58(p)
+#: C/tomboy.xml:1097(para)
 msgid ""
-"If you do not use your computer for a while, or if the screensaver is on, "
-"the status will be automatically set to Away."
+"To delete a Notebook from the <menuchoice><guimenuitem>Search All Notes</"
+"guimenuitem></menuchoice> menu, open <menuchoice><guimenuitem>Search All "
+"Notes</guimenuitem></menuchoice> by choosing it from the Tomboy icon on the "
+"GNOME Panel, the taskbar in Microsoft Windows, or the dock in Mac OS X."
 msgstr ""
-"Se non usa o seu equipo durante un tempo ou se se activa o protector de "
-"pantallas, o estado cambiarase automaticamente a Ausente."
 
-#. When image changes, this message will be marked fuzzy or untranslated for you.
-#. It doesn't matter what you translate it to: it's not used at all.
-#: C/audio-video.page:58(None)
-msgid ""
-"@@image: 'figures/audio-input-microphone.png'; "
-"md5=8d89026b66a263a3bc5b1f0665948567"
+#: C/tomboy.xml:1103(para)
+msgid "Using your mouse, left click on the Notebook you want to delete."
 msgstr ""
-"@@image: 'figures/audio-input-microphone.png'; "
-"md5=8d89026b66a263a3bc5b1f0665948567"
+"Usando o rato, prema co botón esquerdo sobre o caderno que quere eliminar."
 
-#: C/audio-video.page:8(desc)
+#: C/tomboy.xml:1107(para)
 msgid ""
-"Information on when it is possible to have an audio or video conversation."
-msgstr "Información sobre cando é posíbel ter unha conversa de vídeo ou son."
+"From the menu, choose <menuchoice><guimenuitem>Edit</"
+"guimenuitem><guimenuitem>Delete Notebook</guimenuitem></menuchoice>"
+msgstr ""
+"Desde o menú, seleccione <menuchoice><guimenuitem>Editar</"
+"guimenuitem><guimenuitem>Eliminar caderno</guimenuitem></menuchoice>"
 
-#: C/audio-video.page:32(title)
-msgid "Audio and video support"
-msgstr "Compatibilidade de son e vídeo"
+#: C/tomboy.xml:1121(title)
+msgid "Note Synchronization"
+msgstr "Sincronización de notas"
 
-#: C/audio-video.page:34(p)
+#: C/tomboy.xml:1123(para)
 msgid ""
-"You can only have audio and video conversation with contacts who are using "
-"an application which also supports this feature. When your contacts support "
-"audio or video conversations, you will see the following icons next to their "
-"names in the contact list:"
+"Tomboy can now keep your notes synchronized between multiple computers by "
+"relying on a central server."
 msgstr ""
-"Só pode ter conversas de son e vídeo con contactos que estean usando un "
-"aplicativo que tamén admita esta característica. Cando os aplicativos dos "
-"seus contactos admitan conversas de son ou vídeo poderá velo mediante unha "
-"icona xunto aos seus nomes, na lista de contactos:"
+"Tomboy pode manter as súas notas sincronizadas entre varios computadores "
+"mediante un servidor central."
 
-#: C/audio-video.page:43(p)
-msgid "Icon"
-msgstr "Icona"
+#: C/tomboy.xml:1127(title)
+msgid "Configure note synchronization"
+msgstr "Configurar a sincronización de notas"
 
-#: C/audio-video.page:48(p)
-msgid "Description"
-msgstr "Descrición"
-
-#: C/audio-video.page:58(media)
-msgid "Icon for audio conversation"
-msgstr "Icona para a conversa de son"
-
-#: C/audio-video.page:64(p)
-msgid "The contact is able to have an audio conversation."
-msgstr "O contacto pode ter conversas de son."
+#: C/tomboy.xml:1129(para)
+msgid ""
+"You can configure your note synchronization preferences in the "
+"<guilabel>Synchronization</guilabel> tab of the <interface>Tomboy "
+"Preferences</interface> dialog. Default conflict handling behavior can be "
+"configured by selecting the <guibutton>Advanced...</guibutton> button."
+msgstr ""
 
-#: C/audio-video.page:70(media)
-msgid "Icon for video conversation"
-msgstr "Icona para a conversa de vídeo"
+#: C/tomboy.xml:1135(title)
+msgid "Tomboy Synchronization Preferences"
+msgstr "Preferencias de sincronización de Tomboy"
 
-#: C/audio-video.page:76(p)
-msgid "The contact is able to have a video conversation."
-msgstr "O contacto pode ter conversas de vídeo."
+#: C/tomboy.xml:1145(title)
+msgid "Configure note synchronization service (WebDAV)"
+msgstr "Configurar o servizo de sincronización de notas (WebDAV)"
 
-#: C/audio-video.page:83(p)
+#: C/tomboy.xml:1147(para)
 msgid ""
-"In order to have an audio conversation, you need to have a sound card that "
-"is supported by your operating system, and a working microphone."
+"In order to synchronize your notes with a WebDAV server, you will need the "
+"wdfs FUSE file system installed. Follow the documentation for your operating "
+"system to set up FUSE for your user. You will also need the GNOME Keyring "
+"installed."
 msgstr ""
-"Para poder ter unha conversa de son debe ter unha tarxeta de son admitida "
-"polo sistema operativo e un micrófono que funcione."
 
-#: C/audio-video.page:87(p)
+#: C/tomboy.xml:1151(para)
 msgid ""
-"In order to have a video conversation, you need to have a webcam that is "
-"supported by your operating system, and a working microphone."
+"Choose <guimenuitem>WebDAV</guimenuitem> from the <guilabel>Service</"
+"guilabel> drop-down list. Fill in the connection information for your "
+"server, and then select the <guibutton>Save</guibutton> button. You are now "
+"ready to synchronize your notes."
 msgstr ""
-"Para poder ter unha conversa de vídeo debe ter unha cámara web compatíbel "
-"polo sistema operativo e un micrófono que funcione."
 
-#: C/audio-video.page:95(title)
-msgid "Supported Account Types"
-msgstr "Tipos de contas admitidas"
+#: C/tomboy.xml:1157(title)
+msgid "Configure note synchronization service (SSH)"
+msgstr "Configurar o servizo de sincronización de notas (SSH)"
 
-#: C/audio-video.page:97(p)
+#: C/tomboy.xml:1159(para)
 msgid ""
-"You can only have audio and video conversations using accounts on certain "
-"supported services. The following table lists whether audio and video is "
-"supported for each type of account."
+"In order to synchronize your notes with an SSH server, you will need the "
+"sshfs FUSE file system installed. Follow the documentation for your "
+"operating system to set up FUSE for your user. You will also need an SSH key "
+"for your SSH server account, which should be added to a running SSH daemon. "
+"This can be done using the GNOME <application>Seahorse</application> "
+"application, which is also known as <application>Passwords and Encryption "
+"Keys</application>."
 msgstr ""
-"Só pode ter conversas de son e vídeo usando contas en certos servizos "
-"compatíbeis. A seguinte táboa mostra se o son ou vídeo están admitidos para "
-"cada tipo de conta."
 
-#: C/audio-video.page:102(p)
+#: C/tomboy.xml:1166(para)
 msgid ""
-"Account types are provided by plugins. Your system may not have all of the "
-"following types available, or it may have types not listed here. Updated "
-"plugins may make audio or video conversations possible on account types that "
-"are listed as unsupported here."
+"It is recommended to use a third computer or server as the remote computer "
+"to store the syncronized notes that are to be synced between multiple "
+"computers."
 msgstr ""
-"Os tipos de contas son fornecidos por engadidos. Pode que o seu sistema non "
-"teña dispoñíbel todos os seguintes tipos, ou pode ter tipos non mostrados "
-"aquí. As actualizacións de engadidos pode facer posíbel conversas de son ou "
-"vídeo en tipos de contas que aquí móstranse como non compatíbeis."
 
-#: C/audio-video.page:110(p)
+#: C/tomboy.xml:1169(para)
 msgid ""
-"I'd like to do tables like this using nothing for No and ✔ for Yes, but we "
-"need to look at the accessibility impact. I've <link href=\"http://mail."
-"gnome.org/archives/gnome-doc-list/2009-September/msg00006.html\">asked the "
-"accessibility team</link> for input."
+"Open <application>Passwords and Encryption Keys</application> by choosing "
+"<menuchoice><guimenu>Applications</guimenu><guimenu>Accessories</"
+"guimenu><guimenu>Passwords and Encryption Keys</guimenu></menuchoice>. Click "
+"on your key, and from the menu choose <menuchoice><guimenu>Remote</"
+"guimenu><guimenu>Configure Key for Secure Shell...</guimenu></menuchoice> "
+"and enter the domain name or IP address of the computer you want to sync to "
+"in <guimenu>Computer Name</guimenu>. Enter the username of the remote "
+"computer in <guimenu>Computer Name:</guimenu> and click <guimenu>Set Up</"
+"guimenu>. When prompted, enter the password, and setting up your key will be "
+"completed."
 msgstr ""
-"Gustariame poñer táboas como ésta sen usar nada para Non e ✔ para Sí, pero "
-"débese tener en conta o impacto na accesibilidade. Xa <link href=\"http://"
-"mail.gnome.org/archives/gnome-doc-list/2009-September/msg00006.html"
-"\">preguntei ao equipo de accesibilidade</link>."
 
-#: C/audio-video.page:118(p)
+#: C/tomboy.xml:1178(para)
 msgid ""
-"There's recent work on telepathy-butterfly and papyon to support audio and "
-"video for MSN. It might be released in time for 2.28, but since it doesn't "
-"follow the Gnome release schedule, I can't be sure. If it looks like it's "
-"going to ship, let's mark it Yes."
+"In <application>Tomboy</application>, choose <guimenuitem>SSH</guimenuitem> "
+"from the <guilabel>Service</guilabel> drop-down list. Fill in the connection "
+"information for your server, and then select the <guibutton>Save</guibutton> "
+"button. The <guimenuitem>Folder Path</guimenuitem>, while optional, should "
+"point at an empty folder. You are now ready to synchronize your notes."
 msgstr ""
-"Existe traballo recente en telepathy-butterfly e papyon para admitir son e "
-"vídeo para MSN. Pode que se publique a tempo para 2.28 pero xa non serve a "
-"planificación de publicacións de GNOME non se pode estar seguro. Se parece "
-"que vai dar tempo incluirase."
-
-#: C/audio-video.page:128(p)
-msgid "Service"
-msgstr "Servizo"
 
-#: C/audio-video.page:129(p)
-msgid "Audio"
-msgstr "Son"
+#: C/tomboy.xml:1185(title)
+msgid "Configure note synchronization service (Local Folder)"
+msgstr "Configurar o servizo de sincronización de notas (Cartafol local)"
 
-#: C/audio-video.page:130(p)
-msgid "Video"
-msgstr "Vídeo"
-
-#: C/audio-video.page:136(p) C/audio-video.page:137(p)
-#: C/audio-video.page:141(p) C/audio-video.page:142(p)
-#: C/audio-video.page:146(p) C/audio-video.page:147(p)
-#: C/audio-video.page:156(p) C/audio-video.page:157(p)
-#: C/audio-video.page:161(p) C/audio-video.page:162(p)
-#: C/audio-video.page:166(p) C/audio-video.page:167(p)
-#: C/audio-video.page:181(p) C/audio-video.page:182(p)
-#: C/audio-video.page:186(p) C/audio-video.page:187(p)
-#: C/audio-video.page:191(p) C/audio-video.page:192(p)
-#: C/audio-video.page:196(p) C/audio-video.page:197(p)
-#: C/audio-video.page:201(p) C/audio-video.page:202(p)
-#: C/audio-video.page:211(p) C/audio-video.page:212(p)
-#: C/audio-video.page:216(p) C/audio-video.page:217(p)
-msgid "No"
-msgstr "Non"
-
-#: C/audio-video.page:140(p)
-msgid "Facebook Chat"
-msgstr "Chat de Facebook"
-
-#: C/audio-video.page:145(p)
-msgid "gadugadu"
-msgstr "gadugadu"
-
-#: C/audio-video.page:150(p)
-msgid "Google Talk"
-msgstr "Google Talk"
-
-#: C/audio-video.page:151(p) C/audio-video.page:152(p)
-#: C/audio-video.page:171(p) C/audio-video.page:172(p)
-#: C/audio-video.page:176(p) C/audio-video.page:177(p)
-#: C/audio-video.page:206(p) C/audio-video.page:207(p)
-msgid "Yes"
-msgstr "Si"
-
-#: C/audio-video.page:155(p)
-msgid "Groupwise"
-msgstr "Groupwise"
-
-#: C/audio-video.page:180(p)
-msgid "myspace"
-msgstr "myspace"
-
-#: C/audio-video.page:185(p)
-msgid "qq"
-msgstr "qq"
-
-#: C/audio-video.page:195(p)
-msgid "sametime"
-msgstr "sametime"
-
-#: C/audio-video.page:200(p)
-msgid "silc"
-msgstr "silc"
-
-#: C/audio-video.page:215(p)
-msgid "zephyr"
-msgstr "zephyr"
-
-#: C/audio-call.page:9(desc)
-msgid "Call your contacts over the Internet."
-msgstr "Chamar aos seus contactos a través de Internet."
-
-#: C/audio-call.page:27(title)
-msgid "Start an audio conversation"
-msgstr "Comezar unha conversa de son"
-
-#: C/audio-call.page:29(p)
-msgid ""
-"You can call your contacts and have an audio conversation with them. This "
-"features only works with certain types of accounts, and it requires the "
-"other person to have an application that supports audio calls."
-msgstr ""
-"Pode chamar aos seus contactos e ter conversas de son con eles. Esta "
-"característica só funciona con certo tipo de contas e require que a outra "
-"persoa teña un aplicativo que admita chamadas de son."
-
-#: C/audio-call.page:34(p)
+#: C/tomboy.xml:1187(para)
 msgid ""
-"From the <gui>Contact List</gui> window, click the <media type=\"image\" "
-"mime=\"image/png\" src=\"figures/camera-web.png\">video call</media> icon "
-"next to the name of the contact you wish to call and choose <gui style="
-"\"menuitem\">Audio Call</gui>."
+"You may want to synchronize your notes to a local folder if that folder is "
+"available to your other systems, or if that folder represents a local mount "
+"of a remote server."
 msgstr ""
-"Desde a xanela <gui>Lista de contactos</gui>, prema a icona <media type="
-"\"image\" mime=\"image/png\" src=\"figures/camera-web.png\">chamada de "
-"vídeo</media> ao lado do nome do contacto ao que quere chamar e seleccione "
-"<gui style=\"menuitem\">Chamada de son</gui>."
 
-#: C/audio-call.page:55(p)
+#: C/tomboy.xml:1191(para)
 msgid ""
-"To turn an audio conversation into a video conversation, choose <guiseq><gui "
-"style=\"menu\">Video</gui><gui style=\"menuitem\">Video On</gui></guiseq>."
+"Choose <guimenuitem>Local Folder</guimenuitem> from the <guilabel>Service</"
+"guilabel> drop-down list. Choose the desired synchronization "
+"<guilabel>Folder Path</guilabel>, and then select the <guibutton>Save</"
+"guibutton> button. You are now ready to synchronize your notes."
 msgstr ""
-"Para trocar unha conversa de vídeo nunha conversa de son, seleccione "
-"<guiseq><gui style=\"menu\">Vídeo</gui><gui style=\"menuitem\">Vídeo "
-"activado</gui></guiseq>."
 
-#: C/audio-call.page:63(title)
-msgid "Start an audio conversation with a meta-contact"
-msgstr "Comezar unha conversa de son con un metacontacto."
+#: C/tomboy.xml:1198(title)
+msgid "Synchronize your notes"
+msgstr "Sincronizar as súas notas"
 
-#: C/audio-call.page:71(p)
+#: C/tomboy.xml:1200(para)
 msgid ""
-"Select the contact you want to have the conversation, and from the menu "
-"select <gui style=\"menuitem\">Audio Call</gui>."
-msgstr ""
-"Seleccione o contacto co que desexe ter unha conversa e desde o menú "
-"seleccione <gui style=\"menuitem\">Audiochamada</gui>."
-
-#: C/add-contact.page:9(desc)
-msgid "Add someone to the contact list."
-msgstr "Engadir a alguén á lista de contactos."
-
-#: C/add-contact.page:33(title)
-msgid "Add someone to your list of contacts"
-msgstr "Engadir a alguén á súa lista de contactos."
-
-#: C/add-contact.page:37(p)
-msgid "Choose <guiseq><gui>Chat</gui><gui>Add Contact</gui></guiseq>."
+"You can synchronize your notes at any time by selecting "
+"<menuchoice><guimenu>Tools</guimenu><guimenuitem>Synchronize Notes</"
+"guimenuitem></menuchoice> from any note or from the <interface>Search All "
+"Notes</interface> dialog."
 msgstr ""
-"Seleccione<guiseq><gui>Conversa</gui><gui>Engadir contacto</gui></guiseq>."
 
-#: C/add-contact.page:40(p)
-msgid ""
-"From the <gui>Account</gui> drop-down list, select the account you wish to "
-"use to connect to your contact. Your contact will need to be using the same "
-"service as the account you select."
-msgstr ""
-"Desde a lista despregábel <gui>Conta</gui> seleccione a conta que quere usar "
-"par conectar co seu contacto. O seu contacto deberá usar o mesmo servizo que "
-"a conta que estea seleccionando."
+#: C/tomboy.xml:1210(title)
+msgid "Handling synchronization conflicts"
+msgstr "Xestionar conflitos de sincronización"
 
-#: C/add-contact.page:45(p)
+#: C/tomboy.xml:1212(para)
 msgid ""
-"In the <gui>Identifier</gui> field, enter your contact’s login ID, username, "
-"screen name, or other appropriate identifier for the service type."
+"When synchronizing notes between multiple computers, conflicts may occur. "
+"Usually this is the result of not synchronizing regularly when switching "
+"between systems. Tomboy will detect conflicts in the content of your notes "
+"and help you to avoid loss of important data."
 msgstr ""
-"No campo <gui>Identificador</gui> introduza o ID de inicio de sesión do seu "
-"contacto, o seu nome en pantalla ou outro identificador axeitado para o tipo "
-"de servizo."
 
-#: C/add-contact.page:49(p)
+#: C/tomboy.xml:1217(para)
 msgid ""
-"In the <gui>Alias</gui> field, type your contact’s name as you would like it "
-"to appear in your contact list."
+"If a conflict is detected during note synchronization, the <interface>Note "
+"Conflict</interface> dialog will appear. If you do not need the changes you "
+"made in your local note, you can select <guilabel>Overwrite local note</"
+"guilabel>. If you would like to keep your local changes in a new note, "
+"select <guilabel>Rename local note</guilabel>."
 msgstr ""
-"No campo <gui>Alcume</gui>escriba o nome do seu contacto tal e como lle "
-"gustaría que aparecese na súa lista de contactos."
 
-#: C/add-contact.page:53(p)
-msgid "Click <gui>Add</gui> to add the person to your list of contacts."
-msgstr ""
-"Prema <gui>Engadir</gui> para engadir a persoa á súa lista de contactos."
+#: C/tomboy.xml:1226(title)
+msgid "Preferences"
+msgstr "Preferencias"
 
-#: C/add-contact.page:61(p)
+#: C/tomboy.xml:1228(para)
 msgid ""
-"To add a new person to your list of contacts, you need to be connected to "
-"the Internet and to your account."
+"To set preferences for Tomboy, right-click on the icon in the panel, and "
+"select <menuchoice><guimenuitem>Preferences</guimenuitem></menuchoice> from "
+"the menu. You will see a dialog similar to the one displayed in <xref "
+"linkend=\"pref-editing\"/>. There are two categories of preferences, "
+"<guilabel>Editing</guilabel> and <guilabel>Hotkeys</guilabel>. Preferences "
+"for each tab will be described below."
 msgstr ""
-"Par engadir unha nova persoa á súa lista de contactos necesita estar "
-"conectado a Internet e á súa conta."
 
-#: C/add-account.page:9(desc)
-msgid "Add a new account to <app>Empathy</app>."
-msgstr "Engadir unha nova conta en <app>Empathy</app>."
+#: C/tomboy.xml:1238(title)
+msgid "Editing"
+msgstr "Editar"
 
-#: C/add-account.page:39(title)
-msgid "Add a new account"
-msgstr "Engadir unha nova conta"
-
-#: C/add-account.page:41(p)
+#: C/tomboy.xml:1240(para)
 msgid ""
-"You can add instant messaging accounts from any supported service to "
-"communicate with all of your contacts in <app>Empathy</app>. For some "
-"account providers, these steps will also allow you to register for a new "
-"account. For more details, see <link xref=\"create-account\"/>."
+"The editing tab will allow you to set preferences related to editing notes. "
+"There are three checkboxes on this tab, which can either be turned on or off."
 msgstr ""
-"Pode engadir contas de mensaxaría instantánea de calquera servizo admitido "
-"para comunicarse con todos os seus contactos no <app>Empathy</app>. Para "
-"algúns fornecedores de contas estes pasos permitiranlle rexistrar unha nova "
-"conta. Para obter máis información consulte a <link xref=\"create-account\"/"
-">."
 
-#: C/add-account.page:52(p)
-msgid "Click <gui style=\"button\">Add</gui>."
-msgstr "Prema <gui style=\"button\">Engadir</gui>."
+#: C/tomboy.xml:1246(term)
+msgid "Spellcheck While Typing"
+msgstr "Comprobar ortografía mentres se escribe"
 
-#: C/add-account.page:57(p)
+#: C/tomboy.xml:1249(para)
 msgid ""
-"From the <gui>Protocol</gui> drop-down list, select the type of account you "
-"wish to add."
+"Enable this checkbox to underline misspellings in red, and provide "
+"suggestions in the right click context menu. Enable or disable the checkbox "
+"using the mouse or the key combination <keycombo><keycap>Alt</"
+"keycap><keycap>S</keycap></keycombo>."
 msgstr ""
-"Desde a lista despregábel <gui>Protocolo</gui>seleccione o tipo de conta que "
-"quere engadir."
 
-#: C/add-account.page:61(p)
+#: C/tomboy.xml:1259(para)
 msgid ""
-"If you do not already have a registered account, select <gui>Create a new "
-"account on the server</gui>. This feature is not available for all account "
-"types, and may not work with some account providers. See <link xref=\"create-"
-"account\"/> for more information."
+"The spellcheck option is only available if you have the "
+"<application>GtkSpell</application> package installed."
 msgstr ""
-"Se aínda non ten unha conta rexistrada seleccione <gui>Crear unha nova conta "
-"no servidor</gui>. Esta característica non está dispoñíbel para todos os "
-"tipos de contas e pode non funcionar con algúns fornecedores de contas. Para "
-"obter máis información consulte a <link xref=\"create-account\"/>."
+"A opción de comprobación ortográfica só está dispoñíbel se ten o paquete "
+"<application>GtkSpell</application> instalado."
 
-#: C/add-account.page:66(p)
+#: C/tomboy.xml:1266(term)
+msgid "Highlight WikiWords"
+msgstr "Realzar as palabras wiki"
+
+#: C/tomboy.xml:1269(para)
 msgid ""
-"Enter the required information. For most accounts, you will only need a "
-"login ID and a password. Some accounts may require additional information. "
-"See <link xref=\"accounts-window#details\"/> for more information."
+"Enable this checkbox to create links for phrases <literal>ThatLookLikeThis</"
+"literal>. Clicking on the link will create a new note with the title "
+"corresponding to the link text. Enable or disable this checkbox using the "
+"mouse or the key combination <keycombo><keycap>Alt</keycap><keycap>W</"
+"keycap></keycombo>."
 msgstr ""
-"Introduza a información requirida. Para a maioría das contas só necesitará "
-"un ID de inicio de sesión e un contrasinal. Algunhas contas poden requirir "
-"información adicional. Para obter máis información consulte a <link xref="
-"\"accounts-window#details\"/>."
 
-#: C/add-account.page:71(p)
-msgid "Click <gui style=\"button\">Log in</gui>."
-msgstr "Prema <gui style=\"button\">Iniciar sesión</gui>."
+#: C/tomboy.xml:1282(term)
+msgid "Use Custom Font"
+msgstr "Usar un tipo de letra personalizado"
 
-#: C/add-account.page:78(p)
+#: C/tomboy.xml:1285(para)
 msgid ""
-"To change the name that identifies the account in the <gui>Accounts</gui> "
-"window, select the account from the list on the left and either click on the "
-"name or press the space bar. Edit the account name and press <key>Enter</"
-"key> when you’re finished."
+"Enable this checkbox to set a custom font to be used in your notes. If this "
+"option is disabled, the default system font will be used. Enable or disable "
+"this checkbox using the mouse or the key combination <keycombo><keycap>Alt</"
+"keycap><keycap>F</keycap></keycombo>."
 msgstr ""
-"Para cambiar o nome que identifica a conta na xanela <gui>Contas</gui>, "
-"seleccione a conta da lista á esquerda e prema no nome ou a barra "
-"espaciadora. Edite o nome da conta e prema <key>Intro</key> cando remate."
 
-#: C/accounts-window.page:11(desc)
-msgid "Add, modify, and delete accounts."
-msgstr "Engadir, modificar e borrar contas."
+#: C/tomboy.xml:1298(title)
+msgid "Tomboy Editing Preferences"
+msgstr "Preferencias de edición de Tomboy"
 
-#: C/accounts-window.page:33(title)
-msgid "Accounts Window"
-msgstr "Xanela de contas"
+#: C/tomboy.xml:1309(title)
+msgid "Hotkeys"
+msgstr "Teclas rápidas"
 
-#: C/accounts-window.page:35(p)
+#: C/tomboy.xml:1311(para)
 msgid ""
-"The <gui>Accounts</gui> window allows you to add, modify, and delete "
-"accounts."
+"The hotkeys tab allows you to set global key combinations to perform "
+"different functions in Tomboy. In order to set key combinations, you must "
+"have the <guibutton>Listen for Hotkeys</guibutton> checkbox enabled. Use "
+"<keycombo><keycap>Alt</keycap><keycap>H</keycap></keycombo> to toggle this "
+"option."
 msgstr ""
-"A xanela <gui>Contas</gui> permítelle engadir, modificar e eliminar contas."
-
-#: C/accounts-window.page:43(title)
-msgid "Account Details"
-msgstr "Detalles da conta"
 
-#: C/accounts-window.page:44(p)
-msgid ""
-"For most types of accounts, you can simply enter a login ID and a password. "
-"Certain accounts or account types, however, may require additional "
-"information."
-msgstr ""
-"Para a maioría dos tipos de conta pode, simplemente, introducir un ID de "
-"inicio de sesión e un contrasinal. Porén, algúns tipos de conta poden "
-"requirir información adicional."
+#: C/tomboy.xml:1322(term)
+msgid "Show notes menu"
+msgstr "Mostrar o menú de notas"
 
-#: C/account-jabber.page:7(desc)
-msgid "Advanced options for Jabber and Google Talk accounts."
-msgstr "Opcións avanzadas para contas Jabber e Google Talk."
+#: C/tomboy.xml:1325(para)
+msgid "Enter the key combination to open the notes menu."
+msgstr "Prema a combinación de teclas para abrir o menú de notas."
 
-#: C/account-jabber.page:29(title)
-msgid "Jabber account details"
-msgstr "Detalles da conta Jabber"
+#: C/tomboy.xml:1330(term)
+msgid "Open \"Start Here\""
+msgstr "Abrir \"Comezar aquí\""
 
-#: C/account-jabber.page:31(p)
+#: C/tomboy.xml:1333(para)
 msgid ""
-"Most Jabber accounts will require only a login ID and a password to connect. "
-"For some accounts or on certain types of networks, you may need to enter "
-"additional information in the <gui>Advanced</gui> section. Normally, you "
-"will not need to use the advanced options below. For general instructions on "
-"adding an account, see <link xref=\"add-account\"/>."
+"Enter the key combination to open the <quote>Start Here</quote> note, which "
+"is preinstalled with Tomboy."
 msgstr ""
-"A maioría das contas Jabber, para conectarse, só requiren un ID de inicio de "
-"sesión e un contrasinal. Para algunhas contas en certo tipo de redes, pode "
-"necesitar introducir información adicional na sección <gui>Avanzadas</gui>. "
-"Xeralmente non necesita usar as opcións avanzadas de embaixo. Consulte a "
-"<link xref=\"add-account\"/> para obter instrucións xerais para engadir unha "
-"conta."
 
-#: C/account-jabber.page:39(p)
-msgid ""
-"Google Talk is a type of Jabber account. These instructions hold for Google "
-"Talk accounts as well."
-msgstr ""
-"Google Talk é un tipo de conta Jabber. Estas instrucións tamén funcionan "
-"para contas de Google Talk."
+#: C/tomboy.xml:1339(term)
+msgid "Create new note"
+msgstr "Crear unha nova nota"
 
-#: C/account-jabber.page:45(gui)
-msgid "Encryption required (TLS/SSL)"
-msgstr "Requírese cifrado (TLS/SSL)"
+#: C/tomboy.xml:1342(para)
+msgid "Enter the key combination to create a new note."
+msgstr ""
 
-#: C/account-jabber.page:46(gui)
-msgid "Ignore SSL certificate errors"
-msgstr "Ignorar os erros de certificados SSL"
+#: C/tomboy.xml:1347(term)
+msgid "Search notes"
+msgstr "Buscar notas"
 
-#: C/account-jabber.page:47(p)
+#: C/tomboy.xml:1350(para)
 msgid ""
-"Whenever possible, communication between <app>Empathy</app> and the Jabber "
-"server is encrypted. If encrypted communication is not possible, messages "
-"may be sent unencrypted. Select <gui>Encryption required</gui> to prevent "
-"<app>Empathy</app> from communicating with the Jabber server when encryption "
-"is not possible."
+"Enter the key combination to open the <interface>Search All Notes</"
+"interface> dialog."
 msgstr ""
-"Sempre que sexa posíbel, a comunicación entre <app>Empathy</app> e o "
-"servidor Jabber está cifrada. Se a comunicación cifrada non é posíbel, pode "
-"que as mensaxes se envíen sen cifrar. Seleccione <gui>Require cifrado</gui> "
-"para evitar que <app>Empathy</app> se comunique co servidor Jabber cando non "
-"é posíbel cifrar a comunicación."
 
-#: C/account-jabber.page:52(p)
-msgid ""
-"Some Jabber servers may encrypt data using invalid certificates, or using "
-"certificates from unknown authorities. If you trust the server you are "
-"connecting to, you can select <gui>Ignore SSL certificate errors</gui> to "
-"allow encrypted communication with invalid certificates."
-msgstr ""
-"Algúns servidores Jabber poden cifrar datos usando certificados non válidos "
-"ou usando certificados de autoridades descoñecidas. Se confía no servidor ao "
-"que se está conectando pode seleccionar <gui>Ignorar os erros de "
-"certificados SSL</gui> para permitir comunicacións cifradas con certificados "
-"non válidos."
+#: C/tomboy.xml:1357(title)
+msgid "Tomboy Hotkey Preferences"
+msgstr "Preferencias das teclas rápidas de Tomboy"
 
-#: C/account-jabber.page:59(gui)
-msgid "Resource"
-msgstr "Recurso"
+#: C/tomboy.xml:1368(title)
+msgid "Synchronization"
+msgstr "Sincronización"
 
-#: C/account-jabber.page:60(gui)
-msgid "Priority"
-msgstr "Prioridade"
+#: C/tomboy.xml:1370(para)
+msgid "Please see <xref linkend=\"synchronization\"/> for more details."
+msgstr ""
 
-#: C/account-jabber.page:61(p)
-msgid ""
-"If you have multiple applications (for instance, on separate computers) "
-"connected to your account at the same time, you can set a resource to "
-"uniquely identify each one. By default, <app>Empathy</app> will use "
-"<input>Telepathy</input> as the resource."
+#: C/tomboy.xml:1375(title) C/tomboy.xml:1402(title)
+msgid "Add-ins"
+msgstr "Engadidos"
+
+#: C/tomboy.xml:1377(para)
+msgid "The add-ins tab allows you to enable and configure Tomboy Add-ins."
 msgstr ""
-"Se ten múltiples aplicativos (en equipos diferentes, por exemplo) conectados "
-"á súa conta ao mesmo tempo, pode configurar un recurso para identificar "
-"univocamente cada unha. De forma predefinida <app>Empathy</app> usará "
-"<input>Telepathy</input> como recurso."
 
-#: C/account-jabber.page:65(p)
+#: C/tomboy.xml:1380(para)
 msgid ""
-"You can set the priority to specify which application should receive "
-"incoming messages from your contacts. New messages will be sent to the "
-"application with the highest priority."
+"The list of installed add-ins shows on the left. An add-in is enabled by "
+"selecting it from the list and then selecting <guibutton>Enable</guibutton>. "
+"Disable an add-in by selecting it from the list and then selecting "
+"<guibutton>Disable</guibutton>."
 msgstr ""
-"Pode estabelecer a prioridade para especificar que aplicativo debería "
-"recibir mensaxes entrantes dos seus contactos. As mensaxes novas enviaranse "
-"ao aplicativo coa prioridade máis alta."
-
-#: C/account-jabber.page:70(gui)
-msgid "Override server settings"
-msgstr "Sobrescribir os axustes do servidor"
 
-#: C/account-jabber.page:71(p)
+#: C/tomboy.xml:1386(para)
 msgid ""
-"<app>Empathy</app> will use default settings to connect to the Jabber server "
-"based on your login ID. For some Jabber servers, you will need to enter "
-"custom server settings manually. These settings should be provided for you "
-"by your Jabber provider."
+"Please see <xref linkend=\"plugins\"/> for more information about the add-"
+"ins that are installed with Tomboy."
 msgstr ""
-"<app>Empathy</app> usará a configuración predeterminada para conectarse ao "
-"servidor Jabber en función do seu ID de inicio de sesión. Para algúns "
-"servidores Jabber precisará introducir manualmente os axustes do servidor. O "
-"seu fornecedor de Jabber deberíalle fornecer ditos axustes."
 
-#. When image changes, this message will be marked fuzzy or untranslated for you.
-#. It doesn't matter what you translate it to: it's not used at all.
-#: C/account-irc.page:106(None)
-msgid "@@image: 'figures/gtk-add.png'; md5=a856b499d8d4681b70b5ce6f25bc5c6d"
-msgstr "@@image: 'figures/gtk-add.png'; md5=a856b499d8d4681b70b5ce6f25bc5c6d"
-
-#. When image changes, this message will be marked fuzzy or untranslated for you.
-#. It doesn't matter what you translate it to: it's not used at all.
-#: C/account-irc.page:112(None)
-msgid "@@image: 'figures/gtk-remove.png'; md5=215e3a325a3dd619874e35c30a018bb6"
+#: C/tomboy.xml:1390(title)
+msgid "Tomboy Add-in Preferences"
 msgstr ""
-"@@image: 'figures/gtk-remove.png'; md5=215e3a325a3dd619874e35c30a018bb6"
-
-#: C/account-irc.page:8(desc)
-msgid "Additional information necessary for connecting to IRC networks."
-msgstr "Información adicional necesaria para conectarse a redes IRC."
 
-#: C/account-irc.page:31(title)
-msgid "IRC account details"
-msgstr "Detalles da conta IRC"
+#: C/tomboy.xml:1406(member)
+msgid "Backlinks"
+msgstr "Retroligazóns"
 
-#: C/account-irc.page:33(p)
-msgid ""
-"IRC accounts require different information than many other types of "
-"accounts. To create an IRC account, you must specify at least an IRC network "
-"and a nickname. This page details the information you can provide for an IRC "
-"account."
+#: C/tomboy.xml:1408(member) C/tomboy.xml:1445(term)
+msgid "Bugzilla URL Drop"
 msgstr ""
-"As contas de IRC requiren información diferente que outros tipos de contas. "
-"Para crear unha conta IRC debe especificar cando menos a rede IRC e o "
-"alcume. Esta páxina detalla a información que pode fornecer para unha conta "
-"de IRC."
 
-#: C/account-irc.page:45(gui) C/account-irc.page:120(gui)
-msgid "Network"
-msgstr "Rede"
+#: C/tomboy.xml:1410(member) C/tomboy.xml:1468(term)
+msgid "Evolution Mail Drop"
+msgstr ""
 
-#: C/account-irc.page:46(p)
-msgid ""
-"IRC is an open system that allows people to run separate IRC networks. Each "
-"network is distinct and has its own users and chat rooms. <app>Empathy</app> "
-"lists the most popular networks in the <gui>Network</gui> drop-down list. "
-"You can add additional networks. See <link xref=\"#networks\"/> below."
+#: C/tomboy.xml:1416(member) C/tomboy.xml:1510(term)
+msgid "Note of the Day"
 msgstr ""
-"IRC é un sistema aberto que permite á xente estar en diferentes redes IRC. "
-"Cada rede é distinta e ten os seus propios usuarios e salas de chat. "
-"<app>Empathy</app> lista as redes máis populares na lista despregábel "
-"<gui>Rede</gui>. Aínda así engadir máis redes. Consulte embaixo a <link xref="
-"\"#networks\"/>."
 
-#: C/account-irc.page:53(gui)
-msgid "Nickname"
-msgstr "Alcume"
+#: C/tomboy.xml:1418(member) C/tomboy.xml:1531(term)
+msgid "Print Notes"
+msgstr "Imprimir notas"
 
-#: C/account-irc.page:54(p)
+#: C/tomboy.xml:1420(member)
+msgid "and Sticky Notes Import."
+msgstr "e importar notas adhesivas."
+
+#: C/tomboy.xml:1404(para)
 msgid ""
-"Your nickname is your unique name on the IRC network. Only one person on a "
-"network may use a given nickname. If you get an error message that says "
-"<link xref=\"prob-conn-name\" role=\"error-msg\"/> you will need to change "
-"your nickname."
+"By default, Tomboy comes with several pre-installed add-ins: <placeholder-1/"
+"> Since these are preinstalled, they are ready to use and are automatically "
+"loaded into the Tomboy interface."
 msgstr ""
-"O seu alcume é un nome único na rede IRC. Só unha persoa nunha rede pode "
-"usar certo alcume. Se obtén unha mensaxe que dí <link xref=\"prob-conn-name"
-"\" role=\"error-msg\"/> deberá cambiar o seu alcume."
-
-#: C/account-irc.page:60(gui)
-msgid "Password"
-msgstr "Contrasinal"
 
-#: C/account-irc.page:61(p)
-msgid ""
-"Some servers, particularly those on private networks, require a password to "
-"connect. If you are authorized to use the network, the network "
-"administrators should provide you with a password."
+#: C/tomboy.xml:1425(para)
+msgid "Some add-ins exist that are not installed by default."
 msgstr ""
-"Algúns servidores, particularmente aqueles en redes privadas, requiren un "
-"contrasinal para a conexión. Se está autorizado a usar a rede, os "
-"administradores da rede forneceranlle un contrasinal."
 
-#: C/account-irc.page:65(title)
-msgid "NickServ Passwords"
-msgstr "Contrasinais NickServ"
+#: C/tomboy.xml:1430(term)
+msgid "Backlinks (What links here?)"
+msgstr "Retroligazóns (Que liga aquí?)"
 
-#: C/account-irc.page:66(p)
+#: C/tomboy.xml:1433(para)
 msgid ""
-"On some networks, nicknames can be registered using a service known as "
-"NickServ. <app>Empathy</app> does not directly support nickname passwords. "
-"On some networks, including the popular freenode network, server passwords "
-"are automatically forwarded to NickServ, allowing you to set this field to "
-"identify yourself with NickServ. See <link xref=\"irc-nick-password\"/> for "
-"more details."
+"This add-in allows you to know which notes link to the note you are "
+"currently editing. It makes it easier to keep track of the relationships "
+"between notes. If this add-in is enabled, the <link linkend=\"tools\">Tools</"
+"link> menu will have a <guimenuitem>What links here?</guimenuitem> option. "
+"When you select this option, it will list all the notes which link to the "
+"current note in a submenu. Select a note in the submenu to open it."
 msgstr ""
-"Nalgunhas redes pode rexistrar os alcumes con un servizo coñecido como "
-"«NickServ». <app>Empathy</app> non admite directamente contrasinais para "
-"alcumes. Nalgunhas redes, incluíndo a popular rede freenode, os contrasinais "
-"do servidor redirecciónanse automaticamente a NickServ, permitíndolle usar "
-"este campo para identificarse con NickServ. Para obter máis información "
-"contacte a <link xref=\"irc-nick-password\"/>."
-
-#: C/account-irc.page:76(gui)
-msgid "Real name"
-msgstr "Nome real"
 
-#: C/account-irc.page:77(p)
+#: C/tomboy.xml:1448(para)
 msgid ""
-"You can provide your real name in addition to your nickname. Other users "
-"will be able to see this when they view your information."
+"Allows you to drag a Bugzilla URL from your browser directly into a Tomboy "
+"note. The bug number is inserted as a link with a small bug icon next to it. "
+"Once the Bugzilla link has been inserted into the note, click on it to open "
+"the URL in your web browser."
 msgstr ""
-"Pode fornecer o seu nome real ademais do seu alcume. Outros usuarios poderán "
-"velo ao ver a súa información."
 
-#: C/account-irc.page:81(gui)
-msgid "Quit message"
-msgstr "Mensaxe de saída"
-
-#: C/account-irc.page:82(p)
+#: C/tomboy.xml:1454(para)
 msgid ""
-"When you go offline, a quit message is sent to all the chat rooms you’re in "
-"and to all the users you’re having a private conversation with. Use this "
-"field to provide a custom quit message."
+"Customize the icons that are used by editing the add-in preferences in the "
+"<link linkend=\"prefs-plugins\">Preferences Dialog</link>. After "
+"highlighting the Bugzilla Add-in, click <guibutton>Preferences</guibutton> "
+"to open the <interface>Bugzilla Add-in Settings</interface> dialog. To add a "
+"new icon, click <guibutton>Add</guibutton>, select an icon on your computer, "
+"provide a Bugzilla host name (e.g., bugzilla.gnome.org), and click "
+"<guibutton>Open</guibutton>. Any Bugzilla URL that is dragged and dropped "
+"from one of these custom host names will now use the icon you specified."
 msgstr ""
-"Cando se desconecta enviase unha mensaxe de saída todas as salas de conversa "
-"nas que está e a todos os usuarios cos que ten unha conversa privada. Use "
-"este campo para fornecer unha mensaxe personalizada."
-
-#: C/account-irc.page:94(title)
-msgid "IRC Networks"
-msgstr "Redes IRC"
 
-#: C/account-irc.page:97(title)
-msgid "Networks"
-msgstr "Redes"
-
-#: C/account-irc.page:99(p)
+#: C/tomboy.xml:1471(para)
 msgid ""
-"<app>Empathy</app> includes a list of popular IRC networks. If you wish to "
-"another IRC network, you can add it to the list. You can also modify "
-"networks and remove them from the list."
+"This add-in allows you to drag and drag an e-mail message from the "
+"<application>Evolution</application> mail application to one of your Tomboy "
+"notes. Clicking on the mail icon in the note will then open the "
+"corresponding e-mail message in Evolution."
 msgstr ""
-"<app>Empathy</app> inclúe unha lista de redes IRC populares. Se quere usar "
-"outra rede IRC pode engadila á lista. Tamén pode modificar e eliminar redes "
-"da lista."
 
-#: C/account-irc.page:104(p)
+#: C/tomboy.xml:1482(para)
 msgid ""
-"To add a network to the list, click <media type=\"image\" mime=\"image/png\" "
-"src=\"figures/gtk-add.png\" width=\"16\" height=\"16\">Add</media>."
+"When this add-in is installed, the <link linkend=\"tools\">Tools</link> menu "
+"will have the <guimenuitem>Export to HTML</guimenuitem> option available."
 msgstr ""
-"Para engadir unha rede á lista prema <media type=\"image\" mime=\"image/png"
-"\" src=\"figures/gtk-add.png\" width=\"16\" height=\"16\">Engadir</media>."
 
-#: C/account-irc.page:107(p)
+#: C/tomboy.xml:1486(para)
 msgid ""
-"To modify a network in the list, select the network and click <media type="
-"\"image\" mime=\"image/png\" src=\"figures/gtk-edit.png\" width=\"16\" "
-"height=\"16\">Edit</media>."
+"After selecting this option, you will be presented with a dialog that allows "
+"you to choose where to save the <acronym>HTML</acronym> file. Enter the "
+"destination filename and click <guibutton>OK</guibutton> to save the file, "
+"or <guibutton>Cancel</guibutton> to abort the operation."
 msgstr ""
-"Para modificar unha rede da lista seleccione a rede e prema <media type="
-"\"image\" mime=\"image/png\" src=\"figures/gtk-edit.png\" width=\"16\" "
-"height=\"16\">Editar</media>."
 
-#: C/account-irc.page:110(p)
+#: C/tomboy.xml:1492(para)
 msgid ""
-"To remove a network from the list, select the network and click <media type="
-"\"image\" mime=\"image/png\" src=\"figures/gtk-remove.png\" width=\"16\" "
-"height=\"16\">Remove</media>."
+"To export any notes for which a link exists in the current note, select the "
+"<guibutton>Export linked notes</guibutton> button."
 msgstr ""
-"Para eliminar unha rede da lista seleccione e prema <media type=\"image\" "
-"mime=\"image/png\" src=\"figures/gtk-remove.png\" width=\"16\" height="
-"\"16\">Eliminar</media>."
 
-#: C/account-irc.page:115(p)
+#: C/tomboy.xml:1502(para)
 msgid ""
-"When adding or modifying a network, you can enter the following information:"
+"Allows you to use a fixed-width font when creating/editing notes. If this "
+"add-in is enabled, the <link linkend=\"text\">Text</link> menu will have a "
+"<guimenuitem>Fixed Width</guimenuitem> option."
 msgstr ""
-"Ao engadir ou modificar unha rede pode introducir a seguinte información:"
 
-#: C/account-irc.page:121(p)
+#: C/tomboy.xml:1513(para)
 msgid ""
-"This is the name of the network as you want it to appear in the list of "
-"networks."
-msgstr "Este é o nome da rede como quere que apareza na lista de redes."
-
-#: C/account-irc.page:125(gui)
-msgid "Charset"
-msgstr "Conxunto de caracteres"
+"This add-in automatically creates a \"Today\" note for jotting daily "
+"thoughts down. The current date is used as a basis for the title of the "
+"note. As an example, the title of a \"Today\" note created on February 28, "
+"2007, would be, \"Today: Wednesday, February 28 2007\""
+msgstr ""
 
-#: C/account-irc.page:126(p)
+#: C/tomboy.xml:1519(para)
 msgid ""
-"This specifies the character encoding that is typically used on this "
-"network. A character encoding is a specific way of recording characters "
-"internally in a computer. There are many character encodings, and you need "
-"to use the same character encoding as other users to see their messages "
-"correctly."
+"If you leave a \"Today\" note unmodified, the Note of the Day Add-in will "
+"automatically delete the note."
 msgstr ""
-"Isto especifica a codificación de caracteres usada xeralmente nesta rede. "
-"Unha codificación de caracteres é unha forma específica de gravar os "
-"caracteres internamente nun computador. Existen moitas configuracións de "
-"caracteres e debe usar a mesma configuración de caracteres que o resto de "
-"usuarios para poder ver as súas mensaxes correctamente."
 
-#. Translators: Recommend character encodings that are common
-#.             for your language.
-#: C/account-irc.page:135(p)
+#: C/tomboy.xml:1522(para)
 msgid ""
-"By default, <app>Empathy</app> uses UTF-8, a modern character encoding that "
-"can handle text from most of the world's languages. Another common encoding "
-"for English and some other Western languages is ISO-8859-1."
+"To customize the content of the default \"Today\" note, create a new note "
+"and change the title of the note to be, \"Today: Template\". Change the "
+"content of the template note to whatever you like. When new \"Today\" notes "
+"are created, it will then use the content of your \"Today: Template\" note."
 msgstr ""
-"De forma predefinida <app>Empathy</app> usa UTF-8, unha codificación de "
-"caracteres moderna que pode xestionar texto na maioría dos idiomas do mundo. "
-"Outra configuración de caracteres común para inglés e outros idiomas "
-"occidentais é ISO-8859-1."
 
-#: C/account-irc.page:141(gui)
-msgid "Servers"
-msgstr "Servidores"
-
-#: C/account-irc.page:142(p)
+#: C/tomboy.xml:1534(para)
 msgid ""
-"An IRC network may have many servers you can connect to. When you are "
-"connected to a server on a particular network, you can communicate with all "
-"users on all other servers on that network. You can add and remove servers "
-"for this network using the <gui>Add</gui> and <gui>Remove</gui> buttons."
+"When this add-in is installed, the <link linkend=\"tools\">Tools</link> menu "
+"will have the <guimenuitem>Print</guimenuitem> option available."
 msgstr ""
-"Unha rede IRC pode ter moitos servidores aos que se pode conectar. Cando "
-"está conectado a un servidor nunha rede en particular, pode comunicarse con "
-"todos os usuarios en todos os servidores desa rede. Pode engadir e quitar "
-"servidores para esa rede usando os botóns <gui>Engadir</gui> e "
-"<gui>Eliminar</gui>."
+
+#: C/tomboy.xml:1544(term)
+msgid "Sticky Notes Import"
+msgstr "Importar notas adhesivas"
 
-#: C/account-irc.page:147(p)
+#: C/tomboy.xml:1547(para)
 msgid ""
-"When a server is selected, click the field under <gui>Server</gui> or "
-"<gui>Port</gui> to edit it. Alternatively, use the left and right arrow keys "
-"to focus the field, and press the space bar to begin editing."
+"When this add-in is installed, the <link linkend=\"tools\">Tools</link> menu "
+"will have the <guimenuitem>Import from Sticky Notes</guimenuitem> option "
+"available."
 msgstr ""
-"Cando un servidor estea seleccionado prema o campo baixo <gui>Servidor</gui> "
-"ou <gui>Porto</gui> para editalo. De forma alternativa, use as frechas "
-"esquerda e dereita para dar o foco ao campo e prema a barra espazadora para "
-"comezar a editalo."
+"Cando este engadido está instalado, o menú <link linkend=\"tools"
+"\">Ferramentas</link> terá unha nova opción dispoñíbel <guimenuitem>Importar "
+"desde notas adhesivas</guimenuitem>."
 
-#: C/account-irc.page:151(p)
+#: C/tomboy.xml:1551(para)
 msgid ""
-"Select the check box in the <gui>SSL</gui> column to encrypt all "
-"communication with a server. Note that this does not prevent other users on "
-"the network from seeing what you write on public chat rooms."
+"Use this option to import notes from the <application>Sticky Notes</"
+"application> application that is available in prior releases of GNOME. This "
+"option has been included in Tomboy to provide an upgrade path for users who "
+"would like to migrate from <application>Sticky Notes</application> to Tomboy "
+"for their note taking purposes."
 msgstr ""
-"Seleccione a caixa de verificación na columna <gui>SSL</gui> para cifrar "
-"toda a comunicación co servidor. Note que isto non prevén que outros "
-"usuarios na rede vexan o que escribe en salas de conversa públicas."
 
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
-#: C/index.page:0(None)
+#: C/tomboy.xml:0(None)
 msgid "translator-credits"
-msgstr "Fran Diéguez <frandieguez@ubuntu.com>, 2010"
-
-#~ msgid ""
-#~ "From the <gui>Contact List</gui> window, click the <media type=\"image\" "
-#~ "mime=\"image/png\" src=\"figures/audio-input-microphone.png\">audio call</"
-#~ "media> icon next to the name of the contact you wish to call and choose "
-#~ "<gui style=\"menuitem\">Audio Call</gui>. Alternatively, right click the "
-#~ "contact and choose <gui style=\"menuitem\">Audio Call</gui>."
-#~ msgstr ""
-#~ "Desde a xanela <gui>Lista de contactos</gui>, prema a icona <media type="
-#~ "\"image\" mime=\"image/png\" src=\"figures/audio-input-microphone.png"
-#~ "\">Audiochamada</media> ao lado do nome do contacto ao que quere chamar e "
-#~ "seleccione <gui style=\"menuitem\">Audiochamada</gui>. De forma "
-#~ "alternativa, prema co botón dereito e seleccione <gui style=\"menuitem"
-#~ "\">Audiochamada</gui>."
-
-#~ msgid "Contact List"
-#~ msgstr "Lista de contactos"
-
-#~ msgid "video call"
-#~ msgstr "vídeochamada"
-
-#~ msgid "Video Call"
-#~ msgstr "Vídeochamada"
-
-#~ msgid "Connected"
-#~ msgstr "Conectado"
-
-#~ msgid "Hang up"
-#~ msgstr "Colgar"
-
-#~ msgid "Video Off"
-#~ msgstr "Vídeo desactivado"
-
-#~ msgid "Empathy"
-#~ msgstr "Empathy"
-
-#~ msgid "Edit"
-#~ msgstr "Editar"
-
-#~ msgid "Contact"
-#~ msgstr "Contacto"
-
-#~ msgid "Share my desktop"
-#~ msgstr "Compartir o meu escritorio"
-
-#~ msgid "Custom Message"
-#~ msgstr "Mensaxe personalizada"
-
-#~ msgid "Enter"
-#~ msgstr "Introducir"
-
-#~ msgid "Select <placeholder-1/>."
-#~ msgstr "Seleccione <placeholder-1/>."
-
-#~ msgid "Saved Presets"
-#~ msgstr "Preferencias gardadas"
-
-#~ msgid "Remove"
-#~ msgstr "Eliminar"
-
-#~ msgid "Add"
-#~ msgstr "Engadir"
-
-#~ msgid "Close"
-#~ msgstr "Pechar"
-
-#~ msgid "Chat"
-#~ msgstr "Conversa"
-
-#~ msgid "Send file"
-#~ msgstr "Enviar ficheiro"
-
-#~ msgid "Send"
-#~ msgstr "Enviar"
-
-#~ msgid "Stop"
-#~ msgstr "Deter"
-
-#~ msgid "Clear"
-#~ msgstr "Limpar"
-
-#~ msgid "Accounts"
-#~ msgstr "Contas"
-
-#~ msgid "F4"
-#~ msgstr "F4"
-
-#~ msgid "Click on <placeholder-1/>."
-#~ msgstr "Prema sobre <placeholder-1/>."
-
-#~ msgid "Network error"
-#~ msgstr "Erro de rede"
-
-#~ msgid "edit"
-#~ msgstr "editar"
-
-#~ msgid "Advanced"
-#~ msgstr "Avanzado"
-
-#~ msgid "Enabled"
-#~ msgstr "Activar"
-
-#~ msgid "Name in use"
-#~ msgstr "Nome en uso"
-
-#~ msgid "Authentication failed"
-#~ msgstr "Fallou a autenticación"
-
-#~ msgid "#593733"
-#~ msgstr "#593733"
-
-#~ msgid "search through all of your previous conversations"
-#~ msgstr "buscar a través de todas as súas conversas anteriores"
-
-#~ msgid "browse previous conversations"
-#~ msgstr "explorar as conversas anteriores"
-
-#~ msgid "View"
-#~ msgstr "Ver"
-
-#~ msgid "Previous Conversations"
-#~ msgstr "Conversas previas"
-
-#~ msgid "F3"
-#~ msgstr "F3"
-
-#~ msgid "Search"
-#~ msgstr "Buscar"
-
-#~ msgid "For"
-#~ msgstr "Por"
-
-#~ msgid "Find"
-#~ msgstr "Buscar"
-
-#~ msgid "Conversations"
-#~ msgstr "Conversas"
-
-#~ msgid "View Previous Conversations"
-#~ msgstr "Ver as conversas anteriores"
-
-#~ msgid "CreativeCommons website"
-#~ msgstr "Sitio web de Creative Commons"
-
-#~ msgid "Conversation"
-#~ msgstr "Conversa"
-
-#~ msgid "Show Contact List"
-#~ msgstr "Mostrar a lista de contactos"
-
-#~ msgid "server password"
-#~ msgstr "contrasinal do servidor"
-
-#~ msgid "Apply"
-#~ msgstr "Aplicar"
-
-#~ msgid "telepathy-idle"
-#~ msgstr "telepathy-idle"
-
-#~ msgid "Room"
-#~ msgstr "Sala"
-
-#~ msgid "Join"
-#~ msgstr "Unirse"
-
-#~ msgid "Account"
-#~ msgstr "Conta"
-
-#~ msgid "#"
-#~ msgstr "#"
-
-#~ msgid "Join the room"
-#~ msgstr "Unirse á sala"
-
-#~ msgid "<placeholder-1/> as normal."
-#~ msgstr "<placeholder-1/> é normal."
-
-#~ msgid "/help"
-#~ msgstr "/help"
-
-#~ msgid "Pidgin"
-#~ msgstr "Pidgin"
-
-#~ msgid "Yes, import my account details from"
-#~ msgstr "Si, importar os detalles da miña conta desde"
-
-#~ msgid "Forward"
-#~ msgstr "Adiante"
-
-#~ msgid "Offline Contacts"
-#~ msgstr "Contactos desconectados"
-
-#~ msgid "Ctrl"
-#~ msgstr "Ctrl"
-
-#~ msgid "H"
-#~ msgstr "H"
-
-#~ msgid "Server"
-#~ msgstr "Servidor"
-
-#~ msgid "Invite to chatroom"
-#~ msgstr "Invitar a unha sala de conversa"
-
-#~ msgid "Room List"
-#~ msgstr "Lista de salas"
-
-#~ msgid "Preferences"
-#~ msgstr "Preferencias"
-
-#~ msgid "Choose <guiseq><placeholder-1/><placeholder-2/></guiseq>."
-#~ msgstr "Seleccione <guiseq><placeholder-1/><placeholder-2/></guiseq>."
-
-#~ msgid "Location"
-#~ msgstr "Localización"
-
-#~ msgid "Publish location to my contacts"
-#~ msgstr "Publicar a localización aos meus contactos"
-
-#~ msgid "Reduce location accuracy"
-#~ msgstr "Reducir a exactitude da localización"
-
-#~ msgid "Geoclue Settings"
-#~ msgstr "Configuración de Geoclue"
-
-#~ msgid "Google Latitude"
-#~ msgstr "Google Latitude"
-
-#~ msgid "Yahoo Fire Eagle"
-#~ msgstr "Yahoo Fire Eagle"
-
-#~ msgid "Brightkite"
-#~ msgstr "Brightkite"
-
-#~ msgid "Favorite Chat Room"
-#~ msgstr "Sala de conversa favorita"
-
-#~ msgid "F5"
-#~ msgstr "F5"
-
-#~ msgid "Press <placeholder-1/>."
-#~ msgstr "Prema <placeholder-1/>."
-
-#~ msgid "Join Favorites"
-#~ msgstr "Unirse ás favoritas"
-
-#~ msgid "Manage Favorites"
-#~ msgstr "Xestionar favoritas"
-
-#~ msgid "All"
-#~ msgstr "Todas"
-
-#~ msgid "Auto-Connect"
-#~ msgstr "Conectarse automaticamente"
-
-#~ msgid "add an account"
-#~ msgstr "engadir unha conta"
-
-#~ msgid "www.facebook.com"
-#~ msgstr "www.facebook.com"
-
-#~ msgid "Jabber.org"
-#~ msgstr "Jabber.org"
-
-#~ msgid "Sipphone"
-#~ msgstr "Sipphone"
-
-#~ msgid "Ekiga.net"
-#~ msgstr "Ekiga.net"
-
-#~ msgid "audio call"
-#~ msgstr "chamada de son"
-
-#~ msgid "Audio Call"
-#~ msgstr "chamada de vídeo"
-
-#~ msgid "Add Contact"
-#~ msgstr "Engadir contacto"
-
-#~ msgid "Identifier"
-#~ msgstr "Identificador"
-
-#~ msgid "Alias"
-#~ msgstr "Alias"
-
-#~ msgid "Log in"
-#~ msgstr "Iniciar a sesión"
-
-#~ msgid "Telepathy"
-#~ msgstr "Telepathy"
-
-#~ msgid "Port"
-#~ msgstr "Porto"
-
-#~ msgid "SSL"
-#~ msgstr "SSL"
+msgstr "Fran Dieguez <frandieguez@gnome.org>, 2011."
