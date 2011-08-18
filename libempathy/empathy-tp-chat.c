@@ -1614,28 +1614,26 @@ empathy_tp_chat_get_feature_ready (void)
 }
 
 static void
-conn_prepared_cb (GObject *source,
-	GAsyncResult *result,
+tp_chat_prepare_ready_async (TpProxy *proxy,
+	const TpProxyFeature *feature,
+	GAsyncReadyCallback callback,
 	gpointer user_data)
 {
-	EmpathyTpChat *self = user_data;
-	TpChannel *channel = (TpChannel *) self;
-	GError *error = NULL;
-	TpHandle handle;
-	TpConnection *connection = (TpConnection *) source;
+	EmpathyTpChat *self = (EmpathyTpChat *) proxy;
+	TpChannel *channel = (TpChannel *) proxy;
+	TpConnection *connection;
 
-	if (!tp_proxy_prepare_finish (source, result, &error)) {
-		g_simple_async_result_set_from_error (self->priv->ready_result, error);
-		g_error_free (error);
-		g_simple_async_result_complete (self->priv->ready_result);
-		tp_clear_object (&self->priv->ready_result);
-		return;
-	}
+	g_assert (self->priv->ready_result == NULL);
+	self->priv->ready_result = g_simple_async_result_new (G_OBJECT (self),
+		callback, user_data, tp_chat_prepare_ready_async);
+
+	connection = tp_channel_borrow_connection (channel);
 
 	if (tp_proxy_has_interface_by_id (self,
 					  TP_IFACE_QUARK_CHANNEL_INTERFACE_GROUP)) {
 		const TpIntSet *members;
 		GArray *handles;
+		TpHandle handle;
 
 		/* Get self contact from the group's self handle */
 		handle = tp_channel_group_get_self_handle (channel);
@@ -1658,6 +1656,7 @@ conn_prepared_cb (GObject *source,
 		TpCapabilities *caps;
 		GPtrArray *classes;
 		guint i;
+		TpHandle handle;
 
 		/* Get the self contact from the connection's self handle */
 		handle = tp_connection_get_self_handle (connection);
@@ -1703,25 +1702,4 @@ conn_prepared_cb (GObject *source,
 									       NULL, NULL,
 									       G_OBJECT (self), NULL);
 	}
-}
-
-static void
-tp_chat_prepare_ready_async (TpProxy *proxy,
-	const TpProxyFeature *feature,
-	GAsyncReadyCallback callback,
-	gpointer user_data)
-{
-	EmpathyTpChat *self = (EmpathyTpChat *) proxy;
-	TpChannel *channel = (TpChannel *) proxy;
-	TpConnection *connection;
-	GQuark conn_features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
-
-	g_assert (self->priv->ready_result == NULL);
-	self->priv->ready_result = g_simple_async_result_new (G_OBJECT (self),
-		callback, user_data, tp_chat_prepare_ready_async);
-
-	connection = tp_channel_borrow_connection (channel);
-
-	tp_proxy_prepare_async (connection, conn_features,
-		conn_prepared_cb, self);
 }
