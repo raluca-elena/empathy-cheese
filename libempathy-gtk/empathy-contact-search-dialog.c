@@ -379,37 +379,6 @@ on_server_changed_cb (GtkEditable *editable,
 }
 #endif
 
-typedef struct
-{
-    EmpathyAccountChooserFilterResultCallback callback;
-    gpointer                                  user_data;
-} FilterCallbackData;
-
-static void
-supports_contact_search_cb (GObject *conn,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  FilterCallbackData *data = user_data;
-  GError *error = NULL;
-  TpCapabilities *caps;
-
-  if (!tp_proxy_prepare_finish (conn, result, &error))
-    {
-      DEBUG ("Error preparing the connection: %s", error->message);
-      data->callback (FALSE, data->user_data);
-      g_error_free (error);
-      g_slice_free (FilterCallbackData, data);
-      return;
-    }
-
-  caps = tp_connection_get_capabilities (TP_CONNECTION (conn));
-  data->callback (tp_capabilities_supports_contact_search (caps, NULL, NULL),
-    data->user_data);
-
-  g_slice_free (FilterCallbackData, data);
-}
-
 static void
 empathy_account_chooser_filter_supports_contact_search (
     TpAccount *account,
@@ -418,30 +387,21 @@ empathy_account_chooser_filter_supports_contact_search (
     gpointer user_data)
 {
   TpConnection *connection;
-  FilterCallbackData *cb_data;
-  GQuark features[] = { TP_CONNECTION_FEATURE_CAPABILITIES, 0 };
+  gboolean supported = FALSE;
+  TpCapabilities *caps;
 
-  if (tp_account_get_connection_status (account, NULL)
-      != TP_CONNECTION_STATUS_CONNECTED)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
-
-  /* check if CM supports contact search */
   connection = tp_account_get_connection (account);
   if (connection == NULL)
-    {
-      callback (FALSE, callback_data);
-      return;
-    }
+      goto out;
 
-  cb_data = g_slice_new0 (FilterCallbackData);
-  cb_data->callback = callback;
-  cb_data->user_data = callback_data;
+  caps = tp_connection_get_capabilities (connection);
+  if (caps == NULL)
+      goto out;
 
-  tp_proxy_prepare_async (connection, features, supports_contact_search_cb,
-      cb_data);
+  supported = tp_capabilities_supports_contact_search (caps, NULL, NULL);
+
+out:
+  callback (supported, callback_data);
 }
 
 static void
