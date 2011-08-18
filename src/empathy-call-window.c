@@ -2699,6 +2699,7 @@ empathy_call_window_constructed (GObject *object)
     {
       gtk_toggle_tool_button_set_active (
           GTK_TOGGLE_TOOL_BUTTON (priv->camera_button), FALSE);
+      empathy_call_window_play_camera (self, FALSE);
     }
   /* If call has InitialVideo, the preview will be started once the call has
    * been started (start_call()). */
@@ -3074,6 +3075,7 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
       if (priv->camera_state == CAMERA_STATE_ON)
         {
           /* Restart the preview with the new pipeline. */
+          empathy_call_window_play_camera (self, TRUE);
           display_video_preview (self, TRUE);
         }
 
@@ -4047,11 +4049,13 @@ start_call (EmpathyCallWindow *self)
           /* Enable 'send video' buttons and display the preview */
           gtk_toggle_tool_button_set_active (
             GTK_TOGGLE_TOOL_BUTTON (priv->camera_button), TRUE);
+          empathy_call_window_play_camera (self, TRUE);
         }
       else
         {
           gtk_toggle_tool_button_set_active (
             GTK_TOGGLE_TOOL_BUTTON (priv->camera_button), FALSE);
+          empathy_call_window_play_camera (self, FALSE);
 
           if (priv->video_preview == NULL)
             {
