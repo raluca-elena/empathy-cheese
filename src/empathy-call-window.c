@@ -1647,6 +1647,7 @@ empathy_call_window_on_selected_effect_change_cb (ClutterActor       *sender,
   gst_element_set_state (priv->video_preview_csp1, GST_STATE_NULL);
   gst_element_set_state (priv->video_preview_filter, GST_STATE_NULL);
   gst_element_set_state (priv->video_preview_csp2, GST_STATE_NULL);
+  gst_element_set_state (priv->video_preview_sink, GST_STATE_NULL);
 
   gst_element_unlink_many (priv->video_preview_csp1, priv->video_preview_filter,
                            priv->video_preview_csp2, NULL);
@@ -1679,6 +1680,7 @@ empathy_call_window_on_selected_effect_change_cb (ClutterActor       *sender,
 
   empathy_call_window_video_effects_toggle (self);
 
+  gst_element_set_state (priv->video_preview_sink, GST_STATE_PLAYING);
   gst_element_set_state (priv->video_preview_csp2, GST_STATE_PLAYING);
   gst_element_set_state (priv->video_preview_filter, GST_STATE_PLAYING);
   gst_element_set_state (priv->video_preview_csp1, GST_STATE_PLAYING);
