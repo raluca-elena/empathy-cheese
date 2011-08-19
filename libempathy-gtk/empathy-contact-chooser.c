@@ -201,7 +201,7 @@ get_contacts_cb (TpConnection *connection,
   if (n_contacts != 1)
     return;
 
-  account = g_object_get_data (G_OBJECT (connection), "account");
+  account = tp_connection_get_account (connection);
 
   store = tpf_persona_store_new (account);
   personas = GEE_SET (
@@ -251,10 +251,6 @@ add_temporary_individuals (EmpathyContactChooser *self,
       conn = tp_account_get_connection (account);
       if (conn == NULL)
         continue;
-
-      /* One day we'll have tp_connection_get_account()... */
-      g_object_set_data_full (G_OBJECT (conn), "account",
-          g_object_ref (account), g_object_unref);
 
       tp_connection_get_contacts_by_id (conn, 1, &id, G_N_ELEMENTS (features),
           features, get_contacts_cb, self->priv->add_temp_ctx, NULL,
