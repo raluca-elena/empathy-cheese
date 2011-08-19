@@ -875,17 +875,6 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
   ClutterActor *stage = clutter_actor_get_stage (actor);
   ClutterActor *preview = clutter_clone_new (actor);
 
-#if 0
-  /* Flip the video preview */
-  /* FIXME: disabled because it makes the drag handle to go away! */
-  clutter_actor_set_rotation (preview,
-      CLUTTER_Y_AXIS,
-      180,
-      SELF_VIDEO_SECTION_WIDTH * 0.5,
-      0.0,
-      0.0);
-#endif
-
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), preview);
   clutter_actor_set_position (preview, event_x, event_y);
 
@@ -999,14 +988,6 @@ create_video_preview (EmpathyCallWindow *self)
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGHT);
   priv->video_preview_sink = clutter_gst_video_sink_new (
       CLUTTER_TEXTURE (preview));
-
-  /* Flip the video preview */
-  clutter_actor_set_rotation (preview,
-      CLUTTER_Y_AXIS,
-      180,
-      SELF_VIDEO_SECTION_WIDTH * 0.5,
-      0.0,
-      0.0);
 
   /* Add a little offset to the video preview */
   layout = clutter_bin_layout_new (CLUTTER_BIN_ALIGNMENT_CENTER,

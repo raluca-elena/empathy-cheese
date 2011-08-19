@@ -45,6 +45,10 @@ empathy_rounded_texture_paint (ClutterActor *texture)
 
   CLUTTER_ACTOR_CLASS (empathy_rounded_texture_parent_class)->paint (texture);
 
+  /* Flip */
+  cogl_rectangle_with_texture_coords (0, 0, width, height,
+      1., 0., 0., 1.);
+
   cogl_clip_pop ();
 }
 
