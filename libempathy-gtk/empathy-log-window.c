@@ -614,7 +614,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
   GtkBuilder *gui;
   gchar *filename;
   GFile *gfile;
-  GtkWidget *vbox, *accounts, *search, *label, *quit;
+  GtkWidget *vbox, *accounts, *search, *label, *closeitem;
   GtkWidget *scrolledwindow_events;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
@@ -643,7 +643,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
       "toolbutton_video", &self->priv->button_video,
       "toolbutton_accounts", &accounts,
       "toolbutton_search", &search,
-      "imagemenuitem_quit", &quit,
+      "imagemenuitem_close", &closeitem,
       "treeview_who", &self->priv->treeview_who,
       "treeview_what", &self->priv->treeview_what,
       "treeview_when", &self->priv->treeview_when,
@@ -665,7 +665,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
 
   g_object_unref (gui);
 
-  g_signal_connect_swapped (quit, "activate",
+  g_signal_connect_swapped (closeitem, "activate",
       G_CALLBACK (gtk_widget_destroy), self);
 
   /* Account chooser for chats */
