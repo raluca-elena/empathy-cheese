@@ -232,14 +232,17 @@ AC_ARG_ENABLE(call-logs,
 if test "x$enable_call_logs" != "xno" ; then
    SAVE_CFLAGS=$CFLAGS
    SAVE_CPPFLAGS=$CPPFLAGS
+   SAVE_LDFLAGS=$LDFLAGS
    CFLAGS="$CFLAGS $EMPATHY_CFLAGS"
    CPPFLAGS="$CPPFLAGS $EMPATHY_CFLAGS"
+   LDFLAGS="$LDFLAGS $EMPATHY_LDFLAGS"
 
    AC_CHECK_HEADER(telepathy-logger/call-event.h,
       have_call_logs="yes", have_call_logs="no")
 
    CFLAGS=$SAVE_CFLAGS
    CPPFLAGS=$SAVE_CPPFLAGS
+   LDFLAGS=$SAVE_LDFLAGS
 
    if test "x$have_call_logs" = "xyes"; then
       AC_DEFINE(HAVE_CALL_LOGS, 1, [Define if you have call log support])
