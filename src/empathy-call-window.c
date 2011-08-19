@@ -1159,6 +1159,9 @@ empathy_call_window_set_state_connecting (EmpathyCallWindow *window)
   empathy_call_window_status_message (window, _("Connecting…"));
   priv->call_state = CONNECTING;
 
+  /* Show the toolbar */
+  clutter_state_set_state (priv->transitions, "fade-in");
+
   if (priv->outgoing)
     empathy_sound_manager_start_playing (priv->sound_mgr, GTK_WIDGET (window),
         EMPATHY_SOUND_PHONE_OUTGOING, MS_BETWEEN_RING);
@@ -1275,7 +1278,11 @@ empathy_call_window_toolbar_timeout (gpointer data)
 {
   EmpathyCallWindow *self = data;
 
-  clutter_state_set_state (self->priv->transitions, "fade-out");
+  /* We don't want to hide the toolbar if we're not in a call, as
+   * to show the call status all the time. */
+  if (self->priv->call_state != CONNECTING &&
+      self->priv->call_state != DISCONNECTED)
+    clutter_state_set_state (self->priv->transitions, "fade-out");
 
   return TRUE;
 }
@@ -2304,6 +2311,9 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
   if (priv->call_state != REDIALING)
     priv->call_state = DISCONNECTED;
+
+  /* Show the toolbar */
+  clutter_state_set_state (priv->transitions, "fade-in");
 
   if (could_reset_pipeline)
     {
