@@ -132,6 +132,7 @@ empathy_camera_menu_activate_cb (GtkAction *action,
 {
   EmpathyGstVideoSrc *video;
   const gchar *device;
+  gchar *current_device;
 
   if (self->priv->in_update)
     return;
@@ -139,10 +140,18 @@ empathy_camera_menu_activate_cb (GtkAction *action,
   video = empathy_call_window_get_video_src (self->priv->window);
 
   device = gtk_action_get_name (action);
+  current_device = empathy_video_src_dup_device (video);
+
+  /* Don't change the device if it's the currently used one */
+  if (!tp_strdiff (device, current_device))
+    goto out;
 
   empathy_call_window_play_camera (self->priv->window, FALSE);
   empathy_video_src_change_device (video, device);
   empathy_call_window_play_camera (self->priv->window, TRUE);
+
+ out:
+  g_free (current_device);
 }
 
 static void
