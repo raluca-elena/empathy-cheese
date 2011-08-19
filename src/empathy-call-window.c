@@ -1101,6 +1101,7 @@ create_video_preview (EmpathyCallWindow *self)
 
   clutter_actor_add_action (preview, action);
   clutter_actor_set_reactive (preview, TRUE);
+  clutter_actor_set_reactive (priv->preview_shown_button, TRUE);
 }
 
 void
