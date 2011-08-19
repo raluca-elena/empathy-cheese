@@ -901,7 +901,7 @@ static void
 main_window_balance_update_balance (GtkAction   *action,
 				    TpConnection *conn)
 {
-	TpAccount *account = g_object_get_data (G_OBJECT (action), "account");
+	TpAccount *account = tp_connection_get_account (conn);
 	GtkWidget *label;
 	int amount = 0;
 	guint scale = G_MAXINT32;
@@ -977,7 +977,6 @@ main_window_setup_balance_create_action (EmpathyMainWindow *window,
 	g_object_bind_property (account, "icon-name", action, "icon-name",
 		G_BINDING_SYNC_CREATE);
 
-	g_object_set_data (G_OBJECT (action), "account", account);
 	g_signal_connect (action, "activate",
 		G_CALLBACK (main_window_balance_activate_cb), window);
 
@@ -1016,14 +1015,11 @@ main_window_setup_balance_create_action (EmpathyMainWindow *window,
 
 static GtkWidget *
 main_window_setup_balance_create_widget (EmpathyMainWindow *window,
-					 GtkAction         *action)
+					 GtkAction         *action,
+					 TpAccount *account)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-	TpAccount *account;
 	GtkWidget *hbox, *image, *label, *button;
-
-	account = g_object_get_data (G_OBJECT (action), "account");
-	g_return_val_if_fail (TP_IS_ACCOUNT (account), NULL);
 
 	hbox = gtk_hbox_new (FALSE, 6);
 
@@ -1074,10 +1070,6 @@ main_window_setup_balance (EmpathyMainWindow *window,
 	if (conn == NULL)
 		return;
 
-	/* need to prepare the connection:
-	 * store the account on the connection */
-	g_object_set_data (G_OBJECT (conn), "account", account);
-
 	if (!tp_proxy_is_prepared (conn, TP_CONNECTION_FEATURE_BALANCE))
 		return;
 
@@ -1093,7 +1085,7 @@ main_window_setup_balance (EmpathyMainWindow *window,
 	gtk_action_set_visible (priv->view_balance_show_in_roster, TRUE);
 
 	/* create the display widget */
-	main_window_setup_balance_create_widget (window, action);
+	main_window_setup_balance_create_widget (window, action, account);
 
 	/* check the current balance and monitor for any changes */
 	uri = tp_connection_get_balance_uri (conn);
