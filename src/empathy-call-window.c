@@ -2273,6 +2273,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
       G_CALLBACK (empathy_call_window_stage_allocation_changed_cb),
       constraint);
 
+  /* Make the floating_toolbar reactive to mouse events. Without this, when the
+  toolbar is displayed over the effect previews, when you'd click inside the
+  toolbar the mouse click would be sent to the effect under it. This would even
+  happen for "click" events for buttons embedded in the toolbar! */
+  clutter_actor_set_reactive (CLUTTER_ACTOR (priv->floating_toolbar), TRUE);
+
   clutter_actor_set_size (priv->floating_toolbar,
       FLOATING_TOOLBAR_WIDTH, FLOATING_TOOLBAR_HEIGHT);
   clutter_actor_set_opacity (priv->floating_toolbar, FLOATING_TOOLBAR_OPACITY);
