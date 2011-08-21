@@ -154,8 +154,8 @@ empathy_call_SOURCES = \
        empathy-mic-monitor.c \
        empathy-mic-monitor.h
 
-empathy_call_CFLAGS = $(EMPATHY_CALL_CFLAGS)
-empathy_call_LDFLAGS = $(EMPATHY_CALL_LIBS)
+empathy_call_CFLAGS = $(EMPATHY_CALL_CFLAGS) $(VIDEO_EFFECT_CFLAGS)
+empathy_call_LDFLAGS = $(EMPATHY_CALL_LIBS) $(VIDEO_EFFECT_LIBS)
 
 endif
 
