@@ -55,6 +55,7 @@ GEOCLUE_REQUIRED=0.11
 ISO_CODES_REQUIRED=0.35
 LIBCHAMPLAIN_GTK_REQUIRED=0.7.1
 LIBCHAMPLAIN_REQUIRED=0.9
+LIBCHEESE_GTK_REQUIRED=3.1.5
 NAUTILUS_SENDTO_REQUIRED=2.90.0
 NETWORK_MANAGER_REQUIRED=0.7.0
 GNOME_CONTROL_CENTER_REQUIRED=2.31.4
@@ -589,7 +590,7 @@ AC_ARG_WITH([cheese],
             with_cheese=auto)
 
 if test x"$with_cheese" != x"no" ; then
-   PKG_CHECK_MODULES(CHEESE, gstreamer-0.10 cheese-gtk >= 2.91.91.1, [have_cheese=yes], [have_cheese=no])
+   PKG_CHECK_MODULES(CHEESE, gstreamer-0.10 cheese-gtk >= LIBCHEESE_GTK_REQUIRED, [have_cheese=yes], [have_cheese=no])
    if test x${have_cheese} = xyes; then
      AC_DEFINE(HAVE_CHEESE, 1, [Define to 1 to enable cheese webcam support])
    fi
