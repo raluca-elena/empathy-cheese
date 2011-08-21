@@ -1716,6 +1716,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
       priv->camera_button, "sensitive",
       G_BINDING_SYNC_CREATE);
 
+#ifdef HAVE_VIDEO_EFFECT
+  /* menu_video_effects is hidden by default.
+     Only show it if we have access to Cheese effects. */
+  gtk_action_set_visible (self->priv->menu_video_effects, TRUE);
+#endif /* HAVE_VIDEO_EFFECT */
+
   g_signal_connect (priv->camera_monitor, "added",
       G_CALLBACK (empathy_call_window_camera_added_cb), self);
   g_signal_connect (priv->camera_monitor, "removed",
