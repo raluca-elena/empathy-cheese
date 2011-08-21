@@ -21,6 +21,12 @@ private_icons = \
 	hicolor_actions_16x16_im-message-new.png \
 	hicolor_actions_22x22_im-message-new.png \
 	hicolor_actions_24x24_im-message-new.png \
+	hicolor_actions_16x16_browse-webcam-effects.png \
+	hicolor_actions_22x22_browse-webcam-effects.png \
+	hicolor_actions_24x24_browse-webcam-effects.png \
+	hicolor_actions_32x32_browse-webcam-effects.png \
+	hicolor_actions_48x48_browse-webcam-effects.png \
+	hicolor_actions_scalable_browse-webcam-effects.svg \
 	hicolor_status_16x16_im-message.png \
 	hicolor_status_22x22_im-message.png \
 	hicolor_status_16x16_user-typing.png \
