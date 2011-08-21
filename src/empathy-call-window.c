@@ -1439,6 +1439,12 @@ empathy_call_window_init (EmpathyCallWindow *self)
       priv->video_effects_button, "sensitive",
       G_BINDING_SYNC_CREATE);
 
+  #ifdef HAVE_VIDEO_EFFECT
+  /* video_effects_button is hidden by default.
+     Only show it if we have access to cheeese effects. */
+  g_object_set (priv->video_effects_button, "visible", TRUE, NULL);
+  #endif /* HAVE_VIDEO_EFFECT */
+
   g_signal_connect (priv->camera_monitor, "added",
       G_CALLBACK (empathy_call_window_camera_added_cb), self);
   g_signal_connect (priv->camera_monitor, "removed",
