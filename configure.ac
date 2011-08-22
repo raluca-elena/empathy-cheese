@@ -685,7 +685,7 @@ Configure summary:
 	Spell checking (enchant)....:  ${have_enchant}
 	Display maps (libchamplain).:  ${have_libchamplain}
 	Location awareness (Geoclue):  ${have_geoclue}
-	Geocode support (Geoclue)...:  ${have_geocode}
+	Geocode support (Geocode)...:  ${have_geocode}
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
