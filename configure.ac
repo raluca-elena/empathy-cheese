@@ -604,6 +604,33 @@ AM_CONDITIONAL(BUILD_CHEESE, test x${have_cheese} = xyes)
 
 
 # -----------------------------------------------------------
+# Optional cheese video effects
+# -----------------------------------------------------------
+AC_ARG_ENABLE(video-effect,
+            AS_HELP_STRING([--enable-video-effect=@<:@no/yes/auto@:>@],
+            [build with Cheese video effects]),,
+            [enable_video_effect=auto])
+if test "x$enable_video_effect" != "xno" ; then
+   PKG_CHECK_MODULES(VIDEO_EFFECT,
+   [
+     gstreamer-0.10
+     cheese-gtk >= LIBCHEESE_GTK_REQUIRED
+   ], have_video_effect="yes", have_video_effect="no" )
+
+   if test "x$have_video_effect" = "xyes"; then
+      AC_DEFINE(HAVE_VIDEO_EFFECT, 1, [Define if you have Cheese video effects support])
+   fi
+else
+  have_video_effect=no
+fi
+
+if test "x$enable_video_effect" = "xyes" -a "x$have_video_effect" != "xyes"; then
+   AC_MSG_ERROR([Could not find Cheese video effects support.])
+fi
+AM_CONDITIONAL(HAVE_VIDEO_EFFECT, test "x$have_video_effect" = "xyes")
+
+
+# -----------------------------------------------------------
 # Coding style checks
 # -----------------------------------------------------------
 AC_ARG_ENABLE(coding-style-checks,
@@ -650,6 +677,7 @@ Configure summary:
 	Geocode support (Geoclue)...:  ${have_geocode}
 	Meego widgets...............:  ${have_meego}
 	Control center embedding....:  ${have_control_center_embedding}
+	Cheese video effects  ......:  ${have_video_effect}
 	Cheese webcam support ......:  ${have_cheese}
 	Camera monitoring...........:  ${have_gudev}
 
