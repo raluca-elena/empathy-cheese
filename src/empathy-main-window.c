@@ -2105,6 +2105,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	gchar                    *filename;
 	GSList                   *l;
 	GtkTreeModel             *model;
+	GtkWidget                *search_vbox;
 
 	priv = window->priv = G_TYPE_INSTANCE_GET_PRIVATE (window,
 			EMPATHY_TYPE_MAIN_WINDOW, EmpathyMainWindowPriv);
@@ -2141,6 +2142,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 				       "no_entry_label", &priv->no_entry_label,
 				       "roster_scrolledwindow", &sw,
 				       "view_balance_show_in_roster", &priv->view_balance_show_in_roster,
+				       "search_vbox", &search_vbox,
 				       NULL);
 	g_free (filename);
 
@@ -2280,8 +2282,9 @@ empathy_main_window_init (EmpathyMainWindow *window)
 		GTK_WIDGET (priv->individual_view));
 	empathy_individual_view_set_live_search (priv->individual_view,
 		EMPATHY_LIVE_SEARCH (priv->search_bar));
-	gtk_box_pack_start (GTK_BOX (priv->main_vbox), priv->search_bar,
+	gtk_box_pack_start (GTK_BOX (search_vbox), priv->search_bar,
 		FALSE, TRUE, 0);
+
 	g_signal_connect_swapped (window, "map",
 		G_CALLBACK (gtk_widget_grab_focus), priv->individual_view);
 
