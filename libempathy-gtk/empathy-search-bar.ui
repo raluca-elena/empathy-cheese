@@ -7,18 +7,6 @@
     <property name="icon_size">2</property>
     <property name="toolbar_style">GTK_TOOLBAR_BOTH_HORIZ</property>
     <child>
-      <object class="GtkToolButton" id="search_close">
-        <property name="visible">True</property>
-        <property name="is_important">True</property>
-        <property name="receives_default">True</property>
-        <property name="icon_name">gtk-close</property>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="homogeneous">True</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkToolItem" id="search_entry_toolitem">
         <property name="visible">True</property>
         <child>
@@ -118,6 +106,27 @@
           </object>
         </child>
       </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorToolItem" id="expander1">
+        <property name="visible">True</property>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="homogeneous">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkToolButton" id="search_close">
+        <property name="visible">True</property>
+        <property name="is_important">True</property>
+        <property name="receives_default">True</property>
+        <property name="icon_name">gtk-close</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="homogeneous">True</property>
+      </packing>
     </child>
   </object>
 </interface>
