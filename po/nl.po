@@ -18,15 +18,15 @@
 # Taco Witte <tcwitte@cs.uu.nl>, 2003–2004.
 # Freek de Kruijf <f.de.kruijf@hetnet.nl>, 2006–2008.
 # Reinout van Schouwen <reinouts@gnome.org>, 2007.
-# Wouter Bolsterlee <wbolster@gnome.org>, 2006—2009.
+# Wouter Bolsterlee <wbolster@gnome.org>, 2006—2011.
 # Hannie Dumoleyn <hannie@ubuntu-nl.org>, 2010—2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-08-18 22:37+0200\n"
-"PO-Revision-Date: 2011-08-16 10:52+0200\n"
-"Last-Translator: Hannie Dumoleyn <hannie@ubuntu-nl.org>\n"
+"POT-Creation-Date: 2011-08-22 22:12+0200\n"
+"PO-Revision-Date: 2011-08-22 22:15+0200\n"
+"Last-Translator: Wouter Bolsterlee <wbolster@gnome.org>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
@@ -536,15 +536,15 @@ msgstr "Messaging- en VoIP-accounts"
 msgid "File transfer completed, but the file was corrupted"
 msgstr "Bestandsoverdracht voltooid, maar het bestand was beschadigd"
 
-#: ../libempathy/empathy-ft-handler.c:1113
+#: ../libempathy/empathy-ft-handler.c:1111
 msgid "File transfer not supported by remote contact"
 msgstr "Bestandsoverdracht wordt niet ondersteund door extern contact"
 
-#: ../libempathy/empathy-ft-handler.c:1169
+#: ../libempathy/empathy-ft-handler.c:1167
 msgid "The selected file is not a regular file"
 msgstr "Het geselecteerde bestand is geen normaal bestand"
 
-#: ../libempathy/empathy-ft-handler.c:1178
+#: ../libempathy/empathy-ft-handler.c:1176
 msgid "The selected file is empty"
 msgstr "Het geselecteerde bestand is leeg"
 
@@ -1295,37 +1295,37 @@ msgstr "Yahoo!-I_D:"
 msgid "_Room List locale:"
 msgstr "Taalinstelling voor lijst van chat_ruimtes:"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:474
-#: ../libempathy-gtk/empathy-avatar-chooser.c:559
+#: ../libempathy-gtk/empathy-avatar-chooser.c:470
+#: ../libempathy-gtk/empathy-avatar-chooser.c:555
 msgid "Couldn't convert image"
 msgstr "Kon afbeelding niet converteren"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:475
+#: ../libempathy-gtk/empathy-avatar-chooser.c:471
 msgid "None of the accepted image formats are supported on your system"
 msgstr ""
 "Geen van de toegestane afbeeldingsformaten wordt op uw systeem ondersteund"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:822
+#: ../libempathy-gtk/empathy-avatar-chooser.c:818
 msgid "Couldn't save pixbuf to png"
 msgstr "Kon pixbuf naar png niet opslaan"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:938
+#: ../libempathy-gtk/empathy-avatar-chooser.c:934
 msgid "Select Your Avatar Image"
 msgstr "Kies uw gebruikersafbeelding"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:942
+#: ../libempathy-gtk/empathy-avatar-chooser.c:938
 msgid "Take a picture..."
 msgstr "Maak een foto…"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:945
+#: ../libempathy-gtk/empathy-avatar-chooser.c:941
 msgid "No Image"
 msgstr "Geen afbeelding"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1005
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1001
 msgid "Images"
 msgstr "Afbeeldingen"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1009
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1005
 msgid "All Files"
 msgstr "Alle bestanden"
 
@@ -1597,7 +1597,7 @@ msgstr "%s is nu bekend als %s"
 
 #: ../libempathy-gtk/empathy-chat.c:2727
 #: ../src/empathy-streamed-media-window.c:1894
-#: ../src/empathy-event-manager.c:1240 ../src/empathy-call-window.c:2325
+#: ../src/empathy-event-manager.c:1240 ../src/empathy-call-window.c:2328
 msgid "Disconnected"
 msgstr "Verbinding verbroken"
 
@@ -1672,9 +1672,9 @@ msgstr "Geblokkeerde contacten bewerken"
 
 #. Account and Identifier
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:1
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:521
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:512
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1495
+#: ../libempathy-gtk/empathy-individual-widget.c:1485
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
@@ -1692,11 +1692,15 @@ msgstr "Geblokkeerde contacten"
 msgid "Remove"
 msgstr "Verwijderen"
 
+#. Copy Link Address menu item
 #: ../libempathy-gtk/empathy-chat-text-view.c:320
+#: ../libempathy-gtk/empathy-webkit-utils.c:277
 msgid "_Copy Link Address"
 msgstr "Koppelingsadres _kopiëren"
 
+#. Open Link menu item
 #: ../libempathy-gtk/empathy-chat-text-view.c:327
+#: ../libempathy-gtk/empathy-webkit-utils.c:284
 msgid "_Open Link"
 msgstr "Koppeling _openen"
 
@@ -1727,18 +1731,18 @@ msgid "Block %s?"
 msgstr "%s blokkeren?"
 
 #: ../libempathy-gtk/empathy-contact-dialogs.c:538
-#: ../libempathy-gtk/empathy-individual-dialogs.c:252
+#: ../libempathy-gtk/empathy-individual-dialogs.c:255
 #, c-format
 msgid "Are you sure you want to block '%s' from contacting you again?"
 msgstr "Weet u zeker dat u niet meer wilt dat ‘%s’ nog contact met u opneemt?"
 
 #: ../libempathy-gtk/empathy-contact-dialogs.c:543
-#: ../libempathy-gtk/empathy-individual-dialogs.c:274
+#: ../libempathy-gtk/empathy-individual-dialogs.c:277
 msgid "_Block"
 msgstr "_Blokkeren"
 
 #: ../libempathy-gtk/empathy-contact-dialogs.c:559
-#: ../libempathy-gtk/empathy-individual-dialogs.c:283
+#: ../libempathy-gtk/empathy-individual-dialogs.c:286
 msgid "_Report this contact as abusive"
 msgid_plural "_Report these contacts as abusive"
 msgstr[0] "_Melden dat dit contact beledigend is"
@@ -1765,32 +1769,32 @@ msgid "Favorite People"
 msgstr "Favoriete personen"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:1986
-#: ../libempathy-gtk/empathy-individual-view.c:2375
+#: ../libempathy-gtk/empathy-individual-view.c:2376
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Wilt u echt de groep ‘%s’ verwijderen?"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:1988
-#: ../libempathy-gtk/empathy-individual-view.c:2378
+#: ../libempathy-gtk/empathy-individual-view.c:2379
 msgid "Removing group"
 msgstr "Groep verwijderen"
 
 #. Remove
 #: ../libempathy-gtk/empathy-contact-list-view.c:2037
 #: ../libempathy-gtk/empathy-contact-list-view.c:2114
-#: ../libempathy-gtk/empathy-individual-view.c:2433
-#: ../libempathy-gtk/empathy-individual-view.c:2636
+#: ../libempathy-gtk/empathy-individual-view.c:2434
+#: ../libempathy-gtk/empathy-individual-view.c:2637
 msgid "_Remove"
 msgstr "_Verwijderen"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:2067
-#: ../libempathy-gtk/empathy-individual-view.c:2500
+#: ../libempathy-gtk/empathy-individual-view.c:2501
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "Wilt u het contact ‘%s’ echt verwijderen?"
 
 #: ../libempathy-gtk/empathy-contact-list-view.c:2069
-#: ../libempathy-gtk/empathy-individual-view.c:2521
+#: ../libempathy-gtk/empathy-individual-view.c:2522
 msgid "Removing contact"
 msgstr "Contact wordt verwijderd"
 
@@ -1804,49 +1808,49 @@ msgid "_Block Contact"
 msgstr "Contact _blokkeren"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:329
-#: ../libempathy-gtk/empathy-individual-menu.c:548
+#: ../libempathy-gtk/empathy-individual-menu.c:551
 #: ../src/empathy-main-window.ui.h:16
 msgid "_Chat"
 msgstr "_Chatten"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:361
-#: ../libempathy-gtk/empathy-individual-menu.c:639
+#: ../libempathy-gtk/empathy-individual-menu.c:642
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "_Audiogesprek"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:394
-#: ../libempathy-gtk/empathy-individual-menu.c:684
+#: ../libempathy-gtk/empathy-individual-menu.c:687
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "_Videogesprek"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:440
-#: ../libempathy-gtk/empathy-individual-menu.c:737
+#: ../libempathy-gtk/empathy-individual-menu.c:740
 #: ../src/empathy-main-window.ui.h:27
 msgid "_Previous Conversations"
 msgstr "_Eerdere gesprekken"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:462
-#: ../libempathy-gtk/empathy-individual-menu.c:778
+#: ../libempathy-gtk/empathy-individual-menu.c:781
 msgid "Send File"
 msgstr "Bestand versturen"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:485
-#: ../libempathy-gtk/empathy-individual-menu.c:820
+#: ../libempathy-gtk/empathy-individual-menu.c:823
 msgid "Share My Desktop"
 msgstr "Mijn bureaublad delen"
 
 # hmmmm (Wouter Bolsterlee)
 #: ../libempathy-gtk/empathy-contact-menu.c:525
-#: ../libempathy-gtk/empathy-contact-widget.c:1890
-#: ../libempathy-gtk/empathy-individual-menu.c:855
-#: ../libempathy-gtk/empathy-individual-widget.c:1386
+#: ../libempathy-gtk/empathy-contact-widget.c:1886
+#: ../libempathy-gtk/empathy-individual-menu.c:858
+#: ../libempathy-gtk/empathy-individual-widget.c:1373
 msgid "Favorite"
 msgstr "Favoriet"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:554
-#: ../libempathy-gtk/empathy-individual-menu.c:883
+#: ../libempathy-gtk/empathy-individual-menu.c:886
 msgid "Infor_mation"
 msgstr "Infor_matie"
 
@@ -1856,32 +1860,41 @@ msgid "_Edit"
 msgstr "Be_werken"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:654
-#: ../libempathy-gtk/empathy-individual-menu.c:1070
+#: ../libempathy-gtk/empathy-individual-menu.c:1076
 #: ../src/empathy-chat-window.c:1011
 msgid "Inviting you to this room"
 msgstr "In deze ruimte uitnodigen"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:685
-#: ../libempathy-gtk/empathy-individual-menu.c:1116
+#: ../libempathy-gtk/empathy-individual-menu.c:1122
 msgid "_Invite to Chat Room"
 msgstr "U_itnodigen naar gespreksruimte"
 
 #. Title
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:514
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:505
 msgid "Search contacts"
 msgstr "Zoeken naar contacten"
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:544
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:535
 msgid "Search: "
 msgstr "Zoeken: "
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:602
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:593
 msgid "_Add Contact"
 msgstr "Cont_act toevoegen..."
 
-#: ../libempathy-gtk/empathy-contact-search-dialog.c:620
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:611
 msgid "No contacts found"
 msgstr "Geen contacten gevonden"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:627
+msgid "Your message introducing yourself:"
+msgstr "Uw introductiebericht:"
+
+# Geen idee of dit zinnig is. (Wouter Bolsterlee)
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:635
+msgid "Please let me see when you're online. Thanks!"
+msgstr "Laat me het maar weten als je online bent. Bedankt!"
 
 #: ../libempathy-gtk/empathy-contact-selector.c:129
 msgid "Select a contact"
@@ -1935,154 +1948,154 @@ msgstr "Afwezigheidsbericht:"
 msgid "Channels:"
 msgstr "Kanalen:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:901
-#: ../libempathy-gtk/empathy-individual-widget.c:495
+#: ../libempathy-gtk/empathy-contact-widget.c:897
+#: ../libempathy-gtk/empathy-individual-widget.c:469
 msgid "Country ISO Code:"
 msgstr "Land-ISO-code:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:903
-#: ../libempathy-gtk/empathy-individual-widget.c:497
+#: ../libempathy-gtk/empathy-contact-widget.c:899
+#: ../libempathy-gtk/empathy-individual-widget.c:471
 msgid "Country:"
 msgstr "Land:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:905
-#: ../libempathy-gtk/empathy-individual-widget.c:499
+#: ../libempathy-gtk/empathy-contact-widget.c:901
+#: ../libempathy-gtk/empathy-individual-widget.c:473
 msgid "State:"
 msgstr "Provincie:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:907
-#: ../libempathy-gtk/empathy-individual-widget.c:501
+#: ../libempathy-gtk/empathy-contact-widget.c:903
+#: ../libempathy-gtk/empathy-individual-widget.c:475
 msgid "City:"
 msgstr "Woonplaats:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:909
-#: ../libempathy-gtk/empathy-individual-widget.c:503
+#: ../libempathy-gtk/empathy-contact-widget.c:905
+#: ../libempathy-gtk/empathy-individual-widget.c:477
 msgid "Area:"
 msgstr "Regio:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:911
-#: ../libempathy-gtk/empathy-individual-widget.c:505
+#: ../libempathy-gtk/empathy-contact-widget.c:907
+#: ../libempathy-gtk/empathy-individual-widget.c:479
 msgid "Postal Code:"
 msgstr "Postcode:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:913
-#: ../libempathy-gtk/empathy-individual-widget.c:507
+#: ../libempathy-gtk/empathy-contact-widget.c:909
+#: ../libempathy-gtk/empathy-individual-widget.c:481
 msgid "Street:"
 msgstr "Straat:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:915
-#: ../libempathy-gtk/empathy-individual-widget.c:509
+#: ../libempathy-gtk/empathy-contact-widget.c:911
+#: ../libempathy-gtk/empathy-individual-widget.c:483
 msgid "Building:"
 msgstr "Gebouw:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:917
-#: ../libempathy-gtk/empathy-individual-widget.c:511
+#: ../libempathy-gtk/empathy-contact-widget.c:913
+#: ../libempathy-gtk/empathy-individual-widget.c:485
 msgid "Floor:"
 msgstr "Verdieping:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:919
-#: ../libempathy-gtk/empathy-individual-widget.c:513
+#: ../libempathy-gtk/empathy-contact-widget.c:915
+#: ../libempathy-gtk/empathy-individual-widget.c:487
 msgid "Room:"
 msgstr "Ruimte:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:921
-#: ../libempathy-gtk/empathy-individual-widget.c:515
+#: ../libempathy-gtk/empathy-contact-widget.c:917
+#: ../libempathy-gtk/empathy-individual-widget.c:489
 msgid "Text:"
 msgstr "Tekst:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:923
-#: ../libempathy-gtk/empathy-individual-widget.c:517
+#: ../libempathy-gtk/empathy-contact-widget.c:919
+#: ../libempathy-gtk/empathy-individual-widget.c:491
 msgid "Description:"
 msgstr "Omschrijving:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:925
-#: ../libempathy-gtk/empathy-individual-widget.c:519
+#: ../libempathy-gtk/empathy-contact-widget.c:921
+#: ../libempathy-gtk/empathy-individual-widget.c:493
 msgid "URI:"
 msgstr "URI:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:927
-#: ../libempathy-gtk/empathy-individual-widget.c:521
+#: ../libempathy-gtk/empathy-contact-widget.c:923
+#: ../libempathy-gtk/empathy-individual-widget.c:495
 msgid "Accuracy Level:"
 msgstr "Nauwkeurigheidsniveau:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:929
-#: ../libempathy-gtk/empathy-individual-widget.c:523
+#: ../libempathy-gtk/empathy-contact-widget.c:925
+#: ../libempathy-gtk/empathy-individual-widget.c:497
 msgid "Error:"
 msgstr "Fout:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:931
-#: ../libempathy-gtk/empathy-individual-widget.c:525
+#: ../libempathy-gtk/empathy-contact-widget.c:927
+#: ../libempathy-gtk/empathy-individual-widget.c:499
 msgid "Vertical Error (meters):"
 msgstr "Verticale fout (meters):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:933
-#: ../libempathy-gtk/empathy-individual-widget.c:527
+#: ../libempathy-gtk/empathy-contact-widget.c:929
+#: ../libempathy-gtk/empathy-individual-widget.c:501
 msgid "Horizontal Error (meters):"
 msgstr "Horizontale fout (meters):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:935
-#: ../libempathy-gtk/empathy-individual-widget.c:529
+#: ../libempathy-gtk/empathy-contact-widget.c:931
+#: ../libempathy-gtk/empathy-individual-widget.c:503
 msgid "Speed:"
 msgstr "Snelheid:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:937
-#: ../libempathy-gtk/empathy-individual-widget.c:531
+#: ../libempathy-gtk/empathy-contact-widget.c:933
+#: ../libempathy-gtk/empathy-individual-widget.c:505
 msgid "Bearing:"
 msgstr "Koers:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:939
-#: ../libempathy-gtk/empathy-individual-widget.c:533
+#: ../libempathy-gtk/empathy-contact-widget.c:935
+#: ../libempathy-gtk/empathy-individual-widget.c:507
 msgid "Climb Speed:"
 msgstr "Klimsnelheid:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:941
-#: ../libempathy-gtk/empathy-individual-widget.c:535
+#: ../libempathy-gtk/empathy-contact-widget.c:937
+#: ../libempathy-gtk/empathy-individual-widget.c:509
 msgid "Last Updated on:"
 msgstr "Voor het laatst bijgewerkt op:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:943
-#: ../libempathy-gtk/empathy-individual-widget.c:537
+#: ../libempathy-gtk/empathy-contact-widget.c:939
+#: ../libempathy-gtk/empathy-individual-widget.c:511
 msgid "Longitude:"
 msgstr "Lengtegraad:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:945
-#: ../libempathy-gtk/empathy-individual-widget.c:539
+#: ../libempathy-gtk/empathy-contact-widget.c:941
+#: ../libempathy-gtk/empathy-individual-widget.c:513
 msgid "Latitude:"
 msgstr "Breedtegraad:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:947
-#: ../libempathy-gtk/empathy-individual-widget.c:541
+#: ../libempathy-gtk/empathy-contact-widget.c:943
+#: ../libempathy-gtk/empathy-individual-widget.c:515
 msgid "Altitude:"
 msgstr "Hoogte:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1000
-#: ../libempathy-gtk/empathy-contact-widget.c:1015
-#: ../libempathy-gtk/empathy-individual-widget.c:629
-#: ../libempathy-gtk/empathy-individual-widget.c:644
+#: ../libempathy-gtk/empathy-contact-widget.c:996
+#: ../libempathy-gtk/empathy-contact-widget.c:1011
+#: ../libempathy-gtk/empathy-individual-widget.c:607
+#: ../libempathy-gtk/empathy-individual-widget.c:622
 #: ../src/empathy-preferences.ui.h:16
 msgid "Location"
 msgstr "Locatie"
 
 #. translators: format is "Location, $date"
-#: ../libempathy-gtk/empathy-contact-widget.c:1017
-#: ../libempathy-gtk/empathy-individual-widget.c:646
+#: ../libempathy-gtk/empathy-contact-widget.c:1013
+#: ../libempathy-gtk/empathy-individual-widget.c:624
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1069
-#: ../libempathy-gtk/empathy-individual-widget.c:695
+#: ../libempathy-gtk/empathy-contact-widget.c:1065
+#: ../libempathy-gtk/empathy-individual-widget.c:673
 msgid "%B %e, %Y at %R UTC"
 msgstr "%e %B %Y om %R UTC"
 
 # hier geen 'gebruikersafbeelding', want dat is te groot (Wouter Bolsterlee)
-#: ../libempathy-gtk/empathy-contact-widget.c:1151
-#: ../libempathy-gtk/empathy-individual-widget.c:931
+#: ../libempathy-gtk/empathy-contact-widget.c:1147
+#: ../libempathy-gtk/empathy-individual-widget.c:915
 msgid "Save Avatar"
 msgstr "Gebruikersafbeelding opslaan"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1207
-#: ../libempathy-gtk/empathy-individual-widget.c:989
+#: ../libempathy-gtk/empathy-contact-widget.c:1203
+#: ../libempathy-gtk/empathy-individual-widget.c:973
 msgid "Unable to save avatar"
 msgstr "Kan gebruikersafbeelding niet opslaan"
 
@@ -2092,7 +2105,7 @@ msgstr "<b>Locatie</b> op (datum)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1321
+#: ../libempathy-gtk/empathy-individual-widget.c:1308
 msgid "Alias:"
 msgstr "Alias:"
 
@@ -2112,7 +2125,7 @@ msgstr "Gegevens contact"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1525
+#: ../libempathy-gtk/empathy-individual-widget.c:1515
 msgid "Identifier:"
 msgstr "Identificatie:"
 
@@ -2151,17 +2164,17 @@ msgid "Select"
 msgstr "Selecteren"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:409
-#: ../src/empathy-main-window.c:1835
+#: ../src/empathy-main-window.c:1807
 msgid "Group"
 msgstr "Groep"
 
-#: ../libempathy-gtk/empathy-individual-dialogs.c:257
+#: ../libempathy-gtk/empathy-individual-dialogs.c:260
 msgid "The following identity will be blocked:"
 msgid_plural "The following identities will be blocked:"
 msgstr[0] "De volgende identiteit zal worden geblokkeerd:"
 msgstr[1] "De volgende identiteiten zullen worden geblokkeerd:"
 
-#: ../libempathy-gtk/empathy-individual-dialogs.c:264
+#: ../libempathy-gtk/empathy-individual-dialogs.c:267
 msgid "The following identity can not be blocked:"
 msgid_plural "The following identities can not be blocked:"
 msgstr[0] "De volgende identiteit kan niet worden geblokkeerd:"
@@ -2187,34 +2200,34 @@ msgstr "Contactpersonen aan de linkerzijde zullen met elkaar worden verbonden."
 #. Translators: this is used in the context menu for a contact. The first
 #. * parameter is a contact ID (e.g. foo@jabber.org) and the second is one
 #. * of the user's account IDs (e.g. me@hotmail.com).
-#: ../libempathy-gtk/empathy-individual-menu.c:138
+#: ../libempathy-gtk/empathy-individual-menu.c:141
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #. add an SMS button
-#: ../libempathy-gtk/empathy-individual-menu.c:594
-#: ../libempathy-gtk/empathy-new-message-dialog.c:248
+#: ../libempathy-gtk/empathy-individual-menu.c:597
+#: ../libempathy-gtk/empathy-new-message-dialog.c:215
 msgid "_SMS"
 msgstr "_SMS"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:931
+#: ../libempathy-gtk/empathy-individual-menu.c:934
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "Be_werken"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:957
+#: ../libempathy-gtk/empathy-individual-menu.c:960
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "Contacten _verbinden…"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2340
+#: ../libempathy-gtk/empathy-individual-view.c:2341
 msgid "Delete and _Block"
 msgstr "Verwijderen en _blokkeren"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2509
+#: ../libempathy-gtk/empathy-individual-view.c:2510
 #, c-format
 msgid ""
 "Do you really want to remove the linked contact '%s'? Note that this will "
@@ -2223,7 +2236,7 @@ msgstr ""
 "Wilt u echt het meta-contact ‘%s’ verwijderen? Dit zal tevens alle contacten "
 "die bij dit meta-contact horen verwijderen."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1672
+#: ../libempathy-gtk/empathy-individual-widget.c:1662
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -2482,27 +2495,27 @@ msgid "Contact ID:"
 msgstr "Contact-ID:"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-message-dialog.c:258
+#: ../libempathy-gtk/empathy-new-message-dialog.c:225
 msgid "C_hat"
 msgstr "_Chatten"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-message-dialog.c:277
+#: ../libempathy-gtk/empathy-new-message-dialog.c:244
 msgid "New Conversation"
 msgstr "Nieuw gesprek"
 
 #. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:231
+#: ../libempathy-gtk/empathy-new-call-dialog.c:204
 msgid "Send _Video"
 msgstr "_Video sturen"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:242
+#: ../libempathy-gtk/empathy-new-call-dialog.c:215
 msgid "C_all"
 msgstr "_Opbellen"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:252
+#: ../libempathy-gtk/empathy-new-call-dialog.c:225
 msgid "New Call"
 msgstr "Nieuwe oproep"
 
@@ -3216,7 +3229,7 @@ msgstr "Uw nieuwe account is nog niet opgeslagen."
 
 #: ../src/empathy-accounts-dialog.c:345
 #: ../src/empathy-streamed-media-window.c:754
-#: ../src/empathy-call-window.c:1159
+#: ../src/empathy-call-window.c:1152
 msgid "Connecting…"
 msgstr "Verbinden…"
 
@@ -3428,12 +3441,12 @@ msgid "Connected — %d:%02dm"
 msgstr "Verbonden — %d:%02dm"
 
 #: ../src/empathy-streamed-media-window.c:2205
-#: ../src/empathy-call-window.c:2644
+#: ../src/empathy-call-window.c:2647
 msgid "Technical Details"
 msgstr "Technische details"
 
 #: ../src/empathy-streamed-media-window.c:2243
-#: ../src/empathy-call-window.c:2682
+#: ../src/empathy-call-window.c:2685
 #, c-format
 msgid ""
 "%s's software does not understand any of the audio formats supported by your "
@@ -3443,7 +3456,7 @@ msgstr ""
 "worden ondersteund"
 
 #: ../src/empathy-streamed-media-window.c:2248
-#: ../src/empathy-call-window.c:2687
+#: ../src/empathy-call-window.c:2690
 #, c-format
 msgid ""
 "%s's software does not understand any of the video formats supported by your "
@@ -3453,7 +3466,7 @@ msgstr ""
 "worden ondersteund"
 
 #: ../src/empathy-streamed-media-window.c:2254
-#: ../src/empathy-call-window.c:2693
+#: ../src/empathy-call-window.c:2696
 #, c-format
 msgid ""
 "Can't establish a connection to %s. One of you might be on a network that "
@@ -3463,12 +3476,12 @@ msgstr ""
 "geen directe verbindingen toestaat."
 
 #: ../src/empathy-streamed-media-window.c:2260
-#: ../src/empathy-call-window.c:2699
+#: ../src/empathy-call-window.c:2702
 msgid "There was a failure on the network"
 msgstr "Er is een netwerkstoring opgetreden"
 
 #: ../src/empathy-streamed-media-window.c:2264
-#: ../src/empathy-call-window.c:2703
+#: ../src/empathy-call-window.c:2706
 msgid ""
 "The audio formats necessary for this call are not installed on your computer"
 msgstr ""
@@ -3476,7 +3489,7 @@ msgstr ""
 "computer"
 
 #: ../src/empathy-streamed-media-window.c:2267
-#: ../src/empathy-call-window.c:2706
+#: ../src/empathy-call-window.c:2709
 msgid ""
 "The video formats necessary for this call are not installed on your computer"
 msgstr ""
@@ -3484,7 +3497,7 @@ msgstr ""
 "computer"
 
 #: ../src/empathy-streamed-media-window.c:2277
-#: ../src/empathy-call-window.c:2718
+#: ../src/empathy-call-window.c:2721
 #, c-format
 msgid ""
 "Something unexpected happened in a Telepathy component. Please <a href=\"%s"
@@ -3496,22 +3509,22 @@ msgstr ""
 "‘Foutopsporing’ in het menu Hulp."
 
 #: ../src/empathy-streamed-media-window.c:2285
-#: ../src/empathy-call-window.c:2727
+#: ../src/empathy-call-window.c:2730
 msgid "There was a failure in the call engine"
 msgstr "Er is een fout in de call-engine opgetreden"
 
 #: ../src/empathy-streamed-media-window.c:2288
-#: ../src/empathy-call-window.c:2730
+#: ../src/empathy-call-window.c:2733
 msgid "The end of the stream was reached"
 msgstr "Het einde van de stream is bereikt"
 
 #: ../src/empathy-streamed-media-window.c:2328
-#: ../src/empathy-call-window.c:2770
+#: ../src/empathy-call-window.c:2773
 msgid "Can't establish audio stream"
 msgstr "Kan geen audiostream tot stand brengen"
 
 #: ../src/empathy-streamed-media-window.c:2338
-#: ../src/empathy-call-window.c:2780
+#: ../src/empathy-call-window.c:2783
 msgid "Can't establish video stream"
 msgstr "Kan geen videostream tot stand brengen"
 
@@ -4007,7 +4020,7 @@ msgstr "Verbinding verbreken"
 
 #: ../src/empathy-main-window.c:622
 msgid "No match found"
-msgstr "Geen overeenkomst gevonden"
+msgstr "Geen resultaten"
 
 #: ../src/empathy-main-window.c:777
 msgid "Reconnect"
@@ -4033,19 +4046,19 @@ msgid "Top up account credit"
 msgstr "Tegoed aanvullen"
 
 #. top up button
-#: ../src/empathy-main-window.c:1050
+#: ../src/empathy-main-window.c:1046
 msgid "Top Up..."
 msgstr "Aanvullen…"
 
-#: ../src/empathy-main-window.c:1817
+#: ../src/empathy-main-window.c:1789
 msgid "Contact"
 msgstr "Contact"
 
-#: ../src/empathy-main-window.c:2145
+#: ../src/empathy-main-window.c:2118
 msgid "Contact List"
 msgstr "Contactenlijst"
 
-#: ../src/empathy-main-window.c:2263
+#: ../src/empathy-main-window.c:2237
 msgid "Show and edit accounts"
 msgstr "Accounts tonen en bewerken"
 
@@ -4079,7 +4092,7 @@ msgstr "Nieuwe _oproep…"
 
 #: ../src/empathy-main-window.ui.h:8
 msgid "Normal Size With _Avatars"
-msgstr "Normale grootte _Gebruikersafbeeldingen"
+msgstr "Normale grootte met _afbeeldingen"
 
 #: ../src/empathy-main-window.ui.h:9
 msgid "P_references"
@@ -4653,24 +4666,24 @@ msgstr ""
 
 #. Translators: this is an "Info" label. It should be as short
 #. * as possible.
-#: ../src/empathy-call-window.c:1041 ../src/empathy-call-window.c:1061
+#: ../src/empathy-call-window.c:1026 ../src/empathy-call-window.c:1049
 msgid "i"
 msgstr "i"
 
-#: ../src/empathy-call-window.c:2573
+#: ../src/empathy-call-window.c:2576
 msgid "On hold"
 msgstr "In de wacht"
 
-#: ../src/empathy-call-window.c:2576
+#: ../src/empathy-call-window.c:2579
 msgid "Mute"
 msgstr "Dempen"
 
-#: ../src/empathy-call-window.c:2578
+#: ../src/empathy-call-window.c:2581
 msgid "Duration"
 msgstr "Duur"
 
 #. Translators: 'status - minutes:seconds' the caller has been connected
-#: ../src/empathy-call-window.c:2581
+#: ../src/empathy-call-window.c:2584
 #, c-format
 msgid "%s — %d:%02dm"
 msgstr "%s — %d:%02dm"
