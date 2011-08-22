@@ -152,6 +152,17 @@ AS_COMPILER_FLAG(-Wstrict-prototypes, ERROR_CFLAGS="$ERROR_CFLAGS -Wstrict-proto
 
 AC_SUBST(ERROR_CFLAGS)
 
+AC_ARG_ENABLE(gprof,
+            AS_HELP_STRING([--enable-gprof=@<:@no/yes@:>@],
+            [build with support for gprof]),,
+            [enable_gprof=no])
+if test "x$enable_gprof" != "xno" ; then
+    CFLAGS="$CFLAGS -pg"
+    LDFLAGS="$LDFLAGS -pg"
+fi
+
+AC_SUBST(LDFLAGS)
+
 # -----------------------------------------------------------
 # Pkg-Config dependency checks
 # -----------------------------------------------------------
@@ -639,6 +650,7 @@ Configure summary:
 
 	Compiler....................:  ${CC}
 	Compiler Flags..............:  ${CFLAGS} ${ERROR_CFLAGS}
+	Linker Flags................:  ${LDFLAGS}
 	Prefix......................:  ${prefix}
 	Coding style checks.........:  ${ENABLE_CODING_STYLE_CHECKS}
 
