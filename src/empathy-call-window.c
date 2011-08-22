@@ -874,9 +874,14 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
 {
   ClutterActor *stage = clutter_actor_get_stage (actor);
   ClutterActor *preview = clutter_clone_new (actor);
+  gfloat rel_x, rel_y;
 
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), preview);
-  clutter_actor_set_position (preview, event_x, event_y);
+
+  clutter_actor_transform_stage_point (actor, event_x, event_y,
+      &rel_x, &rel_y);
+
+  clutter_actor_set_position (preview, event_x - rel_x, event_y - rel_y);
 
   clutter_drag_action_set_drag_handle (action, preview);
 
