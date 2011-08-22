@@ -1811,8 +1811,17 @@ contact_set_avatar_from_tp_contact (EmpathyContact *contact)
       gchar *data;
       gsize len;
       gchar *path;
+      GError *error = NULL;
 
-      g_file_load_contents (file, NULL, &data, &len, NULL, NULL);
+      if (!g_file_load_contents (file, NULL, &data, &len, NULL, &error))
+        {
+          DEBUG ("Failed to load avatar: %s", error->message);
+
+          g_error_free (error);
+          contact_set_avatar (contact, NULL);
+          return;
+        }
+
       path = g_file_get_path (file);
 
       avatar = empathy_avatar_new ((guchar *) data, len, mime, path);
