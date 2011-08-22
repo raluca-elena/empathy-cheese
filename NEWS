@@ -1,3 +1,46 @@
+NEW in 3.1.5.1 (22/08/2011)
+==============
+
+This release fixes important regressions which have been introduced by
+Folks's contacts cache. It also continues improving the new experimental call
+UI.
+
+Dependencies:
+
+ • WebkitGtk is now required
+ • telepathy-glib ≥ 0.15.5
+
+Bugs fixed:
+ - Fixed #653599, Empathy shouldn't assume all TpfPersonas contain a valid TpContact (Travis Reitter)
+ - Fixed #654471, Links in log viewer are not clickable (Danielle Madeley)
+ - Fixed #655799, Use new client factory (Guillaume Desmottes)
+ - Fixed #656566, Call toolbar shouldn't disappear when the call isn't connected (Emilio Pozuelo Monfort)
+ - Fixed #656573, Call preview should be visibly dragged (Emilio Pozuelo Monfort)
+ - Fixed #656576, Video preview could have rounded corners (Emilio Pozuelo Monfort)
+ - Fixed #656579, Changing video device causes video to just freeze (Emilio Pozuelo Monfort)
+ - Fixed #656673, Update autotools config a bit (Javier Jardón)
+ - Fixed #656831, Rely on Empathy's factory to prepare TpConnection features (Guillaume Desmottes)
+ - Fixed #656866, Use more tp_connection_get_account() (Guillaume Desmottes)
+ - Fixed #656885, Don't actually "switch" to the same camera (Emilio Pozuelo Monfort)
+ - Fixed #656887, Dragging preview is really weird (Emilio Pozuelo Monfort)
+ - Fixed #656888, Preview button no longer works (Emilio Pozuelo Monfort)
+ - Fixed #656908, telepathy-logger call support detection broken (Laurent Bigonville)
+ - Fixed #656934, Allow to provide a request message when adding contact (Emilio Pozuelo Monfort)
+
+Translations:
+ - Updated es Translation (Daniel Mustieles)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated id Translation (Andika Triwidada)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Hannie Dumoleyn)
+ - Updated pa Translation (A S Alam)
+ - Updated sl Translation (Andrej Žnidaršič)
+ - Updated zh_CN Translation (Aron Xu)
+
+Documentation translations:
+ - Updated gl Documentation translation (Fran Dieguez)
+
 NEW in 3.1.5 (16/08/2011)
 ============
 
