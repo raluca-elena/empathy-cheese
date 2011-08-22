@@ -73,6 +73,9 @@ struct _EmpathyContactSearchDialogPrivate
   GtkWidget *no_contact_found;
   GtkWidget *search_entry;
   /* GtkWidget *server_entry; */
+  GtkWidget *message;
+  GtkWidget *message_window;
+  GtkWidget *message_label;
 };
 
 static void
@@ -140,6 +143,7 @@ on_get_contact_factory_get_from_id_cb (TpConnection *connection,
     GObject *object)
 {
     EmpathyContactManager *manager = empathy_contact_manager_dup_singleton ();
+    const gchar *message = user_data;
 
     if (error != NULL)
       {
@@ -147,7 +151,8 @@ on_get_contact_factory_get_from_id_cb (TpConnection *connection,
         return;
       }
 
-    empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager), contact, "");
+    empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager), contact,
+        message);
 }
 
 static void
@@ -158,6 +163,9 @@ add_selected_contact (EmpathyContactSearchDialog *self)
   TpConnection *conn;
   GtkTreeIter iter;
   GtkTreeModel *model;
+  GtkTextBuffer *buffer;
+  GtkTextIter start, end;
+  gchar *message;
   gboolean sel;
   gchar *id;
 
@@ -170,9 +178,14 @@ add_selected_contact (EmpathyContactSearchDialog *self)
 
   DEBUG ("Requested to add contact: %s", id);
 
+  buffer = gtk_text_view_get_buffer GTK_TEXT_VIEW (priv->message);
+  gtk_text_buffer_get_start_iter (buffer, &start);
+  gtk_text_buffer_get_end_iter (buffer, &end);
+  message = gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
+
   empathy_tp_contact_factory_get_from_id (conn, id,
-      on_get_contact_factory_get_from_id_cb, NULL,
-      NULL, NULL);
+      on_get_contact_factory_get_from_id_cb,
+      message, g_free, NULL);
 
   /* Close the dialog */
   gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_CANCEL);
@@ -324,6 +337,21 @@ on_selection_changed (GtkTreeSelection *selection,
   gtk_widget_set_sensitive (priv->add_button, sel);
 }
 
+static void
+check_request_message_available (EmpathyContactSearchDialog *self,
+    TpConnection *conn)
+{
+  EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
+  EmpathyContactManager *manager = empathy_contact_manager_dup_singleton ();
+  EmpathyContactListFlags flags;
+
+  flags = empathy_contact_manager_get_flags_for_connection (manager, conn);
+
+  gtk_widget_set_visible (priv->message_window,
+      flags & EMPATHY_CONTACT_LIST_MESSAGE_ADD);
+  gtk_widget_set_visible (priv->message_label,
+      flags & EMPATHY_CONTACT_LIST_MESSAGE_ADD);
+}
 
 static void
 _account_chooser_changed (EmpathyAccountChooser *chooser,
@@ -352,6 +380,9 @@ _account_chooser_changed (EmpathyAccountChooser *chooser,
       NULL, /* gtk_entry_get_text (GTK_ENTRY (priv->server_entry)), */
       0,
       on_searcher_created, self);
+
+  /* Make the request message textview sensitive if it can be used */
+  check_request_message_available (self, conn);
 }
 
 static void
@@ -590,6 +621,30 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
       priv->no_contact_found, NULL);
 
   gtk_box_pack_start (GTK_BOX (vbox), priv->notebook, TRUE, TRUE, 3);
+
+  /* Request message textview */
+  priv->message_label = gtk_label_new (
+       _("Your message introducing yourself:"));
+  gtk_misc_set_alignment (GTK_MISC (priv->message_label), 0, 0.5);
+
+  priv->message = gtk_text_view_new ();
+  gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (priv->message),
+      GTK_WRAP_WORD_CHAR);
+  gtk_text_buffer_set_text (
+      gtk_text_view_get_buffer (GTK_TEXT_VIEW (priv->message)),
+      _("Please let me see when you're online. Thanks!"), -1);
+
+  priv->message_window = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_shadow_type (
+      GTK_SCROLLED_WINDOW (priv->message_window),
+      GTK_SHADOW_ETCHED_IN);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (priv->message_window),
+      GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+  gtk_container_add (GTK_CONTAINER (priv->message_window), priv->message);
+
+  gtk_box_pack_start (GTK_BOX (vbox), priv->message_label, FALSE, TRUE, 3);
+  gtk_box_pack_start (GTK_BOX (vbox), priv->message_window, FALSE, TRUE, 3);
 
   gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (
           GTK_DIALOG (self))), vbox, TRUE, TRUE, 0);
