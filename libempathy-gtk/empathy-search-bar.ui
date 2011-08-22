@@ -36,10 +36,11 @@
     </child>
     <child>
       <object class="GtkToolButton" id="search_previous">
-        <property name="label" translatable="yes">Find Previous</property>
+        <property name="label" translatable="yes">_Previous</property>
         <property name="visible">True</property>
         <property name="is_important">True</property>
         <property name="icon_name">gtk-go-back-ltr</property>
+        <property name="use_underline">True</property>
       </object>
       <packing>
         <property name="homogeneous">True</property>
@@ -47,10 +48,11 @@
     </child>
     <child>
       <object class="GtkToolButton" id="search_next">
-        <property name="label" translatable="yes">Find Next</property>
+        <property name="label" translatable="yes">_Next</property>
         <property name="visible">True</property>
         <property name="is_important">True</property>
         <property name="icon_name">gtk-go-forward-ltr</property>
+        <property name="use_underline">True</property>
       </object>
       <packing>
         <property name="homogeneous">True</property>
@@ -62,10 +64,11 @@
         <property name="is_important">True</property>
         <child>
           <object class="GtkCheckButton" id="search_match_case">
-            <property name="label" translatable="yes">Match case</property>
+            <property name="label" translatable="yes">Mat_ch case</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="draw_indicator">True</property>
+            <property name="use_underline">True</property>
           </object>
         </child>
       </object>
