@@ -566,6 +566,21 @@ pixbuf_avatar_from_individual_closure_free (
 }
 
 static void
+avatar_icon_load_close_cb (GObject      *object,
+                           GAsyncResult *result,
+                           gpointer      user_data)
+{
+	GError *error = NULL;
+
+	g_input_stream_close_finish (G_INPUT_STREAM (object), result, &error);
+
+	if (error != NULL) {
+		DEBUG ("Failed to close pixbuf stream: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
 avatar_icon_load_read_cb (GObject      *object,
                           GAsyncResult *result,
                           gpointer      user_data)
@@ -606,6 +621,11 @@ avatar_icon_load_read_cb (GObject      *object,
 		g_simple_async_result_set_op_res_gpointer (closure->result,
 			avatar_pixbuf_from_loader (closure->loader),
 			g_object_unref);
+
+		/* Close the file for safety (even though it should be
+		 * automatically closed when the stream is finalised). */
+		g_input_stream_close_async (stream, G_PRIORITY_DEFAULT, NULL,
+			(GAsyncReadyCallback) avatar_icon_load_close_cb, NULL);
 
 		goto out;
 	} else {
