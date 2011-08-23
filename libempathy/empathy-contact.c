@@ -1614,7 +1614,7 @@ geocode_cb (GObject *source,
   EmpathyContactPriv *priv = GET_PRIV (contact);
   GError *error = NULL;
   GHashTable *new_location;
-  GHashTable *resolved;
+  GHashTable *resolved = NULL;
   gdouble latitude, longitude;
 
   if (priv->location == NULL)
