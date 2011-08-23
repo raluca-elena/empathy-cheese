@@ -2096,7 +2096,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 {
 	EmpathyMainWindowPriv    *priv;
 	EmpathyIndividualManager *individual_manager;
-	GtkBuilder               *gui;
+	GtkBuilder               *gui, *gui_mgr;
 	GtkWidget                *sw;
 	GtkToggleAction          *show_offline_widget;
 	GtkAction                *show_map_widget;
@@ -2106,6 +2106,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	GSList                   *l;
 	GtkTreeModel             *model;
 	GtkWidget                *search_vbox;
+	GtkWidget                *menubar;
 
 	priv = window->priv = G_TYPE_INSTANCE_GET_PRIVATE (window,
 			EMPATHY_TYPE_MAIN_WINDOW, EmpathyMainWindowPriv);
@@ -2126,6 +2127,17 @@ empathy_main_window_init (EmpathyMainWindow *window)
 				       "balance_vbox", &priv->balance_vbox,
 				       "errors_vbox", &priv->errors_vbox,
 				       "auth_vbox", &priv->auth_vbox,
+				       "search_vbox", &search_vbox,
+				       "presence_toolbar", &priv->presence_toolbar,
+				       "notebook", &priv->notebook,
+				       "no_entry_label", &priv->no_entry_label,
+				       "roster_scrolledwindow", &sw,
+				       NULL);
+	g_free (filename);
+
+	/* Set UI manager */
+	filename = empathy_file_lookup ("empathy-main-window-menubar.ui", "src");
+	gui_mgr = empathy_builder_get_file (filename,
 				       "ui_manager", &priv->ui_manager,
 				       "view_show_offline", &show_offline_widget,
 				       "view_show_protocols", &priv->show_protocols,
@@ -2137,14 +2149,16 @@ empathy_main_window_init (EmpathyMainWindow *window)
 				       "view_history", &priv->view_history,
 				       "view_show_map", &show_map_widget,
 				       "room_join_favorites", &priv->room_join_favorites,
-				       "presence_toolbar", &priv->presence_toolbar,
-				       "notebook", &priv->notebook,
-				       "no_entry_label", &priv->no_entry_label,
-				       "roster_scrolledwindow", &sw,
 				       "view_balance_show_in_roster", &priv->view_balance_show_in_roster,
-				       "search_vbox", &search_vbox,
+				       "menubar", &menubar,
 				       NULL);
 	g_free (filename);
+
+	/* The UI manager is living in its own .ui file as Glade doesn't support
+	 * those. The GtkMenubar has to be in this file as well to we manually add
+	 * it to the first position of the vbox. */
+	gtk_box_pack_start (GTK_BOX (priv->main_vbox), menubar, FALSE, FALSE, 0);
+	gtk_box_reorder_child (GTK_BOX (priv->main_vbox), menubar, 0);
 
 	gtk_container_add (GTK_CONTAINER (window), priv->main_vbox);
 	gtk_widget_show (priv->main_vbox);
@@ -2152,7 +2166,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	g_signal_connect (window, "key-press-event",
 			  G_CALLBACK (main_window_key_press_event_cb), NULL);
 
-	empathy_builder_connect (gui, window,
+	empathy_builder_connect (gui_mgr, window,
 			      "chat_quit", "activate", main_window_chat_quit_cb,
 			      "chat_new_message", "activate", main_window_chat_new_message_cb,
 			      "chat_new_call", "activate", main_window_chat_new_call_cb,
@@ -2180,10 +2194,11 @@ empathy_main_window_init (EmpathyMainWindow *window)
 			      NULL);
 
 	/* Set up connection related widgets. */
-	main_window_connection_items_setup (window, gui);
+	main_window_connection_items_setup (window, gui_mgr);
 
 	g_object_ref (priv->ui_manager);
 	g_object_unref (gui);
+	g_object_unref (gui_mgr);
 
 #ifndef HAVE_LIBCHAMPLAIN
 	gtk_action_set_visible (show_map_widget, FALSE);
