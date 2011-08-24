@@ -36,6 +36,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
 
+#include <libempathy-gtk/empathy-contact-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-images.h>
 
@@ -45,7 +46,13 @@
 static EmpathyNewMessageDialog *dialog_singleton = NULL;
 
 G_DEFINE_TYPE(EmpathyNewMessageDialog, empathy_new_message_dialog,
-               EMPATHY_TYPE_CONTACT_SELECTOR_DIALOG)
+    GTK_TYPE_DIALOG)
+
+struct _EmpathyNewMessageDialogPriv {
+  GtkWidget *chooser;
+  GtkWidget *button_chat;
+  GtkWidget *button_sms;
+};
 
 /**
  * SECTION:empathy-new-message-dialog
@@ -140,29 +147,42 @@ ensure_text_channel_cb (GObject *source,
 }
 
 static void
-empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
+empathy_new_message_dialog_response (GtkDialog *dialog,
+    int response_id)
 {
-  TpAccount *account;
-  const gchar *contact_id;
+  EmpathyNewMessageDialog *self = (EmpathyNewMessageDialog *) dialog;
+  FolksIndividual *individual;
+  EmpathyContact *contact;
 
-  if (response_id < EMP_NEW_MESSAGE_TEXT) goto out;
+  if (response_id < EMP_NEW_MESSAGE_TEXT)
+    goto out;
 
-  contact_id = empathy_contact_selector_dialog_get_selected (
-      EMPATHY_CONTACT_SELECTOR_DIALOG (dialog), NULL, &account);
-
-  if (EMP_STR_EMPTY (contact_id) || account == NULL) goto out;
+  individual = empathy_contact_chooser_dup_selected (
+      EMPATHY_CONTACT_CHOOSER (self->priv->chooser));
+  if (individual == NULL)
+    goto out;
 
   switch (response_id)
     {
       case EMP_NEW_MESSAGE_TEXT:
-        empathy_chat_with_contact_id (account, contact_id,
+        contact = empathy_contact_dup_best_for_action (individual,
+            EMPATHY_ACTION_CHAT);
+        g_return_if_fail (contact != NULL);
+
+        empathy_chat_with_contact_id (empathy_contact_get_account (contact),
+            empathy_contact_get_id (contact),
             empathy_get_current_action_time (),
             ensure_text_channel_cb,
             gtk_widget_get_parent_window (GTK_WIDGET (dialog)));
         break;
 
       case EMP_NEW_MESSAGE_SMS:
-        empathy_sms_contact_id (account, contact_id,
+        contact = empathy_contact_dup_best_for_action (individual,
+            EMPATHY_ACTION_SMS);
+        g_return_if_fail (contact != NULL);
+
+        empathy_sms_contact_id (empathy_contact_get_account (contact),
+            empathy_contact_get_id (contact),
             empathy_get_current_action_time (),
             ensure_text_channel_cb,
             gtk_widget_get_parent_window (GTK_WIDGET (dialog)));
@@ -173,89 +193,9 @@ empathy_new_message_dialog_response (GtkDialog *dialog, int response_id)
     }
 
 out:
+  tp_clear_object (&individual);
+  tp_clear_object (&contact);
   gtk_widget_destroy (GTK_WIDGET (dialog));
-}
-
-static void
-empathy_new_message_account_filter (EmpathyContactSelectorDialog *dialog,
-    EmpathyAccountChooserFilterResultCallback callback,
-    gpointer callback_data,
-    TpAccount *account)
-{
-  TpConnection *connection;
-  gboolean supported = FALSE;
-  TpCapabilities *caps;
-
-  /* check if CM supports 1-1 text chat */
-  connection = tp_account_get_connection (account);
-  if (connection == NULL)
-      goto out;
-
-  caps = tp_connection_get_capabilities (connection);
-  if (caps == NULL)
-      goto out;
-
-  supported = tp_capabilities_supports_text_chats (caps);
-
-out:
-  callback (supported, callback_data);
-}
-
-static void
-empathy_new_message_dialog_update_sms_button_sensitivity (GtkWidget *widget,
-    GParamSpec *pspec,
-    GtkWidget *button)
-{
-  GtkWidget *self = gtk_widget_get_toplevel (widget);
-  EmpathyContactSelectorDialog *dialog;
-  TpConnection *conn;
-  GPtrArray *rccs;
-  gboolean sensitive = FALSE;
-  guint i;
-
-  g_return_if_fail (EMPATHY_IS_NEW_MESSAGE_DIALOG (self));
-
-  dialog = EMPATHY_CONTACT_SELECTOR_DIALOG (self);
-
-  /* if the Text widget isn't sensitive, don't bother checking the caps */
-  if (!gtk_widget_get_sensitive (dialog->button_action))
-    goto finally;
-
-  empathy_contact_selector_dialog_get_selected (dialog, &conn, NULL);
-
-  if (conn == NULL)
-    goto finally;
-
-  /* iterate the rccs to find if SMS channels are supported, this should
-   * be in tp-glib */
-  rccs = tp_capabilities_get_channel_classes (
-      tp_connection_get_capabilities (conn));
-
-  for (i = 0; i < rccs->len; i++)
-    {
-      GHashTable *fixed;
-      GStrv allowed;
-      const char *type;
-      gboolean sms_channel;
-
-      tp_value_array_unpack (g_ptr_array_index (rccs, i), 2,
-          &fixed,
-          &allowed);
-
-      /* SMS channels are type:Text and sms-channel:True */
-      type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
-      sms_channel = tp_asv_get_boolean (fixed,
-          TP_PROP_CHANNEL_INTERFACE_SMS_SMS_CHANNEL, NULL);
-
-      sensitive = sms_channel &&
-        !tp_strdiff (type, TP_IFACE_CHANNEL_TYPE_TEXT);
-
-      if (sensitive)
-        break;
-    }
-
-finally:
-  gtk_widget_set_sensitive (button, sensitive);
 }
 
 static GObject *
@@ -283,48 +223,121 @@ empathy_new_message_dialog_constructor (GType type,
   return retval;
 }
 
-static void
-empathy_new_message_dialog_init (EmpathyNewMessageDialog *dialog)
+static gboolean
+individual_supports_action (FolksIndividual *individual,
+    EmpathyActionType action)
 {
-  EmpathyContactSelectorDialog *parent = EMPATHY_CONTACT_SELECTOR_DIALOG (
-        dialog);
-  GtkWidget *button;
-  GtkWidget *image;
+  EmpathyContact *contact;
 
-  /* add an SMS button */
-  button = gtk_button_new_with_mnemonic (_("_SMS"));
+  contact = empathy_contact_dup_best_for_action (individual, action);
+  if (contact == NULL)
+    return FALSE;
+
+  g_object_unref (contact);
+  return TRUE;
+}
+
+static gboolean
+filter_individual (EmpathyContactChooser *chooser,
+    FolksIndividual *individual,
+    gboolean is_online,
+    gboolean searching,
+    gpointer user_data)
+{
+  return individual_supports_action (individual, EMPATHY_ACTION_CHAT) ||
+    individual_supports_action (individual, EMPATHY_ACTION_SMS);
+}
+
+static void
+selection_changed_cb (GtkWidget *chooser,
+    FolksIndividual *selected,
+    EmpathyNewMessageDialog *self)
+{
+  gboolean can_chat, can_sms;
+
+  if (selected == NULL)
+    {
+      can_chat = can_sms = FALSE;
+    }
+  else
+    {
+      can_chat = individual_supports_action (selected, EMPATHY_ACTION_CHAT);
+      can_sms = individual_supports_action (selected, EMPATHY_ACTION_SMS);
+    }
+
+  gtk_widget_set_sensitive (self->priv->button_chat, can_chat);
+  gtk_widget_set_sensitive (self->priv->button_sms, can_sms);
+}
+
+static void
+selection_activate_cb (GtkWidget *chooser,
+    EmpathyNewMessageDialog *self)
+{
+  gtk_dialog_response (GTK_DIALOG (self), EMP_NEW_MESSAGE_TEXT);
+}
+
+static void
+empathy_new_message_dialog_init (EmpathyNewMessageDialog *self)
+{
+  GtkWidget *label;
+  GtkWidget *image;
+  GtkWidget *content;
+
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EMPATHY_TYPE_NEW_MESSAGE_DIALOG, EmpathyNewMessageDialogPriv);
+
+  content = gtk_dialog_get_content_area (GTK_DIALOG (self));
+
+  label = gtk_label_new (_("Enter a contact identifier or phone number:"));
+  gtk_box_pack_start (GTK_BOX (content), label, FALSE, FALSE, 0);
+  gtk_widget_show (label);
+
+  /* contact chooser */
+  self->priv->chooser = empathy_contact_chooser_new ();
+
+  empathy_contact_chooser_set_filter_func (
+      EMPATHY_CONTACT_CHOOSER (self->priv->chooser), filter_individual, self);
+
+  gtk_box_pack_start (GTK_BOX (content), self->priv->chooser, TRUE, TRUE, 6);
+  gtk_widget_show (self->priv->chooser);
+
+  g_signal_connect (self->priv->chooser, "selection-changed",
+      G_CALLBACK (selection_changed_cb), self);
+  g_signal_connect (self->priv->chooser, "activate",
+      G_CALLBACK (selection_activate_cb), self);
+
+  /* close button */
+  gtk_dialog_add_buttons (GTK_DIALOG (self), GTK_STOCK_CLOSE, NULL);
+
+  /* add SMS button */
+  self->priv->button_sms = gtk_button_new_with_mnemonic (_("_SMS"));
   image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_SMS,
       GTK_ICON_SIZE_BUTTON);
-  gtk_button_set_image (GTK_BUTTON (button), image);
-
-  gtk_dialog_add_action_widget (GTK_DIALOG (dialog), button,
-      EMP_NEW_MESSAGE_SMS);
-  gtk_widget_show (button);
+  gtk_button_set_image (GTK_BUTTON (self->priv->button_sms), image);
 
   /* add chat button */
-  parent->button_action = gtk_button_new_with_mnemonic (_("C_hat"));
+  self->priv->button_chat = gtk_button_new_with_mnemonic (_("_Chat"));
   image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_NEW_MESSAGE,
       GTK_ICON_SIZE_BUTTON);
-  gtk_button_set_image (GTK_BUTTON (parent->button_action), image);
+  gtk_button_set_image (GTK_BUTTON (self->priv->button_chat), image);
 
-  gtk_dialog_add_action_widget (GTK_DIALOG (dialog), parent->button_action,
+  gtk_dialog_add_action_widget (GTK_DIALOG (self), self->priv->button_chat,
       EMP_NEW_MESSAGE_TEXT);
-  gtk_widget_show (parent->button_action);
+  gtk_widget_show (self->priv->button_chat);
 
-  /* the parent class will update the sensitivity of button_action, propagate
-   * it */
-  g_signal_connect (parent->button_action, "notify::sensitive",
-      G_CALLBACK (empathy_new_message_dialog_update_sms_button_sensitivity),
-      button);
-  g_signal_connect (dialog, "notify::selected-account",
-      G_CALLBACK (empathy_new_message_dialog_update_sms_button_sensitivity),
-      button);
+  gtk_dialog_add_action_widget (GTK_DIALOG (self), self->priv->button_sms,
+      EMP_NEW_MESSAGE_SMS);
+  gtk_widget_show (self->priv->button_sms);
 
   /* Tweak the dialog */
-  gtk_window_set_title (GTK_WINDOW (dialog), _("New Conversation"));
-  gtk_window_set_role (GTK_WINDOW (dialog), "new_message");
+  gtk_window_set_title (GTK_WINDOW (self), _("New Conversation"));
+  gtk_window_set_role (GTK_WINDOW (self), "new_message");
 
-  gtk_widget_set_sensitive (parent->button_action, FALSE);
+  /* Set a default height so a few contacts are displayed */
+  gtk_window_set_default_size (GTK_WINDOW (self), -1, 400);
+
+  gtk_widget_set_sensitive (self->priv->button_chat, FALSE);
+  gtk_widget_set_sensitive (self->priv->button_sms, FALSE);
 }
 
 static void
@@ -333,14 +346,12 @@ empathy_new_message_dialog_class_init (
 {
   GObjectClass *object_class = G_OBJECT_CLASS (class);
   GtkDialogClass *dialog_class = GTK_DIALOG_CLASS (class);
-  EmpathyContactSelectorDialogClass *selector_dialog_class = \
-    EMPATHY_CONTACT_SELECTOR_DIALOG_CLASS (class);
 
   object_class->constructor = empathy_new_message_dialog_constructor;
 
   dialog_class->response = empathy_new_message_dialog_response;
 
-  selector_dialog_class->account_filter = empathy_new_message_account_filter;
+  g_type_class_add_private (class, sizeof (EmpathyNewMessageDialogPriv));
 }
 
 /**
