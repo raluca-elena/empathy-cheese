@@ -93,6 +93,21 @@ keep_alive_mechanism_combobox_change_cb (GtkWidget *widget,
   g_free (mechanism);
 }
 
+static void
+checkbutton_tel_toggled (
+    GtkWidget *checkbox,
+    EmpathyAccountWidgetSip *sip_settings)
+{
+  EmpathyAccountSettings *settings;
+
+  settings = empathy_account_widget_get_settings (sip_settings->self);
+
+  empathy_account_settings_set_uri_scheme_tel (settings,
+      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkbox)));
+
+  empathy_account_widget_changed (sip_settings->self);
+}
+
 void
 empathy_account_widget_sip_build (EmpathyAccountWidget *self,
     const char *filename,
@@ -123,6 +138,7 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
       GtkListStore *store;
       GtkTreeIter iter;
       GtkCellRenderer *renderer;
+      GtkToggleButton *checkbutton_tel;
 
       settings = g_slice_new0 (EmpathyAccountWidgetSip);
       settings->self = self;
@@ -138,8 +154,13 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
           "checkbutton_discover-stun", &settings->checkbutton_discover_stun,
           "spinbutton_keepalive-interval",
             &settings->spinbutton_keepalive_interval,
+          "checkbutton_tel", &checkbutton_tel,
           NULL);
       settings->vbox_settings = vbox_settings;
+
+      gtk_toggle_button_set_active (checkbutton_tel,
+          empathy_account_settings_has_uri_scheme_tel (
+            empathy_account_widget_get_settings (self)));
 
       empathy_account_widget_handle_params (self,
           "entry_userid", "account",
@@ -164,6 +185,7 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
           "vbox_sip_settings", "destroy", account_widget_sip_destroy_cb,
           "checkbutton_discover-stun", "toggled",
           account_widget_sip_discover_stun_toggled_cb,
+          "checkbutton_tel", "toggled", checkbutton_tel_toggled,
           NULL);
 
       self->ui_details->default_focus = g_strdup ("entry_userid");
