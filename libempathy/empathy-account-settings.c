@@ -100,6 +100,10 @@ struct _EmpathyAccountSettingsPriv
   gulong managers_ready_id;
   gboolean preparing_protocol;
 
+  /* If TRUE, the account should have 'tel' in its
+   * Account.Interface.Addressing.URISchemes property. */
+  gboolean uri_scheme_tel;
+
   GSimpleAsyncResult *apply_result;
 };
 
@@ -243,6 +247,7 @@ empathy_account_settings_constructed (GObject *object)
       GQuark features[] = {
           TP_ACCOUNT_FEATURE_CORE,
           TP_ACCOUNT_FEATURE_STORAGE,
+          TP_ACCOUNT_FEATURE_ADDRESSING,
           0 };
 
       if (priv->account != NULL)
@@ -524,6 +529,25 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
   priv->password_original = g_strdup (password);
 }
 
+static gboolean
+account_has_uri_scheme_tel (TpAccount *account)
+{
+  const gchar * const * uri_schemes;
+  guint i;
+
+  uri_schemes = tp_account_get_uri_schemes (account);
+  if (uri_schemes == NULL)
+    return FALSE;
+
+  for (i = 0; uri_schemes[i] != NULL; i++)
+    {
+      if (!tp_strdiff (uri_schemes[i], "tel"))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 {
@@ -561,6 +585,8 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
       g_free (priv->icon_name);
       priv->icon_name =
         g_strdup (tp_account_get_icon_name (priv->account));
+
+      priv->uri_scheme_tel = account_has_uri_scheme_tel (priv->account);
     }
 
   tp_protocol = tp_connection_manager_get_protocol (priv->manager,
@@ -919,6 +945,11 @@ empathy_account_settings_discard_changes (EmpathyAccountSettings *settings)
   priv->password_changed = FALSE;
   g_free (priv->password);
   priv->password = g_strdup (priv->password_original);
+
+  if (priv->account != NULL)
+    priv->uri_scheme_tel = account_has_uri_scheme_tel (priv->account);
+  else
+    priv->uri_scheme_tel = FALSE;
 }
 
 const gchar *
@@ -1421,6 +1452,18 @@ empathy_account_settings_delete_password_cb (GObject *source,
 }
 
 static void
+update_account_uri_schemes (EmpathyAccountSettings *self)
+{
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+
+  if (priv->uri_scheme_tel == account_has_uri_scheme_tel (priv->account))
+    return;
+
+  tp_account_set_uri_scheme_association_async (priv->account, "tel",
+      priv->uri_scheme_tel, NULL, NULL);
+}
+
+static void
 empathy_account_settings_account_updated (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
@@ -1459,6 +1502,8 @@ empathy_account_settings_account_updated (GObject *source,
 
       return;
     }
+
+  update_account_uri_schemes (settings);
 
   g_simple_async_result_set_op_res_gboolean (priv->apply_result,
       g_strv_length (reconnect_required) > 0);
@@ -1507,6 +1552,8 @@ empathy_account_settings_created_cb (GObject *source,
               settings);
           return;
         }
+
+      update_account_uri_schemes (settings);
 
       empathy_account_settings_discard_changes (settings);
     }
@@ -1793,4 +1840,22 @@ empathy_account_settings_param_is_supported (EmpathyAccountSettings *self,
   EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
 
   return tp_protocol_has_param (priv->protocol_obj, param);
+}
+
+void
+empathy_account_settings_set_uri_scheme_tel (EmpathyAccountSettings *self,
+    gboolean associate)
+{
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+
+  priv->uri_scheme_tel = associate;
+}
+
+gboolean
+empathy_account_settings_has_uri_scheme_tel (
+    EmpathyAccountSettings *self)
+{
+  EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
+
+  return priv->uri_scheme_tel;
 }

@@ -200,6 +200,12 @@ gboolean empathy_account_settings_param_is_supported (
     EmpathyAccountSettings *self,
     const gchar *param);
 
+void empathy_account_settings_set_uri_scheme_tel (EmpathyAccountSettings *self,
+    gboolean associate);
+
+gboolean empathy_account_settings_has_uri_scheme_tel (
+    EmpathyAccountSettings *self);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_ACCOUNT_SETTINGS_H__*/
