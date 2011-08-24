@@ -461,12 +461,18 @@ tp_contact_list_got_local_pending_cb (TpConnection            *connection,
 		TpHandle handle;
 		const gchar *message;
 		TpChannelGroupChangeReason reason;
+		const TpIntSet *members, *remote_pending;
 
 		handle = empathy_contact_get_handle (contact);
-		if (g_hash_table_lookup (priv->members, GUINT_TO_POINTER (handle))) {
+		members = tp_channel_group_get_members (priv->subscribe);
+		remote_pending = tp_channel_group_get_remote_pending (priv->subscribe);
+
+		if (tp_intset_is_member (members, handle) ||
+		    tp_intset_is_member (remote_pending, handle)) {
 			GArray handles = {(gchar *) &handle, 1};
 
-			/* This contact is already member, auto accept. */
+			/* This contact is already subscribed, or user requested
+			 * to subscribe, auto accept. */
 			tp_cli_channel_interface_group_call_add_members (priv->publish,
 				-1, &handles, NULL, NULL, NULL, NULL, NULL);
 		}
