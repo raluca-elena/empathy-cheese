@@ -2493,3 +2493,11 @@ empathy_account_widget_set_password_param (EmpathyAccountWidget *self,
 
   gtk_entry_set_text (GTK_ENTRY (priv->param_password_widget), account);
 }
+
+EmpathyAccountSettings *
+empathy_account_widget_get_settings (EmpathyAccountWidget *self)
+{
+  EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+
+  return priv->settings;
+}

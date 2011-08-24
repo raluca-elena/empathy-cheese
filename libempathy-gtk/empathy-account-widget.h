@@ -85,6 +85,9 @@ void empathy_account_widget_set_other_accounts_exist (
 /* protected methods */
 void empathy_account_widget_changed (EmpathyAccountWidget *widget);
 
+EmpathyAccountSettings * empathy_account_widget_get_settings (
+    EmpathyAccountWidget *self);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_ACCOUNT_WIDGET_H__ */
