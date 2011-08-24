@@ -39,6 +39,7 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
 
+#include <libempathy-gtk/empathy-contact-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-images.h>
 
@@ -49,17 +50,14 @@
 static EmpathyNewCallDialog *dialog_singleton = NULL;
 
 G_DEFINE_TYPE(EmpathyNewCallDialog, empathy_new_call_dialog,
-               EMPATHY_TYPE_CONTACT_SELECTOR_DIALOG)
+               GTK_TYPE_DIALOG)
 
 typedef struct _EmpathyNewCallDialogPriv EmpathyNewCallDialogPriv;
 
-typedef struct {
-  EmpathyAccountChooserFilterResultCallback callback;
-  gpointer                                  user_data;
-} FilterCallbackData;
-
 struct _EmpathyNewCallDialogPriv {
-  GtkWidget *check_video;
+  GtkWidget *chooser;
+  GtkWidget *button_audio;
+  GtkWidget *button_video;
 
   EmpathyCameraMonitor *monitor;
 };
@@ -67,6 +65,14 @@ struct _EmpathyNewCallDialogPriv {
 #define GET_PRIV(o) \
   (G_TYPE_INSTANCE_GET_PRIVATE ((o), EMPATHY_TYPE_NEW_CALL_DIALOG, \
     EmpathyNewCallDialogPriv))
+
+/* Re-use the accept and ok Gtk response so we are sure they won't be used
+ * when the dialog window is closed for example */
+enum
+{
+  RESPONSE_AUDIO = GTK_RESPONSE_ACCEPT,
+  RESPONSE_VIDEO = GTK_RESPONSE_OK,
+};
 
 /**
  * SECTION:empathy-new-call-dialog
@@ -82,77 +88,29 @@ static void
 empathy_new_call_dialog_response (GtkDialog *dialog, int response_id)
 {
   EmpathyNewCallDialogPriv *priv = GET_PRIV (dialog);
-  gboolean video;
-  TpAccount *account;
-  const gchar *contact_id;
+  FolksIndividual *individual;
+  EmpathyContact *contact;
 
-  if (response_id != GTK_RESPONSE_ACCEPT) goto out;
+  if (response_id != RESPONSE_AUDIO &&
+      response_id != RESPONSE_VIDEO)
+    goto out;
 
-  contact_id = empathy_contact_selector_dialog_get_selected (
-      EMPATHY_CONTACT_SELECTOR_DIALOG (dialog), NULL, &account);
+  individual = empathy_contact_chooser_dup_selected (
+      EMPATHY_CONTACT_CHOOSER (priv->chooser));
+  if (individual == NULL) goto out;
 
-  if (EMP_STR_EMPTY (contact_id) || account == NULL) goto out;
+  empathy_individual_can_audio_video_call (individual, NULL, NULL, &contact);
+  g_assert (contact != NULL);
 
-  /* check if video is enabled now because the dialog will be destroyed once
-   * we return from this function. */
-  video = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->check_video));
+  empathy_call_new_with_streams (empathy_contact_get_id (contact),
+      empathy_contact_get_account (contact), TRUE,
+      response_id == RESPONSE_VIDEO, empathy_get_current_action_time ());
 
-  empathy_call_new_with_streams (contact_id,
-      account, TRUE, video,
-      empathy_get_current_action_time ());
+  g_object_unref (individual);
+  g_object_unref (contact);
 
 out:
   gtk_widget_destroy (GTK_WIDGET (dialog));
-}
-
-static void
-empathy_new_call_dialog_account_filter (EmpathyContactSelectorDialog *dialog,
-    EmpathyAccountChooserFilterResultCallback callback,
-    gpointer callback_data,
-    TpAccount *account)
-{
-  TpConnection *connection;
-  gboolean supported = FALSE;
-  guint i;
-  TpCapabilities *caps;
-  GPtrArray *classes;
-
-  /* check if CM supports calls */
-  connection = tp_account_get_connection (account);
-  if (connection == NULL)
-      goto out;
-
-  caps = tp_connection_get_capabilities (connection);
-  if (caps == NULL)
-      goto out;
-
-  classes = tp_capabilities_get_channel_classes (caps);
-
-  for (i = 0; i < classes->len; i++)
-    {
-      GHashTable *fixed;
-      GStrv allowed;
-      const gchar *chan_type;
-
-      tp_value_array_unpack (g_ptr_array_index (classes, i), 2,
-          &fixed, &allowed);
-
-      chan_type = tp_asv_get_string (fixed, TP_PROP_CHANNEL_CHANNEL_TYPE);
-
-      if (tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_STREAMED_MEDIA)
-          && tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL))
-        continue;
-
-      if (tp_asv_get_uint32 (fixed, TP_PROP_CHANNEL_TARGET_HANDLE_TYPE, NULL) !=
-          TP_HANDLE_TYPE_CONTACT)
-        continue;
-
-      supported = TRUE;
-      break;
-    }
-
-out:
-  callback (supported, callback_data);
 }
 
 static void
@@ -190,42 +148,112 @@ empathy_new_call_dialog_constructor (GType type,
   return retval;
 }
 
-static void
-empathy_new_call_dialog_init (EmpathyNewCallDialog *dialog)
+static gboolean
+filter_individual (EmpathyContactChooser *chooser,
+    FolksIndividual *individual,
+    gboolean is_online,
+    gboolean searching,
+    gpointer user_data)
 {
-  EmpathyContactSelectorDialog *parent = EMPATHY_CONTACT_SELECTOR_DIALOG (
-        dialog);
-  EmpathyNewCallDialogPriv *priv = GET_PRIV (dialog);
+  gboolean can_audio_call, can_video_call;
+
+  empathy_individual_can_audio_video_call (individual, &can_audio_call,
+      &can_video_call, NULL);
+
+  return can_audio_call || can_video_call;
+}
+
+static void
+selection_changed_cb (GtkWidget *chooser,
+    FolksIndividual *selected,
+    EmpathyNewCallDialog *self)
+{
+  EmpathyNewCallDialogPriv *priv = GET_PRIV (self);
+  gboolean can_audio_call, can_video_call;
+
+  if (selected == NULL)
+    {
+      can_audio_call = can_video_call = FALSE;
+    }
+  else
+    {
+      empathy_individual_can_audio_video_call (selected, &can_audio_call,
+          &can_video_call, NULL);
+    }
+
+  gtk_widget_set_sensitive (priv->button_audio, can_audio_call);
+  gtk_widget_set_sensitive (priv->button_video, can_video_call);
+}
+
+static void
+selection_activate_cb (GtkWidget *chooser,
+    EmpathyNewCallDialog *self)
+{
+  gtk_dialog_response (GTK_DIALOG (self), RESPONSE_AUDIO);
+}
+
+static void
+empathy_new_call_dialog_init (EmpathyNewCallDialog *self)
+{
+  EmpathyNewCallDialogPriv *priv = GET_PRIV (self);
+  GtkWidget *label;
   GtkWidget *image;
+  GtkWidget *content;
 
   priv->monitor = empathy_camera_monitor_dup_singleton ();
 
-  /* add video toggle */
-  priv->check_video = gtk_check_button_new_with_mnemonic (_("Send _Video"));
-  g_object_bind_property (priv->monitor, "available",
-      priv->check_video, "sensitive",
-      G_BINDING_SYNC_CREATE);
+  content = gtk_dialog_get_content_area (GTK_DIALOG (self));
 
-  gtk_box_pack_end (GTK_BOX (parent->vbox), priv->check_video,
-      FALSE, TRUE, 0);
+  label = gtk_label_new (_("Enter a contact identifier or phone number:"));
+  gtk_box_pack_start (GTK_BOX (content), label, FALSE, FALSE, 0);
+  gtk_widget_show (label);
 
-  gtk_widget_show (priv->check_video);
+  /* contact chooser */
+  priv->chooser = empathy_contact_chooser_new ();
 
-  /* add call button */
-  parent->button_action = gtk_button_new_with_mnemonic (_("C_all"));
+  empathy_contact_chooser_set_filter_func (
+      EMPATHY_CONTACT_CHOOSER (priv->chooser), filter_individual, self);
+
+  gtk_box_pack_start (GTK_BOX (content), priv->chooser, TRUE, TRUE, 6);
+  gtk_widget_show (priv->chooser);
+
+  g_signal_connect (priv->chooser, "selection-changed",
+      G_CALLBACK (selection_changed_cb), self);
+  g_signal_connect (priv->chooser, "activate",
+      G_CALLBACK (selection_activate_cb), self);
+
+  /* close button */
+  gtk_dialog_add_buttons (GTK_DIALOG (self), GTK_STOCK_CLOSE, NULL);
+
+  /* add video button */
+  priv->button_video = gtk_button_new_with_mnemonic (_("_Video Call"));
+  image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_VIDEO_CALL,
+      GTK_ICON_SIZE_BUTTON);
+  gtk_button_set_image (GTK_BUTTON (priv->button_video), image);
+
+  gtk_dialog_add_action_widget (GTK_DIALOG (self), priv->button_video,
+      RESPONSE_VIDEO);
+  gtk_widget_show (priv->button_video);
+
+  /* add audio button */
+  priv->button_audio = gtk_button_new_with_mnemonic (_("_Audio Call"));
   image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_VOIP,
       GTK_ICON_SIZE_BUTTON);
-  gtk_button_set_image (GTK_BUTTON (parent->button_action), image);
+  gtk_button_set_image (GTK_BUTTON (priv->button_audio), image);
 
-  gtk_dialog_add_action_widget (GTK_DIALOG (dialog), parent->button_action,
-      GTK_RESPONSE_ACCEPT);
-  gtk_widget_show (parent->button_action);
+  gtk_dialog_add_action_widget (GTK_DIALOG (self), priv->button_audio,
+      RESPONSE_AUDIO);
+  gtk_widget_show (priv->button_audio);
 
   /* Tweak the dialog */
-  gtk_window_set_title (GTK_WINDOW (dialog), _("New Call"));
-  gtk_window_set_role (GTK_WINDOW (dialog), "new_call");
+  gtk_window_set_title (GTK_WINDOW (self), _("New Call"));
+  gtk_window_set_role (GTK_WINDOW (self), "new_call");
 
-  gtk_widget_set_sensitive (parent->button_action, FALSE);
+  /* Set a default height so a few contacts are displayed */
+  gtk_window_set_default_size (GTK_WINDOW (self), -1, 400);
+
+  gtk_widget_set_sensitive (priv->button_audio, FALSE);
+  gtk_widget_set_sensitive (priv->button_video, FALSE);
 }
 
 static void
@@ -234,8 +262,6 @@ empathy_new_call_dialog_class_init (
 {
   GObjectClass *object_class = G_OBJECT_CLASS (class);
   GtkDialogClass *dialog_class = GTK_DIALOG_CLASS (class);
-  EmpathyContactSelectorDialogClass *selector_dialog_class = \
-    EMPATHY_CONTACT_SELECTOR_DIALOG_CLASS (class);
 
   g_type_class_add_private (class, sizeof (EmpathyNewCallDialogPriv));
 
@@ -243,8 +269,6 @@ empathy_new_call_dialog_class_init (
   object_class->dispose = empathy_new_call_dialog_dispose;
 
   dialog_class->response = empathy_new_call_dialog_response;
-
-  selector_dialog_class->account_filter = empathy_new_call_dialog_account_filter;
 }
 
 /**

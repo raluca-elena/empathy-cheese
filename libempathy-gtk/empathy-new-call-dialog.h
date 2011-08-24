@@ -24,19 +24,17 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 
-#include <libempathy-gtk/empathy-contact-selector-dialog.h>
-
 G_BEGIN_DECLS
 
 typedef struct _EmpathyNewCallDialog EmpathyNewCallDialog;
 typedef struct _EmpathyNewCallDialogClass EmpathyNewCallDialogClass;
 
 struct _EmpathyNewCallDialogClass {
-    EmpathyContactSelectorDialogClass parent_class;
+    GtkDialogClass parent_class;
 };
 
 struct _EmpathyNewCallDialog {
-    EmpathyContactSelectorDialog parent;
+    GtkDialog parent;
 };
 
 GType empathy_new_call_dialog_get_type (void);
