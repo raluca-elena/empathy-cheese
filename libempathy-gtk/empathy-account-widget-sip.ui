@@ -1,18 +1,28 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
-  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAdjustment" id="adjustment1">
     <property name="upper">65535</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjustment2">
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment3">
+    <property name="upper">10000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkVBox" id="vbox_sip_settings">
     <property name="visible">True</property>
-    <property name="orientation">vertical</property>
+    <property name="can_focus">False</property>
     <child>
       <object class="GtkTable" id="table_common_settings">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="n_rows">4</property>
         <property name="n_columns">2</property>
         <property name="column_spacing">12</property>
@@ -20,6 +30,7 @@
         <child>
           <object class="GtkLabel" id="label_password">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="xalign">0</property>
             <property name="label" translatable="yes">Pass_word:</property>
             <property name="use_underline">True</property>
@@ -46,6 +57,7 @@
         <child>
           <object class="GtkLabel" id="label_userid">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="xalign">0</property>
             <property name="label" translatable="yes">_Username:</property>
             <property name="use_underline">True</property>
@@ -59,12 +71,13 @@
         <child>
           <object class="GtkLabel" id="label_username_example">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="xalign">0</property>
             <property name="xpad">3</property>
             <property name="label" translatable="yes">&lt;b&gt;Example:&lt;/b&gt; user@my.sip.server</property>
             <property name="use_markup">True</property>
             <attributes>
-              <attribute name="scale" value="0.800000"/>
+              <attribute name="scale" value="0.80000000000000004"/>
             </attributes>
           </object>
           <packing>
@@ -96,6 +109,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
+            <property name="use_action_appearance">False</property>
             <property name="active">True</property>
             <property name="draw_indicator">True</property>
           </object>
@@ -130,21 +144,23 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="hscrollbar_policy">never</property>
-            <property name="vscrollbar_policy">automatic</property>
             <child>
               <object class="GtkViewport" id="viewport1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="resize_mode">queue</property>
                 <property name="shadow_type">none</property>
                 <child>
                   <object class="GtkAlignment" id="alignment3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="top_padding">6</property>
                     <property name="left_padding">12</property>
                     <child>
                       <object class="GtkTable" id="table_advanced_sip_settings">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_rows">13</property>
                         <property name="n_columns">4</property>
                         <property name="column_spacing">6</property>
@@ -201,6 +217,7 @@
                         <child>
                           <object class="GtkLabel" id="label_nat_traversal">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">NAT Traversal Options</property>
                             <attributes>
@@ -214,6 +231,7 @@
                         <child>
                           <object class="GtkLabel" id="label_proxy">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Proxy Options</property>
                             <attributes>
@@ -229,6 +247,7 @@
                         <child>
                           <object class="GtkLabel" id="label_misc">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Miscellaneous Options</property>
                             <attributes>
@@ -244,10 +263,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment7">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">24</property>
                             <child>
                               <object class="GtkLabel" id="label_stun-server">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">STUN Server:</property>
                                 <property name="mnemonic_widget">entry_stun-server</property>
@@ -264,6 +285,7 @@
                         <child>
                           <object class="GtkAlignment" id="alignment4">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_discover-stun">
@@ -271,6 +293,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                               </object>
@@ -287,6 +310,7 @@
                         <child>
                           <object class="GtkAlignment" id="alignment5">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_discover-binding">
@@ -294,6 +318,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                               </object>
                             </child>
@@ -307,10 +332,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment8">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkLabel" id="label_proxy-host">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Server:</property>
                               </object>
@@ -324,6 +351,7 @@
                         <child>
                           <object class="GtkLabel" id="label_keep_alive">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Keep-Alive Options</property>
                             <attributes>
@@ -339,10 +367,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment10">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkLabel" id="label_keepalive-mechanism">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Mechanism:</property>
                               </object>
@@ -356,10 +386,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment11">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkLabel" id="label_keepalive-interval">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Interval (seconds)</property>
                               </object>
@@ -373,10 +405,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment12">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkLabel" id="label_auth-user">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Authentication username:</property>
                               </object>
@@ -390,10 +424,12 @@
                         <child>
                           <object class="GtkAlignment" id="alignment13">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkLabel" id="label_transport">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Transport:</property>
                               </object>
@@ -407,6 +443,7 @@
                         <child>
                           <object class="GtkAlignment" id="alignment14">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_loose-routing">
@@ -414,6 +451,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                               </object>
                             </child>
@@ -427,6 +465,7 @@
                         <child>
                           <object class="GtkAlignment" id="alignment15">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_ignore-tls-errors">
@@ -434,6 +473,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                               </object>
                             </child>
@@ -447,6 +487,7 @@
                         <child>
                           <object class="GtkLabel" id="label_stun-port">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Port:</property>
                             <property name="mnemonic_widget">spinbutton_stun-port</property>
@@ -475,6 +516,7 @@
                         <child>
                           <object class="GtkLabel" id="label_port">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Port:</property>
                           </object>
@@ -528,6 +570,7 @@
         <child type="label">
           <object class="GtkLabel" id="label_expander">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Advanced</property>
             <attributes>
               <attribute name="weight" value="bold"/>
@@ -536,27 +579,33 @@
         </child>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">1</property>
       </packing>
     </child>
   </object>
   <object class="GtkVBox" id="vbox_sip_simple">
     <property name="visible">True</property>
-    <property name="orientation">vertical</property>
+    <property name="can_focus">False</property>
     <property name="spacing">6</property>
     <child>
       <object class="GtkLabel" id="label_userid_simple">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="xalign">0</property>
         <property name="label" translatable="yes">What is your SIP login ID?</property>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">0</property>
       </packing>
     </child>
     <child>
       <object class="GtkAlignment" id="alignment1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="xalign">0</property>
         <property name="yalign">0</property>
         <property name="xscale">0.34999999403953552</property>
@@ -566,7 +615,7 @@
         <child>
           <object class="GtkVBox" id="vbox1">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
+            <property name="can_focus">False</property>
             <property name="spacing">4</property>
             <child>
               <object class="GtkEntry" id="entry_userid_simple">
@@ -574,20 +623,25 @@
                 <property name="can_focus">True</property>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label_example">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="xalign">0.10000000149011612</property>
                 <property name="label" translatable="yes">&lt;b&gt;Example:&lt;/b&gt; user@my.sip.server</property>
                 <property name="use_markup">True</property>
                 <attributes>
-                  <attribute name="scale" value="0.800000"/>
+                  <attribute name="scale" value="0.80000000000000004"/>
                 </attributes>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -595,22 +649,28 @@
         </child>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">1</property>
       </packing>
     </child>
     <child>
       <object class="GtkLabel" id="label_password_simple">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="xalign">0</property>
         <property name="label" translatable="yes">What is your SIP account password?</property>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">2</property>
       </packing>
     </child>
     <child>
       <object class="GtkAlignment" id="alignment2">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="xalign">0</property>
         <property name="yalign">0</property>
         <property name="xscale">0.34999999403953552</property>
@@ -625,6 +685,8 @@
         </child>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">3</property>
       </packing>
     </child>
@@ -634,22 +696,15 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">False</property>
+        <property name="use_action_appearance">False</property>
         <property name="active">True</property>
         <property name="draw_indicator">True</property>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">4</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkAdjustment" id="adjustment2">
-    <property name="upper">65535</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment3">
-    <property name="upper">10000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
   </object>
 </interface>
