@@ -245,6 +245,7 @@ ui_DATA = 					\
 	empathy-ft-manager.ui			\
 	empathy-import-dialog.ui		\
 	empathy-main-window.ui			\
+	empathy-main-window-menubar.ui		\
 	empathy-new-chatroom-dialog.ui		\
 	empathy-preferences.ui			\
 	empathy-status-icon.ui
