@@ -815,7 +815,7 @@ avatar_chooser_set_avatar_from_pixbuf (EmpathyAvatarChooser *self,
   if (!gdk_pixbuf_save_to_buffer (pb, &buf, &size, "png", &error, NULL))
     {
       avatar_chooser_error_show (self,
-        _("Couldn't save pixbuf to png"),
+        _("Couldn't save picture to file"),
         error ? error->message : NULL);
       g_clear_error (&error);
       return;
