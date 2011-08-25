@@ -218,7 +218,7 @@ if test "x$enable_call" != "xno" ; then
       clutter-1.0
       clutter-gtk-1.0
       clutter-gst-1.0
-   ], have_call="yes", have_call="no" )
+   ], have_call="yes" )
 
    if test "x$have_call" = "xyes"; then
       AC_DEFINE(HAVE_CALL, 1, [Define if you have Call channel support])
@@ -227,9 +227,6 @@ else
   have_call=no
 fi
 
-if test "x$enable_call" = "xyes" -a "x$have_call" != "xyes"; then
-   AC_MSG_ERROR([Could not find Call handler dependencies.])
-fi
 AM_CONDITIONAL(HAVE_CALL, test "x$have_call" = "xyes")
 
 
