@@ -228,7 +228,9 @@ else
 fi
 
 if test "x$enable_call" = "xyes" -a "x$have_call" != "xyes"; then
-   AC_MSG_ERROR([Could not find Call handler dependencies.])
+   AC_MSG_ERROR([Could not find Call handler dependencies:
+
+$EMPATHY_CALL_PKG_ERRORS])
 fi
 AM_CONDITIONAL(HAVE_CALL, test "x$have_call" = "xyes")
 
@@ -342,11 +344,15 @@ else
 fi
 
 if test "x$with_connectivity" = "xconnman" -a "x$have_connman" != "xyes"; then
-   AC_MSG_ERROR([Couldn't find connman dependencies.])
+   AC_MSG_ERROR([Couldn't find connman dependencies:
+
+$CONNMAN_PKG_ERRORS])
 fi
 
 if test "x$with_connectivity" = "xnm" -a "x$have_nm" != "xyes"; then
-   AC_MSG_ERROR([Couldn't find libnm-glib dependencies.])
+   AC_MSG_ERROR([Couldn't find Network Manager dependencies:
+
+$NETWORK_MANAGER_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_NM, test "x$have_nm" = "xyes")
@@ -373,7 +379,9 @@ else
 fi
 
 if test "x$enable_gudev" = "xyes" -a "x$have_gudev" != "xyes"; then
-   AC_MSG_ERROR([Could not find gudev dependencies.])
+   AC_MSG_ERROR([Could not find gudev dependencies:
+
+$UDEV_PKG_ERRORS])
 fi
 AM_CONDITIONAL(HAVE_UDEV, test "x$have_gudev" = "xyes")
 
@@ -410,7 +418,9 @@ else
 fi
 
 if test "x$enable_spell" = "xyes" -a "x$have_enchant" != "xyes"; then
-   AC_MSG_ERROR([Could not find spell dependencies.])
+   AC_MSG_ERROR([Could not find spell-checking dependencies:
+
+$ENCHANT_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_ENCHANT, test "x$have_enchant" = "xyes")
@@ -440,7 +450,9 @@ else
 fi
 
 if test "x$enable_map" = "xyes" -a "x$have_libchamplain" != "xyes"; then
-   AC_MSG_ERROR([Could not find map view dependencies.])
+   AC_MSG_ERROR([Could not find map view dependencies:
+
+$LIBCHAMPLAIN_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_LIBCHAMPLAIN, test "x$have_libchamplain" = "xyes")
@@ -467,7 +479,9 @@ else
 fi
 
 if test "x$enable_location" = "xyes" -a "x$have_geoclue" != "xyes"; then
-   AC_MSG_ERROR([Could not find location dependencies.])
+   AC_MSG_ERROR([Could not find location dependencies:
+
+$GEOCLUE_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_GEOCLUE, test "x$have_geoclue" = "xyes")
@@ -496,7 +510,9 @@ else
 fi
 
 if test "x$enable_geocode" = "xyes" -a "x$have_geocode" != "xyes"; then
-   AC_MSG_ERROR([Could not find geocode dependencies.])
+   AC_MSG_ERROR([Could not find geocode dependencies:
+
+$GEOCODE_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_GEOCODE, test "x$have_geocode" = "xyes")
@@ -526,7 +542,9 @@ else
 fi
 
 if test "x$enable_meego" = "xyes" -a "x$have_meego" != "xyes"; then
-   AC_MSG_ERROR([Could not find meego dependencies.])
+   AC_MSG_ERROR([Could not find meego dependencies:
+
+$MEEGO_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_MEEGO, test "x$have_meego" = "xyes")
@@ -551,7 +569,9 @@ else
 fi
 
 if test "x$enable_nautilus_sendto" = "xyes" -a "x$have_nst" != "xyes"; then
-   AC_MSG_ERROR([Could not find nautilus-sendto dependencies.])
+   AC_MSG_ERROR([Could not find nautilus-sendto dependencies:
+
+$NST_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_NST, test "x$have_nst" = "xyes")
@@ -586,7 +606,9 @@ else
 fi
 
 if test "x$enable_control_center_embedding" = "xyes" -a "x$have_control_center_embedding" != "xyes"; then
-   AC_MSG_ERROR([Could not find single-window control center dependencies.])
+   AC_MSG_ERROR([Could not find single-window control center dependencies:
+
+$CONTROL_CENTER_EMBEDDING_PKG_ERRORS])
 fi
 
 AM_CONDITIONAL(HAVE_CONTROL_CENTER_EMBEDDING, test "x$have_control_center_embedding" = "xyes")
@@ -605,7 +627,9 @@ if test x"$with_cheese" != x"no" ; then
      AC_DEFINE(HAVE_CHEESE, 1, [Define to 1 to enable cheese webcam support])
    fi
    if test x${with_cheese} = xyes && test x${have_cheese} = xno; then
-     AC_MSG_ERROR([Cheese configured but not found])
+     AC_MSG_ERROR([Cheese configured but not found:
+
+$CHEESE_PKG_ERRORS])
    fi
 else
    have_cheese=no
