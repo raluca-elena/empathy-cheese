@@ -70,19 +70,11 @@ typedef struct {
 	guint                       setup_idle_id;
 	gboolean                    dispose_has_run;
 	GHashTable                  *status_icons;
+	/* Hash: EmpathyContact* -> GQueue(GtkTreeRowReference) */
+	GHashTable                  *empathy_contact_cache;
+	/* Hash: char *groupname -> GtkTreeRowReference *row */
+	GHashTable                  *empathy_group_cache;
 } EmpathyContactListStorePriv;
-
-typedef struct {
-	GtkTreeIter  iter;
-	const gchar *name;
-	gboolean     found;
-} FindGroup;
-
-typedef struct {
-	EmpathyContact *contact;
-	gboolean       found;
-	GList         *iters;
-} FindContact;
 
 typedef struct {
 	EmpathyContactListStore *store;
@@ -141,10 +133,6 @@ static ShowActiveData * contact_list_store_contact_active_new        (EmpathyCon
 								      gboolean                       remove);
 static void             contact_list_store_contact_active_free       (ShowActiveData                *data);
 static gboolean         contact_list_store_contact_active_cb         (ShowActiveData                *data);
-static gboolean         contact_list_store_get_group_foreach         (GtkTreeModel                  *model,
-								      GtkTreePath                   *path,
-								      GtkTreeIter                   *iter,
-								      FindGroup                     *fg);
 static void             contact_list_store_get_group                 (EmpathyContactListStore       *store,
 								      const gchar                   *name,
 								      GtkTreeIter                   *iter_group_to_set,
@@ -159,10 +147,6 @@ static gint             contact_list_store_name_sort_func            (GtkTreeMod
 								      GtkTreeIter                   *iter_a,
 								      GtkTreeIter                   *iter_b,
 								      gpointer                       user_data);
-static gboolean         contact_list_store_find_contact_foreach      (GtkTreeModel                  *model,
-								      GtkTreePath                   *path,
-								      GtkTreeIter                   *iter,
-								      FindContact                   *fc);
 static GList *          contact_list_store_find_contact              (EmpathyContactListStore       *store,
 								      EmpathyContact                *contact);
 static gboolean         contact_list_store_update_list_mode_foreach  (GtkTreeModel                  *model,
@@ -338,6 +322,15 @@ empathy_contact_list_store_class_init (EmpathyContactListStoreClass *klass)
 }
 
 static void
+g_queue_free_full_row_ref (gpointer data)
+{
+	GQueue *queue = (GQueue *) data;
+	g_queue_foreach (queue, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_queue_free (queue);
+}
+
+
+static void
 empathy_contact_list_store_init (EmpathyContactListStore *store)
 {
 	EmpathyContactListStorePriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (store,
@@ -351,6 +344,11 @@ empathy_contact_list_store_init (EmpathyContactListStore *store)
 						      (GSourceFunc) contact_list_store_inibit_active_cb,
 						      store);
 	priv->status_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+	priv->empathy_contact_cache = g_hash_table_new_full (NULL, NULL, NULL,
+		g_queue_free_full_row_ref);
+	priv->empathy_group_cache = g_hash_table_new_full (g_str_hash,
+		g_str_equal, g_free,
+		(GDestroyNotify) gtk_tree_row_reference_free);
 	contact_list_store_setup (store);
 }
 
@@ -397,6 +395,8 @@ contact_list_store_dispose (GObject *object)
 	}
 
 	g_hash_table_destroy (priv->status_icons);
+	g_hash_table_destroy (priv->empathy_contact_cache);
+	g_hash_table_destroy (priv->empathy_group_cache);
 	G_OBJECT_CLASS (empathy_contact_list_store_parent_class)->dispose (object);
 }
 
@@ -654,6 +654,11 @@ empathy_contact_list_store_set_show_groups (EmpathyContactListStore *store,
 		GList *contacts, *l;
 
 		gtk_tree_store_clear (GTK_TREE_STORE (store));
+
+		/* Also clear the cache */
+		g_hash_table_remove_all (priv->empathy_contact_cache);
+		g_hash_table_remove_all (priv->empathy_group_cache);
+
 		contacts = empathy_contact_list_get_members (priv->list);
 		for (l = contacts; l; l = l->next) {
 			contact_list_store_members_changed_cb (priv->list,
@@ -1001,6 +1006,11 @@ add_contact_to_store (GtkTreeStore *store,
 		      EmpathyContact *contact,
 		      EmpathyContactListFlags flags)
 {
+	EmpathyContactListStorePriv *priv = GET_PRIV (store);
+	GtkTreeRowReference *row_ref;
+	GtkTreePath *path;
+	GQueue *queue;
+
 	gtk_tree_store_insert_with_values (store, iter, parent, 0,
 			    EMPATHY_CONTACT_LIST_STORE_COL_NAME, empathy_contact_get_alias (contact),
 			    EMPATHY_CONTACT_LIST_STORE_COL_CONTACT, contact,
@@ -1014,6 +1024,19 @@ add_contact_to_store (GtkTreeStore *store,
 			        EMPATHY_CAPABILITIES_VIDEO,
 			    EMPATHY_CONTACT_LIST_STORE_COL_FLAGS, flags,
 			    -1);
+
+	path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), iter);
+	row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (store), path);
+	queue = g_hash_table_lookup (priv->empathy_contact_cache, contact);
+	if (queue) {
+		g_queue_push_tail (queue, row_ref);
+	} else {
+		queue = g_queue_new ();
+		g_queue_push_tail (queue, row_ref);
+		g_hash_table_insert (priv->empathy_contact_cache, contact,
+			queue);
+	}
+	gtk_tree_path_free (path);
 }
 
 static void
@@ -1099,34 +1122,50 @@ static void
 contact_list_store_remove_contact (EmpathyContactListStore *store,
 				   EmpathyContact          *contact)
 {
+	EmpathyContactListStorePriv *priv = GET_PRIV (store);
 	GtkTreeModel               *model;
-	GList                      *iters, *l;
+	GList                      *l;
+	GQueue                     *row_refs;
 
-	iters = contact_list_store_find_contact (store, contact);
-	if (!iters) {
+	row_refs = g_hash_table_lookup (priv->empathy_contact_cache, contact);
+	if (!row_refs) {
 		return;
 	}
 
 	/* Clean up model */
 	model = GTK_TREE_MODEL (store);
 
-	for (l = iters; l; l = l->next) {
+	for (l = g_queue_peek_head_link (row_refs); l; l = l->next) {
+		GtkTreePath *path = gtk_tree_row_reference_get_path (l->data);
+		GtkTreeIter iter;
 		GtkTreeIter parent;
+
+		if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (store), &iter,
+			path)) {
+			gtk_tree_path_free (path);
+			continue;
+		}
+		gtk_tree_path_free (path);
 
 		/* NOTE: it is only <= 2 here because we have
 		 * separators after the group name, otherwise it
 		 * should be 1.
 		 */
-		if (gtk_tree_model_iter_parent (model, &parent, l->data) &&
+		if (gtk_tree_model_iter_parent (model, &parent, &iter) &&
 		    gtk_tree_model_iter_n_children (model, &parent) <= 2) {
+			gchar *group_name;
+			gtk_tree_model_get (model, &parent,
+			    EMPATHY_CONTACT_LIST_STORE_COL_NAME, &group_name,
+			    -1);
+			g_hash_table_remove (priv->empathy_group_cache,
+				group_name);
 			gtk_tree_store_remove (GTK_TREE_STORE (store), &parent);
 		} else {
-			gtk_tree_store_remove (GTK_TREE_STORE (store), l->data);
+			gtk_tree_store_remove (GTK_TREE_STORE (store), &iter);
 		}
 	}
 
-	g_list_foreach (iters, (GFunc) gtk_tree_iter_free, NULL);
-	g_list_free (iters);
+	g_hash_table_remove (priv->empathy_contact_cache, contact);
 }
 
 static void
@@ -1390,35 +1429,6 @@ contact_list_store_contact_active_cb (ShowActiveData *data)
 	return FALSE;
 }
 
-static gboolean
-contact_list_store_get_group_foreach (GtkTreeModel *model,
-				      GtkTreePath  *path,
-				      GtkTreeIter  *iter,
-				      FindGroup    *fg)
-{
-	gchar    *str;
-	gboolean  is_group;
-
-	/* Groups are only at the top level. */
-	if (gtk_tree_path_get_depth (path) != 1) {
-		return FALSE;
-	}
-
-	gtk_tree_model_get (model, iter,
-			    EMPATHY_CONTACT_LIST_STORE_COL_NAME, &str,
-			    EMPATHY_CONTACT_LIST_STORE_COL_IS_GROUP, &is_group,
-			    -1);
-
-	if (is_group && !tp_strdiff (str, fg->name)) {
-		fg->found = TRUE;
-		fg->iter = *iter;
-	}
-
-	g_free (str);
-
-	return fg->found;
-}
-
 static void
 contact_list_store_get_group (EmpathyContactListStore *store,
 			      const gchar            *name,
@@ -1427,21 +1437,18 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 			      gboolean               *created,
 			      gboolean               is_fake_group)
 {
+	EmpathyContactListStorePriv *priv = GET_PRIV (store);
 	GtkTreeModel                *model;
 	GtkTreeIter                  iter_group;
 	GtkTreeIter                  iter_separator;
-	FindGroup                    fg;
-
-	memset (&fg, 0, sizeof (fg));
-
-	fg.name = name;
+	GtkTreeRowReference         *row_ref;
 
 	model = GTK_TREE_MODEL (store);
-	gtk_tree_model_foreach (model,
-				(GtkTreeModelForeachFunc) contact_list_store_get_group_foreach,
-				&fg);
+	row_ref = g_hash_table_lookup (priv->empathy_group_cache, name);
 
-	if (!fg.found) {
+	if (row_ref == NULL) {
+		GtkTreePath *path;
+
 		if (created) {
 			*created = TRUE;
 		}
@@ -1455,6 +1462,12 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 				    EMPATHY_CONTACT_LIST_STORE_COL_IS_FAKE_GROUP, is_fake_group,
 				    -1);
 
+		path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), &iter_group);
+		row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (store), path);
+		g_hash_table_insert (priv->empathy_group_cache,
+			g_strdup (name), row_ref);
+		gtk_tree_path_free (path);
+
 		if (iter_group_to_set) {
 			*iter_group_to_set = iter_group;
 		}
@@ -1467,15 +1480,24 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 			*iter_separator_to_set = iter_separator;
 		}
 	} else {
+		GtkTreePath *path = gtk_tree_row_reference_get_path (row_ref);
+		GtkTreeIter iter;
+
+		if (!gtk_tree_model_get_iter (model, &iter, path)) {
+			gtk_tree_path_free (path);
+			return;
+		}
+		gtk_tree_path_free (path);
+
 		if (created) {
 			*created = FALSE;
 		}
 
 		if (iter_group_to_set) {
-			*iter_group_to_set = fg.iter;
+			*iter_group_to_set = iter;
 		}
 
-		iter_separator = fg.iter;
+		iter_separator = iter;
 
 		if (gtk_tree_model_iter_next (model, &iter_separator)) {
 			gboolean is_separator;
@@ -1717,52 +1739,35 @@ contact_list_store_name_sort_func (GtkTreeModel *model,
 	return ret_val;
 }
 
-static gboolean
-contact_list_store_find_contact_foreach (GtkTreeModel *model,
-					 GtkTreePath  *path,
-					 GtkTreeIter  *iter,
-					 FindContact  *fc)
-{
-	EmpathyContact *contact;
-
-	gtk_tree_model_get (model, iter,
-			    EMPATHY_CONTACT_LIST_STORE_COL_CONTACT, &contact,
-			    -1);
-
-	if (contact == fc->contact) {
-		fc->found = TRUE;
-		fc->iters = g_list_append (fc->iters, gtk_tree_iter_copy (iter));
-	}
-
-	if (contact) {
-		g_object_unref (contact);
-	}
-
-	return FALSE;
-}
-
 static GList *
 contact_list_store_find_contact (EmpathyContactListStore *store,
 				 EmpathyContact          *contact)
 {
+	EmpathyContactListStorePriv *priv = GET_PRIV (store);
 	GtkTreeModel              *model;
-	GList                     *l = NULL;
-	FindContact                fc;
-
-	memset (&fc, 0, sizeof (fc));
-
-	fc.contact = contact;
+	GQueue                    *row_refs_queue;
+	GList                     *i;
+	GList                     *iters_list = NULL;
 
 	model = GTK_TREE_MODEL (store);
-	gtk_tree_model_foreach (model,
-				(GtkTreeModelForeachFunc) contact_list_store_find_contact_foreach,
-				&fc);
+	row_refs_queue = g_hash_table_lookup (priv->empathy_contact_cache, contact);
+	if (!row_refs_queue)
+		return NULL;
 
-	if (fc.found) {
-		l = fc.iters;
+	for (i = g_queue_peek_head_link (row_refs_queue) ; i != NULL ;
+	     i = i->next) {
+		GtkTreePath *path = gtk_tree_row_reference_get_path (i->data);
+		GtkTreeIter iter;
+		if (!gtk_tree_model_get_iter (model, &iter, path)) {
+			gtk_tree_path_free (path);
+			continue;
+		}
+		gtk_tree_path_free (path);
+		iters_list = g_list_prepend
+			(iters_list, gtk_tree_iter_copy (&iter));
 	}
 
-	return l;
+	return iters_list;
 }
 
 static gboolean
