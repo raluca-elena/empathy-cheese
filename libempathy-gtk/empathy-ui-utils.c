@@ -622,11 +622,6 @@ avatar_icon_load_read_cb (GObject      *object,
 			avatar_pixbuf_from_loader (closure->loader),
 			g_object_unref);
 
-		/* Close the file for safety (even though it should be
-		 * automatically closed when the stream is finalised). */
-		g_input_stream_close_async (stream, G_PRIORITY_DEFAULT, NULL,
-			(GAsyncReadyCallback) avatar_icon_load_close_cb, NULL);
-
 		goto out;
 	} else {
 		/* Loop round and read another chunk. */
@@ -643,6 +638,11 @@ out_close:
 	gdk_pixbuf_loader_close (closure->loader, NULL);
 
 out:
+	/* Close the file for safety (even though it should be
+	 * automatically closed when the stream is finalised). */
+	g_input_stream_close_async (stream, G_PRIORITY_DEFAULT, NULL,
+		(GAsyncReadyCallback) avatar_icon_load_close_cb, NULL);
+
 	g_simple_async_result_complete (closure->result);
 
 	g_clear_error (&error);
