@@ -955,3 +955,22 @@ empathy_format_currency (gint amount,
 
   return money;
 }
+
+gboolean
+empathy_account_has_uri_scheme_tel (TpAccount *account)
+{
+  const gchar * const * uri_schemes;
+  guint i;
+
+  uri_schemes = tp_account_get_uri_schemes (account);
+  if (uri_schemes == NULL)
+    return FALSE;
+
+  for (i = 0; uri_schemes[i] != NULL; i++)
+    {
+      if (!tp_strdiff (uri_schemes[i], "tel"))
+        return TRUE;
+    }
+
+  return FALSE;
+}

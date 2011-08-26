@@ -529,25 +529,6 @@ empathy_account_settings_try_migrating_password (EmpathyAccountSettings *self)
   priv->password_original = g_strdup (password);
 }
 
-static gboolean
-account_has_uri_scheme_tel (TpAccount *account)
-{
-  const gchar * const * uri_schemes;
-  guint i;
-
-  uri_schemes = tp_account_get_uri_schemes (account);
-  if (uri_schemes == NULL)
-    return FALSE;
-
-  for (i = 0; uri_schemes[i] != NULL; i++)
-    {
-      if (!tp_strdiff (uri_schemes[i], "tel"))
-        return TRUE;
-    }
-
-  return FALSE;
-}
-
 static void
 empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
 {
@@ -586,7 +567,7 @@ empathy_account_settings_check_readyness (EmpathyAccountSettings *self)
       priv->icon_name =
         g_strdup (tp_account_get_icon_name (priv->account));
 
-      priv->uri_scheme_tel = account_has_uri_scheme_tel (priv->account);
+      priv->uri_scheme_tel = empathy_account_has_uri_scheme_tel (priv->account);
     }
 
   tp_protocol = tp_connection_manager_get_protocol (priv->manager,
@@ -947,7 +928,7 @@ empathy_account_settings_discard_changes (EmpathyAccountSettings *settings)
   priv->password = g_strdup (priv->password_original);
 
   if (priv->account != NULL)
-    priv->uri_scheme_tel = account_has_uri_scheme_tel (priv->account);
+    priv->uri_scheme_tel = empathy_account_has_uri_scheme_tel (priv->account);
   else
     priv->uri_scheme_tel = FALSE;
 }
@@ -1456,7 +1437,8 @@ update_account_uri_schemes (EmpathyAccountSettings *self)
 {
   EmpathyAccountSettingsPriv *priv = GET_PRIV (self);
 
-  if (priv->uri_scheme_tel == account_has_uri_scheme_tel (priv->account))
+  if (priv->uri_scheme_tel == empathy_account_has_uri_scheme_tel (
+        priv->account))
     return;
 
   tp_account_set_uri_scheme_association_async (priv->account, "tel",

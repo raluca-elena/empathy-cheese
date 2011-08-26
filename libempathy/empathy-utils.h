@@ -106,6 +106,8 @@ gchar *empathy_format_currency (gint amount,
     guint scale,
     const gchar *currency);
 
+gboolean empathy_account_has_uri_scheme_tel (TpAccount *account);
+
 /* Copied from wocky/wocky-utils.h */
 
 #define empathy_implement_finish_void(source, tag) \
