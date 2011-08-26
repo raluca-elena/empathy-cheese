@@ -285,14 +285,6 @@ constructed (GObject *object)
       gtk_widget_show (item);
     }
 
-  /* Log */
-  if (features & EMPATHY_INDIVIDUAL_FEATURE_LOG)
-    {
-      item = empathy_individual_log_menu_item_new (individual, NULL);
-      gtk_menu_shell_append (shell, item);
-      gtk_widget_show (item);
-    }
-
   /* Invite */
   item = empathy_individual_invite_menu_item_new (individual, NULL);
   gtk_menu_shell_append (shell, item);
@@ -341,6 +333,14 @@ constructed (GObject *object)
       g_signal_connect_swapped (item, "activate",
           (GCallback) individual_link_menu_item_activate_cb, object);
 
+      gtk_widget_show (item);
+    }
+
+  /* Log */
+  if (features & EMPATHY_INDIVIDUAL_FEATURE_LOG)
+    {
+      item = empathy_individual_log_menu_item_new (individual, NULL);
+      gtk_menu_shell_append (shell, item);
       gtk_widget_show (item);
     }
 
