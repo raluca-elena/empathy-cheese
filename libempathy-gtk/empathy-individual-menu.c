@@ -37,6 +37,7 @@
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-utils.h>
 
+#include "empathy-account-selector-dialog.h"
 #include "empathy-individual-menu.h"
 #include "empathy-images.h"
 #include "empathy-log-window.h"
@@ -48,6 +49,9 @@
 #include "empathy-share-my-desktop.h"
 #include "empathy-linking-dialog.h"
 #include "empathy-call-utils.h"
+
+#define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
+#include <libempathy/empathy-debug.h>
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIndividualMenu)
 
@@ -236,9 +240,209 @@ empathy_individual_menu_init (EmpathyIndividualMenu *self)
   self->priv = priv;
 }
 
+static GList *
+find_phone_accounts (void)
+{
+  TpAccountManager *am;
+  GList *accounts, *l;
+  GList *found = NULL;
+
+  am = tp_account_manager_dup ();
+  g_return_val_if_fail (am != NULL, NULL);
+
+  accounts = tp_account_manager_get_valid_accounts (am);
+  for (l = accounts; l != NULL; l = g_list_next (l))
+    {
+      TpAccount *account = l->data;
+
+      if (tp_account_get_connection_status (account, NULL) !=
+          TP_CONNECTION_STATUS_CONNECTED)
+        continue;
+
+      if (!empathy_account_has_uri_scheme_tel (account))
+        continue;
+
+      found = g_list_prepend (found, g_object_ref (account));
+    }
+
+  g_list_free (accounts);
+  g_object_unref (am);
+
+  return found;
+}
+
+static gboolean
+has_phone_account (void)
+{
+  GList *accounts;
+  gboolean result;
+
+  accounts = find_phone_accounts ();
+  result = (accounts != NULL);
+
+  g_list_free_full (accounts, (GDestroyNotify) g_object_unref);
+
+  return result;
+}
+
+static void
+call_phone_number (FolksPhoneFieldDetails *details,
+    TpAccount *account)
+{
+  DEBUG ("Try to call %s", folks_phone_field_details_get_normalised (details));
+
+  empathy_call_new_with_streams (
+      folks_phone_field_details_get_normalised (details),
+      account, TRUE, FALSE, empathy_get_current_action_time ());
+}
+
+static void
+display_call_phone_dialog (FolksPhoneFieldDetails *details,
+    GList *accounts)
+{
+  GtkWidget *dialog;
+  gint response;
+
+  dialog = empathy_account_selector_dialog_new (accounts);
+
+  gtk_window_set_title (GTK_WINDOW (dialog),
+      _("Select account to use to place the call"));
+
+  gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+      _("Call"), GTK_RESPONSE_OK,
+      NULL);
+
+  response = gtk_dialog_run (GTK_DIALOG (dialog));
+
+  if (response == GTK_RESPONSE_OK)
+    {
+      TpAccount *account;
+
+      account = empathy_account_selector_dialog_dup_selected (
+           EMPATHY_ACCOUNT_SELECTOR_DIALOG (dialog));
+
+      if (account != NULL)
+        {
+          call_phone_number (details, account);
+
+          g_object_unref (account);
+        }
+    }
+
+  gtk_widget_destroy (dialog);
+}
+
+static void
+call_phone_number_cb (GtkMenuItem *item,
+      FolksPhoneFieldDetails *details)
+{
+  GList *accounts;
+
+  accounts = find_phone_accounts ();
+  if (accounts == NULL)
+    {
+      DEBUG ("No phone aware account connected; can't call");
+    }
+  else if (g_list_length (accounts) == 1)
+    {
+      call_phone_number (details, accounts->data);
+    }
+  else
+    {
+      /* Ask which account to use */
+      display_call_phone_dialog (details, accounts);
+    }
+
+  g_list_free_full (accounts, (GDestroyNotify) g_object_unref);
+}
+
+static const gchar *
+find_phone_type (FolksPhoneFieldDetails *details)
+{
+  GeeCollection *types;
+  GeeIterator *iter;
+
+  types = folks_abstract_field_details_get_parameter_values (
+      FOLKS_ABSTRACT_FIELD_DETAILS (details), "type");
+
+  if (types == NULL)
+    return NULL;
+
+  iter = gee_iterable_iterator (GEE_ITERABLE (types));
+  while (gee_iterator_next (iter))
+    {
+      const gchar *type = gee_iterator_get (iter);
+
+      if (!tp_strdiff (type, "CELL"))
+        return _("Mobile");
+      else if (!tp_strdiff (type, "WORK"))
+        return _("Work");
+      else if (!tp_strdiff (type, "HOME"))
+        return _("HOME");
+    }
+
+  return NULL;
+}
+
+static void
+add_phone_numbers (EmpathyIndividualMenu *self)
+{
+  EmpathyIndividualMenuPriv *priv = GET_PRIV (self);
+  GeeSet *all_numbers;
+  GeeIterator *iter;
+  gboolean sensitive;
+
+  all_numbers = folks_phone_details_get_phone_numbers (
+      FOLKS_PHONE_DETAILS (priv->individual));
+
+  sensitive = has_phone_account ();
+
+  iter = gee_iterable_iterator (GEE_ITERABLE (all_numbers));
+  while (gee_iterator_next (iter))
+    {
+      FolksPhoneFieldDetails *details = gee_iterator_get (iter);
+      GtkWidget *item, *image;
+      gchar *tmp;
+      const gchar *type;
+
+      type = find_phone_type (details);
+
+      if (type != NULL)
+        {
+          tmp = g_strdup_printf ("Call %s (%s)",
+              folks_phone_field_details_get_normalised (details),
+              type);
+        }
+      else
+        {
+          tmp = g_strdup_printf ("Call %s",
+              folks_phone_field_details_get_normalised (details));
+        }
+
+      item = gtk_image_menu_item_new_with_mnemonic (tmp);
+      g_free (tmp);
+
+      g_signal_connect_data (item, "activate",
+          G_CALLBACK (call_phone_number_cb), g_object_ref (details),
+          (GClosureNotify) g_object_unref, 0);
+
+      gtk_widget_set_sensitive (item, sensitive);
+
+      image = gtk_image_new_from_icon_name (EMPATHY_IMAGE_CALL,
+          GTK_ICON_SIZE_MENU);
+      gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), image);
+      gtk_widget_show (image);
+
+      gtk_menu_shell_append (GTK_MENU_SHELL (self), item);
+      gtk_widget_show (item);
+    }
+}
+
 static void
 constructed (GObject *object)
 {
+  EmpathyIndividualMenu *self = (EmpathyIndividualMenu *) object;
   EmpathyIndividualMenuPriv *priv = GET_PRIV (object);
   GtkMenuShell *shell;
   GtkWidget *item;
@@ -284,6 +488,9 @@ constructed (GObject *object)
       gtk_menu_shell_append (shell, item);
       gtk_widget_show (item);
     }
+
+  if (features & EMPATHY_INDIVIDUAL_FEATURE_CALL_PHONE)
+    add_phone_numbers (self);
 
   /* Invite */
   item = empathy_individual_invite_menu_item_new (individual, NULL);
