@@ -29,6 +29,7 @@ noinst_LTLIBRARIES = libempathy-gtk.la
 
 libempathy_gtk_handwritten_source =            	\
 	empathy-account-chooser.c		\
+	empathy-account-selector-dialog.c		\
 	empathy-account-widget-irc.c		\
 	empathy-account-widget-private.h	\
 	empathy-account-widget-sip.c		\
@@ -96,6 +97,7 @@ libempathy_gtk_handwritten_source =            	\
 
 libempathy_gtk_headers =			\
 	empathy-account-chooser.h		\
+	empathy-account-selector-dialog.h		\
 	empathy-account-widget-irc.h		\
 	empathy-account-widget-sip.h		\
 	empathy-account-widget.h		\
