@@ -210,7 +210,7 @@ static void
 chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
     xmlNodePtr node)
 {
-  EmpathyChatroom *chatroom;
+  EmpathyChatroom *chatroom = NULL;
   TpAccount *account;
   xmlNodePtr child;
   gchar *str;
@@ -269,6 +269,11 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
       xmlFree (str);
     }
 
+  /* account has to be a valid Account object path */
+  if (!tp_dbus_check_valid_object_path (account_id, NULL) ||
+      !g_str_has_prefix (account_id, TP_ACCOUNT_OBJECT_PATH_BASE))
+    goto out;
+
   factory = empathy_client_factory_dup ();
 
   account = tp_simple_client_factory_ensure_account (
@@ -292,10 +297,11 @@ chatroom_manager_parse_chatroom (EmpathyChatroomManager *manager,
   add_chatroom (manager, chatroom);
   g_signal_emit (manager, signals[CHATROOM_ADDED], 0, chatroom);
 
+out:
   g_free (name);
   g_free (room);
   g_free (account_id);
-  g_object_unref (chatroom);
+  tp_clear_object (&chatroom);
 }
 
 static gboolean
