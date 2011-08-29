@@ -552,7 +552,7 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
 
           g_object_set_data ((GObject *) w, DATA_FIELD, field);
 
-          g_signal_connect (w, "day-selected-double-click",
+          g_signal_connect (w, "day-selected",
             G_CALLBACK (contact_widget_bday_changed_cb), information);
           g_signal_connect (w, "month-changed",
             G_CALLBACK (contact_widget_bday_changed_cb), information);
