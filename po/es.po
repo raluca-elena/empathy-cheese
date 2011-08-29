@@ -1,23 +1,23 @@
 # translation of empathy.master.po to Español
 # Copyright (C) 2003 Free Software Foundation
 # This file is distributed under the same license as the Gossip package.
-# Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010, 2011.
 # Daniel Mustieles <daniel.mustieles@gmail.com>, 2010, 2011.
+# Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-08-25 20:14+0000\n"
-"PO-Revision-Date: 2011-08-26 10:53+0200\n"
-"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
-"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"POT-Creation-Date: 2011-08-29 09:48+0000\n"
+"PO-Revision-Date: 2011-08-29 12:59+0200\n"
+"Last-Translator: Jorge González <jorgegonz@svn.gnome.org>\n"
+"Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: ../data/empathy.desktop.in.in.h:1
 msgid "Chat on Google Talk, Facebook, MSN and many other chat services"
@@ -1313,7 +1313,6 @@ msgid "None of the accepted image formats are supported on your system"
 msgstr "Su sistema no soporta ninguno de los formatos de imagen aceptados"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:818
-#| msgid "Couldn't save pixbuf to png"
 msgid "Couldn't save picture to file"
 msgstr "No se pudo guardar la imagen a un archivo"
 
@@ -1426,8 +1425,8 @@ msgid ""
 "join a new chat room\""
 msgstr ""
 "/say <mensaje>: enviar un <mensaje> a la conversación actual. Esto se usa "
-"para enviar un mensaje comenzando por una «/». Por ejemplo: «/say /join se usa "
-"para unirse a una sala de chat nueva»"
+"para enviar un mensaje comenzando por una «/». Por ejemplo: «/say /join se "
+"usa para unirse a una sala de chat nueva»"
 
 #: ../libempathy-gtk/empathy-chat.c:1064
 msgid "/whois <contact ID>: display information about a contact"
@@ -1817,48 +1816,48 @@ msgid "_Block Contact"
 msgstr "_Bloquear contacto"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:329
-#: ../libempathy-gtk/empathy-individual-menu.c:551
+#: ../libempathy-gtk/empathy-individual-menu.c:758
 #: ../src/empathy-main-window-menubar.ui.h:16
 msgid "_Chat"
 msgstr "_Chat"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:361
-#: ../libempathy-gtk/empathy-individual-menu.c:642
+#: ../libempathy-gtk/empathy-individual-menu.c:849
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "Llamada de vo_z"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:394
-#: ../libempathy-gtk/empathy-individual-menu.c:687
+#: ../libempathy-gtk/empathy-individual-menu.c:894
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "Llamada de _vídeo"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:440
-#: ../libempathy-gtk/empathy-individual-menu.c:740
+#: ../libempathy-gtk/empathy-individual-menu.c:947
 #: ../src/empathy-main-window-menubar.ui.h:27
 msgid "_Previous Conversations"
 msgstr "Conversaciones an_teriores"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:462
-#: ../libempathy-gtk/empathy-individual-menu.c:781
+#: ../libempathy-gtk/empathy-individual-menu.c:988
 msgid "Send File"
 msgstr "Enviar archivo"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:485
-#: ../libempathy-gtk/empathy-individual-menu.c:823
+#: ../libempathy-gtk/empathy-individual-menu.c:1030
 msgid "Share My Desktop"
 msgstr "Compartir mi escritorio"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:525
 #: ../libempathy-gtk/empathy-contact-widget.c:1886
-#: ../libempathy-gtk/empathy-individual-menu.c:858
+#: ../libempathy-gtk/empathy-individual-menu.c:1065
 #: ../libempathy-gtk/empathy-individual-widget.c:1373
 msgid "Favorite"
 msgstr "Favorita"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:554
-#: ../libempathy-gtk/empathy-individual-menu.c:886
+#: ../libempathy-gtk/empathy-individual-menu.c:1093
 msgid "Infor_mation"
 msgstr "Infor_mación"
 
@@ -1868,13 +1867,13 @@ msgid "_Edit"
 msgstr "_Editar"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:654
-#: ../libempathy-gtk/empathy-individual-menu.c:1076
+#: ../libempathy-gtk/empathy-individual-menu.c:1283
 #: ../src/empathy-chat-window.c:1011
 msgid "Inviting you to this room"
 msgstr "Invitándolo a esta sala"
 
 #: ../libempathy-gtk/empathy-contact-menu.c:685
-#: ../libempathy-gtk/empathy-individual-menu.c:1122
+#: ../libempathy-gtk/empathy-individual-menu.c:1329
 msgid "_Invite to Chat Room"
 msgstr "_Invitar a sala de chat"
 
@@ -2208,25 +2207,52 @@ msgstr ""
 #. Translators: this is used in the context menu for a contact. The first
 #. * parameter is a contact ID (e.g. foo@jabber.org) and the second is one
 #. * of the user's account IDs (e.g. me@hotmail.com).
-#: ../libempathy-gtk/empathy-individual-menu.c:141
+#: ../libempathy-gtk/empathy-individual-menu.c:145
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
+#: ../libempathy-gtk/empathy-individual-menu.c:309
+msgid "Select account to use to place the call"
+msgstr "Seleccionar la cuenta que usar para realizar la llamada"
+
+#. translators: Call is a noun. This string is used in the window
+#. * title
+#: ../libempathy-gtk/empathy-individual-menu.c:313
+#: ../libempathy-gtk/empathy-log-window.ui.h:2
+#: ../src/empathy-streamed-media-window.c:1299
+#: ../src/empathy-call-window.ui.h:2
+msgid "Call"
+msgstr "Llamar"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:378
+#| msgid "Profile"
+msgid "Mobile"
+msgstr "Móvil"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:380
+#| msgid "Word"
+msgid "Work"
+msgstr "Trabajo"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:382
+msgid "HOME"
+msgstr "Casa"
+
 #. add an SMS button
-#: ../libempathy-gtk/empathy-individual-menu.c:597
+#: ../libempathy-gtk/empathy-individual-menu.c:804
 #: ../libempathy-gtk/empathy-new-message-dialog.c:215
 msgid "_SMS"
 msgstr "_SMS"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:934
+#: ../libempathy-gtk/empathy-individual-menu.c:1141
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "_Editar"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:960
+#: ../libempathy-gtk/empathy-individual-menu.c:1167
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "_Enlazar contactos…"
@@ -2459,14 +2485,6 @@ msgstr "Eliminar de:"
 #: ../libempathy-gtk/empathy-log-window.ui.h:1
 msgid "<span size=\"x-large\">Loading...</span>"
 msgstr "<span size=\"x-large\">Cargando…</span>"
-
-#. translators: Call is a noun. This string is used in the window
-#. * title
-#: ../libempathy-gtk/empathy-log-window.ui.h:2
-#: ../src/empathy-streamed-media-window.c:1299
-#: ../src/empathy-call-window.ui.h:2
-msgid "Call"
-msgstr "Llamar"
 
 #: ../libempathy-gtk/empathy-log-window.ui.h:3
 #: ../src/empathy-chat-window.ui.h:3
@@ -5113,9 +5131,6 @@ msgstr "_Coincidir con capitalización"
 
 #~ msgid "_Check Word Spelling..."
 #~ msgstr "_Comprobar ortografía…"
-
-#~ msgid "Word"
-#~ msgstr "Palabra"
 
 #~ msgid "Suggestions for the word"
 #~ msgstr "Sugerencias para la palabra"
