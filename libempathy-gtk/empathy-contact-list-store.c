@@ -70,7 +70,7 @@ typedef struct {
 	guint                       setup_idle_id;
 	gboolean                    dispose_has_run;
 	GHashTable                  *status_icons;
-	/* Hash: EmpathyContact* -> GQueue(GtkTreeRowReference) */
+	/* Hash: EmpathyContact* -> GQueue (GtkTreeRowReference) */
 	GHashTable                  *empathy_contact_cache;
 	/* Hash: char *groupname -> GtkTreeRowReference *row */
 	GHashTable                  *empathy_group_cache;

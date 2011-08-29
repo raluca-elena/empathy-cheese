@@ -73,7 +73,7 @@ typedef struct
   GHashTable *status_icons;
   /* List of owned GCancellables for each pending avatar load operation */
   GList *avatar_cancellables;
-  /* Hash: FolksIndividual* -> GQueue(GtkTreeRowReference) */
+  /* Hash: FolksIndividual* -> GQueue (GtkTreeRowReference) */
   GHashTable                  *folks_individual_cache;
   /* Hash: char *groupname -> GtkTreeRowReference *row */
   GHashTable                  *empathy_group_cache;
@@ -258,7 +258,7 @@ individual_store_get_group (EmpathyIndividualStore *self,
 
   model = GTK_TREE_MODEL (self);
   row_ref = g_hash_table_lookup (priv->empathy_group_cache, name);
-  
+
   if (row_ref == NULL)
     {
       GtkTreePath *path;
