@@ -1,3 +1,42 @@
+NEW in 3.1.90 (29/08/2011)
+=============
+
+SIP accounts can now be marked as being able to make PSTN calls. Such accounts
+can be used to call landline and mobile phones of contacts.
+At the moment, this is only possible if the IM contact is linked with a
+contact from Evolution's addressbook containing at least one phone field.
+
+Bugs fixed:
+ - Fixed #650113, Chat search bar is LITERALLY THE WORST THING EVER (Jonny Lamb)
+ - Fixed #647124, crash in empathy-call (Sjoerd Simons)
+ - Fixed #657086, Contact list is slow with loads of contacts (Alban Crequy)
+ - Fixed #657562, Birthday on jabber account : can't chose the day (Guillaume Desmottes)
+ - Fixed #650112, Allow to call phone number of contacts (Guillaume Desmottes)
+ - Fixed #657362, [oneiric] empathy crash at launch (Guillaume Desmottes)
+ - Fixed #656682, Empathy exits due to problem in the main loop exits with "Too many open files" (Philip Withnall, Will Thompson)
+ - Fixed #657166, Unclear error message visible to users (Milo Casagrande)
+ - Fixed #657271, SIGSEGV from g_settings_bind_with_mapping (Raluca Elena Podiuc)
+ - Fixed #657173, auto accept publish requests even if contact has subscription=none (Xavier Claessens)
+ - Fixed #657220, Add option to use account for phone calls (Guillaume Desmottes)
+ - Fixed #657105, Clicking the spinner icon does not bring up the preference dialog (Guillaume Desmottes)
+ - Fixed #657104, The "quit message" entry should be a normal entry instead of a password entry (Guillaume Desmottes)
+ - Fixed #656829, empathy crashed with SIGSEGV in __memcpy_ssse3() (Guillaume Desmottes)
+ - Fixed #642385, Incomplete list of servers and port numbers for Freenode (Debarshi Ray)
+
+Translations:
+ - Updated be Translation (Ihar Hrachyshka)
+ - Updated de Translation (Mario Blättermann)
+ - Updated es Translation (Jorge González, Daniel Mustieles)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Wouter Bolsterlee)
+ - Updated pt_BR Translation (Og B. Maciel)
+ - Updated ru Translation (Yuri Myasoedov)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated zh_HK Translation (Cheng-Chia Tseng)
+ - Updated zh_TW Translation (Cheng-Chia Tseng)
+
 NEW in 3.1.5.1 (22/08/2011)
 ==============
 
