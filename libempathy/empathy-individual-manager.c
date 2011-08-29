@@ -162,16 +162,20 @@ individual_notify_personas_cb (FolksIndividual *individual,
 
 static void
 aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
-    GeeSet *added,
-    GeeSet *removed,
-    const char *message,
-    FolksPersona *actor,
-    guint reason,
+    GeeMultiMap *changes,
     EmpathyIndividualManager *self)
 {
   EmpathyIndividualManagerPriv *priv = GET_PRIV (self);
   GeeIterator *iter;
-  GList *added_filtered = NULL, *removed_list = NULL;
+  GeeSet *removed;
+  GeeCollection *added;
+  GList *added_set = NULL, *added_filtered = NULL, *removed_list = NULL;
+
+  /* We're not interested in the relationships between the added and removed
+   * individuals, so just extract collections of them. Note that the added
+   * collection may contain duplicates, while the removed set won't. */
+  removed = gee_multi_map_get_keys (changes);
+  added = gee_multi_map_get_values (changes);
 
   /* Handle the removals first, as one of the added Individuals might have the
    * same ID as one of the removed Individuals (due to linking). */
@@ -179,6 +183,9 @@ aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
   while (gee_iterator_next (iter))
     {
       FolksIndividual *ind = gee_iterator_get (iter);
+
+      if (ind == NULL)
+        continue;
 
       g_signal_handlers_disconnect_by_func (ind,
           individual_notify_personas_cb, self);
@@ -200,6 +207,11 @@ aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
     {
       FolksIndividual *ind = gee_iterator_get (iter);
 
+      /* Make sure we handle each added individual only once. */
+      if (ind == NULL || g_list_find (added_set, ind) != NULL)
+        continue;
+      added_set = g_list_prepend (added_set, ind);
+
       g_signal_connect (ind, "notify::personas",
           G_CALLBACK (individual_notify_personas_cb), self);
 
@@ -213,15 +225,20 @@ aggregator_individuals_changed_cb (FolksIndividualAggregator *aggregator,
     }
   g_clear_object (&iter);
 
+  g_list_free (added_set);
+
+  g_object_unref (added);
+  g_object_unref (removed);
+
   /* Bail if we have no individuals left */
   if (added_filtered == NULL && removed == NULL)
     return;
 
   added_filtered = g_list_reverse (added_filtered);
 
-  g_signal_emit (self, signals[MEMBERS_CHANGED], 0, message,
+  g_signal_emit (self, signals[MEMBERS_CHANGED], 0, NULL,
       added_filtered, removed_list,
-      tp_channel_group_change_reason_from_folks_groups_change_reason (reason),
+      TP_CHANNEL_GROUP_CHANGE_REASON_NONE,
       TRUE);
 
   g_list_free (added_filtered);
@@ -334,7 +351,7 @@ empathy_individual_manager_init (EmpathyIndividualManager *self)
       g_free, g_object_unref);
 
   priv->aggregator = folks_individual_aggregator_new ();
-  g_signal_connect (priv->aggregator, "individuals-changed",
+  g_signal_connect (priv->aggregator, "individuals-changed-detailed",
       G_CALLBACK (aggregator_individuals_changed_cb), self);
   folks_individual_aggregator_prepare (priv->aggregator, NULL, NULL);
 }
