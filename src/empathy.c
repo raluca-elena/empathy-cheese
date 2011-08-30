@@ -272,7 +272,7 @@ list_names_cb (TpDBusDaemon *bus_daemon,
 out:
   if (self->shell_running)
     {
-      DEBUG ("GNOMES Shell is running, don't create status icon");
+      DEBUG ("GNOME Shell is running, don't create status icon");
     }
   else
     {
