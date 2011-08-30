@@ -128,6 +128,8 @@ struct _EmpathyApp
 #ifdef ENABLE_DEBUG
   TpDebugSender *debug_sender;
 #endif
+
+  gboolean shell_running;
 };
 
 
@@ -140,7 +142,10 @@ empathy_app_dispose (GObject *object)
   void (*dispose) (GObject *) =
     G_OBJECT_CLASS (empathy_app_parent_class)->dispose;
 
-  if (self->presence_mgr != NULL)
+  /* Only set our presence to offline when exiting if GNOME Shell is not
+   * running */
+  if (self->presence_mgr != NULL &&
+      !self->shell_running)
     {
       empathy_presence_manager_set_state (self->presence_mgr,
           TP_CONNECTION_PRESENCE_TYPE_OFFLINE);
@@ -250,7 +255,6 @@ list_names_cb (TpDBusDaemon *bus_daemon,
         GObject *weak_object)
 {
   EmpathyApp *self = (EmpathyApp *) weak_object;
-  gboolean shell_running = FALSE;
   guint i;
 
   if (error != NULL)
@@ -260,13 +264,13 @@ list_names_cb (TpDBusDaemon *bus_daemon,
     {
       if (!tp_strdiff (names[i], GNOME_SHELL_BUS_NAME))
         {
-          shell_running = TRUE;
+          self->shell_running = TRUE;
           break;
         }
     }
 
 out:
-  if (shell_running)
+  if (self->shell_running)
     {
       DEBUG ("GNOMES Shell is running, don't create status icon");
     }
