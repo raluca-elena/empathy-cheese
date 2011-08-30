@@ -141,6 +141,7 @@ struct _EmpathyCallWindowPriv
    * alive only during call. */
   ClutterActor *video_output;
   ClutterActor *video_preview;
+  ClutterActor *drag_preview;
   ClutterActor *preview_shown_button;
   ClutterActor *preview_hidden_button;
   ClutterActor *preview_rectangle1;
@@ -875,17 +876,21 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
     EmpathyCallWindow *self)
 {
   ClutterActor *stage = clutter_actor_get_stage (actor);
-  ClutterActor *preview = clutter_clone_new (actor);
   gfloat rel_x, rel_y;
 
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), preview);
+  self->priv->drag_preview = clutter_clone_new (actor);
+
+  clutter_container_add_actor (CLUTTER_CONTAINER (stage),
+      self->priv->drag_preview);
 
   clutter_actor_transform_stage_point (actor, event_x, event_y,
       &rel_x, &rel_y);
 
-  clutter_actor_set_position (preview, event_x - rel_x, event_y - rel_y);
+  clutter_actor_set_position (self->priv->drag_preview,
+      event_x - rel_x, event_y - rel_y);
 
-  clutter_drag_action_set_drag_handle (action, preview);
+  clutter_drag_action_set_drag_handle (action,
+      self->priv->drag_preview);
 
   clutter_actor_set_opacity (actor, 0);
   clutter_actor_hide (self->priv->preview_shown_button);
@@ -902,7 +907,6 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     ClutterModifierType modifiers,
     EmpathyCallWindow *self)
 {
-  ClutterActor *preview = clutter_drag_action_get_drag_handle (action);
   PreviewPosition pos;
 
   /* Get the position before destroying the drag actor, otherwise the
@@ -911,7 +915,8 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
   pos = empathy_call_window_get_preview_position (self, event_x, event_y);
 
   /* Destroy the video preview copy that we were dragging */
-  clutter_actor_destroy (preview);
+  clutter_actor_destroy (self->priv->drag_preview);
+  self->priv->drag_preview = NULL;
 
   clutter_actor_set_opacity (actor, 255);
   clutter_actor_show (self->priv->preview_shown_button);
@@ -2260,6 +2265,15 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       if (priv->video_preview != NULL)
         clutter_actor_destroy (priv->video_preview);
       priv->video_preview = NULL;
+
+      /* If we destroy the preview while it's being dragged, we won't
+       * get the ::drag-end signal, so manually destroy the clone */
+      if (priv->drag_preview != NULL)
+        {
+          clutter_actor_destroy (priv->drag_preview);
+          empathy_call_window_show_preview_rectangles (self, FALSE);
+          priv->drag_preview = NULL;
+        }
 
       priv->funnel = NULL;
 
