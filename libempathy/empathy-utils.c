@@ -780,6 +780,10 @@ empathy_connection_can_add_personas (TpConnection *connection)
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
+  if (tp_connection_get_status (connection, NULL) !=
+          TP_CONNECTION_STATUS_CONNECTED)
+      return FALSE;
+
   persona_store = FOLKS_PERSONA_STORE (
       empathy_dup_persona_store_for_connection (connection));
 
@@ -799,6 +803,10 @@ empathy_connection_can_alias_personas (TpConnection *connection)
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
+  if (tp_connection_get_status (connection, NULL) !=
+          TP_CONNECTION_STATUS_CONNECTED)
+      return FALSE;
+
   persona_store = FOLKS_PERSONA_STORE (
       empathy_dup_persona_store_for_connection (connection));
 
@@ -817,6 +825,10 @@ empathy_connection_can_group_personas (TpConnection *connection)
   FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
+
+  if (tp_connection_get_status (connection, NULL) !=
+          TP_CONNECTION_STATUS_CONNECTED)
+      return FALSE;
 
   persona_store = FOLKS_PERSONA_STORE (
       empathy_dup_persona_store_for_connection (connection));
