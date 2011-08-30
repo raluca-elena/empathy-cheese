@@ -1,4 +1,12 @@
 <schemalist>
+
+  <enum id="position">
+    <value nick="top-left" value="1"/>
+    <value nick="top-right" value="2"/>
+    <value nick="bottom-left" value="3"/>
+    <value nick="bottom-right" value="4"/>
+  </enum>
+
   <schema id="org.gnome.Empathy" path="/org/gnome/empathy/">
     <key name="use-conn" type="b">
       <default>true</default>
@@ -235,6 +243,11 @@ present them to the user immediately.</_description>
       <default>''</default>
       <_summary>Camera device</_summary>
       <_description>Default camera device to use in video calls, e.g. /dev/video0.</_description>
+    </key>
+    <key name="camera-position" enum="position">
+      <default>'bottom-left'</default>
+      <_summary>Camera position</_summary>
+      <_description>Position the camera preview should be during a call.</_description>
     </key>
     <key name="echo-cancellation" type="b">
       <default>true</default>

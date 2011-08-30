@@ -810,6 +810,8 @@ empathy_call_window_move_video_preview (EmpathyCallWindow *self,
       default:
         g_warn_if_reached ();
     }
+
+  g_settings_set_enum (self->priv->settings, "camera-position", pos);
 }
 
 static void
@@ -985,8 +987,11 @@ create_video_preview (EmpathyCallWindow *self)
   ClutterActor *b;
   ClutterAction *action;
   GtkWidget *button;
+  PreviewPosition pos;
 
   g_assert (priv->video_preview == NULL);
+
+  pos = g_settings_get_enum (priv->settings, "camera-position");
 
   preview = empathy_rounded_texture_new ();
   clutter_actor_set_size (preview,
@@ -1071,6 +1076,8 @@ create_video_preview (EmpathyCallWindow *self)
       priv->video_preview,
       CLUTTER_BIN_ALIGNMENT_START,
       CLUTTER_BIN_ALIGNMENT_END);
+
+  empathy_call_window_move_video_preview (self, pos);
 
   action = clutter_drag_action_new ();
   g_signal_connect (action, "drag-begin",
