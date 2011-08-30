@@ -245,6 +245,17 @@ empathy_app_local_command_line (GApplication *app,
     gchar ***arguments,
     gint *exit_status);
 
+static void
+empathy_presence_manager_set_auto_away_cb (GSettings *gsettings,
+    const gchar *key,
+    gpointer user_data)
+{
+  EmpathyPresenceManager *presence_mgr = user_data;
+
+  empathy_presence_manager_set_auto_away (presence_mgr,
+      g_settings_get_boolean (gsettings, key));
+}
+
 #define GNOME_SHELL_BUS_NAME "org.gnome.Shell"
 
 static void
@@ -273,11 +284,27 @@ out:
   if (self->shell_running)
     {
       DEBUG ("GNOME Shell is running, don't create status icon");
+
+      /* Rely on GNOME Shell to watch session state */
+      empathy_presence_manager_set_auto_away (self->presence_mgr, FALSE);
     }
   else
     {
+      gboolean autoaway;
+
       self->icon = empathy_status_icon_new (GTK_WINDOW (self->window),
           self->start_hidden);
+
+      /* Allow Empathy to watch session state */
+      autoaway = g_settings_get_boolean (self->gsettings,
+          EMPATHY_PREFS_AUTOAWAY);
+
+      g_signal_connect (self->gsettings,
+          "changed::" EMPATHY_PREFS_AUTOAWAY,
+          G_CALLBACK (empathy_presence_manager_set_auto_away_cb),
+          self->presence_mgr);
+
+      empathy_presence_manager_set_auto_away (self->presence_mgr, autoaway);
     }
 }
 
@@ -726,22 +753,10 @@ chatroom_manager_ready_cb (EmpathyChatroomManager *chatroom_manager,
 }
 
 static void
-empathy_presence_manager_set_auto_away_cb (GSettings *gsettings,
-				const gchar *key,
-				gpointer user_data)
-{
-	EmpathyPresenceManager *presence_mgr = user_data;
-
-	empathy_presence_manager_set_auto_away (presence_mgr,
-      g_settings_get_boolean (gsettings, key));
-}
-
-static void
 empathy_app_constructed (GObject *object)
 {
   EmpathyApp *self = (EmpathyApp *) object;
   gboolean chatroom_manager_ready;
-  gboolean autoaway;
 
   g_set_application_name (_(PACKAGE_NAME));
 
@@ -760,14 +775,6 @@ empathy_app_constructed (GObject *object)
   self->presence_mgr = empathy_presence_manager_dup_singleton ();
 
   self->gsettings = g_settings_new (EMPATHY_PREFS_SCHEMA);
-  autoaway = g_settings_get_boolean (self->gsettings, EMPATHY_PREFS_AUTOAWAY);
-
-  g_signal_connect (self->gsettings,
-      "changed::" EMPATHY_PREFS_AUTOAWAY,
-      G_CALLBACK (empathy_presence_manager_set_auto_away_cb),
-      self->presence_mgr);
-
-  empathy_presence_manager_set_auto_away (self->presence_mgr, autoaway);
 
   /* Setting up Connectivity */
   self->connectivity = empathy_connectivity_dup_singleton ();
