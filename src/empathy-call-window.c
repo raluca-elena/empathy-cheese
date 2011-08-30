@@ -707,8 +707,8 @@ empathy_call_window_get_preview_position (EmpathyCallWindow *self,
   ClutterGeometry box;
   PreviewPosition pos = PREVIEW_POS_NONE;
 
-  g_return_val_if_fail (clutter_actor_has_allocation (self->priv->video_box),
-      pos);
+  if (!clutter_actor_has_allocation (self->priv->video_box))
+    return pos;
 
   clutter_actor_get_geometry (self->priv->video_box, &box);
 
