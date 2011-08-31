@@ -301,27 +301,11 @@ mcp_account_manager_goa_list (const McpAccountStorage *self,
 static void
 get_enabled (const McpAccountStorage *self,
     const McpAccountManager *am,
-    const gchar *acct)
+    const gchar *acct,
+    GoaObject *object)
 {
-  // McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
-  // GError *error = NULL;
-  // gboolean enabled;
-  // const char *value;
-
-  // enabled = gconf_client_get_bool (priv->gconf,
-  //     BISHO_FB_GCONF_ENABLE_CHAT_KEY, &error);
-  // if (error != NULL)
-  //   {
-  //     g_warning ("Unabled to get value for %s/Enabled from GConf: %s",
-  //         acct, error->message);
-  //     g_clear_error (&error);
-  //   }
-
-  // value = enabled ? "true" : "false";
-
-  // DEBUG ("Facebook Chat enabled = %s", value);
-
-  mcp_account_manager_set_value (am, acct, "Enabled", "true");
+  mcp_account_manager_set_value (am, acct, "Enabled",
+      goa_object_peek_chat (object) != NULL ? "true" : "false");
 }
 
 
@@ -360,11 +344,11 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
 
       g_hash_table_destroy (params);
 
-      get_enabled (self, am, acct);
+      get_enabled (self, am, acct, object);
     }
   else if (!tp_strdiff (key, "Enabled"))
     {
-      get_enabled (self, am, acct);
+      get_enabled (self, am, acct, object);
     }
   else
     {
