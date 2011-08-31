@@ -96,6 +96,10 @@ empathy_import_protocol_is_supported (const gchar *protocol,
       if (tp_connection_manager_has_protocol (tp_cm,
           (const gchar*) protocol))
         {
+          if (!tp_strdiff (protocol, "irc")
+              && !tp_strdiff (tp_cm->name, "haze"))
+              continue;
+
           if (!proto_is_supported)
             {
               *cm = tp_cm;
