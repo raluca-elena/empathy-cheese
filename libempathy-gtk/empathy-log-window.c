@@ -1200,7 +1200,7 @@ get_parent_iter_for_message (TplEvent *event,
       GDateTime *date;
       gchar *body, *pretty_date;
 
-      date = g_date_time_new_from_unix_utc (
+      date = g_date_time_new_from_unix_local (
           tpl_event_get_timestamp (event));
 
       pretty_date = g_date_time_format (date,
@@ -1270,7 +1270,7 @@ log_window_append_chat_message (TplEvent *event,
   EmpathyStringParser *parsers;
   GString *msg;
 
-  date = g_date_time_new_from_unix_utc (
+  date = g_date_time_new_from_unix_local (
       tpl_event_get_timestamp (event));
 
   pretty_date = g_date_time_format (date, "%X");
@@ -1347,7 +1347,7 @@ log_window_append_call (TplEvent *event,
         }
     }
 
-  started_date = g_date_time_new_from_unix_utc (
+  started_date = g_date_time_new_from_unix_local (
       tpl_event_get_timestamp (event));
 
   pretty_date = g_date_time_format (started_date,
