@@ -154,9 +154,10 @@ static guint signals[LAST_SIGNAL] = { 0 };
 #define ALPHADIGITDASHS   "(["ALPHADIGITDASH"]*)"
 
 #define HOSTNUMBER        "("DIGITS"\\."DIGITS"\\."DIGITS"\\."DIGITS")"
-#define TOPLABEL          ALPHAS"|(["ALPHA"]" ALPHADIGITDASHS "["ALPHADIGIT"])"
-#define DOMAINLABEL       ALPHADIGITS"|(["ALPHADIGIT"]" ALPHADIGITDASHS \
-                                       "["ALPHADIGIT"])"
+#define TOPLABEL          "("ALPHAS \
+                            "| (["ALPHA"]"ALPHADIGITDASHS "["ALPHADIGIT"]))"
+#define DOMAINLABEL       "("ALPHADIGITS"|(["ALPHADIGIT"]" ALPHADIGITDASHS \
+                                       "["ALPHADIGIT"]))"
 #define HOSTNAME          "((" DOMAINLABEL "\\.)+" TOPLABEL ")"
 /* Based on http://www.ietf.org/rfc/rfc1738.txt (section 5) */
 #define HOST              "("HOSTNAME "|" HOSTNUMBER")"
