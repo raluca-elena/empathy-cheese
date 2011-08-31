@@ -12,7 +12,7 @@ CPPFLAGS_COMMON =					\
 	$(WARN_CFLAGS)					\
 	$(NULL)
 
-AM_LDFLAGS = -lm
+AM_LDFLAGS = $(LIBM)
 AM_CPPFLAGS =						\
 	$(CPPFLAGS_COMMON)				\
 	$(LIBCHAMPLAIN_CFLAGS)				\
@@ -130,7 +130,7 @@ empathy_av_SOURCES = \
 nodist_empathy_av_SOURCES = $(BUILT_SOURCES)
 
 empathy_av_CFLAGS = $(EMPATHY_AV_CFLAGS)
-empathy_av_LDFLAGS = $(EMPATHY_AV_LIBS) -lm
+empathy_av_LDFLAGS = $(EMPATHY_AV_LIBS) $(LIBM)
 
 empathy_auth_client_SOURCES =						\
 	empathy-auth-client.c \

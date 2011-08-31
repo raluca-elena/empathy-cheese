@@ -167,6 +167,9 @@ AC_SUBST(LDFLAGS)
 # Pkg-Config dependency checks
 # -----------------------------------------------------------
 
+AC_CHECK_LIBM
+AC_SUBST(LIBM)
+
 PKG_CHECK_MODULES(EMPATHY,
 [
    dbus-glib-1
