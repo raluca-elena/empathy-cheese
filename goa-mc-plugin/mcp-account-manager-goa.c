@@ -102,9 +102,6 @@ get_tp_parameters (GoaAccount *account)
 
 #define PARAM(key, value) g_hash_table_insert (params, key, g_strdup (value));
 
- // { "param-account", "chat.facebook.com" },
- // { "param-server", "chat.facebook.com" },
-
   if (!tp_strdiff (type, "google"))
     {
       PARAM ("manager", "gabble");
@@ -127,6 +124,8 @@ get_tp_parameters (GoaAccount *account)
       g_hash_table_destroy (params);
       return NULL;
     }
+
+  /* TODO: add Facebook support */
 
   /* generic properties */
   PARAM ("DisplayName", goa_account_get_presentation_identity (account));
@@ -373,33 +372,6 @@ mcp_account_manager_goa_set (const McpAccountStorage *self,
 
   /* Pretend we save everything so MC won't save this in accounts.cfg */
   return TRUE;
-  // if (!tp_strdiff (acct, FACEBOOK_ACCOUNT_NAME))
-  //   {
-  //     if (!tp_strdiff (key, "Enabled"))
-  //       {
-  //         gboolean enabled = !tp_strdiff (val, "true");
-
-  //         DEBUG ("set Enabled to %s", enabled ? "enabled" : "disabled");
-
-  //         gconf_client_set_bool (priv->gconf, BISHO_FB_GCONF_ENABLE_CHAT_KEY,
-  //             enabled, &error);
-  //         if (error != NULL)
-  //           {
-  //             g_warning ("Unable to save %s/Enable state in GConf: %s",
-  //                 acct, error->message);
-  //             g_clear_error (&error);
-  //           }
-
-  //         return TRUE;
-  //       }
-  //     else
-  //       /* pretend we saved everything else */
-  //       return TRUE;
-  //   }
-  // else
-  //   {
-  //     return FALSE;
-  //   }
 }
 
 
@@ -411,18 +383,8 @@ mcp_account_manager_goa_delete (const McpAccountStorage *self,
 {
   DEBUG ("%s: (%s, %s)", G_STRFUNC, acct, key);
 
-//  if (!tp_strdiff (acct, FACEBOOK_ACCOUNT_NAME))
-//    {
-//      if (!tp_strdiff (key, "Enabled"))
-//        return TRUE;
-//      else
-//        /* pretend we deleted everything else */
-//        return TRUE;
-//    }
-//  else
-//    {
-//      return FALSE;
-//    }
+  /* Pretend we deleted everything */
+  return TRUE;
 }
 
 
