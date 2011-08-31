@@ -2004,6 +2004,12 @@ empathy_call_window_constructed (GObject *object)
   g_object_get (priv->handler, "target-contact", &priv->contact, NULL);
   g_assert (priv->contact != NULL);
 
+  if (!empathy_contact_can_voip_video (priv->contact))
+    {
+      gtk_widget_set_sensitive (priv->video_call_button, FALSE);
+      gtk_widget_set_sensitive (priv->camera_button, FALSE);
+    }
+
   empathy_call_window_setup_avatars (self, priv->handler);
   empathy_call_window_set_state_connecting (self);
 
