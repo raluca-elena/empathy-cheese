@@ -413,7 +413,8 @@ mcp_account_manager_goa_get_restrictions (const McpAccountStorage *self,
     const gchar *account)
 {
   return TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS |
-         TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE;
+         TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_SERVICE |
+         TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_ENABLED;
 }
 
 
