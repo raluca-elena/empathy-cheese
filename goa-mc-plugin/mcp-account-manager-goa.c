@@ -55,7 +55,7 @@ struct _McpAccountManagerGoaPrivate
   gboolean ready;
 
   GoaClient *client;
-  GHashTable *accounts; /* alloc'ed string -> ref'ed GoaAccount */
+  GHashTable *accounts; /* alloc'ed string -> ref'ed GoaObject */
 };
 
 
@@ -184,8 +184,9 @@ get_tp_account_name (GoaAccount *account)
 
 static void
 _new_account (McpAccountManagerGoa *self,
-    GoaAccount *account)
+    GoaObject *object)
 {
+  GoaAccount *account = goa_object_peek_account (object);
   char *account_name = get_tp_account_name (account);
 
   if (account_name == NULL)
@@ -193,7 +194,7 @@ _new_account (McpAccountManagerGoa *self,
 
   /* @account_name now is owned by the hash table */
   g_hash_table_insert (self->priv->accounts, account_name,
-      g_object_ref (account));
+      g_object_ref (object));
 
   if (self->priv->ready)
     g_signal_emit_by_name (self, "created", account_name);
@@ -222,9 +223,7 @@ _account_added_cb (GoaClient *client,
     GoaObject *object,
     McpAccountManagerGoa *self)
 {
-      GoaAccount *account = goa_object_peek_account (object);
-
-      _new_account (self, account);
+  _new_account (self, object);
 }
 
 
@@ -267,9 +266,7 @@ _goa_client_new_cb (GObject *obj,
 
   for (ptr = accounts; ptr != NULL; ptr = ptr->next)
     {
-      GoaAccount *account = goa_object_peek_account (ptr->data);
-
-      _new_account (self, account);
+      _new_account (self, ptr->data);
     }
 
   g_list_free_full (accounts, g_object_unref);
@@ -335,11 +332,17 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
     const gchar *key)
 {
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+  GoaObject *object;
   GoaAccount *account;
 
   DEBUG ("%s: %s, %s", G_STRFUNC, acct, key);
 
-  account = g_hash_table_lookup (priv->accounts, acct);
+  object = g_hash_table_lookup (priv->accounts, acct);
+
+  if (object == NULL)
+    return FALSE;
+
+  account = goa_object_peek_account (object);
 
   if (account == NULL)
     return FALSE;
@@ -477,10 +480,13 @@ mcp_account_manager_goa_get_identifier (const McpAccountStorage *self,
     GValue *identifier)
 {
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+  GoaObject *object;
   GoaAccount *account;
 
-  account = g_hash_table_lookup (priv->accounts, acct);
+  object = g_hash_table_lookup (priv->accounts, acct);
+  g_return_if_fail (object != NULL);
 
+  account = goa_object_peek_account (object);
   g_return_if_fail (account != NULL);
 
   g_value_init (identifier, G_TYPE_STRING);
