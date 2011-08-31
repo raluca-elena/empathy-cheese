@@ -2033,6 +2033,14 @@ individual_store_get_individual_status_icon_with_icon_name (
           icon_name = g_strdup_printf ("%s-%s", status_icon_name,
               protocol_name);
         }
+      else
+        {
+          g_warning ("Cannot retrieve contact from individual '%s'",
+              folks_alias_details_get_alias (
+                FOLKS_ALIAS_DETAILS (individual)));
+
+          return NULL;
+        }
     }
   else
     {
