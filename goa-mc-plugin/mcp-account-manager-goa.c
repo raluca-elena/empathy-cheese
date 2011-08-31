@@ -93,28 +93,6 @@ mcp_account_manager_goa_class_init (McpAccountManagerGoaClass *klass)
       sizeof (McpAccountManagerGoaPrivate));
 }
 
-
-// static void
-// _enable_chat_toggled (GConfClient *client,
-//     guint cnxn_id,
-//     GConfEntry *entry,
-//     gpointer user_data)
-// {
-//   McpAccountStorage *self = MCP_ACCOUNT_STORAGE (user_data);
-//   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
-//   gboolean enabled = gconf_value_get_bool (gconf_entry_get_value (entry));
-// 
-//   DEBUG ("%s: %s", G_STRFUNC, enabled ? "enabled" : "disabled");
-// 
-//   if (priv->ready && priv->facebook_available)
-//     {
-//       DEBUG ("Emitting toggled signal");
-// 
-//       g_signal_emit_by_name (self, "toggled", FACEBOOK_ACCOUNT_NAME, enabled);
-//     }
-// }
-
-
 static GHashTable *
 get_tp_parameters (GoaAccount *account)
 {
@@ -243,6 +221,22 @@ _account_removed_cb (GoaClient *client,
   g_free (name);
 }
 
+static void
+_account_changed_cb (GoaClient *client,
+    GoaObject *object,
+    McpAccountManagerGoa *self)
+{
+  GoaAccount *account = goa_object_peek_account (object);
+  char *name = get_tp_account_name (account);
+  gboolean enabled;
+
+  enabled = (goa_object_peek_chat (object) != NULL);
+
+  DEBUG ("%s %s", name, enabled ? "enabled" : "disabled");
+
+  if (self->priv->ready)
+    g_signal_emit_by_name (self, "toggled", name, enabled);
+}
 
 static void
 _goa_client_new_cb (GObject *obj,
@@ -275,7 +269,8 @@ _goa_client_new_cb (GObject *obj,
       G_CALLBACK (_account_added_cb), self);
   g_signal_connect (self->priv->client, "account-removed",
       G_CALLBACK (_account_removed_cb), self);
-  /* FIXME: do we need to support account-changed ? */
+  g_signal_connect (self->priv->client, "account-changed",
+      G_CALLBACK (_account_changed_cb), self);
 }
 
 
