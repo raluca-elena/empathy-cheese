@@ -1,3 +1,22 @@
+NEW in 3.1.90.1 (31/08/2011)
+===============
+
+This release fixes the build when using latest gdk-pixbuf.
+As the Telepathy integration has been greatly improved in GNOME Shell 3.1.90,
+Empathy will no longer use a status icon and set your presence to offline when
+exiting, if the Shell is running.
+
+Bugs fixed:
+ - Fixed #656886, Dragging preview crashes empathy-call (Emilio Pozuelo Monfort)
+ - Fixed #656631, Stop watching session status if the Shell is running (Guillaume Desmottes)
+ - Fixed #656632, Don't set presence to offline when Shell is running (Guillaume Desmottes)
+ - Fixed #656911, Asserts when you drag the preview out of the window (Emilio Pozuelo Monfort)
+ - Fixed #656889, Remember preview location on disk (Emilio Pozuelo Monfort)
+ - Fixed #631944, Don't use a status icon when using the Shell (Guillaume Desmottes)
+
+Translations:
+ - Updated es Translation (Jorge González)
+
 NEW in 3.1.90 (29/08/2011)
 =============
 
