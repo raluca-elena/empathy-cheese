@@ -376,6 +376,8 @@ mcp_account_manager_goa_set (const McpAccountStorage *self,
 
   DEBUG ("%s: (%s, %s, %s)", G_STRFUNC, acct, key, val);
 
+  /* Pretend we save everything so MC won't save this in accounts.cfg */
+  return TRUE;
   // if (!tp_strdiff (acct, FACEBOOK_ACCOUNT_NAME))
   //   {
   //     if (!tp_strdiff (key, "Enabled"))
