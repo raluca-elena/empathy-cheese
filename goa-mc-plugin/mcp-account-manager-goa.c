@@ -158,6 +158,22 @@ get_tp_account_name (GoaAccount *account)
   return name;
 }
 
+static void
+object_chat_changed_cb (GoaObject *object,
+    GParamSpec *spec,
+    McpAccountManagerGoa *self)
+{
+  GoaAccount *account = goa_object_peek_account (object);
+  char *name = get_tp_account_name (account);
+  gboolean enabled;
+
+  enabled = (goa_object_peek_chat (object) != NULL);
+
+  DEBUG ("%s %s", name, enabled ? "enabled" : "disabled");
+
+  if (self->priv->ready)
+    g_signal_emit_by_name (self, "toggled", name, enabled);
+}
 
 static void
 _new_account (McpAccountManagerGoa *self,
@@ -175,6 +191,9 @@ _new_account (McpAccountManagerGoa *self,
 
   if (self->priv->ready)
     g_signal_emit_by_name (self, "created", account_name);
+
+  tp_g_signal_connect_object (object, "notify::chat",
+      G_CALLBACK (object_chat_changed_cb), self, 0);
 }
 
 
@@ -221,23 +240,6 @@ _account_removed_cb (GoaClient *client,
 }
 
 static void
-_account_changed_cb (GoaClient *client,
-    GoaObject *object,
-    McpAccountManagerGoa *self)
-{
-  GoaAccount *account = goa_object_peek_account (object);
-  char *name = get_tp_account_name (account);
-  gboolean enabled;
-
-  enabled = (goa_object_peek_chat (object) != NULL);
-
-  DEBUG ("%s %s", name, enabled ? "enabled" : "disabled");
-
-  if (self->priv->ready)
-    g_signal_emit_by_name (self, "toggled", name, enabled);
-}
-
-static void
 _goa_client_new_cb (GObject *obj,
     GAsyncResult *result,
     gpointer user_data)
@@ -268,8 +270,6 @@ _goa_client_new_cb (GObject *obj,
       G_CALLBACK (_account_added_cb), self);
   g_signal_connect (self->priv->client, "account-removed",
       G_CALLBACK (_account_removed_cb), self);
-  g_signal_connect (self->priv->client, "account-changed",
-      G_CALLBACK (_account_changed_cb), self);
 }
 
 
