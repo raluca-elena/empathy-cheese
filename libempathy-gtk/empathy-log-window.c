@@ -678,6 +678,9 @@ empathy_log_window_init (EmpathyLogWindow *self)
       empathy_account_chooser_filter_has_logs, NULL);
   empathy_account_chooser_set_all (account_chooser);
 
+  gtk_style_context_add_class (gtk_widget_get_style_context (self->priv->account_chooser),
+                               GTK_STYLE_CLASS_RAISED);
+
   g_signal_connect (self->priv->account_chooser, "changed",
       G_CALLBACK (log_window_chats_accounts_changed_cb),
       self);
