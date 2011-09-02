@@ -1213,7 +1213,7 @@ get_parent_iter_for_message (TplEvent *event,
           COL_EVENTS_TS, tpl_event_get_timestamp (event),
           COL_EVENTS_PRETTY_DATE, pretty_date,
           COL_EVENTS_TEXT, body,
-          COL_EVENTS_ICON, "stock_text_justify",
+          COL_EVENTS_ICON, "format-justify-fill",
           COL_EVENTS_ACCOUNT, tpl_event_get_account (event),
           COL_EVENTS_TARGET, event_get_target (event),
           COL_EVENTS_EVENT, event,
@@ -2956,7 +2956,7 @@ log_window_what_setup (EmpathyLogWindow *self)
   struct event events [] = {
     { TPL_EVENT_MASK_ANY, 0, NULL, _("Anything") },
     { WHAT_TYPE_SEPARATOR, 0, NULL, "separator" },
-    { TPL_EVENT_MASK_TEXT, 0, "stock_text_justify", _("Text chats") },
+    { TPL_EVENT_MASK_TEXT, 0, "format-justify-fill", _("Text chats") },
 #ifdef HAVE_CALL_LOGS
     { TPL_EVENT_MASK_CALL, EVENT_CALL_ALL, EMPATHY_IMAGE_CALL, _("Calls") },
 #endif
