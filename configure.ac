@@ -57,7 +57,6 @@ LIBCHAMPLAIN_GTK_REQUIRED=0.7.1
 LIBCHAMPLAIN_REQUIRED=0.9
 NAUTILUS_SENDTO_REQUIRED=2.90.0
 NETWORK_MANAGER_REQUIRED=0.7.0
-GNOME_CONTROL_CENTER_REQUIRED=2.31.4
 
 # Use --enable-maintainer-mode to disable deprecated symbols,
 # disable single include and enable GSEAL. If this is not a released empathy,
@@ -579,45 +578,6 @@ fi
 
 AM_CONDITIONAL(HAVE_NST, test "x$have_nst" = "xyes")
 
-# -----------------------------------------------------------
-# new, single-window control center
-# -----------------------------------------------------------
-AC_ARG_ENABLE(control_center_embedding,
-              AS_HELP_STRING([--enable-control-center-embedding=@<:@no/yes/auto@:>@],
-                             [Enable support for single-window control center]),
-                             , enable_control_center_embedding=auto)
-
-if test "x$enable_control_center_embedding" != "xno"; then
-
-   PKG_CHECK_MODULES(CONTROL_CENTER_EMBEDDING, [libgnome-control-center >= GNOME_CONTROL_CENTER_REQUIRED],
-        have_control_center_embedding="yes", have_control_center_embedding="no")
-
-   if test "x$have_control_center_embedding" = "xyes"; then
-      AC_DEFINE(HAVE_CONTROL_CENTER_EMBEDDING, 1, [Define if you have the single-window control center])
-
-      AC_MSG_CHECKING([gnome-control-center extension dir])
-      CONTROL_CENTER_EXTENSIONDIR=`$PKG_CONFIG --variable=extensiondir libgnome-control-center`
-      if test "x$CONTROL_CENTER_EXTENSIONDIR" = "x"; then
-          AC_MSG_ERROR([Could not determine extensiondir])
-      else
-          AC_MSG_RESULT([$CONTROL_CENTER_EXTENSIONDIR])
-      fi
-      AC_SUBST(CONTROL_CENTER_EXTENSIONDIR)
-   fi
-else
-   have_control_center_embedding="no"
-fi
-
-if test "x$enable_control_center_embedding" = "xyes" -a "x$have_control_center_embedding" != "xyes"; then
-   AC_MSG_ERROR([Could not find single-window control center dependencies:
-
-$CONTROL_CENTER_EMBEDDING_PKG_ERRORS])
-fi
-
-AM_CONDITIONAL(HAVE_CONTROL_CENTER_EMBEDDING, test "x$have_control_center_embedding" = "xyes")
-AC_SUBST(CONTROL_CENTER_EMBEDDING_CFLAGS)
-AC_SUBST(CONTROL_CENTER_EMBEDDING_LIBS)
-
 # Optional dependency for avatar selection
 AC_ARG_WITH([cheese],
             AS_HELP_STRING([--with-cheese],
@@ -687,7 +647,6 @@ Configure summary:
 	Location awareness (Geoclue):  ${have_geoclue}
 	Geocode support (Geocode)...:  ${have_geocode}
 	Meego widgets...............:  ${have_meego}
-	Control center embedding....:  ${have_control_center_embedding}
 	Cheese webcam support ......:  ${have_cheese}
 	Camera monitoring...........:  ${have_gudev}
 
