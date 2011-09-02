@@ -42,6 +42,8 @@
 #define PLUGIN_DESCRIPTION "Provide Telepathy Accounts from GOA"
 #define PLUGIN_PROVIDER "org.gnome.OnlineAccounts"
 
+#define INITIAL_COMMENT "Parameters of GOA Telepathy accounts"
+
 static void account_storage_iface_init (McpAccountStorageIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (McpAccountManagerGoa,
@@ -56,6 +58,9 @@ struct _McpAccountManagerGoaPrivate
 
   GoaClient *client;
   GHashTable *accounts; /* alloc'ed string -> ref'ed GoaObject */
+
+  GKeyFile *store;
+  gchar *filename;
 };
 
 
@@ -76,6 +81,8 @@ mcp_account_manager_goa_finalize (GObject *self)
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
 
   g_hash_table_destroy (priv->accounts);
+  g_key_file_free (priv->store);
+  g_free (priv->filename);
 
   G_OBJECT_CLASS (mcp_account_manager_goa_parent_class)->finalize (self);
 }
@@ -200,8 +207,34 @@ _new_account (McpAccountManagerGoa *self,
 DECLARE_GASYNC_CALLBACK (_goa_client_new_cb);
 
 static void
+load_store (McpAccountManagerGoa *self)
+{
+  GError *error = NULL;
+
+  if (!g_key_file_load_from_file (self->priv->store, self->priv->filename,
+        G_KEY_FILE_KEEP_COMMENTS, &error))
+    {
+      gchar *dir;
+
+      DEBUG ("Failed to load keyfile, creating a new one: %s", error->message);
+
+      dir = g_path_get_dirname (self->priv->filename);
+
+      g_mkdir_with_parents (dir, 0700);
+      g_free (dir);
+
+      g_key_file_set_comment (self->priv->store, NULL, NULL, INITIAL_COMMENT,
+          NULL);
+
+      g_error_free (error);
+    }
+}
+
+static void
 mcp_account_manager_goa_init (McpAccountManagerGoa *self)
 {
+  gchar *path;
+
   DEBUG ("GOA MC plugin initialised");
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
@@ -211,6 +244,13 @@ mcp_account_manager_goa_init (McpAccountManagerGoa *self)
       g_free, g_object_unref);
 
   goa_client_new (NULL, _goa_client_new_cb, self);
+
+  /* key file store */
+  self->priv->store = g_key_file_new ();
+  self->priv->filename = g_build_filename (g_get_user_data_dir (), "telepathy",
+      "mission-control", "accounts-goa.cfg", NULL);
+
+  load_store (self);
 }
 
 
@@ -331,13 +371,35 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
       GHashTable *params = get_tp_parameters (account);
       GHashTableIter iter;
       gpointer key, value;
+      GStrv keys;
+      guint i;
+      gssize n;
 
+      /* Properties from GOA */
       g_hash_table_iter_init (&iter, params);
       while (g_hash_table_iter_next (&iter, &key, &value))
         mcp_account_manager_set_value (am, acct, key, value);
 
       g_hash_table_destroy (params);
 
+      /* Stored properties */
+      keys = g_key_file_get_keys (priv->store, acct, &n, NULL);
+
+      if (keys == NULL)
+        n = 0;
+
+      for (i = 0; i < n; i++)
+        {
+          gchar *v = g_key_file_get_value (priv->store, acct, keys[i], NULL);
+
+          if (v != NULL)
+            {
+              mcp_account_manager_set_value (am, acct, keys[i], v);
+              g_free (v);
+            }
+        }
+
+      /* Enabled */
       get_enabled (self, am, acct, object);
     }
   else if (!tp_strdiff (key, "Enabled"))
@@ -348,11 +410,19 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
     {
       /* get a specific key */
       GHashTable *params = get_tp_parameters (account);
+      gchar *value;
 
-      mcp_account_manager_set_value (am, acct, key,
-          g_hash_table_lookup (params, key));
+      value = g_hash_table_lookup (params, key);
+
+      if (value == NULL)
+        value = g_key_file_get_value (priv->store, acct, key, NULL);
+      else
+        value = g_strdup (value);
+
+      mcp_account_manager_set_value (am, acct, key, value);
 
       g_hash_table_destroy (params);
+      g_free (value);
     }
 
   return TRUE;
@@ -362,13 +432,24 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
 static gboolean
 mcp_account_manager_goa_set (const McpAccountStorage *self,
     const McpAccountManager *am,
-    const gchar *acct,
+    const gchar *account,
     const gchar *key,
     const gchar *val)
 {
+  McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
 
-  DEBUG ("%s: (%s, %s, %s)", G_STRFUNC, acct, key, val);
+  /* No need to save Enabled, it's up to the GOA configuration if the account
+   * is configured or not. */
+  if (!tp_strdiff (key, "Enabled"))
+    return TRUE;
+
+  DEBUG ("%s: (%s, %s, %s)", G_STRFUNC, account, key, val);
+
+  if (val != NULL)
+    g_key_file_set_value (priv->store, account, key, val);
+  else
+    g_key_file_remove_key (priv->store, account, key, NULL);
 
   /* Pretend we save everything so MC won't save this in accounts.cfg */
   return TRUE;
@@ -378,10 +459,21 @@ mcp_account_manager_goa_set (const McpAccountStorage *self,
 static gboolean
 mcp_account_manager_goa_delete (const McpAccountStorage *self,
     const McpAccountManager *am,
-    const gchar *acct,
+    const gchar *account,
     const gchar *key)
 {
-  DEBUG ("%s: (%s, %s)", G_STRFUNC, acct, key);
+  McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+
+  DEBUG ("%s: (%s, %s)", G_STRFUNC, account, key);
+
+  if (key == NULL)
+    {
+      g_key_file_remove_group (priv->store, account, NULL);
+    }
+  else
+    {
+      g_key_file_remove_key (priv->store, account, key, NULL);
+    }
 
   /* Pretend we deleted everything */
   return TRUE;
@@ -392,7 +484,32 @@ static gboolean
 mcp_account_manager_goa_commit (const McpAccountStorage *self,
     const McpAccountManager *am)
 {
-  DEBUG ("%s", G_STRFUNC);
+  McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+  gchar *data;
+  gsize len;
+  GError *error = NULL;
+
+  DEBUG ("Save config to %s", priv->filename);
+
+  data = g_key_file_to_data (priv->store, &len, &error);
+  if (data == NULL)
+    {
+      DEBUG ("Failed to get data from store: %s", error->message);
+
+      g_error_free (error);
+      return FALSE;
+    }
+
+  if (!g_file_set_contents (priv->filename, data, len, &error))
+    {
+      DEBUG ("Failed to write file: %s", error->message);
+
+      g_free (data);
+      g_error_free (error);
+      return FALSE;
+    }
+
+  g_free (data);
 
   return TRUE;
 }
