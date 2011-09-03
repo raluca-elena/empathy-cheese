@@ -1,5 +1,6 @@
 <page xmlns="http://projectmallard.org/1.0/"
       xmlns:e="http://projectmallard.org/experimental/"
+      xmlns:if="http://projectmallard.org/experimental/if/"
       type="guide" style="2column"
       id="irc-manage"
       groups="one two">
@@ -36,6 +37,11 @@
   <note style="info package">
     <p>You must have the <sys>telepathy-idle</sys> package installed to use IRC 
     in <app>Empathy</app>.</p>
+    <if:choose>
+      <if:when test="if:supports('action:install')">
+        <p><link action="install:telepathy-idle" xref="index" style="button">Install telepathy-idle</link></p>
+      </if:when>
+    </if:choose>
   </note>
 
   <section id="manage" style="2column">
