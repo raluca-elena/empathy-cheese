@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-02 20:59+0300\n"
-"PO-Revision-Date: 2011-09-02 20:59+0300\n"
+"POT-Creation-Date: 2011-09-04 18:37+0300\n"
+"PO-Revision-Date: 2011-09-04 18:37+0300\n"
 "Last-Translator: Ihar Hrachyshka <ihar.hrachyshka@gmail.com>\n"
 "Language-Team: Belarusian <be-i18n-gnome@googlegroups.com>\n"
 "Language: be\n"
@@ -34,7 +34,7 @@ msgstr "Кліент абмену паведамленнямі"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:1
 msgid "Always open a separate chat window for new chats."
-msgstr "Заўсёды адчыняць новае акно для новага чату."
+msgstr "Заўсёды адкрываць новае акно для новага чату."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:2
 msgid "Call volume"
@@ -189,7 +189,7 @@ msgstr "Знак пасля дапоўненай мянушкі"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:36
 msgid "Open new chats in separate windows"
-msgstr "Адчыняць новыя чаты ў асобных вокнах"
+msgstr "Адкрываць новыя чаты ў асобных вокнах"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:37
 msgid "Path of the Adium theme to use"
@@ -257,7 +257,7 @@ msgstr "Паказваць спіс кантактаў у пакоях"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:53
 msgid "Show hint about closing the main window"
-msgstr "Паказваць падказку пры зачыненні галоўнага акна"
+msgstr "Паказваць падказку пры закрыцці галоўнага акна"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:54
 msgid "Show offline contacts"
@@ -434,7 +434,7 @@ msgid ""
 "the chat is already opened, but not focused."
 msgstr ""
 "Ці трэба паказваць выплыўныя апавяшчэнні пры атрыманні новага паведамлення, "
-"нават калі акно чату ўжо адчынена, хоць і не мае фокусу."
+"нават калі акно чату ўжо адкрыта, хоць і не мае фокусу."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:92
 msgid "Whether to show a popup notification when receiving a new message."
@@ -476,8 +476,8 @@ msgid ""
 "Whether to show the message dialog about closing the main window with the "
 "'x' button in the title bar."
 msgstr ""
-"Ці трэба паказваць дыялогавае акенца пры зачыненні галоўнага акна з "
-"дапамогай кнопкі \"x\" у загалоўнай стужцы."
+"Ці трэба паказваць дыялогавае акенца пры закрыцці галоўнага акна з дапамогай "
+"кнопкі \"x\" у загалоўнай стужцы."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:101
 msgid "Whether to use the theme for chat rooms."
@@ -1353,7 +1353,7 @@ msgstr "\"%s\" не з'яўляецца прыдатным ідэнтыфіка�
 
 #: ../libempathy-gtk/empathy-chat.c:1030
 msgid "/clear: clear all messages from the current conversation"
-msgstr "/clear: ачысціць усе паведамленні ў адчыненым акне размовы"
+msgstr "/clear: ачысціць усе паведамленні ў адкрытым акне размовы"
 
 #: ../libempathy-gtk/empathy-chat.c:1033
 msgid "/topic <topic>: set the topic of the current conversation"
@@ -1390,7 +1390,7 @@ msgstr "/nick <мянушка>: змяніць сваю мянушку на ак
 #: ../libempathy-gtk/empathy-chat.c:1056
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr ""
-"/me <паведамленне>: паслаць ACTION-паведамленне ў адчыненае акно размовы"
+"/me <паведамленне>: паслаць ACTION-паведамленне ў адкрытае акно размовы"
 
 #: ../libempathy-gtk/empathy-chat.c:1059
 msgid ""
@@ -1398,7 +1398,7 @@ msgid ""
 "send a message starting with a '/'. For example: \"/say /join is used to "
 "join a new chat room\""
 msgstr ""
-"/say <паведамленне>: паслаць <паведамленне> ў адчыненае акно размовы. Гэты "
+"/say <паведамленне>: паслаць <паведамленне> ў адкрытае акно размовы. Гэты "
 "загад выкарыстоўваецца для пасылкі паведамлення, якое пачынаецца знакам \"/"
 "\". Напрыклад: \"/say /join выкарыстоўваецца для далучэння да новага "
 "групавога чату ў пакоі\""
@@ -1685,7 +1685,7 @@ msgstr "_Скапіраваць адрас спасылкі"
 #: ../libempathy-gtk/empathy-chat-text-view.c:327
 #: ../libempathy-gtk/empathy-webkit-utils.c:284
 msgid "_Open Link"
-msgstr "_Адчыніць спасылку"
+msgstr "_Адкрыць спасылку"
 
 #. Translators: timestamp displayed between conversations in
 #. * chat windows (strftime format string)
@@ -2333,124 +2333,124 @@ msgstr "_Раз'яднаць"
 msgid "History"
 msgstr "Журнал"
 
-#: ../libempathy-gtk/empathy-log-window.c:685
+#: ../libempathy-gtk/empathy-log-window.c:688
 msgid "Show"
 msgstr "Паказаць"
 
-#: ../libempathy-gtk/empathy-log-window.c:707
+#: ../libempathy-gtk/empathy-log-window.c:710
 msgid "Search"
 msgstr "Пошук"
 
-#: ../libempathy-gtk/empathy-log-window.c:1155
+#: ../libempathy-gtk/empathy-log-window.c:1158
 #, c-format
 msgid "Chat in %s"
 msgstr "Чат у %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1157
+#: ../libempathy-gtk/empathy-log-window.c:1160
 #, c-format
 msgid "Chat with %s"
 msgstr "Чат з %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1207
-#: ../libempathy-gtk/empathy-log-window.c:1354
+#: ../libempathy-gtk/empathy-log-window.c:1210
+#: ../libempathy-gtk/empathy-log-window.c:1357
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
 msgstr "%A, %d %B %Y"
 
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:1296
+#: ../libempathy-gtk/empathy-log-window.c:1299
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:1302
+#: ../libempathy-gtk/empathy-log-window.c:1305
 #, c-format
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1373
-#: ../libempathy-gtk/empathy-log-window.c:1375
+#: ../libempathy-gtk/empathy-log-window.c:1376
+#: ../libempathy-gtk/empathy-log-window.c:1378
 #: ../src/empathy-ft-manager.c:1026
 msgid "%"
 msgstr "%"
 
-#: ../libempathy-gtk/empathy-log-window.c:1382
+#: ../libempathy-gtk/empathy-log-window.c:1385
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "Званок працягваўся %s, скончаны ў %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1714
+#: ../libempathy-gtk/empathy-log-window.c:1717
 msgid "Today"
 msgstr "Сёння"
 
-#: ../libempathy-gtk/empathy-log-window.c:1718
+#: ../libempathy-gtk/empathy-log-window.c:1721
 msgid "Yesterday"
 msgstr "Учора"
 
-#: ../libempathy-gtk/empathy-log-window.c:1734
+#: ../libempathy-gtk/empathy-log-window.c:1737
 msgctxt ""
 "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
 msgstr "%e %B %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1815
-#: ../libempathy-gtk/empathy-log-window.c:3396
+#: ../libempathy-gtk/empathy-log-window.c:1818
+#: ../libempathy-gtk/empathy-log-window.c:3399
 msgid "Anytime"
 msgstr "За ўвесь час"
 
-#: ../libempathy-gtk/empathy-log-window.c:1895
-#: ../libempathy-gtk/empathy-log-window.c:2325
+#: ../libempathy-gtk/empathy-log-window.c:1898
+#: ../libempathy-gtk/empathy-log-window.c:2328
 msgid "Anyone"
 msgstr "Усе"
 
-#: ../libempathy-gtk/empathy-log-window.c:2637
+#: ../libempathy-gtk/empathy-log-window.c:2640
 msgid "Who"
 msgstr "Хто"
 
-#: ../libempathy-gtk/empathy-log-window.c:2841
+#: ../libempathy-gtk/empathy-log-window.c:2844
 msgid "When"
 msgstr "Калі"
 
-#: ../libempathy-gtk/empathy-log-window.c:2957
+#: ../libempathy-gtk/empathy-log-window.c:2960
 msgid "Anything"
 msgstr "Усё"
 
-#: ../libempathy-gtk/empathy-log-window.c:2959
+#: ../libempathy-gtk/empathy-log-window.c:2962
 msgid "Text chats"
 msgstr "Тэкставыя чаты"
 
-#: ../libempathy-gtk/empathy-log-window.c:2961
+#: ../libempathy-gtk/empathy-log-window.c:2964
 #: ../src/empathy-preferences.ui.h:4
 msgid "Calls"
 msgstr "Званкі"
 
-#: ../libempathy-gtk/empathy-log-window.c:2966
+#: ../libempathy-gtk/empathy-log-window.c:2969
 msgid "Incoming calls"
 msgstr "Уваходныя званкі"
 
-#: ../libempathy-gtk/empathy-log-window.c:2967
+#: ../libempathy-gtk/empathy-log-window.c:2970
 msgid "Outgoing calls"
 msgstr "Выхадныя званкі"
 
-#: ../libempathy-gtk/empathy-log-window.c:2968
+#: ../libempathy-gtk/empathy-log-window.c:2971
 msgid "Missed calls"
 msgstr "Прапушчаныя званкі"
 
-#: ../libempathy-gtk/empathy-log-window.c:2990
+#: ../libempathy-gtk/empathy-log-window.c:2993
 msgid "What"
 msgstr "Што"
 
-#: ../libempathy-gtk/empathy-log-window.c:3699
+#: ../libempathy-gtk/empathy-log-window.c:3702
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr "Ці вы сапраўды хочаце выдаліць усе журналы мінулых размоў?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3703
+#: ../libempathy-gtk/empathy-log-window.c:3706
 msgid "Clear All"
 msgstr "Ачысціць усё"
 
-#: ../libempathy-gtk/empathy-log-window.c:3710
+#: ../libempathy-gtk/empathy-log-window.c:3713
 msgid "Delete from:"
 msgstr "Выдаліць для:"
 
@@ -2738,7 +2738,7 @@ msgstr "Падрабязнасці аб сертыфікаце"
 
 #: ../libempathy-gtk/empathy-ui-utils.c:1735
 msgid "Unable to open URI"
-msgstr "Не ўдалося адчыніць URI-адрас"
+msgstr "Не ўдалося адкрыць URI-адрас"
 
 #: ../libempathy-gtk/empathy-ui-utils.c:1831
 msgid "Select a file"
@@ -3043,7 +3043,7 @@ msgid ""
 "this assistant and add accounts later from the Edit menu."
 msgstr ""
 "Вы можаце альбо вярнуцца назад і паўтарыць увод падрабязнасцяў аб вашых "
-"контах, альбо зачыніць гэтага памочніка і дадаць конты пазней з дапамогай "
+"контах, альбо закрыць гэтага памочніка і дадаць конты пазней з дапамогай "
 "меню Праўка."
 
 #: ../src/empathy-account-assistant.c:220
@@ -3255,7 +3255,7 @@ msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
 msgstr ""
-"Вы зачыняеце гэта акно, што прывядзе да страты\n"
+"Вы закрываеце гэта акно, што прывядзе да страты\n"
 "вашых змен. Ці вы сапраўды хочаце працягнуць працэдуру?"
 
 #: ../src/empathy-accounts-dialog.ui.h:1
@@ -3729,7 +3729,7 @@ msgstr "_Карткі"
 
 #: ../src/empathy-chat-window.ui.h:19
 msgid "_Undo Close Tab"
-msgstr "_Вярнуць зачыненую картку"
+msgstr "_Вярнуць закрытую картку"
 
 #: ../src/empathy-chatrooms-window.c:251
 msgid "Name"
@@ -3999,7 +3999,7 @@ msgstr "Змяніць настройкі конта"
 
 #: ../src/empathy-main-window.c:789
 msgid "Close"
-msgstr "Зачыніць"
+msgstr "Закрыць"
 
 #. Translators: this string will be something like:
 #. *   Top up My Account ($1.23)..."
@@ -4399,7 +4399,7 @@ msgstr "_Сетка (IP, Wi-Fi)"
 
 #: ../src/empathy-preferences.ui.h:36
 msgid "_Open new chats in separate windows"
-msgstr "_Адчыняць новыя размовы ў асобных вокнах"
+msgstr "_Адкрываць новыя размовы ў асобных вокнах"
 
 #: ../src/empathy-preferences.ui.h:37
 msgid "_Publish location to my contacts"
