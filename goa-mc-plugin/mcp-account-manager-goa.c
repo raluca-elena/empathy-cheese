@@ -373,7 +373,7 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
       gpointer key, value;
       GStrv keys;
       guint i;
-      gssize n;
+      gssize nkeys = 0;
 
       /* Properties from GOA */
       g_hash_table_iter_init (&iter, params);
@@ -383,12 +383,9 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
       g_hash_table_destroy (params);
 
       /* Stored properties */
-      keys = g_key_file_get_keys (priv->store, acct, &n, NULL);
+      keys = g_key_file_get_keys (priv->store, acct, &nkeys, NULL);
 
-      if (keys == NULL)
-        n = 0;
-
-      for (i = 0; i < n; i++)
+      for (i = 0; i < nkeys; i++)
         {
           gchar *v = g_key_file_get_value (priv->store, acct, keys[i], NULL);
 
