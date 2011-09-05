@@ -396,6 +396,8 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
             }
         }
 
+      g_strfreev (keys);
+
       /* Enabled */
       get_enabled (self, am, acct, object);
     }
