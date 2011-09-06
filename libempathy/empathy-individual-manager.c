@@ -234,6 +234,9 @@ individual_manager_dispose (GObject *object)
   EmpathyIndividualManagerPriv *priv = GET_PRIV (object);
 
   g_hash_table_destroy (priv->individuals);
+
+  g_signal_handlers_disconnect_by_func (priv->aggregator,
+      aggregator_individuals_changed_cb, object);
   tp_clear_object (&priv->aggregator);
 
   G_OBJECT_CLASS (empathy_individual_manager_parent_class)->dispose (object);
