@@ -233,19 +233,6 @@ contact_selector_change_state_button_cb  (GtkEditable *editable,
 }
 
 static void
-entry_activate_cb (GtkEntry *entry,
-    gpointer self)
-{
-  const gchar *id;
-
-  id = gtk_entry_get_text (entry);
-  if (EMP_STR_EMPTY (id))
-    return;
-
-  gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_ACCEPT);
-}
-
-static void
 account_chooser_filter (TpAccount *account,
     EmpathyAccountChooserFilterResultCallback callback,
     gpointer callback_data,
@@ -311,9 +298,7 @@ empathy_contact_selector_dialog_init (EmpathyContactSelectorDialog *dialog)
                 NULL);
   g_free (filename);
 
-  empathy_builder_connect (gui, dialog,
-      "entry_id", "activate", entry_activate_cb,
-      NULL);
+  gtk_entry_set_activates_default (GTK_ENTRY (priv->entry_id), TRUE);
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
   gtk_container_add (GTK_CONTAINER (content_area), dialog->vbox);
@@ -439,7 +424,11 @@ empathy_contact_selector_dialog_set_property (GObject *self,
 static void
 empathy_contact_selector_dialog_constructed (GObject *dialog)
 {
+  EmpathyContactSelectorDialog *self = EMPATHY_CONTACT_SELECTOR_DIALOG (dialog);
   EmpathyContactSelectorDialogPriv *priv = GET_PRIV (dialog);
+
+  gtk_widget_set_can_default (self->button_action, TRUE);
+  gtk_widget_grab_default (self->button_action);
 
   if (EMPATHY_CONTACT_SELECTOR_DIALOG_GET_CLASS (dialog)->contact_filter)
     {
