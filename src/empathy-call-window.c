@@ -3400,11 +3400,6 @@ empathy_call_window_connect_handler (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
-  gint width;
-
-  /* Make the hangup button twice as wide */
-  width = gtk_widget_get_allocated_width (priv->hangup_button);
-  gtk_widget_set_size_request (priv->hangup_button, width * 2, -1);
 
   g_signal_connect (priv->handler, "state-changed",
     G_CALLBACK (empathy_call_window_state_changed_cb), self);
@@ -3440,6 +3435,12 @@ static void
 empathy_call_window_realized_cb (GtkWidget *widget,
     EmpathyCallWindow *self)
 {
+  gint width;
+
+  /* Make the hangup button twice as wide */
+  width = gtk_widget_get_allocated_width (self->priv->hangup_button);
+  gtk_widget_set_size_request (self->priv->hangup_button, width * 2, -1);
+
   empathy_call_window_connect_handler (self);
 
   gst_element_set_state (self->priv->pipeline, GST_STATE_PAUSED);
