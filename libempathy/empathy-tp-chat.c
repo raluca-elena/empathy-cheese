@@ -686,12 +686,12 @@ tp_chat_list_properties_cb (TpProxy         *proxy,
 	GArray            *ids;
 	guint              i;
 
-	self->priv->had_properties_list = TRUE;
-
 	if (error) {
 		DEBUG ("Error listing properties: %s", error->message);
 		return;
 	}
+
+	self->priv->had_properties_list = TRUE;
 
 	ids = g_array_sized_new (FALSE, FALSE, sizeof (guint), properties->len);
 	self->priv->properties = g_ptr_array_sized_new (properties->len);
