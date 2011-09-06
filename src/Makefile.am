@@ -48,31 +48,6 @@ libempathy_accounts_common_la_LIBADD =					\
         $(LIBCHAMPLAIN_LIBS)						\
 	$(NULL)
 
-if HAVE_CONTROL_CENTER_EMBEDDING
-ccmodulesdir = $(CONTROL_CENTER_EXTENSIONDIR)
-ccmodules_LTLIBRARIES = libempathy-accounts-panel.la
-
-libempathy_accounts_panel_la_SOURCES =				\
-	empathy-accounts-module.c				\
-	cc-empathy-accounts-panel.c				\
-	cc-empathy-accounts-panel.h				\
-	$(NULL)
-
-libempathy_accounts_panel_la_CPPFLAGS =				\
-	$(CPPFLAGS_COMMON)					\
-	$(CONTROL_CENTER_EMBEDDING_CFLAGS)			\
-	-DLOCALEDIR=\""$(datadir)/locale"\"			\
-	$(NULL)
-
-libempathy_accounts_panel_la_LDFLAGS = -export_dynamic -avoid-version -module -no-undefined -export-symbols-regex '^g_io_module_(load|unload)'
-
-libempathy_accounts_panel_la_LIBADD =				\
-	$(EMPATHY_LIBS)						\
-	$(CONTROL_CENTER_EMBEDDING_LIBS)			\
-	libempathy-accounts-common.la				\
-	$(NULL)
-endif
-
 bin_PROGRAMS =			\
 	empathy			\
 	empathy-accounts	\
@@ -266,12 +241,6 @@ EXTRA_DIST +=					\
 	empathy-map-view.c			\
 	empathy-map-view.h			\
 	empathy-map-view.ui
-endif
-
-if !HAVE_CONTROL_CENTER_EMBEDDING
-EXTRA_DIST += $(libempathy_accounts_panel_la_SOURCES)
-else
-check_c_sources += $(libempathy_accounts_panel_la_SOURCES)
 endif
 
 dist_man_MANS =			\
