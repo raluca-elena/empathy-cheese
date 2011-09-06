@@ -1984,9 +1984,11 @@ main_window_connection_items_setup (EmpathyMainWindow *window,
 		"room_join_favorites",
 		"chat_new_message",
 		"chat_new_call",
+		"chat_search_contacts",
 		"chat_add_contact",
 		"edit_personal_information",
-		"edit_blocked_contacts"
+		"edit_blocked_contacts",
+		"edit_search_contacts"
 	};
 
 	for (i = 0, list = NULL; i < G_N_ELEMENTS (actions_connected); i++) {
