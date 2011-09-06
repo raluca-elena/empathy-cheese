@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy.master\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-04 18:37+0300\n"
-"PO-Revision-Date: 2011-09-04 18:37+0300\n"
+"POT-Creation-Date: 2011-09-07 01:40+0300\n"
+"PO-Revision-Date: 2011-09-07 01:40+0300\n"
 "Last-Translator: Ihar Hrachyshka <ihar.hrachyshka@gmail.com>\n"
 "Language-Team: Belarusian <be-i18n-gnome@googlegroups.com>\n"
 "Language: be\n"
@@ -802,42 +802,52 @@ msgstr "Порт"
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1167
-#, c-format
-msgid "The account %s is edited via My Web Accounts."
-msgstr "Настройкі конта %s зменены з дапамогай My Web Accounts."
+#: ../libempathy-gtk/empathy-account-widget.c:1192
+msgid "My Web Accounts"
+msgstr "My Web Accounts"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1173
+#: ../libempathy-gtk/empathy-account-widget.c:1208
+#, c-format
+msgid "The account %s is edited via %s."
+msgstr "Конт %s зменены з дапамогай %s."
+
+#: ../libempathy-gtk/empathy-account-widget.c:1214
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Empathy не ўмее змяняць настройкі конта %s."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1193
+#: ../libempathy-gtk/empathy-account-widget.c:1233
 msgid "Launch My Web Accounts"
 msgstr "Запусціць My Web Accounts"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1533
+#. general handler
+#: ../libempathy-gtk/empathy-account-widget.c:1241
+#, c-format
+msgid "Edit %s"
+msgstr "Рэдагаваць %s"
+
+#: ../libempathy-gtk/empathy-account-widget.c:1591
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
 msgid "Username:"
 msgstr "Імя карыстальніка:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1851
+#: ../libempathy-gtk/empathy-account-widget.c:1909
 msgid "A_pply"
 msgstr "У_жыць"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1881
+#: ../libempathy-gtk/empathy-account-widget.c:1939
 msgid "L_og in"
 msgstr "_Увайсці"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1955
+#: ../libempathy-gtk/empathy-account-widget.c:2013
 msgid "This account already exists on the server"
 msgstr "Такі конт ужо існуе на гэтым серверы"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1958
+#: ../libempathy-gtk/empathy-account-widget.c:2016
 msgid "Create a new account on the server"
 msgstr "Стварыць новы конт на гэтым серверы"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2150
+#: ../libempathy-gtk/empathy-account-widget.c:2208
 msgid "Ca_ncel"
 msgstr "_Скасаваць"
 
@@ -846,19 +856,19 @@ msgstr "_Скасаваць"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2428
+#: ../libempathy-gtk/empathy-account-widget.c:2486
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s на %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2454
+#: ../libempathy-gtk/empathy-account-widget.c:2512
 #, c-format
 msgid "%s Account"
 msgstr "Конт %s"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2458
+#: ../libempathy-gtk/empathy-account-widget.c:2516
 msgid "New account"
 msgstr "Новы конт"
 
@@ -2191,7 +2201,7 @@ msgstr "%s (%s)"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:309
 msgid "Select account to use to place the call"
-msgstr ""
+msgstr "Выберыце конт для перанакіравання званка"
 
 #. translators: Call is a noun. This string is used in the window
 #. * title
