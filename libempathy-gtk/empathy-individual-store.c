@@ -954,6 +954,20 @@ individual_personas_changed_cb (FolksIndividual *individual,
   g_clear_object (&iter);
 }
 
+static void
+individual_store_favourites_changed_cb (FolksIndividual *individual,
+    GParamSpec *param,
+    EmpathyIndividualStore *self)
+{
+  DEBUG ("Individual %s is %s a favourite",
+      folks_individual_get_id (individual),
+      folks_favourite_details_get_is_favourite (
+        FOLKS_FAVOURITE_DETAILS (individual)) ? "now" : "no longer");
+
+  individual_store_remove_individual (self, individual);
+  individual_store_add_individual (self, individual);
+}
+
 void
 individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
     FolksIndividual *individual)
@@ -972,6 +986,8 @@ individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
       (GCallback) individual_store_individual_updated_cb, self);
   g_signal_connect (individual, "personas-changed",
       (GCallback) individual_personas_changed_cb, self);
+  g_signal_connect (individual, "notify::is-favourite",
+      (GCallback) individual_store_favourites_changed_cb, self);
 
   /* provide an empty set so the callback can assume non-NULL sets */
   individual_personas_changed_cb (individual,
@@ -994,6 +1010,8 @@ individual_store_disconnect_individual (EmpathyIndividualStore *self,
       (GCallback) individual_store_individual_updated_cb, self);
   g_signal_handlers_disconnect_by_func (individual,
       (GCallback) individual_personas_changed_cb, self);
+  g_signal_handlers_disconnect_by_func (individual,
+      (GCallback) individual_store_favourites_changed_cb, self);
 }
 
 void
@@ -1028,20 +1046,6 @@ individual_store_members_changed_cb (EmpathyIndividualManager *manager,
 
       individual_store_remove_individual_and_disconnect (self, l->data);
     }
-}
-
-static void
-individual_store_favourites_changed_cb (EmpathyIndividualManager *manager,
-    FolksIndividual *individual,
-    gboolean is_favourite,
-    EmpathyIndividualStore *self)
-{
-  DEBUG ("Individual %s is %s a favourite",
-      folks_individual_get_id (individual),
-      is_favourite ? "now" : "no longer");
-
-  individual_store_remove_individual (self, individual);
-  individual_store_add_individual (self, individual);
 }
 
 static void
@@ -1085,10 +1089,6 @@ individual_store_manager_setup (gpointer user_data)
   g_signal_connect (priv->manager,
       "members-changed",
       G_CALLBACK (individual_store_members_changed_cb), self);
-
-  g_signal_connect (priv->manager,
-      "favourites-changed",
-      G_CALLBACK (individual_store_favourites_changed_cb), self);
 
   g_signal_connect (priv->manager,
       "groups-changed",
@@ -1168,8 +1168,6 @@ individual_store_dispose (GObject *object)
       G_CALLBACK (individual_store_member_renamed_cb), object);
   g_signal_handlers_disconnect_by_func (priv->manager,
       G_CALLBACK (individual_store_members_changed_cb), object);
-  g_signal_handlers_disconnect_by_func (priv->manager,
-      G_CALLBACK (individual_store_favourites_changed_cb), object);
   g_signal_handlers_disconnect_by_func (priv->manager,
       G_CALLBACK (individual_store_groups_changed_cb), object);
   g_object_unref (priv->manager);
