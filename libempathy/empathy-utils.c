@@ -728,7 +728,7 @@ empathy_contact_dup_from_folks_individual (FolksIndividual *individual)
   if (contact == NULL)
     {
       DEBUG ("Can't create an EmpathyContact for Individual %s",
-          folks_individual_get_id (individual))
+          folks_individual_get_id (individual));
     }
 
   return contact;
