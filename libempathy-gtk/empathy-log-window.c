@@ -182,6 +182,7 @@ enum
   COL_WHO_TYPE,
   COL_WHO_ICON,
   COL_WHO_NAME,
+  COL_WHO_NAME_SORT_KEY,
   COL_WHO_ID,
   COL_WHO_ACCOUNT,
   COL_WHO_TARGET,
@@ -1864,22 +1865,29 @@ populate_entities_from_search_hits (void)
         {
           TplEntityType type = tpl_entity_get_entity_type (hit->target);
           EmpathyContact *contact;
+          const gchar *name;
+          gchar *sort_key;
           gboolean room = type == TPL_ENTITY_ROOM;
 
           contact = empathy_contact_from_tpl_contact (hit->account,
               hit->target);
+
+          name = empathy_contact_get_alias (contact);
+          sort_key = g_utf8_collate_key (name, -1);
 
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
               COL_WHO_TYPE, COL_TYPE_NORMAL,
               COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                                  : EMPATHY_IMAGE_AVATAR_DEFAULT,
-              COL_WHO_NAME, empathy_contact_get_alias (contact),
+              COL_WHO_NAME, name,
+              COL_WHO_NAME_SORT_KEY, sort_key,
               COL_WHO_ID, tpl_entity_get_identifier (hit->target),
               COL_WHO_ACCOUNT, hit->account,
               COL_WHO_TARGET, hit->target,
               -1);
 
+          g_free (sort_key);
           g_object_unref (contact);
         }
     }
@@ -2282,21 +2290,28 @@ log_manager_got_entities_cb (GObject *manager,
       TplEntity *entity = TPL_ENTITY (l->data);
       TplEntityType type = tpl_entity_get_entity_type (entity);
       EmpathyContact *contact;
+      const gchar *name;
+      gchar *sort_key;
       gboolean room = type == TPL_ENTITY_ROOM;
 
       contact = empathy_contact_from_tpl_contact (ctx->account, entity);
+
+      name = empathy_contact_get_alias (contact);
+      sort_key = g_utf8_collate_key (name, -1);
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
           COL_WHO_TYPE, COL_TYPE_NORMAL,
           COL_WHO_ICON, room ? EMPATHY_IMAGE_GROUP_MESSAGE
                              : EMPATHY_IMAGE_AVATAR_DEFAULT,
-          COL_WHO_NAME, empathy_contact_get_alias (contact),
+          COL_WHO_NAME, name,
+          COL_WHO_NAME_SORT_KEY, sort_key,
           COL_WHO_ID, tpl_entity_get_identifier (entity),
           COL_WHO_ACCOUNT, ctx->account,
           COL_WHO_TARGET, entity,
           -1);
 
+      g_free (sort_key);
       g_object_unref (contact);
 
       if (ctx->self->priv->selected_account != NULL &&
@@ -2448,23 +2463,23 @@ log_window_who_populate (EmpathyLogWindow *self)
 }
 
 static gint
-sort_by_name (GtkTreeModel *model,
+sort_by_name_key (GtkTreeModel *model,
     GtkTreeIter *a,
     GtkTreeIter *b,
     gpointer user_data)
 {
-  gchar *name1, *name2;
+  gchar *key1, *key2;
   gint type1, type2;
   gint ret;
 
   gtk_tree_model_get (model, a,
       COL_WHO_TYPE, &type1,
-      COL_WHO_NAME, &name1,
+      COL_WHO_NAME_SORT_KEY, &key1,
       -1);
 
   gtk_tree_model_get (model, b,
       COL_WHO_TYPE, &type2,
-      COL_WHO_NAME, &name2,
+      COL_WHO_NAME_SORT_KEY, &key2,
       -1);
 
   if (type1 == COL_TYPE_ANY)
@@ -2476,10 +2491,10 @@ sort_by_name (GtkTreeModel *model,
   else if (type2 == COL_TYPE_SEPARATOR)
     ret = 1;
   else
-    ret = g_strcmp0 (name1, name2);
+    ret = g_strcmp0 (key1, key2);
 
-  g_free (name1);
-  g_free (name2);
+  g_free (key1);
+  g_free (key2);
 
   return ret;
 }
@@ -2626,6 +2641,7 @@ log_window_who_setup (EmpathyLogWindow *self)
       G_TYPE_INT,           /* type */
       G_TYPE_STRING,        /* icon */
       G_TYPE_STRING,        /* name */
+      G_TYPE_STRING,        /* name sort key */
       G_TYPE_STRING,        /* id */
       TP_TYPE_ACCOUNT,      /* account */
       TPL_TYPE_ENTITY);     /* target */
@@ -2660,10 +2676,10 @@ log_window_who_setup (EmpathyLogWindow *self)
       NULL, NULL);
 
   gtk_tree_sortable_set_sort_column_id (sortable,
-      COL_WHO_NAME,
+      COL_WHO_NAME_SORT_KEY,
       GTK_SORT_ASCENDING);
   gtk_tree_sortable_set_sort_func (sortable,
-      COL_WHO_NAME, sort_by_name,
+      COL_WHO_NAME_SORT_KEY, sort_by_name_key,
       NULL, NULL);
 
   gtk_tree_view_set_search_column (view, COL_WHO_NAME);
