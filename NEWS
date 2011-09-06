@@ -1,3 +1,43 @@
+NEW in 3.1.91 (06/09/2011)
+=============
+
+This release introduces a new optional mission-control plugins providing
+integration with GNOME's online accounts service. With this plugin
+installed, mission-control will automatically create a Telepathy account
+if there is a Google GOA account configured with the 'Chat' feature enabled.
+
+Dependencies:
+
+ • mission-control-plugins (optional)
+ • goa (optional)
+
+Bugs fixed:
+ - Fixed #652543, Add a MC GOA plugin (Danielle Madeley, Guillaume, Desmottes)
+ - Fixed #656871, Shouldn't allow to start video call with audio only contact (Emilio Pozuelo Monfort)
+ - Fixed #657087, build: fix typo in configure summary (Cosimo Cecchi)
+ - Fixed #657266, empathy crashed with SIGSEGV in folks_persona_store_get_can_alias_personas() (Guillaume Desmottes)
+ - Fixed #657842, Search field isn't at the right end of the History window toolbar (Guillaume Desmottes)
+ - Fixed #657843, Chat and Call icons don't match in History window (Emilio Pozuelo Monfort)
+ - Fixed #657914, EmpathyIndividualStore segfaults if contact cannot be obtained by individual (Cosimo Alfarano)
+ - Fixed #657954, log-window: add the "raised" style class to the account chooser (Cosimo Cecchi)
+ - Fixed #657956, primary-toolbar style class has been removed (Cosimo Cecchi)
+ - Fixed #658254, empathy-accounts.desktop should not get installed if no control center embedding (Guillaume Desmottes)
+
+Translations:
+ - Updated be Translation (Ihar Hrachyshka)
+ - Updated fa Translation (Arash Mousavi)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated lt Translation (Aurimas Černius)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Hannie Dumoleyn)
+ - Updated pt_BR Translation (Antonio Fernandes C. Neto)
+ - Updated ru Translation (Yuri Myasoedov)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated ta Translation (Dr.T.Vasudevan)
+
+Documentation translations:
+ - Updated es Documentation translation (Jorge González)
+
 NEW in 3.1.90.1 (31/08/2011)
 ===============
 
