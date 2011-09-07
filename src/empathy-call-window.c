@@ -188,6 +188,7 @@ struct _EmpathyCallWindowPriv
 
   /* These are used to accept or reject an incoming call when the status
      is RINGING. */
+  GtkWidget *incoming_call_dialog;
   TpyCallChannel *pending_channel;
   TpChannelDispatchOperation *pending_cdo;
   TpAddDispatchOperationContext *pending_context;
@@ -1368,35 +1369,80 @@ empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
 }
 
 static void
+empathy_call_window_incoming_call_response_cb (GtkDialog *dialog,
+    gint response_id,
+    EmpathyCallWindow *self)
+{
+  switch (response_id)
+    {
+      case GTK_RESPONSE_ACCEPT:
+        tp_channel_dispatch_operation_handle_with_async (
+            self->priv->pending_cdo, EMPATHY_CALL_BUS_NAME, NULL, NULL);
+
+        tp_clear_object (&self->priv->pending_cdo);
+        tp_clear_object (&self->priv->pending_channel);
+        tp_clear_object (&self->priv->pending_context);
+
+        break;
+      case GTK_RESPONSE_CANCEL:
+        tp_channel_dispatch_operation_close_channels_async (
+            self->priv->pending_cdo, NULL, NULL);
+
+        empathy_call_window_status_message (self, _("Disconnected"));
+        self->priv->call_state = DISCONNECTED;
+        break;
+      default:
+        g_warn_if_reached ();
+    }
+}
+
+static void
 empathy_call_window_set_state_ringing (EmpathyCallWindow *self)
 {
+  gboolean video;
+
   g_assert (self->priv->call_state != CONNECTED);
+
+  video = tpy_call_channel_has_initial_video (self->priv->pending_channel);
 
   empathy_call_window_status_message (self, _("Incoming call"));
   self->priv->call_state = RINGING;
+
+  self->priv->incoming_call_dialog = gtk_message_dialog_new (
+      GTK_WINDOW (self), GTK_DIALOG_MODAL,
+      GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+      video ? _("Incoming video call from %s") : _("Incoming call from %s"),
+      empathy_contact_get_alias (self->priv->contact));
+
+  gtk_dialog_add_buttons (GTK_DIALOG (self->priv->incoming_call_dialog),
+      _("Reject"), GTK_RESPONSE_CANCEL,
+      _("Answer"), GTK_RESPONSE_ACCEPT,
+      NULL);
+
+  g_signal_connect (self->priv->incoming_call_dialog, "response",
+      G_CALLBACK (empathy_call_window_incoming_call_response_cb), self);
+  gtk_widget_show (self->priv->incoming_call_dialog);
 }
 
 static void
-empathy_call_window_stop_ringing (EmpathyCallWindow *self)
-{
-  empathy_call_window_status_message (self, _("Disconnected"));
-  self->priv->call_state = DISCONNECTED;
-}
-
-static void
-empathy_call_window_incoming_channel_invalidated_cb (TpProxy *channel,
+empathy_call_window_cdo_invalidated_cb (TpProxy *channel,
     guint domain,
     gint code,
     gchar *message,
     EmpathyCallWindow *self)
 {
-  tp_channel_dispatch_operation_destroy_channels_async (
-      self->priv->pending_cdo, NULL, NULL);
-  empathy_call_window_stop_ringing (self);
-
   tp_clear_object (&self->priv->pending_cdo);
   tp_clear_object (&self->priv->pending_channel);
   tp_clear_object (&self->priv->pending_context);
+
+  /* We don't know if the incoming call has been accepted or not, so we
+   * assume it hasn't and if it has, we'll set the proper status when
+   * we get the new handler. */
+  empathy_call_window_status_message (self, _("Disconnected"));
+  self->priv->call_state = DISCONNECTED;
+
+  gtk_widget_destroy (self->priv->incoming_call_dialog);
+  self->priv->incoming_call_dialog = NULL;
 }
 
 void
@@ -1414,8 +1460,8 @@ empathy_call_window_start_ringing (EmpathyCallWindow *self,
   self->priv->pending_context = g_object_ref (context);
   self->priv->pending_cdo = g_object_ref (dispatch_operation);
 
-  g_signal_connect (self->priv->pending_channel, "invalidated",
-      G_CALLBACK (empathy_call_window_incoming_channel_invalidated_cb), self);
+  g_signal_connect (self->priv->pending_cdo, "invalidated",
+      G_CALLBACK (empathy_call_window_cdo_invalidated_cb), self);
 
   empathy_call_window_set_state_ringing (self);
   tp_add_dispatch_operation_context_accept (context);
