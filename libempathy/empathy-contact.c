@@ -1663,7 +1663,8 @@ update_geocode (EmpathyContact *contact)
   GHashTable *location;
 
   location = empathy_contact_get_location (contact);
-  if (location == NULL)
+  if (location == NULL ||
+      g_hash_table_size (location) == 0)
     return;
 
   /* No need to search for position if contact published it */
