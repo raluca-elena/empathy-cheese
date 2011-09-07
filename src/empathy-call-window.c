@@ -43,6 +43,7 @@
 #include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-tp-contact-factory.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-avatar-image.h>
@@ -103,6 +104,7 @@ enum {
 };
 
 typedef enum {
+  RINGING,
   CONNECTING,
   CONNECTED,
   HELD,
@@ -183,6 +185,12 @@ struct _EmpathyCallWindowPriv
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
+
+  /* These are used to accept or reject an incoming call when the status
+     is RINGING. */
+  TpyCallChannel *pending_channel;
+  TpChannelDispatchOperation *pending_cdo;
+  TpAddDispatchOperationContext *pending_context;
 
   gulong video_output_motion_handler_id;
   guint bus_message_source_id;
@@ -1357,6 +1365,60 @@ empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
   clutter_bind_constraint_set_offset (constraint,
       allocation.y2 - allocation.y1 -
       FLOATING_TOOLBAR_SPACING - FLOATING_TOOLBAR_HEIGHT);
+}
+
+static void
+empathy_call_window_set_state_ringing (EmpathyCallWindow *self)
+{
+  g_assert (self->priv->call_state != CONNECTED);
+
+  empathy_call_window_status_message (self, _("Incoming call"));
+  self->priv->call_state = RINGING;
+}
+
+static void
+empathy_call_window_stop_ringing (EmpathyCallWindow *self)
+{
+  empathy_call_window_status_message (self, _("Disconnected"));
+  self->priv->call_state = DISCONNECTED;
+}
+
+static void
+empathy_call_window_incoming_channel_invalidated_cb (TpProxy *channel,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyCallWindow *self)
+{
+  tp_channel_dispatch_operation_destroy_channels_async (
+      self->priv->pending_cdo, NULL, NULL);
+  empathy_call_window_stop_ringing (self);
+
+  tp_clear_object (&self->priv->pending_cdo);
+  tp_clear_object (&self->priv->pending_channel);
+  tp_clear_object (&self->priv->pending_context);
+}
+
+void
+empathy_call_window_start_ringing (EmpathyCallWindow *self,
+    TpyCallChannel *channel,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context)
+{
+  g_assert (self->priv->pending_channel == NULL);
+  g_assert (self->priv->pending_context == NULL);
+  g_assert (self->priv->pending_cdo == NULL);
+
+  /* Start ringing and delay until the user answers or hangs. */
+  self->priv->pending_channel = g_object_ref (channel);
+  self->priv->pending_context = g_object_ref (context);
+  self->priv->pending_cdo = g_object_ref (dispatch_operation);
+
+  g_signal_connect (self->priv->pending_channel, "invalidated",
+      G_CALLBACK (empathy_call_window_incoming_channel_invalidated_cb), self);
+
+  empathy_call_window_set_state_ringing (self);
+  tp_add_dispatch_operation_context_accept (context);
 }
 
 static void

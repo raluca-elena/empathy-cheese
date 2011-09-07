@@ -70,6 +70,42 @@ call_window_destroyed_cb (GtkWidget *window,
   g_application_release (G_APPLICATION (app));
 }
 
+static gboolean
+find_window_for_handle (gpointer key,
+    gpointer value,
+    gpointer user_data)
+{
+  EmpathyContact *contact = key;
+  guint handle = GPOINTER_TO_UINT (user_data);
+
+  if (handle == empathy_contact_get_handle (contact))
+    return TRUE;
+
+  return FALSE;
+}
+
+static gboolean
+incoming_call_cb (EmpathyCallFactory *factory,
+    guint handle,
+    TpyCallChannel *channel,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context,
+    gpointer user_data)
+{
+  EmpathyCallWindow *window = g_hash_table_find (call_windows,
+      find_window_for_handle, GUINT_TO_POINTER (handle));
+
+  if (window != NULL)
+    {
+      /* The window takes care of accepting or rejecting the context. */
+      empathy_call_window_start_ringing (window,
+          channel, dispatch_operation, context);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 new_call_handler_cb (EmpathyCallFactory *factory,
     EmpathyCallHandler *handler,
@@ -123,6 +159,8 @@ activate_cb (GApplication *application)
 
   g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
       G_CALLBACK (new_call_handler_cb), NULL);
+  g_signal_connect (G_OBJECT (call_factory), "incoming-call",
+      G_CALLBACK (incoming_call_cb), NULL);
 
   if (!empathy_call_factory_register (call_factory, &error))
     {
