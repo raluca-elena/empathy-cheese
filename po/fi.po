@@ -12,17 +12,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
-"Report-Msgid-Bugs-To: "
-"http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&component=general\n"
-"POT-Creation-Date: 2010-11-13 22:40+0000\n"
-"PO-Revision-Date: 2010-11-15 13:51+0200\n"
-"Last-Translator: Ville-Pekka Vainio <vpivaini@cs.helsinki.fi>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-09-08 13:41+0300\n"
+"PO-Revision-Date: 2011-09-08 13:41+0300\n"
+"Last-Translator: Timo Jyrinki <timo.jyrinki@iki.fi>\n"
 "Language-Team: Finnish <gnome-fi-laatu@lists.sourceforge.net>\n"
+"Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Launchpad-Export-Date: 2010-09-13 15:12+0000\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: ../data/empathy.desktop.in.in.h:1
 msgid "Chat on Google Talk, Facebook, MSN and many other chat services"
@@ -47,6 +46,22 @@ msgid "Always open a separate chat window for new chats."
 msgstr "Avaa aina uusi ikkuna uusille keskusteluille."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:2
+msgid "Call volume"
+msgstr "Puhelun äänenvoimakkuus"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:3
+msgid "Call volume, as a percentage."
+msgstr "Puhelun äänenvoimakkuus prosentteina."
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:4
+msgid "Camera device"
+msgstr "Kamera"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:5
+msgid "Camera position"
+msgstr "Kameran sijainti"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:6
 msgid ""
 "Character to add after nickname when using nick completion (tab) in group "
 "chat."
@@ -54,46 +69,54 @@ msgstr ""
 "Lempinimen jälkeen lisättävä merkki, kun käytetään lempinimen täydennystä "
 "(sarkain) ryhmäkeskustelussa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:3
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:7
 msgid "Chat window theme"
 msgstr "Keskusteluikkunan teema"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:4
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:8
+msgid "Chat window theme variant"
+msgstr "Keskusteluikkunan teemamuunnos"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:9
 msgid ""
 "Comma-separated list of spell checker languages to use (e.g. \"en, fr, nl\")."
 msgstr ""
 "Pilkuilla eroteltu lista oikeinkirjoituksen tarkistusohjelman käyttämistä "
 "kielistä (esim. \"fi, en, fr\")."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:5
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:10
 msgid "Compact contact list"
 msgstr "Pienikokoinen tuttavaluettelo"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:6
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:11
 msgid "Connection managers should be used"
 msgstr "Yhteyden hallintaohjelmia tulisi käyttää"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:7
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:12
 msgid "Contact list sort criterion"
 msgstr "Tuttavaluettelon lajitteluperuste"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:8
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:13
+msgid "Default camera device to use in video calls, e.g. /dev/video0."
+msgstr "Oletuskamera videopuheluihin, esim. /dev/video0"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:14
 msgid "Default directory to select an avatar image from"
 msgstr "Oletushakemisto, josta avatar-kuvat haetaan"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:9
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:15
 msgid "Disable popup notifications when away"
 msgstr "Älä näytä ponnahdusikkunoita poissaollessa"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:10
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:16
 msgid "Disable sounds when away"
 msgstr "Älä soita ääniä poissaollessa"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:11
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:17
 msgid "Display incoming events in the status area"
 msgstr "Näytä ajankohtaiset tapahtumat tilarivillä"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:12
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:18
 msgid ""
 "Display incoming events in the status area. If false, present them to the "
 "user immediately."
@@ -101,238 +124,248 @@ msgstr ""
 "Näytä ajankohtaiset tapahtumat tilarivillä. Mikäli epätosi, näytä ne "
 "käyttäjälle välittömästi."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:13
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:19
+msgid "Echo cancellation support"
+msgstr "Kaiun poiston tuki"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:20
 msgid "Empathy can publish the user's location"
 msgstr "Empathy voi julkaista käyttäjän sijainnin"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:14
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:21
 msgid "Empathy can use the GPS to guess the location"
 msgstr "Empathy voi käyttää GPS:ää paikantamaan sijainnin"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:15
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:22
 msgid "Empathy can use the cellular network to guess the location"
 msgstr "Empathy voi käyttää matkapuhelinverkkoa paikantamaan sijainnin"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:16
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:23
 msgid "Empathy can use the network to guess the location"
 msgstr "Empathy voi käyttää verkkoa paikantamaan sijainnin"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:17
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:24
 msgid "Empathy default download folder"
 msgstr "Empathyn noutojen oletuskansio"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:18
-msgid "Empathy has asked about importing accounts"
-msgstr "Empathy on kysynyt tilien tuonnista"
-
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:19
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:25
 msgid "Empathy has migrated butterfly logs"
 msgstr "Empathy on siirtänyt butterfly:n lokit"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:20
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:26
 msgid "Empathy should auto-away when idle"
 msgstr ""
 "Empathyn tulisi merkitä automaattisesti poissaolevaksi, mikäli konetta ei "
 "käytetä"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:21
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:27
 msgid "Empathy should auto-connect on startup"
 msgstr "Empathy yrittää yhdistää automaattisesti käynnistettäessä"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:22
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:28
 msgid "Empathy should reduce the location's accuracy"
 msgstr "Empathyn pitää heikentää sijainnin tarkkuutta"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:23
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:29
 msgid "Empathy should use the avatar of the contact as the chat window icon"
 msgstr "Empathy yrittää käyttää tuttavan avatarta keskusteluikkunan kuvakkeena"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:24
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:30
 msgid "Enable WebKit Developer Tools"
-msgstr "Ota käyttöön WebKit-kehittäjän työkalut"
+msgstr "Käytä WebKit-kehittäjän työkaluja"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:25
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:31
 msgid "Enable popup notifications for new messages"
 msgstr "Näytä ponnahdusikkuna uusille viesteille"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:26
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:32
 msgid "Enable spell checker"
-msgstr "Ota käyttöön oikeinkirjoituksen tarkistus"
+msgstr "Käytä oikeinkirjoituksen tarkistusta"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:27
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:33
 msgid "Hide main window"
 msgstr "Piilota pääikkuna"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:28
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:34
 msgid "Hide the main window."
 msgstr "Piilota pääikkuna."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:29
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:35
 msgid "Nick completed character"
 msgstr "Lempinimen täydennysmerkki"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:30
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:36
 msgid "Open new chats in separate windows"
 msgstr "Avaa uusi ikkuna uusille keskusteluille"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:31
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:37
 msgid "Path of the Adium theme to use"
 msgstr "Käytettävän Adium-teeman sijainti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:32
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:38
 msgid "Path of the Adium theme to use if the theme used for chat is Adium."
 msgstr "Adium-teeman sijainti Adiumia keskustelun teemana käytettäessä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:33
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:39
 msgid "Play a sound for incoming messages"
 msgstr "Soita merkkiääni saapuville viesteille"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:34
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:40
 msgid "Play a sound for new conversations"
 msgstr "Soita merkkiääni uusista keskusteluista"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:35
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:41
 msgid "Play a sound for outgoing messages"
 msgstr "Soita merkkiääni lähetettäville viesteille"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:36
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:42
 msgid "Play a sound when a contact logs in"
 msgstr "Soita merkkiääni tuttavan kirjautuessa sisään"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:37
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:43
 msgid "Play a sound when a contact logs out"
 msgstr "Soita merkkiääni tuttavan kirjautuessa ulos"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:38
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:44
 msgid "Play a sound when we log in"
 msgstr "Soita merkkiääni kirjauduttaessa sisään"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:39
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:45
 msgid "Play a sound when we log out"
 msgstr "Soita merkkiääni kirjauduttaessa ulos"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:40
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:46
 msgid "Pop up notifications if the chat isn't focused"
 msgstr "Ponnahdusilmoitus kohdistamattomasta keskustelusta"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:41
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:47
 msgid "Pop up notifications when a contact logs in"
 msgstr "Ponnahdusilmoitus tuttavan kirjautuessa sisään"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:42
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:48
 msgid "Pop up notifications when a contact logs out"
 msgstr "Ponnahdusilmoitus tuttavan kirjautuessa ulos"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:43
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:49
+msgid "Position the camera preview should be during a call."
+msgstr ""
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:50
+msgid "Show Balance in contact list"
+msgstr ""
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:51
 msgid "Show avatars"
 msgstr "Näytä avatar-kuvat"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:44
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:52
 msgid "Show contact list in rooms"
 msgstr "Näytä tuttavaluettelo huoneissa"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:45
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:53
 msgid "Show hint about closing the main window"
 msgstr "Näytä vihje pääikkunan sulkemisesta"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:46
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:54
 msgid "Show offline contacts"
 msgstr "Näytä linjoilta poissa olevat tuttavat"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:47
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:55
 msgid "Show protocols"
 msgstr "Näytä protokollat"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:48
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:56
 msgid "Spell checking languages"
 msgstr "Kielentarkastuksessa käytetyt kielet"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:49
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:57
 msgid "The default folder to save file transfers in."
 msgstr "Oletuskansio, johon siirretyt tiedostot tallennetaan."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:50
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:58
 msgid "The last directory that an avatar image was chosen from."
 msgstr "Viimeisin hakemisto, josta avatar-kuva oli valittu."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:51
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:59
 msgid "The position for the chat window side pane"
 msgstr "Keskusteluikkunan sivupaneelin sijainti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:52
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:60
 msgid "The stored position (in pixels) of the chat window side pane."
 msgstr "Keskusteluikkunan sivupaneelin tallennettu sijainti (pikseleinä)."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:53
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:61
 msgid "The theme that is used to display the conversation in chat windows."
 msgstr "Keskusteluikkunoissa käytettävä teema."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:54
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:62
+msgid ""
+"The theme variant that is used to display the conversation in chat windows."
+msgstr ""
+"Teemamuunnos jota käytetään näyttämään keskustelu keskusteluikkunoissa."
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:63
 msgid "Use graphical smileys"
 msgstr "Käytä hymiökuvakkeita"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:55
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:64
 msgid "Use notification sounds"
 msgstr "Käytä merkkiääniä"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:56
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:65
 msgid "Use theme for chat rooms"
 msgstr "Käytä teemaa keskusteluhuoneille"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:57
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:66
 msgid "Whether Empathy can publish the user's location to their contacts."
 msgstr "Saako Empathy paljastaa käyttäjän sijainnin tuttaville."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:58
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:67
 msgid "Whether Empathy can use the GPS to guess the location."
 msgstr "Saako Empathy käyttää GPS:ää sijainnin arvaamiseen."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:59
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:68
 msgid "Whether Empathy can use the cellular network to guess the location."
 msgstr "Saako Empathy käyttää matkapuhelinverkkoa sijainnin arvaamiseen."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:60
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:69
 msgid "Whether Empathy can use the network to guess the location."
 msgstr "Saako Empathy käyttää verkkoa sijainnin arvaamiseen."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:61
-msgid "Whether Empathy has asked about importing accounts from other programs."
-msgstr "Onko Empathy tiedustellut tilien tuomisesta."
-
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:62
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:70
 msgid "Whether Empathy has migrated butterfly logs."
 msgstr "Onko Empathy siirtänyt butterfly-lokit."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:63
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:71
 msgid "Whether Empathy should automatically log into your accounts on startup."
 msgstr ""
 "Kirjautuuko Empathy tileillesi automaattisesti käynnistymisensä yhteydessä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:64
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:72
 msgid ""
 "Whether Empathy should go into away mode automatically if the user is idle."
 msgstr ""
 "Tulisiko Empathyn merkitä käyttäjä automaattisesti poissaolevaksi, mikäli "
 "konetta ei käytetä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:65
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:73
 msgid ""
 "Whether Empathy should reduce the location's accuracy for privacy reasons."
 msgstr ""
 "Alentaako Empathy sijaintitiedon tarkkuutta yksityisyyden suojaamiseksi."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:66
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:74
 msgid ""
 "Whether Empathy should use the avatar of the contact as the chat window icon."
 msgstr ""
 "Käyttääkö Empathy tuttavan avatar-kuvaketta keskusteluikkunan kuvakkeena."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:67
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:75
 msgid ""
 "Whether WebKit developer tools, such as the Web Inspector, should be enabled."
 msgstr "Otetaanko WebKit-kehittäjän työkalut, kuten Web-tutkain, käyttöön."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:68
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:76
 msgid ""
 "Whether connectivity managers should be used to automatically disconnect/"
 "reconnect."
@@ -340,61 +373,65 @@ msgstr ""
 "Käyttääkö Empathy yhteyksienhallintaa verkkoyhteyksien automaattiseen "
 "luomiseen ja katkaisuun."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:69
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:77
 msgid ""
 "Whether to check words typed against the languages you want to check with."
 msgstr "Tarkistetaanko kirjoitetut sanat oikolukukielellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:70
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:78
 msgid "Whether to convert smileys into graphical images in conversations."
 msgstr "Näytetäänkö keskusteluiden hymiöt hymiökuvakkeina."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:71
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:79
+msgid "Whether to enable Pulseaudio's echo cancellation filter."
+msgstr ""
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:80
 msgid "Whether to play a sound to notify of contacts logging into the network."
 msgstr "Ilmoitetaanko tuttavien sisäänkirjautumisesta merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:72
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:81
 msgid ""
 "Whether to play a sound to notify of contacts logging out of the network."
 msgstr "Ilmoitetaanko tuttavien uloskirjautumisesta merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:73
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:82
 msgid "Whether to play a sound to notify of events."
 msgstr "Ilmoitetaanko tapahtumista merkkiäänin."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:74
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:83
 msgid "Whether to play a sound to notify of incoming messages."
 msgstr "Ilmoitetaanko saapuvista viesteistä merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:75
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:84
 msgid "Whether to play a sound to notify of new conversations."
 msgstr "Ilmoitetaanko uusista keskusteluista merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:76
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:85
 msgid "Whether to play a sound to notify of outgoing messages."
 msgstr "Ilmoitetaanko lähtevistä viesteistä merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:77
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:86
 msgid "Whether to play a sound when logging into a network."
 msgstr "Ilmoitetaanko verkkoon kirjautumisesta merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:78
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:87
 msgid "Whether to play a sound when logging out of a network."
 msgstr "Ilmoitetaanko verkosta uloskirjautumisesta merkkiäänellä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:79
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:88
 msgid "Whether to play sound notifications when away or busy."
 msgstr "Ilmoitetaanko tapahtumista merkkiäänin varattuna tai poissa oltaessa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:80
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:89
 msgid "Whether to show a popup notification when a contact goes offline."
 msgstr "Näytetäänkö ponnahdusilmoitus tuttavan uloskirjautumisesta."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:81
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:90
 msgid "Whether to show a popup notification when a contact goes online."
 msgstr "Näytetäänkö ponnahdusilmoitus tuttavan sisäänkirjautumisesta."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:82
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:91
 msgid ""
 "Whether to show a popup notification when receiving a new message even if "
 "the chat is already opened, but not focused."
@@ -402,56 +439,60 @@ msgstr ""
 "Näytetäänkö avatussa, kohdistamattomassa keskustelussa saapuneesta uudesta "
 "viestistä ponnahdusilmoitus."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:83
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:92
 msgid "Whether to show a popup notification when receiving a new message."
 msgstr "Näytetäänkö uudesta viestistä ponnahdusilmoitus."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:84
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:93
+msgid "Whether to show account balances in the contact list."
+msgstr ""
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:94
 msgid ""
 "Whether to show avatars for contacts in the contact list and chat windows."
 msgstr ""
 "Näytetäänkö tuttavien avatar-kuvakkeet tuttavaluettelossa ja "
 "keskusteluikkunoissa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:85
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:95
 msgid "Whether to show contacts that are offline in the contact list."
 msgstr "Näytetäänkö poissa linjoilta olevat tuttavat tuttavaluettelossa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:86
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:96
 msgid "Whether to show popup notifications when away or busy."
 msgstr "Näytetäänkö ponnahdusilmoituksia varattuna tai poissa oltaessa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:87
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:97
 msgid "Whether to show protocols for contacts in the contact list."
 msgstr "Näytetäänkö tuttavien yhteyskäytännöt tuttavaluettelossa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:88
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:98
 msgid "Whether to show the contact list in chat rooms."
 msgstr "Näytetäänkö tuttavaluettelo keskusteluhuoneissa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:89
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:99
 msgid "Whether to show the contact list in compact mode."
 msgstr "Näytetäänkö tuttavaluettelo pienoiskokoa käytettäessä."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:90
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:100
 msgid ""
 "Whether to show the message dialog about closing the main window with the "
 "'x' button in the title bar."
 msgstr "Pyydetäänkö pääikkunan sulkemisesta vahvistusta."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:91
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:101
 msgid "Whether to use the theme for chat rooms."
 msgstr "Käytetäänkö teemaa keskusteluhuoneissa."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:92
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:102
 msgid ""
 "Which criterion to use when sorting the contact list. Default is to sort by "
 "the contact's name with the value \"name\". A value of \"state\" will sort "
 "the contact list by state."
 msgstr ""
 "Kuinka tuttavaluettelo järjestetään. Oletusarvolla \"name\" "
-"järjestelyperusteena on tuttavan nimi. Arvolla \"state\" luettelo järjestetään "
-"tuttavien tilan perusteella."
+"järjestelyperusteena on tuttavan nimi. Arvolla \"state\" luettelo "
+"järjestetään tuttavien tilan perusteella."
 
 #: ../data/empathy-accounts.desktop.in.in.h:1
 msgid "Manage Messaging and VoIP accounts"
@@ -459,187 +500,204 @@ msgstr "Hallitse viestimiä ja Internet-puheluiden (VoIP) käyttäjätilejä"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2156
+#: ../src/empathy-accounts-dialog.c:2324
 msgid "Messaging and VoIP Accounts"
 msgstr "Viestintä ja VoIP-käyttäjätilit"
 
-#: ../libempathy/empathy-ft-handler.c:851
-msgid "The hash of the received file and the sent one do not match"
-msgstr "Vastaanotetun ja lähetetyn tiedoston tiiviste ei täsmää"
+#: ../libempathy/empathy-ft-handler.c:825
+msgid "File transfer completed, but the file was corrupted"
+msgstr "Tiedostonsiirto valmistui, mutta tiedosto oli viallinen"
 
 #: ../libempathy/empathy-ft-handler.c:1111
 msgid "File transfer not supported by remote contact"
 msgstr "Etäyhteys ei tue tiedostonsiirtoa"
 
-#: ../libempathy/empathy-ft-handler.c:1169
+#: ../libempathy/empathy-ft-handler.c:1167
 msgid "The selected file is not a regular file"
 msgstr "Valittu tiedosto ei ole tavanomainen tiedosto"
 
-#: ../libempathy/empathy-ft-handler.c:1178
+#: ../libempathy/empathy-ft-handler.c:1176
 msgid "The selected file is empty"
 msgstr "Valittu tiedosto on tyhjä"
 
-#: ../libempathy/empathy-tp-file.c:283
+#: ../libempathy/empathy-message.c:415 ../src/empathy-call-observer.c:131
+#, c-format
+msgid "Missed call from %s"
+msgstr "Vastaamaton puhelu käyttäjältä %s"
+
+#. Translators: this is an outgoing call, e.g. 'Called Alice'
+#: ../libempathy/empathy-message.c:419
+#, c-format
+msgid "Called %s"
+msgstr "Soitettiin käytäjälle %s"
+
+#: ../libempathy/empathy-message.c:422
+#, c-format
+msgid "Call from %s"
+msgstr "Puhelu käyttäjältä %s"
+
+#: ../libempathy/empathy-tp-file.c:268
 msgid "Socket type not supported"
 msgstr "Pistoketyyppi ei ole tuettu"
 
-#: ../libempathy/empathy-tp-file.c:402
+#: ../libempathy/empathy-tp-file.c:387
 msgid "No reason was specified"
 msgstr "Syytä ei annettu"
 
-#: ../libempathy/empathy-tp-file.c:405
+#: ../libempathy/empathy-tp-file.c:390
 msgid "The change in state was requested"
 msgstr "Pyydettiin tilan muutosta"
 
-#: ../libempathy/empathy-tp-file.c:408
+#: ../libempathy/empathy-tp-file.c:393
 msgid "You canceled the file transfer"
 msgstr "Keskeytit tiedostonsiirron"
 
-#: ../libempathy/empathy-tp-file.c:411
+#: ../libempathy/empathy-tp-file.c:396
 msgid "The other participant canceled the file transfer"
 msgstr "Toinen osapuoli katkaisi tiedostonsiirron"
 
-#: ../libempathy/empathy-tp-file.c:414
+#: ../libempathy/empathy-tp-file.c:399
 msgid "Error while trying to transfer the file"
 msgstr "Virhe yritettäessä siirtää tiedostoa"
 
-#: ../libempathy/empathy-tp-file.c:417
+#: ../libempathy/empathy-tp-file.c:402
 msgid "The other participant is unable to transfer the file"
 msgstr "Toinen osapuoli ei voi siirtää tiedostoa"
 
-#: ../libempathy/empathy-tp-file.c:420 ../libempathy/empathy-utils.c:324
+#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:302
 msgid "Unknown reason"
 msgstr "Tuntematon syy"
 
-#: ../libempathy/empathy-utils.c:246
+#: ../libempathy/empathy-utils.c:222
 msgid "Available"
 msgstr "Tavoitettavissa"
 
-#: ../libempathy/empathy-utils.c:248
+#: ../libempathy/empathy-utils.c:224
 msgid "Busy"
 msgstr "Varattu"
 
-#: ../libempathy/empathy-utils.c:251
+#: ../libempathy/empathy-utils.c:227
 msgid "Away"
 msgstr "Poissa"
 
-#: ../libempathy/empathy-utils.c:253
+#: ../libempathy/empathy-utils.c:229
 msgid "Invisible"
 msgstr "Näkymätön"
 
-#: ../libempathy/empathy-utils.c:255
+#: ../libempathy/empathy-utils.c:231
 msgid "Offline"
 msgstr "Poissa linjoilta"
 
-#: ../libempathy/empathy-utils.c:257 ../src/empathy-call-window.c:1903
-#: ../src/empathy-call-window.c:1904 ../src/empathy-call-window.c:1905
-#: ../src/empathy-call-window.c:1906 ../src/empathy-call-window.ui.h:18
+#. translators: presence type is unknown
+#: ../libempathy/empathy-utils.c:234
+msgctxt "presence"
 msgid "Unknown"
 msgstr "Tuntematon"
 
-#: ../libempathy/empathy-utils.c:296
+#: ../libempathy/empathy-utils.c:274
 msgid "No reason specified"
 msgstr "Erittelemätön syy"
 
-#: ../libempathy/empathy-utils.c:298 ../libempathy/empathy-utils.c:354
+#: ../libempathy/empathy-utils.c:276 ../libempathy/empathy-utils.c:332
 msgid "Status is set to offline"
 msgstr "Tila on nyt ”Poissa linjoilta”"
 
-#: ../libempathy/empathy-utils.c:300 ../libempathy/empathy-utils.c:334
+#: ../libempathy/empathy-utils.c:278 ../libempathy/empathy-utils.c:312
+#: ../libempathy-gtk/empathy-call-utils.c:49
 msgid "Network error"
 msgstr "Verkkovirhe"
 
-#: ../libempathy/empathy-utils.c:302 ../libempathy/empathy-utils.c:336
+#: ../libempathy/empathy-utils.c:280 ../libempathy/empathy-utils.c:314
 msgid "Authentication failed"
 msgstr "Todennus epäonnistui"
 
-#: ../libempathy/empathy-utils.c:304 ../libempathy/empathy-utils.c:338
+#: ../libempathy/empathy-utils.c:282 ../libempathy/empathy-utils.c:316
 msgid "Encryption error"
 msgstr "Salausvirhe"
 
-#: ../libempathy/empathy-utils.c:306
+#: ../libempathy/empathy-utils.c:284
 msgid "Name in use"
 msgstr "Nimi on käytössä"
 
-#: ../libempathy/empathy-utils.c:308 ../libempathy/empathy-utils.c:340
+#: ../libempathy/empathy-utils.c:286 ../libempathy/empathy-utils.c:318
 msgid "Certificate not provided"
 msgstr "Varmennetta ei ole annettu"
 
-#: ../libempathy/empathy-utils.c:310 ../libempathy/empathy-utils.c:342
+#: ../libempathy/empathy-utils.c:288 ../libempathy/empathy-utils.c:320
 msgid "Certificate untrusted"
 msgstr "Varmenne ei ole luotettu"
 
-#: ../libempathy/empathy-utils.c:312 ../libempathy/empathy-utils.c:344
+#: ../libempathy/empathy-utils.c:290 ../libempathy/empathy-utils.c:322
 msgid "Certificate expired"
 msgstr "Varmenne on vanhentunut"
 
-#: ../libempathy/empathy-utils.c:314 ../libempathy/empathy-utils.c:346
+#: ../libempathy/empathy-utils.c:292 ../libempathy/empathy-utils.c:324
 msgid "Certificate not activated"
 msgstr "Varmenne ei ole vielä aktivoitu"
 
-#: ../libempathy/empathy-utils.c:316 ../libempathy/empathy-utils.c:348
+#: ../libempathy/empathy-utils.c:294 ../libempathy/empathy-utils.c:326
 msgid "Certificate hostname mismatch"
 msgstr "Varmenteen verkkonimi ei täsmää"
 
-#: ../libempathy/empathy-utils.c:318 ../libempathy/empathy-utils.c:350
+#: ../libempathy/empathy-utils.c:296 ../libempathy/empathy-utils.c:328
 msgid "Certificate fingerprint mismatch"
 msgstr "Varmenteen sormenjälki ei täsmää"
 
-#: ../libempathy/empathy-utils.c:320 ../libempathy/empathy-utils.c:352
+#: ../libempathy/empathy-utils.c:298 ../libempathy/empathy-utils.c:330
 msgid "Certificate self-signed"
 msgstr "Itseallekirjoitettu varmenne"
 
-#: ../libempathy/empathy-utils.c:322
+#: ../libempathy/empathy-utils.c:300
 msgid "Certificate error"
 msgstr "Varmennevirhe"
 
-#: ../libempathy/empathy-utils.c:356
+#: ../libempathy/empathy-utils.c:334
 msgid "Encryption is not available"
 msgstr "Salausta ei ole käytettävissä"
 
-#: ../libempathy/empathy-utils.c:358
+#: ../libempathy/empathy-utils.c:336
 msgid "Certificate is invalid"
 msgstr "Varmenne ei ole kelvollinen"
 
-#: ../libempathy/empathy-utils.c:360
+#: ../libempathy/empathy-utils.c:338
 msgid "Connection has been refused"
 msgstr "Yhteys hylättiin"
 
-#: ../libempathy/empathy-utils.c:362
+#: ../libempathy/empathy-utils.c:340
 msgid "Connection can't be established"
 msgstr "Yhteyttä ei voi muodostaa"
 
-#: ../libempathy/empathy-utils.c:364
+#: ../libempathy/empathy-utils.c:342
 msgid "Connection has been lost"
 msgstr "Yhteys katkesi"
 
-#: ../libempathy/empathy-utils.c:366
+#: ../libempathy/empathy-utils.c:344
 msgid "This resource is already connected to the server"
 msgstr "Tämä resurssi on jo yhdistetty palvelimelle"
 
-#: ../libempathy/empathy-utils.c:368
+#: ../libempathy/empathy-utils.c:346
 msgid ""
 "Connection has been replaced by a new connection using the same resource"
 msgstr "Yhteys on korvattu samaa resurssia käyttävällä uudella yhteydellä"
 
-#: ../libempathy/empathy-utils.c:371
+#: ../libempathy/empathy-utils.c:349
 msgid "The account already exists on the server"
-msgstr "Tunnus on jo olemassa palvelimella"
+msgstr "Tili on jo olemassa palvelimella"
 
-#: ../libempathy/empathy-utils.c:373
+#: ../libempathy/empathy-utils.c:351
 msgid "Server is currently too busy to handle the connection"
 msgstr "Palvelin on liian kiireinen käsitelläkseen tätä yhteyttä"
 
-#: ../libempathy/empathy-utils.c:375
+#: ../libempathy/empathy-utils.c:353
 msgid "Certificate has been revoked"
 msgstr "Varmenne on kumottu"
 
-#: ../libempathy/empathy-utils.c:377
+#: ../libempathy/empathy-utils.c:355
 msgid ""
 "Certificate uses an insecure cipher algorithm or is cryptographically weak"
 msgstr "Varmenne käyttää heikkoa salausmenetelmää"
 
-#: ../libempathy/empathy-utils.c:380
+#: ../libempathy/empathy-utils.c:358
 msgid ""
 "The length of the server certificate, or the depth of the server certificate "
 "chain, exceed the limits imposed by the cryptography library"
@@ -647,130 +705,144 @@ msgstr ""
 "Palvelinsertifikaatin pituus tai palvelinsertifikaattiketjun pituus ovat "
 "suurempia kuin salauskirjasto sallii"
 
-#: ../libempathy/empathy-utils.c:544
+#: ../libempathy/empathy-utils.c:519
 #: ../libempathy-gtk/empathy-contact-list-store.h:73
 msgid "People Nearby"
 msgstr "Lähellä olevat ihmiset"
 
-#: ../libempathy/empathy-utils.c:549
+#: ../libempathy/empathy-utils.c:524
 msgid "Yahoo! Japan"
 msgstr "Yahoo! Japan"
 
-#: ../libempathy/empathy-utils.c:550
+#: ../libempathy/empathy-utils.c:553
+msgid "Google Talk"
+msgstr "Google Talk"
+
+#: ../libempathy/empathy-utils.c:554
 msgid "Facebook Chat"
 msgstr "Facebook-keskustelu"
 
-#: ../libempathy/empathy-time.c:137
+#: ../libempathy/empathy-time.c:88
 #, c-format
 msgid "%d second ago"
 msgid_plural "%d seconds ago"
 msgstr[0] "%d sekunti sitten"
 msgstr[1] "%d sekuntia sitten"
 
-#: ../libempathy/empathy-time.c:142
+#: ../libempathy/empathy-time.c:93
 #, c-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] "%d minuutti sitten"
 msgstr[1] "%d minuuttia sitten"
 
-#: ../libempathy/empathy-time.c:147
+#: ../libempathy/empathy-time.c:98
 #, c-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] "%d tunti sitten"
 msgstr[1] "%d tuntia sitten"
 
-#: ../libempathy/empathy-time.c:152
+#: ../libempathy/empathy-time.c:103
 #, c-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] "%d päivä sitten"
 msgstr[1] "%d päivää sitten"
 
-#: ../libempathy/empathy-time.c:157
+#: ../libempathy/empathy-time.c:108
 #, c-format
 msgid "%d week ago"
 msgid_plural "%d weeks ago"
 msgstr[0] "%d viikko sitten"
 msgstr[1] "%d viikkoa sitten"
 
-#: ../libempathy/empathy-time.c:162
+#: ../libempathy/empathy-time.c:113
 #, c-format
 msgid "%d month ago"
 msgid_plural "%d months ago"
 msgstr[0] "%d kuukausi sitten"
 msgstr[1] "%d kuukautta sitten"
 
-#: ../libempathy/empathy-time.c:167
+#: ../libempathy/empathy-time.c:136
 msgid "in the future"
 msgstr "tulevaisuudessa"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:463
-msgid "All"
-msgstr "Kaikki"
+#: ../libempathy-gtk/empathy-account-chooser.c:539
+msgid "All accounts"
+msgstr "Kaikki tilit"
 
-#: ../libempathy-gtk/empathy-account-widget.c:514
-#: ../libempathy-gtk/empathy-log-window.c:646
-#: ../src/empathy-import-widget.c:312
+#: ../libempathy-gtk/empathy-account-widget.c:694
+#: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "Käyttäjätili"
 
-#: ../libempathy-gtk/empathy-account-widget.c:515
+#: ../libempathy-gtk/empathy-account-widget.c:695
 msgid "Password"
 msgstr "Salasana"
 
-#: ../libempathy-gtk/empathy-account-widget.c:516
+#: ../libempathy-gtk/empathy-account-widget.c:696
 #: ../libempathy-gtk/empathy-irc-network-dialog.c:507
 msgid "Server"
 msgstr "Palvelin"
 
-#: ../libempathy-gtk/empathy-account-widget.c:517
+#: ../libempathy-gtk/empathy-account-widget.c:697
 #: ../libempathy-gtk/empathy-irc-network-dialog.c:522
 msgid "Port"
 msgstr "Portti"
 
-#: ../libempathy-gtk/empathy-account-widget.c:589
-#: ../libempathy-gtk/empathy-account-widget.c:646
+#: ../libempathy-gtk/empathy-account-widget.c:769
+#: ../libempathy-gtk/empathy-account-widget.c:826
 #, c-format
 msgid "%s:"
 msgstr "%s:"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1192
+msgid "My Web Accounts"
+msgstr "Omat WWW-tilit"
+
+#: ../libempathy-gtk/empathy-account-widget.c:1208
+#, c-format
+msgid "The account %s is edited via %s."
+msgstr ""
+
+#: ../libempathy-gtk/empathy-account-widget.c:1214
+#, c-format
+msgid "The account %s cannot be edited in Empathy."
+msgstr "Käyttäjätiliä %s ei voi muokata Empathyssä."
+
+#: ../libempathy-gtk/empathy-account-widget.c:1233
+msgid "Launch My Web Accounts"
+msgstr "Käynnistä Web-tilit"
+
+#. general handler
+#: ../libempathy-gtk/empathy-account-widget.c:1241
+#, c-format
+msgid "Edit %s"
+msgstr "Muokkaa %s"
+
+#: ../libempathy-gtk/empathy-account-widget.c:1591
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
 msgid "Username:"
 msgstr "Käyttäjänimi:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1521
+#: ../libempathy-gtk/empathy-account-widget.c:1909
 msgid "A_pply"
 msgstr "_Toteuta"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1551
+#: ../libempathy-gtk/empathy-account-widget.c:1939
 msgid "L_og in"
 msgstr "_Kirjaudu sisään"
 
-#. Account and Identifier
-#: ../libempathy-gtk/empathy-account-widget.c:1617
-#: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1401
-#: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
-#: ../src/empathy-chatrooms-window.ui.h:1
-#: ../src/empathy-new-chatroom-dialog.ui.h:1
-msgid "Account:"
-msgstr "Käyttäjätili:"
-
-#: ../libempathy-gtk/empathy-account-widget.c:1628
-msgid "_Enabled"
-msgstr "_Käytössä"
-
-#: ../libempathy-gtk/empathy-account-widget.c:1693
+#: ../libempathy-gtk/empathy-account-widget.c:2013
 msgid "This account already exists on the server"
 msgstr "Tämä tili on jo olemassa palvelimella"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1696
+#: ../libempathy-gtk/empathy-account-widget.c:2016
 msgid "Create a new account on the server"
 msgstr "Luo uusi tili palvelimelle"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1789
+#: ../libempathy-gtk/empathy-account-widget.c:2208
 msgid "Ca_ncel"
 msgstr "_Peru"
 
@@ -779,19 +851,19 @@ msgstr "_Peru"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2077
+#: ../libempathy-gtk/empathy-account-widget.c:2486
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%s palvelimella %s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2103
+#: ../libempathy-gtk/empathy-account-widget.c:2512
 #, c-format
 msgid "%s Account"
 msgstr "%s-tili"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2107
+#: ../libempathy-gtk/empathy-account-widget.c:2516
 msgid "New account"
 msgstr "Uusi tili"
 
@@ -803,6 +875,7 @@ msgstr "<b>Esimerkki:</b> Nimimerkkini"
 #: ../libempathy-gtk/empathy-account-widget-generic.ui.h:1
 #: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:2
 #: ../libempathy-gtk/empathy-account-widget-icq.ui.h:2
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:1
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:3
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:2
 #: ../libempathy-gtk/empathy-account-widget-local-xmpp.ui.h:1
@@ -816,38 +889,58 @@ msgstr "Lisäasetukset"
 #: ../libempathy-gtk/empathy-account-widget-icq.ui.h:5
 #: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:8
 #: ../libempathy-gtk/empathy-account-widget-msn.ui.h:4
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:12
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:13
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:5
 msgid "Pass_word:"
 msgstr "S_alasana:"
 
 #: ../libempathy-gtk/empathy-account-widget-aim.ui.h:4
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+msgid "Remember Password"
+msgstr "Muista salasana"
+
+#. remember password ticky box
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
+#: ../libempathy-gtk/empathy-password-dialog.c:311
+msgid "Remember password"
+msgstr "Muista salasana"
+
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
 msgid "Screen _Name:"
 msgstr "Näyttö_nimi:"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
 msgid "What is your AIM password?"
 msgstr "Mikä on AIM-salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
 msgid "What is your AIM screen name?"
 msgstr "Mikä on AIM-näyttönimesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:7
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:26
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
 msgid "_Port:"
 msgstr "_Portti:"
 
-#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-aim.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:27
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:10
 #: ../src/empathy-new-chatroom-dialog.ui.h:9
 msgid "_Server:"
 msgstr "Pal_velin:"
@@ -863,11 +956,11 @@ msgstr "<b>Esimerkki:</b> käyttäjänimi"
 msgid "Login I_D:"
 msgstr "_Käyttäjätunnus:"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:7
 msgid "What is your GroupWise User ID?"
 msgstr "Mikä on GroupWise-käyttäjätunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-groupwise.ui.h:8
 msgid "What is your GroupWise password?"
 msgstr "Mikä on GroupWise-salasanasi?"
 
@@ -884,84 +977,92 @@ msgstr "_Merkkikartta:"
 msgid "ICQ _UIN:"
 msgstr "ICQ _UIN:"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:8
 msgid "What is your ICQ UIN?"
 msgstr "Mikä on ICQ UIN -tunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-icq.ui.h:9
 msgid "What is your ICQ password?"
 msgstr "Mikä on ICQ-salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.c:183
-#: ../libempathy-gtk/empathy-account-widget-sip.c:216
+#: ../libempathy-gtk/empathy-account-widget-sip.c:206
+#: ../libempathy-gtk/empathy-account-widget-sip.c:239
 msgid "Auto"
 msgstr "Automaattinen"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.c:186
+#: ../libempathy-gtk/empathy-account-widget-sip.c:209
 msgid "UDP"
 msgstr "UDP"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.c:189
+#: ../libempathy-gtk/empathy-account-widget-sip.c:212
 msgid "TCP"
 msgstr "TCP"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.c:192
+#: ../libempathy-gtk/empathy-account-widget-sip.c:215
 msgid "TLS"
 msgstr "TLS"
 
 #. translators: this string is very specific to SIP's internal; maybe
 #. * best to keep the English version.
-#: ../libempathy-gtk/empathy-account-widget-sip.c:221
+#: ../libempathy-gtk/empathy-account-widget-sip.c:244
 msgid "Register"
 msgstr "Rekisteröi"
 
 #. translators: this string is very specific to SIP's internal; maybe
 #. * best to keep the English version.
-#: ../libempathy-gtk/empathy-account-widget-sip.c:226
+#: ../libempathy-gtk/empathy-account-widget-sip.c:249
 msgid "Options"
 msgstr "Valinnat"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.c:229
+#: ../libempathy-gtk/empathy-account-widget-sip.c:252
 msgid "None"
 msgstr "Ei mitään"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:1
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:2
 msgid "Character set:"
 msgstr "Merkkikartta:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:2
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:3
+msgid ""
+"Most IRC servers don't need a password, so if you're not sure, don't enter a "
+"password."
+msgstr ""
+"Useimmat IRC-palvelimet eivät tarvitse salasanaa, joten jos et ole varma, "
+"älä syötä salasanaa."
+
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:4
 msgid "Network"
 msgstr "Verkko"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:3
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:5
 msgid "Network:"
 msgstr "Verkko:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:4
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:6
 msgid "Nickname:"
 msgstr "Nimimerkki:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:7
 msgid "Password:"
 msgstr "Salasana:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:8
 msgid "Quit message:"
 msgstr "Lopetusviesti:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:9
 msgid "Real name:"
 msgstr "Oikea nimi:"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:8
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:10
 msgid "Servers"
 msgstr "Palvelimet"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:12
 msgid "What is your IRC nickname?"
 msgstr "Mikä on IRC-nimimerkkisi?"
 
-#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-irc.ui.h:13
 msgid "Which IRC network?"
 msgstr "Mikä IRC-verkko?"
 
@@ -989,12 +1090,12 @@ msgstr "Ohita palvelimen asetukset"
 msgid "Priori_ty:"
 msgstr "_Prioriteetti:"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:12
 msgid "Reso_urce:"
 msgstr "Res_urssi:"
 
 #. This string is not wrapped in the dialog so you may have to add some '\n' to make it look nice.
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:12
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:14
 msgid ""
 "This is your username, not your normal Facebook login.\n"
 "If you are facebook.com/<b>badger</b>, enter <b>badger</b>.\n"
@@ -1005,42 +1106,42 @@ msgstr ""
 "sähköpostiosoite.\n"
 "Jos käyttäjänimesi on esimerkiksi facebook.com/<b>tunnus</b>, kirjoita "
 "<b>tunnus</b>.\n"
-"Jos et ole vielä luonut Facebook-käyttäjänimeä, voit luoda sellaisen <a "
-"href=\"http://www.facebook.com/username/\">tällä sivulla</a>."
+"Jos et ole vielä luonut Facebook-käyttäjänimeä, voit luoda sellaisen <a href="
+"\"http://www.facebook.com/username/\">tällä sivulla</a>."
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:15
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
 msgid "Use old SS_L"
 msgstr "Käytä vanhaa SS_L-porttia"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
 msgid "What is your Facebook password?"
 msgstr "Mikä on Facebook-salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
 msgid "What is your Facebook username?"
 msgstr "Mikä on Facebook-käyttäjänimesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
 msgid "What is your Google ID?"
 msgstr "Mikä on Google-tunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
 msgid "What is your Google password?"
 msgstr "Mikä on Google-salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
 msgid "What is your Jabber ID?"
 msgstr "Mikä on Jabber-tunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:21
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
 msgid "What is your Jabber password?"
 msgstr "Mikä on Jabber-salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:22
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:24
 msgid "What is your desired Jabber ID?"
 msgstr "Mikä on haluamasi Jabber-tunnus?"
 
-#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:23
+#: ../libempathy-gtk/empathy-account-widget-jabber.ui.h:25
 msgid "What is your desired Jabber password?"
 msgstr "Mikä on haluamasi Jabber-salasana?"
 
@@ -1048,11 +1149,11 @@ msgstr "Mikä on haluamasi Jabber-salasana?"
 msgid "<b>Example:</b> user@hotmail.com"
 msgstr "<b>Esimerkki:</b> tunnus@hotmail.com"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:5
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:7
 msgid "What is your Windows Live ID?"
 msgstr "Mikä on Windows Live -tunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-msn.ui.h:8
 msgid "What is your Windows Live password?"
 msgstr "Mikä on Windows Live -salasanasi?"
 
@@ -1097,156 +1198,205 @@ msgid "Discover the STUN server automatically"
 msgstr "Havaitse STUN-palvelin automaattisesti"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:6
+msgid "Ignore TLS Errors"
+msgstr "Sivuuta TLS-virheet"
+
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:7
 msgid "Interval (seconds)"
 msgstr "Aikaväli (sekunneissa)"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:8
 msgid "Keep-Alive Options"
 msgstr "Käynnissä pitävät valinnat"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:8
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:9
 msgid "Loose Routing"
 msgstr "Löyhä reititys"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:9
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:10
 msgid "Mechanism:"
 msgstr "Mekanismi:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:11
 msgid "Miscellaneous Options"
 msgstr "Muut valinnat"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:11
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:12
 msgid "NAT Traversal Options"
 msgstr "NAT-läpäisyn (NAT-T) asetukset"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:13
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:14
 msgid "Port:"
 msgstr "Portti:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:14
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:15
 msgid "Proxy Options"
 msgstr "Välipalvelinvalinnat"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:15
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
 msgid "STUN Server:"
 msgstr "STUN-palvelin:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:16
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
+#: ../libempathy-gtk/empathy-contact-widget.c:347
 msgid "Server:"
 msgstr "Palvelin:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:17
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
 msgid "Transport:"
 msgstr "Siirto:"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:18
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
+msgid "Use this account to call _landlines and mobile phones"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:22
 msgid "What is your SIP account password?"
 msgstr "Mikä on SIP-tilisi salasana?"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:23
 msgid "What is your SIP login ID?"
 msgstr "Mikä on SIP-tilisi käyttäjätunnus?"
 
-#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:20
+#: ../libempathy-gtk/empathy-account-widget-sip.ui.h:24
 msgid "_Username:"
-msgstr "_Käyttäjätunnus:"
+msgstr "_Käyttäjänimi:"
 
 #: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:4
 msgid "I_gnore conference and chat room invitations"
 msgstr "_Älä huomioi konferenssi- ja keskusteluhuonekutsuja"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:6
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
 msgid "What is your Yahoo! ID?"
 msgstr "Mikä on Yahoo! -tunnuksesi?"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:7
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
 msgid "What is your Yahoo! password?"
 msgstr "Mikä on Yahoo! -salasanasi?"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:8
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:9
 msgid "Yahoo! I_D:"
 msgstr "Yahoo!-_tunnus:"
 
-#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:10
+#: ../libempathy-gtk/empathy-account-widget-yahoo.ui.h:11
 msgid "_Room List locale:"
 msgstr "_Huoneluettelon maa-asetusto:"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:443
-#: ../libempathy-gtk/empathy-avatar-chooser.c:519
+#: ../libempathy-gtk/empathy-avatar-chooser.c:470
+#: ../libempathy-gtk/empathy-avatar-chooser.c:555
 msgid "Couldn't convert image"
 msgstr "Kuvaa ei voitu muuntaa"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:444
+#: ../libempathy-gtk/empathy-avatar-chooser.c:471
 msgid "None of the accepted image formats are supported on your system"
 msgstr ""
 "Järjestelmässäsi ei ole tukea yhdellekään hyväksytylle kuvatiedostomuodolle"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:935
+#: ../libempathy-gtk/empathy-avatar-chooser.c:818
+msgid "Couldn't save picture to file"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-avatar-chooser.c:934
 msgid "Select Your Avatar Image"
 msgstr "Valitse avatar-kuvasi"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:938
+msgid "Take a picture..."
+msgstr "Ota kuva..."
+
+#: ../libempathy-gtk/empathy-avatar-chooser.c:941
 msgid "No Image"
 msgstr "Ei kuvaa"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1000
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1001
 msgid "Images"
 msgstr "Kuvat"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1004
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1005
 msgid "All Files"
 msgstr "Kaikki tiedostot"
 
-#: ../libempathy-gtk/empathy-avatar-image.c:323
+#: ../libempathy-gtk/empathy-avatar-image.c:322
 msgid "Click to enlarge"
 msgstr "Suurenna napsauttamalla"
 
-#: ../libempathy-gtk/empathy-chat.c:642
+#: ../libempathy-gtk/empathy-call-utils.c:44
+#: ../libempathy-gtk/empathy-call-utils.c:60
+msgid "There was an error starting the call"
+msgstr "Puhelun aloittamisessa tapahtui virhe"
+
+#: ../libempathy-gtk/empathy-call-utils.c:51
+msgid "The specified contact doesn't support calls"
+msgstr "Valittu yhteystieto ei tue puheluja"
+
+#: ../libempathy-gtk/empathy-call-utils.c:53
+msgid "The specified contact is offline"
+msgstr "Valittu yhteystieto on poissa linjoilta"
+
+#: ../libempathy-gtk/empathy-call-utils.c:55
+msgid "The specified contact is not valid"
+msgstr "Valittu yhteystieto on virheellinen"
+
+#: ../libempathy-gtk/empathy-call-utils.c:57
+msgid "Emergency calls are not supported on this protocol"
+msgstr "Tämä protokolla ei tue hätäpuheluita"
+
+#: ../libempathy-gtk/empathy-chat.c:702
 msgid "Failed to open private chat"
 msgstr "Yksityiskeskustelun avaaminen epäonnistui"
 
-#: ../libempathy-gtk/empathy-chat.c:682
+#: ../libempathy-gtk/empathy-chat.c:763
 msgid "Topic not supported on this conversation"
 msgstr "Aihe ei ole tuettu tässä keskustelussa"
 
-#: ../libempathy-gtk/empathy-chat.c:688
+#: ../libempathy-gtk/empathy-chat.c:769
 msgid "You are not allowed to change the topic"
 msgstr "Sinulla ei ole oikeutta muuttaa aihetta"
 
-#: ../libempathy-gtk/empathy-chat.c:822
+#: ../libempathy-gtk/empathy-chat.c:973
+#, c-format
+msgid "“%s” is not a valid contact ID"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:1030
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: pyyhi kaikki nykyisen keskustelun viestit pois näkyvistä"
 
-#: ../libempathy-gtk/empathy-chat.c:825
+#: ../libempathy-gtk/empathy-chat.c:1033
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr "/topic <aihe>: aseta nykyisen keskustelun aihe"
 
-#: ../libempathy-gtk/empathy-chat.c:828
+#: ../libempathy-gtk/empathy-chat.c:1036
 msgid "/join <chat room ID>: join a new chat room"
 msgstr "/join <kanavan nimi>: liity kanavalle"
 
-#: ../libempathy-gtk/empathy-chat.c:831
+#: ../libempathy-gtk/empathy-chat.c:1039
 msgid "/j <chat room ID>: join a new chat room"
 msgstr "/j <kanavan nimi>: liity kanavalle"
 
-#: ../libempathy-gtk/empathy-chat.c:836
+#: ../libempathy-gtk/empathy-chat.c:1043
+msgid ""
+"/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
+"current one"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:1047
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr "/query <tuttavan tunnus> [<viesti>]: avaa yksityiskeskustelu"
 
-#: ../libempathy-gtk/empathy-chat.c:839
+#: ../libempathy-gtk/empathy-chat.c:1050
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr "/msg <tuttavan tunnus> <viesti>: avaa yksityiskeskustelu"
 
-#: ../libempathy-gtk/empathy-chat.c:843
+#: ../libempathy-gtk/empathy-chat.c:1053
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr "/nick <nimi>: vaihda nimeä nykyisellä palvelimella"
 
-#: ../libempathy-gtk/empathy-chat.c:846
+#: ../libempathy-gtk/empathy-chat.c:1056
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr "/me <viesti>: lähetä TOIMINTO viesti tämänhetkiseen keskusteluun"
 
-#: ../libempathy-gtk/empathy-chat.c:849
+#: ../libempathy-gtk/empathy-chat.c:1059
 msgid ""
 "/say <message>: send <message> to the current conversation. This is used to "
 "send a message starting with a '/'. For example: \"/say /join is used to "
@@ -1256,7 +1406,11 @@ msgstr ""
 "Tätä toimintoa käytetään kun viestin halutaan alkavan merkillä \"/\", "
 "esimerkiksi: \"/say /join komentoa käytetään kanavalle liittymiseen\""
 
-#: ../libempathy-gtk/empathy-chat.c:854
+#: ../libempathy-gtk/empathy-chat.c:1064
+msgid "/whois <contact ID>: display information about a contact"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:1067
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -1264,84 +1418,113 @@ msgstr ""
 "/help [<komento>]: näyttää kaikki tuetut komennot. Jos <komento> on "
 "määritetty, näytä sen ohje."
 
-#: ../libempathy-gtk/empathy-chat.c:864
+#: ../libempathy-gtk/empathy-chat.c:1077
 #, c-format
 msgid "Usage: %s"
 msgstr "Käyttö: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:893
+#: ../libempathy-gtk/empathy-chat.c:1116
 msgid "Unknown command"
 msgstr "Tuntematon komento"
 
-#: ../libempathy-gtk/empathy-chat.c:1014
+#: ../libempathy-gtk/empathy-chat.c:1242
 msgid "Unknown command; see /help for the available commands"
 msgstr "Tuntematon komento; kirjoita /help nähdäksesi käytössä olevat komennot"
 
-#: ../libempathy-gtk/empathy-chat.c:1152
+#. translators: error used when user doesn't have enough credit on his
+#. * account to send the message.
+#: ../libempathy-gtk/empathy-chat.c:1412
+msgid "insufficient balance to send message"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:1414
+msgid "not capable"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-chat.c:1421
 msgid "offline"
 msgstr "poissa linjoilta"
 
-#: ../libempathy-gtk/empathy-chat.c:1155
+#: ../libempathy-gtk/empathy-chat.c:1424
 msgid "invalid contact"
 msgstr "virheellinen tuttava"
 
-#: ../libempathy-gtk/empathy-chat.c:1158
+#: ../libempathy-gtk/empathy-chat.c:1427
 msgid "permission denied"
 msgstr "lupa evätty"
 
-#: ../libempathy-gtk/empathy-chat.c:1161
+#: ../libempathy-gtk/empathy-chat.c:1430
 msgid "too long message"
 msgstr "liian pitkä viesti"
 
-#: ../libempathy-gtk/empathy-chat.c:1164
+#: ../libempathy-gtk/empathy-chat.c:1433
 msgid "not implemented"
 msgstr "ei toteutettu"
 
-#: ../libempathy-gtk/empathy-chat.c:1168
+#: ../libempathy-gtk/empathy-chat.c:1437
 msgid "unknown"
 msgstr "tuntematon"
 
-#: ../libempathy-gtk/empathy-chat.c:1172
+#: ../libempathy-gtk/empathy-chat.c:1443
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "Virhe lähetettäessä viestiä \"%s\": %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1282 ../src/empathy-chat-window.c:691
+#: ../libempathy-gtk/empathy-chat.c:1447
+#, c-format
+msgid "Error sending message: %s"
+msgstr "Virhe viestiä lähettäessä: %s"
+
+#: ../libempathy-gtk/empathy-chat.c:1508 ../src/empathy-chat-window.c:761
 msgid "Topic:"
 msgstr "Aihe:"
 
-#: ../libempathy-gtk/empathy-chat.c:1294
+#: ../libempathy-gtk/empathy-chat.c:1520
 #, c-format
 msgid "Topic set to: %s"
 msgstr "Aihe asetettu: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1296
+#: ../libempathy-gtk/empathy-chat.c:1522
 msgid "No topic defined"
 msgstr "Aihetta ei ole annettu"
 
-#: ../libempathy-gtk/empathy-chat.c:1775
+#: ../libempathy-gtk/empathy-chat.c:2031
 msgid "(No Suggestions)"
 msgstr "(Ei ehdotuksia)"
 
-#: ../libempathy-gtk/empathy-chat.c:1829
+#. translators: %s is the selected word
+#: ../libempathy-gtk/empathy-chat.c:2099
+#, c-format
+msgid "Add '%s' to Dictionary"
+msgstr "Lisää ”%s” sanakirjaan"
+
+#. translators: first %s is the selected word,
+#. * second %s is the language name of the target dictionary
+#: ../libempathy-gtk/empathy-chat.c:2136
+#, c-format
+msgid "Add '%s' to %s Dictionary"
+msgstr "Lisää ”%s” kielen %s sanakirjaan"
+
+#: ../libempathy-gtk/empathy-chat.c:2206
 msgid "Insert Smiley"
 msgstr "Lisää hymiö"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:1847
-#: ../libempathy-gtk/empathy-ui-utils.c:1805
+#: ../libempathy-gtk/empathy-chat.c:2224
+#: ../libempathy-gtk/empathy-ui-utils.c:1839
 msgid "_Send"
 msgstr "_Lähetä"
 
-#: ../libempathy-gtk/empathy-chat.c:1881
+#. Spelling suggestions
+#: ../libempathy-gtk/empathy-chat.c:2278
 msgid "_Spelling Suggestions"
 msgstr "_Kielentarkistuksen ehdotukset"
 
-#: ../libempathy-gtk/empathy-chat.c:1958
+#: ../libempathy-gtk/empathy-chat.c:2367
 msgid "Failed to retrieve recent logs"
 msgstr "Viimeisimpien lokien nouto epäonnistui"
 
-#: ../libempathy-gtk/empathy-chat.c:2064
+#: ../libempathy-gtk/empathy-chat.c:2504
 #, c-format
 msgid "%s has disconnected"
 msgstr "%s katkaisi"
@@ -1349,12 +1532,12 @@ msgstr "%s katkaisi"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2071
+#: ../libempathy-gtk/empathy-chat.c:2511
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "%2$s potkaisi henkilön %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2074
+#: ../libempathy-gtk/empathy-chat.c:2514
 #, c-format
 msgid "%s was kicked"
 msgstr "%s potkaistiin"
@@ -1362,17 +1545,17 @@ msgstr "%s potkaistiin"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2082
+#: ../libempathy-gtk/empathy-chat.c:2522
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "%2$s esti henkilön %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2085
+#: ../libempathy-gtk/empathy-chat.c:2525
 #, c-format
 msgid "%s was banned"
 msgstr "%s estettiin"
 
-#: ../libempathy-gtk/empathy-chat.c:2089
+#: ../libempathy-gtk/empathy-chat.c:2529
 #, c-format
 msgid "%s has left the room"
 msgstr "%s on poistunut huoneesta"
@@ -1382,81 +1565,173 @@ msgstr "%s on poistunut huoneesta"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2098
+#: ../libempathy-gtk/empathy-chat.c:2538
 #, c-format
 msgid " (%s)"
 msgstr " (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2123
+#: ../libempathy-gtk/empathy-chat.c:2563
 #, c-format
 msgid "%s has joined the room"
 msgstr "%s on saapunut huoneeseen"
 
-#: ../libempathy-gtk/empathy-chat.c:2148
+#: ../libempathy-gtk/empathy-chat.c:2588
 #, c-format
 msgid "%s is now known as %s"
 msgstr "%s vaihtoi nimekseen %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2287 ../src/empathy-call-window.c:1947
+#: ../libempathy-gtk/empathy-chat.c:2727
+#: ../src/empathy-streamed-media-window.c:1894
+#: ../src/empathy-event-manager.c:1240 ../src/empathy-call-window.c:2355
 msgid "Disconnected"
 msgstr "Ei yhteyttä"
 
-#: ../libempathy-gtk/empathy-chat.c:2934
-msgid "Wrong password; please try again:"
-msgstr "Väärä salasana, yritä uudelleen:"
+#. Add message
+#: ../libempathy-gtk/empathy-chat.c:3374
+msgid "Would you like to store this password?"
+msgstr "Haluaisitteko tallentaa tämän salasanan?"
 
-#: ../libempathy-gtk/empathy-chat.c:2935
+#: ../libempathy-gtk/empathy-chat.c:3380
+msgid "Remember"
+msgstr "Muista"
+
+#: ../libempathy-gtk/empathy-chat.c:3390
+msgid "Not now"
+msgstr "Ei nyt"
+
+#: ../libempathy-gtk/empathy-chat.c:3434
 msgid "Retry"
 msgstr "Yritä uudelleen"
 
-#: ../libempathy-gtk/empathy-chat.c:2940
+#: ../libempathy-gtk/empathy-chat.c:3438
+msgid "Wrong password; please try again:"
+msgstr "Väärä salasana, yritä uudelleen:"
+
+#. Add message
+#: ../libempathy-gtk/empathy-chat.c:3568
 msgid "This room is protected by a password:"
 msgstr "Huone on salasanasuojattu:"
 
-#: ../libempathy-gtk/empathy-chat.c:2941
+#: ../libempathy-gtk/empathy-chat.c:3595
 msgid "Join"
 msgstr "Liity"
 
-#: ../libempathy-gtk/empathy-chat.c:3081
+#: ../libempathy-gtk/empathy-chat.c:3797 ../src/empathy-event-manager.c:1261
 msgid "Connected"
 msgstr "Yhdistetty"
 
-#: ../libempathy-gtk/empathy-chat.c:3134
-#: ../libempathy-gtk/empathy-log-window.c:653
+#: ../libempathy-gtk/empathy-chat.c:3852
 msgid "Conversation"
 msgstr "Keskustelu"
 
+#. Translators: this string is a something like
+#. * "Escher Cat (SMS)"
+#: ../libempathy-gtk/empathy-chat.c:3857
+#, c-format
+msgid "%s (SMS)"
+msgstr "%s (SMS)"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:424
+msgid "Unknown or invalid identifier"
+msgstr "Tuntematon tai virheellinen tunniste"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:426
+msgid "Contact blocking temporarily unavailable"
+msgstr "Yhteyshenkilöiden esto tilapäisesti poissa"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:428
+msgid "Contact blocking unavailable"
+msgstr "Yhteyshenkilöiden esto poissa"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:430
+msgid "Permission Denied"
+msgstr "Pääsy evätty"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:434
+msgid "Could not block contact"
+msgstr "Yhteystietoa ei voitu estää"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:774
+msgid "Edit Blocked Contacts"
+msgstr "Muokkaa estettyjä yhteystietoja"
+
+#. Account and Identifier
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:1
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:512
+#: ../libempathy-gtk/empathy-contact-widget.ui.h:2
+#: ../libempathy-gtk/empathy-individual-widget.c:1485
+#: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
+#: ../src/empathy-chatrooms-window.ui.h:1
+#: ../src/empathy-new-chatroom-dialog.ui.h:1
+msgid "Account:"
+msgstr "Käyttäjätili:"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:2
+msgid "Blocked Contacts"
+msgstr "Estetyt yhteyshenkilöt"
+
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:3
+#: ../libempathy-gtk/empathy-status-preset-dialog.ui.h:1
+#: ../src/empathy-accounts-dialog.ui.h:5
+#: ../src/empathy-chatrooms-window.ui.h:3
+msgid "Remove"
+msgstr "Poista"
+
 #. Copy Link Address menu item
-#: ../libempathy-gtk/empathy-chat-text-view.c:324
-#: ../libempathy-gtk/empathy-theme-adium.c:791
+#: ../libempathy-gtk/empathy-chat-text-view.c:320
+#: ../libempathy-gtk/empathy-webkit-utils.c:277
 msgid "_Copy Link Address"
 msgstr "_Kopioi linkin osoite"
 
 #. Open Link menu item
-#: ../libempathy-gtk/empathy-chat-text-view.c:331
-#: ../libempathy-gtk/empathy-theme-adium.c:798
+#: ../libempathy-gtk/empathy-chat-text-view.c:327
+#: ../libempathy-gtk/empathy-webkit-utils.c:284
 msgid "_Open Link"
 msgstr "_Avaa linkki"
 
 #. Translators: timestamp displayed between conversations in
 #. * chat windows (strftime format string)
-#: ../libempathy-gtk/empathy-chat-text-view.c:424
+#: ../libempathy-gtk/empathy-chat-text-view.c:415
 msgid "%A %B %d %Y"
 msgstr "%A %d. %Bta %Y"
 
-#: ../libempathy-gtk/empathy-contact-dialogs.c:241
+#: ../libempathy-gtk/empathy-contact-dialogs.c:299
 #: ../libempathy-gtk/empathy-individual-edit-dialog.c:247
 msgid "Edit Contact Information"
 msgstr "Muokkaa tuttavan tietoja"
 
-#: ../libempathy-gtk/empathy-contact-dialogs.c:292
+#: ../libempathy-gtk/empathy-contact-dialogs.c:350
 msgid "Personal Information"
 msgstr "Henkilökohtaiset tiedot"
 
-#: ../libempathy-gtk/empathy-contact-dialogs.c:397
-#: ../libempathy-gtk/empathy-individual-dialogs.c:111
+#: ../libempathy-gtk/empathy-contact-dialogs.c:459
+#: ../libempathy-gtk/empathy-individual-dialogs.c:119
 msgid "New Contact"
 msgstr "Uusi tuttava"
+
+#: ../libempathy-gtk/empathy-contact-dialogs.c:533
+#: ../libempathy-gtk/empathy-individual-dialogs.c:200
+#, c-format
+msgid "Block %s?"
+msgstr "Estetäänkö %s?"
+
+#: ../libempathy-gtk/empathy-contact-dialogs.c:538
+#: ../libempathy-gtk/empathy-individual-dialogs.c:255
+#, c-format
+msgid "Are you sure you want to block '%s' from contacting you again?"
+msgstr "Oletko varma käyttäjän '%s' estämisestä?"
+
+#: ../libempathy-gtk/empathy-contact-dialogs.c:543
+#: ../libempathy-gtk/empathy-individual-dialogs.c:277
+msgid "_Block"
+msgstr "_Estä"
+
+#: ../libempathy-gtk/empathy-contact-dialogs.c:559
+#: ../libempathy-gtk/empathy-individual-dialogs.c:286
+msgid "_Report this contact as abusive"
+msgid_plural "_Report these contacts as abusive"
+msgstr[0] "_Raportoi tämä yhteyshenkilö loukkaavana"
+msgstr[1] "_Raportoi nämä yhteyshenkilöt loukkaavina"
 
 #: ../libempathy-gtk/empathy-contact-dialogs.ui.h:1
 msgid "Decide _Later"
@@ -1466,6 +1741,10 @@ msgstr "_Päätä myöhemmin"
 msgid "Subscription Request"
 msgstr "Liittymispyyntö"
 
+#: ../libempathy-gtk/empathy-contact-dialogs.ui.h:3
+msgid "_Block User"
+msgstr "Es_tä käyttäjä"
+
 #: ../libempathy-gtk/empathy-contact-list-store.h:71
 msgid "Ungrouped"
 msgstr "Ryhmittelemättömät"
@@ -1474,280 +1753,331 @@ msgstr "Ryhmittelemättömät"
 msgid "Favorite People"
 msgstr "Suosikkihenkilöt"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2004
-#: ../libempathy-gtk/empathy-individual-view.c:2232
+#: ../libempathy-gtk/empathy-contact-list-view.c:1986
+#: ../libempathy-gtk/empathy-individual-view.c:2376
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Haluatko varmasti poistaa ryhmän \"%s\"?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2006
-#: ../libempathy-gtk/empathy-individual-view.c:2235
+#: ../libempathy-gtk/empathy-contact-list-view.c:1988
+#: ../libempathy-gtk/empathy-individual-view.c:2379
 msgid "Removing group"
 msgstr "Poistetaan ryhmää"
 
 #. Remove
-#: ../libempathy-gtk/empathy-contact-list-view.c:2055
-#: ../libempathy-gtk/empathy-contact-list-view.c:2132
-#: ../libempathy-gtk/empathy-individual-view.c:2289
-#: ../libempathy-gtk/empathy-individual-view.c:2387
-#: ../src/empathy-accounts-dialog.ui.h:7
+#: ../libempathy-gtk/empathy-contact-list-view.c:2037
+#: ../libempathy-gtk/empathy-contact-list-view.c:2114
+#: ../libempathy-gtk/empathy-individual-view.c:2434
+#: ../libempathy-gtk/empathy-individual-view.c:2637
 msgid "_Remove"
 msgstr "_Poista"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2085
-#: ../libempathy-gtk/empathy-individual-view.c:2320
+#: ../libempathy-gtk/empathy-contact-list-view.c:2067
+#: ../libempathy-gtk/empathy-individual-view.c:2501
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "Haluatko varmasti poistaa tuttavan \"%s\" yhteystiedot?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2087
-#: ../libempathy-gtk/empathy-individual-view.c:2322
+#: ../libempathy-gtk/empathy-contact-list-view.c:2069
+#: ../libempathy-gtk/empathy-individual-view.c:2522
 msgid "Removing contact"
 msgstr "Poistetaan tuttava"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:203
-#: ../src/empathy-main-window.ui.h:13
+#: ../libempathy-gtk/empathy-contact-menu.c:220
+#: ../src/empathy-main-window-menubar.ui.h:14
 msgid "_Add Contact…"
 msgstr "_Lisää tuttava…"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:230
-#: ../libempathy-gtk/empathy-individual-menu.c:516
-#: ../src/empathy-main-window.ui.h:14
+#: ../libempathy-gtk/empathy-contact-menu.c:300
+msgid "_Block Contact"
+msgstr "Es_tä yhteystieto"
+
+#: ../libempathy-gtk/empathy-contact-menu.c:329
+#: ../libempathy-gtk/empathy-individual-menu.c:758
+#: ../src/empathy-main-window-menubar.ui.h:16
 msgid "_Chat"
 msgstr "_Keskustele"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:260
-#: ../libempathy-gtk/empathy-individual-menu.c:559
+#: ../libempathy-gtk/empathy-contact-menu.c:361
+#: ../libempathy-gtk/empathy-individual-menu.c:849
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "_Äänipuhelu"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:290
-#: ../libempathy-gtk/empathy-individual-menu.c:601
+#: ../libempathy-gtk/empathy-contact-menu.c:394
+#: ../libempathy-gtk/empathy-individual-menu.c:894
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "_Videopuhelu"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:330
-#: ../libempathy-gtk/empathy-individual-menu.c:644
-#: ../src/empathy-main-window.ui.h:25
+#: ../libempathy-gtk/empathy-contact-menu.c:440
+#: ../libempathy-gtk/empathy-individual-menu.c:947
+#: ../src/empathy-main-window-menubar.ui.h:27
 msgid "_Previous Conversations"
 msgstr "_Aiemmat keskustelut"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:352
-#: ../libempathy-gtk/empathy-individual-menu.c:685
+#: ../libempathy-gtk/empathy-contact-menu.c:462
+#: ../libempathy-gtk/empathy-individual-menu.c:988
 msgid "Send File"
 msgstr "Lähetä tiedosto"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:374
-#: ../libempathy-gtk/empathy-individual-menu.c:727
+#: ../libempathy-gtk/empathy-contact-menu.c:485
+#: ../libempathy-gtk/empathy-individual-menu.c:1030
 msgid "Share My Desktop"
 msgstr "Jaa työpöytäni"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:414
-#: ../libempathy-gtk/empathy-contact-widget.c:1570
-#: ../libempathy-gtk/empathy-individual-menu.c:761
-#: ../libempathy-gtk/empathy-individual-widget.c:1292
+#: ../libempathy-gtk/empathy-contact-menu.c:525
+#: ../libempathy-gtk/empathy-contact-widget.c:1886
+#: ../libempathy-gtk/empathy-individual-menu.c:1065
+#: ../libempathy-gtk/empathy-individual-widget.c:1373
 msgid "Favorite"
 msgstr "Suosikki"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:443
-#: ../libempathy-gtk/empathy-individual-menu.c:788
+#: ../libempathy-gtk/empathy-contact-menu.c:554
+#: ../libempathy-gtk/empathy-individual-menu.c:1093
 msgid "Infor_mation"
 msgstr "_Tietoja"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:489
+#: ../libempathy-gtk/empathy-contact-menu.c:600
 msgctxt "Edit contact (contextual menu)"
 msgid "_Edit"
 msgstr "_Muokkaa"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:543
-#: ../libempathy-gtk/empathy-individual-menu.c:972
-#: ../src/empathy-chat-window.c:903
+#: ../libempathy-gtk/empathy-contact-menu.c:654
+#: ../libempathy-gtk/empathy-individual-menu.c:1283
+#: ../src/empathy-chat-window.c:1011
 msgid "Inviting you to this room"
 msgstr "Kutsuu sinut tähän keskusteluhuoneeseen"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:574
-#: ../libempathy-gtk/empathy-individual-menu.c:1019
+#: ../libempathy-gtk/empathy-contact-menu.c:685
+#: ../libempathy-gtk/empathy-individual-menu.c:1329
 msgid "_Invite to Chat Room"
 msgstr "_Kutsu keskusteluhuoneeseen"
+
+#. Title
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:505
+msgid "Search contacts"
+msgstr "Etsi yhteystietoja"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:535
+msgid "Search: "
+msgstr "Etsi: "
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:593
+msgid "_Add Contact"
+msgstr "_Lisää yhteystieto"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:611
+msgid "No contacts found"
+msgstr "Yhteystietoa ei löytynyt"
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:627
+msgid "Your message introducing yourself:"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-contact-search-dialog.c:635
+msgid "Please let me see when you're online. Thanks!"
+msgstr ""
 
 #: ../libempathy-gtk/empathy-contact-selector.c:129
 msgid "Select a contact"
 msgstr "Valitse tuttava"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:226
-#: ../libempathy-gtk/empathy-individual-widget.c:148
+#: ../libempathy-gtk/empathy-contact-widget.c:336
+#: ../libempathy-gtk/empathy-individual-widget.c:153
 msgid "Full name:"
 msgstr "Koko nimi:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:227
-#: ../libempathy-gtk/empathy-individual-widget.c:149
+#: ../libempathy-gtk/empathy-contact-widget.c:337
+#: ../libempathy-gtk/empathy-individual-widget.c:154
 msgid "Phone number:"
 msgstr "Puhelinnumero:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:228
-#: ../libempathy-gtk/empathy-individual-widget.c:150
+#: ../libempathy-gtk/empathy-contact-widget.c:338
+#: ../libempathy-gtk/empathy-individual-widget.c:155
 msgid "E-mail address:"
 msgstr "Sähköpostiosoite:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:229
-#: ../libempathy-gtk/empathy-individual-widget.c:151
+#: ../libempathy-gtk/empathy-contact-widget.c:339
+#: ../libempathy-gtk/empathy-individual-widget.c:156
 msgid "Website:"
 msgstr "Kotisivu:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:230
-#: ../libempathy-gtk/empathy-individual-widget.c:152
+#: ../libempathy-gtk/empathy-contact-widget.c:340
+#: ../libempathy-gtk/empathy-individual-widget.c:157
 msgid "Birthday:"
 msgstr "Syntymäpäivä:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:609
-#: ../libempathy-gtk/empathy-individual-widget.c:454
+#. Note to translators: this is the caption for a string of the form "5
+#. * minutes ago", and refers to the time since the contact last interacted
+#. * with their IM client.
+#.
+#: ../libempathy-gtk/empathy-contact-widget.c:346
+msgid "Last seen:"
+msgstr "Viimeksi nähty:"
+
+#: ../libempathy-gtk/empathy-contact-widget.c:348
+msgid "Connected from:"
+msgstr "Yhdisti kohteesta:"
+
+#. FIXME: once Idle implements SimplePresence using this information, we can
+#. * and should bin this.
+#.
+#: ../libempathy-gtk/empathy-contact-widget.c:353
+msgid "Away message:"
+msgstr "Poissaoloviesti:"
+
+#: ../libempathy-gtk/empathy-contact-widget.c:606
+msgid "Channels:"
+msgstr "Kanavat:"
+
+#: ../libempathy-gtk/empathy-contact-widget.c:897
+#: ../libempathy-gtk/empathy-individual-widget.c:469
 msgid "Country ISO Code:"
 msgstr "Maan ISO-tunnus:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:611
-#: ../libempathy-gtk/empathy-individual-widget.c:456
+#: ../libempathy-gtk/empathy-contact-widget.c:899
+#: ../libempathy-gtk/empathy-individual-widget.c:471
 msgid "Country:"
 msgstr "Maa:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:613
-#: ../libempathy-gtk/empathy-individual-widget.c:458
+#: ../libempathy-gtk/empathy-contact-widget.c:901
+#: ../libempathy-gtk/empathy-individual-widget.c:473
 msgid "State:"
 msgstr "Osavaltio:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:615
-#: ../libempathy-gtk/empathy-individual-widget.c:460
+#: ../libempathy-gtk/empathy-contact-widget.c:903
+#: ../libempathy-gtk/empathy-individual-widget.c:475
 msgid "City:"
 msgstr "Kaupunki:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:617
-#: ../libempathy-gtk/empathy-individual-widget.c:462
+#: ../libempathy-gtk/empathy-contact-widget.c:905
+#: ../libempathy-gtk/empathy-individual-widget.c:477
 msgid "Area:"
 msgstr "Alue:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:619
-#: ../libempathy-gtk/empathy-individual-widget.c:464
+#: ../libempathy-gtk/empathy-contact-widget.c:907
+#: ../libempathy-gtk/empathy-individual-widget.c:479
 msgid "Postal Code:"
 msgstr "Postinumero:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:621
-#: ../libempathy-gtk/empathy-individual-widget.c:466
+#: ../libempathy-gtk/empathy-contact-widget.c:909
+#: ../libempathy-gtk/empathy-individual-widget.c:481
 msgid "Street:"
 msgstr "Katu:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:623
-#: ../libempathy-gtk/empathy-individual-widget.c:468
+#: ../libempathy-gtk/empathy-contact-widget.c:911
+#: ../libempathy-gtk/empathy-individual-widget.c:483
 msgid "Building:"
 msgstr "Rakennus:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:625
-#: ../libempathy-gtk/empathy-individual-widget.c:470
+#: ../libempathy-gtk/empathy-contact-widget.c:913
+#: ../libempathy-gtk/empathy-individual-widget.c:485
 msgid "Floor:"
 msgstr "Kerros:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:627
-#: ../libempathy-gtk/empathy-individual-widget.c:472
+#: ../libempathy-gtk/empathy-contact-widget.c:915
+#: ../libempathy-gtk/empathy-individual-widget.c:487
 msgid "Room:"
 msgstr "Huone:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:629
-#: ../libempathy-gtk/empathy-individual-widget.c:474
+#: ../libempathy-gtk/empathy-contact-widget.c:917
+#: ../libempathy-gtk/empathy-individual-widget.c:489
 msgid "Text:"
 msgstr "Teksti:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:631
-#: ../libempathy-gtk/empathy-individual-widget.c:476
+#: ../libempathy-gtk/empathy-contact-widget.c:919
+#: ../libempathy-gtk/empathy-individual-widget.c:491
 msgid "Description:"
 msgstr "Kuvaus:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:633
-#: ../libempathy-gtk/empathy-individual-widget.c:478
+#: ../libempathy-gtk/empathy-contact-widget.c:921
+#: ../libempathy-gtk/empathy-individual-widget.c:493
 msgid "URI:"
 msgstr "URI:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:635
-#: ../libempathy-gtk/empathy-individual-widget.c:480
+#: ../libempathy-gtk/empathy-contact-widget.c:923
+#: ../libempathy-gtk/empathy-individual-widget.c:495
 msgid "Accuracy Level:"
 msgstr "Tarkkuustaso:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:637
-#: ../libempathy-gtk/empathy-individual-widget.c:482
+#: ../libempathy-gtk/empathy-contact-widget.c:925
+#: ../libempathy-gtk/empathy-individual-widget.c:497
 msgid "Error:"
 msgstr "Virhe:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:639
-#: ../libempathy-gtk/empathy-individual-widget.c:484
+#: ../libempathy-gtk/empathy-contact-widget.c:927
+#: ../libempathy-gtk/empathy-individual-widget.c:499
 msgid "Vertical Error (meters):"
 msgstr "Vertikaalinen virhe (metriä):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:641
-#: ../libempathy-gtk/empathy-individual-widget.c:486
+#: ../libempathy-gtk/empathy-contact-widget.c:929
+#: ../libempathy-gtk/empathy-individual-widget.c:501
 msgid "Horizontal Error (meters):"
 msgstr "Horisontaalinen virhe (metriä):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:643
-#: ../libempathy-gtk/empathy-individual-widget.c:488
+#: ../libempathy-gtk/empathy-contact-widget.c:931
+#: ../libempathy-gtk/empathy-individual-widget.c:503
 msgid "Speed:"
 msgstr "Nopeus:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:645
-#: ../libempathy-gtk/empathy-individual-widget.c:490
+#: ../libempathy-gtk/empathy-contact-widget.c:933
+#: ../libempathy-gtk/empathy-individual-widget.c:505
 msgid "Bearing:"
 msgstr "Suuntima:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:647
-#: ../libempathy-gtk/empathy-individual-widget.c:492
+#: ../libempathy-gtk/empathy-contact-widget.c:935
+#: ../libempathy-gtk/empathy-individual-widget.c:507
 msgid "Climb Speed:"
 msgstr "Kiipeämisvauhti:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:649
-#: ../libempathy-gtk/empathy-individual-widget.c:494
+#: ../libempathy-gtk/empathy-contact-widget.c:937
+#: ../libempathy-gtk/empathy-individual-widget.c:509
 msgid "Last Updated on:"
 msgstr "Viimeksi päivitetty:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:651
-#: ../libempathy-gtk/empathy-individual-widget.c:496
+#: ../libempathy-gtk/empathy-contact-widget.c:939
+#: ../libempathy-gtk/empathy-individual-widget.c:511
 msgid "Longitude:"
 msgstr "Pituuspiiri:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:653
-#: ../libempathy-gtk/empathy-individual-widget.c:498
+#: ../libempathy-gtk/empathy-contact-widget.c:941
+#: ../libempathy-gtk/empathy-individual-widget.c:513
 msgid "Latitude:"
 msgstr "Leveyspiiri:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:655
-#: ../libempathy-gtk/empathy-individual-widget.c:500
+#: ../libempathy-gtk/empathy-contact-widget.c:943
+#: ../libempathy-gtk/empathy-individual-widget.c:515
 msgid "Altitude:"
 msgstr "Korkeus:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:718
-#: ../libempathy-gtk/empathy-contact-widget.c:735
-#: ../libempathy-gtk/empathy-individual-widget.c:582
-#: ../libempathy-gtk/empathy-individual-widget.c:599
-#: ../src/empathy-preferences.ui.h:12
+#: ../libempathy-gtk/empathy-contact-widget.c:996
+#: ../libempathy-gtk/empathy-contact-widget.c:1011
+#: ../libempathy-gtk/empathy-individual-widget.c:607
+#: ../libempathy-gtk/empathy-individual-widget.c:622
+#: ../src/empathy-preferences.ui.h:16
 msgid "Location"
 msgstr "Sijainti"
 
 #. translators: format is "Location, $date"
-#: ../libempathy-gtk/empathy-contact-widget.c:737
-#: ../libempathy-gtk/empathy-individual-widget.c:601
+#: ../libempathy-gtk/empathy-contact-widget.c:1013
+#: ../libempathy-gtk/empathy-individual-widget.c:624
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:789
-#: ../libempathy-gtk/empathy-individual-widget.c:650
+#: ../libempathy-gtk/empathy-contact-widget.c:1065
+#: ../libempathy-gtk/empathy-individual-widget.c:673
 msgid "%B %e, %Y at %R UTC"
 msgstr "%e. %Bta %Y klo %R UTC"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:872
-#: ../libempathy-gtk/empathy-individual-widget.c:841
+#: ../libempathy-gtk/empathy-contact-widget.c:1147
+#: ../libempathy-gtk/empathy-individual-widget.c:915
 msgid "Save Avatar"
 msgstr "Tallenna vastaus"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:928
-#: ../libempathy-gtk/empathy-individual-widget.c:899
+#: ../libempathy-gtk/empathy-contact-widget.c:1203
+#: ../libempathy-gtk/empathy-individual-widget.c:973
 msgid "Unable to save avatar"
 msgstr "Avataria ei voitu tallentaa"
 
@@ -1757,7 +2087,7 @@ msgstr "<b>Sijainti</b> hetkellä (pvm)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1227
+#: ../libempathy-gtk/empathy-individual-widget.c:1308
 msgid "Alias:"
 msgstr "Nimimerkki:"
 
@@ -1777,7 +2107,7 @@ msgstr "Tuttavan tiedot"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1431
+#: ../libempathy-gtk/empathy-individual-widget.c:1515
 msgid "Identifier:"
 msgstr "Tunniste:"
 
@@ -1794,11 +2124,11 @@ msgstr "Käyttöjärjestelmä:"
 msgid "Version:"
 msgstr "Versio:"
 
-#: ../libempathy-gtk/empathy-groups-widget.c:332
+#: ../libempathy-gtk/empathy-groups-widget.c:333
 msgid "Groups"
 msgstr "Ryhmät"
 
-#: ../libempathy-gtk/empathy-groups-widget.c:344
+#: ../libempathy-gtk/empathy-groups-widget.c:345
 msgid ""
 "Select the groups you want this contact to appear in.  Note that you can "
 "select more than one group or no groups."
@@ -1806,34 +2136,46 @@ msgstr ""
 "Valitse ryhmät, joissa haluat tämän tuttavan näkyvän. Huomaa että voit "
 "valita useita ryhmiä tai olla valitsematta yhtään ryhmää."
 
-#: ../libempathy-gtk/empathy-groups-widget.c:363
+#: ../libempathy-gtk/empathy-groups-widget.c:364
 msgid "_Add Group"
 msgstr "_Lisää ryhmä"
 
-#: ../libempathy-gtk/empathy-groups-widget.c:397
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:554
+#: ../libempathy-gtk/empathy-groups-widget.c:399
+msgctxt "verb in a column header displaying group names"
 msgid "Select"
 msgstr "Valitse"
 
-#: ../libempathy-gtk/empathy-groups-widget.c:407
-#: ../src/empathy-main-window.c:1250
+#: ../libempathy-gtk/empathy-groups-widget.c:409
+#: ../src/empathy-main-window.c:1807
 msgid "Group"
 msgstr "Ryhmä"
 
+#: ../libempathy-gtk/empathy-individual-dialogs.c:260
+msgid "The following identity will be blocked:"
+msgid_plural "The following identities will be blocked:"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../libempathy-gtk/empathy-individual-dialogs.c:267
+msgid "The following identity can not be blocked:"
+msgid_plural "The following identities can not be blocked:"
+msgstr[0] ""
+msgstr[1] ""
+
 #. Translators: the heading at the top of the Information dialogue
-#: ../libempathy-gtk/empathy-individual-information-dialog.c:281
+#: ../libempathy-gtk/empathy-individual-information-dialog.c:288
 msgid "Linked Contacts"
 msgstr "Linkitetyt yhteystiedot"
 
-#: ../libempathy-gtk/empathy-individual-linker.c:354
+#: ../libempathy-gtk/empathy-individual-linker.c:370
 msgid "Select contacts to link"
 msgstr "Valitse linkitettävät yhteystiedot"
 
-#: ../libempathy-gtk/empathy-individual-linker.c:428
+#: ../libempathy-gtk/empathy-individual-linker.c:444
 msgid "New contact preview"
 msgstr "Uuden yhteystiedon esikatselu"
 
-#: ../libempathy-gtk/empathy-individual-linker.c:472
+#: ../libempathy-gtk/empathy-individual-linker.c:488
 msgid "Contacts selected in the list on the left will be linked together."
 msgstr ""
 "Vasemmanpuoleisesta luettelosta valitut yhteystiedot linkitetään yhteen."
@@ -1841,41 +2183,96 @@ msgstr ""
 #. Translators: this is used in the context menu for a contact. The first
 #. * parameter is a contact ID (e.g. foo@jabber.org) and the second is one
 #. * of the user's account IDs (e.g. me@hotmail.com).
-#: ../libempathy-gtk/empathy-individual-menu.c:132
+#: ../libempathy-gtk/empathy-individual-menu.c:145
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:839
+#: ../libempathy-gtk/empathy-individual-menu.c:309
+msgid "Select account to use to place the call"
+msgstr "Valitse soittoon käytettävä tili"
+
+#. translators: Call is a noun. This string is used in the window
+#. * title
+#: ../libempathy-gtk/empathy-individual-menu.c:313
+#: ../libempathy-gtk/empathy-log-window.ui.h:2
+#: ../src/empathy-streamed-media-window.c:1299
+#: ../src/empathy-call-window.ui.h:2
+msgid "Call"
+msgstr "Soita"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:378
+msgid "Mobile"
+msgstr "Matkapuhelin"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:380
+msgid "Work"
+msgstr "Työ"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:382
+msgid "HOME"
+msgstr "Koti"
+
+#. add an SMS button
+#: ../libempathy-gtk/empathy-individual-menu.c:804
+#: ../libempathy-gtk/empathy-new-message-dialog.c:215
+msgid "_SMS"
+msgstr "_SMS"
+
+#: ../libempathy-gtk/empathy-individual-menu.c:1141
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "_Muokkaa"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:865
+#: ../libempathy-gtk/empathy-individual-menu.c:1167
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "_Linkitä yhteystiedot…"
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1569
+#: ../libempathy-gtk/empathy-individual-view.c:2341
+msgid "Delete and _Block"
+msgstr "Poista ja _estä"
+
+#: ../libempathy-gtk/empathy-individual-view.c:2510
 #, c-format
-msgid "Meta-contact containing %u contact"
-msgid_plural "Meta-contact containing %u contacts"
-msgstr[0] "Metayhteystieto, joka sisältää %u yhteystiedon"
-msgstr[1] "Metayhteystieto, joka sisältää %u yhteystietoa"
+msgid ""
+"Do you really want to remove the linked contact '%s'? Note that this will "
+"remove all the contacts which make up this linked contact."
+msgstr ""
+
+#: ../libempathy-gtk/empathy-individual-widget.c:1662
+#, c-format
+msgid "Linked contact containing %u contact"
+msgid_plural "Linked contacts containing %u contacts"
+msgstr[0] ""
+msgstr[1] ""
 
 #: ../libempathy-gtk/empathy-individual-widget.ui.h:1
 msgid "<b>Location</b> at (date)"
 msgstr "<b>Sijainti</b> hetkellä (pvm)"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:328
+#: ../libempathy-gtk/empathy-individual-widget.ui.h:4
+msgid "Online from a phone or mobile device"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:332
 msgid "New Network"
 msgstr "Uusi verkko"
 
-#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:495
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:527
 msgid "Choose an IRC network"
 msgstr "Valitse IRC-verkko"
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:584
+msgid "Reset _Networks List"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-irc-network-chooser-dialog.c:588
+msgctxt "verb displayed on a button to select an IRC network"
+msgid "Select"
+msgstr "Valitse"
 
 #: ../libempathy-gtk/empathy-irc-network-dialog.c:280
 msgid "new server"
@@ -1899,8 +2296,8 @@ msgstr "_Poista linkitys…"
 
 #: ../libempathy-gtk/empathy-linking-dialog.c:121
 msgid ""
-"Completely split the displayed meta-contact into the contacts it contains."
-msgstr "Jaa näytettävä metayhteystieto sen sisältämiin yhteystietoihin."
+"Completely split the displayed linked contacts into the separate contacts."
+msgstr ""
 
 #. Add button
 #. Translators: this is an action button in the linking dialogue. "Link" is
@@ -1910,85 +2307,222 @@ msgstr "Jaa näytettävä metayhteystieto sen sisältämiin yhteystietoihin."
 msgid "_Link"
 msgstr "_Linkitä"
 
-#: ../libempathy-gtk/empathy-linking-dialog.c:182
+#: ../libempathy-gtk/empathy-linking-dialog.c:183
 #, c-format
-msgid "Unlink meta-contact '%s'?"
-msgstr "Poistetaanko metayhteystiedon ”%s” linkitys?"
-
-#: ../libempathy-gtk/empathy-linking-dialog.c:185
-msgid ""
-"Are you sure you want to unlink this meta-contact? This will completely "
-"split the meta-contact into the contacts it contains."
+msgid "Unlink linked contacts '%s'?"
 msgstr ""
-"Haluatko varmasti poistaa tämän metayhteystiedon linkityksen? "
-"Metayhteystieto jaetaan sen sisältämiin yhteystietoihin."
+
+#: ../libempathy-gtk/empathy-linking-dialog.c:186
+msgid ""
+"Are you sure you want to unlink these linked contacts? This will completely "
+"split the linked contacts into separate contacts."
+msgstr ""
 
 #: ../libempathy-gtk/empathy-linking-dialog.c:190
 msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Poista linkitys"
 
-#: ../libempathy-gtk/empathy-log-window.c:663
-msgid "Date"
-msgstr "Päivämäärä"
+#: ../libempathy-gtk/empathy-log-window.c:633
+msgid "History"
+msgstr "Historia"
 
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:2
-msgid "Conversations"
-msgstr "Keskustelut"
+#: ../libempathy-gtk/empathy-log-window.c:688
+msgid "Show"
+msgstr "Näytä"
 
-#: ../libempathy-gtk/empathy-log-window.ui.h:3
-#: ../libempathy-gtk/empathy-search-bar.ui.h:1
-msgid "Find Next"
-msgstr "Etsi seuraava"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:4
-#: ../libempathy-gtk/empathy-search-bar.ui.h:2
-msgid "Find Previous"
-msgstr "Etsi edellinen"
-
-#: ../libempathy-gtk/empathy-log-window.ui.h:5
-msgid "Previous Conversations"
-msgstr "Aikaisemmat keskustelut"
-
-#. Tab Label
-#: ../libempathy-gtk/empathy-log-window.ui.h:7
+#: ../libempathy-gtk/empathy-log-window.c:710
 msgid "Search"
 msgstr "Etsi"
 
-#. Searching *for* something
+#: ../libempathy-gtk/empathy-log-window.c:1158
+#, c-format
+msgid "Chat in %s"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:1160
+#, c-format
+msgid "Chat with %s"
+msgstr "Keskustele käyttäjän %s kanssa"
+
+#: ../libempathy-gtk/empathy-log-window.c:1210
+#: ../libempathy-gtk/empathy-log-window.c:1357
+msgctxt "A date with the time"
+msgid "%A, %e %B %Y %X"
+msgstr ""
+
+#. Translators: this is an emote: '* Danielle waves'
+#: ../libempathy-gtk/empathy-log-window.c:1299
+#, c-format
+msgid "<i>* %s %s</i>"
+msgstr "<i>* %s %s</i>"
+
+#. Translators: this is a message: 'Danielle: hello'
+#. * The string in bold is the sender's name
+#: ../libempathy-gtk/empathy-log-window.c:1305
+#, c-format
+msgid "<b>%s:</b> %s"
+msgstr "<b>%s:</b> %s"
+
+#: ../libempathy-gtk/empathy-log-window.c:1376
+#: ../libempathy-gtk/empathy-log-window.c:1378
+#: ../src/empathy-ft-manager.c:1026
+msgid "%"
+msgstr "%"
+
+#: ../libempathy-gtk/empathy-log-window.c:1385
+#, c-format
+msgid "Call took %s, ended at %s"
+msgstr "Puhelun kesto %s, puhelu päättyi %s"
+
+#: ../libempathy-gtk/empathy-log-window.c:1717
+msgid "Today"
+msgstr "Tänään"
+
+#: ../libempathy-gtk/empathy-log-window.c:1721
+msgid "Yesterday"
+msgstr "Eilen"
+
+#: ../libempathy-gtk/empathy-log-window.c:1737
+msgctxt ""
+"A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+msgid "%e %B %Y"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:1818
+#: ../libempathy-gtk/empathy-log-window.c:3399
+msgid "Anytime"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:1898
+#: ../libempathy-gtk/empathy-log-window.c:2328
+msgid "Anyone"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:2640
+msgid "Who"
+msgstr "Kuka"
+
+#: ../libempathy-gtk/empathy-log-window.c:2844
+msgid "When"
+msgstr "Milloin"
+
+#: ../libempathy-gtk/empathy-log-window.c:2960
+msgid "Anything"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:2962
+msgid "Text chats"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.c:2964
+#: ../src/empathy-preferences.ui.h:4
+msgid "Calls"
+msgstr "Puhelut"
+
+#: ../libempathy-gtk/empathy-log-window.c:2969
+msgid "Incoming calls"
+msgstr "Saapuneet puhelut"
+
+#: ../libempathy-gtk/empathy-log-window.c:2970
+msgid "Outgoing calls"
+msgstr "Soitetut puhelut"
+
+#: ../libempathy-gtk/empathy-log-window.c:2971
+msgid "Missed calls"
+msgstr "Vastaamattomat puhelut"
+
+#: ../libempathy-gtk/empathy-log-window.c:2993
+msgid "What"
+msgstr "Mitä"
+
+#: ../libempathy-gtk/empathy-log-window.c:3702
+msgid "Are you sure you want to delete all logs of previous conversations?"
+msgstr ""
+"Haluatko varmasti poistaa kaikki aikaisempien keskusteluiden historiatiedot?"
+
+#: ../libempathy-gtk/empathy-log-window.c:3706
+msgid "Clear All"
+msgstr "Tyhjennä kaikki"
+
+#: ../libempathy-gtk/empathy-log-window.c:3713
+msgid "Delete from:"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:1
+msgid "<span size=\"x-large\">Loading...</span>"
+msgstr "<span size=\"x-large\">Ladataan...</span>"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:3
+#: ../src/empathy-chat-window.ui.h:3
+msgid "Chat"
+msgstr "Keskustelu"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:4
+msgid "Delete All History..."
+msgstr "Poista kaikki historia..."
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:5
+msgid "Profile"
+msgstr "Profiili"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:6
+#: ../src/empathy-call-window.ui.h:22
+#: ../src/empathy-streamed-media-window.ui.h:20
+msgid "Video"
+msgstr "Video"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:7
+#: ../src/empathy-call-window.ui.h:28 ../src/empathy-chat-window.ui.h:12
+#: ../src/empathy-main-window-menubar.ui.h:20
+msgid "_Edit"
+msgstr "_Muokkaa"
+
+#: ../libempathy-gtk/empathy-log-window.ui.h:8
+msgid "_File"
+msgstr "_Tiedosto"
+
 #: ../libempathy-gtk/empathy-log-window.ui.h:9
-msgid "_For:"
-msgstr "_Ajalta:"
+msgid "page 2"
+msgstr "sivu 2"
 
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:2
 msgid "Contact ID:"
 msgstr "Tuttavan tunniste:"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-message-dialog.c:145
+#: ../libempathy-gtk/empathy-new-message-dialog.c:225
 msgid "C_hat"
 msgstr "_Keskustele"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-message-dialog.c:155
+#: ../libempathy-gtk/empathy-new-message-dialog.c:244
 msgid "New Conversation"
 msgstr "Uusi keskustelu"
 
 #. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:205
+#: ../libempathy-gtk/empathy-new-call-dialog.c:204
 msgid "Send _Video"
 msgstr "Lähetä _videota"
 
 #. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:213
+#: ../libempathy-gtk/empathy-new-call-dialog.c:215
 msgid "C_all"
 msgstr "_Soita"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:223
+#: ../libempathy-gtk/empathy-new-call-dialog.c:225
 msgid "New Call"
 msgstr "Uusi puhelu"
+
+#: ../libempathy-gtk/empathy-password-dialog.c:274
+#, c-format
+msgid ""
+"Enter your password for account\n"
+"<b>%s</b>"
+msgstr ""
+"Anna salasana tilille\n"
+"<b>%s</b>"
 
 #. COL_STATUS_TEXT
 #. COL_STATE_ICON_NAME
@@ -1996,200 +2530,228 @@ msgstr "Uusi puhelu"
 #. COL_DISPLAY_MARKUP
 #. COL_STATUS_CUSTOMISABLE
 #. COL_TYPE
-#: ../libempathy-gtk/empathy-presence-chooser.c:168
-#: ../libempathy-gtk/empathy-presence-chooser.c:204
+#: ../libempathy-gtk/empathy-presence-chooser.c:167
+#: ../libempathy-gtk/empathy-presence-chooser.c:203
 msgid "Custom Message…"
 msgstr "Oma viesti…"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:221
-#: ../libempathy-gtk/empathy-presence-chooser.c:223
+#: ../libempathy-gtk/empathy-presence-chooser.c:220
+#: ../libempathy-gtk/empathy-presence-chooser.c:222
 msgid "Edit Custom Messages…"
 msgstr "Muokkaa omia viestejä…"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:346
+#: ../libempathy-gtk/empathy-presence-chooser.c:345
 msgid "Click to remove this status as a favorite"
 msgstr "Napsauta poistaaksesi tämän tilan suosikeista"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:355
+#: ../libempathy-gtk/empathy-presence-chooser.c:354
 msgid "Click to make this status a favorite"
 msgstr "Napsauta tehdäksesi tästä tilasta suosikin"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:389
+#: ../libempathy-gtk/empathy-presence-chooser.c:388
 msgid "Set status"
 msgstr "Aseta tila"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:939
+#: ../libempathy-gtk/empathy-presence-chooser.c:943
 msgid "Set your presence and current status"
 msgstr "Aseta läsnäolosi ja nykyinen tilasi"
 
 #. Custom messages
-#: ../libempathy-gtk/empathy-presence-chooser.c:1124
+#: ../libempathy-gtk/empathy-presence-chooser.c:1131
 msgid "Custom messages…"
 msgstr "Omat viestit…"
 
-#: ../libempathy-gtk/empathy-search-bar.ui.h:3
+#. Create account
+#. To translator: %s is the name of the protocol, such as "Google Talk" or
+#. * "Yahoo!"
+#.
+#: ../libempathy-gtk/empathy-protocol-chooser.c:584
+#, c-format
+msgid "New %s account"
+msgstr "Uusi %s-tili"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:1
 msgid "Find:"
 msgstr "Etsi:"
 
-#: ../libempathy-gtk/empathy-search-bar.ui.h:4
-msgid "Match case"
-msgstr "Huomioi kirjainkoko"
+#: ../libempathy-gtk/empathy-search-bar.ui.h:2
+msgid "Mat_ch case"
+msgstr ""
 
-#: ../libempathy-gtk/empathy-search-bar.ui.h:5
+#: ../libempathy-gtk/empathy-search-bar.ui.h:3
 msgid "Phrase not found"
 msgstr "Lausetta ei löydy"
 
-#: ../libempathy-gtk/empathy-sound.c:50
+#: ../libempathy-gtk/empathy-search-bar.ui.h:4
+msgid "_Next"
+msgstr "_Seuraava"
+
+#: ../libempathy-gtk/empathy-search-bar.ui.h:5
+msgid "_Previous"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-sound-manager.c:51
 msgid "Received an instant message"
 msgstr "Vastaanotettiin pikaviesti"
 
-#: ../libempathy-gtk/empathy-sound.c:52
+#: ../libempathy-gtk/empathy-sound-manager.c:53
 msgid "Sent an instant message"
 msgstr "Lähetettiin pikaviesti"
 
-#: ../libempathy-gtk/empathy-sound.c:54
+#: ../libempathy-gtk/empathy-sound-manager.c:55
 msgid "Incoming chat request"
 msgstr "Saapuva keskustelupyyntö"
 
-#: ../libempathy-gtk/empathy-sound.c:56
+#: ../libempathy-gtk/empathy-sound-manager.c:57
 msgid "Contact connected"
 msgstr "Tuttava yhdistetty"
 
-#: ../libempathy-gtk/empathy-sound.c:58
+#: ../libempathy-gtk/empathy-sound-manager.c:59
 msgid "Contact disconnected"
 msgstr "Yhteys tuttavaan katkaistu"
 
-#: ../libempathy-gtk/empathy-sound.c:60
+#: ../libempathy-gtk/empathy-sound-manager.c:61
 msgid "Connected to server"
 msgstr "Yhdistetty palvelimeen"
 
-#: ../libempathy-gtk/empathy-sound.c:62
+#: ../libempathy-gtk/empathy-sound-manager.c:63
 msgid "Disconnected from server"
 msgstr "Yhteys palvelimeen katkaistu"
 
-#: ../libempathy-gtk/empathy-sound.c:64
+#: ../libempathy-gtk/empathy-sound-manager.c:65
 msgid "Incoming voice call"
 msgstr "Saapuva puhelu"
 
-#: ../libempathy-gtk/empathy-sound.c:66
+#: ../libempathy-gtk/empathy-sound-manager.c:67
 msgid "Outgoing voice call"
 msgstr "Lähetä puhelu"
 
-#: ../libempathy-gtk/empathy-sound.c:68
+#: ../libempathy-gtk/empathy-sound-manager.c:69
 msgid "Voice call ended"
 msgstr "Puhelu päättyi"
 
-#: ../libempathy-gtk/empathy-status-preset-dialog.c:364
-msgid "Enter Custom Message"
-msgstr "Syötä itse määritelty viesti"
-
-#: ../libempathy-gtk/empathy-status-preset-dialog.c:523
+#: ../libempathy-gtk/empathy-status-preset-dialog.c:296
 msgid "Edit Custom Messages"
 msgstr "Muokkaa itse määriteltyjä viestejä"
 
-#: ../libempathy-gtk/empathy-status-preset-dialog.ui.h:1
-msgid "Add _New Preset"
-msgstr "Lisää _uusi esitieto"
+#: ../libempathy-gtk/empathy-theme-adium.c:1030
+#, c-format
+msgid "Message edited at %s"
+msgstr ""
 
-#: ../libempathy-gtk/empathy-status-preset-dialog.ui.h:2
-msgid "Saved Presets"
-msgstr "Tallennetut esitiedot"
+#: ../libempathy-gtk/empathy-theme-adium.c:1720
+msgid "Normal"
+msgstr ""
 
-#: ../libempathy-gtk/empathy-theme-manager.c:67
+#: ../libempathy-gtk/empathy-theme-manager.c:70
 msgid "Classic"
 msgstr "Perinteinen"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:68
+#: ../libempathy-gtk/empathy-theme-manager.c:71
 msgid "Simple"
 msgstr "Yksinkertainen"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:69
+#: ../libempathy-gtk/empathy-theme-manager.c:72
 msgid "Clean"
 msgstr "Siisti"
 
-#: ../libempathy-gtk/empathy-theme-manager.c:70
+#: ../libempathy-gtk/empathy-theme-manager.c:73
 msgid "Blue"
 msgstr "Sininen"
 
 #: ../libempathy-gtk/empathy-tls-dialog.c:150
-msgid "The identity provided by the chat server cannot be verified.\n"
-msgstr "Keskustelupalvelimen antamaa tunnistetta ei voida varmistaa.\n"
+msgid "The identity provided by the chat server cannot be verified."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:156
-msgid "The certificate is not signed by a Certification Authority"
-msgstr "Varmennetta ei ole virallisesti allekirjoitettu"
+#: ../libempathy-gtk/empathy-tls-dialog.c:157
+msgid "The certificate is not signed by a Certification Authority."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:160
-msgid "The certificate has expired"
-msgstr "Varmenne on vanhentunut"
+#: ../libempathy-gtk/empathy-tls-dialog.c:161
+msgid "The certificate has expired."
+msgstr "Varmenne on vanhentunut."
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:163
-msgid "The certificate hasn't yet been activated"
-msgstr "Varmennetta ei ole vielä aktivoitu"
+#: ../libempathy-gtk/empathy-tls-dialog.c:164
+msgid "The certificate hasn't yet been activated."
+msgstr "Varmennetta ei ole vielä aktivoitu."
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:166
-msgid "The certificate does not have the expected fingerprint"
-msgstr "Varmenteessa ei ole odotettua sormenjälkeä"
+#: ../libempathy-gtk/empathy-tls-dialog.c:167
+msgid "The certificate does not have the expected fingerprint."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:169
-msgid "The hostname verified by the certificate doesn't match the server name"
-msgstr "Varmenteessa ilmoitettu isäntänimi ei täsmää palvelimen nimen kanssa"
+#: ../libempathy-gtk/empathy-tls-dialog.c:170
+msgid "The hostname verified by the certificate doesn't match the server name."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:173
-msgid "The certificate is self-signed"
-msgstr "Varmenne on itsetehty"
+#: ../libempathy-gtk/empathy-tls-dialog.c:174
+msgid "The certificate is self-signed."
+msgstr "Varmenne on allekirjoitettu itse."
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:176
-msgid "The certificate has been revoked by the issuing Certification Authority"
-msgstr "Varmenne on peruutettu varmenteen myöntäjän toimesta"
+#: ../libempathy-gtk/empathy-tls-dialog.c:177
+msgid ""
+"The certificate has been revoked by the issuing Certification Authority."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:180
-msgid "The certificate is cryptographically weak"
-msgstr "Varmenteen salausmenetelmä on heikko"
+#: ../libempathy-gtk/empathy-tls-dialog.c:181
+msgid "The certificate is cryptographically weak."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:183
-msgid "The certificate length exceeds verifiable limits"
-msgstr "Varmenteen pituus ylittää sallitut rajat"
+#: ../libempathy-gtk/empathy-tls-dialog.c:184
+msgid "The certificate length exceeds verifiable limits."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:187
-msgid "The certificate is malformed"
-msgstr "Varmenne on muodostettu väärin"
+#: ../libempathy-gtk/empathy-tls-dialog.c:188
+msgid "The certificate is malformed."
+msgstr ""
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:205
+#: ../libempathy-gtk/empathy-tls-dialog.c:206
 #, c-format
 msgid "Expected hostname: %s"
 msgstr "Odotettu isäntänimi: %s"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:208
+#: ../libempathy-gtk/empathy-tls-dialog.c:209
 #, c-format
 msgid "Certificate hostname: %s"
 msgstr "Varmenteen ilmoittama isäntänimi: %s"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:263
+#: ../libempathy-gtk/empathy-tls-dialog.c:281
 msgid "Continue"
 msgstr "Jatka"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:269
+#: ../libempathy-gtk/empathy-tls-dialog.c:287
 msgid "This connection is untrusted. Would you like to continue anyway?"
 msgstr "Yhteys ei ole luotettava. Haluatko kuitenkin jatkaa?"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:286
+#: ../libempathy-gtk/empathy-tls-dialog.c:297
 msgid "Remember this choice for future connections"
 msgstr "Muista tämä valinta tulevia yhteyksiä varten"
 
-#: ../libempathy-gtk/empathy-tls-dialog.c:294
+#: ../libempathy-gtk/empathy-tls-dialog.c:303
 msgid "Certificate Details"
 msgstr "Varmenteen tiedot"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1702
+#: ../libempathy-gtk/empathy-ui-utils.c:1735
 msgid "Unable to open URI"
 msgstr "URI:a ei voi avata"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1797
+#: ../libempathy-gtk/empathy-ui-utils.c:1831
 msgid "Select a file"
 msgstr "Valitse tiedosto"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1866
+#: ../libempathy-gtk/empathy-ui-utils.c:1903
+msgid "Insufficient free space to save file"
+msgstr "Tiedoston tallennukseen ei ole riittävästi tilaa"
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1911
+#, c-format
+msgid ""
+"%s of free space are required to save this file, but only %s is available. "
+"Please choose another location."
+msgstr ""
+"Tiedoston tallennukseen vaaditaan tilaa vähintään %s, mutta vain %s on "
+"saatavilla. Valitse toinen tallennussijainti."
+
+#: ../libempathy-gtk/empathy-ui-utils.c:1955
 #, c-format
 msgid "Incoming file from %s"
 msgstr "Saapuva tiedosto käyttäjältä %s"
@@ -2377,19 +2939,35 @@ msgstr "Ei virheilmoitusta"
 msgid "Instant Message (Empathy)"
 msgstr "Pikaviesti (Empathy)"
 
-#: ../src/empathy.c:414
+#: ../src/empathy.c:431
 msgid "Don't connect on startup"
 msgstr "Älä yhdistä käynnistettäessä"
 
-#: ../src/empathy.c:418
+#: ../src/empathy.c:435
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "Älä näytä tuttavalistaa tai muita dialogeja käynnistyksessä"
 
-#: ../src/empathy.c:435
+#: ../src/empathy.c:450
 msgid "- Empathy IM Client"
 msgstr "- Empathy-pikaviestin"
 
-#: ../src/empathy-about-dialog.c:85
+#: ../src/empathy.c:637
+msgid "Error contacting the Account Manager"
+msgstr "Virhe yhdistettäessä tilienhallintaan"
+
+#: ../src/empathy.c:639
+#, c-format
+msgid ""
+"There was an error while trying to connect to the Telepathy Account Manager. "
+"The error was:\n"
+"\n"
+"%s"
+msgstr ""
+"Yhdistettäessä Empathyn tilienhallintaan tapahtui virhe:\n"
+"\n"
+"%s"
+
+#: ../src/empathy-about-dialog.c:81
 msgid ""
 "Empathy is free software; you can redistribute it and/or modify it under the "
 "terms of the GNU General Public License as published by the Free Software "
@@ -2401,7 +2979,7 @@ msgstr ""
 "Software Foundation on ne julkaissut; joko lisenssin version 2, tai "
 "(valinnan mukaan) minkä tahansa myöhemmän version mukaisesti."
 
-#: ../src/empathy-about-dialog.c:89
+#: ../src/empathy-about-dialog.c:85
 msgid ""
 "Empathy is distributed in the hope that it will be useful, but WITHOUT ANY "
 "WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS "
@@ -2413,7 +2991,7 @@ msgstr ""
 "laadusta tai soveltuvuudesta tiettyyn tarkoitukseen. Katso GPL lisenssistä "
 "lisää yksityiskohtia."
 
-#: ../src/empathy-about-dialog.c:93
+#: ../src/empathy-about-dialog.c:89
 msgid ""
 "You should have received a copy of the GNU General Public License along with "
 "Empathy; if not, write to the Free Software Foundation, Inc., 51 Franklin "
@@ -2423,11 +3001,11 @@ msgstr ""
 "kirjoita osoitteeseen Free Software Foundation Inc., 51 Franklin St, Fifth "
 "Floor, Boston, MA 02110-1301, USA."
 
-#: ../src/empathy-about-dialog.c:121
+#: ../src/empathy-about-dialog.c:107
 msgid "An Instant Messaging client for GNOME"
 msgstr "Gnomen pikaviestiohjelma"
 
-#: ../src/empathy-about-dialog.c:127
+#: ../src/empathy-about-dialog.c:113
 msgid "translator-credits"
 msgstr ""
 "Samuli Seppänen ja Henna Nykänen, 2006.\n"
@@ -2447,18 +3025,22 @@ msgstr ""
 "  Ilkka Tuohela https://launchpad.net/~hile\n"
 "  Ilkka Tuohela https://launchpad.net/~hile-utu\n"
 "  Jammi Vesterinen https://launchpad.net/~jmov\n"
-"  Jani Uusitalo https://launchpad.net/~jani-uusitalo\n"
+"  Jani Uusitalo https://launchpad.net/~uusijani\n"
 "  Jere Sokka https://launchpad.net/~jerry-sokka\n"
 "  Jiri Grönroos https://launchpad.net/~jiri-gronroos\n"
-"  Jussi Aalto https://launchpad.net/~jtaalto\n"
+"  Joonas Pajuniva https://launchpad.net/~joonas-pajuniva\n"
+"  Jussi Aalto https://launchpad.net/~jtaalto-deactivatedaccount\n"
+"  Kristian Kurki https://launchpad.net/~kristian-kurki\n"
 "  Matti Karnaattu https://launchpad.net/~mattikarnaattu\n"
-"  Mika Suomalainen https://launchpad.net/~s-mika\n"
+"  Mika Suomalainen https://launchpad.net/~mkaysi\n"
 "  Mikko Nissinen https://launchpad.net/~mikko\n"
+"  Miko-Matias Grönvall https://launchpad.net/~matias-gronvall\n"
 "  Ncl8 https://launchpad.net/~crofle\n"
 "  Timo Jyrinki https://launchpad.net/~timo-jyrinki\n"
 "  Tomi Juntunen https://launchpad.net/~tojuntu\n"
 "  Tommi Saira https://launchpad.net/~tommisaira\n"
 "  Tommi Vainikainen https://launchpad.net/~thv\n"
+"  Ville-Pekka Vainio https://launchpad.net/~vpvainio\n"
 "  papukaija https://launchpad.net/~papukaija"
 
 #: ../src/empathy-account-assistant.c:167
@@ -2471,7 +3053,7 @@ msgstr "Virhe jäsennettäessä käyttäjätilien asetuksia."
 
 #: ../src/empathy-account-assistant.c:173
 msgid "There was an error while creating the account."
-msgstr "Tunnusta luodessa tapahtui virhe."
+msgstr "Tiliä luodessa tapahtui virhe."
 
 #: ../src/empathy-account-assistant.c:175
 msgid "There was an error."
@@ -2491,92 +3073,81 @@ msgstr ""
 "tämän apulaisen ja lisätä tilit myöhemmin Muokkaa-valikosta."
 
 #: ../src/empathy-account-assistant.c:220
-#: ../src/empathy-account-assistant.c:1315
+#: ../src/empathy-account-assistant.c:1271
 msgid "An error occurred"
 msgstr "Tapahtui virhe"
 
-#. To translator: %s is the protocol name
-#. Create account
-#. To translator: %s is the name of the protocol, such as "Google Talk" or
-#. * "Yahoo!"
-#.
-#: ../src/empathy-account-assistant.c:412 ../src/empathy-accounts-dialog.c:614
-#, c-format
-msgid "New %s account"
-msgstr "Uusi %s-tili"
-
-#: ../src/empathy-account-assistant.c:514
+#: ../src/empathy-account-assistant.c:467
 msgid "What kind of chat account do you have?"
 msgstr "Minkä tyyppinen pikaviestintili sinulla on?"
 
-#: ../src/empathy-account-assistant.c:520
+#: ../src/empathy-account-assistant.c:473
 msgid "Do you have any other chat accounts you want to set up?"
 msgstr "Onko sinulla muita tilejä, jotka haluaisit määritellä?"
 
-#: ../src/empathy-account-assistant.c:526
+#: ../src/empathy-account-assistant.c:479
 msgid "Enter your account details"
 msgstr "Syötä tilisi tiedot"
 
-#: ../src/empathy-account-assistant.c:531
+#: ../src/empathy-account-assistant.c:484
 msgid "What kind of chat account do you want to create?"
 msgstr "Minkä tyyppisen pikaviestintilin haluat luoda?"
 
-#: ../src/empathy-account-assistant.c:537
+#: ../src/empathy-account-assistant.c:490
 msgid "Do you want to create other chat accounts?"
 msgstr "Haluatko luoda muita pikaviestintilejä?"
 
-#: ../src/empathy-account-assistant.c:544
+#: ../src/empathy-account-assistant.c:497
 msgid "Enter the details for the new account"
 msgstr "Syötä uuden käyttäjätilin tiedot"
 
-#: ../src/empathy-account-assistant.c:659
+#: ../src/empathy-account-assistant.c:612
 msgid ""
 "With Empathy you can chat with people online nearby and with friends and "
 "colleagues who use Google Talk, AIM, Windows Live and many other chat "
 "programs. With a microphone or a webcam you can also have audio or video "
 "calls."
 msgstr ""
-"Empathya käyttäen voit keskustella verkossa olevien tuttujen kanssa, jotka "
-"käyttävät Google Talkia, AIM:ää, Windows Liveä ja monia muita pikaviestimiä. "
-"Mikrofonin ja web-kameran avulla voit myös soittaa puheluita sekä "
-"videopuheluita."
+"Keskustele Empathyn avulla verkossa olevien tuttujen kanssa, joilla on "
+"esimerkiksi Google Talk, AIM, Windows Live tai muu pikaviestintili käytössä. "
+"Mikrofonin ja web-kameran avulla voit myös soittaa ääni- tai videopuheluita."
 
-#: ../src/empathy-account-assistant.c:676
+#: ../src/empathy-account-assistant.c:629
 msgid "Do you have an account you've been using with another chat program?"
 msgstr ""
 "Onko sinulla käyttäjätili, jota olet käyttänyt toisessa pikaviestimessä?"
 
-#: ../src/empathy-account-assistant.c:699
+#: ../src/empathy-account-assistant.c:652
 msgid "Yes, import my account details from "
 msgstr "Kyllä, tuo tilitiedot ohjelmasta "
 
-#: ../src/empathy-account-assistant.c:720
+#: ../src/empathy-account-assistant.c:673
 msgid "Yes, I'll enter my account details now"
 msgstr "Kyllä, syötän tilitietoni nyt"
 
-#: ../src/empathy-account-assistant.c:742
+#: ../src/empathy-account-assistant.c:695
 msgid "No, I want a new account"
 msgstr "Ei, haluan uuden käyttäjätilin"
 
-#: ../src/empathy-account-assistant.c:752
+#: ../src/empathy-account-assistant.c:705
 msgid "No, I just want to see people online nearby for now"
 msgstr "Ei, haluan vain nähdä samassa lähiverkossa linjoilla olevat henkilöt"
 
-#: ../src/empathy-account-assistant.c:773
+#: ../src/empathy-account-assistant.c:726
 msgid "Select the accounts you want to import:"
 msgstr "Valitse tilit, jotka haluat tuoda:"
 
-#: ../src/empathy-account-assistant.c:857
-#: ../src/empathy-new-chatroom-dialog.c:609
-#: ../src/empathy-new-chatroom-dialog.c:610
+#: ../src/empathy-account-assistant.c:813
+#: ../src/empathy-new-chatroom-dialog.c:555
+#: ../src/empathy-new-chatroom-dialog.c:556
 msgid "Yes"
 msgstr "Kyllä"
 
-#: ../src/empathy-account-assistant.c:864
+#: ../src/empathy-account-assistant.c:820
 msgid "No, that's all for now"
 msgstr "Ei, tässä oli kaikki"
 
-#: ../src/empathy-account-assistant.c:1129
+#: ../src/empathy-account-assistant.c:1085
 msgid ""
 "Empathy can automatically discover and chat with the people connected on the "
 "same network as you. If you want to use this feature, please check that the "
@@ -2586,19 +3157,19 @@ msgstr ""
 "Empathy voi automaattisesti löytää ja keskustella kanssasi samaan verkkoon "
 "yhdistettyjen ihmisten kanssa. Jos haluat käyttää tätä toimintoa, tarkista "
 "että alla olevat yksityiskohdat pitävät paikkansa. Voit helposti muuttaa "
-"näitä yksityiskohtia myöhemmin tai estää tämän toiminnon käyttämällä "
-"”Tilit”-valintaikkunaa."
+"näitä yksityiskohtia myöhemmin tai estää tämän toiminnon käyttämällä ”Tilit”-"
+"valintaikkunaa."
 
-#: ../src/empathy-account-assistant.c:1135
-#: ../src/empathy-account-assistant.c:1191
+#: ../src/empathy-account-assistant.c:1091
+#: ../src/empathy-account-assistant.c:1147
 msgid "Edit->Accounts"
 msgstr "Muokkaa->Tilit"
 
-#: ../src/empathy-account-assistant.c:1151
-msgid "I don't want to enable this feature for now"
-msgstr "En halua ottaa tätä toimintoa käyttöön nyt"
+#: ../src/empathy-account-assistant.c:1107
+msgid "I do _not want to enable this feature for now"
+msgstr "En _halua käyttää tätä ominaisuutta juuri nyt"
 
-#: ../src/empathy-account-assistant.c:1187
+#: ../src/empathy-account-assistant.c:1143
 msgid ""
 "You won't be able to chat with people connected to your local network, as "
 "telepathy-salut is not installed. If you want to enable this feature, please "
@@ -2607,69 +3178,71 @@ msgid ""
 msgstr ""
 "Et voi keskustella paikalliseen verkkoon liittyneiden ihmisten kanssa sillä "
 "telepathy-salut ei ole asennettu. Jos haluat ottaa tämän ominaisuuden "
-"käyttöön, asenna telepathy-salut paketti ja luo läheiset ihmiset -tili "
-"Tilit-ikkunassa."
+"käyttöön, asenna telepathy-salut paketti ja luo läheiset ihmiset -tili Tilit-"
+"ikkunassa."
 
-#: ../src/empathy-account-assistant.c:1193
+#: ../src/empathy-account-assistant.c:1149
 msgid "telepathy-salut not installed"
 msgstr "pakettia telepathy-salut ei ole asennettu"
 
-#: ../src/empathy-account-assistant.c:1239
+#: ../src/empathy-account-assistant.c:1195
 msgid "Messaging and VoIP Accounts Assistant"
 msgstr "Viestintä- ja VoIP-käyttäjätilien apulainen"
 
-#: ../src/empathy-account-assistant.c:1273
+#: ../src/empathy-account-assistant.c:1229
 msgid "Welcome to Empathy"
 msgstr "Tervetuloa Empathyyn"
 
-#: ../src/empathy-account-assistant.c:1282
+#: ../src/empathy-account-assistant.c:1238
 msgid "Import your existing accounts"
 msgstr "Tuo olemassa olevat käyttäjätilit"
 
-#: ../src/empathy-account-assistant.c:1300
+#: ../src/empathy-account-assistant.c:1256
 msgid "Please enter personal details"
 msgstr "Syötä henkilökohtaiset tiedot"
 
 #. The primary text of the dialog shown to the user when he is about to lose
 #. * unsaved changes
-#: ../src/empathy-accounts-dialog.c:65
+#: ../src/empathy-accounts-dialog.c:64
 #, c-format
 msgid "There are unsaved modifications to your %s account."
 msgstr "Tilille %s tehtyjä muutoksia ei ole tallennettu."
 
 #. The primary text of the dialog shown to the user when he is about to lose
 #. * an unsaved new account
-#: ../src/empathy-accounts-dialog.c:69
+#: ../src/empathy-accounts-dialog.c:68
 msgid "Your new account has not been saved yet."
-msgstr "Uutta tunnustasi ei ole vielä tallennettu."
+msgstr "Uutta tiliäsi ei ole vielä tallennettu."
 
-#: ../src/empathy-accounts-dialog.c:281 ../src/empathy-call-window.c:818
+#: ../src/empathy-accounts-dialog.c:345
+#: ../src/empathy-streamed-media-window.c:754
+#: ../src/empathy-call-window.c:1164
 msgid "Connecting…"
 msgstr "Yhdistetään…"
 
-#: ../src/empathy-accounts-dialog.c:322
+#: ../src/empathy-accounts-dialog.c:386
 #, c-format
 msgid "Offline — %s"
 msgstr "Poissa linjoilta — %s"
 
-#: ../src/empathy-accounts-dialog.c:334
+#: ../src/empathy-accounts-dialog.c:398
 #, c-format
 msgid "Disconnected — %s"
 msgstr "Yhteys katkaistu — %s"
 
-#: ../src/empathy-accounts-dialog.c:345
+#: ../src/empathy-accounts-dialog.c:409
 msgid "Offline — No Network Connection"
 msgstr "Poissa linjoilta — Ei verkkoyhteyttä"
 
-#: ../src/empathy-accounts-dialog.c:352
+#: ../src/empathy-accounts-dialog.c:416
 msgid "Unknown Status"
 msgstr "Tuntematon tila"
 
-#: ../src/empathy-accounts-dialog.c:364
+#: ../src/empathy-accounts-dialog.c:428
 msgid "Offline — Account Disabled"
 msgstr "Poissa linjoilta — Tili ei ole käytettävissä"
 
-#: ../src/empathy-accounts-dialog.c:810
+#: ../src/empathy-accounts-dialog.c:831
 msgid ""
 "You are about to create a new account, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2677,16 +3250,16 @@ msgstr ""
 "Olet luomassa uutta käyttäjätiliä. Uuden tilin luonti hylkää\n"
 "tehdyt muutokset. Haluatko varmasti jatkaa?"
 
-#: ../src/empathy-accounts-dialog.c:1157
+#: ../src/empathy-accounts-dialog.c:1192
 #, c-format
 msgid "Do you want to remove %s from your computer?"
 msgstr "Haluatko poistaa tilin ”%s” tietokoneeltasi?"
 
-#: ../src/empathy-accounts-dialog.c:1161
+#: ../src/empathy-accounts-dialog.c:1196
 msgid "This will not remove your account on the server."
 msgstr "Tämä ei poista tiliäsi palvelimelta."
 
-#: ../src/empathy-accounts-dialog.c:1399
+#: ../src/empathy-accounts-dialog.c:1432
 msgid ""
 "You are about to select another account, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2694,7 +3267,16 @@ msgstr ""
 "Olet vaihtamassa käyttäjätiliä. Tilin vaihtamineen hylkää\n"
 "tehdyt muutokset. Haluatko varmasti jatkaa?"
 
-#: ../src/empathy-accounts-dialog.c:2002
+#. Menu items: to enabled/disable the account
+#: ../src/empathy-accounts-dialog.c:1643
+msgid "_Enable"
+msgstr ""
+
+#: ../src/empathy-accounts-dialog.c:1644
+msgid "_Disable"
+msgstr ""
+
+#: ../src/empathy-accounts-dialog.c:2154
 msgid ""
 "You are about to close the window, which will discard\n"
 "your changes. Are you sure you want to proceed?"
@@ -2703,18 +3285,22 @@ msgstr ""
 "tehdyt muutokset. Haluatko varmasti jatkaa?"
 
 #: ../src/empathy-accounts-dialog.ui.h:1
+msgid "Add…"
+msgstr "Lisää..."
+
+#: ../src/empathy-accounts-dialog.ui.h:2
 msgid "Loading account information"
 msgstr "Ladataan tilin tietoja"
 
-#: ../src/empathy-accounts-dialog.ui.h:2
+#: ../src/empathy-accounts-dialog.ui.h:3
 msgid "No protocol installed"
 msgstr "Protokollaa ei ole asennettu"
 
-#: ../src/empathy-accounts-dialog.ui.h:3
+#: ../src/empathy-accounts-dialog.ui.h:4
 msgid "Protocol:"
 msgstr "Yhteyskäytäntö:"
 
-#: ../src/empathy-accounts-dialog.ui.h:4
+#: ../src/empathy-accounts-dialog.ui.h:6
 msgid ""
 "To add a new account, you first have to install a backend for each protocol "
 "you want to use."
@@ -2722,19 +3308,15 @@ msgstr ""
 "Ennen kuin voit lisätä tilin, sinun täytyy asentaa kullekin käytettävälle "
 "protokollalle tarvittava taustajärjestelmä."
 
-#: ../src/empathy-accounts-dialog.ui.h:5
-msgid "_Add…"
-msgstr "_Lisää…"
-
-#: ../src/empathy-accounts-dialog.ui.h:6
+#: ../src/empathy-accounts-dialog.ui.h:7
 msgid "_Import…"
 msgstr "_Tuo…"
 
-#: ../src/empathy-auth-client.c:217
+#: ../src/empathy-auth-client.c:249
 msgid " - Empathy authentication client"
 msgstr " - Empathyn tunnistautumisasiakas"
 
-#: ../src/empathy-auth-client.c:233
+#: ../src/empathy-auth-client.c:265
 msgid "Empathy authentication client"
 msgstr "Empathyn tunnistautumisasiakas"
 
@@ -2742,108 +3324,132 @@ msgstr "Empathyn tunnistautumisasiakas"
 msgid "People nearby"
 msgstr "Lähellä olevat ihmiset"
 
-#: ../src/empathy-av.c:133
+#: ../src/empathy-av.c:118 ../src/empathy-call.c:127
 msgid "- Empathy Audio/Video Client"
 msgstr "- Empathyn audio/video-asiakas"
 
-#: ../src/empathy-av.c:149
+#: ../src/empathy-av.c:134 ../src/empathy-call.c:152
 msgid "Empathy Audio/Video Client"
 msgstr "Empathyn audio/video-asiakas"
 
-#: ../src/empathy-call-window.c:479
+#: ../src/empathy-streamed-media-window.c:431
 msgid "Contrast"
 msgstr "Kontrasti"
 
-#: ../src/empathy-call-window.c:482
+#: ../src/empathy-streamed-media-window.c:434
 msgid "Brightness"
 msgstr "Kirkkaus"
 
-#: ../src/empathy-call-window.c:485
+#: ../src/empathy-streamed-media-window.c:437
 msgid "Gamma"
 msgstr "Gamma"
 
-#: ../src/empathy-call-window.c:590
+#: ../src/empathy-streamed-media-window.c:542
 msgid "Volume"
 msgstr "Äänenvoimakkuus"
 
-#: ../src/empathy-call-window.c:1175
+#: ../src/empathy-streamed-media-window.c:1110
 msgid "_Sidebar"
 msgstr "_Sivupalkki"
 
-#: ../src/empathy-call-window.c:1194
+#: ../src/empathy-streamed-media-window.c:1130
 msgid "Audio input"
 msgstr "Äänisyöte"
 
-#: ../src/empathy-call-window.c:1198
+#: ../src/empathy-streamed-media-window.c:1134
 msgid "Video input"
 msgstr "Videosyöte"
 
-#: ../src/empathy-call-window.c:1202
+#: ../src/empathy-streamed-media-window.c:1140
 msgid "Dialpad"
 msgstr "Valintalevy"
 
-#: ../src/empathy-call-window.c:1207
+#: ../src/empathy-streamed-media-window.c:1151
 msgid "Details"
 msgstr "Tiedot"
 
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
-#: ../src/empathy-call-window.c:1275
+#: ../src/empathy-streamed-media-window.c:1220
+#: ../src/empathy-call-window.c:1672
 #, c-format
 msgid "Call with %s"
 msgstr "Soita tuttavalle %s"
 
-#. translators: Call is a noun. This string is used in the window
-#. * title
-#: ../src/empathy-call-window.c:1354
-msgid "Call"
-msgstr "Soita"
-
-#: ../src/empathy-call-window.c:1508
+#: ../src/empathy-streamed-media-window.c:1453
+#: ../src/empathy-call-window.c:1916
 msgid "The IP address as seen by the machine"
 msgstr "Tämän koneen näkemä IP-osoite"
 
-#: ../src/empathy-call-window.c:1510
+#: ../src/empathy-streamed-media-window.c:1455
+#: ../src/empathy-call-window.c:1918
 msgid "The IP address as seen by a server on the Internet"
 msgstr "Internetissä olevan palvelimen näkemä IP-osoite"
 
-#: ../src/empathy-call-window.c:1512
+#: ../src/empathy-streamed-media-window.c:1457
+#: ../src/empathy-call-window.c:1920
 msgid "The IP address of the peer as seen by the other side"
-msgstr ""
+msgstr "Vertaisen IP-osoite toiselta puolen nähtynä"
 
-#: ../src/empathy-call-window.c:1514
+#: ../src/empathy-streamed-media-window.c:1459
+#: ../src/empathy-call-window.c:1922
 msgid "The IP address of a relay server"
-msgstr ""
+msgstr "Välityspalvelimen IP-osoite"
 
-#: ../src/empathy-call-window.c:1516
+#: ../src/empathy-streamed-media-window.c:1461
+#: ../src/empathy-call-window.c:1924
 msgid "The IP address of the multicast group"
 msgstr "Ryhmälähetysryhmän IP-osoite"
 
+#: ../src/empathy-streamed-media-window.c:1843
+msgctxt "encoding video codec"
+msgid "Unknown"
+msgstr "Tuntematon"
+
+#: ../src/empathy-streamed-media-window.c:1846
+msgctxt "encoding audio codec"
+msgid "Unknown"
+msgstr "Tuntematon"
+
+#: ../src/empathy-streamed-media-window.c:1849
+msgctxt "decoding video codec"
+msgid "Unknown"
+msgstr "Tuntematon"
+
+#: ../src/empathy-streamed-media-window.c:1852
+msgctxt "decoding audio codec"
+msgid "Unknown"
+msgstr "Tuntematon"
+
 #. Translators: number of minutes:seconds the caller has been connected
-#: ../src/empathy-call-window.c:2263
+#: ../src/empathy-streamed-media-window.c:2144
 #, c-format
 msgid "Connected — %d:%02dm"
 msgstr "Yhdistetty -- %d:%02d min"
 
-#: ../src/empathy-call-window.c:2324
+#: ../src/empathy-streamed-media-window.c:2205
+#: ../src/empathy-call-window.c:2674
 msgid "Technical Details"
 msgstr "Tekniset tiedot"
 
-#: ../src/empathy-call-window.c:2362
+#: ../src/empathy-streamed-media-window.c:2243
+#: ../src/empathy-call-window.c:2712
 #, c-format
 msgid ""
 "%s's software does not understand any of the audio formats supported by your "
 "computer"
 msgstr "%s:n ohjelmisto ei ymmärrä mitään äänimuotoja mitä tietokoneesi tukee"
 
-#: ../src/empathy-call-window.c:2367
+#: ../src/empathy-streamed-media-window.c:2248
+#: ../src/empathy-call-window.c:2717
 #, c-format
 msgid ""
 "%s's software does not understand any of the video formats supported by your "
 "computer"
 msgstr "%s:n ohjelmisto ei ymmärrä mitään videomuotoja mitä tietokoneesi tukee"
 
-#: ../src/empathy-call-window.c:2373
+#: ../src/empathy-streamed-media-window.c:2254
+#: ../src/empathy-call-window.c:2723
 #, c-format
 msgid ""
 "Can't establish a connection to %s. One of you might be on a network that "
@@ -2852,25 +3458,29 @@ msgstr ""
 "Yhteyttä ei voi muodostaa kohteeseen %s. Yksi teistä voi ehkä olla verkossa, "
 "joka ei salli suoria yhteyksiä."
 
-#: ../src/empathy-call-window.c:2379
+#: ../src/empathy-streamed-media-window.c:2260
+#: ../src/empathy-call-window.c:2729
 msgid "There was a failure on the network"
 msgstr "Verkkoyhteydessä tapahtui virhe"
 
-#: ../src/empathy-call-window.c:2383
+#: ../src/empathy-streamed-media-window.c:2264
+#: ../src/empathy-call-window.c:2733
 msgid ""
 "The audio formats necessary for this call are not installed on your computer"
 msgstr ""
 "Tähän puheluun vaadittavia äänitiedostomuotoja ei ole asennettu tälle "
 "tietokoneelle"
 
-#: ../src/empathy-call-window.c:2386
+#: ../src/empathy-streamed-media-window.c:2267
+#: ../src/empathy-call-window.c:2736
 msgid ""
 "The video formats necessary for this call are not installed on your computer"
 msgstr ""
 "Tähän puheluun vaadittavia videotiedostomuotoja ei ole asennettu tälle "
 "tietokoneelle"
 
-#: ../src/empathy-call-window.c:2396
+#: ../src/empathy-streamed-media-window.c:2277
+#: ../src/empathy-call-window.c:2748
 #, c-format
 msgid ""
 "Something unexpected happened in a Telepathy component. Please <a href=\"%s"
@@ -2878,150 +3488,203 @@ msgid ""
 "the Help menu."
 msgstr ""
 "Telepathy-komponentin kanssa tapahtui jotain odottamatonta. Ole hyvä ja <a "
-"href=\"%s\">raportoi tämä ohjelmavirhe</a> sekä liitä 'Vianjäljitys'-ikkunasta "
-"kerätyt lokit \"Apua\"-valikosta."
+"href=\"%s\">raportoi tämä ohjelmavirhe</a> sekä liitä 'Vianjäljitys'-"
+"ikkunasta kerätyt lokit \"Apua\"-valikosta."
 
-#: ../src/empathy-call-window.c:2404
+#: ../src/empathy-streamed-media-window.c:2285
+#: ../src/empathy-call-window.c:2757
 msgid "There was a failure in the call engine"
 msgstr "Virhe soitettaessa"
 
-#: ../src/empathy-call-window.c:2407
+#: ../src/empathy-streamed-media-window.c:2288
+#: ../src/empathy-call-window.c:2760
 msgid "The end of the stream was reached"
 msgstr "Virran loppu saavutettiin"
 
-#: ../src/empathy-call-window.c:2447
+#: ../src/empathy-streamed-media-window.c:2328
+#: ../src/empathy-call-window.c:2800
 msgid "Can't establish audio stream"
 msgstr "Ääniyhteyden muodostus ei onnistunut"
 
-#: ../src/empathy-call-window.c:2457
+#: ../src/empathy-streamed-media-window.c:2338
+#: ../src/empathy-call-window.c:2810
 msgid "Can't establish video stream"
 msgstr "Videoyhteyden muodostus ei onnistunut"
 
-#: ../src/empathy-call-window.ui.h:1
+#: ../src/empathy-call-window.ui.h:1 ../src/empathy-preferences.ui.h:2
+#: ../src/empathy-streamed-media-window.ui.h:1
 msgid "Audio"
 msgstr "Ääni"
 
-#: ../src/empathy-call-window.ui.h:2
-msgid "Call the contact again"
-msgstr "Soita tuttavalle uudelleen"
-
 #: ../src/empathy-call-window.ui.h:3
-msgid "Camera Off"
-msgstr "Kamera pois"
-
-#: ../src/empathy-call-window.ui.h:4
-msgid "Camera On"
-msgstr "Kamera päällä"
-
-#: ../src/empathy-call-window.ui.h:5
+#: ../src/empathy-streamed-media-window.ui.h:5
 msgid "Decoding Codec:"
 msgstr "Purkamiskoodekki:"
 
+#: ../src/empathy-call-window.ui.h:4
+msgid "Disable camera"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:5
+msgid "Display the dialpad"
+msgstr ""
+
 #: ../src/empathy-call-window.ui.h:6
-msgid "Disable camera and stop sending video"
-msgstr "Kytke kamera poista käytöstä ja lopeta videokuvan lähetys"
-
-#: ../src/empathy-call-window.ui.h:7
-msgid "Enable camera and send video"
-msgstr "Ota kamera käyttöön ja lähetä videokuvaa"
-
-#: ../src/empathy-call-window.ui.h:8
-msgid "Enable camera but don't send video"
-msgstr "Ota kamera käyttöön, mutta älä lähetä videokuvaa"
-
-#: ../src/empathy-call-window.ui.h:9
+#: ../src/empathy-streamed-media-window.ui.h:9
 msgid "Encoding Codec:"
 msgstr "Pakkauskoodekki:"
 
-#: ../src/empathy-call-window.ui.h:10
+#: ../src/empathy-call-window.ui.h:7
+#: ../src/empathy-streamed-media-window.ui.h:10
 msgid "Hang up"
 msgstr "Katkaise"
 
-#: ../src/empathy-call-window.ui.h:11
+#: ../src/empathy-call-window.ui.h:8
+#: ../src/empathy-streamed-media-window.ui.h:11
 msgid "Hang up current call"
 msgstr "Lopeta nykyinen puhelu"
 
-#: ../src/empathy-call-window.ui.h:12
+#: ../src/empathy-call-window.ui.h:9
+#: ../src/empathy-streamed-media-window.ui.h:12
 msgid "Local Candidate:"
+msgstr "Paikallisehdokas:"
+
+#: ../src/empathy-call-window.ui.h:10
+msgid "Maximise me"
 msgstr ""
+
+#: ../src/empathy-call-window.ui.h:11
+msgid "Minimise me"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:12
+#: ../src/empathy-streamed-media-window.ui.h:15
+msgid "Remote Candidate:"
+msgstr "Etäehdokas:"
 
 #: ../src/empathy-call-window.ui.h:13
-msgid "Preview"
-msgstr "Esikatselu"
-
-#: ../src/empathy-call-window.ui.h:14
-msgid "Redial"
-msgstr "Yhdistä uudelleen"
-
-#: ../src/empathy-call-window.ui.h:15
-msgid "Remote Candidate:"
-msgstr ""
-
-#: ../src/empathy-call-window.ui.h:16
+#: ../src/empathy-streamed-media-window.ui.h:16
 msgid "Send Audio"
 msgstr "Lähetä ääntä"
 
+#: ../src/empathy-call-window.ui.h:14
+msgid "Send Video"
+msgstr "Lähetä video"
+
+#: ../src/empathy-call-window.ui.h:15
+msgid "Show dialpad"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:16
+msgid "Start a video call"
+msgstr "Aloita videopuhelu"
+
 #: ../src/empathy-call-window.ui.h:17
+msgid "Start an audio call"
+msgstr "Aloita äänipuhelu"
+
+#: ../src/empathy-call-window.ui.h:18
+msgid "Swap camera"
+msgstr "Vaihda kamera"
+
+#: ../src/empathy-call-window.ui.h:19
+#: ../src/empathy-streamed-media-window.ui.h:17
 msgid "Toggle audio transmission"
 msgstr "Äänen lähetys päälle/pois"
 
-#: ../src/empathy-call-window.ui.h:19
-msgid "V_ideo"
-msgstr "V_ideo"
-
 #: ../src/empathy-call-window.ui.h:20
-msgid "Video"
-msgstr "Video"
+msgid "Toggle video transmission"
+msgstr ""
 
 #: ../src/empathy-call-window.ui.h:21
-msgid "Video Off"
-msgstr "Video pois"
-
-#: ../src/empathy-call-window.ui.h:22
-msgid "Video On"
-msgstr "Video päällä"
+#: ../src/empathy-streamed-media-window.ui.h:18
+#: ../src/empathy-call-window.c:2307 ../src/empathy-call-window.c:2308
+#: ../src/empathy-call-window.c:2309 ../src/empathy-call-window.c:2310
+msgid "Unknown"
+msgstr "Tuntematon"
 
 #: ../src/empathy-call-window.ui.h:23
-msgid "Video Preview"
-msgstr "Videon esikatselu"
+msgid "Video call"
+msgstr "Videopuhelu"
 
 #: ../src/empathy-call-window.ui.h:24
+#: ../src/empathy-streamed-media-window.ui.h:24
 msgid "_Call"
 msgstr "_Soita"
 
-#: ../src/empathy-call-window.ui.h:25 ../src/empathy-main-window.ui.h:27
+#: ../src/empathy-call-window.ui.h:25
+msgid "_Camera"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:26 ../src/empathy-chat-window.ui.h:9
+#: ../src/empathy-main-window-menubar.ui.h:18
+msgid "_Contents"
+msgstr "_Sisältö"
+
+#: ../src/empathy-call-window.ui.h:27
+#: ../src/empathy-main-window-menubar.ui.h:19
+msgid "_Debug"
+msgstr "_Vianetsintä"
+
+#: ../src/empathy-call-window.ui.h:29 ../src/empathy-chat-window.ui.h:14
+#: ../src/empathy-main-window-menubar.ui.h:22
+msgid "_Help"
+msgstr "O_hje"
+
+#: ../src/empathy-call-window.ui.h:30
+msgid "_Microphone"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:31
+msgid "_Settings"
+msgstr ""
+
+#: ../src/empathy-call-window.ui.h:32
+#: ../src/empathy-main-window-menubar.ui.h:30
+#: ../src/empathy-streamed-media-window.ui.h:25
 msgid "_View"
 msgstr "_Näytä"
 
-#: ../src/empathy-chat-window.c:452 ../src/empathy-chat-window.c:472
+#: ../src/empathy-chat-window.c:481 ../src/empathy-chat-window.c:501
 #, c-format
 msgid "%s (%d unread)"
 msgid_plural "%s (%d unread)"
 msgstr[0] "%s (%d lukematon)"
 msgstr[1] "%s (%d lukematonta)"
 
-#: ../src/empathy-chat-window.c:464
+#: ../src/empathy-chat-window.c:493
 #, c-format
 msgid "%s (and %u other)"
 msgid_plural "%s (and %u others)"
 msgstr[0] "%s (ja %u muu)"
 msgstr[1] "%s (ja %u muuta)"
 
-#: ../src/empathy-chat-window.c:480
+#: ../src/empathy-chat-window.c:509
 #, c-format
 msgid "%s (%d unread from others)"
 msgid_plural "%s (%d unread from others)"
 msgstr[0] "%s (%d lukematon muilta)"
 msgstr[1] "%s (%d lukematonta muilta)"
 
-#: ../src/empathy-chat-window.c:489
+#: ../src/empathy-chat-window.c:518
 #, c-format
 msgid "%s (%d unread from all)"
 msgid_plural "%s (%d unread from all)"
 msgstr[0] "%s (%d lukematon kaikilta)"
 msgstr[1] "%s (%d lukematonta kaikilta)"
 
-#: ../src/empathy-chat-window.c:695
+#: ../src/empathy-chat-window.c:733
+msgid "SMS:"
+msgstr "SMS:"
+
+#: ../src/empathy-chat-window.c:743
+#, c-format
+msgid "Sending %d message"
+msgid_plural "Sending %d messages"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ../src/empathy-chat-window.c:765
 msgid "Typing a message."
 msgstr "Kirjoittaa viestiä."
 
@@ -3032,10 +3695,6 @@ msgstr "_Tyhjennä"
 #: ../src/empathy-chat-window.ui.h:2
 msgid "C_ontact"
 msgstr "T_uttava"
-
-#: ../src/empathy-chat-window.ui.h:3
-msgid "Chat"
-msgstr "Keskustelu"
 
 #: ../src/empathy-chat-window.ui.h:4
 msgid "Insert _Smiley"
@@ -3057,10 +3716,6 @@ msgstr "Siirrä välilehti _oikealle"
 msgid "Notify for All Messages"
 msgstr "Ilmoita kaikista viesteistä"
 
-#: ../src/empathy-chat-window.ui.h:9 ../src/empathy-main-window.ui.h:16
-msgid "_Contents"
-msgstr "_Sisältö"
-
 #: ../src/empathy-chat-window.ui.h:10
 msgid "_Conversation"
 msgstr "_Keskustelu"
@@ -3069,17 +3724,9 @@ msgstr "_Keskustelu"
 msgid "_Detach Tab"
 msgstr "_Irrota välilehti"
 
-#: ../src/empathy-chat-window.ui.h:12 ../src/empathy-main-window.ui.h:18
-msgid "_Edit"
-msgstr "_Muokkaa"
-
 #: ../src/empathy-chat-window.ui.h:13
 msgid "_Favorite Chat Room"
 msgstr "_Suosikkikeskusteluhuone"
-
-#: ../src/empathy-chat-window.ui.h:14 ../src/empathy-main-window.ui.h:20
-msgid "_Help"
-msgstr "O_hje"
 
 #: ../src/empathy-chat-window.ui.h:15
 msgid "_Next Tab"
@@ -3101,15 +3748,15 @@ msgstr "V_älilehdet"
 msgid "_Undo Close Tab"
 msgstr "_Kumoa Sulje välilehti"
 
-#: ../src/empathy-chatrooms-window.c:241
+#: ../src/empathy-chatrooms-window.c:251
 msgid "Name"
 msgstr "Nimi"
 
-#: ../src/empathy-chatrooms-window.c:259
+#: ../src/empathy-chatrooms-window.c:269
 msgid "Room"
 msgstr "Huone"
 
-#: ../src/empathy-chatrooms-window.c:267
+#: ../src/empathy-chatrooms-window.c:277
 msgid "Auto-Connect"
 msgstr "Yhdistä automaattisesti"
 
@@ -3117,86 +3764,95 @@ msgstr "Yhdistä automaattisesti"
 msgid "Manage Favorite Rooms"
 msgstr "Hallitse suosikkihuoneita"
 
-#: ../src/empathy-event-manager.c:468
+#: ../src/empathy-event-manager.c:521
 msgid "Incoming video call"
 msgstr "Saapuva videopuhelu"
 
-#: ../src/empathy-event-manager.c:468
+#: ../src/empathy-event-manager.c:521
 msgid "Incoming call"
 msgstr "Saapuva puhelu"
 
-#: ../src/empathy-event-manager.c:472
+#: ../src/empathy-event-manager.c:525
 #, c-format
 msgid "%s is video calling you. Do you want to answer?"
 msgstr "%s soittaa videopuhelun sinulle. Haluatko vastata?"
 
-#: ../src/empathy-event-manager.c:473
+#: ../src/empathy-event-manager.c:526
 #, c-format
 msgid "%s is calling you. Do you want to answer?"
 msgstr "%s soittaa sinulle. Haluatko vastata?"
 
-#: ../src/empathy-event-manager.c:476 ../src/empathy-event-manager.c:618
+#: ../src/empathy-event-manager.c:529 ../src/empathy-event-manager.c:730
+#: ../src/empathy-event-manager.c:763
 #, c-format
 msgid "Incoming call from %s"
 msgstr "Puhelu käyttäjältä %s"
 
-#: ../src/empathy-event-manager.c:501
+#: ../src/empathy-event-manager.c:554
 msgid "_Reject"
 msgstr "_Hylkää"
 
-#: ../src/empathy-event-manager.c:507
+#: ../src/empathy-event-manager.c:562 ../src/empathy-event-manager.c:570
 msgid "_Answer"
 msgstr "_Vastaa"
 
-#: ../src/empathy-event-manager.c:618
+#: ../src/empathy-event-manager.c:570
+msgid "_Answer with video"
+msgstr "_Vastaa käyttäen videota"
+
+#: ../src/empathy-event-manager.c:730 ../src/empathy-event-manager.c:763
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "Saapuva videopuhelu taholta %s"
 
-#: ../src/empathy-event-manager.c:695
+#: ../src/empathy-event-manager.c:836
 msgid "Room invitation"
 msgstr "Kutsu huoneeseen"
 
-#: ../src/empathy-event-manager.c:697
+#: ../src/empathy-event-manager.c:838
 #, c-format
 msgid "Invitation to join %s"
 msgstr "Kutsu liittyä kohteeseen %s"
 
-#: ../src/empathy-event-manager.c:704
+#: ../src/empathy-event-manager.c:845
 #, c-format
 msgid "%s is inviting you to join %s"
 msgstr "%s kutsui sinut liittymään kohteeseen %s"
 
-#: ../src/empathy-event-manager.c:712
+#: ../src/empathy-event-manager.c:853
 msgid "_Decline"
 msgstr "_Kieltäydy"
 
-#: ../src/empathy-event-manager.c:717
+#: ../src/empathy-event-manager.c:858
 #: ../src/empathy-new-chatroom-dialog.ui.h:7
 msgid "_Join"
 msgstr "_Liity"
 
-#: ../src/empathy-event-manager.c:743
+#: ../src/empathy-event-manager.c:885
 #, c-format
 msgid "%s invited you to join %s"
 msgstr "%s kutsui sinut liittymään kohteeseen %s"
 
-#: ../src/empathy-event-manager.c:749
+#: ../src/empathy-event-manager.c:891
 #, c-format
 msgid "You have been invited to join %s"
 msgstr "Sinut on kutsuttu liittymään kohteeseen %s"
 
-#: ../src/empathy-event-manager.c:797
+#: ../src/empathy-event-manager.c:942
 #, c-format
 msgid "Incoming file transfer from %s"
 msgstr "Saapuva tiedostonsiirto tuttavalta %s"
 
-#: ../src/empathy-event-manager.c:1005
-#, c-format
-msgid "Subscription requested by %s"
-msgstr "Liittymispyyntö tuttavalta %s"
+#: ../src/empathy-event-manager.c:1134 ../src/empathy-main-window.c:375
+msgid "Password required"
+msgstr "Salasana vaaditaan"
 
-#: ../src/empathy-event-manager.c:1009
+#: ../src/empathy-event-manager.c:1190
+#, c-format
+msgid "%s would like permission to see when you are online"
+msgstr ""
+
+#: ../src/empathy-event-manager.c:1194
 #, c-format
 msgid ""
 "\n"
@@ -3205,116 +3861,102 @@ msgstr ""
 "\n"
 "Viesti: %s"
 
-#: ../src/empathy-event-manager.c:1052
-#, c-format
-msgid "%s is now offline."
-msgstr "%s on nyt poissa linjoilta."
-
-#: ../src/empathy-event-manager.c:1072
-#, c-format
-msgid "%s is now online."
-msgstr "%s on nyt linjoilla."
-
 #. Translators: time left, when it is more than one hour
-#: ../src/empathy-ft-manager.c:99
+#: ../src/empathy-ft-manager.c:100
 #, c-format
 msgid "%u:%02u.%02u"
 msgstr "%u:%02u.%02u"
 
 #. Translators: time left, when is is less than one hour
-#: ../src/empathy-ft-manager.c:102
+#: ../src/empathy-ft-manager.c:103
 #, c-format
 msgid "%02u.%02u"
 msgstr "%02u.%02u"
 
-#: ../src/empathy-ft-manager.c:178
+#: ../src/empathy-ft-manager.c:179
 msgctxt "file transfer percent"
 msgid "Unknown"
 msgstr "Tuntematon"
 
-#: ../src/empathy-ft-manager.c:273
+#: ../src/empathy-ft-manager.c:274
 #, c-format
 msgid "%s of %s at %s/s"
 msgstr "%s / %s nopeudella %s/s"
 
-#: ../src/empathy-ft-manager.c:274
+#: ../src/empathy-ft-manager.c:275
 #, c-format
 msgid "%s of %s"
 msgstr "%s / %s"
 
 #. translators: first %s is filename, second %s is the contact name
-#: ../src/empathy-ft-manager.c:305
+#: ../src/empathy-ft-manager.c:306
 #, c-format
 msgid "Receiving \"%s\" from %s"
 msgstr "Vastaanotetaan \"%s\" tuttavalta %s"
 
 #. translators: first %s is filename, second %s is the contact name
-#: ../src/empathy-ft-manager.c:308
+#: ../src/empathy-ft-manager.c:309
 #, c-format
 msgid "Sending \"%s\" to %s"
 msgstr "Lähetetään \"%s\" tuttavalle %s"
 
 #. translators: first %s is filename, second %s
 #. * is the contact name
-#: ../src/empathy-ft-manager.c:338
+#: ../src/empathy-ft-manager.c:339
 #, c-format
 msgid "Error receiving \"%s\" from %s"
 msgstr "Virhe vastaanotettaessa \"%s\" tuttavalta %s"
 
-#: ../src/empathy-ft-manager.c:341
+#: ../src/empathy-ft-manager.c:342
 msgid "Error receiving a file"
 msgstr "Virhe vastaanotettaessa tiedostoa"
 
-#: ../src/empathy-ft-manager.c:346
+#: ../src/empathy-ft-manager.c:347
 #, c-format
 msgid "Error sending \"%s\" to %s"
 msgstr "Virhe lähetettäessä \"%s\" tuttavalle %s"
 
-#: ../src/empathy-ft-manager.c:349
+#: ../src/empathy-ft-manager.c:350
 msgid "Error sending a file"
 msgstr "Virhe lähetettäessä tiedostoa"
 
 #. translators: first %s is filename, second %s
 #. * is the contact name
-#: ../src/empathy-ft-manager.c:488
+#: ../src/empathy-ft-manager.c:489
 #, c-format
 msgid "\"%s\" received from %s"
 msgstr "\"%s\" vastaanotettu tuttavalta %s"
 
 #. translators: first %s is filename, second %s
 #. * is the contact name
-#: ../src/empathy-ft-manager.c:493
+#: ../src/empathy-ft-manager.c:494
 #, c-format
 msgid "\"%s\" sent to %s"
 msgstr "\"%s\" lähetetty tuttavalle %s"
 
-#: ../src/empathy-ft-manager.c:496
+#: ../src/empathy-ft-manager.c:497
 msgid "File transfer completed"
 msgstr "Tiedostonsiirto valmistui"
 
-#: ../src/empathy-ft-manager.c:615 ../src/empathy-ft-manager.c:782
+#: ../src/empathy-ft-manager.c:616 ../src/empathy-ft-manager.c:780
 msgid "Waiting for the other participant's response"
 msgstr "Odotetaan toisen osallistujan vastausta"
 
-#: ../src/empathy-ft-manager.c:641 ../src/empathy-ft-manager.c:679
+#: ../src/empathy-ft-manager.c:642 ../src/empathy-ft-manager.c:680
 #, c-format
 msgid "Checking integrity of \"%s\""
 msgstr "Tarkistetaan tiedoston ”%s” eheyttä"
 
-#: ../src/empathy-ft-manager.c:644 ../src/empathy-ft-manager.c:682
+#: ../src/empathy-ft-manager.c:645 ../src/empathy-ft-manager.c:683
 #, c-format
 msgid "Hashing \"%s\""
 msgstr "Lasketaan tiivistettä tiedostolle ”%s”"
 
-#: ../src/empathy-ft-manager.c:996
-msgid "%"
-msgstr "%"
-
-#: ../src/empathy-ft-manager.c:1008
+#: ../src/empathy-ft-manager.c:1038
 msgid "File"
 msgstr "Tiedosto"
 
-#: ../src/empathy-ft-manager.c:1030
+#: ../src/empathy-ft-manager.c:1060
 msgid "Remaining"
 msgstr "Jäljellä"
 
@@ -3339,137 +3981,166 @@ msgid "Import Accounts"
 msgstr "Tuo tilejä"
 
 #. Translators: this is the header of a treeview column
-#: ../src/empathy-import-widget.c:292
+#: ../src/empathy-import-widget.c:301
 msgid "Import"
 msgstr "Tuo"
 
-#: ../src/empathy-import-widget.c:301
+#: ../src/empathy-import-widget.c:310
 msgid "Protocol"
 msgstr "Protokolla"
 
-#: ../src/empathy-import-widget.c:325
+#: ../src/empathy-import-widget.c:334
 msgid "Source"
 msgstr "Lähde"
 
-#: ../src/empathy-main-window.c:383
+#: ../src/empathy-main-window.c:392
+msgid "Provide Password"
+msgstr "Anna salasana"
+
+#: ../src/empathy-main-window.c:398
+msgid "Disconnect"
+msgstr "Katkaise yhteys"
+
+#: ../src/empathy-main-window.c:622
 msgid "No match found"
 msgstr "Vastinetta ei löytynyt"
 
-#: ../src/empathy-main-window.c:538
+#: ../src/empathy-main-window.c:777
 msgid "Reconnect"
 msgstr "Yhdistä uudelleen"
 
-#: ../src/empathy-main-window.c:544
+#: ../src/empathy-main-window.c:783
 msgid "Edit Account"
 msgstr "Muokkaa tiliä"
 
-#: ../src/empathy-main-window.c:550
+#: ../src/empathy-main-window.c:789
 msgid "Close"
 msgstr "Sulje"
 
-#: ../src/empathy-main-window.c:1232
+#. Translators: this string will be something like:
+#. *   Top up My Account ($1.23)..."
+#: ../src/empathy-main-window.c:928
+#, c-format
+msgid "Top up %s (%s)..."
+msgstr ""
+
+#: ../src/empathy-main-window.c:975
+msgid "Top up account credit"
+msgstr ""
+
+#. top up button
+#: ../src/empathy-main-window.c:1046
+msgid "Top Up..."
+msgstr ""
+
+#: ../src/empathy-main-window.c:1789
 msgid "Contact"
 msgstr "Tuttava"
 
-#: ../src/empathy-main-window.c:1557
+#: ../src/empathy-main-window.c:2119
 msgid "Contact List"
 msgstr "Tuttavaluettelo"
 
-#: ../src/empathy-main-window.c:1666
-msgid "Show and edit accounts"
-msgstr "Näytä ja muokkaa tilejä"
-
-#: ../src/empathy-main-window.ui.h:1
+#: ../src/empathy-main-window-menubar.ui.h:1
 msgid "Contacts on a _Map"
 msgstr "Tuttavat _kartalla"
 
-#: ../src/empathy-main-window.ui.h:2
-msgid "Context"
-msgstr "Yhteys"
+#: ../src/empathy-main-window-menubar.ui.h:2
+msgid "Credit Balance"
+msgstr ""
 
-#: ../src/empathy-main-window.ui.h:3
+#: ../src/empathy-main-window-menubar.ui.h:3
+msgid "Find in Contact _List"
+msgstr "Etsi _tuttavaluettelosta"
+
+#: ../src/empathy-main-window-menubar.ui.h:4
 msgid "Join _Favorites"
 msgstr "Liity _suosikkeihin"
 
-#: ../src/empathy-main-window.ui.h:4
+#: ../src/empathy-main-window-menubar.ui.h:5
 msgid "Manage Favorites"
 msgstr "Hallitse suosikkeja"
 
-#: ../src/empathy-main-window.ui.h:5
+#: ../src/empathy-main-window-menubar.ui.h:6
 msgid "N_ormal Size"
 msgstr "_Normaali koko"
 
-#: ../src/empathy-main-window.ui.h:6 ../src/empathy-status-icon.ui.h:1
+#: ../src/empathy-main-window-menubar.ui.h:7 ../src/empathy-status-icon.ui.h:1
 msgid "New _Call…"
 msgstr "Uusi _puhelu…"
 
-#: ../src/empathy-main-window.ui.h:7
+#: ../src/empathy-main-window-menubar.ui.h:8
 msgid "Normal Size With _Avatars"
 msgstr "Normaali koko _avatarien kera"
 
-#: ../src/empathy-main-window.ui.h:8
+#: ../src/empathy-main-window-menubar.ui.h:9
 msgid "P_references"
 msgstr "_Asetukset"
 
-#: ../src/empathy-main-window.ui.h:9
+#: ../src/empathy-main-window-menubar.ui.h:10
 msgid "Show P_rotocols"
 msgstr "Näytä p_rotokollat"
 
-#: ../src/empathy-main-window.ui.h:10
+#: ../src/empathy-main-window-menubar.ui.h:11
 msgid "Sort by _Name"
 msgstr "Lajittele _nimen mukaan"
 
-#: ../src/empathy-main-window.ui.h:11
+#: ../src/empathy-main-window-menubar.ui.h:12
 msgid "Sort by _Status"
 msgstr "Lajittele _tilan mukaan"
 
-#: ../src/empathy-main-window.ui.h:12
+#: ../src/empathy-main-window-menubar.ui.h:13
 msgid "_Accounts"
 msgstr "_Käyttäjätilit"
 
-#: ../src/empathy-main-window.ui.h:15
+#: ../src/empathy-main-window-menubar.ui.h:15
+msgid "_Blocked Contacts"
+msgstr "_Estetyt yhteystiedot"
+
+#: ../src/empathy-main-window-menubar.ui.h:17
 msgid "_Compact Size"
 msgstr "_Tiivis koko"
 
-#: ../src/empathy-main-window.ui.h:17
-msgid "_Debug"
-msgstr "_Vianetsintä"
-
-#: ../src/empathy-main-window.ui.h:19
+#: ../src/empathy-main-window-menubar.ui.h:21
 msgid "_File Transfers"
 msgstr "_Tiedostosiirrot"
 
-#: ../src/empathy-main-window.ui.h:21
+#: ../src/empathy-main-window-menubar.ui.h:23
 msgid "_Join…"
 msgstr "_Liity…"
 
-#: ../src/empathy-main-window.ui.h:22 ../src/empathy-status-icon.ui.h:3
+#: ../src/empathy-main-window-menubar.ui.h:24
+#: ../src/empathy-status-icon.ui.h:3
 msgid "_New Conversation…"
 msgstr "_Uusi keskustelu…"
 
-#: ../src/empathy-main-window.ui.h:23
+#: ../src/empathy-main-window-menubar.ui.h:25
 msgid "_Offline Contacts"
 msgstr "_Poissa linjoilta olevat tuttavat"
 
-#: ../src/empathy-main-window.ui.h:24
+#: ../src/empathy-main-window-menubar.ui.h:26
 msgid "_Personal Information"
 msgstr "_Henkilötiedot"
 
-#: ../src/empathy-main-window.ui.h:26
+#: ../src/empathy-main-window-menubar.ui.h:28
 msgid "_Room"
 msgstr "_Huone"
 
-#: ../src/empathy-new-chatroom-dialog.c:379
+#: ../src/empathy-main-window-menubar.ui.h:29
+msgid "_Search for Contacts…"
+msgstr "Etsi _yhteystietoja..."
+
+#: ../src/empathy-new-chatroom-dialog.c:337
 msgid "Chat Room"
 msgstr "Keskusteluhuone"
 
-#: ../src/empathy-new-chatroom-dialog.c:395
+#: ../src/empathy-new-chatroom-dialog.c:353
 msgid "Members"
 msgstr "Jäsenet"
 
 #. Translators: Room/Join's roomlist tooltip. Parameters are a channel name,
 #. yes/no, yes/no and a number.
-#: ../src/empathy-new-chatroom-dialog.c:607
+#: ../src/empathy-new-chatroom-dialog.c:553
 #, c-format
 msgid ""
 "%s\n"
@@ -3482,16 +4153,16 @@ msgstr ""
 "Vaaditaan salasana: %s\n"
 "Jäseniä: %s"
 
-#: ../src/empathy-new-chatroom-dialog.c:609
-#: ../src/empathy-new-chatroom-dialog.c:610
+#: ../src/empathy-new-chatroom-dialog.c:555
+#: ../src/empathy-new-chatroom-dialog.c:556
 msgid "No"
 msgstr "Ei"
 
-#: ../src/empathy-new-chatroom-dialog.c:638
+#: ../src/empathy-new-chatroom-dialog.c:584
 msgid "Could not start room listing"
 msgstr "Ei voitu aloittaa huoneluettelointia"
 
-#: ../src/empathy-new-chatroom-dialog.c:648
+#: ../src/empathy-new-chatroom-dialog.c:594
 msgid "Could not stop room listing"
 msgstr "Ei voitu lopettaa huoneluettelointia"
 
@@ -3526,39 +4197,79 @@ msgstr "Huoneluettelo"
 msgid "_Room:"
 msgstr "_Keskusteluhuone:"
 
-#: ../src/empathy-preferences.c:138
+#: ../src/empathy-preferences.c:169
 msgid "Message received"
 msgstr "Viesti vastaanotettu"
 
-#: ../src/empathy-preferences.c:139
+#: ../src/empathy-preferences.c:170
 msgid "Message sent"
 msgstr "Viesti lähetetty"
 
-#: ../src/empathy-preferences.c:140
+#: ../src/empathy-preferences.c:171
 msgid "New conversation"
 msgstr "Uusi keskustelu"
 
-#: ../src/empathy-preferences.c:141
+#: ../src/empathy-preferences.c:172
 msgid "Contact goes online"
 msgstr "Tuttava saapui linjoille"
 
-#: ../src/empathy-preferences.c:142
+#: ../src/empathy-preferences.c:173
 msgid "Contact goes offline"
 msgstr "Tuttava poistui linjoilta"
 
-#: ../src/empathy-preferences.c:143
+#: ../src/empathy-preferences.c:174
 msgid "Account connected"
 msgstr "Tili yhdistetty"
 
-#: ../src/empathy-preferences.c:144
+#: ../src/empathy-preferences.c:175
 msgid "Account disconnected"
 msgstr "Tilin yhteys katkaistu"
 
-#: ../src/empathy-preferences.c:445
+#: ../src/empathy-preferences.c:484
 msgid "Language"
 msgstr "Kieli"
 
-#: ../src/empathy-preferences.c:882
+#. translators: Contact name for the chat theme preview
+#: ../src/empathy-preferences.c:734
+msgid "Juliet"
+msgstr ""
+
+#. translators: Contact name for the chat theme preview
+#: ../src/empathy-preferences.c:741
+msgid "Romeo"
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:747
+msgid "O Romeo, Romeo, wherefore art thou Romeo?"
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:750
+msgid "Deny thy father and refuse thy name;"
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:753
+msgid "Or if thou wilt not, be but sworn my love"
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:756
+msgid "And I'll no longer be a Capulet."
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:759
+msgid "Shall I hear more, or shall I speak at this?"
+msgstr ""
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+#: ../src/empathy-preferences.c:762
+msgid "Juliet has disconnected"
+msgstr ""
+
+#: ../src/empathy-preferences.c:1166
 msgid "Preferences"
 msgstr "Asetukset"
 
@@ -3566,67 +4277,75 @@ msgstr "Asetukset"
 msgid "Appearance"
 msgstr "Ulkoasu"
 
-#: ../src/empathy-preferences.ui.h:2
+#: ../src/empathy-preferences.ui.h:3
 msgid "Behavior"
 msgstr "Käytös"
 
-#: ../src/empathy-preferences.ui.h:3
+#: ../src/empathy-preferences.ui.h:5
 msgid "Chat Th_eme:"
 msgstr "Keskustelun _teema:"
 
-#: ../src/empathy-preferences.ui.h:4
+#: ../src/empathy-preferences.ui.h:6
 msgid "Disable notifications when _away or busy"
 msgstr "Poista huomautukset käytöstä oltaessa _poissa tai kiireinen"
 
-#: ../src/empathy-preferences.ui.h:5
+#: ../src/empathy-preferences.ui.h:7
 msgid "Disable sounds when _away or busy"
 msgstr "Poista äänet käytöstä oltaessa _poissa tai kiireinen"
 
-#: ../src/empathy-preferences.ui.h:6
+#: ../src/empathy-preferences.ui.h:8
 msgid "Display incoming events in the notification area"
 msgstr "Näytä tulevat tapahtumat tilarivillä"
 
-#: ../src/empathy-preferences.ui.h:7
-msgid "Enable notifications when a contact comes online"
-msgstr "Ota käyttöön ponnahdusikkunat, kun tuttava tulee linjoille"
-
-#: ../src/empathy-preferences.ui.h:8
-msgid "Enable notifications when a contact goes offline"
-msgstr "Ota käyttöön ponnahdusikkunat, kun tuttava lähtee linjoilta"
-
 #: ../src/empathy-preferences.ui.h:9
+msgid "Enable notifications when a contact comes online"
+msgstr "Näytä ponnahdusikkuna, kun tuttava tulee linjoille"
+
+#: ../src/empathy-preferences.ui.h:10
+msgid "Enable notifications when a contact goes offline"
+msgstr "Näytä ponnahdusikkuna, kun tuttava lähtee linjoilta"
+
+#: ../src/empathy-preferences.ui.h:11
 msgid "Enable notifications when the _chat is not focused"
 msgstr "Näytä huomautuksia, kun _keskustelu ei ole kohdistettu"
 
-#: ../src/empathy-preferences.ui.h:10
+#: ../src/empathy-preferences.ui.h:12
 msgid "Enable spell checking for languages:"
 msgstr "Käytä kielentarkistusta kielille:"
 
-#: ../src/empathy-preferences.ui.h:11
+#: ../src/empathy-preferences.ui.h:13
 msgid "General"
 msgstr "Yleinen"
 
-#: ../src/empathy-preferences.ui.h:13
+#: ../src/empathy-preferences.ui.h:14
+msgid "Input level"
+msgstr ""
+
+#: ../src/empathy-preferences.ui.h:15
+msgid "Input volume"
+msgstr ""
+
+#: ../src/empathy-preferences.ui.h:17
 msgid "Location sources:"
 msgstr "Sijainti:"
 
-#: ../src/empathy-preferences.ui.h:14
+#: ../src/empathy-preferences.ui.h:18
 msgid "Log conversations"
 msgstr "Tallenna keskustelut lokitiedostoon"
 
-#: ../src/empathy-preferences.ui.h:15
+#: ../src/empathy-preferences.ui.h:19
 msgid "Notifications"
 msgstr "Huomautukset"
 
-#: ../src/empathy-preferences.ui.h:16
+#: ../src/empathy-preferences.ui.h:20
 msgid "Play sound for events"
 msgstr "Soita ääniä tapahtumille"
 
-#: ../src/empathy-preferences.ui.h:17
+#: ../src/empathy-preferences.ui.h:21
 msgid "Privacy"
 msgstr "Yksityisyys"
 
-#: ../src/empathy-preferences.ui.h:18
+#: ../src/empathy-preferences.ui.h:22
 msgid ""
 "Reduced location accuracy means that nothing more precise than your city, "
 "state and country will be published.  GPS coordinates will be accurate to 1 "
@@ -3635,23 +4354,23 @@ msgstr ""
 "Heikennetty sijaintitiedon tarkkuus tarkoittaa, että ainoastaan kaupunkisi "
 "ja maasi julkaistaan. GPS-koordinaattien tarkkuus on yksi desimaali."
 
-#: ../src/empathy-preferences.ui.h:19
+#: ../src/empathy-preferences.ui.h:23
 msgid "Show _smileys as images"
 msgstr "Näytä _hymiöt hymiökuvakkeina"
 
-#: ../src/empathy-preferences.ui.h:20
+#: ../src/empathy-preferences.ui.h:24
 msgid "Show contact _list in rooms"
 msgstr "Näytä tuttava_luettelo huoneissa"
 
-#: ../src/empathy-preferences.ui.h:21
+#: ../src/empathy-preferences.ui.h:25
 msgid "Sounds"
 msgstr "Äänet"
 
-#: ../src/empathy-preferences.ui.h:22
+#: ../src/empathy-preferences.ui.h:26
 msgid "Spell Checking"
 msgstr "Kielentarkastus"
 
-#: ../src/empathy-preferences.ui.h:23
+#: ../src/empathy-preferences.ui.h:27
 msgid ""
 "The list of languages reflects only the languages for which you have a "
 "dictionary installed."
@@ -3659,66 +4378,50 @@ msgstr ""
 "Luettelo kielistä sisältää ainoastaan ne kielet, joille tietokoneessasi on "
 "asennettu sanakirja."
 
-#: ../src/empathy-preferences.ui.h:24
+#: ../src/empathy-preferences.ui.h:28
 msgid "Themes"
 msgstr "Teemat"
 
-#: ../src/empathy-preferences.ui.h:25
+#: ../src/empathy-preferences.ui.h:29
+msgid "Variant:"
+msgstr "Muunnelma:"
+
+#: ../src/empathy-preferences.ui.h:30
 msgid "_Automatically connect on startup"
 msgstr "_Yhdistä automaattisesti käynnistyksen yhteydessä"
 
-#: ../src/empathy-preferences.ui.h:26
+#: ../src/empathy-preferences.ui.h:31
 msgid "_Cellphone"
 msgstr "_Matkapuhelin"
 
-#: ../src/empathy-preferences.ui.h:27
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Enable bubble notifications"
 msgstr "_Käytä ponnahdusikkunahuomautuksia"
 
-#: ../src/empathy-preferences.ui.h:28
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Enable sound notifications"
 msgstr "_Käytä merkkiääniä"
 
-#: ../src/empathy-preferences.ui.h:29
+#: ../src/empathy-preferences.ui.h:34
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:30
+#: ../src/empathy-preferences.ui.h:35
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Verkko (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:36
 msgid "_Open new chats in separate windows"
 msgstr "_Avaa uusi ikkuna uusille keskusteluille"
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:37
 msgid "_Publish location to my contacts"
 msgstr "_Julkaise sijainti tuttavilleni"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:39
 msgid "_Reduce location accuracy"
 msgstr "_Heikennä sijaintitiedon tarkkuutta"
-
-#: ../src/empathy-status-icon.c:141
-msgid "Respond"
-msgstr "Vastaa"
-
-#: ../src/empathy-status-icon.c:147
-msgid "Reject"
-msgstr "Hylkää"
-
-#: ../src/empathy-status-icon.c:151
-msgid "Answer"
-msgstr "Vastaa"
-
-#: ../src/empathy-status-icon.c:158
-msgid "Decline"
-msgstr "Kieltäydy"
-
-#: ../src/empathy-status-icon.c:162
-msgid "Accept"
-msgstr "Hyväksy"
 
 #: ../src/empathy-status-icon.ui.h:2
 msgid "Status"
@@ -3728,249 +4431,379 @@ msgstr "Tila"
 msgid "_Quit"
 msgstr "_Lopeta"
 
-#: ../src/empathy-map-view.c:452
+#: ../src/empathy-streamed-media-window.ui.h:2
+msgid "Call the contact again"
+msgstr "Soita tuttavalle uudelleen"
+
+#: ../src/empathy-streamed-media-window.ui.h:3
+msgid "Camera Off"
+msgstr "Kamera pois"
+
+#: ../src/empathy-streamed-media-window.ui.h:4
+msgid "Camera On"
+msgstr "Kamera päällä"
+
+#: ../src/empathy-streamed-media-window.ui.h:6
+msgid "Disable camera and stop sending video"
+msgstr "Kytke kamera poista käytöstä ja lopeta videokuvan lähetys"
+
+#: ../src/empathy-streamed-media-window.ui.h:7
+msgid "Enable camera and send video"
+msgstr "Ota kamera käyttöön ja lähetä videokuvaa"
+
+#: ../src/empathy-streamed-media-window.ui.h:8
+msgid "Enable camera but don't send video"
+msgstr "Ota kamera käyttöön, mutta älä lähetä videokuvaa"
+
+#: ../src/empathy-streamed-media-window.ui.h:13
+msgid "Preview"
+msgstr "Esikatselu"
+
+#: ../src/empathy-streamed-media-window.ui.h:14
+msgid "Redial"
+msgstr "Yhdistä uudelleen"
+
+#: ../src/empathy-streamed-media-window.ui.h:19
+msgid "V_ideo"
+msgstr "V_ideo"
+
+#: ../src/empathy-streamed-media-window.ui.h:21
+msgid "Video Off"
+msgstr "Video pois"
+
+#: ../src/empathy-streamed-media-window.ui.h:22
+msgid "Video On"
+msgstr "Video päällä"
+
+#: ../src/empathy-streamed-media-window.ui.h:23
+msgid "Video Preview"
+msgstr "Videon esikatselu"
+
+#: ../src/empathy-map-view.c:448
 msgid "Contact Map View"
 msgstr "Tuttavien karttanäkymä"
 
-#: ../src/empathy-debug-window.c:1219
+#: ../src/empathy-debug-window.c:1228
 msgid "Save"
 msgstr "Tallenna"
 
-#: ../src/empathy-debug-window.c:1395
+#: ../src/empathy-debug-window.c:1435
 msgid "Debug Window"
 msgstr "Vianetsintäikkuna"
 
-#: ../src/empathy-debug-window.c:1475
+#: ../src/empathy-debug-window.c:1517
 msgid "Pause"
 msgstr "Pysäytä"
 
-#: ../src/empathy-debug-window.c:1487
+#: ../src/empathy-debug-window.c:1529
 msgid "Level "
 msgstr "Taso "
 
-#: ../src/empathy-debug-window.c:1507
+#: ../src/empathy-debug-window.c:1549
 msgid "Debug"
 msgstr "Virheenjäljitys"
 
-#: ../src/empathy-debug-window.c:1513
+#: ../src/empathy-debug-window.c:1555
 msgid "Info"
 msgstr "Tietoa"
 
-#: ../src/empathy-debug-window.c:1519 ../src/empathy-debug-window.c:1568
+#: ../src/empathy-debug-window.c:1561 ../src/empathy-debug-window.c:1610
 msgid "Message"
 msgstr "Viesti"
 
-#: ../src/empathy-debug-window.c:1525
+#: ../src/empathy-debug-window.c:1567
 msgid "Warning"
 msgstr "Varoitus"
 
-#: ../src/empathy-debug-window.c:1531
+#: ../src/empathy-debug-window.c:1573
 msgid "Critical"
 msgstr "Kriittinen"
 
-#: ../src/empathy-debug-window.c:1537
+#: ../src/empathy-debug-window.c:1579
 msgid "Error"
 msgstr "Virhe"
 
-#: ../src/empathy-debug-window.c:1556
+#: ../src/empathy-debug-window.c:1598
 msgid "Time"
 msgstr "Aika"
 
-#: ../src/empathy-debug-window.c:1559
+#: ../src/empathy-debug-window.c:1601
 msgid "Domain"
 msgstr "Alue"
 
-#: ../src/empathy-debug-window.c:1561
+#: ../src/empathy-debug-window.c:1603
 msgid "Category"
 msgstr "Luokka"
 
-#: ../src/empathy-debug-window.c:1563
+#: ../src/empathy-debug-window.c:1605
 msgid "Level"
 msgstr "Taso"
 
-#: ../src/empathy-debug-window.c:1600
+#: ../src/empathy-debug-window.c:1642
 msgid ""
 "The selected connection manager does not support the remote debugging "
 "extension."
 msgstr "Valittu yhteyshallinta ei tue etävianetsintälaajennusta."
 
-#: ../src/empathy-invite-participant-dialog.c:34
-#: ../src/empathy-invite-participant-dialog.c:48
+#: ../src/empathy-invite-participant-dialog.c:205
+#: ../src/empathy-invite-participant-dialog.c:231
 msgid "Invite Participant"
 msgstr "Kutsu osanottaja"
 
-#: ../src/empathy-invite-participant-dialog.c:35
+#: ../src/empathy-invite-participant-dialog.c:206
 msgid "Choose a contact to invite into the conversation:"
 msgstr "Valitse keskusteluun kutsuttava tuttava:"
 
-#: ../src/empathy-invite-participant-dialog.c:45
+#: ../src/empathy-invite-participant-dialog.c:227
 msgid "Invite"
 msgstr "Kutsu"
 
-#: ../src/empathy-accounts.c:182
+#: ../src/empathy-accounts.c:183
 msgid "Don't display any dialogs; do any work (eg, importing) and exit"
 msgstr ""
 "Älä näytä mitään valintaikkunoita; tee mitä tahansa työtä (esim. tuonti) ja "
 "poistu"
 
-#: ../src/empathy-accounts.c:186
-msgid "Don't display any dialogs if there are any non-Salut accounts"
+#: ../src/empathy-accounts.c:187
+msgid ""
+"Don't display any dialogs unless there are only \"People Nearby\" accounts"
 msgstr ""
-"Älä näytä mitään valintaikkunoita, paitsi jos käytössä on vain ”Lähellä "
-"olevat ihmiset” -tilejä"
 
-#: ../src/empathy-accounts.c:190
+#: ../src/empathy-accounts.c:191
 msgid "Initially select given account (eg, gabble/jabber/foo_40example_2eorg0)"
 msgstr "Valitse tili alussa (esim. gabble/jabber/foo_40example_2eorg0)"
 
-#: ../src/empathy-accounts.c:192
+#: ../src/empathy-accounts.c:193
 msgid "<account-id>"
 msgstr "<käyttäjätunnus>"
 
-#: ../src/empathy-accounts.c:200
+#: ../src/empathy-accounts.c:198
 msgid "- Empathy Accounts"
 msgstr "- Empathy-tilit"
 
-#: ../src/empathy-accounts.c:216
+#: ../src/empathy-accounts.c:237
 msgid "Empathy Accounts"
 msgstr "Empathy-tilit"
 
-#: ../src/empathy-debugger.c:40
+#: ../src/empathy-debugger.c:70
+msgid "Show a particular service"
+msgstr ""
+
+#: ../src/empathy-debugger.c:75
+msgid "- Empathy Debugger"
+msgstr ""
+
+#: ../src/empathy-debugger.c:114
 msgid "Empathy Debugger"
 msgstr "Empathyn virheenjäljitin"
 
-#~ msgid "Use _Yahoo! Japan"
-#~ msgstr "Käytä _Yahoo! Japania"
+#: ../src/empathy-chat.c:107
+msgid "- Empathy Chat Client"
+msgstr "- Empathy-keskusteluasiakas"
+
+#: ../src/empathy-notifications-approver.c:203
+msgid "Respond"
+msgstr "Vastaa"
+
+#: ../src/empathy-notifications-approver.c:217
+msgid "Reject"
+msgstr "Hylkää"
+
+#: ../src/empathy-notifications-approver.c:222
+#: ../src/empathy-notifications-approver.c:227
+msgid "Answer"
+msgstr "Vastaa"
+
+#: ../src/empathy-notifications-approver.c:227
+msgid "Answer with video"
+msgstr "Vastaa videon kanssa"
+
+#: ../src/empathy-notifications-approver.c:235
+#: ../src/empathy-notifications-approver.c:245
+msgid "Decline"
+msgstr "Kieltäydy"
+
+#: ../src/empathy-notifications-approver.c:239
+#: ../src/empathy-notifications-approver.c:250
+msgid "Accept"
+msgstr "Hyväksy"
+
+#: ../src/empathy-notifications-approver.c:260
+msgid "Provide"
+msgstr ""
+
+#: ../src/empathy-call-observer.c:134
+#, c-format
+msgid "%s just tried to call you, but you were in another call."
+msgstr ""
+"%s yritti juuri soittaa sinulle, mutta sinulla oli toinen puhelu kesken."
+
+#. Translators: this is an "Info" label. It should be as short
+#. * as possible.
+#: ../src/empathy-call-window.c:1036 ../src/empathy-call-window.c:1059
+msgid "i"
+msgstr ""
+
+#: ../src/empathy-call-window.c:2603
+msgid "On hold"
+msgstr "Pidossa"
+
+#: ../src/empathy-call-window.c:2606
+msgid "Mute"
+msgstr "Vaimenna"
+
+#: ../src/empathy-call-window.c:2608
+msgid "Duration"
+msgstr "Kesto"
+
+#. Translators: 'status - minutes:seconds' the caller has been connected
+#: ../src/empathy-call-window.c:2611
+#, c-format
+msgid "%s — %d:%02dm"
+msgstr ""
+
+#: ../libempathy-gtk/empathy-search-bar.c:243
+msgid "_Match case"
+msgstr ""
+
+#~ msgid "%s is sending you a file. Do you want to accept it?"
+#~ msgstr "%s haluaa lähettää sinulle tiedoston. Haluatko vastaanottaa sen?"
+
+#~ msgid "_Accept"
+#~ msgstr "_Hyväksy"
+
+#~ msgid "Empathy has asked about importing accounts"
+#~ msgstr "Empathy on kysynyt tilien tuonnista"
+
+#~ msgid "All"
+#~ msgstr "Kaikki"
+
+#~ msgid "Select"
+#~ msgstr "Valitse"
+
+#~ msgid "Date"
+#~ msgstr "Päivämäärä"
+
+#~ msgid "Conversations"
+#~ msgstr "Keskustelut"
+
+#~ msgid "Previous Conversations"
+#~ msgstr "Aikaisemmat keskustelut"
+
+#~ msgid "_For:"
+#~ msgstr "_Ajalta:"
+
+#~ msgid "Show and edit accounts"
+#~ msgstr "Näytä ja muokkaa tilejä"
+
+#~ msgid "The hash of the received file and the sent one do not match"
+#~ msgstr "Vastaanotetun ja lähetetyn tiedoston tiiviste ei täsmää"
+
+#~ msgid "Enter Custom Message"
+#~ msgstr "Syötä itse määritelty viesti"
+
+#~ msgid "Add _New Preset"
+#~ msgstr "Lisää _uusi esitieto"
+
+#~ msgid "Saved Presets"
+#~ msgstr "Tallennetut esitiedot"
+
+#~ msgid ""
+#~ "Whether Empathy has asked about importing accounts from other programs."
+#~ msgstr "Onko Empathy tiedustellut tilien tuomisesta."
 
 #~ msgid "Show incoming messages in the messaging menu"
 #~ msgstr "Näytä saapuvat viestit viestivalikossa"
 
-#~ msgid "Pri_ority:"
-#~ msgstr "_Tärkeys:"
+#~ msgid "Match case"
+#~ msgstr "Huomioi kirjainkoko"
 
-#~ msgid "_Encryption required (TLS/SSL)"
-#~ msgstr "_Vaadi salaus (TLS/SSL)"
+#~ msgid "_Add…"
+#~ msgstr "_Lisää…"
 
-#~ msgid "_Ignore SSL certificate errors"
-#~ msgstr "Älä _huomioi SSL-varmenteiden virheitä"
+#~ msgid "Find Next"
+#~ msgstr "Etsi seuraava"
 
-#~ msgid "_Nickname:"
-#~ msgstr "_Nimimerkki:"
+#~ msgid "Find Previous"
+#~ msgstr "Etsi edellinen"
 
-#~ msgid "Send file"
-#~ msgstr "Lähetä tiedosto"
-
-#~ msgid "Enabled"
-#~ msgstr "Käytössä"
-
-#~ msgid "Automatically _connect on startup "
-#~ msgstr "Yhdistä _käynnistettäessä "
-
-#~ msgid "Failed to reconnect this chat"
-#~ msgstr "Uudelleenyhdistäminen tähän keskusteluun epäonnistui"
-
-#~ msgid "<b>Location</b>, "
-#~ msgstr "<b>Sijainti</b>, "
-
-#~ msgid "Select a destination"
-#~ msgstr "Valitse kohde"
-
-#~ msgid "Empathy IM Client"
-#~ msgstr "Empathy-pikaviestin"
-
-#~ msgid "Send and receive messages"
-#~ msgstr "Lähetä ja vastaanota viestejä"
-
-#~ msgid "Share my desktop"
-#~ msgstr "Jaa työpöytäni"
-
-#~ msgid "MC 4 accounts have been imported"
-#~ msgstr "MC 4 -tilit on tuotu"
-
-#~ msgid "MC 4 accounts have been imported."
-#~ msgstr "MC 4 -tilit on tuotu."
-
-#~ msgid "%s account"
-#~ msgstr "%s-tili"
-
-#~ msgid "Use the messaging indicator"
-#~ msgstr "Käytä viesti-ilmoittimia"
+#~ msgid "The certificate has expired"
+#~ msgstr "Varmenne on vanhentunut"
 
 #~ msgid ""
-#~ "Whether or not to use the messaging indicator, if false the icon in the "
-#~ "notification area will be displayed."
-#~ msgstr ""
-#~ "Näytetäänkö viesti-ilmoitin, jos ei, ilmoitusalueella näytetään ikoni."
+#~ "The certificate has been revoked by the issuing Certification Authority"
+#~ msgstr "Varmenne on peruutettu varmenteen myöntäjän toimesta"
 
-#~ msgid "Failed to join chat room"
-#~ msgstr "Keskusteluhuoneeseen liittyminen epäonnistui"
+#~ msgid "The certificate hasn't yet been activated"
+#~ msgstr "Varmennetta ei ole vielä aktivoitu"
 
-#~ msgid "_Character set:"
-#~ msgstr "_Merkkikartta:"
+#~ msgid "The certificate is self-signed"
+#~ msgstr "Varmenne on itsetehty"
 
-#~ msgid ""
-#~ "<b>%s</b>\n"
-#~ "Invite required: %s\n"
-#~ "Password required: %s\n"
-#~ "Members: %s"
-#~ msgstr ""
-#~ "<b>%s</b>\n"
-#~ "Kutsu vaaditaan: %s\n"
-#~ "Salasana vaaditaan: %s\n"
-#~ "Jäsenet: %s"
+#~ msgid "The certificate is malformed"
+#~ msgstr "Varmenne on muodostettu väärin"
 
-#~ msgid "_E-mail address:"
-#~ msgstr "_Sähköpostiosoite:"
+#~ msgid "The identity provided by the chat server cannot be verified.\n"
+#~ msgstr "Keskustelupalvelimen antamaa tunnistetta ei voida varmistaa.\n"
 
-#~ msgid "File transfer completed, but the file was corrupted"
-#~ msgstr "Tiedostonsiirto valmistui, mutta tiedosto oli viallinen"
-
-#~ msgid "Google Talk"
-#~ msgstr "Google Talk"
-
-#~ msgid "The account %s is edited via My Web Accounts."
-#~ msgstr "Tiliä %s muokataan Web-tilien kautta."
-
-#~ msgid "The account %s cannot be edited in Empathy."
-#~ msgstr "Käyttäjätiliä %s ei voi muokata Empathyssä."
-
-#~ msgid "Launch My Web Accounts"
-#~ msgstr "Käynnistä Web-tilit"
-
-#~ msgid "Add '%s' to Dictionary"
-#~ msgstr "Lisää ”%s” sanakirjaan"
-
-#~ msgid "Add '%s' to %s Dictionary"
-#~ msgstr "Lisää ”%s” kielen %s sanakirjaan"
-
-#~ msgctxt "verb displayed on a button to select an IRC network"
-#~ msgid "Select"
-#~ msgstr "Valitse"
-
-#~ msgid "Save _New Status Message"
-#~ msgstr "Tallenna _uusi tilaviesti"
-
-#~ msgid "Saved Status Messages"
-#~ msgstr "Tallennetut tilaviestit"
-
-#~ msgid "Error contacting the Account Manager"
-#~ msgstr "Virhe yhdistettäessä tilienhallintaan"
+#~ msgid "The certificate is cryptographically weak"
+#~ msgstr "Varmenteen salausmenetelmä on heikko"
 
 #~ msgid ""
-#~ "There was an error while trying to connect to the Telepathy Account "
-#~ "Manager. The error was:\n"
-#~ "\n"
-#~ "%s"
+#~ "The hostname verified by the certificate doesn't match the server name"
 #~ msgstr ""
-#~ "Yhdistettäessä Empathyn tilienhallintaan tapahtui virhe:\n"
-#~ "\n"
-#~ "%s"
+#~ "Varmenteessa ilmoitettu isäntänimi ei täsmää palvelimen nimen kanssa"
 
-#~ msgid "%s would like permission to see when you are available"
-#~ msgstr "%s haluaisi oikeuden nähdä, milloin olet tavoitettavissa"
+#~ msgid "The certificate length exceeds verifiable limits"
+#~ msgstr "Varmenteen pituus ylittää sallitut rajat"
 
-#~ msgid "Find in Contact _List"
-#~ msgstr "Etsi _tuttavaluettelosta"
+#~ msgid "_Enabled"
+#~ msgstr "_Käytössä"
 
-#~ msgid "- Empathy Chat Client"
-#~ msgstr "- Empathy-keskusteluasiakas"
+#~ msgid "Meta-contact containing %u contact"
+#~ msgid_plural "Meta-contact containing %u contacts"
+#~ msgstr[0] "Metayhteystieto, joka sisältää %u yhteystiedon"
+#~ msgstr[1] "Metayhteystieto, joka sisältää %u yhteystietoa"
+
+#~ msgid ""
+#~ "Completely split the displayed meta-contact into the contacts it contains."
+#~ msgstr "Jaa näytettävä metayhteystieto sen sisältämiin yhteystietoihin."
+
+#~ msgid "Unlink meta-contact '%s'?"
+#~ msgstr "Poistetaanko metayhteystiedon ”%s” linkitys?"
+
+#~ msgid ""
+#~ "Are you sure you want to unlink this meta-contact? This will completely "
+#~ "split the meta-contact into the contacts it contains."
+#~ msgstr ""
+#~ "Haluatko varmasti poistaa tämän metayhteystiedon linkityksen? "
+#~ "Metayhteystieto jaetaan sen sisältämiin yhteystietoihin."
+
+#~ msgid "The certificate is not signed by a Certification Authority"
+#~ msgstr "Varmennetta ei ole virallisesti allekirjoitettu"
+
+#~ msgid "The certificate does not have the expected fingerprint"
+#~ msgstr "Varmenteessa ei ole odotettua sormenjälkeä"
+
+#~ msgid "Don't display any dialogs if there are any non-Salut accounts"
+#~ msgstr ""
+#~ "Älä näytä mitään valintaikkunoita, paitsi jos käytössä on vain ”Lähellä "
+#~ "olevat ihmiset” -tilejä"
+
+#~ msgid "Are you sure you want to remove '%s' from your contacts?"
+#~ msgstr "Haluatko varmasti poistaa kohteen '%s' yhteystiedoistasi?"
+
+#~ msgid "Your software is too old"
+#~ msgstr "Sovelluksesi on liian vanha"
+
+#~ msgid "Update software..."
+#~ msgstr "Päivitä sovellus..."
+
+#~ msgid "Unavailable"
+#~ msgstr "Ei käytettävissä"
+
+#~ msgid "Off"
+#~ msgstr "Kiinni"
+
+#~ msgid "On"
+#~ msgstr "Päällä"
