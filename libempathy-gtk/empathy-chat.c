@@ -758,26 +758,20 @@ chat_command_topic (EmpathyChat *chat,
 		    GStrv        strv)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	EmpathyTpChatProperty *property;
-	GValue value = {0, };
 
-	property = empathy_tp_chat_get_property (priv->tp_chat, "subject");
-	if (property == NULL) {
+	if (!empathy_tp_chat_supports_subject (priv->tp_chat)) {
 		empathy_chat_view_append_event (chat->view,
 			_("Topic not supported on this conversation"));
 		return;
 	}
 
-	if (!(property->flags & TP_PROPERTY_FLAG_WRITE)) {
+	if (!empathy_tp_chat_can_set_subject (priv->tp_chat)) {
 		empathy_chat_view_append_event (chat->view,
 			_("You are not allowed to change the topic"));
 		return;
 	}
 
-	g_value_init (&value, G_TYPE_STRING);
-	g_value_set_string (&value, strv[1]);
-	empathy_tp_chat_set_property (priv->tp_chat, "subject", &value);
-	g_value_unset (&value);
+	empathy_tp_chat_set_subject (priv->tp_chat, strv[1]);
 }
 
 void
@@ -1586,16 +1580,12 @@ chat_topic_expander_activate_cb (GtkExpander *expander,
 }
 
 static void
-chat_property_changed_cb (EmpathyTpChat *tp_chat,
-			  const gchar   *name,
-			  GValue        *value,
-			  EmpathyChat   *chat)
+chat_subject_changed_cb (EmpathyChat *chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
 
-	if (!tp_strdiff (name, "subject")) {
 		g_free (priv->subject);
-		priv->subject = g_value_dup_string (value);
+		priv->subject = g_strdup (empathy_tp_chat_get_subject (priv->tp_chat));
 		g_object_notify (G_OBJECT (chat), "subject");
 
 		if (EMP_STR_EMPTY (priv->subject)) {
@@ -1625,12 +1615,16 @@ chat_property_changed_cb (EmpathyTpChat *tp_chat,
 			empathy_chat_view_append_event (EMPATHY_CHAT (chat)->view, str);
 			g_free (str);
 		}
-	}
-	else if (!tp_strdiff (name, "name")) {
+}
+
+static void
+chat_title_changed_cb (EmpathyChat *chat)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
 		g_free (priv->name);
-		priv->name = g_value_dup_string (value);
+		priv->name = g_strdup (empathy_tp_chat_get_title (priv->tp_chat));
 		g_object_notify (G_OBJECT (chat), "name");
-	}
 }
 
 static gboolean
@@ -3144,11 +3138,13 @@ chat_finalize (GObject *object)
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_state_changed_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
-			chat_property_changed_cb, chat);
-		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_members_changed_cb, chat);
 		g_signal_handlers_disconnect_by_func (priv->tp_chat,
 			chat_remote_contact_changed_cb, chat);
+		g_signal_handlers_disconnect_by_func (priv->tp_chat,
+			chat_title_changed_cb, chat);
+		g_signal_handlers_disconnect_by_func (priv->tp_chat,
+			chat_subject_changed_cb, chat);
 		empathy_tp_chat_leave (priv->tp_chat, "");
 		g_object_unref (priv->tp_chat);
 	}
@@ -3828,7 +3824,6 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 			  EmpathyTpChat *tp_chat)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	GPtrArray       *properties;
 
 	g_return_if_fail (EMPATHY_IS_CHAT (chat));
 	g_return_if_fail (EMPATHY_IS_TP_CHAT (tp_chat));
@@ -3859,9 +3854,6 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect (tp_chat, "chat-state-changed-empathy",
 			  G_CALLBACK (chat_state_changed_cb),
 			  chat);
-	g_signal_connect (tp_chat, "property-changed",
-			  G_CALLBACK (chat_property_changed_cb),
-			  chat);
 	g_signal_connect (tp_chat, "members-changed",
 			  G_CALLBACK (chat_members_changed_cb),
 			  chat);
@@ -3880,28 +3872,18 @@ empathy_chat_set_tp_chat (EmpathyChat   *chat,
 	g_signal_connect_swapped (tp_chat, "notify::n-messages-sending",
 				  G_CALLBACK (chat_n_messages_sending_changed_cb),
 				  chat);
+	g_signal_connect_swapped (tp_chat, "notify::title",
+				  G_CALLBACK (chat_title_changed_cb),
+				  chat);
+	g_signal_connect_swapped (tp_chat, "notify::subject",
+				  G_CALLBACK (chat_subject_changed_cb),
+				  chat);
 
 	/* Get initial value of properties */
-	properties = empathy_tp_chat_get_properties (priv->tp_chat);
-	if (properties != NULL) {
-		guint i;
-
-		for (i = 0; i < properties->len; i++) {
-			EmpathyTpChatProperty *property;
-
-			property = g_ptr_array_index (properties, i);
-			if (property->value == NULL)
-				continue;
-
-			chat_property_changed_cb (priv->tp_chat,
-						  property->name,
-						  property->value,
-						  chat);
-		}
-	}
-
 	chat_sms_channel_changed_cb (chat);
 	chat_remote_contact_changed_cb (chat);
+	chat_title_changed_cb (chat);
+	chat_subject_changed_cb (chat);
 
 	if (chat->input_text_view) {
 		gtk_widget_set_sensitive (chat->input_text_view, TRUE);

@@ -37,6 +37,13 @@
 #define DEBUG_FLAG EMPATHY_DEBUG_TP | EMPATHY_DEBUG_CHAT
 #include "empathy-debug.h"
 
+typedef struct {
+	gchar          *name;
+	guint           id;
+	TpPropertyFlags flags;
+	GValue         *value;
+} EmpathyTpChatProperty;
+
 struct _EmpathyTpChatPrivate {
 	TpAccount             *account;
 	EmpathyContact        *user;
@@ -63,13 +70,14 @@ enum {
 	PROP_ACCOUNT,
 	PROP_REMOTE_CONTACT,
 	PROP_N_MESSAGES_SENDING,
+	PROP_TITLE,
+	PROP_SUBJECT,
 };
 
 enum {
 	MESSAGE_RECEIVED,
 	SEND_ERROR,
 	CHAT_STATE_CHANGED,
-	PROPERTY_CHANGED,
 	MESSAGE_ACKNOWLEDGED,
 	LAST_SIGNAL
 };
@@ -651,8 +659,13 @@ tp_chat_properties_changed_cb (TpProxy         *proxy,
 				}
 
 				DEBUG ("property %s changed", property->name);
-				g_signal_emit (chat, signals[PROPERTY_CHANGED], 0,
-					       property->name, property->value);
+
+				if (!tp_strdiff (property->name, "name")) {
+					g_object_notify (chat, "title");
+				} else if (!tp_strdiff (property->name, "subject")) {
+					g_object_notify (chat, "subject");
+				}
+
 				break;
 			}
 		}
@@ -721,7 +734,7 @@ tp_chat_list_properties_cb (TpProxy         *proxy,
 	g_array_free (ids, TRUE);
 }
 
-void
+static void
 empathy_tp_chat_set_property (EmpathyTpChat *self,
 			      const gchar   *name,
 			      const GValue  *value)
@@ -773,7 +786,19 @@ empathy_tp_chat_set_property (EmpathyTpChat *self,
 	}
 }
 
-EmpathyTpChatProperty *
+void
+empathy_tp_chat_set_subject (EmpathyTpChat *self,
+			     const gchar   *subject)
+{
+	GValue value = { 0, };
+
+	g_value_init (&value, G_TYPE_STRING);
+	g_value_set_string (&value, subject);
+	empathy_tp_chat_set_property (self, "subject", &value);
+	g_value_unset (&value);
+}
+
+static EmpathyTpChatProperty *
 empathy_tp_chat_get_property (EmpathyTpChat *self,
 			      const gchar   *name)
 {
@@ -794,10 +819,54 @@ empathy_tp_chat_get_property (EmpathyTpChat *self,
 	return NULL;
 }
 
-GPtrArray *
-empathy_tp_chat_get_properties (EmpathyTpChat *self)
+const gchar *
+empathy_tp_chat_get_title (EmpathyTpChat *self)
 {
-	return self->priv->properties;
+	EmpathyTpChatProperty *property;
+
+	property = empathy_tp_chat_get_property (self, "title");
+
+	if (property == NULL || !G_VALUE_HOLDS_STRING (property->value)) {
+		return NULL;
+	} else {
+		return g_value_get_string (property->value);
+	}
+}
+
+gboolean
+empathy_tp_chat_supports_subject (EmpathyTpChat *self)
+{
+	return (empathy_tp_chat_get_property (self, "subject") != NULL);
+}
+
+gboolean
+empathy_tp_chat_can_set_subject (EmpathyTpChat *self)
+{
+	EmpathyTpChatProperty *property;
+
+	property = empathy_tp_chat_get_property (self, "subject");
+
+	if (property == NULL) {
+		return FALSE;
+	} else if (property->flags & TP_PROPERTY_FLAG_WRITE) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+
+const gchar *
+empathy_tp_chat_get_subject (EmpathyTpChat *self)
+{
+	EmpathyTpChatProperty *property;
+
+	property = empathy_tp_chat_get_property (self, "subject");
+
+	if (property == NULL || !G_VALUE_HOLDS_STRING (property->value)) {
+		return NULL;
+	} else {
+		return g_value_get_string (property->value);
+	}
 }
 
 static void
@@ -1170,6 +1239,14 @@ tp_chat_get_property (GObject    *object,
 		g_value_set_uint (value,
 			g_hash_table_size (self->priv->messages_being_sent));
 		break;
+	case PROP_TITLE:
+		g_value_set_string (value,
+			empathy_tp_chat_get_title (self));
+		break;
+	case PROP_SUBJECT:
+		g_value_set_string (value,
+			empathy_tp_chat_get_subject (self));
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
@@ -1259,6 +1336,24 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 							    0, G_MAXUINT, 0,
 							    G_PARAM_READABLE));
 
+	g_object_class_install_property (object_class,
+					 PROP_TITLE,
+					 g_param_spec_string ("title",
+							      "Title",
+							      "A human-readable name for the room, if any",
+							      NULL,
+							      G_PARAM_READABLE |
+							      G_PARAM_STATIC_STRINGS));
+
+	g_object_class_install_property (object_class,
+					 PROP_SUBJECT,
+					 g_param_spec_string ("subject",
+							      "Subject",
+							      "The room's current subject, if any",
+							      NULL,
+							      G_PARAM_READABLE |
+							      G_PARAM_STATIC_STRINGS));
+
 	/* Signals */
 	signals[MESSAGE_RECEIVED] =
 		g_signal_new ("message-received-empathy",
@@ -1289,16 +1384,6 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_CONTACT, G_TYPE_UINT);
-
-	signals[PROPERTY_CHANGED] =
-		g_signal_new ("property-changed",
-			      G_TYPE_FROM_CLASS (klass),
-			      G_SIGNAL_RUN_LAST,
-			      0,
-			      NULL, NULL,
-			      g_cclosure_marshal_generic,
-			      G_TYPE_NONE,
-			      2, G_TYPE_STRING, G_TYPE_VALUE);
 
 	signals[MESSAGE_ACKNOWLEDGED] =
 		g_signal_new ("message-acknowledged",

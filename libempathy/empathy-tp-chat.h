@@ -53,13 +53,6 @@ struct _EmpathyTpChatClass {
 	TpTextChannelClass parent_class;
 };
 
-typedef struct {
-	gchar          *name;
-	guint           id;
-	TpPropertyFlags flags;
-	GValue         *value;
-} EmpathyTpChatProperty;
-
 typedef enum {
 	EMPATHY_DELIVERY_STATUS_NONE,
 	EMPATHY_DELIVERY_STATUS_SENDING,
@@ -83,13 +76,14 @@ EmpathyContact *empathy_tp_chat_get_remote_contact   (EmpathyTpChat      *chat);
 TpAccount    * empathy_tp_chat_get_account          (EmpathyTpChat      *chat);
 void           empathy_tp_chat_send                 (EmpathyTpChat      *chat,
 						     TpMessage     *message);
-void           empathy_tp_chat_set_property         (EmpathyTpChat      *chat,
-						     const gchar        *name,
-						     const GValue       *value);
-EmpathyTpChatProperty *
-	       empathy_tp_chat_get_property         (EmpathyTpChat      *chat,
-						     const gchar        *name);
-GPtrArray *    empathy_tp_chat_get_properties       (EmpathyTpChat      *chat);
+
+const gchar *  empathy_tp_chat_get_title            (EmpathyTpChat *self);
+
+gboolean       empathy_tp_chat_supports_subject     (EmpathyTpChat *self);
+const gchar *  empathy_tp_chat_get_subject          (EmpathyTpChat *self);
+gboolean       empathy_tp_chat_can_set_subject      (EmpathyTpChat *self);
+void           empathy_tp_chat_set_subject          (EmpathyTpChat *self,
+						     const gchar   *subject);
 
 /* Returns a read-only list of pending messages (should be a copy maybe ?) */
 const GList *  empathy_tp_chat_get_pending_messages (EmpathyTpChat *chat);
