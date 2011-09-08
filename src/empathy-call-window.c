@@ -3468,18 +3468,19 @@ empathy_call_window_connect_handler (EmpathyCallWindow *self)
   g_signal_connect (priv->handler, "sink-pad-removed",
     G_CALLBACK (empathy_call_window_sink_removed_cb), self);
 
+  /* We connect to ::call-channel unconditionally since we'll
+   * get new channels if we hangup and redial or if we reuse the
+   * call window. */
+  g_signal_connect (priv->handler, "notify::call-channel",
+    G_CALLBACK (call_handler_notify_call_cb), window);
+
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
     {
+      /* We won't get notify::call-channel for this channel, so
+       * directly call the callback. */
       call_handler_notify_call_cb (priv->handler, NULL, self);
       g_object_unref (call);
-    }
-  else
-    {
-      /* call-channel doesn't exist yet, we'll connect signals once it has been
-       * set */
-      g_signal_connect (priv->handler, "notify::call-channel",
-        G_CALLBACK (call_handler_notify_call_cb), self);
     }
 }
 
