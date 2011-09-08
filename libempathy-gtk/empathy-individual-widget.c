@@ -37,12 +37,12 @@
 #include <champlain-gtk/champlain-gtk.h>
 #endif
 
-#include <libempathy/empathy-contactinfo-utils.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-location.h>
 #include <libempathy/empathy-time.h>
 
 #include "empathy-avatar-image.h"
+#include "empathy-contactinfo-utils.h"
 #include "empathy-groups-widget.h"
 #include "empathy-gtk-enum-types.h"
 #include "empathy-individual-widget.h"
