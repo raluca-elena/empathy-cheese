@@ -55,6 +55,16 @@ struct _EmpathyTpChatPrivate {
 	GQueue                *pending_messages_queue;
 	gboolean               had_properties_list;
 	GPtrArray             *properties;
+
+	/* Subject */
+	gboolean               supports_subject;
+	gboolean               can_set_subject;
+	gchar                 *subject;
+
+	/* Room config (for now, we only track the title and don't support
+	 * setting it) */
+	gchar                 *title;
+
 	gboolean               can_upgrade_to_muc;
 
 	GHashTable            *messages_being_sent;
@@ -620,6 +630,10 @@ tp_chat_property_flags_changed_cb (TpProxy         *proxy,
 				property->flags = flags;
 				DEBUG ("property %s flags changed: %d",
 					property->name, property->flags);
+
+				if (!tp_strdiff (property->name, "subject")) {
+					self->priv->can_set_subject = !!(property->flags & TP_PROPERTY_FLAG_WRITE);
+				}
 				break;
 			}
 		}
@@ -633,6 +647,7 @@ tp_chat_properties_changed_cb (TpProxy         *proxy,
 			       GObject         *chat)
 {
 	EmpathyTpChat *self = (EmpathyTpChat *) chat;
+	EmpathyTpChatPrivate *priv = self->priv;
 	guint              i, j;
 
 	if (!self->priv->had_properties_list || !properties) {
@@ -660,9 +675,17 @@ tp_chat_properties_changed_cb (TpProxy         *proxy,
 
 				DEBUG ("property %s changed", property->name);
 
-				if (!tp_strdiff (property->name, "name")) {
+				if (!tp_strdiff (property->name, "name") &&
+				    G_VALUE_HOLDS_STRING (property->value)) {
+					g_free (priv->title);
+					priv->title = g_value_dup_string (property->value);
 					g_object_notify (chat, "title");
-				} else if (!tp_strdiff (property->name, "subject")) {
+				} else if (!tp_strdiff (property->name, "subject") &&
+				           G_VALUE_HOLDS_STRING (property->value)) {
+					priv->supports_subject = TRUE;
+					priv->can_set_subject = !!(property->flags & TP_PROPERTY_FLAG_WRITE);
+					g_free (priv->subject);
+					priv->subject = g_value_dup_string (property->value);
 					g_object_notify (chat, "subject");
 				}
 
@@ -798,75 +821,36 @@ empathy_tp_chat_set_subject (EmpathyTpChat *self,
 	g_value_unset (&value);
 }
 
-static EmpathyTpChatProperty *
-empathy_tp_chat_get_property (EmpathyTpChat *self,
-			      const gchar   *name)
-{
-	EmpathyTpChatProperty *property;
-	guint                  i;
-
-	if (!self->priv->had_properties_list) {
-		return NULL;
-	}
-
-	for (i = 0; i < self->priv->properties->len; i++) {
-		property = g_ptr_array_index (self->priv->properties, i);
-		if (!tp_strdiff (property->name, name)) {
-			return property;
-		}
-	}
-
-	return NULL;
-}
-
 const gchar *
 empathy_tp_chat_get_title (EmpathyTpChat *self)
 {
-	EmpathyTpChatProperty *property;
+	EmpathyTpChatPrivate *priv = self->priv;
 
-	property = empathy_tp_chat_get_property (self, "title");
-
-	if (property == NULL || !G_VALUE_HOLDS_STRING (property->value)) {
-		return NULL;
-	} else {
-		return g_value_get_string (property->value);
-	}
+	return priv->title;
 }
 
 gboolean
 empathy_tp_chat_supports_subject (EmpathyTpChat *self)
 {
-	return (empathy_tp_chat_get_property (self, "subject") != NULL);
+	EmpathyTpChatPrivate *priv = self->priv;
+
+	return priv->supports_subject;
 }
 
 gboolean
 empathy_tp_chat_can_set_subject (EmpathyTpChat *self)
 {
-	EmpathyTpChatProperty *property;
+	EmpathyTpChatPrivate *priv = self->priv;
 
-	property = empathy_tp_chat_get_property (self, "subject");
-
-	if (property == NULL) {
-		return FALSE;
-	} else if (property->flags & TP_PROPERTY_FLAG_WRITE) {
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	return priv->can_set_subject;
 }
 
 const gchar *
 empathy_tp_chat_get_subject (EmpathyTpChat *self)
 {
-	EmpathyTpChatProperty *property;
+	EmpathyTpChatPrivate *priv = self->priv;
 
-	property = empathy_tp_chat_get_property (self, "subject");
-
-	if (property == NULL || !G_VALUE_HOLDS_STRING (property->value)) {
-		return NULL;
-	} else {
-		return g_value_get_string (property->value);
-	}
+	return priv->subject;
 }
 
 static void
@@ -916,6 +900,9 @@ tp_chat_finalize (GObject *object)
 	g_queue_free (self->priv->messages_queue);
 	g_queue_free (self->priv->pending_messages_queue);
 	g_hash_table_destroy (self->priv->messages_being_sent);
+
+	g_free (self->priv->title);
+	g_free (self->priv->subject);
 
 	G_OBJECT_CLASS (empathy_tp_chat_parent_class)->finalize (object);
 }
