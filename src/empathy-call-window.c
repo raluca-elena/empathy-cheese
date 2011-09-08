@@ -198,6 +198,10 @@ struct _EmpathyCallWindowPriv
 
   gdouble volume;
 
+  /* String that contains the queued tones to send after the current ones
+     are sent */
+  GString *tones;
+  gboolean sending_tones;
   GtkWidget *dtmf_panel;
 
   /* Details vbox */
@@ -346,35 +350,72 @@ empathy_call_window_video_call_cb (GtkToggleToolButton *button,
 }
 
 static void
-dtmf_button_pressed_cb (GtkButton *button, EmpathyCallWindow *window)
+empathy_call_window_emit_tones (EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-  TpyCallChannel *call;
+  TpChannel *channel;
+
+  if (tp_str_empty (self->priv->tones->str))
+    return;
+
+  g_object_get (self->priv->handler, "call-channel", &channel, NULL);
+
+  DEBUG ("Emitting multiple tones: %s", self->priv->tones->str);
+
+  tp_cli_channel_interface_dtmf_call_multiple_tones (channel, -1,
+      self->priv->tones->str,
+      NULL, NULL, NULL, NULL);
+
+  self->priv->sending_tones = TRUE;
+
+  g_string_set_size (self->priv->tones, 0);
+
+  g_object_unref (channel);
+}
+
+static void
+empathy_call_window_maybe_emit_tones (EmpathyCallWindow *self)
+{
+  if (self->priv->sending_tones)
+    return;
+
+  empathy_call_window_emit_tones (self);
+}
+
+static void
+empathy_call_window_tones_stopped_cb (TpChannel *proxy,
+    gboolean arg_cancelled,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
+
+  self->priv->sending_tones = FALSE;
+
+  empathy_call_window_emit_tones (self);
+}
+
+static void
+dtmf_button_pressed_cb (GtkButton *button,
+    EmpathyCallWindow *self)
+{
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GQuark button_quark;
   TpDTMFEvent event;
-
-  g_object_get (priv->handler, "call-channel", &call, NULL);
 
   button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
   event = GPOINTER_TO_UINT (g_object_get_qdata (G_OBJECT (button),
     button_quark));
 
-  tpy_call_channel_dtmf_start_tone (call, event);
+  g_string_append_c (priv->tones, tp_dtmf_event_to_char (event));
 
-  g_object_unref (call);
+  empathy_call_window_maybe_emit_tones (self);
 }
 
+/* empathy_create_dtmf_dialpad() requires a callback, even if empty */
 static void
-dtmf_button_released_cb (GtkButton *button, EmpathyCallWindow *window)
+dtmf_button_released_cb (GtkButton *button,
+    EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-  TpyCallChannel *call;
-
-  g_object_get (priv->handler, "call-channel", &call, NULL);
-
-  tpy_call_channel_dtmf_stop_tone (call);
-
-  g_object_unref (call);
 }
 
 static void
@@ -1666,6 +1707,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
       G_CALLBACK (dtmf_button_pressed_cb),
       G_CALLBACK (dtmf_button_released_cb));
 
+  priv->tones = g_string_new ("");
+
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->dtmf_panel,
       FALSE, FALSE, 6);
 
@@ -2298,6 +2341,8 @@ empathy_call_window_finalize (GObject *object)
 
   g_timer_destroy (priv->timer);
 
+  g_string_free (priv->tones, TRUE);
+
   G_OBJECT_CLASS (empathy_call_window_parent_class)->finalize (object);
 }
 
@@ -2447,6 +2492,9 @@ empathy_call_window_disconnected (EmpathyCallWindow *self,
 
   gtk_action_set_sensitive (priv->menu_fullscreen, FALSE);
   gtk_widget_set_sensitive (priv->dtmf_panel, FALSE);
+
+  priv->sending_tones = FALSE;
+  g_string_set_size (priv->tones, 0);
 
   could_reset_pipeline = empathy_call_window_reset_pipeline (self);
 
@@ -3391,6 +3439,10 @@ call_handler_notify_call_cb (EmpathyCallHandler *handler,
 
   tp_g_signal_connect_object (call, "members-changed",
       G_CALLBACK (empathy_call_window_members_changed_cb), self, 0);
+
+  tp_cli_channel_interface_dtmf_connect_to_stopped_tones (TP_CHANNEL (call),
+      empathy_call_window_tones_stopped_cb, self, NULL,
+      G_OBJECT (call), NULL);
 
   g_object_unref (call);
 }
