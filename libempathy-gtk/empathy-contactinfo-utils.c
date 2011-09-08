@@ -23,27 +23,83 @@
 #include <config.h>
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <glib/gi18n-lib.h>
 
 #include <telepathy-glib/util.h>
 
+#include <libempathy/empathy-time.h>
+
 #include "empathy-contactinfo-utils.h"
+#include "empathy-string-parser.h"
+
+static gchar *
+linkify_first_value (GStrv values)
+{
+  return empathy_add_link_markup (values[0]);
+}
+
+static gchar *
+format_idle_time (GStrv values)
+{
+  const gchar *value = values[0];
+  int duration = strtol (value, NULL, 10);
+
+  if (duration <= 0)
+    return NULL;
+
+  return empathy_duration_to_string (duration);
+}
+
+static gchar *
+format_server (GStrv values)
+{
+  g_assert (values[0] != NULL);
+
+  if (values[1] == NULL)
+    return g_markup_escape_text (values[0], -1);
+  else
+    return g_markup_printf_escaped ("%s (%s)", values[0], values[1]);
+}
+
+static gchar *
+presence_hack (GStrv values)
+{
+  if (tp_str_empty (values[0]))
+    return NULL;
+
+  return g_markup_escape_text (values[0], -1);
+}
+
+typedef gchar * (* FieldFormatFunc) (GStrv);
 
 typedef struct
 {
   const gchar *field_name;
   const gchar *title;
-  gboolean linkify;
+  FieldFormatFunc format;
 } InfoFieldData;
 
 static InfoFieldData info_field_data[] =
 {
-  { "fn",    N_("Full name"),      FALSE },
-  { "tel",   N_("Phone number"),   FALSE },
-  { "email", N_("E-mail address"), TRUE },
-  { "url",   N_("Website"),        TRUE },
-  { "bday",  N_("Birthday"),       FALSE },
+  { "fn",    N_("Full name"),      NULL },
+  { "tel",   N_("Phone number"),   NULL },
+  { "email", N_("E-mail address"), linkify_first_value },
+  { "url",   N_("Website"),        linkify_first_value },
+  { "bday",  N_("Birthday"),       NULL },
+
+  /* Note to translators: this is the caption for a string of the form "5
+   * minutes ago", and refers to the time since the contact last interacted
+   * with their IM client. */
+  { "x-idle-time",  N_("Last seen:"),      format_idle_time },
+  { "x-irc-server", N_("Server:"),         format_server },
+  { "x-host",       N_("Connected from:"), format_server },
+
+  /* FIXME: once Idle implements SimplePresence using this information, we can
+   * and should bin this. */
+  { "x-presence-status-message", N_("Away message:"), presence_hack },
+
   { NULL, NULL }
 };
 
@@ -68,7 +124,7 @@ static InfoParameterData info_parameter_data[] =
 gboolean
 empathy_contact_info_lookup_field (const gchar *field_name,
     const gchar **title,
-    gboolean *linkify)
+    EmpathyContactInfoFormatFunc *format)
 {
   guint i;
 
@@ -79,8 +135,8 @@ empathy_contact_info_lookup_field (const gchar *field_name,
           if (title != NULL)
             *title = gettext (info_field_data[i].title);
 
-          if (linkify != NULL)
-            *linkify = info_field_data[i].linkify;
+          if (format != NULL)
+            *format = info_field_data[i].format;
 
           return TRUE;
         }

@@ -46,7 +46,6 @@
 #include "empathy-groups-widget.h"
 #include "empathy-gtk-enum-types.h"
 #include "empathy-individual-widget.h"
-#include "empathy-string-parser.h"
 #include "empathy-ui-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
@@ -229,7 +228,7 @@ details_update_show (EmpathyIndividualWidget *self,
       TpContactInfoField *field = l->data;
       gchar *title;
       const gchar *value;
-      gboolean linkify;
+      EmpathyContactInfoFormatFunc format;
       GtkWidget *w;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
@@ -238,7 +237,7 @@ details_update_show (EmpathyIndividualWidget *self,
       value = field->field_value[0];
 
       if (!empathy_contact_info_lookup_field (field->field_name,
-          NULL, &linkify))
+          NULL, &format))
         {
           DEBUG ("Unhandled ContactInfo field: %s", field->field_name);
           continue;
@@ -257,11 +256,11 @@ details_update_show (EmpathyIndividualWidget *self,
       /* Add Value */
       w = gtk_label_new (value);
 
-      if (linkify == TRUE)
+      if (format != NULL)
         {
           gchar *markup;
 
-          markup = empathy_add_link_markup (value);
+          markup = format (field->field_value);
           gtk_label_set_markup (GTK_LABEL (w), markup);
           g_free (markup);
         }

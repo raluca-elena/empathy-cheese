@@ -26,8 +26,10 @@
 
 G_BEGIN_DECLS
 
+typedef gchar * (* EmpathyContactInfoFormatFunc) (GStrv);
+
 gboolean empathy_contact_info_lookup_field (const gchar *field_name,
-    const gchar **title, gboolean *linkify);
+    const gchar **title, EmpathyContactInfoFormatFunc *linkify);
 char *empathy_contact_info_field_label (const char *field_name,
     GStrv parameters);
 
