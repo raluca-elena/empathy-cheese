@@ -108,6 +108,9 @@ gchar *empathy_format_currency (gint amount,
 
 gboolean empathy_account_has_uri_scheme_tel (TpAccount *account);
 
+TpContact * empathy_get_tp_contact_for_individual (FolksIndividual *individual,
+    TpConnection *conn);
+
 /* Copied from wocky/wocky-utils.h */
 
 #define empathy_implement_finish_void(source, tag) \

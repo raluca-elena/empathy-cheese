@@ -14,6 +14,8 @@
 
 #include "empathy-invite-participant-dialog.h"
 
+#include <libempathy/empathy-utils.h>
+
 #include <libempathy-gtk/empathy-contact-chooser.h>
 #include <libempathy-gtk/empathy-individual-view.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -101,39 +103,11 @@ static TpContact *
 get_tp_contact_for_chat (EmpathyInviteParticipantDialog *self,
     FolksIndividual *individual)
 {
-  TpContact *contact = NULL;
   TpConnection *chat_conn;
-  GeeSet *personas;
-  GeeIterator *iter;
 
   chat_conn = tp_channel_borrow_connection (TP_CHANNEL (self->priv->tp_chat));
 
-  personas = folks_individual_get_personas (individual);
-  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
-  while (contact == FALSE && gee_iterator_next (iter))
-    {
-      TpfPersona *persona = gee_iterator_get (iter);
-      TpConnection *contact_conn;
-      TpContact *contact_cur = NULL;
-
-      if (TPF_IS_PERSONA (persona))
-        {
-          contact_cur = tpf_persona_get_contact (persona);
-          if (contact_cur != NULL)
-            {
-              contact_conn = tp_contact_get_connection (contact_cur);
-
-              if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
-                    tp_proxy_get_object_path (chat_conn)))
-                contact = contact_cur;
-            }
-        }
-
-      g_clear_object (&persona);
-    }
-  g_clear_object (&iter);
-
-  return contact;
+  return empathy_get_tp_contact_for_individual (individual, chat_conn);
 }
 
 static gboolean

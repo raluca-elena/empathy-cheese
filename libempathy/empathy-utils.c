@@ -992,3 +992,41 @@ empathy_account_has_uri_scheme_tel (TpAccount *account)
 
   return FALSE;
 }
+
+/* Return the TpContact on @conn associated with @individual, if any */
+TpContact *
+empathy_get_tp_contact_for_individual (FolksIndividual *individual,
+    TpConnection *conn)
+{
+  TpContact *contact = NULL;
+  GeeSet *personas;
+  GeeIterator *iter;
+
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (contact == NULL && gee_iterator_next (iter))
+    {
+      TpfPersona *persona = gee_iterator_get (iter);
+      TpConnection *contact_conn;
+      TpContact *contact_cur = NULL;
+
+      if (TPF_IS_PERSONA (persona))
+        {
+          contact_cur = tpf_persona_get_contact (persona);
+          if (contact_cur != NULL)
+            {
+              contact_conn = tp_contact_get_connection (contact_cur);
+
+              if (!tp_strdiff (tp_proxy_get_object_path (contact_conn),
+                    tp_proxy_get_object_path (conn)))
+                contact = contact_cur;
+            }
+        }
+
+      g_clear_object (&persona);
+    }
+  g_clear_object (&iter);
+
+  return contact;
+}
+
