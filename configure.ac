@@ -49,6 +49,7 @@ TELEPATHY_LOGGER=0.2.10
 WEBKIT_REQUIRED=1.3.13
 
 # Optional deps
+CLUTTER_REQUIRED=1.7.14
 CLUTTER_GTK_REQUIRED=0.90.3
 ENCHANT_REQUIRED=1.2.0
 GEOCLUE_REQUIRED=0.11
@@ -215,7 +216,7 @@ if test "x$enable_call" != "xno" ; then
    [
       farsight2-0.10
       telepathy-farstream
-      clutter-1.0
+      clutter-1.0 >= $CLUTTER_REQUIRED
       clutter-gtk-1.0
       clutter-gst-1.0
    ], have_call="yes", have_call="no" )
