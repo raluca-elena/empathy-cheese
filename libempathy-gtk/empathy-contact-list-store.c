@@ -1132,6 +1132,11 @@ contact_list_store_remove_contact (EmpathyContactListStore *store,
 		return;
 	}
 
+	/* GtkTreeRowReference owns a ref on the store so removing it from the cache
+	 * may drop our latest reference on the store. Ref it to be sure it stays
+	 * alive during all the process. */
+	g_object_ref (store);
+
 	/* Clean up model */
 	model = GTK_TREE_MODEL (store);
 
@@ -1166,6 +1171,8 @@ contact_list_store_remove_contact (EmpathyContactListStore *store,
 	}
 
 	g_hash_table_remove (priv->empathy_contact_cache, contact);
+
+	g_object_unref (store);
 }
 
 static void
