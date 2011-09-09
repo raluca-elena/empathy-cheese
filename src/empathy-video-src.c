@@ -245,22 +245,31 @@ empathy_video_src_new (void)
   return gst_element_factory_make ("empathyvideosrc", NULL);
 }
 
-void
-empathy_video_src_set_channel (GstElement *src,
-  EmpathyGstVideoSrcChannel channel, guint percent)
+static GstColorBalance *
+dup_color_balance (GstElement *src)
 {
   GstElement *color;
-  GstColorBalance *balance;
-  const GList *channels;
-  GList *l;
 
   /* Find something supporting GstColorBalance */
   color = gst_bin_get_by_interface (GST_BIN (src), GST_TYPE_COLOR_BALANCE);
 
   if (color == NULL)
-    return;
+    return NULL;
 
-  balance = GST_COLOR_BALANCE (color);
+  return GST_COLOR_BALANCE (color);
+}
+
+void
+empathy_video_src_set_channel (GstElement *src,
+  EmpathyGstVideoSrcChannel channel, guint percent)
+{
+  GstColorBalance *balance;
+  const GList *channels;
+  GList *l;
+
+  balance = dup_color_balance (src);
+  if (balance == NULL)
+    return;
 
   channels = gst_color_balance_list_channels (balance);
 
@@ -277,26 +286,21 @@ empathy_video_src_set_channel (GstElement *src,
         }
     }
 
-  g_object_unref (color);
+  g_object_unref (balance);
 }
 
 guint
 empathy_video_src_get_channel (GstElement *src,
   EmpathyGstVideoSrcChannel channel)
 {
-  GstElement *color;
   GstColorBalance *balance;
   const GList *channels;
   GList *l;
   guint percent = 0;
 
-  /* Find something supporting GstColorBalance */
-  color = gst_bin_get_by_interface (GST_BIN (src), GST_TYPE_COLOR_BALANCE);
-
-  if (color == NULL)
+  balance = dup_color_balance (src);
+  if (balance == NULL)
     return percent;
-
-  balance = GST_COLOR_BALANCE (color);
 
   channels = gst_color_balance_list_channels (balance);
 
@@ -315,7 +319,7 @@ empathy_video_src_get_channel (GstElement *src,
         }
     }
 
-  g_object_unref (color);
+  g_object_unref (balance);
 
   return percent;
 }
@@ -324,19 +328,14 @@ empathy_video_src_get_channel (GstElement *src,
 guint
 empathy_video_src_get_supported_channels (GstElement *src)
 {
-  GstElement *color;
   GstColorBalance *balance;
   const GList *channels;
   GList *l;
   guint result = 0;
 
-  /* Find something supporting GstColorBalance */
-  color = gst_bin_get_by_interface (GST_BIN (src), GST_TYPE_COLOR_BALANCE);
-
-  if (color == NULL)
+  balance = dup_color_balance (src);
+  if (balance == NULL)
     goto out;
-
-  balance = GST_COLOR_BALANCE (color);
 
   channels = gst_color_balance_list_channels (balance);
 
@@ -355,7 +354,7 @@ empathy_video_src_get_supported_channels (GstElement *src)
         }
     }
 
-  g_object_unref (color);
+  g_object_unref (balance);
 
 out:
   return result;
