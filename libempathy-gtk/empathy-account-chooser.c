@@ -428,6 +428,7 @@ empathy_account_chooser_set_account (EmpathyAccountChooser *chooser,
 
 	data.chooser = chooser;
 	data.account = account;
+	data.set = FALSE;
 
 	gtk_tree_model_foreach (model,
 				(GtkTreeModelForeachFunc) account_chooser_set_account_foreach,
