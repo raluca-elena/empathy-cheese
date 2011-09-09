@@ -1012,6 +1012,34 @@ chat_command_whois (EmpathyChat *chat,
 		whois_got_contact_cb, NULL, NULL, G_OBJECT (chat));
 }
 
+static void
+chat_command_whale (EmpathyChat *chat,
+		    GStrv        strv)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+	TpMessage *message;
+
+	message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+		"\n\n\n"
+		"•_______________•");
+	empathy_tp_chat_send (priv->tp_chat, message);
+	g_object_unref (message);
+}
+
+static void
+chat_command_babywhale (EmpathyChat *chat,
+			GStrv        strv)
+{
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+	TpMessage *message;
+
+	message = tp_client_message_new_text (TP_CHANNEL_TEXT_MESSAGE_TYPE_NORMAL,
+		"\n"
+		"•_____•");
+	empathy_tp_chat_send (priv->tp_chat, message);
+	g_object_unref (message);
+}
+
 static void chat_command_help (EmpathyChat *chat, GStrv strv);
 
 typedef void (*ChatCommandFunc) (EmpathyChat *chat, GStrv strv);
@@ -1066,6 +1094,9 @@ static ChatCommandItem commands[] = {
 	{"help", 1, 2, chat_command_help, NULL,
 	 N_("/help [<command>]: show all supported commands. "
 	    "If <command> is defined, show its usage.")},
+
+	{"whale", 1, 1, chat_command_whale, NULL, NULL},
+	{"babywhale", 1, 1, chat_command_babywhale, NULL, NULL},
 };
 
 static void
@@ -1073,6 +1104,10 @@ chat_command_show_help (EmpathyChat     *chat,
 			ChatCommandItem *item)
 {
 	gchar *str;
+
+	if (item->help == NULL) {
+		return;
+	}
 
 	str = g_strdup_printf (_("Usage: %s"), _(item->help));
 	empathy_chat_view_append_event (chat->view, str);
@@ -1094,8 +1129,11 @@ chat_command_help (EmpathyChat *chat,
 					continue;
 				}
 			}
-		    empathy_chat_view_append_event (chat->view,
-			    _(commands[i].help));
+			if (commands[i].help == NULL) {
+				continue;
+			}
+			empathy_chat_view_append_event (chat->view,
+				_(commands[i].help));
 		}
 		return;
 	}
@@ -1106,6 +1144,9 @@ chat_command_help (EmpathyChat *chat,
 				if (!commands[i].is_supported (chat)) {
 					break;
 				}
+			}
+			if (commands[i].help == NULL) {
+				break;
 			}
 			chat_command_show_help (chat, &commands[i]);
 			return;
