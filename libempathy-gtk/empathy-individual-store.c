@@ -378,6 +378,11 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
   if (!row_refs)
     return;
 
+  /* GtkTreeRowReference owns a ref on the store so removing it from the cache
+   * may drop our latest reference on the store. Ref it to be sure it stays
+   * alive during all the process. */
+  g_object_ref (self);
+
   /* Clean up model */
   model = GTK_TREE_MODEL (self);
 
@@ -417,6 +422,8 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
     }
 
   g_hash_table_remove (priv->folks_individual_cache, individual);
+
+  g_object_unref (self);
 }
 
 static void
