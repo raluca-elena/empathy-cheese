@@ -256,6 +256,15 @@ dup_color_balance (GstElement *src)
   if (color == NULL)
     return NULL;
 
+  /* colorbalance is wrapped by GstImplementsInterface, we
+   * need to check if it is actually supported for this instance
+   * in its current state before trying to use it */
+  if (!GST_IS_COLOR_BALANCE (color))
+    {
+      g_object_unref (color);
+      return NULL;
+    }
+
   return GST_COLOR_BALANCE (color);
 }
 
