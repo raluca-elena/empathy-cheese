@@ -11,16 +11,16 @@
 # Lukáš Ručka <lukassoftwares.backup@gmail.com>, 2010.
 # Jiri Eischmann <jiri@eischmann.cz>, 2010.
 # Petr Kovar <pknbe@volny.cz>, 2008, 2009, 2010.
-# Pavel Šefránek <pavel@sefranek2.cz>, 2011.
 # Marek Černocký <marek@manet.cz>, 2010, 2011.
+# Pavel Šefránek <pavel@sefranek2.cz>, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-09-08 06:12+0000\n"
-"PO-Revision-Date: 2011-09-08 10:42+0200\n"
+"POT-Creation-Date: 2011-09-08 12:16+0000\n"
+"PO-Revision-Date: 2011-09-09 22:16+0200\n"
 "Last-Translator: Pavel Šefránek <pavel@sefranek2.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "MIME-Version: 1.0\n"
@@ -51,7 +51,6 @@ msgid "Always open a separate chat window for new chats."
 msgstr "Pro nové konverzace vždy otevírat oddělená okna."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:2
-#| msgid "Call from %s"
 msgid "Call volume"
 msgstr "Hlasitost hovoru"
 
@@ -60,12 +59,10 @@ msgid "Call volume, as a percentage."
 msgstr "Hlasitost hovoru, v procentech."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:4
-#| msgid "Camera On"
 msgid "Camera device"
 msgstr "Zařízení kamery"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:5
-#| msgid "Camera On"
 msgid "Camera position"
 msgstr "Poloha kamery"
 
@@ -823,13 +820,11 @@ msgid "%s:"
 msgstr "%s:"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1192
-#| msgid "Launch My Web Accounts"
 msgid "My Web Accounts"
 msgstr "My Web Accounts"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1208
 #, c-format
-#| msgid "The account %s is edited via My Web Accounts."
 msgid "The account %s is edited via %s."
 msgstr "Účet %s je upravován přes %s."
 
@@ -845,7 +840,6 @@ msgstr "Spustit My Web Accounts"
 #. general handler
 #: ../libempathy-gtk/empathy-account-widget.c:1241
 #, c-format
-#| msgid "_Edit"
 msgid "Edit %s"
 msgstr "Upravit %s"
 
@@ -1319,7 +1313,6 @@ msgid "None of the accepted image formats are supported on your system"
 msgstr "Váš systém neobsahuje žádný z podporovaných formátů obrázku"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:818
-#| msgid "Couldn't save pixbuf to png"
 msgid "Couldn't save picture to file"
 msgstr "Nelze uložit obrázek do souboru"
 
@@ -2085,7 +2078,7 @@ msgstr "Nadmořská výška:"
 #: ../libempathy-gtk/empathy-contact-widget.c:1011
 #: ../libempathy-gtk/empathy-individual-widget.c:607
 #: ../libempathy-gtk/empathy-individual-widget.c:622
-#: ../src/empathy-preferences.ui.h:16
+#: ../src/empathy-preferences.ui.h:17
 msgid "Location"
 msgstr "Poloha"
 
@@ -2233,7 +2226,6 @@ msgid "Call"
 msgstr "Hovor"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:378
-#| msgid "Profile"
 msgid "Mobile"
 msgstr "Mobilní"
 
@@ -2360,128 +2352,128 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Rozpojit"
 
-#: ../libempathy-gtk/empathy-log-window.c:633
+#: ../libempathy-gtk/empathy-log-window.c:634
 msgid "History"
 msgstr "Historie"
 
-#: ../libempathy-gtk/empathy-log-window.c:688
+#: ../libempathy-gtk/empathy-log-window.c:689
 msgid "Show"
 msgstr "Zobrazit"
 
-#: ../libempathy-gtk/empathy-log-window.c:710
+#: ../libempathy-gtk/empathy-log-window.c:711
 msgid "Search"
 msgstr "Hledat"
 
-#: ../libempathy-gtk/empathy-log-window.c:1158
+#: ../libempathy-gtk/empathy-log-window.c:1159
 #, c-format
 msgid "Chat in %s"
 msgstr "Konverzace v místnosti %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1160
+#: ../libempathy-gtk/empathy-log-window.c:1161
 #, c-format
 msgid "Chat with %s"
 msgstr "Konverzace s kontaktem %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1210
-#: ../libempathy-gtk/empathy-log-window.c:1357
+#: ../libempathy-gtk/empathy-log-window.c:1211
+#: ../libempathy-gtk/empathy-log-window.c:1358
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
 msgstr "%A, %e. %B %Y, %X"
 
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:1299
+#: ../libempathy-gtk/empathy-log-window.c:1300
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:1305
+#: ../libempathy-gtk/empathy-log-window.c:1306
 #, c-format
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1376
-#: ../libempathy-gtk/empathy-log-window.c:1378
+#: ../libempathy-gtk/empathy-log-window.c:1377
+#: ../libempathy-gtk/empathy-log-window.c:1379
 #: ../src/empathy-ft-manager.c:1026
 msgid "%"
 msgstr "%"
 
-#: ../libempathy-gtk/empathy-log-window.c:1385
+#: ../libempathy-gtk/empathy-log-window.c:1386
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "Hovor trval %s, skončil %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1717
+#: ../libempathy-gtk/empathy-log-window.c:1718
 msgid "Today"
 msgstr "Dnes"
 
-#: ../libempathy-gtk/empathy-log-window.c:1721
+#: ../libempathy-gtk/empathy-log-window.c:1722
 msgid "Yesterday"
 msgstr "Včera"
 
-#: ../libempathy-gtk/empathy-log-window.c:1737
+#: ../libempathy-gtk/empathy-log-window.c:1738
 msgctxt ""
 "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
 msgstr "%e. %B %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1818
-#: ../libempathy-gtk/empathy-log-window.c:3399
+#: ../libempathy-gtk/empathy-log-window.c:1819
+#: ../libempathy-gtk/empathy-log-window.c:3415
 msgid "Anytime"
 msgstr "Kdykoli"
 
-#: ../libempathy-gtk/empathy-log-window.c:1898
-#: ../libempathy-gtk/empathy-log-window.c:2328
+#: ../libempathy-gtk/empathy-log-window.c:1906
+#: ../libempathy-gtk/empathy-log-window.c:2343
 msgid "Anyone"
 msgstr "Kdokoli"
 
-#: ../libempathy-gtk/empathy-log-window.c:2640
+#: ../libempathy-gtk/empathy-log-window.c:2656
 msgid "Who"
 msgstr "Kdo"
 
-#: ../libempathy-gtk/empathy-log-window.c:2844
+#: ../libempathy-gtk/empathy-log-window.c:2860
 msgid "When"
 msgstr "Kdy"
 
-#: ../libempathy-gtk/empathy-log-window.c:2960
+#: ../libempathy-gtk/empathy-log-window.c:2976
 msgid "Anything"
 msgstr "Cokoli"
 
-#: ../libempathy-gtk/empathy-log-window.c:2962
+#: ../libempathy-gtk/empathy-log-window.c:2978
 msgid "Text chats"
 msgstr "Konverzace"
 
-#: ../libempathy-gtk/empathy-log-window.c:2964
+#: ../libempathy-gtk/empathy-log-window.c:2980
 #: ../src/empathy-preferences.ui.h:4
 msgid "Calls"
 msgstr "Hovory"
 
-#: ../libempathy-gtk/empathy-log-window.c:2969
+#: ../libempathy-gtk/empathy-log-window.c:2985
 msgid "Incoming calls"
 msgstr "Příchozí hovory"
 
-#: ../libempathy-gtk/empathy-log-window.c:2970
+#: ../libempathy-gtk/empathy-log-window.c:2986
 msgid "Outgoing calls"
 msgstr "Odchozí hovory"
 
-#: ../libempathy-gtk/empathy-log-window.c:2971
+#: ../libempathy-gtk/empathy-log-window.c:2987
 msgid "Missed calls"
 msgstr "Zmeškané hovory"
 
-#: ../libempathy-gtk/empathy-log-window.c:2993
+#: ../libempathy-gtk/empathy-log-window.c:3009
 msgid "What"
 msgstr "Co"
 
-#: ../libempathy-gtk/empathy-log-window.c:3702
+#: ../libempathy-gtk/empathy-log-window.c:3718
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr "Opravdu chcete vymazat všechny předchozí konverzace?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3706
+#: ../libempathy-gtk/empathy-log-window.c:3722
 msgid "Clear All"
 msgstr "Vymazat vše"
 
-#: ../libempathy-gtk/empathy-log-window.c:3713
+#: ../libempathy-gtk/empathy-log-window.c:3729
 msgid "Delete from:"
 msgstr "Smazat z:"
 
@@ -2611,7 +2603,6 @@ msgid "Find:"
 msgstr "Najít:"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:2
-#| msgid "Match case"
 msgid "Mat_ch case"
 msgstr "Rozlišovat v_elikost písmen"
 
@@ -2620,12 +2611,10 @@ msgid "Phrase not found"
 msgstr "Fráze nenalezena"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:4
-#| msgid "_Next Tab"
 msgid "_Next"
 msgstr "_Následující"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:5
-#| msgid "_Previous Tab"
 msgid "_Previous"
 msgstr "_Předchozí"
 
@@ -3600,7 +3589,6 @@ msgid "Start an audio call"
 msgstr "Začít hovor"
 
 #: ../src/empathy-call-window.ui.h:18
-#| msgid "Disable camera"
 msgid "Swap camera"
 msgstr "Prohodit kamery"
 
@@ -3621,8 +3609,6 @@ msgid "Unknown"
 msgstr "Neznámo"
 
 #: ../src/empathy-call-window.ui.h:23
-#| msgctxt "menu item"
-#| msgid "_Video Call"
 msgid "Video call"
 msgstr "Videohovor"
 
@@ -3632,7 +3618,6 @@ msgid "_Call"
 msgstr "_Hovor"
 
 #: ../src/empathy-call-window.ui.h:25
-#| msgid "Camera On"
 msgid "_Camera"
 msgstr "_Kamera"
 
@@ -4324,54 +4309,68 @@ msgid "Display incoming events in the notification area"
 msgstr "Zobrazovat příchozí události v oznamovací oblasti"
 
 #: ../src/empathy-preferences.ui.h:9
+msgid ""
+"Echo cancellation helps to make your voice sound clearer to the other "
+"person, but may cause problems on some computers. If you or the other person "
+"hear strange noises or glitches during calls, try turning echo cancellation "
+"off and restarting the call."
+msgstr ""
+"Potlačení ozvěny pomáhá, aby váš hlas zněl protější osobě čistěji, ale na "
+"některých počítačích to může způsobovat problémy. Pokud vy nebo protější "
+"osoba slyšíte během hovoru podivné zvuky nebo závady, zkuste potlačení "
+"ozvěny vypnout a hovor začít znovu."
+
+#: ../src/empathy-preferences.ui.h:10
 msgid "Enable notifications when a contact comes online"
 msgstr "Upozornit při připojení uživatele"
 
-#: ../src/empathy-preferences.ui.h:10
+#: ../src/empathy-preferences.ui.h:11
 msgid "Enable notifications when a contact goes offline"
 msgstr "Upozornit při odpojení uživatele"
 
-#: ../src/empathy-preferences.ui.h:11
+#: ../src/empathy-preferences.ui.h:12
 msgid "Enable notifications when the _chat is not focused"
 msgstr "Povolit upozornění, pokud disku_ze není vybrána"
 
-#: ../src/empathy-preferences.ui.h:12
+#: ../src/empathy-preferences.ui.h:13
 msgid "Enable spell checking for languages:"
 msgstr "Povolit kontrolu pravopisu pro jazyky:"
 
-#: ../src/empathy-preferences.ui.h:13
+#: ../src/empathy-preferences.ui.h:14
 msgid "General"
 msgstr "Všeobecné"
 
-#: ../src/empathy-preferences.ui.h:14
-msgid "Input level"
-msgstr "Úroveň vstupu"
-
 #: ../src/empathy-preferences.ui.h:15
-msgid "Input volume"
-msgstr "Hlasitost vstupu"
+#| msgid "Input level"
+msgid "Input level:"
+msgstr "Úroveň vstupu:"
 
-#: ../src/empathy-preferences.ui.h:17
+#: ../src/empathy-preferences.ui.h:16
+#| msgid "Input volume"
+msgid "Input volume:"
+msgstr "Hlasitost vstupu:"
+
+#: ../src/empathy-preferences.ui.h:18
 msgid "Location sources:"
 msgstr "Zdroje polohy:"
 
-#: ../src/empathy-preferences.ui.h:18
+#: ../src/empathy-preferences.ui.h:19
 msgid "Log conversations"
 msgstr "Zaznamenávat konverzace"
 
-#: ../src/empathy-preferences.ui.h:19
+#: ../src/empathy-preferences.ui.h:20
 msgid "Notifications"
 msgstr "Upozornění"
 
-#: ../src/empathy-preferences.ui.h:20
+#: ../src/empathy-preferences.ui.h:21
 msgid "Play sound for events"
 msgstr "Přehrávat zvuky při událostech"
 
-#: ../src/empathy-preferences.ui.h:21
+#: ../src/empathy-preferences.ui.h:22
 msgid "Privacy"
 msgstr "Soukromí"
 
-#: ../src/empathy-preferences.ui.h:22
+#: ../src/empathy-preferences.ui.h:23
 msgid ""
 "Reduced location accuracy means that nothing more precise than your city, "
 "state and country will be published.  GPS coordinates will be accurate to 1 "
@@ -4380,71 +4379,71 @@ msgstr ""
 "Při omezené přesnosti polohy bude zobrazen pouze stát, kraj a město. "
 "Souřadnice GPS budou zaokrouhleny na 1 desetinné místo."
 
-#: ../src/empathy-preferences.ui.h:23
+#: ../src/empathy-preferences.ui.h:24
 msgid "Show _smileys as images"
 msgstr "Zobrazovat _smajlíky jako obrázky"
 
-#: ../src/empathy-preferences.ui.h:24
+#: ../src/empathy-preferences.ui.h:25
 msgid "Show contact _list in rooms"
 msgstr "_Zobrazit seznam kontaktů v místnostech"
 
-#: ../src/empathy-preferences.ui.h:25
+#: ../src/empathy-preferences.ui.h:26
 msgid "Sounds"
 msgstr "Zvuky"
 
-#: ../src/empathy-preferences.ui.h:26
+#: ../src/empathy-preferences.ui.h:27
 msgid "Spell Checking"
 msgstr "Kontrola pravopisu"
 
-#: ../src/empathy-preferences.ui.h:27
+#: ../src/empathy-preferences.ui.h:28
 msgid ""
 "The list of languages reflects only the languages for which you have a "
 "dictionary installed."
 msgstr ""
 "Seznam jazyků obsahuje pouze jazyky, pro které máte nainstalovány slovníky."
 
-#: ../src/empathy-preferences.ui.h:28
+#: ../src/empathy-preferences.ui.h:29
 msgid "Themes"
 msgstr "Motivy"
 
-#: ../src/empathy-preferences.ui.h:29
+#: ../src/empathy-preferences.ui.h:30
 msgid "Variant:"
 msgstr "Varianta:"
 
-#: ../src/empathy-preferences.ui.h:30
+#: ../src/empathy-preferences.ui.h:31
 msgid "_Automatically connect on startup"
 msgstr "Připojovat se _automaticky po spuštění "
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Cellphone"
 msgstr "_Mobil"
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Enable bubble notifications"
 msgstr "P_ovolit bublinová upozornění"
 
-#: ../src/empathy-preferences.ui.h:33
+#: ../src/empathy-preferences.ui.h:34
 msgid "_Enable sound notifications"
 msgstr "_Povolit zvuková upozornění"
 
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:35
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:35
+#: ../src/empathy-preferences.ui.h:36
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Síť (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:36
+#: ../src/empathy-preferences.ui.h:37
 msgid "_Open new chats in separate windows"
 msgstr "_Otevírat nové diskuze v oddělených oknech"
 
-#: ../src/empathy-preferences.ui.h:37
+#: ../src/empathy-preferences.ui.h:38
 msgid "_Publish location to my contacts"
 msgstr "Zveřejnit _kontaktům polohu"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:39
+#: ../src/empathy-preferences.ui.h:40
 msgid "_Reduce location accuracy"
 msgstr "O_mezit přesnost polohy"
 
@@ -4617,7 +4616,6 @@ msgid "Show a particular service"
 msgstr "Zobrazit konkrétní službu"
 
 #: ../src/empathy-debugger.c:75
-#| msgid "Empathy Debugger"
 msgid "- Empathy Debugger"
 msgstr "– Ladění Empathy"
 
@@ -4680,7 +4678,6 @@ msgid "Mute"
 msgstr "Ztišit"
 
 #: ../src/empathy-call-window.c:2608
-#| msgid "Location"
 msgid "Duration"
 msgstr "Doba"
 
