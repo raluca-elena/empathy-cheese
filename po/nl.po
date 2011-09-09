@@ -24,8 +24,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-05 20:01+0200\n"
-"PO-Revision-Date: 2011-09-02 09:22+0200\n"
+"POT-Creation-Date: 2011-09-09 18:38+0200\n"
+"PO-Revision-Date: 2011-09-07 16:15+0200\n"
 "Last-Translator: Hannie Dumoleyn <hannie@ubuntu-nl.org>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "Language: nl\n"
@@ -835,42 +835,52 @@ msgstr "Poort"
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1167
-#, c-format
-msgid "The account %s is edited via My Web Accounts."
-msgstr "Account %s wordt bewerkt via Mijn webaccounts."
+#: ../libempathy-gtk/empathy-account-widget.c:1192
+msgid "My Web Accounts"
+msgstr "Mijn webaccounts"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1173
+#: ../libempathy-gtk/empathy-account-widget.c:1208
+#, c-format
+msgid "The account %s is edited via %s."
+msgstr "Account %s wordt bewerkt via %s."
+
+#: ../libempathy-gtk/empathy-account-widget.c:1214
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Account %s kan niet worden bewerkt in Empathy."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1193
+#: ../libempathy-gtk/empathy-account-widget.c:1233
 msgid "Launch My Web Accounts"
 msgstr "Mijn webaccounts starten"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1533
+#. general handler
+#: ../libempathy-gtk/empathy-account-widget.c:1241
+#, c-format
+msgid "Edit %s"
+msgstr "%s bewerken"
+
+#: ../libempathy-gtk/empathy-account-widget.c:1591
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
 msgid "Username:"
 msgstr "Gebruikersnaam:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1851
+#: ../libempathy-gtk/empathy-account-widget.c:1909
 msgid "A_pply"
 msgstr "Toe_passen"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1881
+#: ../libempathy-gtk/empathy-account-widget.c:1939
 msgid "L_og in"
 msgstr "_Aanmelden"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1955
+#: ../libempathy-gtk/empathy-account-widget.c:2013
 msgid "This account already exists on the server"
 msgstr "Deze account bestaat al op de server"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1958
+#: ../libempathy-gtk/empathy-account-widget.c:2016
 msgid "Create a new account on the server"
 msgstr "Nieuwe account aanmaken op de server"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2150
+#: ../libempathy-gtk/empathy-account-widget.c:2208
 msgid "Ca_ncel"
 msgstr "_Annuleren"
 
@@ -879,19 +889,19 @@ msgstr "_Annuleren"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2428
+#: ../libempathy-gtk/empathy-account-widget.c:2486
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s op %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2454
+#: ../libempathy-gtk/empathy-account-widget.c:2512
 #, c-format
 msgid "%s Account"
 msgstr "%s account"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2458
+#: ../libempathy-gtk/empathy-account-widget.c:2516
 msgid "New account"
 msgstr "Nieuwe account"
 
@@ -1385,23 +1395,23 @@ msgstr "U mag het onderwerp niet wijzigen"
 msgid "“%s” is not a valid contact ID"
 msgstr "‘%s’ is geen geldig contact-ID"
 
-#: ../libempathy-gtk/empathy-chat.c:1030
+#: ../libempathy-gtk/empathy-chat.c:1058
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: alle berichten van de huidige conversatie wissen"
 
-#: ../libempathy-gtk/empathy-chat.c:1033
+#: ../libempathy-gtk/empathy-chat.c:1061
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr "/topic <topic>: bepaal het onderwerp van de huidige conversatie"
 
-#: ../libempathy-gtk/empathy-chat.c:1036
+#: ../libempathy-gtk/empathy-chat.c:1064
 msgid "/join <chat room ID>: join a new chat room"
 msgstr "/join <chat room ID>: een nieuwe chatruimte binnengaan"
 
-#: ../libempathy-gtk/empathy-chat.c:1039
+#: ../libempathy-gtk/empathy-chat.c:1067
 msgid "/j <chat room ID>: join a new chat room"
 msgstr "/j <chat room ID>: een nieuwe chatruimte binnengaan"
 
-#: ../libempathy-gtk/empathy-chat.c:1043
+#: ../libempathy-gtk/empathy-chat.c:1071
 msgid ""
 "/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
 "current one"
@@ -1409,23 +1419,23 @@ msgstr ""
 "/part [<chat room ID>] [<reason>]: de chatruimte verlaten, standaard de "
 "huidige"
 
-#: ../libempathy-gtk/empathy-chat.c:1047
+#: ../libempathy-gtk/empathy-chat.c:1075
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr "/query <contact ID> [<message>]: een privé-gesprek beginnen"
 
-#: ../libempathy-gtk/empathy-chat.c:1050
+#: ../libempathy-gtk/empathy-chat.c:1078
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr "/msg <contact ID> <message>: een privé-gesprek beginnen"
 
-#: ../libempathy-gtk/empathy-chat.c:1053
+#: ../libempathy-gtk/empathy-chat.c:1081
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr "/nick <nickname>: wijzig uw bijnaam op de huidige server"
 
-#: ../libempathy-gtk/empathy-chat.c:1056
+#: ../libempathy-gtk/empathy-chat.c:1084
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr "/me <message>: stuur een ACTIE-bericht naar de huidige conversatie"
 
-#: ../libempathy-gtk/empathy-chat.c:1059
+#: ../libempathy-gtk/empathy-chat.c:1087
 msgid ""
 "/say <message>: send <message> to the current conversation. This is used to "
 "send a message starting with a '/'. For example: \"/say /join is used to "
@@ -1435,11 +1445,11 @@ msgstr ""
 "gebruikt om een bericht beginnend met een '/' te versturen. Bijvoorbeeld: \"/"
 "say /join wordt gebruikt om een nieuwe chatruimte binnen te gaan\""
 
-#: ../libempathy-gtk/empathy-chat.c:1064
+#: ../libempathy-gtk/empathy-chat.c:1092
 msgid "/whois <contact ID>: display information about a contact"
 msgstr "/whois <contact ID>: informatie over een contact weergeven"
 
-#: ../libempathy-gtk/empathy-chat.c:1067
+#: ../libempathy-gtk/empathy-chat.c:1095
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -1447,113 +1457,113 @@ msgstr ""
 "/help [<command>]: toon alle bestaande opdrachten. Als <command> bestaat, "
 "wordt de uitleg ervan weergegeven."
 
-#: ../libempathy-gtk/empathy-chat.c:1077
+#: ../libempathy-gtk/empathy-chat.c:1112
 #, c-format
 msgid "Usage: %s"
 msgstr "Gebruik: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1116
+#: ../libempathy-gtk/empathy-chat.c:1157
 msgid "Unknown command"
 msgstr "Onbekende opdracht"
 
-#: ../libempathy-gtk/empathy-chat.c:1242
+#: ../libempathy-gtk/empathy-chat.c:1283
 msgid "Unknown command; see /help for the available commands"
 msgstr "Onbekende opdracht; zie /help voor de beschikbare opdrachten"
 
 #. translators: error used when user doesn't have enough credit on his
 #. * account to send the message.
-#: ../libempathy-gtk/empathy-chat.c:1412
+#: ../libempathy-gtk/empathy-chat.c:1453
 msgid "insufficient balance to send message"
 msgstr "Onvoldoende saldo om een bericht te versturen"
 
-#: ../libempathy-gtk/empathy-chat.c:1414
+#: ../libempathy-gtk/empathy-chat.c:1455
 msgid "not capable"
 msgstr "kan niet"
 
-#: ../libempathy-gtk/empathy-chat.c:1421
+#: ../libempathy-gtk/empathy-chat.c:1462
 msgid "offline"
 msgstr "offline"
 
-#: ../libempathy-gtk/empathy-chat.c:1424
+#: ../libempathy-gtk/empathy-chat.c:1465
 msgid "invalid contact"
 msgstr "ongeldig contact"
 
-#: ../libempathy-gtk/empathy-chat.c:1427
+#: ../libempathy-gtk/empathy-chat.c:1468
 msgid "permission denied"
 msgstr "toestemming geweigerd"
 
-#: ../libempathy-gtk/empathy-chat.c:1430
+#: ../libempathy-gtk/empathy-chat.c:1471
 msgid "too long message"
 msgstr "bericht te lang"
 
-#: ../libempathy-gtk/empathy-chat.c:1433
+#: ../libempathy-gtk/empathy-chat.c:1474
 msgid "not implemented"
 msgstr "niet geïmplementeerd"
 
-#: ../libempathy-gtk/empathy-chat.c:1437
+#: ../libempathy-gtk/empathy-chat.c:1478
 msgid "unknown"
 msgstr "onbekend"
 
-#: ../libempathy-gtk/empathy-chat.c:1443
+#: ../libempathy-gtk/empathy-chat.c:1484
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "Fout bij versturen van bericht '%s': %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1447
+#: ../libempathy-gtk/empathy-chat.c:1488
 #, c-format
 msgid "Error sending message: %s"
 msgstr "Fout bij versturen van bericht: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1508 ../src/empathy-chat-window.c:761
+#: ../libempathy-gtk/empathy-chat.c:1549 ../src/empathy-chat-window.c:761
 msgid "Topic:"
 msgstr "Onderwerp:"
 
-#: ../libempathy-gtk/empathy-chat.c:1520
+#: ../libempathy-gtk/empathy-chat.c:1561
 #, c-format
 msgid "Topic set to: %s"
 msgstr "Onderwerp ingesteld: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1522
+#: ../libempathy-gtk/empathy-chat.c:1563
 msgid "No topic defined"
 msgstr "Geen onderwerp"
 
-#: ../libempathy-gtk/empathy-chat.c:2031
+#: ../libempathy-gtk/empathy-chat.c:2072
 msgid "(No Suggestions)"
 msgstr "(Geen suggesties)"
 
 #. translators: %s is the selected word
-#: ../libempathy-gtk/empathy-chat.c:2099
+#: ../libempathy-gtk/empathy-chat.c:2140
 #, c-format
 msgid "Add '%s' to Dictionary"
 msgstr "‘%s’ toevoegen aan woordenboek"
 
 #. translators: first %s is the selected word,
 #. * second %s is the language name of the target dictionary
-#: ../libempathy-gtk/empathy-chat.c:2136
+#: ../libempathy-gtk/empathy-chat.c:2177
 #, c-format
 msgid "Add '%s' to %s Dictionary"
 msgstr "‘%s’ toevoegen aan woordenboek %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2206
+#: ../libempathy-gtk/empathy-chat.c:2247
 msgid "Insert Smiley"
 msgstr "Smiley invoegen"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:2224
+#: ../libempathy-gtk/empathy-chat.c:2265
 #: ../libempathy-gtk/empathy-ui-utils.c:1839
 msgid "_Send"
 msgstr "_Sturen"
 
 #. Spelling suggestions
-#: ../libempathy-gtk/empathy-chat.c:2278
+#: ../libempathy-gtk/empathy-chat.c:2319
 msgid "_Spelling Suggestions"
 msgstr "_Spellingsuggesties"
 
-#: ../libempathy-gtk/empathy-chat.c:2367
+#: ../libempathy-gtk/empathy-chat.c:2408
 msgid "Failed to retrieve recent logs"
 msgstr "Terughalen van recente logs is mislukt"
 
-#: ../libempathy-gtk/empathy-chat.c:2504
+#: ../libempathy-gtk/empathy-chat.c:2545
 #, c-format
 msgid "%s has disconnected"
 msgstr "%s heeft de verbinding verbroken"
@@ -1561,12 +1571,12 @@ msgstr "%s heeft de verbinding verbroken"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2511
+#: ../libempathy-gtk/empathy-chat.c:2552
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "%1$s werd door %2$s verwijderd"
 
-#: ../libempathy-gtk/empathy-chat.c:2514
+#: ../libempathy-gtk/empathy-chat.c:2555
 #, c-format
 msgid "%s was kicked"
 msgstr "%s werd verwijderd"
@@ -1574,17 +1584,17 @@ msgstr "%s werd verwijderd"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2522
+#: ../libempathy-gtk/empathy-chat.c:2563
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "%1$s werd verbannen door %2$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2525
+#: ../libempathy-gtk/empathy-chat.c:2566
 #, c-format
 msgid "%s was banned"
 msgstr "%s werd verbannen"
 
-#: ../libempathy-gtk/empathy-chat.c:2529
+#: ../libempathy-gtk/empathy-chat.c:2570
 #, c-format
 msgid "%s has left the room"
 msgstr "%s heeft de chatruimte verlaten"
@@ -1594,68 +1604,68 @@ msgstr "%s heeft de chatruimte verlaten"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2538
+#: ../libempathy-gtk/empathy-chat.c:2579
 #, c-format
 msgid " (%s)"
 msgstr " (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2563
+#: ../libempathy-gtk/empathy-chat.c:2604
 #, c-format
 msgid "%s has joined the room"
 msgstr "%s is de chatruimte binnengekomen"
 
-#: ../libempathy-gtk/empathy-chat.c:2588
+#: ../libempathy-gtk/empathy-chat.c:2629
 #, c-format
 msgid "%s is now known as %s"
 msgstr "%s is nu bekend als %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2727
+#: ../libempathy-gtk/empathy-chat.c:2768
 #: ../src/empathy-streamed-media-window.c:1894
 #: ../src/empathy-event-manager.c:1240 ../src/empathy-call-window.c:2355
 msgid "Disconnected"
 msgstr "Verbinding verbroken"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3374
+#: ../libempathy-gtk/empathy-chat.c:3415
 msgid "Would you like to store this password?"
 msgstr "Wilt u dit wachtwoord opslaan?"
 
-#: ../libempathy-gtk/empathy-chat.c:3380
+#: ../libempathy-gtk/empathy-chat.c:3421
 msgid "Remember"
 msgstr "Onthouden"
 
-#: ../libempathy-gtk/empathy-chat.c:3390
+#: ../libempathy-gtk/empathy-chat.c:3431
 msgid "Not now"
 msgstr "Niet nu"
 
-#: ../libempathy-gtk/empathy-chat.c:3434
+#: ../libempathy-gtk/empathy-chat.c:3475
 msgid "Retry"
 msgstr "Opnieuw proberen"
 
-#: ../libempathy-gtk/empathy-chat.c:3438
+#: ../libempathy-gtk/empathy-chat.c:3479
 msgid "Wrong password; please try again:"
 msgstr "Verkeerd wachtwoord; probeer het opnieuw:"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3568
+#: ../libempathy-gtk/empathy-chat.c:3609
 msgid "This room is protected by a password:"
 msgstr "Deze ruimte is met een wachtwoord beveiligd:"
 
-#: ../libempathy-gtk/empathy-chat.c:3595
+#: ../libempathy-gtk/empathy-chat.c:3636
 msgid "Join"
 msgstr "Binnengaan"
 
-#: ../libempathy-gtk/empathy-chat.c:3797 ../src/empathy-event-manager.c:1261
+#: ../libempathy-gtk/empathy-chat.c:3838 ../src/empathy-event-manager.c:1261
 msgid "Connected"
 msgstr "Verbonden"
 
-#: ../libempathy-gtk/empathy-chat.c:3852
+#: ../libempathy-gtk/empathy-chat.c:3893
 msgid "Conversation"
 msgstr "Gesprek"
 
 #. Translators: this string is a something like
 #. * "Escher Cat (SMS)"
-#: ../libempathy-gtk/empathy-chat.c:3857
+#: ../libempathy-gtk/empathy-chat.c:3898
 #, c-format
 msgid "%s (SMS)"
 msgstr "%s (SMS)"
@@ -2086,7 +2096,7 @@ msgstr "Hoogte:"
 #: ../libempathy-gtk/empathy-contact-widget.c:1011
 #: ../libempathy-gtk/empathy-individual-widget.c:607
 #: ../libempathy-gtk/empathy-individual-widget.c:622
-#: ../src/empathy-preferences.ui.h:16
+#: ../src/empathy-preferences.ui.h:17
 msgid "Location"
 msgstr "Locatie"
 
@@ -2359,128 +2369,128 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Verbinding verbreken"
 
-#: ../libempathy-gtk/empathy-log-window.c:633
+#: ../libempathy-gtk/empathy-log-window.c:634
 msgid "History"
 msgstr "Geschiedenis"
 
-#: ../libempathy-gtk/empathy-log-window.c:688
+#: ../libempathy-gtk/empathy-log-window.c:689
 msgid "Show"
 msgstr "Tonen"
 
-#: ../libempathy-gtk/empathy-log-window.c:710
+#: ../libempathy-gtk/empathy-log-window.c:711
 msgid "Search"
 msgstr "Zoeken"
 
-#: ../libempathy-gtk/empathy-log-window.c:1158
+#: ../libempathy-gtk/empathy-log-window.c:1159
 #, c-format
 msgid "Chat in %s"
 msgstr "Chatten in %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1160
+#: ../libempathy-gtk/empathy-log-window.c:1161
 #, c-format
 msgid "Chat with %s"
 msgstr "Chatten met %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1210
-#: ../libempathy-gtk/empathy-log-window.c:1357
+#: ../libempathy-gtk/empathy-log-window.c:1211
+#: ../libempathy-gtk/empathy-log-window.c:1358
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
 msgstr "%A %d %B %Y"
 
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:1299
+#: ../libempathy-gtk/empathy-log-window.c:1300
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:1305
+#: ../libempathy-gtk/empathy-log-window.c:1306
 #, c-format
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1376
-#: ../libempathy-gtk/empathy-log-window.c:1378
+#: ../libempathy-gtk/empathy-log-window.c:1377
+#: ../libempathy-gtk/empathy-log-window.c:1379
 #: ../src/empathy-ft-manager.c:1026
 msgid "%"
 msgstr "%"
 
-#: ../libempathy-gtk/empathy-log-window.c:1385
+#: ../libempathy-gtk/empathy-log-window.c:1386
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "Gesprek duurde %s, eindigde om %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1717
+#: ../libempathy-gtk/empathy-log-window.c:1718
 msgid "Today"
 msgstr "Vandaag"
 
-#: ../libempathy-gtk/empathy-log-window.c:1721
+#: ../libempathy-gtk/empathy-log-window.c:1722
 msgid "Yesterday"
 msgstr "gisteren"
 
-#: ../libempathy-gtk/empathy-log-window.c:1737
+#: ../libempathy-gtk/empathy-log-window.c:1738
 msgctxt ""
 "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 msgid "%e %B %Y"
 msgstr "%d %B %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1818
-#: ../libempathy-gtk/empathy-log-window.c:3399
+#: ../libempathy-gtk/empathy-log-window.c:1819
+#: ../libempathy-gtk/empathy-log-window.c:3415
 msgid "Anytime"
 msgstr "Altijd"
 
-#: ../libempathy-gtk/empathy-log-window.c:1898
-#: ../libempathy-gtk/empathy-log-window.c:2328
+#: ../libempathy-gtk/empathy-log-window.c:1906
+#: ../libempathy-gtk/empathy-log-window.c:2343
 msgid "Anyone"
 msgstr "Iedereen"
 
-#: ../libempathy-gtk/empathy-log-window.c:2640
+#: ../libempathy-gtk/empathy-log-window.c:2656
 msgid "Who"
 msgstr "Wie"
 
-#: ../libempathy-gtk/empathy-log-window.c:2844
+#: ../libempathy-gtk/empathy-log-window.c:2860
 msgid "When"
 msgstr "Wanneer"
 
-#: ../libempathy-gtk/empathy-log-window.c:2960
+#: ../libempathy-gtk/empathy-log-window.c:2976
 msgid "Anything"
 msgstr "Alles"
 
-#: ../libempathy-gtk/empathy-log-window.c:2962
+#: ../libempathy-gtk/empathy-log-window.c:2978
 msgid "Text chats"
 msgstr "Tekstchats"
 
-#: ../libempathy-gtk/empathy-log-window.c:2964
+#: ../libempathy-gtk/empathy-log-window.c:2980
 #: ../src/empathy-preferences.ui.h:4
 msgid "Calls"
 msgstr "Gesprekken"
 
-#: ../libempathy-gtk/empathy-log-window.c:2969
+#: ../libempathy-gtk/empathy-log-window.c:2985
 msgid "Incoming calls"
 msgstr "Binnenkomende gesprekken"
 
-#: ../libempathy-gtk/empathy-log-window.c:2970
+#: ../libempathy-gtk/empathy-log-window.c:2986
 msgid "Outgoing calls"
 msgstr "Uitgaande gesprekken"
 
-#: ../libempathy-gtk/empathy-log-window.c:2971
+#: ../libempathy-gtk/empathy-log-window.c:2987
 msgid "Missed calls"
 msgstr "Gemiste oproepen"
 
-#: ../libempathy-gtk/empathy-log-window.c:2993
+#: ../libempathy-gtk/empathy-log-window.c:3009
 msgid "What"
 msgstr "Wat"
 
-#: ../libempathy-gtk/empathy-log-window.c:3702
+#: ../libempathy-gtk/empathy-log-window.c:3718
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr "Weet u zeker dat u alle logs van vorige gesprekken wilt verwijderen?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3706
+#: ../libempathy-gtk/empathy-log-window.c:3722
 msgid "Clear All"
 msgstr "Alles wissen"
 
-#: ../libempathy-gtk/empathy-log-window.c:3713
+#: ../libempathy-gtk/empathy-log-window.c:3729
 msgid "Delete from:"
 msgstr "Verwijderen uit:"
 
@@ -4347,54 +4357,62 @@ msgid "Display incoming events in the notification area"
 msgstr "Geef binnenkomende meldingen weer in het mededelingengebied"
 
 #: ../src/empathy-preferences.ui.h:9
+msgid ""
+"Echo cancellation helps to make your voice sound clearer to the other "
+"person, but may cause problems on some computers. If you or the other person "
+"hear strange noises or glitches during calls, try turning echo cancellation "
+"off and restarting the call."
+msgstr ""
+
+#: ../src/empathy-preferences.ui.h:10
 msgid "Enable notifications when a contact comes online"
 msgstr "Notificatieberichten tonen wanneer een contact online komt"
 
-#: ../src/empathy-preferences.ui.h:10
+#: ../src/empathy-preferences.ui.h:11
 msgid "Enable notifications when a contact goes offline"
 msgstr "Notificatieberichten tonen wanneer een contact offline gaat"
 
-#: ../src/empathy-preferences.ui.h:11
+#: ../src/empathy-preferences.ui.h:12
 msgid "Enable notifications when the _chat is not focused"
 msgstr "Notificatieberichten tonen wanneer de _chat geen focus heeft"
 
-#: ../src/empathy-preferences.ui.h:12
+#: ../src/empathy-preferences.ui.h:13
 msgid "Enable spell checking for languages:"
 msgstr "Spelling controleren voor de volgende talen:"
 
-#: ../src/empathy-preferences.ui.h:13
+#: ../src/empathy-preferences.ui.h:14
 msgid "General"
 msgstr "Algemeen"
 
-#: ../src/empathy-preferences.ui.h:14
-msgid "Input level"
-msgstr "Invoerniveau"
-
 #: ../src/empathy-preferences.ui.h:15
-msgid "Input volume"
-msgstr "Invoervolume"
+msgid "Input level:"
+msgstr "Invoerniveau:"
 
-#: ../src/empathy-preferences.ui.h:17
+#: ../src/empathy-preferences.ui.h:16
+msgid "Input volume:"
+msgstr "Invoervolume:"
+
+#: ../src/empathy-preferences.ui.h:18
 msgid "Location sources:"
 msgstr "Locatiebronnen:"
 
-#: ../src/empathy-preferences.ui.h:18
+#: ../src/empathy-preferences.ui.h:19
 msgid "Log conversations"
 msgstr "Gesprekken opslaan"
 
-#: ../src/empathy-preferences.ui.h:19
+#: ../src/empathy-preferences.ui.h:20
 msgid "Notifications"
 msgstr "Notificatieberichten"
 
-#: ../src/empathy-preferences.ui.h:20
+#: ../src/empathy-preferences.ui.h:21
 msgid "Play sound for events"
 msgstr "Geluid afspelen voor gebeurtenissen"
 
-#: ../src/empathy-preferences.ui.h:21
+#: ../src/empathy-preferences.ui.h:22
 msgid "Privacy"
 msgstr "Privacy"
 
-#: ../src/empathy-preferences.ui.h:22
+#: ../src/empathy-preferences.ui.h:23
 msgid ""
 "Reduced location accuracy means that nothing more precise than your city, "
 "state and country will be published.  GPS coordinates will be accurate to 1 "
@@ -4404,23 +4422,23 @@ msgstr ""
 "provincie en land bekend gemaakt zullen worden. GPS-coördinaten zullen tot 1 "
 "decimaal nauwkeurig zijn."
 
-#: ../src/empathy-preferences.ui.h:23
+#: ../src/empathy-preferences.ui.h:24
 msgid "Show _smileys as images"
 msgstr "_Smileys als afbeeldingen tonen"
 
-#: ../src/empathy-preferences.ui.h:24
+#: ../src/empathy-preferences.ui.h:25
 msgid "Show contact _list in rooms"
 msgstr "Contactenlijst in chatruimtes _tonen"
 
-#: ../src/empathy-preferences.ui.h:25
+#: ../src/empathy-preferences.ui.h:26
 msgid "Sounds"
 msgstr "Geluiden"
 
-#: ../src/empathy-preferences.ui.h:26
+#: ../src/empathy-preferences.ui.h:27
 msgid "Spell Checking"
 msgstr "Spellingcontrole"
 
-#: ../src/empathy-preferences.ui.h:27
+#: ../src/empathy-preferences.ui.h:28
 msgid ""
 "The list of languages reflects only the languages for which you have a "
 "dictionary installed."
@@ -4428,48 +4446,48 @@ msgstr ""
 "De lijst met talen toont alleen de talen waarvoor u een woordenboek heeft "
 "geïnstalleerd."
 
-#: ../src/empathy-preferences.ui.h:28
+#: ../src/empathy-preferences.ui.h:29
 msgid "Themes"
 msgstr "Thema's"
 
-#: ../src/empathy-preferences.ui.h:29
+#: ../src/empathy-preferences.ui.h:30
 msgid "Variant:"
 msgstr "Variant:"
 
-#: ../src/empathy-preferences.ui.h:30
+#: ../src/empathy-preferences.ui.h:31
 msgid "_Automatically connect on startup"
 msgstr "_Automatisch verbinden bij opstarten"
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Cellphone"
 msgstr "_Mobiele telefoon"
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Enable bubble notifications"
 msgstr "Ballon-notificatieberichten inscha_kelen"
 
-#: ../src/empathy-preferences.ui.h:33
+#: ../src/empathy-preferences.ui.h:34
 msgid "_Enable sound notifications"
 msgstr "_Geluidswaarschuwingen inschakelen"
 
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:35
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:35
+#: ../src/empathy-preferences.ui.h:36
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Netwerk (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:36
+#: ../src/empathy-preferences.ui.h:37
 msgid "_Open new chats in separate windows"
 msgstr "_Nieuwe chats in eigen vensters openen"
 
-#: ../src/empathy-preferences.ui.h:37
+#: ../src/empathy-preferences.ui.h:38
 msgid "_Publish location to my contacts"
 msgstr "_Locatie aan mijn contacten bekendmaken"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:39
+#: ../src/empathy-preferences.ui.h:40
 msgid "_Reduce location accuracy"
 msgstr "_Nauwkeurigheid van locatie beperken"
 
@@ -4597,16 +4615,16 @@ msgstr ""
 "De geselecteerde verbindingsbeheerder heeft geen ondersteuning voor de "
 "plugin voor foutopsporing op afstand."
 
+#: ../src/empathy-invite-participant-dialog.c:179
 #: ../src/empathy-invite-participant-dialog.c:205
-#: ../src/empathy-invite-participant-dialog.c:231
 msgid "Invite Participant"
 msgstr "Deelnemer uitnodigen"
 
-#: ../src/empathy-invite-participant-dialog.c:206
+#: ../src/empathy-invite-participant-dialog.c:180
 msgid "Choose a contact to invite into the conversation:"
 msgstr "Een contact uitnodigen om deel te nemen aan het gesprek:"
 
-#: ../src/empathy-invite-participant-dialog.c:227
+#: ../src/empathy-invite-participant-dialog.c:201
 msgid "Invite"
 msgstr "Uitnodigen"
 
