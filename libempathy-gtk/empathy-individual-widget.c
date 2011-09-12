@@ -80,10 +80,10 @@ typedef struct {
   /* weak pointer to the contact whose contact details we're displaying */
   TpContact *contact;
 
-  /* unowned Persona (borrowed from priv->individual) -> GtkTable child */
-  GHashTable *persona_tables;
+  /* unowned Persona (borrowed from priv->individual) -> GtkGrid child */
+  GHashTable *persona_grids;
   /* Table containing the information for the individual as whole, or NULL */
-  GtkTable *individual_table;
+  GtkGrid *individual_grid;
 
   /* Individual */
   GtkWidget *hbox_presence;
@@ -1158,28 +1158,28 @@ notify_avatar_cb (gpointer folks_object,
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   EmpathyAvatar *avatar = NULL;
-  GObject *table;
+  GObject *grid;
   GtkWidget *avatar_widget;
 
   if (FOLKS_IS_INDIVIDUAL (folks_object))
     {
       avatar = individual_dup_avatar (FOLKS_INDIVIDUAL (folks_object));
-      table = G_OBJECT (priv->individual_table);
+      grid = G_OBJECT (priv->individual_grid);
     }
   else if (FOLKS_IS_PERSONA (folks_object))
     {
       avatar = persona_dup_avatar (FOLKS_PERSONA (folks_object));
-      table = g_hash_table_lookup (priv->persona_tables, folks_object);
+      grid = g_hash_table_lookup (priv->persona_grids, folks_object);
     }
   else
     {
       g_assert_not_reached ();
     }
 
-  if (table == NULL)
+  if (grid == NULL)
     return;
 
-  avatar_widget = g_object_get_data (table, "avatar-widget");
+  avatar_widget = g_object_get_data (grid, "avatar-widget");
   empathy_avatar_image_set (EMPATHY_AVATAR_IMAGE (avatar_widget), avatar);
 
   if (avatar != NULL)
@@ -1192,20 +1192,20 @@ notify_alias_cb (gpointer folks_object,
     EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GObject *table;
+  GObject *grid;
   GtkWidget *alias_widget;
 
   if (FOLKS_IS_INDIVIDUAL (folks_object))
-    table = G_OBJECT (priv->individual_table);
+    grid = G_OBJECT (priv->individual_grid);
   else if (FOLKS_IS_PERSONA (folks_object))
-    table = g_hash_table_lookup (priv->persona_tables, folks_object);
+    grid = g_hash_table_lookup (priv->persona_grids, folks_object);
   else
     g_assert_not_reached ();
 
-  if (table == NULL)
+  if (grid == NULL)
     return;
 
-  alias_widget = g_object_get_data (table, "alias-widget");
+  alias_widget = g_object_get_data (grid, "alias-widget");
 
   if (GTK_IS_ENTRY (alias_widget))
     {
@@ -1225,23 +1225,23 @@ notify_presence_cb (gpointer folks_object,
     EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GObject *table;
+  GObject *grid;
   GtkWidget *status_label, *state_image;
   const gchar *message;
   gchar *markup_text = NULL;
 
   if (FOLKS_IS_INDIVIDUAL (folks_object))
-    table = G_OBJECT (priv->individual_table);
+    grid = G_OBJECT (priv->individual_grid);
   else if (FOLKS_IS_PERSONA (folks_object))
-    table = g_hash_table_lookup (priv->persona_tables, folks_object);
+    grid = g_hash_table_lookup (priv->persona_grids, folks_object);
   else
     g_assert_not_reached ();
 
-  if (table == NULL)
+  if (grid == NULL)
     return;
 
-  status_label = g_object_get_data (table, "status-label");
-  state_image = g_object_get_data (table, "state-image");
+  status_label = g_object_get_data (grid, "status-label");
+  state_image = g_object_get_data (grid, "state-image");
 
   /* FIXME: Default messages should be moved into libfolks (bgo#627403) */
   message = folks_presence_details_get_presence_message (
@@ -1272,20 +1272,20 @@ notify_is_favourite_cb (gpointer folks_object,
     EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GObject *table;
+  GObject *grid;
   GtkWidget *favourite_widget;
 
   if (FOLKS_IS_INDIVIDUAL (folks_object))
-    table = G_OBJECT (priv->individual_table);
+    grid = G_OBJECT (priv->individual_grid);
   else if (FOLKS_IS_PERSONA (folks_object))
-    table = g_hash_table_lookup (priv->persona_tables, folks_object);
+    grid = g_hash_table_lookup (priv->persona_grids, folks_object);
   else
     g_assert_not_reached ();
 
-  if (table == NULL)
+  if (grid == NULL)
     return;
 
-  favourite_widget = g_object_get_data (table, "favourite-widget");
+  favourite_widget = g_object_get_data (grid, "favourite-widget");
 
   if (GTK_IS_TOGGLE_BUTTON (favourite_widget))
     {
@@ -1297,18 +1297,17 @@ notify_is_favourite_cb (gpointer folks_object,
 
 static void
 alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
-    GtkTable *table,
+    GtkGrid *grid,
     guint starting_row)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GtkWidget *label, *alias, *image, *avatar, *alignment;
+  GtkWidget *label, *alias, *image, *avatar;
   guint current_row = starting_row;
 
   /* Alias */
   label = gtk_label_new (_("Alias:"));
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (table, label, 0, 1, current_row, current_row + 1, GTK_FILL,
-      GTK_FILL, 0, 0);
+  gtk_grid_attach (grid, label, 0, current_row, 1, 1);
   gtk_widget_show (label);
 
   /* Set up alias label/entry */
@@ -1330,9 +1329,9 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
       gtk_misc_set_alignment (GTK_MISC (alias), 0.0, 0.5);
     }
 
-  g_object_set_data (G_OBJECT (table), "alias-widget", alias);
-  gtk_table_attach (table, alias, 1, 2, current_row, current_row + 1,
-      GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+  g_object_set_data (G_OBJECT (grid), "alias-widget", alias);
+  gtk_grid_attach_next_to (grid, alias, label,
+                           GTK_POS_RIGHT, 1, 1);
   gtk_widget_show (alias);
 
   current_row++;
@@ -1343,7 +1342,7 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
   /* Presence image */
   image = gtk_image_new_from_stock (GTK_STOCK_MISSING_IMAGE,
       GTK_ICON_SIZE_BUTTON);
-  g_object_set_data (G_OBJECT (table), "state-image", image);
+  g_object_set_data (G_OBJECT (grid), "state-image", image);
   gtk_box_pack_start (GTK_BOX (priv->hbox_presence), image, FALSE,
       FALSE, 0);
   gtk_widget_show (image);
@@ -1356,13 +1355,13 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
   gtk_label_set_selectable (GTK_LABEL (label),
       (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP) ? FALSE : TRUE);
 
-  g_object_set_data (G_OBJECT (table), "status-label", label);
-  gtk_box_pack_start (GTK_BOX (priv->hbox_presence), label, TRUE,
-      TRUE, 0);
+  g_object_set_data (G_OBJECT (grid), "status-label", label);
+  gtk_box_pack_start (GTK_BOX (priv->hbox_presence), label, FALSE,
+      FALSE, 0);
   gtk_widget_show (label);
 
-  gtk_table_attach (table, priv->hbox_presence, 0, 2, current_row,
-      current_row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+  gtk_grid_attach (grid, priv->hbox_presence,
+                   0, current_row, 2, 1);
   gtk_widget_show (priv->hbox_presence);
 
   current_row++;
@@ -1375,9 +1374,9 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
       g_signal_connect (favourite, "toggled",
           (GCallback) favourite_toggled_cb, self);
 
-      g_object_set_data (G_OBJECT (table), "favourite-widget", favourite);
-      gtk_table_attach (table, favourite, 0, 2, current_row, current_row + 1,
-          GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+      g_object_set_data (G_OBJECT (grid), "favourite-widget", favourite);
+      gtk_grid_attach (grid, favourite,
+                       0, current_row, 2, 1);
       gtk_widget_show (favourite);
 
       current_row++;
@@ -1394,15 +1393,18 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
           (GCallback) avatar_widget_button_press_event_cb, self);
     }
 
-  g_object_set_data (G_OBJECT (table), "avatar-widget", avatar);
+  g_object_set_data (G_OBJECT (grid), "avatar-widget", avatar);
+  g_object_set (avatar,
+                "valign", GTK_ALIGN_START,
+                "margin-left", 6,
+                "margin-right", 6,
+                "margin-top", 6,
+                "margin-bottom", 6,
+                NULL);
 
-  alignment = gtk_alignment_new (1.0, 0.0, 0.0, 0.0);
-  gtk_container_add (GTK_CONTAINER (alignment), avatar);
+  gtk_grid_attach (grid, avatar,
+                   2, 0, 1, current_row);
   gtk_widget_show (avatar);
-
-  gtk_table_attach (table, alignment, 2, 3, 0, current_row,
-      GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 6, 6);
-  gtk_widget_show (alignment);
 }
 
 static void
@@ -1412,14 +1414,14 @@ update_persona (EmpathyIndividualWidget *self, FolksPersona *persona)
   TpContact *tp_contact;
   EmpathyContact *contact;
   TpAccount *account;
-  GtkTable *table;
+  GtkGrid *grid;
   GtkLabel *label;
   GtkImage *image;
   const gchar *id;
 
-  table = g_hash_table_lookup (priv->persona_tables, persona);
+  grid = g_hash_table_lookup (priv->persona_grids, persona);
 
-  g_assert (table != NULL);
+  g_assert (grid != NULL);
 
   tp_contact = tpf_persona_get_contact (TPF_PERSONA (persona));
   if (tp_contact == NULL)
@@ -1435,8 +1437,8 @@ update_persona (EmpathyIndividualWidget *self, FolksPersona *persona)
     {
       const gchar *name;
 
-      label = g_object_get_data (G_OBJECT (table), "account-label");
-      image = g_object_get_data (G_OBJECT (table), "account-image");
+      label = g_object_get_data (G_OBJECT (grid), "account-label");
+      image = g_object_get_data (G_OBJECT (grid), "account-image");
 
       name = tp_account_get_display_name (account);
       gtk_label_set_label (label, name);
@@ -1446,7 +1448,7 @@ update_persona (EmpathyIndividualWidget *self, FolksPersona *persona)
     }
 
   /* Update id widget */
-  label = g_object_get_data (G_OBJECT (table), "id-widget");
+  label = g_object_get_data (G_OBJECT (grid), "id-widget");
   id = folks_persona_get_display_id (persona);
   gtk_label_set_label (label, (id != NULL) ? id : "");
 
@@ -1467,7 +1469,7 @@ add_persona (EmpathyIndividualWidget *self,
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   GtkBox *hbox;
-  GtkTable *table;
+  GtkGrid *grid;
   GtkWidget *label, *account_label, *account_image, *separator;
   guint current_row = 0;
 
@@ -1475,17 +1477,18 @@ add_persona (EmpathyIndividualWidget *self,
     return;
 
   if (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_EDIT_FAVOURITE)
-    table = GTK_TABLE (gtk_table_new (5, 3, FALSE));
+    grid = GTK_GRID (gtk_grid_new ());
   else
-    table = GTK_TABLE (gtk_table_new (4, 3, FALSE));
-  gtk_table_set_row_spacings (table, 6);
-  gtk_table_set_col_spacings (table, 6);
+    grid = GTK_GRID (gtk_grid_new ());
+
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (grid), GTK_ORIENTATION_VERTICAL);
+  gtk_grid_set_row_spacing (grid, 6);
+  gtk_grid_set_column_spacing (grid, 6);
 
   /* Account and Identifier */
   label = gtk_label_new (_("Account:"));
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (table, label, 0, 1, current_row, current_row + 1,
-      GTK_FILL, GTK_FILL, 0, 0);
+  gtk_grid_attach (grid, label, 0, current_row, 1, 1);
   gtk_widget_show (label);
 
   /* Pack the protocol icon with the account name in an hbox */
@@ -1503,10 +1506,9 @@ add_persona (EmpathyIndividualWidget *self,
   gtk_box_pack_start (hbox, account_image, FALSE, FALSE, 0);
   gtk_box_pack_start (hbox, account_label, FALSE, TRUE, 0);
 
-  g_object_set_data (G_OBJECT (table), "account-image", account_image);
-  g_object_set_data (G_OBJECT (table), "account-label", account_label);
-  gtk_table_attach (table, GTK_WIDGET (hbox), 1, 2, current_row,
-      current_row + 1, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+  g_object_set_data (G_OBJECT (grid), "account-image", account_image);
+  g_object_set_data (G_OBJECT (grid), "account-label", account_label);
+  gtk_grid_attach_next_to (grid, GTK_WIDGET (hbox), label, GTK_POS_RIGHT, 1, 1);
   gtk_widget_show (GTK_WIDGET (hbox));
 
   current_row++;
@@ -1514,8 +1516,7 @@ add_persona (EmpathyIndividualWidget *self,
   /* Translators: Identifier to connect to Instant Messaging network */
   label = gtk_label_new (_("Identifier:"));
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-  gtk_table_attach (table, label, 0, 1, current_row, current_row + 1,
-      GTK_FILL, GTK_FILL, 0, 0);
+  gtk_grid_attach (grid, label, 0, current_row, 1, 1);
   gtk_widget_show (label);
 
   /* Set up ID label */
@@ -1524,16 +1525,15 @@ add_persona (EmpathyIndividualWidget *self,
       (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP) ? FALSE : TRUE);
   gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
 
-  g_object_set_data (G_OBJECT (table), "id-widget", label);
-  gtk_table_attach (table, label, 1, 2, current_row, current_row + 1,
-      GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+  g_object_set_data (G_OBJECT (grid), "id-widget", label);
+  gtk_grid_attach (grid, label, 1, current_row, 1, 1);
   gtk_widget_show (label);
 
   current_row++;
 
-  alias_presence_avatar_favourite_set_up (self, table, current_row);
+  alias_presence_avatar_favourite_set_up (self, grid, current_row);
 
-  /* Connect to signals and display the table */
+  /* Connect to signals and display the grid */
   g_signal_connect (persona, "notify::alias",
       (GCallback) notify_alias_cb, self);
   g_signal_connect (persona, "notify::avatar",
@@ -1550,17 +1550,17 @@ add_persona (EmpathyIndividualWidget *self,
     }
 
   gtk_box_pack_start (GTK_BOX (priv->vbox_individual),
-      GTK_WIDGET (table), FALSE, TRUE, 0);
-  gtk_widget_show (GTK_WIDGET (table));
+      GTK_WIDGET (grid), FALSE, TRUE, 0);
+  gtk_widget_show (GTK_WIDGET (grid));
 
-  /* Pack a separator after the table */
+  /* Pack a separator after the grid */
   separator = gtk_hseparator_new ();
-  g_object_set_data (G_OBJECT (table), "separator", separator);
+  g_object_set_data (G_OBJECT (grid), "separator", separator);
   gtk_box_pack_start (GTK_BOX (priv->vbox_individual), separator, FALSE, FALSE,
       0);
   gtk_widget_show (separator);
 
-  g_hash_table_replace (priv->persona_tables, persona, table);
+  g_hash_table_replace (priv->persona_grids, persona, grid);
 
   /* Update the new widgets */
   update_persona (self, persona);
@@ -1572,13 +1572,13 @@ remove_persona (EmpathyIndividualWidget *self,
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   GtkWidget *separator;
-  GtkTable *table;
+  GtkGrid *grid;
 
   if (!empathy_folks_persona_is_interesting (persona))
     return;
 
-  table = g_hash_table_lookup (priv->persona_tables, persona);
-  if (table == NULL)
+  grid = g_hash_table_lookup (priv->persona_grids, persona);
+  if (grid == NULL)
     return;
 
   g_signal_handlers_disconnect_by_func (persona, notify_alias_cb, self);
@@ -1592,19 +1592,19 @@ remove_persona (EmpathyIndividualWidget *self,
     }
 
   /* Remove the separator */
-  separator = g_object_get_data (G_OBJECT (table), "separator");
+  separator = g_object_get_data (G_OBJECT (grid), "separator");
   if (separator != NULL)
     gtk_container_remove (GTK_CONTAINER (priv->vbox_individual), separator);
 
   /* Remove the widget */
   gtk_container_remove (GTK_CONTAINER (priv->vbox_individual),
-      GTK_WIDGET (table));
+      GTK_WIDGET (grid));
 
-  g_hash_table_remove (priv->persona_tables, persona);
+  g_hash_table_remove (priv->persona_grids, persona);
 }
 
 static void
-update_individual_table (EmpathyIndividualWidget *self)
+update_individual_grid (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
 
@@ -1617,22 +1617,16 @@ update_individual_table (EmpathyIndividualWidget *self)
 }
 
 static void
-individual_table_set_up (EmpathyIndividualWidget *self)
+individual_grid_set_up (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
-  GtkTable *table;
   guint current_row = 0;
-  guint nb_rows = 2;
+  GtkGrid *grid;
 
-  if (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_EDIT_FAVOURITE)
-    nb_rows++;
-
-  if (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP)
-    nb_rows++;
-
-  table = GTK_TABLE (gtk_table_new (nb_rows, 3, FALSE));
-  gtk_table_set_row_spacings (table, 6);
-  gtk_table_set_col_spacings (table, 6);
+  grid = GTK_GRID (gtk_grid_new ());
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (grid), GTK_ORIENTATION_VERTICAL);
+  gtk_grid_set_row_spacing (grid, 6);
+  gtk_grid_set_column_spacing (grid, 6);
 
   /* We only display the number of personas in tooltips */
   if (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP)
@@ -1666,37 +1660,36 @@ individual_table_set_up (EmpathyIndividualWidget *self)
       gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
       g_free (message);
 
-      gtk_table_attach (table, label, 0, 2, current_row, current_row + 1,
-          GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+      gtk_grid_attach (grid, label, 0, current_row, 2, 1);
       gtk_widget_show (label);
 
       current_row++;
     }
 
-  alias_presence_avatar_favourite_set_up (self, table, current_row);
+  alias_presence_avatar_favourite_set_up (self, grid, current_row);
 
-  /* Display the table */
-  gtk_box_pack_start (GTK_BOX (priv->vbox_individual), GTK_WIDGET (table),
+  /* Display the grid */
+  gtk_box_pack_start (GTK_BOX (priv->vbox_individual), GTK_WIDGET (grid),
       FALSE, TRUE, 0);
-  gtk_widget_show (GTK_WIDGET (table));
+  gtk_widget_show (GTK_WIDGET (grid));
 
-  priv->individual_table = table;
+  priv->individual_grid = grid;
 
-  /* Update the table */
-  update_individual_table (self);
+  /* Update the grid */
+  update_individual_grid (self);
 }
 
 static void
-individual_table_destroy (EmpathyIndividualWidget *self)
+individual_grid_destroy (EmpathyIndividualWidget *self)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
 
-  if (priv->individual_table == NULL)
+  if (priv->individual_grid == NULL)
     return;
 
   gtk_container_remove (GTK_CONTAINER (priv->vbox_individual),
-      GTK_WIDGET (priv->individual_table));
-  priv->individual_table = NULL;
+      GTK_WIDGET (priv->individual_grid));
+  priv->individual_grid = NULL;
 }
 
 static void
@@ -1716,10 +1709,10 @@ personas_changed_cb (FolksIndividual *individual,
   /* we'll re-use this iterator throughout */
   iter = gee_iterable_iterator (GEE_ITERABLE (personas));
 
-  /* Note that old_num_personas is the number of persona tables we were
+  /* Note that old_num_personas is the number of persona gridss we were
    * displaying, not the number of Personas which were in the Individual
    * before. */
-  old_num_personas = g_hash_table_size (priv->persona_tables);
+  old_num_personas = g_hash_table_size (priv->persona_grids);
 
   while (gee_iterator_next (iter))
     {
@@ -1733,11 +1726,11 @@ personas_changed_cb (FolksIndividual *individual,
   /*
    * What we display for various conditions:
    *  - "Personas": display the alias, avatar, presence account and identifier
-   *                for each of the Individual's Personas. (i.e. One table per
+   *                for each of the Individual's Personas. (i.e. One grid per
    *                Persona.)
    *  - "Individual": display the alias, avatar and presence for the Individual,
    *                  and a label saying "Meta-contact containing x contacts".
-   *                  (i.e. One table in total.)
+   *                  (i.e. One grid in total.)
    *
    *              | SHOW_PERSONAS | !SHOW_PERSONAS
    * -------------+---------------+---------------
@@ -1750,7 +1743,7 @@ personas_changed_cb (FolksIndividual *individual,
   will_show_personas = show_personas || new_num_personas == 1;
 
   /* If both @added and @removed are NULL, we're being called manually, and we
-   * need to set up the tables for the first time. We do this simply by
+   * need to set up the gridss for the first time. We do this simply by
    * ensuring was_showing_personas and will_show_personas are different so that
    * the code resets the UI.
    */
@@ -1785,10 +1778,10 @@ personas_changed_cb (FolksIndividual *individual,
     {
       gboolean c;
 
-      /* Remove the old Individual table */
-      individual_table_destroy (self);
+      /* Remove the old Individual grid */
+      individual_grid_destroy (self);
 
-      /* Set up all the Persona tables instead */
+      /* Set up all the Persona grids instead */
       for (c = gee_iterator_first (iter); c; c = gee_iterator_next (iter))
         {
           FolksPersona *persona = gee_iterator_get (iter);
@@ -1822,8 +1815,8 @@ personas_changed_cb (FolksIndividual *individual,
           g_clear_object (&iter_changed);
         }
 
-      /* Set up the Individual table instead */
-      individual_table_set_up (self);
+      /* Set up the Individual grid instead */
+      individual_grid_set_up (self);
     }
   g_clear_object (&iter);
 
@@ -1887,7 +1880,7 @@ remove_individual (EmpathyIndividualWidget *self)
           g_clear_object (&persona);
         }
       g_clear_object (&iter);
-      individual_table_destroy (self);
+      individual_grid_destroy (self);
 
       if (priv->contact != NULL)
         remove_weak_contact (self);
@@ -1926,7 +1919,7 @@ individual_update (EmpathyIndividualWidget *self)
               (GCallback) notify_is_favourite_cb, self);
         }
 
-      /* Update individual table */
+      /* Update individual grid */
       personas_changed_cb (priv->individual, NULL, NULL, self);
     }
 
@@ -1934,10 +1927,10 @@ individual_update (EmpathyIndividualWidget *self)
     {
       gtk_widget_hide (priv->vbox_individual);
     }
-  else if (priv->individual_table != NULL)
+  else if (priv->individual_grid != NULL)
     {
       /* We only need to update the details for the Individual as a whole */
-      update_individual_table (self);
+      update_individual_grid (self);
       gtk_widget_show (priv->vbox_individual);
     }
   else
@@ -2004,8 +1997,8 @@ empathy_individual_widget_init (EmpathyIndividualWidget *self)
       0);
   gtk_widget_show (priv->vbox_individual_widget);
 
-  priv->persona_tables = g_hash_table_new (NULL, NULL);
-  priv->individual_table = NULL;
+  priv->persona_grids = g_hash_table_new (NULL, NULL);
+  priv->individual_grid = NULL;
 
   /* Create widgets */
   details_set_up (self);
@@ -2109,7 +2102,7 @@ finalize (GObject *object)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->persona_tables);
+  g_hash_table_destroy (priv->persona_grids);
 
   G_OBJECT_CLASS (empathy_individual_widget_parent_class)->finalize (object);
 }
