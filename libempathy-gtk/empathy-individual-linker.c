@@ -280,7 +280,7 @@ individual_view_drag_motion_cb (GtkWidget *widget,
 
   target = gtk_drag_dest_find_target (GTK_WIDGET (view), context, NULL);
 
-  if (target == gdk_atom_intern_static_string ("text/persona-id"))
+  if (target == gdk_atom_intern_static_string ("text/x-persona-id"))
     {
       GtkTreePath *path;
 

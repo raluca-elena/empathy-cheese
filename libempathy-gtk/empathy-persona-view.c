@@ -96,13 +96,13 @@ typedef enum
   { (gchar *) T, 0, I }
 
 static const GtkTargetEntry drag_types_dest[] = {
-  DRAG_TYPE ("text/individual-id", DND_DRAG_TYPE_INDIVIDUAL_ID),
+  DRAG_TYPE ("text/x-individual-id", DND_DRAG_TYPE_INDIVIDUAL_ID),
   DRAG_TYPE ("text/plain", DND_DRAG_TYPE_STRING),
   DRAG_TYPE ("STRING", DND_DRAG_TYPE_STRING),
 };
 
 static const GtkTargetEntry drag_types_source[] = {
-  DRAG_TYPE ("text/persona-id", DND_DRAG_TYPE_PERSONA_ID),
+  DRAG_TYPE ("text/x-persona-id", DND_DRAG_TYPE_PERSONA_ID),
 };
 
 #undef DRAG_TYPE
@@ -477,7 +477,7 @@ drag_data_get (GtkWidget *widget,
 
   persona_uid = folks_persona_get_uid (persona);
   gtk_selection_data_set (selection,
-      gdk_atom_intern ("text/persona-id", FALSE), 8,
+      gdk_atom_intern ("text/x-persona-id", FALSE), 8,
       (guchar *) persona_uid, strlen (persona_uid) + 1);
 
   g_object_unref (persona);
