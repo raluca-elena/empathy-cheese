@@ -96,7 +96,7 @@ add_individual (EmpathyIndividualManager *self, FolksIndividual *individual)
   EmpathyIndividualManagerPriv *priv = GET_PRIV (self);
 
   g_hash_table_insert (priv->individuals,
-      (gpointer) folks_individual_get_id (individual),
+      g_strdup (folks_individual_get_id (individual)),
       g_object_ref (individual));
 
   g_signal_connect (individual, "group-changed",
@@ -331,7 +331,7 @@ empathy_individual_manager_init (EmpathyIndividualManager *self)
 
   self->priv = priv;
   priv->individuals = g_hash_table_new_full (g_str_hash, g_str_equal,
-      NULL, g_object_unref);
+      g_free, g_object_unref);
 
   priv->aggregator = folks_individual_aggregator_new ();
   g_signal_connect (priv->aggregator, "individuals-changed",
