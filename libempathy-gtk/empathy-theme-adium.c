@@ -541,7 +541,8 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 		         const gchar       *service_name,
 		         const gchar       *message_classes,
 		         gint64             timestamp,
-		         gboolean           is_backlog)
+		         gboolean           is_backlog,
+		         gboolean           outgoing)
 {
 	EmpathyThemeAdiumPriv *priv = GET_PRIV (theme);
 	GString     *string;
@@ -571,7 +572,12 @@ theme_adium_append_html (EmpathyThemeAdium *theme,
 			 * Incoming/SenderColors.txt it will be used instead of
 			 * the default colors.
 			 */
-			if (contact_id != NULL) {
+
+			/* Ensure we always use the same color when sending messages
+			 * (bgo #658821) */
+			if (outgoing) {
+				replace = "inherit";
+			} else if (contact_id != NULL) {
 				guint hash = g_str_hash (contact_id);
 				replace = colors[hash % G_N_ELEMENTS (colors)];
 			}
@@ -687,7 +693,7 @@ theme_adium_append_event_escaped (EmpathyChatView *view,
 	theme_adium_append_html (theme, "appendMessage",
 				 priv->data->status_html, escaped, NULL, NULL, NULL,
 				 NULL, "event",
-				 empathy_time_get_current (), FALSE);
+				 empathy_time_get_current (), FALSE, FALSE);
 
 	/* There is no last contact */
 	if (priv->last_contact) {
@@ -944,7 +950,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	theme_adium_append_html (theme, func, html, body_escaped,
 				 avatar_filename, name, contact_id,
 				 service_name, message_classes->str,
-				 timestamp, is_backlog);
+				 timestamp, is_backlog, empathy_contact_is_user (sender));
 
 	/* Keep the sender of the last displayed message */
 	if (priv->last_contact) {
