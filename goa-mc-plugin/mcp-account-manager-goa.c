@@ -427,6 +427,14 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
   return TRUE;
 }
 
+static gboolean
+account_is_in_goa (const McpAccountStorage *self,
+    const gchar *account)
+{
+  McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+
+  return (g_hash_table_lookup (priv->accounts, acct) != NULL);
+}
 
 static gboolean
 mcp_account_manager_goa_set (const McpAccountStorage *self,
@@ -437,6 +445,9 @@ mcp_account_manager_goa_set (const McpAccountStorage *self,
 {
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
   GError *error = NULL;
+
+  if (!account_is_in_goa (self, account))
+    return FALSE;
 
   /* No need to save Enabled, it's up to the GOA configuration if the account
    * is configured or not. */
@@ -462,6 +473,9 @@ mcp_account_manager_goa_delete (const McpAccountStorage *self,
     const gchar *key)
 {
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
+
+  if (!account_is_in_goa (self, account))
+    return FALSE;
 
   DEBUG ("%s: (%s, %s)", G_STRFUNC, account, key);
 
