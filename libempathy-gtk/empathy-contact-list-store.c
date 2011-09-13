@@ -70,9 +70,9 @@ typedef struct {
 	guint                       setup_idle_id;
 	gboolean                    dispose_has_run;
 	GHashTable                  *status_icons;
-	/* Hash: EmpathyContact* -> GQueue (GtkTreeRowReference) */
+	/* Hash: EmpathyContact* -> GQueue (GtkTreeIter *) */
 	GHashTable                  *empathy_contact_cache;
-	/* Hash: char *groupname -> GtkTreeRowReference *row */
+	/* Hash: char *groupname -> GtkTreeIter * */
 	GHashTable                  *empathy_group_cache;
 } EmpathyContactListStorePriv;
 
@@ -322,10 +322,10 @@ empathy_contact_list_store_class_init (EmpathyContactListStoreClass *klass)
 }
 
 static void
-g_queue_free_full_row_ref (gpointer data)
+g_queue_free_full_iter (gpointer data)
 {
 	GQueue *queue = (GQueue *) data;
-	g_queue_foreach (queue, (GFunc) gtk_tree_row_reference_free, NULL);
+	g_queue_foreach (queue, (GFunc) gtk_tree_iter_free, NULL);
 	g_queue_free (queue);
 }
 
@@ -345,10 +345,10 @@ empathy_contact_list_store_init (EmpathyContactListStore *store)
 						      store);
 	priv->status_icons = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
 	priv->empathy_contact_cache = g_hash_table_new_full (NULL, NULL, NULL,
-		g_queue_free_full_row_ref);
+		g_queue_free_full_iter);
 	priv->empathy_group_cache = g_hash_table_new_full (g_str_hash,
 		g_str_equal, g_free,
-		(GDestroyNotify) gtk_tree_row_reference_free);
+		(GDestroyNotify) gtk_tree_iter_free);
 	contact_list_store_setup (store);
 }
 
@@ -1007,8 +1007,6 @@ add_contact_to_store (GtkTreeStore *store,
 		      EmpathyContactListFlags flags)
 {
 	EmpathyContactListStorePriv *priv = GET_PRIV (store);
-	GtkTreeRowReference *row_ref;
-	GtkTreePath *path;
 	GQueue *queue;
 
 	gtk_tree_store_insert_with_values (store, iter, parent, 0,
@@ -1025,18 +1023,15 @@ add_contact_to_store (GtkTreeStore *store,
 			    EMPATHY_CONTACT_LIST_STORE_COL_FLAGS, flags,
 			    -1);
 
-	path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), iter);
-	row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (store), path);
 	queue = g_hash_table_lookup (priv->empathy_contact_cache, contact);
 	if (queue) {
-		g_queue_push_tail (queue, row_ref);
+		g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
 	} else {
 		queue = g_queue_new ();
-		g_queue_push_tail (queue, row_ref);
+		g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
 		g_hash_table_insert (priv->empathy_contact_cache, contact,
 			queue);
 	}
-	gtk_tree_path_free (path);
 }
 
 static void
@@ -1132,31 +1127,18 @@ contact_list_store_remove_contact (EmpathyContactListStore *store,
 		return;
 	}
 
-	/* GtkTreeRowReference owns a ref on the store so removing it from the cache
-	 * may drop our latest reference on the store. Ref it to be sure it stays
-	 * alive during all the process. */
-	g_object_ref (store);
-
 	/* Clean up model */
 	model = GTK_TREE_MODEL (store);
 
 	for (l = g_queue_peek_head_link (row_refs); l; l = l->next) {
-		GtkTreePath *path = gtk_tree_row_reference_get_path (l->data);
-		GtkTreeIter iter;
+		GtkTreeIter *iter = l->data;
 		GtkTreeIter parent;
-
-		if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (store), &iter,
-			path)) {
-			gtk_tree_path_free (path);
-			continue;
-		}
-		gtk_tree_path_free (path);
 
 		/* NOTE: it is only <= 2 here because we have
 		 * separators after the group name, otherwise it
 		 * should be 1.
 		 */
-		if (gtk_tree_model_iter_parent (model, &parent, &iter) &&
+		if (gtk_tree_model_iter_parent (model, &parent, iter) &&
 		    gtk_tree_model_iter_n_children (model, &parent) <= 2) {
 			gchar *group_name;
 			gtk_tree_model_get (model, &parent,
@@ -1166,13 +1148,11 @@ contact_list_store_remove_contact (EmpathyContactListStore *store,
 				group_name);
 			gtk_tree_store_remove (GTK_TREE_STORE (store), &parent);
 		} else {
-			gtk_tree_store_remove (GTK_TREE_STORE (store), &iter);
+			gtk_tree_store_remove (GTK_TREE_STORE (store), iter);
 		}
 	}
 
 	g_hash_table_remove (priv->empathy_contact_cache, contact);
-
-	g_object_unref (store);
 }
 
 static void
@@ -1448,14 +1428,12 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 	GtkTreeModel                *model;
 	GtkTreeIter                  iter_group;
 	GtkTreeIter                  iter_separator;
-	GtkTreeRowReference         *row_ref;
+	GtkTreeIter                 *iter;
 
 	model = GTK_TREE_MODEL (store);
-	row_ref = g_hash_table_lookup (priv->empathy_group_cache, name);
+	iter = g_hash_table_lookup (priv->empathy_group_cache, name);
 
-	if (row_ref == NULL) {
-		GtkTreePath *path;
-
+	if (iter == NULL) {
 		if (created) {
 			*created = TRUE;
 		}
@@ -1469,11 +1447,8 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 				    EMPATHY_CONTACT_LIST_STORE_COL_IS_FAKE_GROUP, is_fake_group,
 				    -1);
 
-		path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), &iter_group);
-		row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (store), path);
 		g_hash_table_insert (priv->empathy_group_cache,
-			g_strdup (name), row_ref);
-		gtk_tree_path_free (path);
+			g_strdup (name), gtk_tree_iter_copy (&iter_group));
 
 		if (iter_group_to_set) {
 			*iter_group_to_set = iter_group;
@@ -1487,24 +1462,15 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 			*iter_separator_to_set = iter_separator;
 		}
 	} else {
-		GtkTreePath *path = gtk_tree_row_reference_get_path (row_ref);
-		GtkTreeIter iter;
-
-		if (!gtk_tree_model_get_iter (model, &iter, path)) {
-			gtk_tree_path_free (path);
-			return;
-		}
-		gtk_tree_path_free (path);
-
 		if (created) {
 			*created = FALSE;
 		}
 
 		if (iter_group_to_set) {
-			*iter_group_to_set = iter;
+			*iter_group_to_set = *iter;
 		}
 
-		iter_separator = iter;
+		iter_separator = *iter;
 
 		if (gtk_tree_model_iter_next (model, &iter_separator)) {
 			gboolean is_separator;
@@ -1763,15 +1729,10 @@ contact_list_store_find_contact (EmpathyContactListStore *store,
 
 	for (i = g_queue_peek_head_link (row_refs_queue) ; i != NULL ;
 	     i = i->next) {
-		GtkTreePath *path = gtk_tree_row_reference_get_path (i->data);
-		GtkTreeIter iter;
-		if (!gtk_tree_model_get_iter (model, &iter, path)) {
-			gtk_tree_path_free (path);
-			continue;
-		}
-		gtk_tree_path_free (path);
+		GtkTreeIter *iter = i->data;
+
 		iters_list = g_list_prepend
-			(iters_list, gtk_tree_iter_copy (&iter));
+			(iters_list, gtk_tree_iter_copy (iter));
 	}
 
 	return iters_list;
