@@ -73,9 +73,9 @@ typedef struct
   GHashTable *status_icons;
   /* List of owned GCancellables for each pending avatar load operation */
   GList *avatar_cancellables;
-  /* Hash: FolksIndividual* -> GQueue (GtkTreeRowReference) */
+  /* Hash: FolksIndividual* -> GQueue (GtkTreeIter *) */
   GHashTable                  *folks_individual_cache;
-  /* Hash: char *groupname -> GtkTreeRowReference *row */
+  /* Hash: char *groupname -> GtkTreeIter * */
   GHashTable                  *empathy_group_cache;
 } EmpathyIndividualStorePriv;
 
@@ -205,8 +205,6 @@ add_individual_to_store (GtkTreeStore *self,
   EmpathyIndividualStorePriv *priv = GET_PRIV (self);
   gboolean can_audio_call, can_video_call;
   const gchar * const *types;
-  GtkTreeRowReference *row_ref;
-  GtkTreePath *path;
   GQueue *queue;
 
   individual_can_audio_video_call (individual, &can_audio_call,
@@ -225,21 +223,18 @@ add_individual_to_store (GtkTreeStore *self,
       EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES, types,
       -1);
 
-  path = gtk_tree_model_get_path (GTK_TREE_MODEL (self), iter);
-  row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (self), path);
   queue = g_hash_table_lookup (priv->folks_individual_cache, individual);
   if (queue)
     {
-      g_queue_push_tail (queue, row_ref);
+      g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
     }
   else
     {
       queue = g_queue_new ();
-      g_queue_push_tail (queue, row_ref);
+      g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
       g_hash_table_insert (priv->folks_individual_cache, individual,
           queue);
     }
-  gtk_tree_path_free (path);
 }
 
 static void
@@ -254,15 +249,13 @@ individual_store_get_group (EmpathyIndividualStore *self,
   GtkTreeModel *model;
   GtkTreeIter iter_group;
   GtkTreeIter iter_separator;
-  GtkTreeRowReference         *row_ref;
+  GtkTreeIter *iter;
 
   model = GTK_TREE_MODEL (self);
-  row_ref = g_hash_table_lookup (priv->empathy_group_cache, name);
+  iter = g_hash_table_lookup (priv->empathy_group_cache, name);
 
-  if (row_ref == NULL)
+  if (iter == NULL)
     {
-      GtkTreePath *path;
-
       if (created)
         *created = TRUE;
 
@@ -276,11 +269,8 @@ individual_store_get_group (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_FAKE_GROUP, is_fake_group,
           -1);
 
-      path = gtk_tree_model_get_path (GTK_TREE_MODEL (self), &iter_group);
-      row_ref = gtk_tree_row_reference_new (GTK_TREE_MODEL (self), path);
-      g_hash_table_insert (priv->empathy_group_cache,
-      	g_strdup (name), row_ref);
-      gtk_tree_path_free (path);
+      g_hash_table_insert (priv->empathy_group_cache, g_strdup (name),
+          gtk_tree_iter_copy (&iter_group));
 
       if (iter_group_to_set)
         *iter_group_to_set = iter_group;
@@ -295,22 +285,13 @@ individual_store_get_group (EmpathyIndividualStore *self,
     }
   else
     {
-      GtkTreePath *path = gtk_tree_row_reference_get_path (row_ref);
-      GtkTreeIter iter;
-
-      if (!gtk_tree_model_get_iter (model, &iter, path)) {
-      	gtk_tree_path_free (path);
-      	return;
-      }
-      gtk_tree_path_free (path);
-
       if (created)
         *created = FALSE;
 
       if (iter_group_to_set)
-        *iter_group_to_set = iter;
+        *iter_group_to_set = *iter;
 
-      iter_separator = iter;
+      iter_separator = *iter;
 
       if (gtk_tree_model_iter_next (model, &iter_separator))
         {
@@ -343,16 +324,9 @@ individual_store_find_contact (EmpathyIndividualStore *self,
 
   for (i = g_queue_peek_head_link (row_refs_queue) ; i != NULL ; i = i->next)
     {
-      GtkTreePath *path = gtk_tree_row_reference_get_path (i->data);
-      GtkTreeIter iter;
-      if (!gtk_tree_model_get_iter (model, &iter, path))
-        {
-          gtk_tree_path_free (path);
-          continue;
-        }
-      gtk_tree_path_free (path);
-      iters_list = g_list_prepend
-          (iters_list, gtk_tree_iter_copy (&iter));
+      GtkTreeIter *iter = i->data;
+
+      iters_list = g_list_prepend (iters_list, gtk_tree_iter_copy (iter));
     }
 
   return iters_list;
@@ -378,33 +352,19 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
   if (!row_refs)
     return;
 
-  /* GtkTreeRowReference owns a ref on the store so removing it from the cache
-   * may drop our latest reference on the store. Ref it to be sure it stays
-   * alive during all the process. */
-  g_object_ref (self);
-
   /* Clean up model */
   model = GTK_TREE_MODEL (self);
 
   for (l = g_queue_peek_head_link (row_refs); l; l = l->next)
     {
-      GtkTreePath *path = gtk_tree_row_reference_get_path (l->data);
-      GtkTreeIter iter;
+      GtkTreeIter *iter = l->data;
       GtkTreeIter parent;
-
-      if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (self), &iter,
-                                    path))
-        {
-          gtk_tree_path_free (path);
-          continue;
-        }
-      gtk_tree_path_free (path);
 
       /* NOTE: it is only <= 2 here because we have
        * separators after the group name, otherwise it
        * should be 1.
        */
-      if (gtk_tree_model_iter_parent (model, &parent, &iter) &&
+      if (gtk_tree_model_iter_parent (model, &parent, iter) &&
           gtk_tree_model_iter_n_children (model, &parent) <= 2)
         {
           gchar *group_name;
@@ -417,13 +377,11 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
         }
       else
         {
-          gtk_tree_store_remove (GTK_TREE_STORE (self), &iter);
+          gtk_tree_store_remove (GTK_TREE_STORE (self), iter);
         }
     }
 
   g_hash_table_remove (priv->folks_individual_cache, individual);
-
-  g_object_unref (self);
 }
 
 static void
@@ -1629,10 +1587,10 @@ individual_store_inhibit_active_cb (EmpathyIndividualStore *self)
 }
 
 static void
-g_queue_free_full_row_ref (gpointer data)
+g_queue_free_full_iter (gpointer data)
 {
   GQueue *queue = (GQueue *) data;
-  g_queue_foreach (queue, (GFunc) gtk_tree_row_reference_free, NULL);
+  g_queue_foreach (queue, (GFunc) gtk_tree_iter_free, NULL);
   g_queue_free (queue);
 }
 
@@ -1652,10 +1610,9 @@ empathy_individual_store_init (EmpathyIndividualStore *self)
   priv->status_icons =
       g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
   priv->folks_individual_cache = g_hash_table_new_full (NULL, NULL, NULL,
-      g_queue_free_full_row_ref);
+      g_queue_free_full_iter);
   priv->empathy_group_cache = g_hash_table_new_full (g_str_hash,
-      g_str_equal, g_free,
-      (GDestroyNotify) gtk_tree_row_reference_free);
+      g_str_equal, g_free, (GDestroyNotify) gtk_tree_iter_free);
   individual_store_setup (self);
 }
 
