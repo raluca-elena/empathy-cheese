@@ -107,7 +107,7 @@ empathy_about_dialog_new (GtkWindow *parent)
 			       "comments", _("An Instant Messaging client for GNOME"),
 			       "license", license_trans,
 			       "wrap-license", TRUE,
-			       "copyright", "Imendio AB 2002-2007\nCollabora Ltd 2007-2010",
+			       "copyright", "Imendio AB 2002-2007\nCollabora Ltd 2007-2011",
 			       "documenters", documenters,
 			       "logo-icon-name", "empathy",
 			       "translator-credits", _("translator-credits"),
