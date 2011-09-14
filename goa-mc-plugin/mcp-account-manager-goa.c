@@ -136,7 +136,6 @@ get_tp_parameters (GoaAccount *account)
 
   /* generic properties */
   PARAM ("DisplayName", goa_account_get_presentation_identity (account));
-  PARAM ("ConnectAutomatically", "true");
 
 #undef PARAM
 
