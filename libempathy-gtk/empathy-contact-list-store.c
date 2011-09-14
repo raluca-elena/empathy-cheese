@@ -1717,12 +1717,10 @@ contact_list_store_find_contact (EmpathyContactListStore *store,
 				 EmpathyContact          *contact)
 {
 	EmpathyContactListStorePriv *priv = GET_PRIV (store);
-	GtkTreeModel              *model;
 	GQueue                    *row_refs_queue;
 	GList                     *i;
 	GList                     *iters_list = NULL;
 
-	model = GTK_TREE_MODEL (store);
 	row_refs_queue = g_hash_table_lookup (priv->empathy_contact_cache, contact);
 	if (!row_refs_queue)
 		return NULL;

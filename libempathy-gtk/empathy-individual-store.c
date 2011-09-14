@@ -311,12 +311,10 @@ individual_store_find_contact (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
   EmpathyIndividualStorePriv *priv = GET_PRIV (self);
-  GtkTreeModel *model;
   GQueue *row_refs_queue;
   GList *i;
   GList *iters_list = NULL;
 
-  model = GTK_TREE_MODEL (self);
   row_refs_queue = g_hash_table_lookup (priv->folks_individual_cache,
       individual);
   if (!row_refs_queue)
