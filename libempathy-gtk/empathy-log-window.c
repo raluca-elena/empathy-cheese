@@ -1744,9 +1744,8 @@ format_date_for_display (GDate *date)
         text = g_date_time_format (dt, "%A");
       else
         text = g_date_time_format (dt,
-            C_("A date such as '23 May 2010', "
-               "%e is the day, %B the month and %Y the year",
-               "%e %B %Y"));
+            /* Translators: A date such as '23 May 2010' (strftime format) */
+            _("%e %B %Y"));
 
       g_date_time_unref (dt);
     }
