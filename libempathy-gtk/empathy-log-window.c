@@ -1371,13 +1371,24 @@ log_window_append_call (TplEvent *event,
   if (tpl_call_event_get_end_reason (call) != TPL_CALL_END_REASON_NO_ANSWER)
     {
       gchar *body;
+      gchar *tmp;
 
       span = tpl_call_event_get_duration (TPL_CALL_EVENT (event));
+
       if (span < 60)
-        duration = g_strdup_printf (_("%" G_GINT64_FORMAT " seconds"), span);
+        {
+          tmp = g_strdup_printf ("%" G_GINT64_FORMAT, span);
+          duration = g_strdup_printf (
+              ngettext ("%s second", "%s seconds", span), tmp);
+          g_free (tmp);
+        }
       else
-        duration = g_strdup_printf (_("%" G_GINT64_FORMAT " minutes"),
-            span / 60);
+        {
+          tmp = g_strdup_printf ("%" G_GINT64_FORMAT, span / 60);
+          duration = g_strdup_printf (
+              ngettext ("%s minute", "%s minutes", span / 60), tmp);
+          g_free (tmp);
+        }
 
       finished_date = g_date_time_add (started_date, -span);
       finished = g_date_time_format (finished_date, "%X");
