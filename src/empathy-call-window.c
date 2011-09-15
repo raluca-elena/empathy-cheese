@@ -43,6 +43,7 @@
 #include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-tp-contact-factory.h>
+#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-avatar-image.h>
@@ -103,11 +104,12 @@ enum {
 };
 
 typedef enum {
-  CONNECTING,
-  CONNECTED,
-  HELD,
-  DISCONNECTED,
-  REDIALING
+  RINGING,       /* Incoming call */
+  CONNECTING,    /* Outgoing call */
+  CONNECTED,     /* Connected */
+  HELD,          /* Connected, but on hold */
+  DISCONNECTED,  /* Disconnected */
+  REDIALING      /* Redialing (special case of CONNECTING) */
 } CallState;
 
 typedef enum {
@@ -183,6 +185,13 @@ struct _EmpathyCallWindowPriv
   /* We keep a reference on the hbox which contains the main content so we can
      easilly repack everything when toggling fullscreen */
   GtkWidget *content_hbox;
+
+  /* These are used to accept or reject an incoming call when the status
+     is RINGING. */
+  GtkWidget *incoming_call_dialog;
+  TpyCallChannel *pending_channel;
+  TpChannelDispatchOperation *pending_cdo;
+  TpAddDispatchOperationContext *pending_context;
 
   gulong video_output_motion_handler_id;
   guint bus_message_source_id;
@@ -292,6 +301,8 @@ static gboolean empathy_call_window_video_output_motion_notify (
 
 static void empathy_call_window_video_menu_popup (EmpathyCallWindow *window,
   guint button);
+
+static void empathy_call_window_connect_handler (EmpathyCallWindow *self);
 
 static void empathy_call_window_dialpad_cb (GtkToggleToolButton *button,
   EmpathyCallWindow *window);
@@ -1358,6 +1369,105 @@ empathy_call_window_stage_allocation_changed_cb (ClutterActor *stage,
 }
 
 static void
+empathy_call_window_incoming_call_response_cb (GtkDialog *dialog,
+    gint response_id,
+    EmpathyCallWindow *self)
+{
+  switch (response_id)
+    {
+      case GTK_RESPONSE_ACCEPT:
+        tp_channel_dispatch_operation_handle_with_async (
+            self->priv->pending_cdo, EMPATHY_CALL_BUS_NAME, NULL, NULL);
+
+        tp_clear_object (&self->priv->pending_cdo);
+        tp_clear_object (&self->priv->pending_channel);
+        tp_clear_object (&self->priv->pending_context);
+
+        break;
+      case GTK_RESPONSE_CANCEL:
+        tp_channel_dispatch_operation_close_channels_async (
+            self->priv->pending_cdo, NULL, NULL);
+
+        empathy_call_window_status_message (self, _("Disconnected"));
+        self->priv->call_state = DISCONNECTED;
+        break;
+      default:
+        g_warn_if_reached ();
+    }
+}
+
+static void
+empathy_call_window_set_state_ringing (EmpathyCallWindow *self)
+{
+  gboolean video;
+
+  g_assert (self->priv->call_state != CONNECTED);
+
+  video = tpy_call_channel_has_initial_video (self->priv->pending_channel);
+
+  empathy_call_window_status_message (self, _("Incoming call"));
+  self->priv->call_state = RINGING;
+
+  self->priv->incoming_call_dialog = gtk_message_dialog_new (
+      GTK_WINDOW (self), GTK_DIALOG_MODAL,
+      GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
+      video ? _("Incoming video call from %s") : _("Incoming call from %s"),
+      empathy_contact_get_alias (self->priv->contact));
+
+  gtk_dialog_add_buttons (GTK_DIALOG (self->priv->incoming_call_dialog),
+      _("Reject"), GTK_RESPONSE_CANCEL,
+      _("Answer"), GTK_RESPONSE_ACCEPT,
+      NULL);
+
+  g_signal_connect (self->priv->incoming_call_dialog, "response",
+      G_CALLBACK (empathy_call_window_incoming_call_response_cb), self);
+  gtk_widget_show (self->priv->incoming_call_dialog);
+}
+
+static void
+empathy_call_window_cdo_invalidated_cb (TpProxy *channel,
+    guint domain,
+    gint code,
+    gchar *message,
+    EmpathyCallWindow *self)
+{
+  tp_clear_object (&self->priv->pending_cdo);
+  tp_clear_object (&self->priv->pending_channel);
+  tp_clear_object (&self->priv->pending_context);
+
+  /* We don't know if the incoming call has been accepted or not, so we
+   * assume it hasn't and if it has, we'll set the proper status when
+   * we get the new handler. */
+  empathy_call_window_status_message (self, _("Disconnected"));
+  self->priv->call_state = DISCONNECTED;
+
+  gtk_widget_destroy (self->priv->incoming_call_dialog);
+  self->priv->incoming_call_dialog = NULL;
+}
+
+void
+empathy_call_window_start_ringing (EmpathyCallWindow *self,
+    TpyCallChannel *channel,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context)
+{
+  g_assert (self->priv->pending_channel == NULL);
+  g_assert (self->priv->pending_context == NULL);
+  g_assert (self->priv->pending_cdo == NULL);
+
+  /* Start ringing and delay until the user answers or hangs. */
+  self->priv->pending_channel = g_object_ref (channel);
+  self->priv->pending_context = g_object_ref (context);
+  self->priv->pending_cdo = g_object_ref (dispatch_operation);
+
+  g_signal_connect (self->priv->pending_cdo, "invalidated",
+      G_CALLBACK (empathy_call_window_cdo_invalidated_cb), self);
+
+  empathy_call_window_set_state_ringing (self);
+  tp_add_dispatch_operation_context_accept (context);
+}
+
+static void
 empathy_call_window_init (EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv;
@@ -2197,6 +2307,20 @@ empathy_call_window_new (EmpathyCallHandler *handler)
 {
   return EMPATHY_CALL_WINDOW (
     g_object_new (EMPATHY_TYPE_CALL_WINDOW, "handler", handler, NULL));
+}
+
+void
+empathy_call_window_present (EmpathyCallWindow *self,
+    EmpathyCallHandler *handler)
+{
+  g_return_if_fail (EMPATHY_IS_CALL_HANDLER (handler));
+
+  tp_clear_object (&self->priv->handler);
+  self->priv->handler = g_object_ref (handler);
+  empathy_call_window_connect_handler (self);
+
+  empathy_window_present (GTK_WINDOW (self));
+  empathy_call_window_restart_call (self);
 }
 
 static void
@@ -3272,35 +3396,30 @@ call_handler_notify_call_cb (EmpathyCallHandler *handler,
 }
 
 static void
-empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
+empathy_call_window_connect_handler (EmpathyCallWindow *self)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
-  gint width;
-
-  /* Make the hangup button twice as wide */
-  width = gtk_widget_get_allocated_width (priv->hangup_button);
-  gtk_widget_set_size_request (priv->hangup_button, width * 2, -1);
 
   g_signal_connect (priv->handler, "state-changed",
-    G_CALLBACK (empathy_call_window_state_changed_cb), window);
+    G_CALLBACK (empathy_call_window_state_changed_cb), self);
   g_signal_connect (priv->handler, "conference-added",
-    G_CALLBACK (empathy_call_window_conference_added_cb), window);
+    G_CALLBACK (empathy_call_window_conference_added_cb), self);
   g_signal_connect (priv->handler, "conference-removed",
-    G_CALLBACK (empathy_call_window_conference_removed_cb), window);
+    G_CALLBACK (empathy_call_window_conference_removed_cb), self);
   g_signal_connect (priv->handler, "closed",
-    G_CALLBACK (empathy_call_window_channel_closed_cb), window);
+    G_CALLBACK (empathy_call_window_channel_closed_cb), self);
   g_signal_connect (priv->handler, "src-pad-added",
-    G_CALLBACK (empathy_call_window_src_added_cb), window);
+    G_CALLBACK (empathy_call_window_src_added_cb), self);
   g_signal_connect (priv->handler, "sink-pad-added",
-    G_CALLBACK (empathy_call_window_sink_added_cb), window);
+    G_CALLBACK (empathy_call_window_sink_added_cb), self);
   g_signal_connect (priv->handler, "sink-pad-removed",
-    G_CALLBACK (empathy_call_window_sink_removed_cb), window);
+    G_CALLBACK (empathy_call_window_sink_removed_cb), self);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
     {
-      call_handler_notify_call_cb (priv->handler, NULL, window);
+      call_handler_notify_call_cb (priv->handler, NULL, self);
       g_object_unref (call);
     }
   else
@@ -3308,10 +3427,23 @@ empathy_call_window_realized_cb (GtkWidget *widget, EmpathyCallWindow *window)
       /* call-channel doesn't exist yet, we'll connect signals once it has been
        * set */
       g_signal_connect (priv->handler, "notify::call-channel",
-        G_CALLBACK (call_handler_notify_call_cb), window);
+        G_CALLBACK (call_handler_notify_call_cb), self);
     }
+}
 
-  gst_element_set_state (priv->pipeline, GST_STATE_PAUSED);
+static void
+empathy_call_window_realized_cb (GtkWidget *widget,
+    EmpathyCallWindow *self)
+{
+  gint width;
+
+  /* Make the hangup button twice as wide */
+  width = gtk_widget_get_allocated_width (self->priv->hangup_button);
+  gtk_widget_set_size_request (self->priv->hangup_button, width * 2, -1);
+
+  empathy_call_window_connect_handler (self);
+
+  gst_element_set_state (self->priv->pipeline, GST_STATE_PAUSED);
 }
 
 static gboolean

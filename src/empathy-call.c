@@ -34,6 +34,8 @@
 
 #include <telepathy-yell/telepathy-yell.h>
 
+#include <libempathy/empathy-client-factory.h>
+
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "empathy-call-window.h"
@@ -55,6 +57,55 @@ static gboolean use_timer = TRUE;
 
 static EmpathyCallFactory *call_factory = NULL;
 
+/* An EmpathyContact -> EmpathyCallWindow hash table for all existing
+ * Call windows. We own a ref on the EmpathyContacts. */
+static GHashTable *call_windows;
+
+static void
+call_window_destroyed_cb (GtkWidget *window,
+    EmpathyContact *contact)
+{
+  g_hash_table_remove (call_windows, contact);
+
+  g_application_release (G_APPLICATION (app));
+}
+
+static gboolean
+find_window_for_handle (gpointer key,
+    gpointer value,
+    gpointer user_data)
+{
+  EmpathyContact *contact = key;
+  guint handle = GPOINTER_TO_UINT (user_data);
+
+  if (handle == empathy_contact_get_handle (contact))
+    return TRUE;
+
+  return FALSE;
+}
+
+static gboolean
+incoming_call_cb (EmpathyCallFactory *factory,
+    guint handle,
+    TpyCallChannel *channel,
+    TpChannelDispatchOperation *dispatch_operation,
+    TpAddDispatchOperationContext *context,
+    gpointer user_data)
+{
+  EmpathyCallWindow *window = g_hash_table_find (call_windows,
+      find_window_for_handle, GUINT_TO_POINTER (handle));
+
+  if (window != NULL)
+    {
+      /* The window takes care of accepting or rejecting the context. */
+      empathy_call_window_start_ringing (window,
+          channel, dispatch_operation, context);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 new_call_handler_cb (EmpathyCallFactory *factory,
     EmpathyCallHandler *handler,
@@ -62,17 +113,29 @@ new_call_handler_cb (EmpathyCallFactory *factory,
     gpointer user_data)
 {
   EmpathyCallWindow *window;
+  EmpathyContact *contact;
 
-  DEBUG ("Create a new call window");
+  DEBUG ("Show the call window");
 
-  window = empathy_call_window_new (handler);
+  g_object_get (handler, "target-contact", &contact, NULL);
 
-  g_application_hold (G_APPLICATION (app));
+  window = g_hash_table_lookup (call_windows, contact);
 
-  g_signal_connect_swapped (window, "destroy",
-      G_CALLBACK (g_application_release), app);
+  if (window != NULL)
+    {
+      empathy_call_window_present (window, handler);
+    }
+  else
+    {
+      window = empathy_call_window_new (handler);
 
-  gtk_widget_show (GTK_WIDGET (window));
+      g_hash_table_insert (call_windows, g_object_ref (contact), window);
+      g_application_hold (G_APPLICATION (app));
+      g_signal_connect (window, "destroy",
+          G_CALLBACK (call_window_destroyed_cb), contact);
+
+      gtk_widget_show (GTK_WIDGET (window));
+    }
 }
 
 static void
@@ -96,6 +159,8 @@ activate_cb (GApplication *application)
 
   g_signal_connect (G_OBJECT (call_factory), "new-call-handler",
       G_CALLBACK (new_call_handler_cb), NULL);
+  g_signal_connect (G_OBJECT (call_factory), "incoming-call",
+      G_CALLBACK (incoming_call_cb), NULL);
 
   if (!empathy_call_factory_register (call_factory, &error))
     {
@@ -172,6 +237,9 @@ main (int argc,
       use_timer = FALSE;
     }
 
+  call_windows = g_hash_table_new_full (g_direct_hash, g_direct_equal,
+      g_object_unref, NULL);
+
   /* the inactivity timeout can only be set while the application is held */
   g_application_hold (G_APPLICATION (app));
   g_application_set_inactivity_timeout (G_APPLICATION (app), TIMEOUT * 1000);
@@ -179,6 +247,7 @@ main (int argc,
 
   retval = g_application_run (G_APPLICATION (app), argc, argv);
 
+  g_hash_table_unref (call_windows);
   g_object_unref (app);
   tp_clear_object (&call_factory);
 
