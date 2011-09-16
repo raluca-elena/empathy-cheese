@@ -934,17 +934,18 @@ avatar_chooser_clicked_cb (GtkWidget *button,
       gtk_file_chooser_dialog_new (_("Select Your Avatar Image"),
         empathy_get_toplevel_window (GTK_WIDGET (self)),
         GTK_FILE_CHOOSER_ACTION_OPEN,
-        #ifdef HAVE_CHEESE
-        _("Take a picture..."),
-        EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM,
-        #endif
-        _("No Image"),
-        EMPATHY_AVATAR_CHOOSER_RESPONSE_NO_IMAGE,
-        GTK_STOCK_CANCEL,
-        EMPATHY_AVATAR_CHOOSER_RESPONSE_CANCEL,
-        GTK_STOCK_OPEN,
-        EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE,
-        NULL));
+        NULL, NULL));
+
+#ifdef HAVE_CHEESE
+  gtk_dialog_add_button (GTK_DIALOG (self->priv->chooser_dialog),
+      _("Take a picture..."), EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM);
+#endif
+
+  gtk_dialog_add_buttons (GTK_DIALOG (self->priv->chooser_dialog),
+      _("No Image"), EMPATHY_AVATAR_CHOOSER_RESPONSE_NO_IMAGE,
+      GTK_STOCK_CANCEL, EMPATHY_AVATAR_CHOOSER_RESPONSE_CANCEL,
+      GTK_STOCK_OPEN, EMPATHY_AVATAR_CHOOSER_RESPONSE_FILE,
+      NULL);
 
   chooser_dialog = self->priv->chooser_dialog;
   gtk_window_set_destroy_with_parent (GTK_WINDOW (chooser_dialog), TRUE);
