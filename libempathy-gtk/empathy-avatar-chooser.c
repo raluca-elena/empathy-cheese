@@ -28,6 +28,7 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 
+#include <libempathy/empathy-camera-monitor.h>
 #include <libempathy/empathy-gsettings.h>
 #include <libempathy/empathy-utils.h>
 
@@ -923,6 +924,10 @@ avatar_chooser_clicked_cb (GtkWidget *button,
   const gchar *default_dir = DEFAULT_DIR;
   const gchar *pics_dir;
   GtkFileFilter *filter;
+#ifdef HAVE_CHEESE
+  GtkWidget *picture_button;
+  EmpathyCameraMonitor *monitor;
+#endif
 
   if (self->priv->chooser_dialog != NULL)
     {
@@ -937,8 +942,18 @@ avatar_chooser_clicked_cb (GtkWidget *button,
         NULL, NULL));
 
 #ifdef HAVE_CHEESE
-  gtk_dialog_add_button (GTK_DIALOG (self->priv->chooser_dialog),
+  picture_button = gtk_dialog_add_button (
+      GTK_DIALOG (self->priv->chooser_dialog),
       _("Take a picture..."), EMPATHY_AVATAR_CHOOSER_RESPONSE_WEBCAM);
+
+  /* Button is sensitive only if there is one camera connected */
+  monitor = empathy_camera_monitor_dup_singleton ();
+
+  g_object_set_data_full (G_OBJECT (picture_button),
+      "monitor", monitor, g_object_unref);
+
+  g_object_bind_property (monitor, "available", picture_button, "sensitive",
+      G_BINDING_SYNC_CREATE);
 #endif
 
   gtk_dialog_add_buttons (GTK_DIALOG (self->priv->chooser_dialog),
