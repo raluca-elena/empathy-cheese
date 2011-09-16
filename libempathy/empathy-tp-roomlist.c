@@ -275,7 +275,7 @@ tp_roomlist_create_channel_cb (GObject *source,
 	if (priv->channel == NULL) {
 		DEBUG ("Error creating channel: %s", error->message);
 		g_error_free (error);
-		return;
+		goto out;
 	}
 
 	g_signal_connect (priv->channel, "invalidated",
@@ -302,6 +302,9 @@ tp_roomlist_create_channel_cb (GObject *source,
 			call_list_rooms_cb, self, NULL, NULL);
 		priv->start_requested = FALSE;
 	}
+
+out:
+	g_object_unref (self);
 }
 
 static void
@@ -347,6 +350,9 @@ tp_roomlist_constructed (GObject *list)
 
 	req = tp_account_channel_request_new (priv->account, request,
 		TP_USER_ACTION_TIME_CURRENT_TIME);
+
+	/* Ensure we stay alive during the async call */
+	g_object_ref (list);
 
 	tp_account_channel_request_create_and_handle_channel_async (req, NULL,
 		tp_roomlist_create_channel_cb, list);
