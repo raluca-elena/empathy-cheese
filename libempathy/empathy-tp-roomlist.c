@@ -299,7 +299,7 @@ tp_roomlist_create_channel_cb (GObject *source,
 
 	if (priv->start_requested == TRUE) {
 		tp_cli_channel_type_room_list_call_list_rooms (priv->channel, -1,
-			call_list_rooms_cb, self, NULL, NULL);
+			call_list_rooms_cb, self, NULL, G_OBJECT (self));
 		priv->start_requested = FALSE;
 	}
 
