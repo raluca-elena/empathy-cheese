@@ -703,10 +703,10 @@ empathy_log_window_init (EmpathyLogWindow *self)
   vbox = gtk_vbox_new (FALSE, 3);
 
   self->priv->search_entry = gtk_entry_new ();
-  gtk_entry_set_icon_from_stock (GTK_ENTRY (self->priv->search_entry),
-      GTK_ENTRY_ICON_PRIMARY, GTK_STOCK_FIND);
-  gtk_entry_set_icon_from_stock (GTK_ENTRY (self->priv->search_entry),
-      GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
+  gtk_entry_set_icon_from_icon_name (GTK_ENTRY (self->priv->search_entry),
+      GTK_ENTRY_ICON_SECONDARY, "edit-find-symbolic");
+  gtk_entry_set_icon_sensitive (GTK_ENTRY (self->priv->search_entry),
+                                GTK_ENTRY_ICON_SECONDARY, FALSE);
 
   label = gtk_label_new (_("Search"));
 
@@ -2025,6 +2025,25 @@ static void
 log_window_search_entry_changed_cb (GtkWidget *entry,
     EmpathyLogWindow *self)
 {
+  const gchar *str;
+
+  str = gtk_entry_get_text (GTK_ENTRY (self->priv->search_entry));
+
+  if (!tp_str_empty (str))
+    {
+      gtk_entry_set_icon_from_icon_name (GTK_ENTRY (self->priv->search_entry),
+          GTK_ENTRY_ICON_SECONDARY, "edit-clear-symbolic");
+      gtk_entry_set_icon_sensitive (GTK_ENTRY (self->priv->search_entry),
+          GTK_ENTRY_ICON_SECONDARY, TRUE);
+    }
+  else
+    {
+      gtk_entry_set_icon_from_icon_name (GTK_ENTRY (self->priv->search_entry),
+          GTK_ENTRY_ICON_SECONDARY, "edit-find-symbolic");
+      gtk_entry_set_icon_sensitive (GTK_ENTRY (self->priv->search_entry),
+          GTK_ENTRY_ICON_SECONDARY, FALSE);
+    }
+
   if (self->priv->source != 0)
     g_source_remove (self->priv->source);
   self->priv->source = g_timeout_add (500, (GSourceFunc) start_find_search,
