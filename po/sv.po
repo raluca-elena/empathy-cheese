@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-12 17:51+0200\n"
-"PO-Revision-Date: 2011-09-12 17:54+0100\n"
+"POT-Creation-Date: 2011-09-18 19:31+0200\n"
+"PO-Revision-Date: 2011-09-18 19:32+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -729,7 +729,7 @@ msgstr[1] "%d månader sedan"
 msgid "in the future"
 msgstr "i framtiden"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:539
+#: ../libempathy-gtk/empathy-account-chooser.c:540
 msgid "All accounts"
 msgstr "Alla konton"
 
@@ -1235,36 +1235,36 @@ msgstr "Yahoo!-I_D:"
 msgid "_Room List locale:"
 msgstr "Lokalanpassning för _rumslista:"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:470
-#: ../libempathy-gtk/empathy-avatar-chooser.c:555
+#: ../libempathy-gtk/empathy-avatar-chooser.c:471
+#: ../libempathy-gtk/empathy-avatar-chooser.c:556
 msgid "Couldn't convert image"
 msgstr "Kunde inte konvertera bild"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:471
+#: ../libempathy-gtk/empathy-avatar-chooser.c:472
 msgid "None of the accepted image formats are supported on your system"
 msgstr "Inget av de accepterade bildformaten stöds på ditt system"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:818
+#: ../libempathy-gtk/empathy-avatar-chooser.c:819
 msgid "Couldn't save picture to file"
 msgstr "Kunde inte spara bilden till fil"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:934
+#: ../libempathy-gtk/empathy-avatar-chooser.c:939
 msgid "Select Your Avatar Image"
 msgstr "Välj din profilbild"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:938
+#: ../libempathy-gtk/empathy-avatar-chooser.c:947
 msgid "Take a picture..."
 msgstr "Ta en bild..."
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:941
+#: ../libempathy-gtk/empathy-avatar-chooser.c:960
 msgid "No Image"
 msgstr "Ingen bild"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1001
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1017
 msgid "Images"
 msgstr "Bilder"
 
-#: ../libempathy-gtk/empathy-avatar-chooser.c:1005
+#: ../libempathy-gtk/empathy-avatar-chooser.c:1021
 msgid "All Files"
 msgstr "Alla filer"
 
@@ -1521,10 +1521,15 @@ msgstr "%s har gått in i rummet"
 msgid "%s is now known as %s"
 msgstr "%s är nu känd som %s"
 
+#. We don't know if the incoming call has been accepted or not, so we
+#. * assume it hasn't and if it has, we'll set the proper status when
+#. * we get the new handler.
 #: ../libempathy-gtk/empathy-chat.c:2768
 #: ../src/empathy-streamed-media-window.c:1894
 #: ../src/empathy-event-manager.c:1240
-#: ../src/empathy-call-window.c:2355
+#: ../src/empathy-call-window.c:1391
+#: ../src/empathy-call-window.c:1441
+#: ../src/empathy-call-window.c:2479
 msgid "Disconnected"
 msgstr "Frånkopplad"
 
@@ -1602,7 +1607,7 @@ msgstr "Redigera blockerade kontakter"
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:1
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:512
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1485
+#: ../libempathy-gtk/empathy-individual-widget.c:1489
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
@@ -1772,7 +1777,7 @@ msgstr "Dela ut mitt skrivbord"
 #: ../libempathy-gtk/empathy-contact-menu.c:525
 #: ../libempathy-gtk/empathy-contact-widget.c:1886
 #: ../libempathy-gtk/empathy-individual-menu.c:1065
-#: ../libempathy-gtk/empathy-individual-widget.c:1373
+#: ../libempathy-gtk/empathy-individual-widget.c:1372
 msgid "Favorite"
 msgstr "Favorit"
 
@@ -2051,7 +2056,7 @@ msgstr "Kontaktuppgifter"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1515
+#: ../libempathy-gtk/empathy-individual-widget.c:1517
 msgid "Identifier:"
 msgstr "Identifierare:"
 
@@ -2179,7 +2184,7 @@ msgstr "Ta bort och _blockera"
 msgid "Do you really want to remove the linked contact '%s'? Note that this will remove all the contacts which make up this linked contact."
 msgstr "Vill du verkligen ta bort den länkade kontakten \"%s\"? Observera att detta kommer att ta bort alla kontakter som denna länkade kontakt innehåller."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1662
+#: ../libempathy-gtk/empathy-individual-widget.c:1656
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -2298,87 +2303,95 @@ msgstr "<i>* %s %s</i>"
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1377
-#: ../libempathy-gtk/empathy-log-window.c:1379
-#: ../src/empathy-ft-manager.c:1026
-msgid "%"
-msgstr "%"
+#: ../libempathy-gtk/empathy-log-window.c:1382
+#, c-format
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s sekund"
+msgstr[1] "%s sekunder"
 
-#: ../libempathy-gtk/empathy-log-window.c:1386
+#: ../libempathy-gtk/empathy-log-window.c:1389
+#, c-format
+msgid "%s minute"
+msgid_plural "%s minutes"
+msgstr[0] "%s minut"
+msgstr[1] "%s minuter"
+
+#: ../libempathy-gtk/empathy-log-window.c:1397
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "Samtalet tog %s, avslutades %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1718
+#: ../libempathy-gtk/empathy-log-window.c:1729
 msgid "Today"
 msgstr "Idag"
 
 # "Web site" är "webbplats". "Web page" är "webbsida".
-#: ../libempathy-gtk/empathy-log-window.c:1722
+#: ../libempathy-gtk/empathy-log-window.c:1733
 msgid "Yesterday"
 msgstr "Igår"
 
-#: ../libempathy-gtk/empathy-log-window.c:1738
-msgctxt "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+#. Translators: A date such as '23 May 2010' (strftime format)
+#: ../libempathy-gtk/empathy-log-window.c:1748
 msgid "%e %B %Y"
-msgstr "%e %B %Y"
+msgstr "%B %e %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1819
-#: ../libempathy-gtk/empathy-log-window.c:3415
+#: ../libempathy-gtk/empathy-log-window.c:1829
+#: ../libempathy-gtk/empathy-log-window.c:3425
 msgid "Anytime"
 msgstr "När som helst"
 
-#: ../libempathy-gtk/empathy-log-window.c:1906
-#: ../libempathy-gtk/empathy-log-window.c:2343
+#: ../libempathy-gtk/empathy-log-window.c:1916
+#: ../libempathy-gtk/empathy-log-window.c:2353
 msgid "Anyone"
 msgstr "Vem som helst"
 
-#: ../libempathy-gtk/empathy-log-window.c:2656
+#: ../libempathy-gtk/empathy-log-window.c:2666
 msgid "Who"
 msgstr "Vem"
 
-#: ../libempathy-gtk/empathy-log-window.c:2860
+#: ../libempathy-gtk/empathy-log-window.c:2870
 msgid "When"
 msgstr "När"
 
-#: ../libempathy-gtk/empathy-log-window.c:2976
+#: ../libempathy-gtk/empathy-log-window.c:2986
 msgid "Anything"
 msgstr "Allting"
 
-#: ../libempathy-gtk/empathy-log-window.c:2978
+#: ../libempathy-gtk/empathy-log-window.c:2988
 msgid "Text chats"
 msgstr "Textchattar"
 
-#: ../libempathy-gtk/empathy-log-window.c:2980
+#: ../libempathy-gtk/empathy-log-window.c:2990
 #: ../src/empathy-preferences.ui.h:4
 msgid "Calls"
 msgstr "Samtal"
 
-#: ../libempathy-gtk/empathy-log-window.c:2985
+#: ../libempathy-gtk/empathy-log-window.c:2995
 msgid "Incoming calls"
 msgstr "Inkommande samtal"
 
-#: ../libempathy-gtk/empathy-log-window.c:2986
+#: ../libempathy-gtk/empathy-log-window.c:2996
 msgid "Outgoing calls"
 msgstr "Utgående samtal"
 
-#: ../libempathy-gtk/empathy-log-window.c:2987
+#: ../libempathy-gtk/empathy-log-window.c:2997
 msgid "Missed calls"
 msgstr "Missade samtal"
 
-#: ../libempathy-gtk/empathy-log-window.c:3009
+#: ../libempathy-gtk/empathy-log-window.c:3019
 msgid "What"
 msgstr "Vad"
 
-#: ../libempathy-gtk/empathy-log-window.c:3718
+#: ../libempathy-gtk/empathy-log-window.c:3728
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr "Är du säker på att du vill ta bort alla loggar för tidigare samtal?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3722
+#: ../libempathy-gtk/empathy-log-window.c:3732
 msgid "Clear All"
 msgstr "Töm allt"
 
-#: ../libempathy-gtk/empathy-log-window.c:3729
+#: ../libempathy-gtk/empathy-log-window.c:3739
 msgid "Delete from:"
 msgstr "Ta bort från:"
 
@@ -2568,12 +2581,12 @@ msgstr "Röstsamtal avslutat"
 msgid "Edit Custom Messages"
 msgstr "Redigera anpassade meddelanden"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1030
+#: ../libempathy-gtk/empathy-theme-adium.c:1036
 #, c-format
 msgid "Message edited at %s"
 msgstr "Meddelandet redigerat %s"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1720
+#: ../libempathy-gtk/empathy-theme-adium.c:1726
 msgid "Normal"
 msgstr "Normal"
 
@@ -3067,7 +3080,7 @@ msgstr "Ditt nya konto har inte sparats än."
 
 #: ../src/empathy-accounts-dialog.c:345
 #: ../src/empathy-streamed-media-window.c:754
-#: ../src/empathy-call-window.c:1164
+#: ../src/empathy-call-window.c:1175
 msgid "Connecting…"
 msgstr "Ansluter..."
 
@@ -3172,12 +3185,12 @@ msgid "People nearby"
 msgstr "Personer i närheten"
 
 #: ../src/empathy-av.c:118
-#: ../src/empathy-call.c:127
+#: ../src/empathy-call.c:192
 msgid "- Empathy Audio/Video Client"
 msgstr "- Ljud/Videoklienten Empathy"
 
 #: ../src/empathy-av.c:134
-#: ../src/empathy-call.c:152
+#: ../src/empathy-call.c:217
 msgid "Empathy Audio/Video Client"
 msgstr "Ljud/Videoklienten Empathy"
 
@@ -3220,33 +3233,33 @@ msgstr "Detaljer"
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
 #: ../src/empathy-streamed-media-window.c:1220
-#: ../src/empathy-call-window.c:1672
+#: ../src/empathy-call-window.c:1782
 #, c-format
 msgid "Call with %s"
 msgstr "Ring med %s"
 
 #: ../src/empathy-streamed-media-window.c:1453
-#: ../src/empathy-call-window.c:1916
+#: ../src/empathy-call-window.c:2026
 msgid "The IP address as seen by the machine"
 msgstr "IP-adressen som den ses av datorn"
 
 #: ../src/empathy-streamed-media-window.c:1455
-#: ../src/empathy-call-window.c:1918
+#: ../src/empathy-call-window.c:2028
 msgid "The IP address as seen by a server on the Internet"
 msgstr "IP-adressen som den ses av en server på Internet"
 
 #: ../src/empathy-streamed-media-window.c:1457
-#: ../src/empathy-call-window.c:1920
+#: ../src/empathy-call-window.c:2030
 msgid "The IP address of the peer as seen by the other side"
 msgstr "IP-adressen för klienten som den ses av andra sidan"
 
 #: ../src/empathy-streamed-media-window.c:1459
-#: ../src/empathy-call-window.c:1922
+#: ../src/empathy-call-window.c:2032
 msgid "The IP address of a relay server"
 msgstr "IP-adressen för en reläserver"
 
 #: ../src/empathy-streamed-media-window.c:1461
-#: ../src/empathy-call-window.c:1924
+#: ../src/empathy-call-window.c:2034
 msgid "The IP address of the multicast group"
 msgstr "IP-adressen för multicast-gruppen"
 
@@ -3277,66 +3290,66 @@ msgid "Connected — %d:%02dm"
 msgstr "Ansluten — %d:%02dm"
 
 #: ../src/empathy-streamed-media-window.c:2205
-#: ../src/empathy-call-window.c:2674
+#: ../src/empathy-call-window.c:2798
 msgid "Technical Details"
 msgstr "Tekniska detaljer"
 
 #: ../src/empathy-streamed-media-window.c:2243
-#: ../src/empathy-call-window.c:2712
+#: ../src/empathy-call-window.c:2836
 #, c-format
 msgid "%s's software does not understand any of the audio formats supported by your computer"
 msgstr "Programvaran hos %s förstår inte något av de ljudformat som stöds av din dator"
 
 #: ../src/empathy-streamed-media-window.c:2248
-#: ../src/empathy-call-window.c:2717
+#: ../src/empathy-call-window.c:2841
 #, c-format
 msgid "%s's software does not understand any of the video formats supported by your computer"
 msgstr "Programvaran hos %s förstår inte något av de videoformat som stöds av din dator"
 
 #: ../src/empathy-streamed-media-window.c:2254
-#: ../src/empathy-call-window.c:2723
+#: ../src/empathy-call-window.c:2847
 #, c-format
 msgid "Can't establish a connection to %s. One of you might be on a network that does not allow direct connections."
 msgstr "Kan inte etablera en anslutning till %s. Någon av er kanske befinner er på ett nätverk som inte tillåter direktanslutningar."
 
 #: ../src/empathy-streamed-media-window.c:2260
-#: ../src/empathy-call-window.c:2729
+#: ../src/empathy-call-window.c:2853
 msgid "There was a failure on the network"
 msgstr "Det inträffade ett fel på nätverket"
 
 #: ../src/empathy-streamed-media-window.c:2264
-#: ../src/empathy-call-window.c:2733
+#: ../src/empathy-call-window.c:2857
 msgid "The audio formats necessary for this call are not installed on your computer"
 msgstr "Ljudformaten som krävs för detta samtal är inte installerade på din dator"
 
 #: ../src/empathy-streamed-media-window.c:2267
-#: ../src/empathy-call-window.c:2736
+#: ../src/empathy-call-window.c:2860
 msgid "The video formats necessary for this call are not installed on your computer"
 msgstr "Videoformaten som krävs för detta samtal är inte installerade på din dator"
 
 #: ../src/empathy-streamed-media-window.c:2277
-#: ../src/empathy-call-window.c:2748
+#: ../src/empathy-call-window.c:2872
 #, c-format
 msgid "Something unexpected happened in a Telepathy component. Please <a href=\"%s\">report this bug</a> and attach logs gathered from the 'Debug' window in the Help menu."
 msgstr "Någonting oväntat hände i en Telepathy-komponent. <a href=\"%s\">Rapportera detta fel</a> och bifoga loggarna som samlats in från \"Felsök\"-fönstret i Hjälp-menyn."
 
 #: ../src/empathy-streamed-media-window.c:2285
-#: ../src/empathy-call-window.c:2757
+#: ../src/empathy-call-window.c:2881
 msgid "There was a failure in the call engine"
 msgstr "Det uppstod ett fel i samtalsmotorn"
 
 #: ../src/empathy-streamed-media-window.c:2288
-#: ../src/empathy-call-window.c:2760
+#: ../src/empathy-call-window.c:2884
 msgid "The end of the stream was reached"
 msgstr "Slutet på strömmen nåddes"
 
 #: ../src/empathy-streamed-media-window.c:2328
-#: ../src/empathy-call-window.c:2800
+#: ../src/empathy-call-window.c:2924
 msgid "Can't establish audio stream"
 msgstr "Kan inte etablera ljudström"
 
 #: ../src/empathy-streamed-media-window.c:2338
-#: ../src/empathy-call-window.c:2810
+#: ../src/empathy-call-window.c:2934
 msgid "Can't establish video stream"
 msgstr "Kan inte etablera videoström"
 
@@ -3428,10 +3441,10 @@ msgstr "Växla videoöverföring"
 
 #: ../src/empathy-call-window.ui.h:21
 #: ../src/empathy-streamed-media-window.ui.h:18
-#: ../src/empathy-call-window.c:2307
-#: ../src/empathy-call-window.c:2308
-#: ../src/empathy-call-window.c:2309
-#: ../src/empathy-call-window.c:2310
+#: ../src/empathy-call-window.c:2431
+#: ../src/empathy-call-window.c:2432
+#: ../src/empathy-call-window.c:2433
+#: ../src/empathy-call-window.c:2434
 msgid "Unknown"
 msgstr "Okänt"
 
@@ -3605,6 +3618,7 @@ msgid "Incoming video call"
 msgstr "Inkommande videosamtal"
 
 #: ../src/empathy-event-manager.c:521
+#: ../src/empathy-call-window.c:1408
 msgid "Incoming call"
 msgstr "Inkommande samtal"
 
@@ -3621,6 +3635,7 @@ msgstr "%s ringer dig. Vill du svara?"
 #: ../src/empathy-event-manager.c:529
 #: ../src/empathy-event-manager.c:730
 #: ../src/empathy-event-manager.c:763
+#: ../src/empathy-call-window.c:1414
 #, c-format
 msgid "Incoming call from %s"
 msgstr "Inkommande samtal från %s"
@@ -3640,6 +3655,7 @@ msgstr "S_vara med video"
 
 #: ../src/empathy-event-manager.c:730
 #: ../src/empathy-event-manager.c:763
+#: ../src/empathy-call-window.c:1414
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "Inkommande videosamtal från %s"
@@ -3795,6 +3811,10 @@ msgstr "Kontrollerar integritet för \"%s\""
 msgid "Hashing \"%s\""
 msgstr "Hashar \"%s\""
 
+#: ../src/empathy-ft-manager.c:1026
+msgid "%"
+msgstr "%"
+
 #: ../src/empathy-ft-manager.c:1038
 msgid "File"
 msgstr "Fil"
@@ -3876,7 +3896,7 @@ msgstr "Fyll på..."
 msgid "Contact"
 msgstr "Kontakt"
 
-#: ../src/empathy-main-window.c:2119
+#: ../src/empathy-main-window.c:2121
 msgid "Contact List"
 msgstr "Kontaktlista"
 
@@ -4432,11 +4452,13 @@ msgid "Respond"
 msgstr "Svara"
 
 #: ../src/empathy-notifications-approver.c:217
+#: ../src/empathy-call-window.c:1418
 msgid "Reject"
 msgstr "Avvisa"
 
 #: ../src/empathy-notifications-approver.c:222
 #: ../src/empathy-notifications-approver.c:227
+#: ../src/empathy-call-window.c:1419
 msgid "Answer"
 msgstr "Svara"
 
@@ -4454,6 +4476,9 @@ msgstr "Neka"
 msgid "Accept"
 msgstr "Acceptera"
 
+#. translators: the 'Provide' button is displayed in a notification
+#. * bubble when Empathy is asking for an account password; clicking on it
+#. * brings the password popup.
 #: ../src/empathy-notifications-approver.c:260
 msgid "Provide"
 msgstr "Tillhandahåll"
@@ -4465,25 +4490,25 @@ msgstr "%s försökte just ringa dig men du var upptagen i ett annat samtal."
 
 #. Translators: this is an "Info" label. It should be as short
 #. * as possible.
-#: ../src/empathy-call-window.c:1036
-#: ../src/empathy-call-window.c:1059
+#: ../src/empathy-call-window.c:1047
+#: ../src/empathy-call-window.c:1070
 msgid "i"
 msgstr "i"
 
-#: ../src/empathy-call-window.c:2603
+#: ../src/empathy-call-window.c:2727
 msgid "On hold"
 msgstr "Väntar"
 
-#: ../src/empathy-call-window.c:2606
+#: ../src/empathy-call-window.c:2730
 msgid "Mute"
 msgstr "Tyst"
 
-#: ../src/empathy-call-window.c:2608
+#: ../src/empathy-call-window.c:2732
 msgid "Duration"
 msgstr "Längd"
 
 #. Translators: 'status - minutes:seconds' the caller has been connected
-#: ../src/empathy-call-window.c:2611
+#: ../src/empathy-call-window.c:2735
 #, c-format
 msgid "%s — %d:%02dm"
 msgstr "%s — %d:%02dm"
