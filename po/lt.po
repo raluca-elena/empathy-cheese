@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=empathy&keywords=I18N+L10N&component=General\n"
-"POT-Creation-Date: 2011-08-30 09:49+0000\n"
-"PO-Revision-Date: 2011-09-01 23:07+0300\n"
+"POT-Creation-Date: 2011-09-15 13:17+0000\n"
+"PO-Revision-Date: 2011-09-18 16:33+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lithuanian\n"
 "MIME-Version: 1.0\n"
@@ -41,7 +41,6 @@ msgid "Always open a separate chat window for new chats."
 msgstr "Naujiems pokalbiams visada atverti atskirą pokalbio langą."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:2
-#| msgid "Call from %s"
 msgid "Call volume"
 msgstr "Skambučio garsumas"
 
@@ -50,12 +49,10 @@ msgid "Call volume, as a percentage."
 msgstr "Skambučio garsumas procentais."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:4
-#| msgid "Camera On"
 msgid "Camera device"
 msgstr "Kameros įrenginys"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:5
-#| msgid "Camera On"
 msgid "Camera position"
 msgstr "Kameros padėtis"
 
@@ -734,71 +731,84 @@ msgstr[2] "prieš %d mėnesių"
 msgid "in the future"
 msgstr "ateityje"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:539
+#: ../libempathy-gtk/empathy-account-chooser.c:540
 msgid "All accounts"
 msgstr "Visos paskyros"
 
-#: ../libempathy-gtk/empathy-account-widget.c:693
+#: ../libempathy-gtk/empathy-account-widget.c:694
 #: ../src/empathy-import-widget.c:321
 msgid "Account"
 msgstr "Paskyra"
 
-#: ../libempathy-gtk/empathy-account-widget.c:694
+#: ../libempathy-gtk/empathy-account-widget.c:695
 msgid "Password"
 msgstr "Slaptažodis"
 
-#: ../libempathy-gtk/empathy-account-widget.c:695
+#: ../libempathy-gtk/empathy-account-widget.c:696
 #: ../libempathy-gtk/empathy-irc-network-dialog.c:507
 msgid "Server"
 msgstr "Serveris"
 
-#: ../libempathy-gtk/empathy-account-widget.c:696
+#: ../libempathy-gtk/empathy-account-widget.c:697
 #: ../libempathy-gtk/empathy-irc-network-dialog.c:522
 msgid "Port"
 msgstr "Prievadas"
 
-#: ../libempathy-gtk/empathy-account-widget.c:768
-#: ../libempathy-gtk/empathy-account-widget.c:825
+#: ../libempathy-gtk/empathy-account-widget.c:769
+#: ../libempathy-gtk/empathy-account-widget.c:826
 #, c-format
 msgid "%s:"
 msgstr "%s:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1166
-#, c-format
-msgid "The account %s is edited via My Web Accounts."
-msgstr "Paskyra %s taisoma naudojantis mano žiniatinklio paskyromis."
+#: ../libempathy-gtk/empathy-account-widget.c:1192
+#| msgid "Launch My Web Accounts"
+msgid "My Web Accounts"
+msgstr "Mano internetinės paskyros"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1172
+#: ../libempathy-gtk/empathy-account-widget.c:1208
+#, c-format
+#| msgid "The account %s is edited via My Web Accounts."
+msgid "The account %s is edited via %s."
+msgstr "Paskyra %s taisoma naudojantis %s."
+
+#: ../libempathy-gtk/empathy-account-widget.c:1214
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Paskyros %s Empathy programoje taisyti negalima."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1192
+#: ../libempathy-gtk/empathy-account-widget.c:1233
 msgid "Launch My Web Accounts"
 msgstr "Paleisti mano žiniatinklio paskyras"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1532
+#. general handler
+#: ../libempathy-gtk/empathy-account-widget.c:1241
+#, c-format
+#| msgid "_Edit"
+msgid "Edit %s"
+msgstr "Taisyti %s"
+
+#: ../libempathy-gtk/empathy-account-widget.c:1591
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
 msgid "Username:"
 msgstr "Naudotojo vardas:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1850
+#: ../libempathy-gtk/empathy-account-widget.c:1909
 msgid "A_pply"
 msgstr "_Pritaikyti"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1880
+#: ../libempathy-gtk/empathy-account-widget.c:1939
 msgid "L_og in"
 msgstr "_Prisijungti"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1954
+#: ../libempathy-gtk/empathy-account-widget.c:2013
 msgid "This account already exists on the server"
 msgstr "Ši paskyra jau yra serveryje"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1957
+#: ../libempathy-gtk/empathy-account-widget.c:2016
 msgid "Create a new account on the server"
 msgstr "Sukurti naują paskyrą serveryje"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2149
+#: ../libempathy-gtk/empathy-account-widget.c:2208
 msgid "Ca_ncel"
 msgstr "_Atšaukti"
 
@@ -807,19 +817,19 @@ msgstr "_Atšaukti"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2427
+#: ../libempathy-gtk/empathy-account-widget.c:2486
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s serveryje %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2453
+#: ../libempathy-gtk/empathy-account-widget.c:2512
 #, c-format
 msgid "%s Account"
 msgstr "%s paskyra"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2457
+#: ../libempathy-gtk/empathy-account-widget.c:2516
 msgid "New account"
 msgstr "Nauja paskyra"
 
@@ -980,7 +990,7 @@ msgstr "Simbolių koduotė:"
 
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:3
 msgid "Most IRC servers don't need a password, so if you're not sure, don't enter a password."
-msgstr "Daugumai IRC serverių nereikia slaptažodžio, todėl jei nesate tikras, neįveskite slaptažodio."
+msgstr "Daugumai IRC serverių nereikia slaptažodžio, todėl jei nesate tikras, neįveskite slaptažodžio."
 
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:4
 msgid "Network"
@@ -1240,7 +1250,6 @@ msgid "None of the accepted image formats are supported on your system"
 msgstr "Jokie priimti paveikslėlių formatai jūsų sistemoje nepalaikomi"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:818
-#| msgid "Couldn't save pixbuf to png"
 msgid "Couldn't save picture to file"
 msgstr "Nepavyko išsaugoti paveikslėlio į failą"
 
@@ -1295,7 +1304,7 @@ msgstr "Nepavyko atverti privataus pokalbio"
 
 #: ../libempathy-gtk/empathy-chat.c:763
 msgid "Topic not supported on this conversation"
-msgstr "Šiame pokalbyje tema yra napalaikoma"
+msgstr "Šiame pokalbyje tema yra nepalaikoma"
 
 #: ../libempathy-gtk/empathy-chat.c:769
 msgid "You are not allowed to change the topic"
@@ -1306,162 +1315,162 @@ msgstr "Jums neleidžiama pakeisti temos"
 msgid "“%s” is not a valid contact ID"
 msgstr "„%s“ yra netinkamas adresato ID"
 
-#: ../libempathy-gtk/empathy-chat.c:1030
+#: ../libempathy-gtk/empathy-chat.c:1058
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: ištrinti visus dabartinio pokalbio pranešimus"
 
-#: ../libempathy-gtk/empathy-chat.c:1033
+#: ../libempathy-gtk/empathy-chat.c:1061
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr "/topic <topic>: nustatyti dabartinio pokalbio temą"
 
-#: ../libempathy-gtk/empathy-chat.c:1036
+#: ../libempathy-gtk/empathy-chat.c:1064
 msgid "/join <chat room ID>: join a new chat room"
 msgstr "/join <pokalbių kambario ID>: prisijungti prie naujo pokalbių kambario"
 
-#: ../libempathy-gtk/empathy-chat.c:1039
+#: ../libempathy-gtk/empathy-chat.c:1067
 msgid "/j <chat room ID>: join a new chat room"
 msgstr "/j <pokalbių kambario ID>: prisijungti prie naujo pokalbių kambario"
 
-#: ../libempathy-gtk/empathy-chat.c:1043
+#: ../libempathy-gtk/empathy-chat.c:1071
 msgid "/part [<chat room ID>] [<reason>]: leave the chat room, by default the current one"
 msgstr "/part [<pokalbių kambario ID>] [<priežastis>]: išeiti iš pokalbių kambario; dabartinio, jei nenurodyta kitaip"
 
-#: ../libempathy-gtk/empathy-chat.c:1047
+#: ../libempathy-gtk/empathy-chat.c:1075
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr "/query <adresato ID> [<žinutė>]: atverti privatų pokalbį"
 
-#: ../libempathy-gtk/empathy-chat.c:1050
+#: ../libempathy-gtk/empathy-chat.c:1078
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr "/msg <adresato ID> <žinutė>: atverti privatų pokalbį"
 
-#: ../libempathy-gtk/empathy-chat.c:1053
+#: ../libempathy-gtk/empathy-chat.c:1081
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr "/nick <slapyvardis>: keisti savo slapyvardį dabartiniame serveryje"
 
-#: ../libempathy-gtk/empathy-chat.c:1056
+#: ../libempathy-gtk/empathy-chat.c:1084
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr "/me <žinutė>: siųsti dabartiniam pokalbiui žinutę ACTION"
 
-#: ../libempathy-gtk/empathy-chat.c:1059
+#: ../libempathy-gtk/empathy-chat.c:1087
 msgid "/say <message>: send <message> to the current conversation. This is used to send a message starting with a '/'. For example: \"/say /join is used to join a new chat room\""
 msgstr "/say <žinutė>: siųsti dabartiniam pokalbiui <žinutę>. Tai naudojama norint siųsti žinutę, prasidedančia simboliu „/“. Pavyzdžiui: „/say /join naudojama norint prisijungti prie naujo pokalbių kambario“"
 
-#: ../libempathy-gtk/empathy-chat.c:1064
+#: ../libempathy-gtk/empathy-chat.c:1092
 msgid "/whois <contact ID>: display information about a contact"
 msgstr "/whois <adresato ID>: parodo informaciją apie adresatą"
 
-#: ../libempathy-gtk/empathy-chat.c:1067
+#: ../libempathy-gtk/empathy-chat.c:1095
 msgid "/help [<command>]: show all supported commands. If <command> is defined, show its usage."
 msgstr "/help [<komanda>]: rodyti visas palaikomas komandas. Jei <komanda> apibrėžta, rodyti, kaip ją naudoti."
 
-#: ../libempathy-gtk/empathy-chat.c:1077
+#: ../libempathy-gtk/empathy-chat.c:1112
 #, c-format
 msgid "Usage: %s"
 msgstr "Naudojimas: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1116
+#: ../libempathy-gtk/empathy-chat.c:1157
 msgid "Unknown command"
 msgstr "Nežinoma komanda"
 
-#: ../libempathy-gtk/empathy-chat.c:1242
+#: ../libempathy-gtk/empathy-chat.c:1283
 msgid "Unknown command; see /help for the available commands"
 msgstr "Nežinoma komanda. Galimas komandas galite pamatyti įvykdę komandą /help"
 
 #. translators: error used when user doesn't have enough credit on his
 #. * account to send the message.
-#: ../libempathy-gtk/empathy-chat.c:1412
+#: ../libempathy-gtk/empathy-chat.c:1453
 msgid "insufficient balance to send message"
 msgstr "nepakankamas balansas žinutės siuntimui"
 
-#: ../libempathy-gtk/empathy-chat.c:1414
+#: ../libempathy-gtk/empathy-chat.c:1455
 msgid "not capable"
 msgstr "nepalaiko"
 
-#: ../libempathy-gtk/empathy-chat.c:1421
+#: ../libempathy-gtk/empathy-chat.c:1462
 msgid "offline"
 msgstr "atsijungęs"
 
-#: ../libempathy-gtk/empathy-chat.c:1424
+#: ../libempathy-gtk/empathy-chat.c:1465
 msgid "invalid contact"
 msgstr "netinkamas adresatas"
 
-#: ../libempathy-gtk/empathy-chat.c:1427
+#: ../libempathy-gtk/empathy-chat.c:1468
 msgid "permission denied"
-msgstr "prieeiga uždrausta"
+msgstr "prieiga uždrausta"
 
-#: ../libempathy-gtk/empathy-chat.c:1430
+#: ../libempathy-gtk/empathy-chat.c:1471
 msgid "too long message"
 msgstr "per ilga žinutė"
 
-#: ../libempathy-gtk/empathy-chat.c:1433
+#: ../libempathy-gtk/empathy-chat.c:1474
 msgid "not implemented"
 msgstr "ši funkcija dar nerealizuota"
 
-#: ../libempathy-gtk/empathy-chat.c:1437
+#: ../libempathy-gtk/empathy-chat.c:1478
 msgid "unknown"
 msgstr "nežinoma"
 
-#: ../libempathy-gtk/empathy-chat.c:1443
+#: ../libempathy-gtk/empathy-chat.c:1484
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "Klaida siunčiant žinutę „%s“: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1447
+#: ../libempathy-gtk/empathy-chat.c:1488
 #, c-format
 msgid "Error sending message: %s"
 msgstr "Klaida siunčiant žinutę: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1508
+#: ../libempathy-gtk/empathy-chat.c:1549
 #: ../src/empathy-chat-window.c:761
 msgid "Topic:"
 msgstr "Tema:"
 
-#: ../libempathy-gtk/empathy-chat.c:1520
+#: ../libempathy-gtk/empathy-chat.c:1561
 #, c-format
 msgid "Topic set to: %s"
 msgstr "Tema nustatyta į: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1522
+#: ../libempathy-gtk/empathy-chat.c:1563
 msgid "No topic defined"
 msgstr "Nenurodyta jokia tema"
 
-#: ../libempathy-gtk/empathy-chat.c:2031
+#: ../libempathy-gtk/empathy-chat.c:2072
 msgid "(No Suggestions)"
 msgstr "(Nėra pasiūlymų)"
 
 #. translators: %s is the selected word
-#: ../libempathy-gtk/empathy-chat.c:2099
+#: ../libempathy-gtk/empathy-chat.c:2140
 #, c-format
 msgid "Add '%s' to Dictionary"
 msgstr "Įtraukti „%s“ į žodyną"
 
 #. translators: first %s is the selected word,
 #. * second %s is the language name of the target dictionary
-#: ../libempathy-gtk/empathy-chat.c:2136
+#: ../libempathy-gtk/empathy-chat.c:2177
 #, c-format
 msgid "Add '%s' to %s Dictionary"
 msgstr "Įtraukti „%s“ į %s žodyną"
 
-#: ../libempathy-gtk/empathy-chat.c:2206
+#: ../libempathy-gtk/empathy-chat.c:2247
 msgid "Insert Smiley"
 msgstr "Įterpti šypsenėlę"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:2224
+#: ../libempathy-gtk/empathy-chat.c:2265
 #: ../libempathy-gtk/empathy-ui-utils.c:1839
 msgid "_Send"
 msgstr "_Siųsti"
 
 #. Spelling suggestions
-#: ../libempathy-gtk/empathy-chat.c:2278
+#: ../libempathy-gtk/empathy-chat.c:2319
 msgid "_Spelling Suggestions"
 msgstr "_Rašybos pasiūlymai"
 
-#: ../libempathy-gtk/empathy-chat.c:2367
+#: ../libempathy-gtk/empathy-chat.c:2408
 msgid "Failed to retrieve recent logs"
 msgstr "Nepavyko gauti naujausių žurnalų"
 
-#: ../libempathy-gtk/empathy-chat.c:2504
+#: ../libempathy-gtk/empathy-chat.c:2545
 #, c-format
 msgid "%s has disconnected"
 msgstr "%s atsijungė"
@@ -1469,12 +1478,12 @@ msgstr "%s atsijungė"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2511
+#: ../libempathy-gtk/empathy-chat.c:2552
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "%2$s išspyrė naudotoją %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2514
+#: ../libempathy-gtk/empathy-chat.c:2555
 #, c-format
 msgid "%s was kicked"
 msgstr "%s buvo išspirtas"
@@ -1482,17 +1491,17 @@ msgstr "%s buvo išspirtas"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2522
+#: ../libempathy-gtk/empathy-chat.c:2563
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "%2$s užblokavo naudotoją %1$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2525
+#: ../libempathy-gtk/empathy-chat.c:2566
 #, c-format
 msgid "%s was banned"
 msgstr "%s buvo užblokuotas"
 
-#: ../libempathy-gtk/empathy-chat.c:2529
+#: ../libempathy-gtk/empathy-chat.c:2570
 #, c-format
 msgid "%s has left the room"
 msgstr "%s paliko pokalbių kambarį"
@@ -1502,70 +1511,75 @@ msgstr "%s paliko pokalbių kambarį"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2538
+#: ../libempathy-gtk/empathy-chat.c:2579
 #, c-format
 msgid " (%s)"
 msgstr " (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2563
+#: ../libempathy-gtk/empathy-chat.c:2604
 #, c-format
 msgid "%s has joined the room"
 msgstr "%s prisijungė prie pokalbių kambario"
 
-#: ../libempathy-gtk/empathy-chat.c:2588
+#: ../libempathy-gtk/empathy-chat.c:2629
 #, c-format
 msgid "%s is now known as %s"
 msgstr "%s dabar žinomas (-a) kaip %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2727
+#. We don't know if the incoming call has been accepted or not, so we
+#. * assume it hasn't and if it has, we'll set the proper status when
+#. * we get the new handler.
+#: ../libempathy-gtk/empathy-chat.c:2768
 #: ../src/empathy-streamed-media-window.c:1894
 #: ../src/empathy-event-manager.c:1240
-#: ../src/empathy-call-window.c:2335
+#: ../src/empathy-call-window.c:1391
+#: ../src/empathy-call-window.c:1441
+#: ../src/empathy-call-window.c:2479
 msgid "Disconnected"
 msgstr "Atsijungęs (-usi)"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3374
+#: ../libempathy-gtk/empathy-chat.c:3415
 msgid "Would you like to store this password?"
 msgstr "Ar norėtumėte įrašyti šį slaptažodį?"
 
-#: ../libempathy-gtk/empathy-chat.c:3380
+#: ../libempathy-gtk/empathy-chat.c:3421
 msgid "Remember"
 msgstr "Įrašyti"
 
-#: ../libempathy-gtk/empathy-chat.c:3390
+#: ../libempathy-gtk/empathy-chat.c:3431
 msgid "Not now"
 msgstr "Ne dabar"
 
-#: ../libempathy-gtk/empathy-chat.c:3434
+#: ../libempathy-gtk/empathy-chat.c:3475
 msgid "Retry"
 msgstr "Bandyti dar kartą"
 
-#: ../libempathy-gtk/empathy-chat.c:3438
+#: ../libempathy-gtk/empathy-chat.c:3479
 msgid "Wrong password; please try again:"
 msgstr "Neteisingas slaptažodis, bandykite dar kartą:"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3568
+#: ../libempathy-gtk/empathy-chat.c:3609
 msgid "This room is protected by a password:"
 msgstr "Šis kambarys yra apsaugotas slaptažodžiu:"
 
-#: ../libempathy-gtk/empathy-chat.c:3595
+#: ../libempathy-gtk/empathy-chat.c:3636
 msgid "Join"
 msgstr "Prisijungti"
 
-#: ../libempathy-gtk/empathy-chat.c:3797
+#: ../libempathy-gtk/empathy-chat.c:3838
 #: ../src/empathy-event-manager.c:1261
 msgid "Connected"
 msgstr "Prisijungęs (-usi)"
 
-#: ../libempathy-gtk/empathy-chat.c:3852
+#: ../libempathy-gtk/empathy-chat.c:3893
 msgid "Conversation"
 msgstr "Pokalbis"
 
 #. Translators: this string is a something like
 #. * "Escher Cat (SMS)"
-#: ../libempathy-gtk/empathy-chat.c:3857
+#: ../libempathy-gtk/empathy-chat.c:3898
 #, c-format
 msgid "%s (SMS)"
 msgstr "%s (SMS)"
@@ -1598,7 +1612,7 @@ msgstr "Taisyti blokuotus adresatus"
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:1
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:512
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1485
+#: ../libempathy-gtk/empathy-individual-widget.c:1489
 #: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
@@ -1606,7 +1620,6 @@ msgid "Account:"
 msgstr "Paskyra:"
 
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:2
-#| msgid "_Blocked Contacts"
 msgid "Blocked Contacts"
 msgstr "Užblokuoti adresatai"
 
@@ -1770,7 +1783,7 @@ msgstr "Dalintis mano darbastaliu"
 #: ../libempathy-gtk/empathy-contact-menu.c:525
 #: ../libempathy-gtk/empathy-contact-widget.c:1886
 #: ../libempathy-gtk/empathy-individual-menu.c:1065
-#: ../libempathy-gtk/empathy-individual-widget.c:1373
+#: ../libempathy-gtk/empathy-individual-widget.c:1372
 msgid "Favorite"
 msgstr "Mėgiamas"
 
@@ -1975,7 +1988,7 @@ msgstr "Kilimo greitis:"
 #: ../libempathy-gtk/empathy-contact-widget.c:937
 #: ../libempathy-gtk/empathy-individual-widget.c:509
 msgid "Last Updated on:"
-msgstr "Paskutinįkart atnaujinta:"
+msgstr "Paskutinį kartą atnaujinta:"
 
 #: ../libempathy-gtk/empathy-contact-widget.c:939
 #: ../libempathy-gtk/empathy-individual-widget.c:511
@@ -1990,13 +2003,13 @@ msgstr "Platuma:"
 #: ../libempathy-gtk/empathy-contact-widget.c:943
 #: ../libempathy-gtk/empathy-individual-widget.c:515
 msgid "Altitude:"
-msgstr "Altitudė:"
+msgstr "Aukštuma:"
 
 #: ../libempathy-gtk/empathy-contact-widget.c:996
 #: ../libempathy-gtk/empathy-contact-widget.c:1011
 #: ../libempathy-gtk/empathy-individual-widget.c:607
 #: ../libempathy-gtk/empathy-individual-widget.c:622
-#: ../src/empathy-preferences.ui.h:16
+#: ../src/empathy-preferences.ui.h:17
 msgid "Location"
 msgstr "Vietovė"
 
@@ -2048,7 +2061,7 @@ msgstr "Adresato informacija"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1515
+#: ../libempathy-gtk/empathy-individual-widget.c:1517
 msgid "Identifier:"
 msgstr "Identifikatorius:"
 
@@ -2140,7 +2153,6 @@ msgid "Call"
 msgstr "Skambutis"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:378
-#| msgid "Profile"
 msgid "Mobile"
 msgstr "Mobilusis"
 
@@ -2179,7 +2191,7 @@ msgstr "Ištrinti ir _blokuoti"
 msgid "Do you really want to remove the linked contact '%s'? Note that this will remove all the contacts which make up this linked contact."
 msgstr "Ar tikrai norite pašalinti susietąjį adresatą „%s“? Atminkite, jog bus pašalinti visi adresatai, sudarantys šį susietąjį adresatą."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1662
+#: ../libempathy-gtk/empathy-individual-widget.c:1656
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -2258,128 +2270,144 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Išskaityti"
 
-#: ../libempathy-gtk/empathy-log-window.c:633
+#: ../libempathy-gtk/empathy-log-window.c:634
 msgid "History"
 msgstr "Istorija"
 
-#: ../libempathy-gtk/empathy-log-window.c:685
+#: ../libempathy-gtk/empathy-log-window.c:689
 msgid "Show"
 msgstr "Rodyti"
 
-#: ../libempathy-gtk/empathy-log-window.c:707
+#: ../libempathy-gtk/empathy-log-window.c:711
 msgid "Search"
 msgstr "Ieškoti"
 
-#: ../libempathy-gtk/empathy-log-window.c:1155
+#: ../libempathy-gtk/empathy-log-window.c:1159
 #, c-format
-#| msgid "Chat with %s"
 msgid "Chat in %s"
 msgstr "Kalbėti kanale %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1157
+#: ../libempathy-gtk/empathy-log-window.c:1161
 #, c-format
 msgid "Chat with %s"
 msgstr "Kalbėti su %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1207
-#: ../libempathy-gtk/empathy-log-window.c:1354
+#: ../libempathy-gtk/empathy-log-window.c:1211
+#: ../libempathy-gtk/empathy-log-window.c:1358
 msgctxt "A date with the time"
 msgid "%A, %e %B %Y %X"
 msgstr "%A, %e %B %Y %X"
 
 #. Translators: this is an emote: '* Danielle waves'
-#: ../libempathy-gtk/empathy-log-window.c:1296
+#: ../libempathy-gtk/empathy-log-window.c:1300
 #, c-format
 msgid "<i>* %s %s</i>"
 msgstr "<i>* %s %s</i>"
 
 #. Translators: this is a message: 'Danielle: hello'
 #. * The string in bold is the sender's name
-#: ../libempathy-gtk/empathy-log-window.c:1302
+#: ../libempathy-gtk/empathy-log-window.c:1306
 #, c-format
 msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1373
-#: ../libempathy-gtk/empathy-log-window.c:1375
-#: ../src/empathy-ft-manager.c:1026
-msgid "%"
-msgstr "%"
-
 #: ../libempathy-gtk/empathy-log-window.c:1382
+#, c-format
+#| msgid "%d second ago"
+#| msgid_plural "%d seconds ago"
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s sekundė"
+msgstr[1] "%s sekundės"
+msgstr[2] "%s sekundžių"
+
+#: ../libempathy-gtk/empathy-log-window.c:1389
+#, c-format
+#| msgid "%d minute ago"
+#| msgid_plural "%d minutes ago"
+msgid "%s minute"
+msgid_plural "%s minutes"
+msgstr[0] "%s minutė"
+msgstr[1] "%s minutės"
+msgstr[2] "%s minučių"
+
+#: ../libempathy-gtk/empathy-log-window.c:1397
 #, c-format
 msgid "Call took %s, ended at %s"
 msgstr "Pokalbis truko %s, baigėsi %s"
 
-#: ../libempathy-gtk/empathy-log-window.c:1714
+#: ../libempathy-gtk/empathy-log-window.c:1729
 msgid "Today"
 msgstr "Šiandien"
 
-#: ../libempathy-gtk/empathy-log-window.c:1718
+#: ../libempathy-gtk/empathy-log-window.c:1733
 msgid "Yesterday"
 msgstr "Vakar"
 
-#: ../libempathy-gtk/empathy-log-window.c:1734
-msgctxt "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+#. Translators: A date such as '23 May 2010' (strftime format)
+#: ../libempathy-gtk/empathy-log-window.c:1748
+#| msgctxt ""
+#| "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
+#| msgid "%e %B %Y"
 msgid "%e %B %Y"
 msgstr "%e %B %Y"
 
-#: ../libempathy-gtk/empathy-log-window.c:1815
-#: ../libempathy-gtk/empathy-log-window.c:3396
+#: ../libempathy-gtk/empathy-log-window.c:1829
+#: ../libempathy-gtk/empathy-log-window.c:3425
 msgid "Anytime"
 msgstr "Bet kada"
 
-#: ../libempathy-gtk/empathy-log-window.c:1895
-#: ../libempathy-gtk/empathy-log-window.c:2325
+#: ../libempathy-gtk/empathy-log-window.c:1916
+#: ../libempathy-gtk/empathy-log-window.c:2353
 msgid "Anyone"
 msgstr "Bet kas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2637
+#: ../libempathy-gtk/empathy-log-window.c:2666
 msgid "Who"
 msgstr "Kas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2841
+#: ../libempathy-gtk/empathy-log-window.c:2870
 msgid "When"
 msgstr "Kada"
 
-#: ../libempathy-gtk/empathy-log-window.c:2957
+#: ../libempathy-gtk/empathy-log-window.c:2986
 msgid "Anything"
 msgstr "Bet kas"
 
-#: ../libempathy-gtk/empathy-log-window.c:2959
+#: ../libempathy-gtk/empathy-log-window.c:2988
 msgid "Text chats"
-msgstr "Tekstiniai pakalbiai"
+msgstr "Tekstiniai pokalbiai"
 
-#: ../libempathy-gtk/empathy-log-window.c:2961
+#: ../libempathy-gtk/empathy-log-window.c:2990
 #: ../src/empathy-preferences.ui.h:4
 msgid "Calls"
 msgstr "Skambučiai"
 
-#: ../libempathy-gtk/empathy-log-window.c:2966
+#: ../libempathy-gtk/empathy-log-window.c:2995
 msgid "Incoming calls"
 msgstr "Įeinantys skambučiai"
 
-#: ../libempathy-gtk/empathy-log-window.c:2967
+#: ../libempathy-gtk/empathy-log-window.c:2996
 msgid "Outgoing calls"
 msgstr "Išeinantys skambučiai"
 
-#: ../libempathy-gtk/empathy-log-window.c:2968
+#: ../libempathy-gtk/empathy-log-window.c:2997
 msgid "Missed calls"
 msgstr "Praleistas skambučiai"
 
-#: ../libempathy-gtk/empathy-log-window.c:2990
+#: ../libempathy-gtk/empathy-log-window.c:3019
 msgid "What"
 msgstr "Kas"
 
-#: ../libempathy-gtk/empathy-log-window.c:3699
+#: ../libempathy-gtk/empathy-log-window.c:3728
 msgid "Are you sure you want to delete all logs of previous conversations?"
 msgstr "Ar tikrai norite ištrinti visų buvusių pokalbių žurnalus?"
 
-#: ../libempathy-gtk/empathy-log-window.c:3703
+#: ../libempathy-gtk/empathy-log-window.c:3732
 msgid "Clear All"
 msgstr "Išvalyti visus"
 
-#: ../libempathy-gtk/empathy-log-window.c:3710
+#: ../libempathy-gtk/empathy-log-window.c:3739
 msgid "Delete from:"
 msgstr "Trinti nuo:"
 
@@ -2510,7 +2538,6 @@ msgid "Find:"
 msgstr "Ieškoti:"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:2
-#| msgid "Match case"
 msgid "Mat_ch case"
 msgstr "Skirti raidžių _registrą"
 
@@ -2519,12 +2546,10 @@ msgid "Phrase not found"
 msgstr "Frazė nerasta"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:4
-#| msgid "_Next Tab"
 msgid "_Next"
 msgstr "_Kitas"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:5
-#| msgid "_Previous Tab"
 msgid "_Previous"
 msgstr "_Ankstesnis"
 
@@ -2572,12 +2597,12 @@ msgstr "Baigtas garsinis skambutis"
 msgid "Edit Custom Messages"
 msgstr "Taisykite pasirinktinę žinutę"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1030
+#: ../libempathy-gtk/empathy-theme-adium.c:1036
 #, c-format
 msgid "Message edited at %s"
 msgstr "Žinutė redaguota %s"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1720
+#: ../libempathy-gtk/empathy-theme-adium.c:1726
 msgid "Normal"
 msgstr "Normalus"
 
@@ -2872,23 +2897,23 @@ msgstr "Nėra klaidų pranešimų"
 msgid "Instant Message (Empathy)"
 msgstr "Tikralaikė žinutė (Empathy)"
 
-#: ../src/empathy.c:400
+#: ../src/empathy.c:431
 msgid "Don't connect on startup"
 msgstr "Paleidimo metu neprisijungti"
 
-#: ../src/empathy.c:404
+#: ../src/empathy.c:435
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "Paleidus nerodyti adresatų sąrašo ar kitų dialogų"
 
-#: ../src/empathy.c:419
+#: ../src/empathy.c:450
 msgid "- Empathy IM Client"
 msgstr "– Tikralaikių pokalbių klientas Empathy"
 
-#: ../src/empathy.c:606
+#: ../src/empathy.c:637
 msgid "Error contacting the Account Manager"
 msgstr "Klaida susisiekiant su paskyrų tvarkykle"
 
-#: ../src/empathy.c:608
+#: ../src/empathy.c:639
 #, c-format
 msgid ""
 "There was an error while trying to connect to the Telepathy Account Manager. The error was:\n"
@@ -3066,7 +3091,7 @@ msgstr "Jūsų naujoji paskyra dar neįrašyta."
 
 #: ../src/empathy-accounts-dialog.c:345
 #: ../src/empathy-streamed-media-window.c:754
-#: ../src/empathy-call-window.c:1159
+#: ../src/empathy-call-window.c:1175
 msgid "Connecting…"
 msgstr "Jungiamasi…"
 
@@ -3171,12 +3196,12 @@ msgid "People nearby"
 msgstr "Žmonės netoliese"
 
 #: ../src/empathy-av.c:118
-#: ../src/empathy-call.c:127
+#: ../src/empathy-call.c:192
 msgid "- Empathy Audio/Video Client"
 msgstr "– Empathy garso/vaizdo transliavimo klientas"
 
 #: ../src/empathy-av.c:134
-#: ../src/empathy-call.c:152
+#: ../src/empathy-call.c:217
 msgid "Empathy Audio/Video Client"
 msgstr "Empathy garso/vaizdo transliavimo klientas"
 
@@ -3219,33 +3244,33 @@ msgstr "Išsami informacija"
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
 #: ../src/empathy-streamed-media-window.c:1220
-#: ../src/empathy-call-window.c:1667
+#: ../src/empathy-call-window.c:1782
 #, c-format
 msgid "Call with %s"
 msgstr "Skambinti su %s"
 
 #: ../src/empathy-streamed-media-window.c:1453
-#: ../src/empathy-call-window.c:1911
+#: ../src/empathy-call-window.c:2026
 msgid "The IP address as seen by the machine"
 msgstr "Kompiuterio matomas IP adresas"
 
 #: ../src/empathy-streamed-media-window.c:1455
-#: ../src/empathy-call-window.c:1913
+#: ../src/empathy-call-window.c:2028
 msgid "The IP address as seen by a server on the Internet"
 msgstr "Interneto serverio matomas IP adresas"
 
 #: ../src/empathy-streamed-media-window.c:1457
-#: ../src/empathy-call-window.c:1915
+#: ../src/empathy-call-window.c:2030
 msgid "The IP address of the peer as seen by the other side"
 msgstr "Kitos pusės matomas lygiarangio IP adresas"
 
 #: ../src/empathy-streamed-media-window.c:1459
-#: ../src/empathy-call-window.c:1917
+#: ../src/empathy-call-window.c:2032
 msgid "The IP address of a relay server"
 msgstr "Perdavimo serverio IP adresas"
 
 #: ../src/empathy-streamed-media-window.c:1461
-#: ../src/empathy-call-window.c:1919
+#: ../src/empathy-call-window.c:2034
 msgid "The IP address of the multicast group"
 msgstr "Daugiaadresio perdavimo grupės IP adresas"
 
@@ -3276,66 +3301,66 @@ msgid "Connected — %d:%02dm"
 msgstr "Prisijunta – %d:%02dm"
 
 #: ../src/empathy-streamed-media-window.c:2205
-#: ../src/empathy-call-window.c:2654
+#: ../src/empathy-call-window.c:2798
 msgid "Technical Details"
 msgstr "Techninė informacija"
 
 #: ../src/empathy-streamed-media-window.c:2243
-#: ../src/empathy-call-window.c:2692
+#: ../src/empathy-call-window.c:2836
 #, c-format
 msgid "%s's software does not understand any of the audio formats supported by your computer"
 msgstr "Adresato %s programinė įranga nepalaiko jokių jūsų kompiuterio palaikomų formatų"
 
 #: ../src/empathy-streamed-media-window.c:2248
-#: ../src/empathy-call-window.c:2697
+#: ../src/empathy-call-window.c:2841
 #, c-format
 msgid "%s's software does not understand any of the video formats supported by your computer"
 msgstr "Adresato %s programinė įranga nepalaiko jokių jūsų kompiuterio palaikomų vaizdo įrašų formatų"
 
 #: ../src/empathy-streamed-media-window.c:2254
-#: ../src/empathy-call-window.c:2703
+#: ../src/empathy-call-window.c:2847
 #, c-format
 msgid "Can't establish a connection to %s. One of you might be on a network that does not allow direct connections."
 msgstr "Nepavyko užmegzti ryšio su %s. Gali būti, kad vienas iš jūsų yra tinkle, nepriimančiame tiesioginių prisijungimų."
 
 #: ../src/empathy-streamed-media-window.c:2260
-#: ../src/empathy-call-window.c:2709
+#: ../src/empathy-call-window.c:2853
 msgid "There was a failure on the network"
 msgstr "Tinkle yra triktis"
 
 #: ../src/empathy-streamed-media-window.c:2264
-#: ../src/empathy-call-window.c:2713
+#: ../src/empathy-call-window.c:2857
 msgid "The audio formats necessary for this call are not installed on your computer"
 msgstr "Jūsų kompiuteryje neįdiegti garso įrašų formatai, reikalingi šiam skambučiui"
 
 #: ../src/empathy-streamed-media-window.c:2267
-#: ../src/empathy-call-window.c:2716
+#: ../src/empathy-call-window.c:2860
 msgid "The video formats necessary for this call are not installed on your computer"
 msgstr "Jūsų kompiuteryje neįdiegti vaizdo įrašų formatai, reikalingi šiam skambučiui"
 
 #: ../src/empathy-streamed-media-window.c:2277
-#: ../src/empathy-call-window.c:2728
+#: ../src/empathy-call-window.c:2872
 #, c-format
 msgid "Something unexpected happened in a Telepathy component. Please <a href=\"%s\">report this bug</a> and attach logs gathered from the 'Debug' window in the Help menu."
 msgstr "Telepathy komponente atsitiko kažkas nenumatyta. <a href=\"%s\">Praneškite apie šią klaidą</a> ir pridėkite žurnalus, kuriuos surinkote meniu Pagalba „Derinimo“ lange."
 
 #: ../src/empathy-streamed-media-window.c:2285
-#: ../src/empathy-call-window.c:2737
+#: ../src/empathy-call-window.c:2881
 msgid "There was a failure in the call engine"
 msgstr "Skambinimo posistemėje yra triktis"
 
 #: ../src/empathy-streamed-media-window.c:2288
-#: ../src/empathy-call-window.c:2740
+#: ../src/empathy-call-window.c:2884
 msgid "The end of the stream was reached"
 msgstr "Pasiekta srauto pabaiga"
 
 #: ../src/empathy-streamed-media-window.c:2328
-#: ../src/empathy-call-window.c:2780
+#: ../src/empathy-call-window.c:2924
 msgid "Can't establish audio stream"
 msgstr "Nepavyko sukurti garso srauto"
 
 #: ../src/empathy-streamed-media-window.c:2338
-#: ../src/empathy-call-window.c:2790
+#: ../src/empathy-call-window.c:2934
 msgid "Can't establish video stream"
 msgstr "Nepavyko sukurti vaizdo srauto"
 
@@ -3351,7 +3376,6 @@ msgid "Decoding Codec:"
 msgstr "Dekodavimo kodekas:"
 
 #: ../src/empathy-call-window.ui.h:4
-#| msgid "_Disable"
 msgid "Disable camera"
 msgstr "Išjungti kamerą"
 
@@ -3398,12 +3422,10 @@ msgid "Send Audio"
 msgstr "Siųsti garsą"
 
 #: ../src/empathy-call-window.ui.h:14
-#| msgid "Send _Video"
 msgid "Send Video"
 msgstr "Siųsti vaizdą"
 
 #: ../src/empathy-call-window.ui.h:15
-#| msgid "Dialpad"
 msgid "Show dialpad"
 msgstr "Rodyti skambinimo skydelį"
 
@@ -3425,22 +3447,19 @@ msgid "Toggle audio transmission"
 msgstr "Įjungti garso transliavimą"
 
 #: ../src/empathy-call-window.ui.h:20
-#| msgid "Toggle audio transmission"
 msgid "Toggle video transmission"
 msgstr "Perjungti vaizdo transliavimą"
 
 #: ../src/empathy-call-window.ui.h:21
 #: ../src/empathy-streamed-media-window.ui.h:18
-#: ../src/empathy-call-window.c:2287
-#: ../src/empathy-call-window.c:2288
-#: ../src/empathy-call-window.c:2289
-#: ../src/empathy-call-window.c:2290
+#: ../src/empathy-call-window.c:2431
+#: ../src/empathy-call-window.c:2432
+#: ../src/empathy-call-window.c:2433
+#: ../src/empathy-call-window.c:2434
 msgid "Unknown"
 msgstr "Nežinoma"
 
 #: ../src/empathy-call-window.ui.h:23
-#| msgctxt "menu item"
-#| msgid "_Video Call"
 msgid "Video call"
 msgstr "Vaizdo skambutis"
 
@@ -3450,7 +3469,6 @@ msgid "_Call"
 msgstr "_Skambutis"
 
 #: ../src/empathy-call-window.ui.h:25
-#| msgid "Camera On"
 msgid "_Camera"
 msgstr "_Kamera"
 
@@ -3616,6 +3634,7 @@ msgid "Incoming video call"
 msgstr "Gaunamas vaizdinis skambutis"
 
 #: ../src/empathy-event-manager.c:521
+#: ../src/empathy-call-window.c:1408
 msgid "Incoming call"
 msgstr "Skambutis jums"
 
@@ -3632,6 +3651,7 @@ msgstr "%s jums skambina, ar atsiliepsite?"
 #: ../src/empathy-event-manager.c:529
 #: ../src/empathy-event-manager.c:730
 #: ../src/empathy-event-manager.c:763
+#: ../src/empathy-call-window.c:1414
 #, c-format
 msgid "Incoming call from %s"
 msgstr "Skambutis jums nuo %s"
@@ -3651,6 +3671,7 @@ msgstr "_Atsakyti vaizdu"
 
 #: ../src/empathy-event-manager.c:730
 #: ../src/empathy-event-manager.c:763
+#: ../src/empathy-call-window.c:1414
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "Gaunamas vaizdinis skambutis iš %s"
@@ -3806,6 +3827,10 @@ msgstr "Tikrinamas „%s“ vientisumas"
 msgid "Hashing \"%s\""
 msgstr "Kuriama „%s“ maiša"
 
+#: ../src/empathy-ft-manager.c:1026
+msgid "%"
+msgstr "%"
+
 #: ../src/empathy-ft-manager.c:1038
 msgid "File"
 msgstr "Failas"
@@ -3887,7 +3912,7 @@ msgstr "Pakelti..."
 msgid "Contact"
 msgstr "Adresatas"
 
-#: ../src/empathy-main-window.c:2119
+#: ../src/empathy-main-window.c:2121
 msgid "Contact List"
 msgstr "Adresatų sąrašas"
 
@@ -4142,119 +4167,125 @@ msgid "Display incoming events in the notification area"
 msgstr "Rodyti gaunamus įvykius pranešimų srityje"
 
 #: ../src/empathy-preferences.ui.h:9
+msgid "Echo cancellation helps to make your voice sound clearer to the other person, but may cause problems on some computers. If you or the other person hear strange noises or glitches during calls, try turning echo cancellation off and restarting the call."
+msgstr "Aido panaikinimas padeda padaryti jūsų balsą aiškesnį kitam asmeniui, bet gali sukelti problemų kai kuriuose kompiuteriuose. Jei jūs arba kitas asmuo girdi keistus triukšmus ar nesklandumus skambučio metu, bandykite išjungti aido panaikinimą ir skambinti iš naujo."
+
+#: ../src/empathy-preferences.ui.h:10
 msgid "Enable notifications when a contact comes online"
 msgstr "Įjungti pranešimus, kai prisijungia adresatas"
 
-#: ../src/empathy-preferences.ui.h:10
+#: ../src/empathy-preferences.ui.h:11
 msgid "Enable notifications when a contact goes offline"
 msgstr "Įjungti pranešimus, kai atsijungia adresatas"
 
-#: ../src/empathy-preferences.ui.h:11
+#: ../src/empathy-preferences.ui.h:12
 msgid "Enable notifications when the _chat is not focused"
 msgstr "Įjungti pranešimus, kai _pokalbio langas nesuaktyvintas"
 
-#: ../src/empathy-preferences.ui.h:12
+#: ../src/empathy-preferences.ui.h:13
 msgid "Enable spell checking for languages:"
 msgstr "Įjungti šių kalbų rašybos tikrinimą:"
 
-#: ../src/empathy-preferences.ui.h:13
+#: ../src/empathy-preferences.ui.h:14
 msgid "General"
 msgstr "Bendra"
 
-#: ../src/empathy-preferences.ui.h:14
-msgid "Input level"
-msgstr "Įvesties lygis"
-
 #: ../src/empathy-preferences.ui.h:15
-msgid "Input volume"
-msgstr "Įvesties garsumas"
+#| msgid "Input level"
+msgid "Input level:"
+msgstr "Įvesties lygis:"
 
-#: ../src/empathy-preferences.ui.h:17
+#: ../src/empathy-preferences.ui.h:16
+#| msgid "Input volume"
+msgid "Input volume:"
+msgstr "Įvesties garsumas:"
+
+#: ../src/empathy-preferences.ui.h:18
 msgid "Location sources:"
 msgstr "Vietovės šaltiniai:"
 
-#: ../src/empathy-preferences.ui.h:18
+#: ../src/empathy-preferences.ui.h:19
 msgid "Log conversations"
 msgstr "Vesti pokalbių žurnalus"
 
-#: ../src/empathy-preferences.ui.h:19
+#: ../src/empathy-preferences.ui.h:20
 msgid "Notifications"
 msgstr "Pranešimai"
 
-#: ../src/empathy-preferences.ui.h:20
+#: ../src/empathy-preferences.ui.h:21
 msgid "Play sound for events"
 msgstr "Groti garsus įvykiams"
 
-#: ../src/empathy-preferences.ui.h:21
+#: ../src/empathy-preferences.ui.h:22
 msgid "Privacy"
 msgstr "Privatumas"
 
-#: ../src/empathy-preferences.ui.h:22
+#: ../src/empathy-preferences.ui.h:23
 msgid "Reduced location accuracy means that nothing more precise than your city, state and country will be published.  GPS coordinates will be accurate to 1 decimal place."
 msgstr "Sumažinus vietovės rodymo tikslumą, bus rodomas tik jūsų miestas, sritis ir šalis. GPS koordinatės bus rodomos vieno skaičiaus po kablelio tikslumu."
 
-#: ../src/empathy-preferences.ui.h:23
+#: ../src/empathy-preferences.ui.h:24
 msgid "Show _smileys as images"
 msgstr "Rodyti š_ypsenelės kaip paveikslėlius"
 
-#: ../src/empathy-preferences.ui.h:24
+#: ../src/empathy-preferences.ui.h:25
 msgid "Show contact _list in rooms"
 msgstr "Rodyti adresatų _sąrašą kambariuose"
 
-#: ../src/empathy-preferences.ui.h:25
+#: ../src/empathy-preferences.ui.h:26
 msgid "Sounds"
 msgstr "Garsai"
 
-#: ../src/empathy-preferences.ui.h:26
+#: ../src/empathy-preferences.ui.h:27
 msgid "Spell Checking"
 msgstr "Rašybos tikrinimas"
 
-#: ../src/empathy-preferences.ui.h:27
+#: ../src/empathy-preferences.ui.h:28
 msgid "The list of languages reflects only the languages for which you have a dictionary installed."
 msgstr "Šiame kalbų sąraše yra tik tos kalbos, kurių žodynus turite įdiegę."
 
-#: ../src/empathy-preferences.ui.h:28
+#: ../src/empathy-preferences.ui.h:29
 msgid "Themes"
 msgstr "Temos"
 
-#: ../src/empathy-preferences.ui.h:29
+#: ../src/empathy-preferences.ui.h:30
 msgid "Variant:"
 msgstr "Variantas:"
 
-#: ../src/empathy-preferences.ui.h:30
+#: ../src/empathy-preferences.ui.h:31
 msgid "_Automatically connect on startup"
 msgstr "_Automatiškai prisijungti paleidimo metu"
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Cellphone"
 msgstr "_Mobilusis telefonas"
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Enable bubble notifications"
 msgstr "Į_jungti burbulinius pranešimus"
 
-#: ../src/empathy-preferences.ui.h:33
+#: ../src/empathy-preferences.ui.h:34
 msgid "_Enable sound notifications"
 msgstr "Į_jungti garsinius pranešimus"
 
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:35
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:35
+#: ../src/empathy-preferences.ui.h:36
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Tinklas (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:36
+#: ../src/empathy-preferences.ui.h:37
 msgid "_Open new chats in separate windows"
 msgstr "_Atverti naujus pokalbius atskiruose languose"
 
-#: ../src/empathy-preferences.ui.h:37
+#: ../src/empathy-preferences.ui.h:38
 msgid "_Publish location to my contacts"
 msgstr "_Rodyti vietovę mano adresatams"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:39
+#: ../src/empathy-preferences.ui.h:40
 msgid "_Reduce location accuracy"
 msgstr "_Sumažinti vietovės tikslumą"
 
@@ -4320,7 +4351,7 @@ msgstr "Adresatų žemėlapio rodinys"
 
 #: ../src/empathy-debug-window.c:1228
 msgid "Save"
-msgstr "Irašyti"
+msgstr "Įrašyti"
 
 #: ../src/empathy-debug-window.c:1435
 msgid "Debug Window"
@@ -4379,16 +4410,16 @@ msgstr "Lygis"
 msgid "The selected connection manager does not support the remote debugging extension."
 msgstr "Pasirinktoji ryšių valdyklė nepalaiko nuotolinio derinimo plėtinio."
 
+#: ../src/empathy-invite-participant-dialog.c:179
 #: ../src/empathy-invite-participant-dialog.c:205
-#: ../src/empathy-invite-participant-dialog.c:231
 msgid "Invite Participant"
 msgstr "Pakviesti dalyvį"
 
-#: ../src/empathy-invite-participant-dialog.c:206
+#: ../src/empathy-invite-participant-dialog.c:180
 msgid "Choose a contact to invite into the conversation:"
 msgstr "Pasirinkite į pokalbį pakviestiną adresatą:"
 
-#: ../src/empathy-invite-participant-dialog.c:227
+#: ../src/empathy-invite-participant-dialog.c:201
 msgid "Invite"
 msgstr "Pakviesti"
 
@@ -4421,7 +4452,6 @@ msgid "Show a particular service"
 msgstr "Rodyti tam tikrą tarnybą"
 
 #: ../src/empathy-debugger.c:75
-#| msgid "Empathy Debugger"
 msgid "- Empathy Debugger"
 msgstr "- Empathy derintuvė"
 
@@ -4438,11 +4468,13 @@ msgid "Respond"
 msgstr "Atsakyti"
 
 #: ../src/empathy-notifications-approver.c:217
+#: ../src/empathy-call-window.c:1418
 msgid "Reject"
 msgstr "Atmesti"
 
 #: ../src/empathy-notifications-approver.c:222
 #: ../src/empathy-notifications-approver.c:227
+#: ../src/empathy-call-window.c:1419
 msgid "Answer"
 msgstr "Atsiliepti"
 
@@ -4460,6 +4492,9 @@ msgstr "Atsisakyti"
 msgid "Accept"
 msgstr "Priimti"
 
+#. translators: the 'Provide' button is displayed in a notification
+#. * bubble when Empathy is asking for an account password; clicking on it
+#. * brings the password popup.
 #: ../src/empathy-notifications-approver.c:260
 msgid "Provide"
 msgstr "Teikia"
@@ -4471,26 +4506,25 @@ msgstr "%s ką tik jums skambino, bet tuo metu kalbėjote su kažkuo kitu."
 
 #. Translators: this is an "Info" label. It should be as short
 #. * as possible.
-#: ../src/empathy-call-window.c:1031
-#: ../src/empathy-call-window.c:1054
+#: ../src/empathy-call-window.c:1047
+#: ../src/empathy-call-window.c:1070
 msgid "i"
 msgstr "i"
 
-#: ../src/empathy-call-window.c:2583
+#: ../src/empathy-call-window.c:2727
 msgid "On hold"
 msgstr "Laukia"
 
-#: ../src/empathy-call-window.c:2586
+#: ../src/empathy-call-window.c:2730
 msgid "Mute"
 msgstr "Nutildyti"
 
-#: ../src/empathy-call-window.c:2588
-#| msgid "Location"
+#: ../src/empathy-call-window.c:2732
 msgid "Duration"
 msgstr "Trukmė"
 
 #. Translators: 'status - minutes:seconds' the caller has been connected
-#: ../src/empathy-call-window.c:2591
+#: ../src/empathy-call-window.c:2735
 #, c-format
 msgid "%s — %d:%02dm"
 msgstr "%s — %d:%02dm"
