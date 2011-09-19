@@ -65,7 +65,7 @@ account_prepare_cb (GObject *source_object,
   TpAccount *account = TP_ACCOUNT (source_object);
   GError *error = NULL;
 
-  if (!tp_account_prepare_finish (account, result, &error))
+  if (!tp_proxy_prepare_finish (account, result, &error))
     {
       DEBUG ("Failed to prepare account: %s", error->message);
       g_error_free (error);
@@ -121,7 +121,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       bus = tp_dbus_daemon_dup (NULL);
       if ((account = tp_account_new (bus, account_path, &error)))
         {
-          tp_account_prepare_async (account, NULL, account_prepare_cb, manager);
+          tp_proxy_prepare_async (account, NULL, account_prepare_cb, manager);
           g_object_unref (bus);
           return;
         }
