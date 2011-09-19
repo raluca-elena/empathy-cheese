@@ -80,6 +80,16 @@ static struct {
   { NULL, },
 };
 
+static gboolean
+properties_contains (gchar **list,
+		     gint length,
+		     const gchar *property);
+
+static gboolean
+check_writeable_property (TpConnection *connection,
+			  FolksIndividual *individual,
+			  gchar *property);
+
 void
 empathy_init (void)
 {
@@ -802,10 +812,10 @@ empathy_connection_can_add_personas (TpConnection *connection)
 }
 
 gboolean
-empathy_connection_can_alias_personas (TpConnection *connection)
+empathy_connection_can_alias_personas (TpConnection *connection,
+				       FolksIndividual *individual)
 {
   gboolean retval;
-  FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
@@ -813,22 +823,16 @@ empathy_connection_can_alias_personas (TpConnection *connection)
           TP_CONNECTION_STATUS_CONNECTED)
       return FALSE;
 
-  persona_store = FOLKS_PERSONA_STORE (
-      empathy_dup_persona_store_for_connection (connection));
-
-  retval = (folks_persona_store_get_can_alias_personas (persona_store) ==
-      FOLKS_MAYBE_BOOL_TRUE);
-
-  g_clear_object (&persona_store);
+  retval = check_writeable_property (connection, individual, "alias");
 
   return retval;
 }
 
 gboolean
-empathy_connection_can_group_personas (TpConnection *connection)
+empathy_connection_can_group_personas (TpConnection *connection,
+				       FolksIndividual *individual)
 {
   gboolean retval;
-  FolksPersonaStore *persona_store;
 
   g_return_val_if_fail (TP_IS_CONNECTION (connection), FALSE);
 
@@ -836,13 +840,7 @@ empathy_connection_can_group_personas (TpConnection *connection)
           TP_CONNECTION_STATUS_CONNECTED)
       return FALSE;
 
-  persona_store = FOLKS_PERSONA_STORE (
-      empathy_dup_persona_store_for_connection (connection));
-
-  retval = (folks_persona_store_get_can_group_personas (persona_store) ==
-      FOLKS_MAYBE_BOOL_TRUE);
-
-  g_clear_object (&persona_store);
+  retval = check_writeable_property (connection, individual, "groups");
 
   return retval;
 }
@@ -1030,3 +1028,63 @@ empathy_get_tp_contact_for_individual (FolksIndividual *individual,
   return contact;
 }
 
+static gboolean
+properties_contains (gchar **list,
+		     gint length,
+		     const gchar *property)
+{
+  gint i;
+
+  for (i = 0; i < length; i++)
+    {
+      if (!tp_strdiff (list[i], property))
+	return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+check_writeable_property (TpConnection *connection,
+			  FolksIndividual *individual,
+			  gchar *property)
+{
+  gchar **properties;
+  gint prop_len;
+  gboolean retval = FALSE;
+  GeeSet *personas;
+  GeeIterator *iter;
+  FolksPersonaStore *persona_store;
+
+  persona_store = FOLKS_PERSONA_STORE (
+      empathy_dup_persona_store_for_connection (connection));
+
+  properties =
+    folks_persona_store_get_always_writeable_properties (persona_store,
+							 &prop_len);
+  retval = properties_contains (properties, prop_len, property);
+  if (retval == TRUE)
+    goto out;
+
+  /* Lets see if the Individual contains a Persona with the given property */
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (!retval && gee_iterator_next (iter))
+    {
+      FolksPersona *persona = gee_iterator_get (iter);
+
+      properties =
+	folks_persona_get_writeable_properties (persona, &prop_len);
+      retval = properties_contains (properties, prop_len, property);
+
+      g_clear_object (&persona);
+
+      if (retval == TRUE)
+	break;
+    }
+  g_clear_object (&iter);
+
+out:
+  g_clear_object (&persona_store);
+  return retval;
+}

@@ -96,8 +96,10 @@ TpChannelGroupChangeReason tp_channel_group_change_reason_from_folks_groups_chan
 TpfPersonaStore * empathy_dup_persona_store_for_connection (
     TpConnection *connection);
 gboolean empathy_connection_can_add_personas (TpConnection *connection);
-gboolean empathy_connection_can_alias_personas (TpConnection *connection);
-gboolean empathy_connection_can_group_personas (TpConnection *connection);
+gboolean empathy_connection_can_alias_personas (TpConnection *connection,
+						FolksIndividual *individual);
+gboolean empathy_connection_can_group_personas (TpConnection *connection,
+						FolksIndividual *individual);
 gboolean empathy_folks_persona_is_interesting (FolksPersona *persona);
 
 gchar * empathy_get_x509_certificate_hostname (gnutls_x509_crt_t cert);

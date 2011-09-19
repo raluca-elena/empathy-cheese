@@ -1131,8 +1131,9 @@ empathy_individual_edit_menu_item_new (FolksIndividual *individual)
       manager = empathy_individual_manager_dup_singleton ();
       connection = empathy_contact_get_connection (contact);
 
-      enable = (empathy_connection_can_alias_personas (connection) &&
-                empathy_connection_can_group_personas (connection));
+      enable = (empathy_connection_can_alias_personas (connection,
+						       individual) &&
+                empathy_connection_can_group_personas (connection, individual));
 
       g_object_unref (manager);
     }
