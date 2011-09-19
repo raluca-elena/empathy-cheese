@@ -672,13 +672,10 @@ account_join_chatrooms (TpAccount *account,
   TpConnection *conn;
   GList *chatrooms, *p;
 
-  if (tp_account_get_connection_status (account, NULL) !=
-      TP_CONNECTION_STATUS_CONNECTED)
-    return;
-
-  /* If we're connected we should have a connection */
+  /* Wait if we are not connected or the TpConnection is not prepared yet */
   conn = tp_account_get_connection (account);
-  g_return_if_fail (conn != NULL);
+  if (conn == NULL)
+    return;
 
   chatrooms = empathy_chatroom_manager_get_chatrooms (
           chatroom_manager, account);
@@ -697,12 +694,8 @@ account_join_chatrooms (TpAccount *account,
 }
 
 static void
-account_status_changed_cb (TpAccount *account,
-    guint old_status,
-    guint new_status,
-    guint reason,
-    gchar *dbus_error_name,
-    GHashTable *details,
+account_connection_changed_cb (TpAccount *account,
+    GParamSpec *spec,
     EmpathyChatroomManager *manager)
 {
   account_join_chatrooms (account, manager);
@@ -735,8 +728,8 @@ account_manager_chatroom_ready_cb (GObject *source_object,
       account_join_chatrooms (account, chatroom_manager);
 
       /* And/or join them on (re)connection */
-      tp_g_signal_connect_object (account, "status-changed",
-        G_CALLBACK (account_status_changed_cb), chatroom_manager, 0);
+      tp_g_signal_connect_object (account, "notify::connection",
+        G_CALLBACK (account_connection_changed_cb), chatroom_manager, 0);
     }
   g_list_free (accounts);
 }
