@@ -106,6 +106,8 @@ struct _EmpathyChatPriv {
 	guint              update_misspelled_words_id;
 	/* Source func ID for save_paned_pos_timeout () */
 	guint              save_paned_pos_id;
+	/* Source func ID for chat_contacts_visible_timeout_cb () */
+	guint              contacts_visible_id;
 
 	GtkWidget         *widget;
 	GtkWidget         *hpaned;
@@ -2636,9 +2638,22 @@ chat_member_renamed_cb (EmpathyTpChat  *tp_chat,
 }
 
 static gboolean
-chat_reset_size_request (gpointer widget)
+chat_contacts_visible_timeout_cb (gpointer chat)
 {
-	gtk_widget_set_size_request (widget, -1, -1);
+	EmpathyChatPriv *priv = GET_PRIV (chat);
+
+	/* Relax the size request */
+	gtk_widget_set_size_request (priv->vbox_left, -1, -1);
+
+	/* Set the position of the slider. This must be done here because
+	 * GtkPaned need to know its size allocation and it will be settled only
+	 * after the gtk_window_resize() tough effect. */
+	if (priv->contacts_width > 0) {
+		gtk_paned_set_position (GTK_PANED (priv->hpaned),
+					priv->contacts_width);
+	}
+
+	priv->contacts_visible_id = 0;
 
 	return FALSE;
 }
@@ -2648,7 +2663,6 @@ chat_update_contacts_visibility (EmpathyChat *chat,
 			 gboolean show)
 {
 	EmpathyChatPriv *priv = GET_PRIV (chat);
-	GtkAllocation allocation;
 
 	if (!priv->scrolled_window_contacts) {
 		return;
@@ -2661,6 +2675,7 @@ chat_update_contacts_visibility (EmpathyChat *chat,
 	if (show && priv->contact_list_view == NULL) {
 		EmpathyContactListStore *store;
 		gint                     min_width;
+		GtkAllocation            allocation;
 
 		/* We are adding the contact list to the chat, we don't want the
 		 * chat view to become too small. If the chat view is already
@@ -2671,12 +2686,13 @@ chat_update_contacts_visibility (EmpathyChat *chat,
 		gtk_widget_get_allocation (priv->vbox_left, &allocation);
 		min_width = MIN (allocation.width, 250);
 		gtk_widget_set_size_request (priv->vbox_left, min_width, -1);
-		g_idle_add (chat_reset_size_request, priv->vbox_left);
 
-		if (priv->contacts_width > 0) {
-			gtk_paned_set_position (GTK_PANED (priv->hpaned),
-						priv->contacts_width);
-		}
+		/* There is no way to know when the window resize will happen
+		 * since it is WM's decision. Let's hope it won't be longer. */
+		if (priv->contacts_visible_id != 0)
+			g_source_remove (priv->contacts_visible_id);
+		priv->contacts_visible_id = g_timeout_add (500,
+			chat_contacts_visible_timeout_cb, chat);
 
 		store = empathy_contact_list_store_new (
 				EMPATHY_CONTACT_LIST (priv->tp_chat));
@@ -2918,7 +2934,6 @@ chat_create_ui (EmpathyChat *chat)
  	GList           *list = NULL;
 	gchar           *filename;
 	GtkTextBuffer   *buffer;
-	gint              paned_pos;
 	EmpathyThemeManager *theme_mgr;
 
 	filename = empathy_file_lookup ("empathy-chat.ui",
@@ -3004,12 +3019,6 @@ chat_create_ui (EmpathyChat *chat)
 			  G_CALLBACK (chat_hpaned_pos_changed_cb),
 			  chat);
 
-        /* Load the paned position */
-	paned_pos = g_settings_get_int (priv->gsettings_ui,
-			EMPATHY_PREFS_UI_CHAT_WINDOW_PANED_POS);
-	if (paned_pos != 0)
-		gtk_paned_set_position (GTK_PANED(priv->hpaned), paned_pos);
-
 	/* Set widget focus order */
 	list = g_list_append (NULL, priv->search_bar);
 	list = g_list_append (list, priv->scrolled_window_input);
@@ -3047,6 +3056,9 @@ chat_finalize (GObject *object)
 
 	if (priv->save_paned_pos_id != 0)
 		g_source_remove (priv->save_paned_pos_id);
+
+	if (priv->contacts_visible_id != 0)
+		g_source_remove (priv->contacts_visible_id);
 
 	g_object_unref (priv->gsettings_chat);
 	g_object_unref (priv->gsettings_ui);
@@ -3292,7 +3304,8 @@ empathy_chat_init (EmpathyChat *chat)
 	priv->gsettings_chat = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
 	priv->gsettings_ui = g_settings_new (EMPATHY_PREFS_UI_SCHEMA);
 
-	priv->contacts_width = -1;
+	priv->contacts_width = g_settings_get_int (priv->gsettings_ui,
+		EMPATHY_PREFS_UI_CHAT_WINDOW_PANED_POS);
 	priv->input_history = NULL;
 	priv->input_history_current = NULL;
 	priv->account_manager = tp_account_manager_dup ();
