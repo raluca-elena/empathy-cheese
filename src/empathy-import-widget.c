@@ -103,7 +103,7 @@ account_manager_prepared_cb (GObject *source_object,
   EmpathyImportWidgetPriv *priv = GET_PRIV (self);
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -156,7 +156,7 @@ import_widget_add_accounts_to_model (EmpathyImportWidget *self)
 
   manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (manager, NULL,
+  tp_proxy_prepare_async (manager, NULL,
       account_manager_prepared_cb, self);
 
   g_object_unref (manager);

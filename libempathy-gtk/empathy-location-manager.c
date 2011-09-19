@@ -182,7 +182,7 @@ publish_to_all_am_prepared_cb (GObject *source_object,
   GList *accounts, *l;
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -214,7 +214,7 @@ publish_to_all_connections (EmpathyLocationManager *self,
   data->self = g_object_ref (self);
   data->force_publication = force_publication;
 
-  tp_account_manager_prepare_async (self->priv->account_manager, NULL,
+  tp_proxy_prepare_async (self->priv->account_manager, NULL,
       publish_to_all_am_prepared_cb, data);
 }
 
@@ -609,7 +609,7 @@ account_manager_prepared_cb (GObject *source_object,
   EmpathyLocationManager *self = user_data;
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -641,7 +641,7 @@ empathy_location_manager_init (EmpathyLocationManager *self)
   /* Setup account status callbacks */
   priv->account_manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (priv->account_manager, NULL,
+  tp_proxy_prepare_async (priv->account_manager, NULL,
       account_manager_prepared_cb, self);
 
   /* Setup settings status callbacks */

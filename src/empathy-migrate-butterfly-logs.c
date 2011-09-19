@@ -140,7 +140,7 @@ migration_account_manager_prepared_cb (GObject *source_object,
   GList *accounts, *l;
   GSettings *gsettings;
 
-  if (!tp_account_manager_prepare_finish (am, result, &error))
+  if (!tp_proxy_prepare_finish (am, result, &error))
     {
       DEBUG ("Failed to prepare the account manager: %s", error->message);
       g_error_free (error);
@@ -189,7 +189,7 @@ migrate_logs (gpointer data)
 
   account_manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (account_manager, NULL,
+  tp_proxy_prepare_async (account_manager, NULL,
       migration_account_manager_prepared_cb, NULL);
 
   g_object_unref (account_manager);

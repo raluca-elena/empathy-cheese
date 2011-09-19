@@ -518,7 +518,7 @@ account_manager_ready_cb (GObject *source_object,
   GError *error = NULL;
   GFile *file = NULL;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -575,7 +575,7 @@ empathy_chatroom_manager_constructor (GType type,
 
   priv->account_manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (priv->account_manager, NULL,
+  tp_proxy_prepare_async (priv->account_manager, NULL,
       account_manager_ready_cb, g_object_ref (self));
 
   if (priv->file == NULL)

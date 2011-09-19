@@ -1617,7 +1617,7 @@ empathy_account_settings_manager_ready_cb (GObject *source_object,
   TpAccountManager *account_manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -1652,7 +1652,7 @@ empathy_account_settings_apply_async (EmpathyAccountSettings *settings,
 
   if (priv->account == NULL)
     {
-      tp_account_manager_prepare_async (priv->account_manager, NULL,
+      tp_proxy_prepare_async (priv->account_manager, NULL,
           empathy_account_settings_manager_ready_cb, settings);
     }
   else

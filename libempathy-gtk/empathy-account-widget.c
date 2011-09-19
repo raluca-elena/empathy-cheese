@@ -1960,7 +1960,7 @@ account_manager_ready_cb (GObject *source_object,
   GError *error = NULL;
   TpConnectionPresenceType state;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -2191,7 +2191,7 @@ do_constructed (GObject *obj)
   priv->account_manager = tp_account_manager_dup ();
 
   g_object_ref (self);
-  tp_account_manager_prepare_async (priv->account_manager, NULL,
+  tp_proxy_prepare_async (priv->account_manager, NULL,
       account_manager_ready_cb, self);
 
   /* handle apply and cancel button */

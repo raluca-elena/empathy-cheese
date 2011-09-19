@@ -114,7 +114,7 @@ account_manager_prepared_cb (GObject *source_object,
   TpAccountManager *account_manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -150,7 +150,7 @@ empathy_notify_manager_init (EmpathyNotifyManager *self)
 
   priv->account_manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (priv->account_manager, NULL,
+  tp_proxy_prepare_async (priv->account_manager, NULL,
       account_manager_prepared_cb, self);
 }
 

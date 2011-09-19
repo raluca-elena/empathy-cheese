@@ -95,7 +95,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
   TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_clear_error (&error);
@@ -248,7 +248,7 @@ main (int argc, char *argv[])
 
   account_manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (account_manager, NULL,
+  tp_proxy_prepare_async (account_manager, NULL,
     account_manager_ready_for_accounts_cb, NULL);
 
   g_signal_connect (app, "command-line", G_CALLBACK (app_command_line_cb),

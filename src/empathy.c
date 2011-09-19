@@ -382,7 +382,7 @@ empathy_app_command_line (GApplication *app,
     empathy_window_present (GTK_WINDOW (self->window));
 
   /* Display the accounts dialog if needed */
-  tp_account_manager_prepare_async (self->account_manager, NULL,
+  tp_proxy_prepare_async (self->account_manager, NULL,
       account_manager_ready_cb, self);
 
   return 0;
@@ -626,7 +626,7 @@ account_manager_ready_cb (GObject *source_object,
   GError *error = NULL;
   TpConnectionPresenceType presence;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       GtkWidget *dialog;
 
@@ -718,7 +718,7 @@ account_manager_chatroom_ready_cb (GObject *source_object,
   GList *accounts, *l;
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -748,7 +748,7 @@ chatroom_manager_ready_cb (EmpathyChatroomManager *chatroom_manager,
 {
   TpAccountManager *account_manager = user_data;
 
-  tp_account_manager_prepare_async (account_manager, NULL,
+  tp_proxy_prepare_async (account_manager, NULL,
       account_manager_chatroom_ready_cb, chatroom_manager);
 }
 
@@ -786,7 +786,7 @@ empathy_app_constructed (GObject *object)
 
   /* account management */
   self->account_manager = tp_account_manager_dup ();
-  tp_account_manager_prepare_async (self->account_manager, NULL,
+  tp_proxy_prepare_async (self->account_manager, NULL,
       account_manager_ready_cb, self);
 
   migrate_config_to_xdg_dir ();

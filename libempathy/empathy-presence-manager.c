@@ -463,7 +463,7 @@ account_manager_ready_cb (GObject *source_object,
 
   self->priv->ready = TRUE;
 
-  if (!tp_account_manager_prepare_finish (account_manager, result, &error))
+  if (!tp_proxy_prepare_finish (account_manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -500,7 +500,7 @@ empathy_presence_manager_init (EmpathyPresenceManager *self)
 
   self->priv->manager = tp_account_manager_dup ();
 
-  tp_account_manager_prepare_async (self->priv->manager, NULL,
+  tp_proxy_prepare_async (self->priv->manager, NULL,
       account_manager_ready_cb, self);
 
   tp_g_signal_connect_object (self->priv->manager,

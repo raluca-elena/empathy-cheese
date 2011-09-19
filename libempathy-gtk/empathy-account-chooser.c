@@ -570,7 +570,7 @@ account_manager_prepared_cb (GObject *source_object,
 	EmpathyAccountChooserPriv *priv = GET_PRIV (chooser);
 	GError *error = NULL;
 
-	if (!tp_account_manager_prepare_finish (manager, result, &error)) {
+	if (!tp_proxy_prepare_finish (manager, result, &error)) {
 		DEBUG ("Failed to prepare account manager: %s", error->message);
 		g_error_free (error);
 		return;
@@ -686,7 +686,7 @@ account_chooser_setup (EmpathyAccountChooser *chooser)
 					NULL);
 
 	/* Populate accounts */
-	tp_account_manager_prepare_async (priv->manager, NULL,
+	tp_proxy_prepare_async (priv->manager, NULL,
 					  account_manager_prepared_cb, chooser);
 
 	g_object_unref (store);

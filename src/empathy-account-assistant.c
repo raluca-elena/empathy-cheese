@@ -1161,7 +1161,7 @@ account_mgr_prepare_cb (GObject *source_object,
   TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
   GError *error = NULL;
 
-  if (!tp_account_manager_prepare_finish (manager, result, &error))
+  if (!tp_proxy_prepare_finish (manager, result, &error))
     {
       DEBUG ("Failed to prepare account manager: %s", error->message);
       g_error_free (error);
@@ -1277,7 +1277,7 @@ do_constructed (GObject *object)
   priv->salut_page = page;
   priv->display_salut_page = TRUE;
 
-  tp_account_manager_prepare_async (priv->account_mgr, NULL,
+  tp_proxy_prepare_async (priv->account_mgr, NULL,
       account_mgr_prepare_cb, self);
 
   gtk_window_set_resizable (GTK_WINDOW (self), FALSE);

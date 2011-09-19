@@ -3263,7 +3263,7 @@ account_manager_prepared_cb (GObject *source_object,
 	EmpathyChat *chat = user_data;
 	GError *error = NULL;
 
-	if (!tp_account_manager_prepare_finish (account_manager, result, &error)) {
+	if (!tp_proxy_prepare_finish (account_manager, result, &error)) {
 		DEBUG ("Failed to prepare the account manager: %s", error->message);
 		g_error_free (error);
 		return;
@@ -3297,7 +3297,7 @@ empathy_chat_init (EmpathyChat *chat)
 	priv->input_history_current = NULL;
 	priv->account_manager = tp_account_manager_dup ();
 
-	tp_account_manager_prepare_async (priv->account_manager, NULL,
+	tp_proxy_prepare_async (priv->account_manager, NULL,
 					  account_manager_prepared_cb, chat);
 
 	priv->show_contacts = g_settings_get_boolean (priv->gsettings_chat,

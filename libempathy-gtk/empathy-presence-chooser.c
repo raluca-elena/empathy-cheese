@@ -742,7 +742,7 @@ update_sensitivity_am_prepared_cb (GObject *source_object,
 	GList *accounts, *l;
 	GError *error = NULL;
 
-	if (!tp_account_manager_prepare_finish (manager, result, &error)) {
+	if (!tp_proxy_prepare_finish (manager, result, &error)) {
 		DEBUG ("Failed to prepare account manager: %s", error->message);
 		g_error_free (error);
 		return;
@@ -774,7 +774,7 @@ presence_chooser_update_sensitivity (EmpathyPresenceChooser *chooser)
 {
 	EmpathyPresenceChooserPriv *priv = GET_PRIV (chooser);
 
-	tp_account_manager_prepare_async (priv->account_manager, NULL,
+	tp_proxy_prepare_async (priv->account_manager, NULL,
 					  update_sensitivity_am_prepared_cb,
 					  chooser);
 }
