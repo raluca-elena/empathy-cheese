@@ -2647,7 +2647,7 @@ chat_contacts_visible_timeout_cb (gpointer chat)
 
 	/* Set the position of the slider. This must be done here because
 	 * GtkPaned need to know its size allocation and it will be settled only
-	 * after the gtk_window_resize() tough effect. */
+	 * after the gtk_window_resize () tough effect. */
 	if (priv->contacts_width > 0) {
 		gtk_paned_set_position (GTK_PANED (priv->hpaned),
 					priv->contacts_width);
