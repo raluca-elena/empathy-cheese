@@ -1,3 +1,81 @@
+NEW in 3.1.92 (19/09/2011)
+=============
+
+Dependencies:
+ • folks ≥ 0.6.2
+ • champlain ≥ 0.12 (optional)
+ • clutter ≥ 1.7.14 (optional)
+ • the optional dependency on libgnome-control-center has been removed
+
+
+Bugs fixed:
+ - Fixed #580794, creates redundant call windows (Emilio Pozuelo Monfort)
+ - Fixed #632357, Contact list pane start with zero size (Xavier Claessens)
+ - Fixed #648315, Standardise drag-and-drop target types for contacts (Guillaume Desmottes)
+ - Fixed #652985, Avatar selector: weird behaviour if no camera is plugged in (Guillaume Desmottes)
+ - Fixed #655270, Closing application after a ctrl-F causes Gtk-CRITICAL and GLib-GObject-CRITICAL messages. (Guillaume Desmottes)
+ - Fixed #655356, Empathy cancel DTMF tones without minimal delay (Emilio Pozuelo Monfort)
+ - Fixed #655388, Remove libgnome-control-center dependency (Danielle Madeley)
+ - Fixed #657335, Unnecessary and unexplained tickybox for “Echo Cancellation” in Preferences (Will Thompson)
+ - Fixed #657746, Port to the new IndividualAggregator::individuals-changed-detailed signal (Philip Withnall)
+ - Fixed #657818, Prevent haze to be used for irc (Alban Browaeys)
+ - Fixed #658336, History window "Who" list should sort alphabetically (Jussi Kukkonen)
+ - Fixed #658340, empathy-chat crashes when I pick “Add Contact…” (Will Thompson)
+ - Fixed #658341, Support libchamplain 0.11/0.12 (Guillaume Desmottes)
+ - Fixed #658343, Mashing Enter in “New Conversation” dialogue does nothing (Will Thompson)
+ - Fixed #658573, Some contact in buddy list are shown as "empty" (Guillaume Desmottes)
+ - Fixed #658584, empathy-av crashed with SIGSEGV in gst_color_balance_list_channels() (Guillaume Desmottes)
+ - Fixed #658644, Invalid read when leaving a muc (Guillaume Desmottes)
+ - Fixed #658785, online accounts should not connect automatically (Guillaume Desmottes)
+ - Fixed #658821, Use a stable colour for the local user's messages (Guillaume Desmottes)
+ - Fixed #658857, individual-widget: use GtkGrid instead of GtkTable internally (Cosimo Cecchi)
+ - Fixed #658866, Translator comment for string "Provide" in code but not in po file (Guillaume Desmottes)
+ - Fixed #658895, GOA plugin should only save params of GOA accounts (Guillaume Desmottes)
+ - Fixed #658909, Crashes if account is changed before the callback tp_roomlist_create_channel_cb() happens (Guillaume Desmottes)
+ - Fixed #659003, Attack of the mutant tooltips (Cosimo Cecchi)
+ - Fixed #659053, Shouldn't save password until we actually connect (Guillaume Desmottes)
+ - Fixed #659141, Bad gettext syntax for duration string translation (Guillaume Desmottes)
+ - Fixed #659377, properly install schemas files under BSDs (Antoine Jacoutot)
+ - Fixed #659439, empathy-CRITICAL **: account_join_chatrooms: assertion `conn != NULL' failed (Guillaume Desmottes)
+ - Fixed #659476, Remove Folks deprecated API (Raul Gutierrez Segales)
+
+Translations:
+ - Updated ast Translation (Xandru Armesto)
+ - Updated be Translation (Ihar Hrachyshka)
+ - Updated bg Translation (Alexander Shopov, Krasimir Chonov)
+ - Updated cs Translation (Marek Černocký)
+ - Updated da Translation (Kenneth Nielsen)
+ - Updated de Translation (Mario Blättermann)
+ - Updated en_GB Translation (Bruce Cowan)
+ - Updated es Translation (Jorge González, Daniel Mustieles)
+ - Updated fi Translation (Timo Jyrinki)
+ - Updated fr Translation (Bruno Brouard)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated hi Translation (Rajesh Ranjan)
+ - Updated id Translation (Andika Triwidada)
+ - Updated it Translation (Milo Casagrande)
+ - Updated ja Translation (Jiro Matsuzawa)
+ - Updated lt Translation (Aurimas Černius)
+ - Updated lv Translation (Rudolfs Mazurs)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated nl Translation (Hannie Dumoleyn)
+ - Updated pa Translation (A S Alam)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated pt_BR Translation (Antonio Fernandes C. Neto)
+ - Updated pt Translation (Duarte Loreto)
+ - Updated ru Translation (Yuri Myasoedov)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated ta Translation (Dr.T.Vasudevan)
+ - Updated tr Translation (Muhammet Kara)
+ - Updated zh_CN Translation (Yinghua Wang)
+ - Updated zh_HK Translation (Chao-Hsiung Liao)
+ - Updated zh_TW Translation (Chao-Hsiung Liao)
+
+Documentation translations:
+ - Updated de Documentation translation (Mario Blättermann)
+ - Updated gl Documentation translation (Fran Dieguez)
+
 NEW in 3.1.91 (06/09/2011)
 =============
 
