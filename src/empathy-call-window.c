@@ -3472,7 +3472,7 @@ empathy_call_window_connect_handler (EmpathyCallWindow *self)
    * get new channels if we hangup and redial or if we reuse the
    * call window. */
   g_signal_connect (priv->handler, "notify::call-channel",
-    G_CALLBACK (call_handler_notify_call_cb), window);
+    G_CALLBACK (call_handler_notify_call_cb), self);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
   if (call != NULL)
