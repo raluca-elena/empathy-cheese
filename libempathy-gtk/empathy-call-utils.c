@@ -132,6 +132,7 @@ create_streamed_media_channel_cb (GObject *source,
     }
 }
 
+#ifdef HAVE_CALL
 static void
 create_call_channel_cb (GObject *source,
     GAsyncResult *result,
@@ -201,6 +202,35 @@ call_new_with_streams (const gchar *contact,
   g_object_unref (call_req);
 }
 
+#else /* HAVE_CALL */
+
+static void
+sm_new_with_streams (const gchar *contact,
+    TpAccount *account,
+    gboolean initial_audio,
+    gboolean initial_video,
+    gint64 timestamp)
+{
+  GHashTable *streamed_media_request;
+  TpAccountChannelRequest *streamed_media_req;
+
+  /* StreamedMedia */
+  streamed_media_request = empathy_call_create_streamed_media_request (
+      contact, initial_audio, initial_video);
+
+  streamed_media_req = tp_account_channel_request_new (account,
+      streamed_media_request,
+      timestamp);
+
+  g_hash_table_unref (streamed_media_request);
+
+  tp_account_channel_request_create_channel_async (streamed_media_req,
+      EMPATHY_AV_BUS_NAME, NULL, create_streamed_media_channel_cb, NULL);
+
+  g_object_unref (streamed_media_req);
+}
+#endif /* HAVE_CALL */
+
 void
 empathy_call_new_with_streams (const gchar *contact,
     TpAccount *account,
@@ -208,8 +238,13 @@ empathy_call_new_with_streams (const gchar *contact,
     gboolean initial_video,
     gint64 timestamp)
 {
+#ifdef HAVE_CALL
   call_new_with_streams (contact, account, initial_audio, initial_video,
       timestamp);
+#else
+  sm_new_with_streams (contact, account, initial_audio, initial_video,
+      timestamp);
+#endif
 }
 
 void
