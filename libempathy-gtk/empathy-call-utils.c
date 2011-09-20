@@ -163,8 +163,9 @@ create_call_channel_cb (GObject *source,
       NULL);
 }
 
-void
-empathy_call_new_with_streams (const gchar *contact,
+/* Try to request a Call channel and fallback to StreamedMedia if that fails */
+static void
+call_new_with_streams (const gchar *contact,
     TpAccount *account,
     gboolean initial_audio,
     gboolean initial_video,
@@ -173,26 +174,42 @@ empathy_call_new_with_streams (const gchar *contact,
   GHashTable *call_request, *streamed_media_request;
   TpAccountChannelRequest *call_req, *streamed_media_req;
 
+  /* Call */
   call_request = empathy_call_create_call_request (contact,
       initial_audio,
       initial_video);
 
+  call_req = tp_account_channel_request_new (account, call_request, timestamp);
+
+  g_hash_table_unref (call_request);
+
+  /* StreamedMedia */
   streamed_media_request = empathy_call_create_streamed_media_request (
       contact, initial_audio, initial_video);
 
-  call_req = tp_account_channel_request_new (account, call_request, timestamp);
   streamed_media_req = tp_account_channel_request_new (account,
       streamed_media_request,
       timestamp);
+
+  g_hash_table_unref (streamed_media_request);
 
   tp_account_channel_request_create_channel_async (call_req,
       EMPATHY_CALL_BUS_NAME, NULL,
       create_call_channel_cb,
       streamed_media_req);
 
-  g_hash_table_unref (call_request);
-  g_hash_table_unref (streamed_media_request);
   g_object_unref (call_req);
+}
+
+void
+empathy_call_new_with_streams (const gchar *contact,
+    TpAccount *account,
+    gboolean initial_audio,
+    gboolean initial_video,
+    gint64 timestamp)
+{
+  call_new_with_streams (contact, account, initial_audio, initial_video,
+      timestamp);
 }
 
 void
