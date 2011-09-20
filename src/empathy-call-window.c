@@ -754,6 +754,55 @@ empathy_call_window_show_preview_rectangles (EmpathyCallWindow *self,
   g_object_set (self->priv->preview_rectangle4, "visible", show, NULL);
 }
 
+static void
+empathy_call_window_get_preview_coordinates (EmpathyCallWindow *self,
+    PreviewPosition pos,
+    guint *x,
+    guint *y)
+{
+  guint ret_x = 0, ret_y = 0;
+  ClutterGeometry box;
+
+  if (!clutter_actor_has_allocation (self->priv->video_box))
+    goto out;
+
+  clutter_actor_get_geometry (self->priv->video_box, &box);
+
+  switch (pos)
+    {
+      case PREVIEW_POS_TOP_LEFT:
+        ret_x = ret_y = SELF_VIDEO_SECTION_MARGIN;
+        break;
+      case PREVIEW_POS_TOP_RIGHT:
+        ret_x = box.width - SELF_VIDEO_SECTION_MARGIN
+            - SELF_VIDEO_SECTION_WIDTH;
+        ret_y = SELF_VIDEO_SECTION_MARGIN;
+        break;
+      case PREVIEW_POS_BOTTOM_LEFT:
+        ret_x = SELF_VIDEO_SECTION_MARGIN;
+        ret_y = box.height - SELF_VIDEO_SECTION_MARGIN
+            - SELF_VIDEO_SECTION_HEIGHT
+            - FLOATING_TOOLBAR_HEIGHT - FLOATING_TOOLBAR_SPACING;
+        break;
+      case PREVIEW_POS_BOTTOM_RIGHT:
+        ret_x = box.width - SELF_VIDEO_SECTION_MARGIN
+            - SELF_VIDEO_SECTION_WIDTH;
+        ret_y = box.height - SELF_VIDEO_SECTION_MARGIN
+            - SELF_VIDEO_SECTION_HEIGHT - FLOATING_TOOLBAR_HEIGHT
+            - FLOATING_TOOLBAR_SPACING;
+        break;
+      default:
+        g_warn_if_reached ();
+    }
+
+out:
+  if (x != NULL)
+    *x = ret_x;
+
+  if (y != NULL)
+    *y = ret_y;
+}
+
 static PreviewPosition
 empathy_call_window_get_preview_position (EmpathyCallWindow *self,
     gfloat event_x,
@@ -954,6 +1003,13 @@ empathy_call_window_preview_on_drag_begin_cb (ClutterDragAction *action,
 }
 
 static void
+empathy_call_window_on_animation_completed_cb (ClutterAnimation *animation,
+    ClutterActor *actor)
+{
+  clutter_actor_set_opacity (actor, 255);
+}
+
+static void
 empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     ClutterActor *actor,
     gfloat event_x,
@@ -962,18 +1018,30 @@ empathy_call_window_preview_on_drag_end_cb (ClutterDragAction *action,
     EmpathyCallWindow *self)
 {
   PreviewPosition pos;
+  guint x, y;
 
   /* Get the position before destroying the drag actor, otherwise the
    * preview_box allocation won't be valid and we won't be able to
    * calculate the position. */
   pos = empathy_call_window_get_preview_position (self, event_x, event_y);
 
-  /* Destroy the video preview copy that we were dragging */
-  clutter_actor_destroy (self->priv->drag_preview);
-  self->priv->drag_preview = NULL;
+  empathy_call_window_get_preview_coordinates (self,
+      pos != PREVIEW_POS_NONE ? pos : self->priv->preview_pos,
+      &x, &y);
 
-  clutter_actor_set_opacity (actor, 255);
-  clutter_actor_show (self->priv->preview_shown_button);
+  /* Move the preview to the destination and destroy it afterwards */
+  clutter_actor_animate (self->priv->drag_preview, CLUTTER_LINEAR, 500,
+      "x", (gfloat) x,
+      "y", (gfloat) y,
+      "signal-swapped-after::completed",
+        clutter_actor_destroy, self->priv->drag_preview,
+      "signal-swapped-after::completed",
+        clutter_actor_show, self->priv->preview_shown_button,
+      "signal::completed",
+        empathy_call_window_on_animation_completed_cb, actor,
+      NULL);
+
+  self->priv->drag_preview = NULL;
 
   if (pos != PREVIEW_POS_NONE)
     empathy_call_window_move_video_preview (self, pos);
