@@ -447,12 +447,13 @@ tp_file_state_changed_cb (TpChannel *proxy,
 }
 
 static void
-tp_file_transferred_bytes_changed_cb (TpChannel *proxy,
-    guint64 count,
-    gpointer user_data,
-    GObject *weak_object)
+tp_file_transferred_bytes_changed_cb (TpFileTransferChannel *channel,
+    GParamSpec *spec,
+    EmpathyTpFile *self)
 {
-  EmpathyTpFile *self = (EmpathyTpFile *) weak_object;
+  guint64 count;
+
+  count = tp_file_transfer_channel_get_transferred_bytes (channel);
 
   /* don't notify for 0 bytes count */
   if (count == 0)
@@ -460,8 +461,7 @@ tp_file_transferred_bytes_changed_cb (TpChannel *proxy,
 
   /* notify clients */
   if (self->priv->progress_callback != NULL)
-    self->priv->progress_callback (EMPATHY_TP_FILE (weak_object),
-        count, self->priv->progress_user_data);
+    self->priv->progress_callback (self, count, self->priv->progress_user_data);
 }
 
 static void
@@ -725,9 +725,8 @@ do_constructed (GObject *object)
   tp_cli_channel_type_file_transfer_connect_to_file_transfer_state_changed (
       channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
 
-  tp_cli_channel_type_file_transfer_connect_to_transferred_bytes_changed (
-      channel, tp_file_transferred_bytes_changed_cb,
-      NULL, NULL, object, NULL);
+  g_signal_connect (self, "notify::transferred-bytes",
+    G_CALLBACK (tp_file_transferred_bytes_changed_cb), self);
 
   tp_cli_dbus_properties_call_get (channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "State", tp_file_get_state_cb,
