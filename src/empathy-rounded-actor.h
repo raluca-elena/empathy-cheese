@@ -27,6 +27,7 @@
 G_BEGIN_DECLS
 
 typedef struct _EmpathyRoundedActor EmpathyRoundedActor;
+typedef struct _EmpathyRoundedActorPriv EmpathyRoundedActorPriv;
 typedef struct _EmpathyRoundedActorClass EmpathyRoundedActorClass;
 
 struct _EmpathyRoundedActorClass {
@@ -35,6 +36,8 @@ struct _EmpathyRoundedActorClass {
 
 struct _EmpathyRoundedActor {
     GtkClutterActor parent;
+
+    EmpathyRoundedActorPriv *priv;
 };
 
 GType empathy_rounded_actor_get_type (void);
@@ -57,6 +60,9 @@ GType empathy_rounded_actor_get_type (void);
     EmpathyRoundedActorClass))
 
 ClutterActor *empathy_rounded_actor_new (void);
+
+void empathy_rounded_actor_set_round_factor (EmpathyRoundedActor *self,
+    guint round_factor);
 
 G_END_DECLS
 

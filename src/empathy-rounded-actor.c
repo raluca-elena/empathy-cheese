@@ -26,9 +26,15 @@
 
 G_DEFINE_TYPE(EmpathyRoundedActor, empathy_rounded_actor, GTK_CLUTTER_TYPE_ACTOR)
 
+struct _EmpathyRoundedActorPriv
+{
+  guint round_factor;
+};
+
 static void
 empathy_rounded_actor_paint (ClutterActor *actor)
 {
+  EmpathyRoundedActor *self = EMPATHY_ROUNDED_ACTOR (actor);
   ClutterActorBox allocation = { 0, };
   gfloat width, height;
 
@@ -38,7 +44,8 @@ empathy_rounded_actor_paint (ClutterActor *actor)
   cogl_path_new ();
 
   /* create and store a path describing a rounded rectangle */
-  cogl_path_round_rectangle (0, 0, width, height, height / 2, 0.1);
+  cogl_path_round_rectangle (0, 0, width, height,
+      height / self->priv->round_factor, 0.1);
 
   cogl_clip_push_from_path ();
 
@@ -50,6 +57,10 @@ empathy_rounded_actor_paint (ClutterActor *actor)
 static void
 empathy_rounded_actor_init (EmpathyRoundedActor *self)
 {
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+      EMPATHY_TYPE_ROUNDED_ACTOR, EmpathyRoundedActorPriv);
+
+  self->priv->round_factor = 2;
 }
 
 static void
@@ -58,6 +69,8 @@ empathy_rounded_actor_class_init (EmpathyRoundedActorClass *klass)
   ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
 
   actor_class->paint = empathy_rounded_actor_paint;
+
+  g_type_class_add_private (klass, sizeof (EmpathyRoundedActorPriv));
 }
 
 ClutterActor *
@@ -65,4 +78,11 @@ empathy_rounded_actor_new (void)
 {
   return CLUTTER_ACTOR (
     g_object_new (EMPATHY_TYPE_ROUNDED_ACTOR, NULL));
+}
+
+void
+empathy_rounded_actor_set_round_factor (EmpathyRoundedActor *self,
+    guint round_factor)
+{
+  self->priv->round_factor = round_factor;
 }
