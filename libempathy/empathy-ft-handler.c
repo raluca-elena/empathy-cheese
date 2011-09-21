@@ -1589,7 +1589,7 @@ empathy_ft_handler_is_incoming (EmpathyFTHandler *handler)
   if (priv->tpfile == NULL)
     return FALSE;
 
-  return empathy_tp_file_is_incoming (priv->tpfile);
+  return !tp_channel_get_requested ((TpChannel *) priv->tpfile);
 }
 
 /**

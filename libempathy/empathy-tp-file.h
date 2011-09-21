@@ -122,8 +122,6 @@ void empathy_tp_file_offer (EmpathyTpFile *tp_file,
 void empathy_tp_file_cancel (EmpathyTpFile *tp_file);
 void empathy_tp_file_close (EmpathyTpFile *tp_file);
 
-gboolean empathy_tp_file_is_incoming (EmpathyTpFile *tp_file);
-
 G_END_DECLS
 
 #endif /* __EMPATHY_TP_FILE_H__ */

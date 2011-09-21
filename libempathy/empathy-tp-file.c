@@ -76,7 +76,6 @@ struct _EmpathyTpFilePrivate {
   TpSocketAccessControl socket_access_control;
 
   /* transfer properties */
-  gboolean incoming;
   gint64 start_time;
   GArray *socket_address;
   guint port;
@@ -335,7 +334,7 @@ tp_file_start_transfer (EmpathyTpFile *self)
   if (self->priv->progress_callback != NULL)
     self->priv->progress_callback (self, 0, self->priv->progress_user_data);
 
-  if (self->priv->incoming)
+  if (!tp_channel_get_requested ((TpChannel *) self))
     {
       GInputStream *socket_stream;
 
@@ -421,7 +420,7 @@ tp_file_state_changed_cb (TpChannel *proxy,
       "old state = %u, state = %u, reason = %u\n"
       "\tincoming = %s, in_stream = %s, out_stream = %s",
       self->priv->state, state, reason,
-      self->priv->incoming ? "yes" : "no",
+      tp_channel_get_requested (proxy) ? "no" : "yes",
       self->priv->in_stream ? "present" : "not present",
       self->priv->out_stream ? "present" : "not present");
 
@@ -723,8 +722,6 @@ do_constructed (GObject *object)
   g_signal_connect (self, "invalidated",
     G_CALLBACK (tp_file_invalidated_cb), self);
 
-  self->priv->incoming = !tp_channel_get_requested (channel);
-
   tp_cli_channel_type_file_transfer_connect_to_file_transfer_state_changed (
       channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
 
@@ -866,22 +863,6 @@ empathy_tp_file_offer (EmpathyTpFile *self,
 
   g_file_read_async (gfile, G_PRIORITY_DEFAULT, cancellable,
       file_read_async_cb, self);
-}
-
-/**
- * empathy_tp_file_is_incoming:
- * @self: an #EmpathyTpFile
- *
- * Returns whether @self is incoming.
- *
- * Return value: %TRUE if the @self is incoming, otherwise %FALSE
- */
-gboolean
-empathy_tp_file_is_incoming (EmpathyTpFile *self)
-{
-  g_return_val_if_fail (EMPATHY_IS_TP_FILE (self), FALSE);
-
-  return self->priv->incoming;
 }
 
 /**
