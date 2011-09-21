@@ -231,6 +231,11 @@ present them to the user immediately.</_description>
       <_summary>Empathy should use the avatar of the contact as the chat window icon</_summary>
       <_description>Whether Empathy should use the avatar of the contact as the chat window icon.</_description>
     </key>
+    <key name="room-last-account" type="o">
+      <default>"/"</default>
+      <_summary>Last account selected in Join Room dialog</_summary>
+      <_description>D-Bus object path of the last account selected to join a room.</_description>
+    </key>
   </schema>
   <schema id="org.gnome.Empathy.call" path="/org/gnome/empathy/call/">
     <key name="volume" type="d">

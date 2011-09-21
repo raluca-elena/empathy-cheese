@@ -37,6 +37,7 @@
 #include <libempathy/empathy-chatroom.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-request-util.h>
+#include <libempathy/empathy-gsettings.h>
 
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -71,6 +72,8 @@ typedef struct {
 	GtkWidget         *button_join;
 	GtkWidget         *label_error_message;
 	GtkWidget         *viewport_error;
+
+	GSettings         *gsettings;
 } EmpathyNewChatroomDialog;
 
 enum {
@@ -94,6 +97,8 @@ static void     new_chatroom_dialog_model_add_columns               (EmpathyNewC
 static void     new_chatroom_dialog_update_widgets                  (EmpathyNewChatroomDialog *dialog);
 static void     new_chatroom_dialog_account_changed_cb              (GtkComboBox              *combobox,
 								     EmpathyNewChatroomDialog *dialog);
+static void     new_chatroom_dialog_account_ready_cb                (EmpathyAccountChooser   *combobox,
+                                                                     EmpathyNewChatroomDialog  *dialog);
 static void     new_chatroom_dialog_roomlist_destroy_cb             (EmpathyTpRoomlist        *room_list,
 								     EmpathyNewChatroomDialog *dialog);
 static void     new_chatroom_dialog_new_room_cb                     (EmpathyTpRoomlist        *room_list,
@@ -198,6 +203,8 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 	gtk_box_pack_start (GTK_BOX (dialog->hbox_expander), dialog->throbber,
 		TRUE, TRUE, 0);
 
+	dialog->gsettings = g_settings_new (EMPATHY_PREFS_CHAT_SCHEMA);
+
 	/* Account chooser for custom */
 	dialog->account_chooser = empathy_account_chooser_new ();
 	empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser),
@@ -208,6 +215,9 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 				   1, 2, 0, 1);
 	gtk_widget_show (dialog->account_chooser);
 
+	g_signal_connect (EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser), "ready",
+			  G_CALLBACK (new_chatroom_dialog_account_ready_cb),
+			  dialog);
 	g_signal_connect (GTK_COMBO_BOX (dialog->account_chooser), "changed",
 			  G_CALLBACK (new_chatroom_dialog_account_changed_cb),
 			  dialog);
@@ -223,12 +233,32 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 }
 
 static void
+new_chatroom_dialog_store_last_account (GSettings             *gsettings,
+                                        EmpathyAccountChooser *account_chooser)
+{
+	TpAccount   *account;
+	const char *account_path;
+
+	account = empathy_account_chooser_get_account (account_chooser);
+	if (account == NULL)
+		return;
+
+	account_path = tp_proxy_get_object_path (account);
+	DEBUG ("Storing account path '%s'", account_path);
+
+	g_settings_set (gsettings, EMPATHY_PREFS_CHAT_ROOM_LAST_ACCOUNT,
+	                "o", account_path);
+}
+
+static void
 new_chatroom_dialog_response_cb (GtkWidget               *widget,
 				 gint                     response,
 				 EmpathyNewChatroomDialog *dialog)
 {
 	if (response == GTK_RESPONSE_OK) {
 		new_chatroom_dialog_join (dialog);
+		new_chatroom_dialog_store_last_account (dialog->gsettings,
+		                                        EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser));
 	}
 
 	gtk_widget_destroy (widget);
@@ -247,6 +277,8 @@ new_chatroom_dialog_destroy_cb (GtkWidget               *widget,
 		g_signal_handler_disconnect (dialog->account, dialog->status_changed_id);
 		g_object_unref (dialog->account);
 	}
+
+	g_clear_object (&dialog->gsettings);
 
 	g_free (dialog);
 }
@@ -425,6 +457,44 @@ account_status_changed_cb (TpAccount *account,
 			    EmpathyNewChatroomDialog *self)
 {
 	update_join_button_sensitivity (self);
+}
+
+static void
+new_chatroom_dialog_select_last_account (GSettings             *gsettings,
+                                         EmpathyAccountChooser *account_chooser)
+{
+	const gchar          *account_path;
+	TpAccountManager      *manager;
+	TpSimpleClientFactory *factory;
+	TpAccount             *account;
+	TpConnectionStatus    status;
+
+	account_path = g_settings_get_string (gsettings, EMPATHY_PREFS_CHAT_ROOM_LAST_ACCOUNT);
+	DEBUG ("Selecting account path '%s'", account_path);
+
+	manager =  tp_account_manager_dup ();
+	factory = tp_proxy_get_factory (manager);
+	account = tp_simple_client_factory_ensure_account (factory,
+	                                                   account_path,
+	                                                   NULL,
+	                                                   NULL);
+
+	if (account != NULL) {
+		status = tp_account_get_connection_status (account, NULL);
+		if (status == TP_CONNECTION_STATUS_CONNECTED) {
+			empathy_account_chooser_set_account (account_chooser,
+			                                     account);
+		}
+		g_object_unref (account);
+	}
+	g_object_unref (manager);
+}
+
+static void
+new_chatroom_dialog_account_ready_cb (EmpathyAccountChooser    *combobox,
+                                      EmpathyNewChatroomDialog *dialog)
+{
+	new_chatroom_dialog_select_last_account (dialog->gsettings, combobox);
 }
 
 static void
