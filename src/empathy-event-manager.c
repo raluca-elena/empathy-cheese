@@ -1115,12 +1115,11 @@ approve_channels (TpSimpleApprover *approver,
         event_manager_call_channel_got_contact_cb,
         approval, NULL, G_OBJECT (self));
     }
-  else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
+  else if (EMPATHY_IS_TP_FILE (channel))
     {
       TpHandle handle;
-      EmpathyTpFile *tp_file = empathy_tp_file_new (channel);
 
-      approval->handler_instance = G_OBJECT (tp_file);
+      approval->handler_instance = g_object_ref (channel);
 
       handle = tp_channel_get_handle (channel, NULL);
 

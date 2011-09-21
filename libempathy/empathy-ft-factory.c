@@ -179,22 +179,16 @@ handle_channels_cb (TpSimpleHandler *handler,
   for (l = channels; l != NULL; l = g_list_next (l))
     {
       TpChannel *channel = l->data;
-      EmpathyTpFile *tp_file;
 
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
 
-      if (tp_channel_get_channel_type_id (channel) !=
-          TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
+      if (!EMPATHY_IS_TP_FILE (channel))
         continue;
 
-      tp_file = empathy_tp_file_new (channel);
-
       /* We handle only incoming FT */
-      empathy_ft_handler_new_incoming (tp_file, ft_handler_incoming_ready_cb,
-          self);
-
-      g_object_unref (tp_file);
+      empathy_ft_handler_new_incoming ((EmpathyTpFile *) channel,
+          ft_handler_incoming_ready_cb, self);
     }
 
 

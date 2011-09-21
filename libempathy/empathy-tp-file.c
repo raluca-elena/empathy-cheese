@@ -66,8 +66,6 @@
 /* EmpathyTpFile object */
 
 struct _EmpathyTpFilePrivate {
-  TpChannel *channel;
-
   GInputStream *in_stream;
   GOutputStream *out_stream;
 
@@ -97,13 +95,7 @@ struct _EmpathyTpFilePrivate {
   gboolean is_closed;
 };
 
-enum {
-  PROP_0,
-  PROP_CHANNEL,
-  PROP_INCOMING
-};
-
-G_DEFINE_TYPE (EmpathyTpFile, empathy_tp_file, G_TYPE_OBJECT);
+G_DEFINE_TYPE (EmpathyTpFile, empathy_tp_file, TP_TYPE_FILE_TRANSFER_CHANNEL);
 
 /* private functions */
 
@@ -589,8 +581,7 @@ file_read_async_cb (GObject *source,
    */
   initialize_empty_ac_variant (self->priv->socket_access_control, &nothing);
 
-  tp_cli_channel_type_file_transfer_call_provide_file (
-      self->priv->channel, -1,
+  tp_cli_channel_type_file_transfer_call_provide_file ((TpChannel *) self, -1,
       self->priv->socket_address_type, self->priv->socket_access_control,
       &nothing, ft_operation_provide_or_accept_file_cb,
       NULL, NULL, G_OBJECT (self));
@@ -616,7 +607,7 @@ file_transfer_set_uri_cb (TpProxy *proxy,
    */
   initialize_empty_ac_variant (self->priv->socket_access_control, &nothing);
 
-  tp_cli_channel_type_file_transfer_call_accept_file (self->priv->channel,
+  tp_cli_channel_type_file_transfer_call_accept_file ((TpChannel *) self,
       -1, self->priv->socket_address_type, self->priv->socket_access_control,
       &nothing, self->priv->offset,
       ft_operation_provide_or_accept_file_cb, NULL, NULL, weak_object);
@@ -650,7 +641,7 @@ file_replace_async_cb (GObject *source,
   uri = g_file_get_uri (file);
   value = tp_g_value_slice_new_take_string (uri);
 
-  tp_cli_dbus_properties_call_set (self->priv->channel, -1,
+  tp_cli_dbus_properties_call_set ((TpChannel *) self, -1,
       TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "URI", value,
       file_transfer_set_uri_cb, NULL, NULL, G_OBJECT (self));
 
@@ -682,7 +673,7 @@ close_channel_internal (EmpathyTpFile *self,
 
   self->priv->is_closing = TRUE;
 
-  tp_cli_channel_call_close (self->priv->channel, -1,
+  tp_cli_channel_call_close ((TpChannel *) self, -1,
     channel_closed_cb, GINT_TO_POINTER (cancel), NULL, G_OBJECT (self));
 }
 
@@ -699,13 +690,6 @@ static void
 do_dispose (GObject *object)
 {
   EmpathyTpFile *self = (EmpathyTpFile *) object;
-
-  if (self->priv->channel != NULL)
-    {
-      g_signal_handlers_disconnect_by_func (self->priv->channel,
-          tp_file_invalidated_cb, object);
-      tp_clear_object (&self->priv->channel);
-    }
 
   tp_clear_object (&self->priv->in_stream);
   tp_clear_object (&self->priv->out_stream);
@@ -731,68 +715,28 @@ do_finalize (GObject *object)
 }
 
 static void
-do_get_property (GObject *object,
-    guint param_id,
-    GValue *value,
-    GParamSpec *pspec)
-{
-  EmpathyTpFile *self = (EmpathyTpFile *) object;
-
-  switch (param_id)
-    {
-      case PROP_CHANNEL:
-        g_value_set_object (value, self->priv->channel);
-        break;
-      case PROP_INCOMING:
-        g_value_set_boolean (value, self->priv->incoming);
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    };
-}
-
-static void
-do_set_property (GObject *object,
-    guint param_id,
-    const GValue *value,
-    GParamSpec *pspec)
-{
-  EmpathyTpFile *self = (EmpathyTpFile *) object;
-
-  switch (param_id)
-    {
-      case PROP_CHANNEL:
-        self->priv->channel = g_object_ref (g_value_get_object (value));
-        break;
-      default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    };
-}
-
-static void
 do_constructed (GObject *object)
 {
   EmpathyTpFile *self = (EmpathyTpFile *) object;
+  TpChannel *channel = (TpChannel *) self;
 
-  g_signal_connect (self->priv->channel, "invalidated",
+  g_signal_connect (self, "invalidated",
     G_CALLBACK (tp_file_invalidated_cb), self);
 
-  self->priv->incoming = !tp_channel_get_requested (self->priv->channel);
+  self->priv->incoming = !tp_channel_get_requested (channel);
 
   tp_cli_channel_type_file_transfer_connect_to_file_transfer_state_changed (
-      self->priv->channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
+      channel, tp_file_state_changed_cb, NULL, NULL, object, NULL);
 
   tp_cli_channel_type_file_transfer_connect_to_transferred_bytes_changed (
-      self->priv->channel, tp_file_transferred_bytes_changed_cb,
+      channel, tp_file_transferred_bytes_changed_cb,
       NULL, NULL, object, NULL);
 
-  tp_cli_dbus_properties_call_get (self->priv->channel,
+  tp_cli_dbus_properties_call_get (channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "State", tp_file_get_state_cb,
       NULL, NULL, object);
 
-  tp_cli_dbus_properties_call_get (self->priv->channel,
+  tp_cli_dbus_properties_call_get (channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER, "AvailableSocketTypes",
       tp_file_get_available_socket_types_cb, NULL, NULL, object);
 
@@ -810,66 +754,32 @@ empathy_tp_file_class_init (EmpathyTpFileClass *klass)
   object_class->finalize = do_finalize;
   object_class->dispose = do_dispose;
   object_class->constructed = do_constructed;
-  object_class->get_property = do_get_property;
-  object_class->set_property = do_set_property;
-
-  /* Construct-only properties */
-
-  /**
-   * EmpathyTpFile:channel:
-   *
-   * The #TpChannel requested for the file transfer.
-   */
-  g_object_class_install_property (object_class,
-      PROP_CHANNEL,
-      g_param_spec_object ("channel",
-          "telepathy channel",
-          "The file transfer channel",
-          TP_TYPE_CHANNEL,
-          G_PARAM_READWRITE |
-          G_PARAM_CONSTRUCT_ONLY));
-
-  /**
-   * EmpathyTpFile:incoming:
-   *
-   * %TRUE if the transfer is incoming, %FALSE if it's outgoing.
-   */
-  g_object_class_install_property (object_class,
-      PROP_INCOMING,
-      g_param_spec_boolean ("incoming",
-          "direction of transfer",
-          "The direction of the file being transferred",
-          FALSE,
-          G_PARAM_READABLE));
 
   g_type_class_add_private (object_class, sizeof (EmpathyTpFilePrivate));
 }
 
 /* public methods */
 
-/**
- * empathy_tp_file_new:
- * @channel: a #TpChannel
- * @incoming: whether the file transfer is incoming or not
- *
- * Creates a new #EmpathyTpFile wrapping @channel.
- * The returned #EmpathyTpFile should be unrefed
- * with g_object_unref() when finished with.
- *
- * Return value: a new #EmpathyTpFile
- */
 EmpathyTpFile *
-empathy_tp_file_new (TpChannel *channel)
+empathy_tp_file_new (TpSimpleClientFactory *factory,
+    TpConnection *conn,
+    const gchar *object_path,
+    const GHashTable *immutable_properties,
+    GError **error)
 {
-  EmpathyTpFile *self;
+  TpProxy *conn_proxy = (TpProxy *) conn;
 
-  g_return_val_if_fail (TP_IS_CHANNEL (channel), NULL);
+  g_return_val_if_fail (TP_IS_CONNECTION (conn), NULL);
+  g_return_val_if_fail (immutable_properties != NULL, NULL);
 
-  self = g_object_new (EMPATHY_TYPE_TP_FILE,
-      "channel", channel,
-      NULL);
-
-  return self;
+  return g_object_new (EMPATHY_TYPE_TP_FILE,
+           "factory", factory,
+           "connection", conn,
+           "dbus-daemon", conn_proxy->dbus_daemon,
+           "bus-name", conn_proxy->bus_name,
+           "object-path", object_path,
+           "channel-properties", immutable_properties,
+           NULL);
 }
 
 /**

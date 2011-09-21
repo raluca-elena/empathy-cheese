@@ -725,7 +725,7 @@ ft_handler_create_channel_cb (GObject *source,
   EmpathyFTHandler *handler = user_data;
   EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
   GError *error = NULL;
-  TpChannel *channel = NULL;
+  TpChannel *channel;
 
   DEBUG ("Dispatcher create channel CB");
 
@@ -741,18 +741,16 @@ ft_handler_create_channel_cb (GObject *source,
     {
       emit_error_signal (handler, error);
 
+      g_clear_object (&channel);
       g_error_free (error);
-      goto out;
+      return;
     }
 
-  priv->tpfile = empathy_tp_file_new (channel);
+  priv->tpfile = EMPATHY_TP_FILE (channel);
 
   empathy_tp_file_offer (priv->tpfile, priv->gfile, priv->cancellable,
       ft_transfer_progress_callback, handler,
       ft_transfer_operation_callback, handler);
-
-out:
-  tp_clear_object (&channel);
 }
 
 static void
@@ -1365,7 +1363,6 @@ empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
     gpointer user_data)
 {
   EmpathyFTHandler *handler;
-  TpChannel *channel;
   CallbacksData *data;
 
   g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
@@ -1373,14 +1370,12 @@ empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
   handler = g_object_new (EMPATHY_TYPE_FT_HANDLER,
       "tp-file", tp_file, NULL);
 
-  g_object_get (tp_file, "channel", &channel, NULL);
-
   data = g_slice_new0 (CallbacksData);
   data->callback = callback;
   data->user_data = user_data;
   data->handler = g_object_ref (handler);
 
-  tp_cli_dbus_properties_call_get_all (channel,
+  tp_cli_dbus_properties_call_get_all (tp_file,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER,
       channel_get_all_properties_cb, data, NULL, G_OBJECT (handler));
 }

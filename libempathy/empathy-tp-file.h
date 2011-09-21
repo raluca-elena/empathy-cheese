@@ -27,7 +27,7 @@
 #include <gio/gio.h>
 #include <glib.h>
 
-#include <telepathy-glib/channel.h>
+#include <telepathy-glib/file-transfer-channel.h>
 
 G_BEGIN_DECLS
 
@@ -60,12 +60,12 @@ typedef struct _EmpathyTpFilePrivate EmpathyTpFilePrivate;
 typedef struct _EmpathyTpFileClass EmpathyTpFileClass;
 
 struct _EmpathyTpFile {
-  GObject  parent;
+  TpFileTransferChannel  parent;
   EmpathyTpFilePrivate *priv;
 };
 
 struct _EmpathyTpFileClass {
-  GObjectClass parent_class;
+  TpFileTransferChannelClass parent_class;
 };
 
 /* prototypes for operation callbacks */
@@ -96,7 +96,11 @@ GType empathy_tp_file_get_type (void) G_GNUC_CONST;
 
 /* public methods */
 
-EmpathyTpFile * empathy_tp_file_new (TpChannel *channel);
+EmpathyTpFile * empathy_tp_file_new (TpSimpleClientFactory *factory,
+    TpConnection *conn,
+    const gchar *object_path,
+    const GHashTable *immutable_properties,
+    GError **error);
 
 void empathy_tp_file_accept (EmpathyTpFile *tp_file,
     guint64 offset,
