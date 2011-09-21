@@ -154,6 +154,8 @@ struct _EmpathyCallWindowPriv
   ClutterActor *preview_rectangle_box2;
   ClutterActor *preview_rectangle_box3;
   ClutterActor *preview_rectangle_box4;
+  ClutterActor *preview_spinner_actor;
+  GtkWidget *preview_spinner_widget;
   GtkWidget *video_container;
   GtkWidget *remote_user_avatar_widget;
   GtkWidget *remote_user_avatar_toolbar;
@@ -1045,6 +1047,7 @@ create_video_preview (EmpathyCallWindow *self)
   ClutterAction *action;
   GtkWidget *button;
   PreviewPosition pos;
+  GdkRGBA transparent = { 0., 0., 0., 0. };
 
   g_assert (priv->video_preview == NULL);
 
@@ -1065,6 +1068,28 @@ create_video_preview (EmpathyCallWindow *self)
       SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN +
       FLOATING_TOOLBAR_HEIGHT + FLOATING_TOOLBAR_SPACING);
 
+  /* Spinner for when changing the camera device */
+  priv->preview_spinner_widget = gtk_spinner_new ();
+  priv->preview_spinner_actor = empathy_rounded_actor_new ();
+  empathy_rounded_actor_set_round_factor (
+      EMPATHY_ROUNDED_ACTOR (priv->preview_spinner_actor), 16);
+
+  g_object_set (priv->preview_spinner_widget, "expand", TRUE, NULL);
+  gtk_widget_override_background_color (
+      gtk_clutter_actor_get_widget (
+          GTK_CLUTTER_ACTOR (priv->preview_spinner_actor)),
+      GTK_STATE_FLAG_NORMAL, &transparent);
+  gtk_widget_show (priv->preview_spinner_widget);
+
+  gtk_container_add (
+      GTK_CONTAINER (gtk_clutter_actor_get_widget (
+          GTK_CLUTTER_ACTOR (priv->preview_spinner_actor))),
+      priv->preview_spinner_widget);
+  clutter_actor_set_size (priv->preview_spinner_actor,
+      SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGHT);
+  clutter_actor_set_opacity (priv->preview_spinner_actor, 128);
+  clutter_actor_hide (priv->preview_spinner_actor);
+
   /* We have a box with the margins and the video in the middle inside
    * a bigger box with an extra bottom margin so we're not on top of
    * the floating toolbar. */
@@ -1076,6 +1101,8 @@ create_video_preview (EmpathyCallWindow *self)
       SELF_VIDEO_SECTION_HEIGHT + 2 * SELF_VIDEO_SECTION_MARGIN);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (box), preview);
+  clutter_container_add_actor (CLUTTER_CONTAINER (box),
+      priv->preview_spinner_actor);
   clutter_container_add_actor (CLUTTER_CONTAINER (priv->video_preview), box);
 
   g_object_set (priv->video_preview_sink,
@@ -1154,24 +1181,43 @@ create_video_preview (EmpathyCallWindow *self)
   clutter_actor_set_reactive (priv->preview_shown_button, TRUE);
 }
 
+static void
+empathy_call_window_start_camera_spinning (EmpathyCallWindow *self)
+{
+  clutter_actor_show (self->priv->preview_spinner_actor);
+  gtk_spinner_start (GTK_SPINNER (self->priv->preview_spinner_widget));
+}
+
+static void
+empathy_call_window_stop_camera_spinning (EmpathyCallWindow *self)
+{
+  clutter_actor_hide (self->priv->preview_spinner_actor);
+  gtk_spinner_stop (GTK_SPINNER (self->priv->preview_spinner_widget));
+}
+
 void
-empathy_call_window_play_camera (EmpathyCallWindow *window,
+empathy_call_window_play_camera (EmpathyCallWindow *self,
     gboolean play)
 {
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
+  EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GstElement *preview;
   GstState state;
 
   if (priv->video_preview == NULL)
     {
-      create_video_preview (window);
-      add_video_preview_to_pipeline (window);
+      create_video_preview (self);
+      add_video_preview_to_pipeline (self);
     }
 
   if (play)
-    state = GST_STATE_PLAYING;
+    {
+      state = GST_STATE_PLAYING;
+    }
   else
-    state = GST_STATE_NULL;
+    {
+      empathy_call_window_start_camera_spinning (self);
+      state = GST_STATE_NULL;
+    }
 
   preview = priv->video_preview_sink;
 
@@ -3312,7 +3358,7 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstState newstate;
+  GstState newstate, pending;
 
   empathy_call_handler_bus_message (priv->handler, bus, message);
 
@@ -3335,6 +3381,15 @@ empathy_call_window_bus_message (GstBus *bus, GstMessage *message,
                 if (priv->start_call_when_playing)
                   start_call (self);
               }
+          }
+        if (GST_MESSAGE_SRC (message) == GST_OBJECT (priv->video_preview_sink))
+          {
+            gst_message_parse_state_changed (message, NULL, &newstate,
+                &pending);
+
+            if (newstate == GST_STATE_PLAYING &&
+                pending == GST_STATE_VOID_PENDING)
+              empathy_call_window_stop_camera_spinning (self);
           }
         break;
       case GST_MESSAGE_ERROR:
