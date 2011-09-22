@@ -1750,6 +1750,7 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
                                 PANGO_WRAP_WORD_CHAR);
   gtk_label_set_line_wrap (GTK_LABEL (information->label_status),
                            TRUE);
+  gtk_misc_set_alignment (GTK_MISC (information->label_status), 0, 0.5);
 
   if (!(information->flags & EMPATHY_CONTACT_WIDGET_FOR_TOOLTIP))
     gtk_label_set_selectable (GTK_LABEL (information->label_status), TRUE);
