@@ -64,7 +64,8 @@ typedef enum
 
 GType empathy_preferences_get_type (void);
 
-GtkWidget *empathy_preferences_new (GtkWindow *parent);
+GtkWidget *empathy_preferences_new (GtkWindow *parent,
+                                    gboolean  shell_running);
 
 void empathy_preferences_show_tab (EmpathyPreferences *self,
     const gchar *tab);

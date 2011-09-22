@@ -55,6 +55,8 @@ GtkWidget *empathy_main_window_dup (void);
 
 void empathy_main_window_show_preferences (EmpathyMainWindow *window,
     const gchar *tab);
+void empathy_main_window_set_shell_running (EmpathyMainWindow *window,
+                                            gboolean           shell_running);
 
 G_END_DECLS
 

@@ -287,6 +287,9 @@ out:
 
       /* Rely on GNOME Shell to watch session state */
       empathy_presence_manager_set_auto_away (self->presence_mgr, FALSE);
+
+      empathy_main_window_set_shell_running (EMPATHY_MAIN_WINDOW (self->window),
+                                             TRUE);
     }
   else
     {

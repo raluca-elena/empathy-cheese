@@ -98,6 +98,11 @@ enum {
 	PAGE_NO_MATCH
 };
 
+enum {
+	PROP_0,
+	PROP_SHELL_RUNNING
+};
+
 G_DEFINE_TYPE (EmpathyMainWindow, empathy_main_window, GTK_TYPE_WINDOW);
 
 #define GET_PRIV(self) ((EmpathyMainWindowPriv *)((EmpathyMainWindow *) self)->priv)
@@ -166,6 +171,8 @@ struct _EmpathyMainWindowPriv {
 
 	/* The idle event source to migrate butterfly's logs */
 	guint butterfly_log_migration_members_changed_id;
+
+	gboolean               shell_running;
 };
 
 static void
@@ -1854,7 +1861,8 @@ empathy_main_window_show_preferences (EmpathyMainWindow *window,
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 
 	if (priv->preferences == NULL) {
-		priv->preferences = empathy_preferences_new (GTK_WINDOW (window));
+		priv->preferences = empathy_preferences_new (GTK_WINDOW (window),
+		                                             priv->shell_running);
 		g_object_add_weak_pointer (G_OBJECT (priv->preferences),
 					   (gpointer) &priv->preferences);
 
@@ -2064,6 +2072,19 @@ main_window_members_changed_cb (EmpathyContactList *list,
 	}
 }
 
+void
+empathy_main_window_set_shell_running (EmpathyMainWindow *window,
+                                       gboolean          shell_running)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+
+	if (priv->shell_running == shell_running)
+		return;
+
+	priv->shell_running = shell_running;
+	g_object_notify (G_OBJECT (window), "shell-running");
+}
+
 static GObject *
 empathy_main_window_constructor (GType type,
                                  guint n_construct_params,
@@ -2083,12 +2104,63 @@ empathy_main_window_constructor (GType type,
 }
 
 static void
+empathy_main_window_set_property (GObject       *object,
+                                  guint         property_id,
+                                  const GValue *value,
+                                  GParamSpec    *pspec)
+{
+	EmpathyMainWindow *self = EMPATHY_MAIN_WINDOW (object);
+	EmpathyMainWindowPriv *priv = GET_PRIV (self);
+
+	switch (property_id)
+	{
+		case PROP_SHELL_RUNNING:
+			priv->shell_running = g_value_get_boolean (value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
+empathy_main_window_get_property (GObject    *object,
+                                  guint      property_id,
+                                  GValue     *value,
+                                  GParamSpec *pspec)
+{
+	EmpathyMainWindow *self = EMPATHY_MAIN_WINDOW (object);
+	EmpathyMainWindowPriv *priv = GET_PRIV (self);
+
+	switch (property_id)
+	{
+		case PROP_SHELL_RUNNING:
+			g_value_set_boolean (value, priv->shell_running);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
 empathy_main_window_class_init (EmpathyMainWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	GParamSpec *pspec;
 
 	object_class->finalize = empathy_main_window_finalize;
 	object_class->constructor = empathy_main_window_constructor;
+
+	object_class->set_property = empathy_main_window_set_property;
+	object_class->get_property = empathy_main_window_get_property;
+
+	pspec = g_param_spec_boolean ("shell-running",
+	                              "Shell running",
+	                              "Whether the Shell is running or not",
+	                              FALSE,
+	                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property (object_class, PROP_SHELL_RUNNING, pspec);
 
 	g_type_class_add_private (object_class, sizeof (EmpathyMainWindowPriv));
 }

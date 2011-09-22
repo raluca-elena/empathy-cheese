@@ -1283,9 +1283,12 @@ empathy_preferences_tab_to_string (EmpathyPreferencesTab tab)
 }
 
 GtkWidget *
-empathy_preferences_new (GtkWindow *parent)
+empathy_preferences_new (GtkWindow *parent,
+                         gboolean  shell_running)
 {
-	GtkWidget *self;
+	GtkWidget              *self;
+	EmpathyPreferencesPriv *priv;
+	GtkWidget              *notif_page;
 
 	g_return_val_if_fail (parent == NULL || GTK_IS_WINDOW (parent), NULL);
 
@@ -1294,6 +1297,19 @@ empathy_preferences_new (GtkWindow *parent)
 	if (parent != NULL) {
 		gtk_window_set_transient_for (GTK_WINDOW (self),
 					      parent);
+	}
+
+	/* when running in Gnome Shell we must hide these options since they
+	 * are meaningless in that context:
+	 * - 'Display incoming events in the notification area' (General->Behavior)
+	 * - 'Notifications' tab
+	 */
+	priv = GET_PRIV (self);
+	if (shell_running) {
+		gtk_widget_hide (priv->checkbutton_events_notif_area);
+		notif_page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (priv->notebook),
+		                                        EMPATHY_PREFERENCES_TAB_NOTIFICATIONS);
+		gtk_widget_hide (notif_page);
 	}
 
 	return self;
