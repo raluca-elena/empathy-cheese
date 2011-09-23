@@ -555,6 +555,23 @@ main_window_event_removed_cb (EmpathyEventManager *manager,
 				&data);
 }
 
+static gboolean
+main_window_load_events_idle_cb (gpointer user_data)
+{
+	EmpathyMainWindow *window = user_data;
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GSList *l;
+
+	l = empathy_event_manager_get_events (priv->event_manager);
+	while (l) {
+		main_window_event_added_cb (priv->event_manager, l->data,
+				window);
+		l = l->next;
+	}
+
+	return FALSE;
+}
+
 static void
 main_window_row_activated_cb (EmpathyContactListView *view,
 			      GtkTreePath            *path,
@@ -649,6 +666,12 @@ main_window_row_inserted_cb (GtkTreeModel      *model,
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (priv->notebook),
 				PAGE_CONTACT_LIST);
 		gtk_widget_grab_focus (GTK_WIDGET (priv->individual_view));
+
+		/* The store is being filled, it will be done after an idle cb.
+		 * So we can then get events. If we do that too soon, event's
+		 * contact is not yet in the store and it won't get marked as
+		 * having events. */
+		g_idle_add (main_window_load_events_idle_cb, window);
 	}
 }
 
@@ -2152,7 +2175,6 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	GtkToolItem              *item;
 	gboolean                  show_offline;
 	gchar                    *filename;
-	GSList                   *l;
 	GtkTreeModel             *model;
 	GtkWidget                *search_vbox;
 	GtkWidget                *menubar;
@@ -2392,13 +2414,6 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	g_signal_connect (priv->account_manager, "account-disabled",
 			  G_CALLBACK (main_window_account_disabled_cb),
 			  window);
-
-	l = empathy_event_manager_get_events (priv->event_manager);
-	while (l) {
-		main_window_event_added_cb (priv->event_manager, l->data,
-				window);
-		l = l->next;
-	}
 
 	/* Show offline ? */
 	show_offline = g_settings_get_boolean (priv->gsettings_ui,
