@@ -164,8 +164,8 @@ empathy_account_widget_irc_build (EmpathyAccountWidget *self,
   g_signal_connect (settings->network_chooser, "changed",
       G_CALLBACK (network_changed_cb), settings);
 
-  gtk_table_attach (GTK_TABLE (*table_common_settings),
-      settings->network_chooser, 1, 2, 0, 1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+  gtk_grid_attach (GTK_GRID (*table_common_settings),
+      settings->network_chooser, 1, 0, 1, 1);
 
   gtk_widget_show (settings->network_chooser);
 
