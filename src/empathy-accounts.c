@@ -55,6 +55,7 @@ static gboolean only_if_needed = FALSE;
 static gboolean hidden = FALSE;
 static gchar *selected_account_name = NULL;
 static gboolean account_manager_prepared = FALSE;
+static gboolean assistant = FALSE;
 
 static void
 account_prepare_cb (GObject *source_object,
@@ -73,7 +74,7 @@ account_prepare_cb (GObject *source_object,
       account = NULL;
     }
 
-  empathy_accounts_show_accounts_ui (manager, account,
+  empathy_accounts_show_accounts_ui (manager, account, assistant,
       G_CALLBACK (gtk_main_quit));
 }
 
@@ -84,7 +85,7 @@ maybe_show_accounts_ui (TpAccountManager *manager)
       (only_if_needed && empathy_accounts_has_non_salut_accounts (manager)))
     gtk_main_quit ();
   else
-    empathy_accounts_show_accounts_ui (manager, NULL, gtk_main_quit);
+    empathy_accounts_show_accounts_ui (manager, NULL, assistant, gtk_main_quit);
 }
 
 static void
@@ -156,7 +157,7 @@ app_command_line_cb (GApplication *app,
       TpAccountManager *account_manager;
 
       account_manager = tp_account_manager_dup ();
-      empathy_accounts_show_accounts_ui (account_manager, NULL,
+      empathy_accounts_show_accounts_ui (account_manager, NULL, assistant,
               G_CALLBACK (gtk_main_quit));
 
       g_object_unref (account_manager);
@@ -191,6 +192,10 @@ local_cmdline (GApplication *app,
         N_("Initially select given account (eg, "
             "gabble/jabber/foo_40example_2eorg0)"),
         N_("<account-id>") },
+      { "assistant", 'a',
+        0, G_OPTION_ARG_NONE, &assistant,
+        N_("Show account assistant"),
+        NULL },
 
       { NULL }
   };

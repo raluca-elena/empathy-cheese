@@ -132,12 +132,13 @@ out:
 void
 empathy_accounts_show_accounts_ui (TpAccountManager *manager,
     TpAccount *account,
+    gboolean assistant,
     GCallback window_destroyed_cb)
 {
   g_return_if_fail (TP_IS_ACCOUNT_MANAGER (manager));
   g_return_if_fail (!account || TP_IS_ACCOUNT (account));
 
-  if (empathy_accounts_has_non_salut_accounts (manager))
+  if (empathy_accounts_has_non_salut_accounts (manager) && !assistant)
     {
       do_show_accounts_ui (manager, account, window_destroyed_cb);
     }
