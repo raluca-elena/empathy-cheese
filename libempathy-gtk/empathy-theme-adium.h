@@ -53,6 +53,7 @@ EmpathyThemeAdium *empathy_theme_adium_new      (EmpathyAdiumData *data,
 						 const gchar *variant);
 void               empathy_theme_adium_set_variant (EmpathyThemeAdium *theme,
 						    const gchar *variant);
+void               empathy_theme_adium_show_inspector (EmpathyThemeAdium *theme);
 
 gboolean           empathy_adium_path_is_valid (const gchar *path);
 

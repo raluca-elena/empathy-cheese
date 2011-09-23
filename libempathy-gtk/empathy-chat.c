@@ -56,6 +56,7 @@
 #include "empathy-input-text-view.h"
 #include "empathy-search-bar.h"
 #include "empathy-theme-manager.h"
+#include "empathy-theme-adium.h"
 #include "empathy-smiley-manager.h"
 #include "empathy-ui-utils.h"
 #include "empathy-string-parser.h"
@@ -1042,6 +1043,16 @@ chat_command_babywhale (EmpathyChat *chat,
 	g_object_unref (message);
 }
 
+static void
+chat_command_inspector (EmpathyChat *chat,
+		    GStrv        strv)
+{
+	if (EMPATHY_IS_THEME_ADIUM (chat->view)) {
+		empathy_theme_adium_show_inspector (
+			EMPATHY_THEME_ADIUM (chat->view));
+	}
+}
+
 static void chat_command_help (EmpathyChat *chat, GStrv strv);
 
 typedef void (*ChatCommandFunc) (EmpathyChat *chat, GStrv strv);
@@ -1096,6 +1107,8 @@ static ChatCommandItem commands[] = {
 	{"help", 1, 2, chat_command_help, NULL,
 	 N_("/help [<command>]: show all supported commands. "
 	    "If <command> is defined, show its usage.")},
+
+	{"inspector", 1, 1, chat_command_inspector, NULL, NULL},
 
 	{"whale", 1, 1, chat_command_whale, NULL, NULL},
 	{"babywhale", 1, 1, chat_command_babywhale, NULL, NULL},
