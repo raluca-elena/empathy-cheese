@@ -1267,26 +1267,11 @@ channel_get_all_properties_cb (TpProxy *proxy,
       return;
     }
 
-  priv->total_bytes = g_value_get_uint64 (
-      g_hash_table_lookup (properties, "Size"));
-
-  priv->transferred_bytes = g_value_get_uint64 (
-      g_hash_table_lookup (properties, "TransferredBytes"));
-
-  priv->filename = g_value_dup_string (
-      g_hash_table_lookup (properties, "Filename"));
-
   priv->content_hash = g_value_dup_string (
       g_hash_table_lookup (properties, "ContentHash"));
 
   priv->content_hash_type = g_value_get_uint (
       g_hash_table_lookup (properties, "ContentHashType"));
-
-  priv->content_type = g_value_dup_string (
-      g_hash_table_lookup (properties, "ContentType"));
-
-  priv->description = g_value_dup_string (
-      g_hash_table_lookup (properties, "Description"));
 
   c_handle = tp_channel_get_handle (TP_CHANNEL (proxy), NULL);
   empathy_tp_contact_factory_get_from_handle (
@@ -1364,16 +1349,33 @@ empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
 {
   EmpathyFTHandler *handler;
   CallbacksData *data;
+  TpFileTransferChannel *ft_chan = (TpFileTransferChannel *) tp_file;
+  EmpathyFTHandlerPriv *priv;
 
   g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
 
   handler = g_object_new (EMPATHY_TYPE_FT_HANDLER,
       "tp-file", tp_file, NULL);
 
+  priv = GET_PRIV (handler);
+
   data = g_slice_new0 (CallbacksData);
   data->callback = callback;
   data->user_data = user_data;
   data->handler = g_object_ref (handler);
+
+  priv->total_bytes = tp_file_transfer_channel_get_size (ft_chan);
+
+  priv->transferred_bytes = tp_file_transfer_channel_get_transferred_bytes (
+      ft_chan);
+
+  priv->filename = g_strdup (tp_file_transfer_channel_get_filename (ft_chan));
+
+  priv->content_type = g_strdup (tp_file_transfer_channel_get_mime_type (
+      ft_chan));
+
+  priv->description = g_strdup (tp_file_transfer_channel_get_description (
+      ft_chan));
 
   tp_cli_dbus_properties_call_get_all (tp_file,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER,
