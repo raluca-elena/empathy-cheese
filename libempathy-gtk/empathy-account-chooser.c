@@ -205,7 +205,7 @@ empathy_account_chooser_class_init (EmpathyAccountChooserClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__VOID,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      0);
 

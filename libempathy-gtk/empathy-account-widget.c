@@ -2363,7 +2363,7 @@ empathy_account_widget_class_init (EmpathyAccountWidgetClass *klass)
   signals[HANDLE_APPLY] =
     g_signal_new ("handle-apply", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__BOOLEAN,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, G_TYPE_BOOLEAN);
 
@@ -2371,14 +2371,14 @@ empathy_account_widget_class_init (EmpathyAccountWidgetClass *klass)
   signals[ACCOUNT_CREATED] =
       g_signal_new ("account-created", G_TYPE_FROM_CLASS (klass),
           G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE,
           1, G_TYPE_OBJECT);
 
   signals[CANCELLED] =
       g_signal_new ("cancelled", G_TYPE_FROM_CLASS (klass),
           G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-          g_cclosure_marshal_VOID__VOID,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE,
           0);
 

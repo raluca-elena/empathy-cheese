@@ -30,7 +30,6 @@
 #include <libempathy/empathy-utils.h>
 
 #include "empathy-live-search.h"
-#include "empathy-gtk-marshal.h"
 
 G_DEFINE_TYPE (EmpathyLiveSearch, empathy_live_search, GTK_TYPE_HBOX)
 
@@ -546,7 +545,7 @@ empathy_live_search_class_init (EmpathyLiveSearchClass *klass)
       G_SIGNAL_RUN_LAST,
       0,
       NULL, NULL,
-      g_cclosure_marshal_VOID__VOID,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 0);
 
   signals[KEYNAV] = g_signal_new ("key-navigation",
@@ -554,7 +553,7 @@ empathy_live_search_class_init (EmpathyLiveSearchClass *klass)
       G_SIGNAL_RUN_LAST,
       0,
       g_signal_accumulator_true_handled, NULL,
-      _empathy_gtk_marshal_BOOLEAN__BOXED,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN, 1, GDK_TYPE_EVENT | G_SIGNAL_TYPE_STATIC_SCOPE);
 
   param_spec = g_param_spec_object ("hook-widget", "Live Search Hook Widget",

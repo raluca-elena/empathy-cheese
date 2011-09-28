@@ -27,7 +27,6 @@
 
 #include "empathy-ft-factory.h"
 #include "empathy-ft-handler.h"
-#include "empathy-marshal.h"
 #include "empathy-request-util.h"
 #include "empathy-utils.h"
 
@@ -126,7 +125,7 @@ empathy_ft_factory_class_init (EmpathyFTFactoryClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _empathy_marshal_VOID__OBJECT_POINTER,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 2, EMPATHY_TYPE_FT_HANDLER, G_TYPE_POINTER);
 
   /**
@@ -149,7 +148,7 @@ empathy_ft_factory_class_init (EmpathyFTFactoryClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _empathy_marshal_VOID__OBJECT_POINTER,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 2, EMPATHY_TYPE_FT_HANDLER, G_TYPE_POINTER);
 }
 

@@ -36,7 +36,6 @@
 #include <libempathy-gtk/empathy-call-utils.h>
 
 #include "empathy-call-handler.h"
-#include "src-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -457,55 +456,55 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
   signals[CONFERENCE_ADDED] =
     g_signal_new ("conference-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      g_cclosure_marshal_VOID__OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, FS_TYPE_CONFERENCE);
 
   signals[CONFERENCE_REMOVED] =
     g_signal_new ("conference-removed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      g_cclosure_marshal_VOID__OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, FS_TYPE_CONFERENCE);
 
   signals[SRC_PAD_ADDED] =
     g_signal_new ("src-pad-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      _src_marshal_BOOLEAN__OBJECT_UINT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
   signals[SINK_PAD_ADDED] =
     g_signal_new ("sink-pad-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      _src_marshal_BOOLEAN__OBJECT_UINT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
   signals[SINK_PAD_REMOVED] =
     g_signal_new ("sink-pad-removed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      _src_marshal_BOOLEAN__OBJECT_UINT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
   signals[CLOSED] =
     g_signal_new ("closed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      g_cclosure_marshal_VOID__VOID,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       0);
 
   signals[CANDIDATES_CHANGED] =
     g_signal_new ("candidates-changed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      g_cclosure_marshal_VOID__UINT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 1, G_TYPE_UINT);
 
   signals[STATE_CHANGED] =
     g_signal_new ("state-changed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      g_cclosure_marshal_VOID__UINT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 1, G_TYPE_UINT);
 }
 

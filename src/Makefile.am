@@ -59,11 +59,6 @@ libexec_PROGRAMS = \
 	empathy-av \
 	empathy-chat
 
-BUILT_SOURCES = \
-	src-marshal.h \
-	src-marshal.c \
-	src-marshal.list
-
 empathy_accounts_SOURCES =						\
 	empathy-accounts.c empathy-accounts.h				\
 	$(NULL)
@@ -101,8 +96,6 @@ empathy_av_SOURCES = \
 	empathy-mic-monitor.c \
 	empathy-mic-monitor.h
 	$(NULL)
-
-nodist_empathy_av_SOURCES = $(BUILT_SOURCES)
 
 empathy_av_CFLAGS = $(EMPATHY_AV_CFLAGS)
 empathy_av_LDFLAGS = $(EMPATHY_AV_LIBS) $(LIBM)
@@ -161,8 +154,6 @@ empathy_call_SOURCES = \
        empathy-mic-monitor.c \
        empathy-mic-monitor.h
 
-nodist_empathy_call_SOURCES = $(BUILT_SOURCES)
-
 empathy_call_CFLAGS = $(EMPATHY_CALL_CFLAGS)
 empathy_call_LDFLAGS = $(EMPATHY_CALL_LIBS)
 
@@ -197,8 +188,6 @@ empathy_LDADD =								\
         $(EMPATHY_LIBS)							\
         $(LIBCHAMPLAIN_LIBS)						\
 	$(NULL)
-
-nodist_empathy_SOURCES = $(BUILT_SOURCES)
 
 check_c_sources = \
     $(empathy_handwritten_source) \
@@ -245,24 +234,4 @@ endif
 dist_man_MANS =			\
 	empathy.1 \
 	empathy-accounts.1
-
-src-marshal.list: $(empathy_SOURCES) $(empathy_call_SOURCES) Makefile.am
-	$(AM_V_GEN)( cd $(srcdir) && \
-	sed -n -e 's/.*src_marshal_\([[:upper:][:digit:]]*__[[:upper:][:digit:]_]*\).*/\1/p' \
-	$(empathy_SOURCES) $(empathy_av_SOURCES) $(empathy_call_SOURCES) ) \
-	| sed -e 's/__/:/' -e 'y/_/,/' | sort -u > $@.tmp
-	@if cmp -s $@.tmp $@; then \
-		rm $@.tmp; \
-	else \
-		mv $@.tmp $@; \
-	fi
-
-%-marshal.h: %-marshal.list Makefile
-	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_$(subst -,_,$*)_marshal $< > $*-marshal.h
-
-%-marshal.c: %-marshal.list Makefile
-	$(AM_V_GEN)echo "#include \"src-marshal.h\"" > $@ && \
-	$(GLIB_GENMARSHAL) --body --prefix=_$(subst -,_,$*)_marshal $< >> $*-marshal.c
-
-CLEANFILES = $(BUILT_SOURCES)
 

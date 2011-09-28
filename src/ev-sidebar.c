@@ -76,7 +76,7 @@ ev_sidebar_class_init (EvSidebarClass *ev_sidebar_class)
 				G_SIGNAL_RUN_LAST,
 				G_STRUCT_OFFSET (EvSidebarClass, closed),
 				NULL, NULL,
-				g_cclosure_marshal_VOID__VOID,
+				g_cclosure_marshal_generic,
 				G_TYPE_NONE, 0);
 
 	ev_sidebar_table_signals[CHANGED] =
@@ -85,7 +85,7 @@ ev_sidebar_class_init (EvSidebarClass *ev_sidebar_class)
 				G_SIGNAL_RUN_LAST,
 				G_STRUCT_OFFSET (EvSidebarClass, closed),
 				NULL, NULL,
-				g_cclosure_marshal_VOID__STRING,
+				g_cclosure_marshal_generic,
 				G_TYPE_NONE, 1, G_TYPE_STRING);
 
 }

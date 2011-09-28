@@ -27,7 +27,6 @@
 
 #include "empathy-audio-src.h"
 
-#include "src-marshal.h"
 #include "empathy-mic-monitor.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
@@ -336,7 +335,7 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    g_cclosure_marshal_VOID__DOUBLE,
+    g_cclosure_marshal_generic,
     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 
   param_spec = g_param_spec_double ("rms-level", "RMS level", "RMS level",
@@ -349,7 +348,7 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    g_cclosure_marshal_VOID__DOUBLE,
+    g_cclosure_marshal_generic,
     G_TYPE_NONE, 1, G_TYPE_DOUBLE);
 }
 

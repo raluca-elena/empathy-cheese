@@ -43,7 +43,6 @@
 #endif
 
 #include "cheese-camera-device-monitor.h"
-#include "empathy-marshal.h"
 
 /**
  * SECTION:cheese-camera-device-monitor
@@ -360,7 +359,7 @@ cheese_camera_device_monitor_class_init (CheeseCameraDeviceMonitorClass *klass)
                                          G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
                                          G_STRUCT_OFFSET (CheeseCameraDeviceMonitorClass, added),
                                          NULL, NULL,
-                                         _empathy_marshal_VOID__STRING_STRING_STRING_INT,
+                                         g_cclosure_marshal_generic,
                                          G_TYPE_NONE, 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 
   /**
@@ -375,7 +374,7 @@ cheese_camera_device_monitor_class_init (CheeseCameraDeviceMonitorClass *klass)
                                            G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
                                            G_STRUCT_OFFSET (CheeseCameraDeviceMonitorClass, removed),
                                            NULL, NULL,
-                                           g_cclosure_marshal_VOID__STRING,
+                                           g_cclosure_marshal_generic,
                                            G_TYPE_NONE, 1, G_TYPE_STRING);
 
   g_type_class_add_private (klass, sizeof (CheeseCameraDeviceMonitorPrivate));

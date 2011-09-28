@@ -44,7 +44,6 @@
 #include <telepathy-glib/interfaces.h>
 
 #include "empathy-tp-file.h"
-#include "empathy-marshal.h"
 #include "empathy-time.h"
 #include "empathy-utils.h"
 

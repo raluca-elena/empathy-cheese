@@ -35,7 +35,6 @@
 #include <extensions/extensions.h>
 
 #include "empathy-individual-manager.h"
-#include "empathy-marshal.h"
 #include "empathy-utils.h"
 #include "empathy-contact-manager.h"
 
@@ -314,7 +313,7 @@ empathy_individual_manager_class_init (EmpathyIndividualManagerClass *klass)
           G_SIGNAL_RUN_LAST,
           0,
           NULL, NULL,
-          _empathy_marshal_VOID__OBJECT_STRING_BOOLEAN,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE, 3, FOLKS_TYPE_INDIVIDUAL, G_TYPE_STRING, G_TYPE_BOOLEAN);
 
   signals[FAVOURITES_CHANGED] =
@@ -323,7 +322,7 @@ empathy_individual_manager_class_init (EmpathyIndividualManagerClass *klass)
           G_SIGNAL_RUN_LAST,
           0,
           NULL, NULL,
-          _empathy_marshal_VOID__OBJECT_BOOLEAN,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE, 2, FOLKS_TYPE_INDIVIDUAL, G_TYPE_BOOLEAN);
 
   signals[MEMBERS_CHANGED] =
@@ -332,7 +331,7 @@ empathy_individual_manager_class_init (EmpathyIndividualManagerClass *klass)
           G_SIGNAL_RUN_LAST,
           0,
           NULL, NULL,
-          _empathy_marshal_VOID__STRING_OBJECT_OBJECT_UINT,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE,
           4, G_TYPE_STRING, G_TYPE_POINTER, G_TYPE_POINTER, G_TYPE_UINT);
 

@@ -55,7 +55,6 @@
 #include "empathy-cell-renderer-activatable.h"
 #include "empathy-ui-utils.h"
 #include "empathy-gtk-enum-types.h"
-#include "empathy-gtk-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
@@ -2152,7 +2151,7 @@ empathy_individual_view_class_init (EmpathyIndividualViewClass *klass)
       G_SIGNAL_RUN_LAST,
       G_STRUCT_OFFSET (EmpathyIndividualViewClass, drag_individual_received),
       NULL, NULL,
-      _empathy_gtk_marshal_VOID__UINT_OBJECT_STRING_STRING,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 4, G_TYPE_UINT, FOLKS_TYPE_INDIVIDUAL,
       G_TYPE_STRING, G_TYPE_STRING);
 
@@ -2162,7 +2161,7 @@ empathy_individual_view_class_init (EmpathyIndividualViewClass *klass)
       G_SIGNAL_RUN_LAST,
       G_STRUCT_OFFSET (EmpathyIndividualViewClass, drag_persona_received),
       NULL, NULL,
-      _empathy_gtk_marshal_BOOLEAN__UINT_OBJECT_OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN, 3, G_TYPE_UINT, FOLKS_TYPE_PERSONA, FOLKS_TYPE_INDIVIDUAL);
 
   g_object_class_install_property (object_class,

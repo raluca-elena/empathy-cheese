@@ -118,7 +118,7 @@ empathy_contact_chooser_class_init (
             G_SIGNAL_RUN_LAST,
             0,
             NULL, NULL,
-            g_cclosure_marshal_VOID__OBJECT,
+            g_cclosure_marshal_generic,
             G_TYPE_NONE,
             1, FOLKS_TYPE_INDIVIDUAL);
 }

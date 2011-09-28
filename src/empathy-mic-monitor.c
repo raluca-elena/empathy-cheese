@@ -26,7 +26,6 @@
 
 #include "empathy-mic-monitor.h"
 
-#include "src-marshal.h"
 
 #include <libempathy/empathy-utils.h>
 
@@ -268,7 +267,7 @@ empathy_mic_monitor_class_init (EmpathyMicMonitorClass *klass)
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    _src_marshal_VOID__UINT_STRING_STRING_BOOLEAN,
+    g_cclosure_marshal_generic,
     G_TYPE_NONE, 4, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_BOOLEAN);
 
   signals[MICROPHONE_REMOVED] = g_signal_new ("microphone-removed",
@@ -276,7 +275,7 @@ empathy_mic_monitor_class_init (EmpathyMicMonitorClass *klass)
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    g_cclosure_marshal_VOID__UINT,
+    g_cclosure_marshal_generic,
     G_TYPE_NONE, 1, G_TYPE_UINT);
 
   signals[MICROPHONE_CHANGED] = g_signal_new ("microphone-changed",
@@ -284,7 +283,7 @@ empathy_mic_monitor_class_init (EmpathyMicMonitorClass *klass)
     G_SIGNAL_RUN_LAST,
     0,
     NULL, NULL,
-    _src_marshal_VOID__UINT_UINT,
+    g_cclosure_marshal_generic,
     G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_UINT);
 
   g_type_class_add_private (object_class, sizeof (EmpathyMicMonitorPrivate));

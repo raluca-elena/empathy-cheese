@@ -52,7 +52,6 @@
 #include "empathy-contact-list-store.h"
 #include "empathy-contact-list-view.h"
 #include "empathy-contact-menu.h"
-#include "empathy-gtk-marshal.h"
 #include "empathy-input-text-view.h"
 #include "empathy-search-bar.h"
 #include "empathy-theme-manager.h"
@@ -3241,7 +3240,7 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      1, G_TYPE_BOOLEAN);
 
@@ -3251,7 +3250,7 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_gtk_marshal_VOID__OBJECT_BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_MESSAGE, G_TYPE_BOOLEAN);
 
@@ -3261,7 +3260,7 @@ empathy_chat_class_init (EmpathyChatClass *klass)
 				  G_SIGNAL_RUN_LAST,
 				  0,
 				  NULL, NULL,
-				  g_cclosure_marshal_VOID__POINTER,
+				  g_cclosure_marshal_generic,
 				  G_TYPE_NONE,
 				  1, G_TYPE_STRV);
 

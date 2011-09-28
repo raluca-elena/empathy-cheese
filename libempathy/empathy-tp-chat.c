@@ -30,7 +30,6 @@
 #include "empathy-tp-chat.h"
 #include "empathy-tp-contact-factory.h"
 #include "empathy-contact-list.h"
-#include "empathy-marshal.h"
 #include "empathy-request-util.h"
 #include "empathy-time.h"
 #include "empathy-utils.h"
@@ -1267,7 +1266,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      1, EMPATHY_TYPE_MESSAGE);
 
@@ -1277,7 +1276,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__STRING_UINT_STRING,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      3, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_STRING);
 
@@ -1287,7 +1286,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_UINT,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_CONTACT, G_TYPE_UINT);
 
@@ -1297,7 +1296,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__STRING_BOXED,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      2, G_TYPE_STRING, G_TYPE_VALUE);
 
@@ -1307,7 +1306,7 @@ empathy_tp_chat_class_init (EmpathyTpChatClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      1, EMPATHY_TYPE_MESSAGE);
 

@@ -44,7 +44,6 @@
 #include "empathy-individual-manager.h"
 #include "empathy-utils.h"
 #include "empathy-enum-types.h"
-#include "empathy-marshal.h"
 #include "empathy-location.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
@@ -405,7 +404,7 @@ empathy_contact_class_init (EmpathyContactClass *class)
                   G_SIGNAL_RUN_LAST,
                   0,
                   NULL, NULL,
-                  _empathy_marshal_VOID__UINT_UINT,
+                  g_cclosure_marshal_generic,
                   G_TYPE_NONE,
                   2, G_TYPE_UINT,
                   G_TYPE_UINT);

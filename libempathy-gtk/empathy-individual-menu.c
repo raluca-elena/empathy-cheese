@@ -664,7 +664,7 @@ empathy_individual_menu_class_init (EmpathyIndividualMenuClass *klass)
   signals[SIGNAL_LINK_CONTACTS_ACTIVATED] =
       g_signal_new ("link-contacts-activated", G_OBJECT_CLASS_TYPE (klass),
           G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-          g_cclosure_marshal_VOID__OBJECT,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE, 1, EMPATHY_TYPE_LINKING_DIALOG);
 
   g_type_class_add_private (object_class, sizeof (EmpathyIndividualMenuPriv));

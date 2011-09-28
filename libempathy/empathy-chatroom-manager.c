@@ -648,7 +648,7 @@ empathy_chatroom_manager_class_init (EmpathyChatroomManagerClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST,
       0, NULL, NULL,
-      g_cclosure_marshal_VOID__OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, EMPATHY_TYPE_CHATROOM);
 
@@ -656,7 +656,7 @@ empathy_chatroom_manager_class_init (EmpathyChatroomManagerClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST,
       0, NULL, NULL,
-      g_cclosure_marshal_VOID__OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, EMPATHY_TYPE_CHATROOM);
 

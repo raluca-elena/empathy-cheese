@@ -30,7 +30,6 @@
 #include "empathy-tp-streamed-media.h"
 #include "empathy-tp-contact-factory.h"
 #include "empathy-utils.h"
-#include "empathy-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include "empathy-debug.h"
@@ -566,7 +565,7 @@ empathy_tp_streamed_media_class_init (EmpathyTpStreamedMediaClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _empathy_marshal_VOID__UINT_STRING,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       2, G_TYPE_UINT, G_TYPE_STRING);
 
@@ -575,7 +574,7 @@ empathy_tp_streamed_media_class_init (EmpathyTpStreamedMediaClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _empathy_marshal_VOID__UINT_STRING,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       2, G_TYPE_UINT, G_TYPE_STRING);
 }

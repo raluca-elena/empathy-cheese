@@ -33,7 +33,6 @@
 #include <telepathy-glib/util.h>
 
 #include "empathy-utils.h"
-#include "empathy-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONNECTIVITY
 #include "empathy-debug.h"
@@ -220,7 +219,7 @@ empathy_connectivity_init (EmpathyConnectivity *connectivity)
           "net.connman.Manager");
 
       dbus_g_object_register_marshaller (
-          _empathy_marshal_VOID__STRING,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE, G_TYPE_STRING, G_TYPE_INVALID);
 
       dbus_g_proxy_add_signal (priv->proxy, "StateChanged",
@@ -364,7 +363,7 @@ empathy_connectivity_class_init (EmpathyConnectivityClass *klass)
         G_SIGNAL_RUN_LAST,
         0,
         NULL, NULL,
-        _empathy_marshal_VOID__BOOLEAN,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, G_TYPE_BOOLEAN, NULL);
 

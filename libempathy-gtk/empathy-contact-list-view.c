@@ -49,7 +49,6 @@
 #include "empathy-cell-renderer-activatable.h"
 #include "empathy-ui-utils.h"
 #include "empathy-gtk-enum-types.h"
-#include "empathy-gtk-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
@@ -1784,7 +1783,7 @@ empathy_contact_list_view_class_init (EmpathyContactListViewClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_gtk_marshal_VOID__OBJECT_STRING_STRING,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      3, EMPATHY_TYPE_CONTACT, G_TYPE_STRING, G_TYPE_STRING);
 

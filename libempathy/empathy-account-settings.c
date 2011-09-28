@@ -336,7 +336,7 @@ empathy_account_settings_class_init (
       g_signal_new ("password-retrieved",
           G_TYPE_FROM_CLASS (empathy_account_settings_class),
           G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-          g_cclosure_marshal_VOID__VOID,
+          g_cclosure_marshal_generic,
           G_TYPE_NONE, 0);
 }
 

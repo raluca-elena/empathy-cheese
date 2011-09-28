@@ -20,9 +20,6 @@ AM_CPPFLAGS =                                           \
 	$(DISABLE_DEPRECATED)
 
 BUILT_SOURCES = 					\
-	empathy-marshal.h				\
-	empathy-marshal.c				\
-	empathy-marshal.list				\
 	empathy-enum-types.h				\
 	empathy-enum-types.c
 
@@ -135,24 +132,6 @@ check_c_sources = \
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
 
-empathy-marshal.list: $(libempathy_la_SOURCES) Makefile.am
-	$(AM_V_GEN)( cd $(srcdir) && \
-	sed -n -e 's/.*empathy_marshal_\([[:upper:][:digit:]]*__[[:upper:][:digit:]_]*\).*/\1/p' \
-	$(libempathy_la_SOURCES) ) \
-	| sed -e 's/__/:/' -e 'y/_/,/' | sort -u > $@.tmp
-	@if cmp -s $@.tmp $@; then \
-		rm $@.tmp; \
-	else \
-		mv $@.tmp $@; \
-	fi
-
-empathy-marshal.h: empathy-marshal.list Makefile
-	$(AM_V_GEN)$(GLIB_GENMARSHAL) --header --prefix=_empathy_marshal $< > empathy-marshal.h
-
-empathy-marshal.c: empathy-marshal.list Makefile
-	$(AM_V_GEN)echo "#include \"empathy-marshal.h\"" > $@ && \
-	$(GLIB_GENMARSHAL) --body --prefix=_empathy_marshal $< >> empathy-marshal.c
-
 empathy-enum-types.h: stamp-empathy-enum-types.h
 	$(AM_V_GEN)true
 stamp-empathy-enum-types.h: $(libempathy_headers) Makefile
@@ -203,7 +182,6 @@ ircnetworks_DATA =		\
 	irc-networks.xml
 
 EXTRA_DIST = 			\
-	empathy-marshal.list	\
 	$(dtd_DATA)		\
 	$(ircnetworks_DATA)
 

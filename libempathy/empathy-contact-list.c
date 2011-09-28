@@ -22,7 +22,6 @@
 #include "config.h"
 
 #include "empathy-contact-list.h"
-#include "empathy-marshal.h"
 
 static void contact_list_base_init (gpointer klass);
 
@@ -59,7 +58,7 @@ contact_list_base_init (gpointer klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_OBJECT_UINT_STRING,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      4, EMPATHY_TYPE_CONTACT, EMPATHY_TYPE_CONTACT, G_TYPE_UINT, G_TYPE_STRING);
 
@@ -68,7 +67,7 @@ contact_list_base_init (gpointer klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_OBJECT_UINT_STRING_BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      5, EMPATHY_TYPE_CONTACT, EMPATHY_TYPE_CONTACT,
 			      G_TYPE_UINT, G_TYPE_STRING, G_TYPE_BOOLEAN);
@@ -78,7 +77,7 @@ contact_list_base_init (gpointer klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      2, EMPATHY_TYPE_CONTACT, G_TYPE_BOOLEAN);
 
@@ -87,7 +86,7 @@ contact_list_base_init (gpointer klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_OBJECT_UINT_STRING_BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      5, EMPATHY_TYPE_CONTACT, EMPATHY_TYPE_CONTACT,
 			      G_TYPE_UINT, G_TYPE_STRING, G_TYPE_BOOLEAN);
@@ -97,7 +96,7 @@ contact_list_base_init (gpointer klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      _empathy_marshal_VOID__OBJECT_STRING_BOOLEAN,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      3, EMPATHY_TYPE_CONTACT, G_TYPE_STRING, G_TYPE_BOOLEAN);
 

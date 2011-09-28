@@ -432,7 +432,7 @@ empathy_tp_roomlist_class_init (EmpathyTpRoomlistClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__OBJECT,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      1, EMPATHY_TYPE_CHATROOM);
 
@@ -442,7 +442,7 @@ empathy_tp_roomlist_class_init (EmpathyTpRoomlistClass *klass)
 			      G_SIGNAL_RUN_LAST,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__VOID,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      0);
 
@@ -452,7 +452,7 @@ empathy_tp_roomlist_class_init (EmpathyTpRoomlistClass *klass)
 			      G_SIGNAL_RUN_LAST | G_SIGNAL_DETAILED,
 			      0,
 			      NULL, NULL,
-			      g_cclosure_marshal_VOID__POINTER,
+			      g_cclosure_marshal_generic,
 			      G_TYPE_NONE,
 			      1, G_TYPE_POINTER);
 

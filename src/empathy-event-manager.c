@@ -1339,7 +1339,7 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
       G_SIGNAL_RUN_LAST,
       0,
       NULL, NULL,
-      g_cclosure_marshal_VOID__POINTER,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, G_TYPE_POINTER);
 
@@ -1349,7 +1349,7 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
       G_SIGNAL_RUN_LAST,
       0,
       NULL, NULL,
-      g_cclosure_marshal_VOID__POINTER,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 1, G_TYPE_POINTER);
 
   signals[EVENT_UPDATED] =
@@ -1358,7 +1358,7 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
       G_SIGNAL_RUN_LAST,
       0,
       NULL, NULL,
-      g_cclosure_marshal_VOID__POINTER,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE, 1, G_TYPE_POINTER);
 
   g_type_class_add_private (object_class, sizeof (EmpathyEventManagerPriv));

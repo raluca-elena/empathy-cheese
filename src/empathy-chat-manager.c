@@ -349,7 +349,7 @@ empathy_chat_manager_class_init (
         G_SIGNAL_RUN_LAST,
         0,
         NULL, NULL,
-        g_cclosure_marshal_VOID__UINT,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, G_TYPE_UINT, NULL);
 
@@ -359,7 +359,7 @@ empathy_chat_manager_class_init (
         G_SIGNAL_RUN_LAST,
         0,
         NULL, NULL,
-        g_cclosure_marshal_VOID__UINT,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, G_TYPE_UINT, NULL);
 

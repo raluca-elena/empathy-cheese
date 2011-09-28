@@ -30,7 +30,6 @@
 
 #include "empathy-ft-handler.h"
 #include "empathy-tp-contact-factory.h"
-#include "empathy-marshal.h"
 #include "empathy-time.h"
 #include "empathy-utils.h"
 
@@ -440,7 +439,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[TRANSFER_STARTED] =
     g_signal_new ("transfer-started", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__OBJECT,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, EMPATHY_TYPE_TP_FILE);
 
@@ -455,7 +454,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[TRANSFER_DONE] =
     g_signal_new ("transfer-done", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__OBJECT,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, EMPATHY_TYPE_TP_FILE);
 
@@ -473,7 +472,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[TRANSFER_ERROR] =
     g_signal_new ("transfer-error", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__POINTER,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         1, G_TYPE_POINTER);
 
@@ -492,7 +491,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[TRANSFER_PROGRESS] =
     g_signal_new ("transfer-progress", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        _empathy_marshal_VOID__UINT64_UINT64_UINT_DOUBLE,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         4, G_TYPE_UINT64, G_TYPE_UINT64, G_TYPE_UINT, G_TYPE_DOUBLE);
 
@@ -510,7 +509,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[HASHING_STARTED] =
     g_signal_new ("hashing-started", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__VOID,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE, 0);
 
   /**
@@ -525,7 +524,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[HASHING_PROGRESS] =
     g_signal_new ("hashing-progress", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        _empathy_marshal_VOID__UINT64_UINT64,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE,
         2, G_TYPE_UINT64, G_TYPE_UINT64);
 
@@ -539,7 +538,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   signals[HASHING_DONE] =
     g_signal_new ("hashing-done", G_TYPE_FROM_CLASS (klass),
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-        g_cclosure_marshal_VOID__VOID,
+        g_cclosure_marshal_generic,
         G_TYPE_NONE, 0);
 }
 

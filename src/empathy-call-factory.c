@@ -36,7 +36,6 @@
 
 #include "empathy-call-factory.h"
 #include "empathy-call-handler.h"
-#include "src-marshal.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_VOIP
 #include <libempathy/empathy-debug.h>
@@ -141,7 +140,7 @@ empathy_call_factory_class_init (EmpathyCallFactoryClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _src_marshal_VOID__OBJECT_BOOLEAN,
+      g_cclosure_marshal_generic,
       G_TYPE_NONE,
       2, EMPATHY_TYPE_CALL_HANDLER, G_TYPE_BOOLEAN);
 
@@ -150,7 +149,7 @@ empathy_call_factory_class_init (EmpathyCallFactoryClass *klass)
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0,
       NULL, NULL,
-      _src_marshal_BOOLEAN__UINT_OBJECT_OBJECT_OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
       4, G_TYPE_UINT, TPY_TYPE_CALL_CHANNEL,
       TP_TYPE_CHANNEL_DISPATCH_OPERATION,

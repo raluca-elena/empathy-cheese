@@ -46,7 +46,6 @@
 #include "empathy-cell-renderer-text.h"
 #include "empathy-cell-renderer-activatable.h"
 #include "empathy-gtk-enum-types.h"
-#include "empathy-gtk-marshal.h"
 #include "empathy-ui-utils.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
@@ -715,7 +714,7 @@ empathy_persona_view_class_init (EmpathyPersonaViewClass *klass)
       G_SIGNAL_RUN_LAST,
       G_STRUCT_OFFSET (EmpathyPersonaViewClass, drag_individual_received),
       NULL, NULL,
-      _empathy_gtk_marshal_BOOLEAN__UINT_OBJECT,
+      g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN, 2, G_TYPE_UINT, FOLKS_TYPE_INDIVIDUAL);
 
   /* We override the "model" property so that we can wrap it in a
