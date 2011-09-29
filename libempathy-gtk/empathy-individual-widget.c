@@ -111,7 +111,7 @@ typedef struct {
 
   /* Details */
   GtkWidget *vbox_details;
-  GtkWidget *table_details;
+  GtkWidget *grid_details;
   GtkWidget *hbox_details_requested;
   GtkWidget *details_spinner;
   GCancellable *details_cancellable; /* owned */
@@ -297,8 +297,8 @@ details_update_show (EmpathyIndividualWidget *self,
 
       /* Add Title */
       w = gtk_label_new (_(field_data->title));
-      gtk_table_attach (GTK_TABLE (priv->table_details),
-          w, 0, 1, n_rows, n_rows + 1, GTK_FILL, 0, 0, 0);
+      gtk_grid_attach (GTK_GRID (priv->grid_details),
+          w, 0, n_rows, 1, 1);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
       gtk_widget_show (w);
 
@@ -316,8 +316,8 @@ details_update_show (EmpathyIndividualWidget *self,
       gtk_label_set_selectable (GTK_LABEL (w),
           (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP) ? FALSE : TRUE);
 
-      gtk_table_attach_defaults (GTK_TABLE (priv->table_details),
-          w, 1, 2, n_rows, n_rows + 1);
+      gtk_grid_attach (GTK_GRID (priv->grid_details),
+          w, 1, n_rows, 1, 1);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
       gtk_widget_show (w);
 
@@ -336,7 +336,7 @@ details_notify_cb (TpContact *contact,
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   guint n_rows;
 
-  gtk_container_foreach (GTK_CONTAINER (priv->table_details),
+  gtk_container_foreach (GTK_CONTAINER (priv->grid_details),
       (GtkCallback) gtk_widget_destroy, NULL);
 
   n_rows = details_update_show (self, contact);
@@ -344,7 +344,7 @@ details_notify_cb (TpContact *contact,
   if (n_rows > 0)
     {
       gtk_widget_show (priv->vbox_details);
-      gtk_widget_show (priv->table_details);
+      gtk_widget_show (priv->grid_details);
     }
   else
     {
@@ -411,7 +411,7 @@ fetch_contact_information (EmpathyIndividualWidget *self)
   /* Request the Individual's info */
   gtk_widget_show (priv->vbox_details);
   gtk_widget_show (priv->hbox_details_requested);
-  gtk_widget_hide (priv->table_details);
+  gtk_widget_hide (priv->grid_details);
   gtk_spinner_start (GTK_SPINNER (priv->details_spinner));
 
   if (priv->details_cancellable == NULL)
@@ -1985,7 +1985,7 @@ empathy_individual_widget_init (EmpathyIndividualWidget *self)
 #endif
       "groups_widget", &priv->groups_widget,
       "vbox_details", &priv->vbox_details,
-      "table_details", &priv->table_details,
+      "grid_details", &priv->grid_details,
       "hbox_details_requested", &priv->hbox_details_requested,
       "hbox_client_types", &priv->hbox_client_types,
       NULL);
