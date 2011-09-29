@@ -282,7 +282,7 @@ empathy_contact_selector_dialog_init (EmpathyContactSelectorDialog *dialog)
   gchar *filename;
   GtkEntryCompletion *completion;
   GtkWidget *content_area;
-  GtkWidget *table_contact;
+  GtkWidget *table_grid;
 
   dialog->vbox = gtk_vbox_new (FALSE, 3);
 
@@ -292,7 +292,7 @@ empathy_contact_selector_dialog_init (EmpathyContactSelectorDialog *dialog)
   filename = empathy_file_lookup ("empathy-contact-selector-dialog.ui",
           "libempathy-gtk");
   gui = empathy_builder_get_file (filename,
-                "table_contact", &table_contact,
+                "table_grid", &table_grid,
                 "account_chooser_label", &priv->account_chooser_label,
                 "entry_id", &priv->entry_id,
                 NULL);
@@ -302,7 +302,7 @@ empathy_contact_selector_dialog_init (EmpathyContactSelectorDialog *dialog)
 
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
   gtk_container_add (GTK_CONTAINER (content_area), dialog->vbox);
-  gtk_box_pack_start (GTK_BOX (dialog->vbox), table_contact, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (dialog->vbox), table_grid, TRUE, TRUE, 0);
   gtk_widget_show (dialog->vbox);
 
   gtk_dialog_add_button (GTK_DIALOG (dialog),
@@ -341,9 +341,9 @@ empathy_contact_selector_dialog_init (EmpathyContactSelectorDialog *dialog)
   /* Create account chooser */
   priv->show_account_chooser = TRUE;
   priv->account_chooser = empathy_account_chooser_new ();
-  gtk_table_attach_defaults (GTK_TABLE (table_contact),
+  gtk_grid_attach (GTK_GRID (table_grid),
            priv->account_chooser,
-           1, 2, 0, 1);
+           1, 0, 1, 1);
   empathy_account_chooser_set_filter (
       EMPATHY_ACCOUNT_CHOOSER (priv->account_chooser),
       account_chooser_filter,
