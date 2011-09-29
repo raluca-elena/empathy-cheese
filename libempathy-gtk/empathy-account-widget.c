@@ -1194,10 +1194,11 @@ account_widget_build_external (EmpathyAccountWidget *self,
   else if (!tp_strdiff (provider, "org.gnome.OnlineAccounts"))
     {
       /* FIXME: we should publish the .desktop file in some general way */
-      desktop_info = g_desktop_app_info_new ("goa-prefs.desktop");
+      desktop_info = g_desktop_app_info_new (
+          "gnome-online-accounts-panel.desktop");
 
       if (desktop_info == NULL)
-        g_critical ("Could not locate 'goa-prefs.desktop'");
+        g_critical ("Could not locate 'gnome-online-accounts-panel.desktop'");
       else
         name = g_app_info_get_name (G_APP_INFO (desktop_info));
     }
