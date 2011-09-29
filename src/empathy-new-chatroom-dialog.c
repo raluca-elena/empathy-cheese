@@ -57,7 +57,7 @@ typedef struct {
 
 	GtkWidget         *window;
 	GtkWidget         *vbox_widgets;
-	GtkWidget         *table_info;
+	GtkWidget         *table_grid;
 	GtkWidget         *label_account;
 	GtkWidget         *account_chooser;
 	GtkWidget         *label_server;
@@ -156,7 +156,7 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 	filename = empathy_file_lookup ("empathy-new-chatroom-dialog.ui", "src");
 	gui = empathy_builder_get_file (filename,
 				       "new_chatroom_dialog", &dialog->window,
-				       "table_info", &dialog->table_info,
+				       "table_grid", &dialog->table_grid,
 				       "label_account", &dialog->label_account,
 				       "label_server", &dialog->label_server,
 				       "label_room", &dialog->label_room,
@@ -210,9 +210,9 @@ empathy_new_chatroom_dialog_show (GtkWindow *parent)
 	empathy_account_chooser_set_filter (EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser),
 					    empathy_account_chooser_filter_supports_chatrooms,
 					    NULL);
-	gtk_table_attach_defaults (GTK_TABLE (dialog->table_info),
+	gtk_grid_attach (GTK_GRID (dialog->table_grid),
 				   dialog->account_chooser,
-				   1, 2, 0, 1);
+				   1, 0, 1, 1);
 	gtk_widget_show (dialog->account_chooser);
 
 	g_signal_connect (EMPATHY_ACCOUNT_CHOOSER (dialog->account_chooser), "ready",
