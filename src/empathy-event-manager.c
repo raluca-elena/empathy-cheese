@@ -1128,10 +1128,31 @@ approve_channels (TpSimpleApprover *approver,
     }
   else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION)
     {
-      event_manager_add (approval->manager, account, NULL, EMPATHY_EVENT_TYPE_AUTH,
-          GTK_STOCK_DIALOG_AUTHENTICATION, tp_account_get_display_name (account),
-          _("Password required"), approval,
-          event_manager_auth_process_func, NULL);
+      GHashTable *props;
+      const gchar * const *available_mechanisms;
+
+      props = tp_channel_borrow_immutable_properties (channel);
+      available_mechanisms = tp_asv_get_boxed (props,
+          TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_AVAILABLE_MECHANISMS,
+          G_TYPE_STRV);
+
+      if (tp_strv_contains (available_mechanisms, "X-TELEPATHY-PASSWORD"))
+        {
+          event_manager_add (approval->manager, account, NULL,
+              EMPATHY_EVENT_TYPE_AUTH,
+              GTK_STOCK_DIALOG_AUTHENTICATION,
+              tp_account_get_display_name (account),
+              _("Password required"), approval,
+              event_manager_auth_process_func, NULL);
+        }
+      else
+        {
+          GError error = { TP_ERRORS, TP_ERROR_NOT_IMPLEMENTED,
+              "Support only X-TELEPATHY-PASSWORD auth method" };
+
+          tp_add_dispatch_operation_context_fail (context, &error);
+          return;
+        }
     }
   else
     {
