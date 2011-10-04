@@ -565,19 +565,12 @@ empathy_auth_factory_class_init (EmpathyAuthFactoryClass *klass)
 }
 
 EmpathyAuthFactory *
-empathy_auth_factory_dup_singleton (void)
+empathy_auth_factory_new (TpSimpleClientFactory *factory)
 {
-  EmpathyAuthFactory *out = NULL;
-  TpDBusDaemon *bus;
-
-  bus = tp_dbus_daemon_dup (NULL);
-  out = g_object_new (EMPATHY_TYPE_AUTH_FACTORY,
-      "dbus-daemon", bus,
+  return g_object_new (EMPATHY_TYPE_AUTH_FACTORY,
+      "factory", factory,
       "name", "Empathy.Auth",
       NULL);
-  g_object_unref (bus);
-
-  return out;
 }
 
 gboolean

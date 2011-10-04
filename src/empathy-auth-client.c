@@ -243,6 +243,8 @@ main (int argc,
   GError *error = NULL;
   EmpathyAuthFactory *factory;
   TpDebugSender *debug_sender;
+  TpSimpleClientFactory *tp_factory;
+  TpDBusDaemon *dbus;
 
   g_thread_init (NULL);
 
@@ -276,7 +278,15 @@ main (int argc,
   g_log_set_default_handler (tp_debug_sender_log_handler, G_LOG_DOMAIN);
 #endif
 
-  factory = empathy_auth_factory_dup_singleton ();
+  dbus = tp_dbus_daemon_dup (NULL);
+  tp_factory = tp_simple_client_factory_new (dbus);
+  tp_simple_client_factory_add_account_features_varargs (tp_factory,
+      TP_ACCOUNT_FEATURE_STORAGE,
+      0);
+
+  factory = empathy_auth_factory_new (tp_factory);
+  g_object_unref (tp_factory);
+  g_object_unref (dbus);
 
   g_signal_connect (factory, "new-server-tls-handler",
       G_CALLBACK (auth_factory_new_tls_handler_cb), NULL);

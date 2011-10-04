@@ -59,7 +59,7 @@ GType empathy_auth_factory_get_type (void);
   (G_TYPE_INSTANCE_GET_CLASS ((obj), EMPATHY_TYPE_AUTH_FACTORY, \
     EmpathyAuthFactoryClass))
 
-EmpathyAuthFactory * empathy_auth_factory_dup_singleton (void);
+EmpathyAuthFactory * empathy_auth_factory_new (TpSimpleClientFactory *factory);
 
 gboolean empathy_auth_factory_register (EmpathyAuthFactory *self,
     GError **error);
