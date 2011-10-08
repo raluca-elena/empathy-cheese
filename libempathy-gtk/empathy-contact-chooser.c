@@ -35,6 +35,7 @@ struct _EmpathyContactChooserPrivate
 
   EmpathyIndividualStore *store;
   EmpathyIndividualView *view;
+  GtkWidget *search_entry;
 
   GPtrArray *search_words;
   gchar *search_str;
@@ -285,7 +286,6 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
   EmpathyIndividualManager *mgr;
   GtkTreeSelection *selection;
   GtkWidget *scroll;
-  GtkWidget *search_entry;
   GQuark features[] = { TP_ACCOUNT_MANAGER_FEATURE_CORE, 0 };
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, EMPATHY_TYPE_CONTACT_CHOOSER,
@@ -300,11 +300,11 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
   tp_proxy_prepare_async (self->priv->account_mgr, features, NULL, NULL);
 
   /* Search entry */
-  search_entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (self), search_entry, FALSE, TRUE, 6);
-  gtk_widget_show (search_entry);
+  self->priv->search_entry = gtk_entry_new ();
+  gtk_box_pack_start (GTK_BOX (self), self->priv->search_entry, FALSE, TRUE, 6);
+  gtk_widget_show (self->priv->search_entry);
 
-  g_signal_connect (search_entry, "changed",
+  g_signal_connect (self->priv->search_entry, "changed",
       G_CALLBACK (search_text_changed), self);
 
   /* Add the treeview */
@@ -357,4 +357,11 @@ empathy_contact_chooser_set_filter_func (EmpathyContactChooser *self,
 
   self->priv->filter_func = func;
   self->priv->filter_data = user_data;
+}
+
+void
+empathy_contact_chooser_show_search_entry (EmpathyContactChooser *self,
+    gboolean show)
+{
+  gtk_widget_set_visible (self->priv->search_entry, show);
 }
