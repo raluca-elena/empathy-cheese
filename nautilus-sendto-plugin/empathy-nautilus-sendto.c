@@ -31,12 +31,11 @@
 
 #include <libempathy/empathy-contact.h>
 #include <libempathy/empathy-debug.h>
-#include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-ft-factory.h>
 #include <libempathy/empathy-ft-handler.h>
 #include <libempathy/empathy-tp-file.h>
 
-#include <libempathy-gtk/empathy-contact-selector.h>
+#include <libempathy-gtk/empathy-contact-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 #include "nautilus-sendto-plugin.h"
@@ -56,37 +55,84 @@ init (NstPlugin *plugin)
   return TRUE;
 }
 
+static EmpathyContact *
+dup_contact_from_individual (FolksIndividual *individual)
+{
+  EmpathyContact *contact;
+  gboolean can_do_action;
+
+  if (individual == NULL)
+    return NULL;
+
+  contact = empathy_contact_dup_best_for_action (individual,
+      EMPATHY_ACTION_SEND_FILE);
+  if (contact == NULL)
+    return NULL;
+
+  can_do_action = empathy_contact_can_do_action (contact,
+      EMPATHY_ACTION_SEND_FILE);
+
+  if (!can_do_action)
+    {
+      /* If contact can't do FT we don't care about him */
+      g_object_unref (contact);
+      return NULL;
+    }
+
+  return contact;
+}
+
+static gboolean
+filter_individual (EmpathyContactChooser *chooser,
+    FolksIndividual *individual,
+    gboolean is_online,
+    gboolean searching,
+    gpointer user_data)
+{
+  EmpathyContact *contact;
+
+  if (!is_online)
+    return FALSE;
+
+  contact = dup_contact_from_individual (individual);
+  if (contact == NULL)
+    return FALSE;
+
+  g_object_unref (contact);
+  return TRUE;
+}
+
 static GtkWidget *
 get_contacts_widget (NstPlugin *plugin)
 {
-  EmpathyContactManager *manager;
-  GtkWidget *selector;
+  GtkWidget *chooser;
 
-  manager = empathy_contact_manager_dup_singleton ();
-  selector = empathy_contact_selector_new (EMPATHY_CONTACT_LIST (manager));
+  chooser = empathy_contact_chooser_new ();
+  empathy_contact_chooser_set_filter_func (EMPATHY_CONTACT_CHOOSER (chooser),
+      filter_individual, plugin);
 
-  empathy_contact_selector_set_visible (EMPATHY_CONTACT_SELECTOR (selector),
-      (EmpathyContactSelectorFilterFunc) empathy_contact_can_send_files, NULL);
+  empathy_contact_chooser_show_search_entry (EMPATHY_CONTACT_CHOOSER (chooser),
+      FALSE);
 
-  g_object_unref (manager);
-
-  return selector;
+  /* Make sure to display some contacts */
+  gtk_widget_set_size_request (chooser, -1, 300);
+  return chooser;
 }
 
 static EmpathyContact *
-get_selected_contact (GtkWidget *contact_widget)
+get_selected_contact (GtkWidget *widget)
 {
+  FolksIndividual *individual;
   EmpathyContact *contact;
-  GtkTreeModel *model;
-  GtkTreeIter iter;
 
-  if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (contact_widget), &iter))
+  individual = empathy_contact_chooser_dup_selected (
+      EMPATHY_CONTACT_CHOOSER (widget));
+  if (individual == NULL)
     return NULL;
 
-  model = gtk_combo_box_get_model (GTK_COMBO_BOX (contact_widget));
-  gtk_tree_model_get (model, &iter,
-      EMPATHY_CONTACT_LIST_STORE_COL_CONTACT, &contact, -1);
+  contact = dup_contact_from_individual (individual);
 
+  g_object_unref (individual);
   return contact;
 }
 
@@ -100,24 +146,12 @@ validate_destination (NstPlugin *plugin,
 
   contact = get_selected_contact (contact_widget);
 
-  if (!contact)
+  if (contact == NULL)
     return FALSE;
-
-  if (!empathy_contact_can_send_files (contact))
-    {
-      *error = g_strdup (_("The selected contact cannot receive files."));
-      ret = FALSE;
-    }
-
-  if (ret && !empathy_contact_is_online (contact))
-    {
-      *error = g_strdup (_("The selected contact is offline."));
-      ret = FALSE;
-    }
 
   g_object_unref (contact);
 
-  return ret;
+  return TRUE;
 }
 
 static void
@@ -192,7 +226,7 @@ send_files (NstPlugin *plugin,
 
   contact = get_selected_contact (contact_widget);
 
-  if (!contact)
+  if (contact == NULL)
     return FALSE;
 
   factory = empathy_ft_factory_dup_singleton ();
