@@ -1753,8 +1753,11 @@ adium_info_dup_path_for_variant (GHashTable *info,
 		return g_strdup ("main.css");
 	}
 
-	/* Verify the variant exists, fallback to the first one */
 	variants = empathy_adium_info_get_available_variants (info);
+	if (variants->len == 0)
+		return g_strdup ("main.css");
+
+	/* Verify the variant exists, fallback to the first one */
 	for (i = 0; i < variants->len; i++) {
 		if (!tp_strdiff (variant, g_ptr_array_index (variants, i))) {
 			break;
