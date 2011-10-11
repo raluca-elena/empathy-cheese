@@ -182,6 +182,7 @@ main (int argc,
 #endif
   GError *error = NULL;
   gint retval;
+  GtkSettings *gtk_settings;
 
   /* Init */
   g_thread_init (NULL);
@@ -220,6 +221,10 @@ main (int argc,
   gdk_set_program_class ("Empathy");
   gtk_window_set_default_icon_name ("empathy");
   textdomain (GETTEXT_PACKAGE);
+
+  gtk_settings = gtk_settings_get_default ();
+  g_object_set (G_OBJECT (gtk_settings), "gtk-application-prefer-dark-theme",
+      TRUE, NULL);
 
   app = gtk_application_new (EMPATHY_CALL_DBUS_NAME, G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
