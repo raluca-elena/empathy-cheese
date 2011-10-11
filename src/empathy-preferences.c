@@ -846,7 +846,8 @@ preferences_theme_variant_notify_cb (GSettings   *gsettings,
 	g_free (conf_name);
 }
 
-static void
+/* return TRUE if we added at least one variant */
+static gboolean
 preferences_theme_variants_fill (EmpathyPreferences *preferences,
 				 GHashTable         *info)
 {
@@ -856,6 +857,7 @@ preferences_theme_variants_fill (EmpathyPreferences *preferences,
 	GPtrArray    *variants;
 	const gchar  *default_variant;
 	guint         i;
+	gboolean      result = FALSE;
 
 	model = gtk_combo_box_get_model (GTK_COMBO_BOX (priv->combobox_chat_theme_variant));
 	store = GTK_LIST_STORE (model);
@@ -870,12 +872,16 @@ preferences_theme_variants_fill (EmpathyPreferences *preferences,
 			COL_VARIANT_NAME, name,
 			COL_VARIANT_DEFAULT, !tp_strdiff (name, default_variant),
 			-1);
+
+		result = TRUE;
 	}
 
 	/* Select the variant from the GSetting key */
 	preferences_theme_variant_notify_cb (priv->gsettings_chat,
 					     EMPATHY_PREFS_CHAT_THEME_VARIANT,
 					     preferences);
+
+	return result;
 }
 
 static void
@@ -943,11 +949,14 @@ preferences_theme_changed_cb (GtkComboBox        *combo,
 				       EMPATHY_PREFS_CHAT_THEME,
 				       name);
 		if (is_adium) {
+			gboolean variant;
+
 			g_settings_set_string (priv->gsettings_chat,
 					       EMPATHY_PREFS_CHAT_ADIUM_PATH,
 					       path);
-			preferences_theme_variants_fill (preferences, info);
-			gtk_widget_show (priv->hbox_chat_theme_variant);
+
+			variant = preferences_theme_variants_fill (preferences, info);
+			gtk_widget_set_visible (priv->hbox_chat_theme_variant, variant);
 		} else {
 			gtk_widget_hide (priv->hbox_chat_theme_variant);
 		}
