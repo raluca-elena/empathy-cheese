@@ -91,6 +91,21 @@ empathy_audio_src_supports_changing_mic (EmpathyGstAudioSrc *self)
           "source-output-index") != NULL);
 }
 
+static guint
+empathy_audio_src_get_mic_index (EmpathyGstAudioSrc *self)
+{
+  EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
+  guint audio_src_idx = PA_INVALID_INDEX;
+
+  if (empathy_audio_src_supports_changing_mic (self))
+    g_object_get (priv->src,
+      "source-output-index", &audio_src_idx,
+      NULL);
+
+  return audio_src_idx;
+}
+
+
 static void
 empathy_audio_src_microphone_changed_cb (EmpathyMicMonitor *monitor,
     guint source_output_idx,
@@ -99,9 +114,9 @@ empathy_audio_src_microphone_changed_cb (EmpathyMicMonitor *monitor,
 {
   EmpathyGstAudioSrc *self = user_data;
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
-  guint audio_src_idx = PA_INVALID_INDEX;
+  guint audio_src_idx;
 
-  g_object_get (priv->src, "source-output-index", &audio_src_idx, NULL);
+  audio_src_idx = empathy_audio_src_get_mic_index (self);
 
   if (source_output_idx == PA_INVALID_INDEX
       || source_output_idx != audio_src_idx)
@@ -147,9 +162,9 @@ empathy_audio_src_source_output_index_notify (GObject *object,
     EmpathyGstAudioSrc *self)
 {
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
-  guint source_output_idx = PA_INVALID_INDEX;
+  guint source_output_idx;
 
-  g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
+  source_output_idx = empathy_audio_src_get_mic_index (self);
 
   if (source_output_idx == PA_INVALID_INDEX)
     return;
@@ -561,7 +576,7 @@ empathy_audio_src_change_microphone_async (EmpathyGstAudioSrc *src,
       return;
     }
 
-  g_object_get (priv->src, "source-output-index", &source_output_idx, NULL);
+  source_output_idx = empathy_audio_src_get_mic_index (src);
 
   if (source_output_idx == PA_INVALID_INDEX)
     {
