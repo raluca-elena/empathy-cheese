@@ -236,7 +236,8 @@ contact_blocking_dialog_deny_channel_members_changed (TpChannel *channel,
             EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser)))))
     return;
 
-  DEBUG ("deny list changed: %u added, %u removed", added->len, removed->len);
+  DEBUG ("deny list changed on %s: %u added, %u removed",
+      get_pretty_conn_name (conn), added->len, removed->len);
 
   /* add contacts */
   contact_blocking_dialog_add_contacts_to_list (self, conn, added);
@@ -317,7 +318,8 @@ contact_blocking_dialog_connection_prepared (GObject *conn,
 
   if (!tp_proxy_prepare_finish (conn, result, &error))
     {
-      DEBUG ("Failed to prepare connection: %s", error->message);
+      DEBUG ("Failed to prepare connection %s: %s",
+          get_pretty_conn_name ((TpConnection *) conn), error->message);
       g_error_free (error);
       return;
     }
@@ -366,7 +368,8 @@ contact_blocking_dialog_got_deny_channel (TpConnection *conn,
 
   if (in_error != NULL)
     {
-      DEBUG ("Failed to get 'deny' channel: %s", in_error->message);
+      DEBUG ("Failed to get 'deny' channel on %s: %s",
+          get_pretty_conn_name (conn), in_error->message);
       return;
     }
 
@@ -374,7 +377,8 @@ contact_blocking_dialog_got_deny_channel (TpConnection *conn,
 
   if (error != NULL)
     {
-      DEBUG ("Failed to create channel proxy: %s", error->message);
+      DEBUG ("Failed to create channel proxy on %s: %s",
+          get_pretty_conn_name (conn), in_error->message);
       g_error_free (error);
       return;
     }
@@ -394,14 +398,16 @@ contact_blocking_dialog_deny_channel_prepared (GObject *channel,
 
   if (!tp_proxy_prepare_finish (channel, result, &error))
     {
-      DEBUG ("Failed to prepare channel: %s", error->message);
+      DEBUG ("Failed to prepare channel %s: %s",
+          tp_proxy_get_object_path (channel), error->message);
       g_error_free (error);
       return;
     }
 
   conn = tp_channel_borrow_connection (TP_CHANNEL (channel));
 
-  DEBUG ("Channel prepared for connection %s", get_pretty_conn_name (conn));
+  DEBUG ("Channel %s prepared for connection %s",
+      tp_proxy_get_object_path (channel), get_pretty_conn_name (conn));
 
   g_hash_table_insert (self->priv->channels,
       g_object_ref (conn), channel);
@@ -451,7 +457,8 @@ contact_blocking_dialog_add_contact (GtkWidget *widget,
   identifiers[0] = gtk_entry_get_text (
       GTK_ENTRY (self->priv->add_contact_entry));
 
-  DEBUG ("Looking up handle for '%s'", identifiers[0]);
+  DEBUG ("Looking up handle for '%s' on %s",
+      identifiers[0], get_pretty_conn_name (conn));
 
   tp_cli_connection_call_request_handles (conn, -1,
       TP_HANDLE_TYPE_CONTACT, identifiers,
@@ -478,7 +485,8 @@ contact_blocking_dialog_add_contact_got_handle (TpConnection *conn,
 
   if (in_error != NULL)
     {
-      DEBUG ("Error getting handle: %s", in_error->message);
+      DEBUG ("Error getting handle on %s: %s",
+          get_pretty_conn_name (conn), in_error->message);
 
       contact_blocking_dialog_set_error (
           EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
@@ -488,8 +496,8 @@ contact_blocking_dialog_add_contact_got_handle (TpConnection *conn,
 
   g_return_if_fail (handles->len == 1);
 
-  DEBUG ("Adding handle %u to deny channel",
-      g_array_index (handles, TpHandle, 0));
+  DEBUG ("Adding handle %u to deny channel on %s",
+      g_array_index (handles, TpHandle, 0), get_pretty_conn_name (conn));
 
   tp_cli_channel_interface_group_call_add_members (channel, -1,
       handles, "",
@@ -504,7 +512,8 @@ contact_blocking_dialog_added_contact (TpChannel *channel,
 {
   if (in_error != NULL)
     {
-      DEBUG ("Error adding contact to deny list: %s", in_error->message);
+      DEBUG ("Error adding contact to deny list %s: %s",
+          tp_proxy_get_object_path (channel), in_error->message);
 
       contact_blocking_dialog_set_error (
           EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
@@ -512,7 +521,7 @@ contact_blocking_dialog_added_contact (TpChannel *channel,
       return;
     }
 
-  DEBUG ("Contact added");
+  DEBUG ("Contact added to %s", tp_proxy_get_object_path (channel));
 }
 
 static void
