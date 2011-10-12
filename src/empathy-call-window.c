@@ -1638,6 +1638,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_CALL_WINDOW, EmpathyCallWindowPriv);
 
+  priv->settings = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
+
   filename = empathy_file_lookup ("empathy-call-window.ui", "src");
   gui = empathy_builder_get_file (filename,
     "call_window_vbox", &top_vbox,
@@ -1874,8 +1876,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->camera_menu = empathy_camera_menu_new (self);
 
   empathy_call_window_show_hangup_button (self, TRUE);
-
-  priv->settings = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
 
   /* Retrieve initial volume */
   priv->volume = g_settings_get_double (priv->settings,
