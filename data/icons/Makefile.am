@@ -188,7 +188,8 @@ private_icons = \
 EXTRA_DIST = \
 	$(public_icons)		\
 	$(private_icons)	\
-	empathy.svg \
+	empathy.svg		\
+	local-xmpp.svg		\
 	$(NULL)
 
 ###############################################################################
