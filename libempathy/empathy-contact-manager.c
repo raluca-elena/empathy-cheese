@@ -28,8 +28,6 @@
 #include <telepathy-glib/proxy-subclass.h>
 #include <telepathy-glib/util.h>
 
-#include <extensions/extensions.h>
-
 #include "empathy-contact-manager.h"
 #include "empathy-contact-list.h"
 #include "empathy-utils.h"
@@ -43,11 +41,6 @@ typedef struct {
 	   The contact list associated with each connected connection */
 	GHashTable     *lists;
 	TpAccountManager *account_manager;
-	TpProxy *logger;
-	/* account object path (gchar *) => GHashTable containing favorite contacts
-	 * (contact ID (gchar *) => TRUE) */
-	GHashTable *favourites;
-	TpProxySignalConnection *favourite_contacts_changed_signal;
 } EmpathyContactManagerPriv;
 
 static void contact_manager_iface_init         (EmpathyContactListIface    *iface);
@@ -197,183 +190,15 @@ contact_manager_validity_changed_cb (TpAccountManager *account_manager,
 	}
 }
 
-static gboolean
-contact_manager_is_favourite (EmpathyContactList *manager,
-			      EmpathyContact     *contact)
-{
-	EmpathyContactManagerPriv *priv;
-	TpAccount *account;
-	const gchar *account_name;
-	GHashTable *contact_hash;
-
-	g_return_val_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager), FALSE);
-	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), FALSE);
-
-	priv = GET_PRIV (manager);
-
-	account = empathy_contact_get_account (contact);
-	account_name = tp_proxy_get_object_path (TP_PROXY (account));
-	contact_hash = g_hash_table_lookup (priv->favourites, account_name);
-
-	if (contact_hash != NULL) {
-		const gchar *contact_id = empathy_contact_get_id (contact);
-
-		if (g_hash_table_lookup (contact_hash, contact_id) != NULL)
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
-static void
-add_favourite_contact_cb (TpProxy *proxy,
-			  const GError *error,
-			  gpointer user_data,
-			  GObject *weak_object)
-{
-	if (error != NULL)
-		DEBUG ("AddFavouriteContact failed: %s", error->message);
-}
-
-static void
-contact_manager_add_favourite (EmpathyContactList *manager,
-			       EmpathyContact *contact)
-{
-	EmpathyContactManagerPriv *priv;
-	TpAccount *account;
-	const gchar *account_name;
-
-	g_return_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager));
-	g_return_if_fail (EMPATHY_IS_CONTACT (contact));
-
-	priv = GET_PRIV (manager);
-
-	account = empathy_contact_get_account (contact);
-	account_name = tp_proxy_get_object_path (TP_PROXY (account));
-
-	emp_cli_logger_call_add_favourite_contact (priv->logger, -1,
-						   account_name,
-						   empathy_contact_get_id (contact),
-						   add_favourite_contact_cb, NULL, NULL, G_OBJECT (manager));
-}
-
-static void
-remove_favourite_contact_cb (TpProxy *proxy,
-			     const GError *error,
-			     gpointer user_data,
-			     GObject *weak_object)
-{
-	if (error != NULL)
-		DEBUG ("RemoveFavouriteContact failed: %s", error->message);
-}
-
-static void
-contact_manager_remove_favourite (EmpathyContactList *manager,
-				  EmpathyContact *contact)
-{
-	EmpathyContactManagerPriv *priv;
-	TpAccount *account;
-	const gchar *account_name;
-
-	g_return_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager));
-	g_return_if_fail (EMPATHY_IS_CONTACT (contact));
-
-	priv = GET_PRIV (manager);
-
-	account = empathy_contact_get_account (contact);
-	account_name = tp_proxy_get_object_path (TP_PROXY (account));
-
-	emp_cli_logger_call_remove_favourite_contact (priv->logger, -1,
-						      account_name,
-						      empathy_contact_get_id (contact),
-						      remove_favourite_contact_cb, NULL, NULL, G_OBJECT (manager));
-}
-
-static void
-add_contacts_to_favourites (EmpathyContactManager *self,
-			    const gchar *account,
-			    const gchar **contacts)
-{
-	EmpathyContactManagerPriv *priv = GET_PRIV (self);
-	guint j;
-	GHashTable *contact_hash;
-
-	contact_hash = g_hash_table_lookup (priv->favourites, account);
-	if (contact_hash == NULL) {
-		contact_hash = g_hash_table_new_full (g_str_hash,
-						      g_str_equal,
-						      g_free, NULL);
-
-		g_hash_table_insert (priv->favourites,
-				     g_strdup (account),
-				     contact_hash);
-	}
-
-	for (j = 0; contacts && contacts[j] != NULL; j++) {
-		g_hash_table_insert (contact_hash,
-				     g_strdup (contacts[j]),
-				     GINT_TO_POINTER (1));
-	}
-}
-
-static void
-logger_favourite_contacts_add_from_value_array (GValueArray           *va,
-						EmpathyContactManager *manager)
-{
-	const gchar *account;
-	const gchar **contacts;
-
-	account = g_value_get_boxed (g_value_array_get_nth (va, 0));
-	contacts = g_value_get_boxed (g_value_array_get_nth (va, 1));
-
-	add_contacts_to_favourites (manager, account, contacts);
-}
-
-static void
-logger_favourite_contacts_get_cb (TpProxy         *proxy,
-				  const GPtrArray *result,
-				  const GError    *error,
-				  gpointer         user_data,
-				  GObject         *weak_object)
-{
-	EmpathyContactManager *manager = EMPATHY_CONTACT_MANAGER (weak_object);
-
-	if (error == NULL) {
-		g_ptr_array_foreach ((GPtrArray *) result,
-				(GFunc)
-				logger_favourite_contacts_add_from_value_array,
-				manager);
-	} else {
-		DEBUG ("Failed to get the FavouriteContacts property: %s",
-				error->message);
-	}
-}
-
-static void
-logger_favourite_contacts_setup (EmpathyContactManager *manager)
-{
-	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
-
-	emp_cli_logger_call_get_favourite_contacts (priv->logger, -1,
-			logger_favourite_contacts_get_cb, NULL, NULL,
-			G_OBJECT (manager));
-}
-
 static void
 contact_manager_finalize (GObject *object)
 {
 	EmpathyContactManagerPriv *priv = GET_PRIV (object);
 
-	tp_proxy_signal_connection_disconnect (priv->favourite_contacts_changed_signal);
-
-	if (priv->logger != NULL)
-		g_object_unref (priv->logger);
-
 	g_hash_table_foreach (priv->lists,
 			      contact_manager_disconnect_foreach,
 			      object);
 	g_hash_table_destroy (priv->lists);
-	g_hash_table_destroy (priv->favourites);
 
 	g_object_unref (priv->account_manager);
 }
@@ -464,106 +289,11 @@ account_manager_prepared_cb (GObject *source_object,
 			     manager, 0);
 }
 
-static EmpathyContact *
-contact_manager_lookup_contact (EmpathyContactManager *manager,
-				const gchar           *account_name,
-				const gchar           *contact_id)
-{
-	EmpathyContact *retval = NULL;
-	GList *members, *l;
-
-	/* XXX: any more efficient way to do this (other than having to build
-	 * and maintain a hash)? */
-	members = empathy_contact_list_get_members (
-			EMPATHY_CONTACT_LIST (manager));
-	for (l = members; l; l = l->next) {
-		EmpathyContact *contact = l->data;
-		TpAccount *account = empathy_contact_get_account (contact);
-		const gchar *id_cur;
-		const gchar *name_cur;
-
-		id_cur = empathy_contact_get_id (contact);
-		name_cur = tp_proxy_get_object_path (TP_PROXY (account));
-
-		if (!tp_strdiff (contact_id, id_cur) &&
-			!tp_strdiff (account_name, name_cur)) {
-			retval = contact;
-		}
-
-		g_object_unref (contact);
-	}
-
-	g_list_free (members);
-
-	return retval;
-}
-
-static void
-logger_favourite_contacts_changed_cb (TpProxy      *proxy,
-				      const gchar  *account_name,
-				      const gchar **added,
-				      const gchar **removed,
-				      gpointer      user_data,
-				      GObject      *weak_object)
-{
-	EmpathyContactManagerPriv *priv;
-	EmpathyContactManager *manager = EMPATHY_CONTACT_MANAGER (weak_object);
-	GHashTable *contact_hash;
-	EmpathyContact *contact;
-	gint i;
-
-	priv = GET_PRIV (manager);
-
-	contact_hash = g_hash_table_lookup (priv->favourites, account_name);
-
-	/* XXX: note that, at the time of this comment, there will always be
-	 * exactly one contact amongst added and removed, so the linear lookup
-	 * of each contact isn't as painful as it appears */
-
-	add_contacts_to_favourites (manager, account_name, added);
-
-	for (i = 0; added && added[i]; i++) {
-		contact = contact_manager_lookup_contact (manager, account_name,
-							  added[i]);
-		if (contact != NULL)
-			g_signal_emit_by_name (manager, "favourites-changed",
-					       contact, TRUE);
-		else
-			DEBUG ("failed to find contact for account %s, contact "
-			       "id %s", account_name, added[i]);
-	}
-
-	for (i = 0; removed && removed[i]; i++) {
-		contact_hash = g_hash_table_lookup (priv->favourites,
-						    account_name);
-
-		if (contact_hash != NULL) {
-			g_hash_table_remove (contact_hash, removed[i]);
-
-			if (g_hash_table_size (contact_hash) < 1) {
-				g_hash_table_remove (priv->favourites,
-						     account_name);
-			}
-		}
-
-		contact = contact_manager_lookup_contact (manager, account_name,
-							  removed[i]);
-		if (contact != NULL)
-			g_signal_emit_by_name (manager, "favourites-changed",
-					       contact, FALSE);
-		else
-			DEBUG ("failed to find contact for account %s, contact "
-			       "id %s", account_name, removed[i]);
-	}
-}
-
 static void
 empathy_contact_manager_init (EmpathyContactManager *manager)
 {
 	EmpathyContactManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
 		EMPATHY_TYPE_CONTACT_MANAGER, EmpathyContactManagerPriv);
-	TpDBusDaemon *bus;
-	GError *error = NULL;
 
 	manager->priv = priv;
 	priv->lists = g_hash_table_new_full (empathy_proxy_hash,
@@ -571,42 +301,10 @@ empathy_contact_manager_init (EmpathyContactManager *manager)
 					     (GDestroyNotify) g_object_unref,
 					     (GDestroyNotify) g_object_unref);
 
-	priv->favourites = g_hash_table_new_full (g_str_hash, g_str_equal,
-						  (GDestroyNotify) g_free,
-						  (GDestroyNotify)
-						  g_hash_table_unref);
-
 	priv->account_manager = tp_account_manager_dup ();
 
 	tp_proxy_prepare_async (priv->account_manager, NULL,
 	    account_manager_prepared_cb, manager);
-
-	bus = tp_dbus_daemon_dup (&error);
-
-	if (error == NULL) {
-		priv->logger = g_object_new (TP_TYPE_PROXY,
-				"bus-name", "org.freedesktop.Telepathy.Logger",
-				"object-path",
-					"/org/freedesktop/Telepathy/Logger",
-				"dbus-daemon", bus,
-				NULL);
-		g_object_unref (bus);
-
-		tp_proxy_add_interface_by_id (priv->logger,
-				EMP_IFACE_QUARK_LOGGER);
-
-		logger_favourite_contacts_setup (manager);
-
-		priv->favourite_contacts_changed_signal =
-			emp_cli_logger_connect_to_favourite_contacts_changed (
-				priv->logger,
-				logger_favourite_contacts_changed_cb, NULL,
-				NULL, G_OBJECT (manager), NULL);
-	} else {
-		DEBUG ("Failed to get telepathy-logger proxy: %s",
-				error->message);
-		g_clear_error (&error);
-	}
 }
 
 EmpathyContactManager *
@@ -918,9 +616,6 @@ contact_manager_iface_init (EmpathyContactListIface *iface)
 	iface->remove_from_group = contact_manager_remove_from_group;
 	iface->rename_group      = contact_manager_rename_group;
 	iface->remove_group	 = contact_manager_remove_group;
-	iface->is_favourite      = contact_manager_is_favourite;
-	iface->remove_favourite  = contact_manager_remove_favourite;
-	iface->add_favourite     = contact_manager_add_favourite;
 	iface->set_blocked	 = contact_manager_set_blocked;
 	iface->get_blocked	 = contact_manager_get_blocked;
 }
