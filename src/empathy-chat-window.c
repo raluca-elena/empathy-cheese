@@ -1865,7 +1865,9 @@ chat_window_drag_data_received (GtkWidget        *widget,
 
 		if (!chat) {
 			empathy_chat_with_contact_id (
-				account, contact_id, empathy_get_current_action_time ());
+				account, contact_id,
+				empathy_get_current_action_time (),
+				NULL, NULL);
 
 			g_strfreev (strv);
 			return;

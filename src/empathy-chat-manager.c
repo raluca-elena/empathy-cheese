@@ -448,9 +448,11 @@ empathy_chat_manager_undo_closed_chat (EmpathyChatManager *self,
   if (data->room)
     empathy_join_muc (data->account, data->id, timestamp);
   else if (data->sms)
-    empathy_sms_contact_id (data->account, data->id, timestamp);
+    empathy_sms_contact_id (data->account, data->id, timestamp,
+        NULL, NULL);
   else
-    empathy_chat_with_contact_id (data->account, data->id, timestamp);
+    empathy_chat_with_contact_id (data->account, data->id, timestamp,
+        NULL, NULL);
 
   g_signal_emit (self, signals[CLOSED_CHATS_CHANGED], 0,
       g_queue_get_length (priv->closed_queue));
