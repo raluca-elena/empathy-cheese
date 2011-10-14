@@ -3120,24 +3120,21 @@ empathy_call_window_video_stream_error (TpyCallChannel *call,
 #endif
 
 static void
-show_balance_error (GObject *object,
-    GAsyncResult *res,
-    gpointer user_data)
+show_balance_error (EmpathyCallWindow *self)
 {
-  EmpathyCallWindow *self = user_data;
-  TpConnection *conn = TP_CONNECTION (object);
-  GError *error = NULL;
+  TpChannel *call;
+  TpConnection *conn;
   gchar *balance, *tmp;
   const gchar *uri, *currency;
   gint amount;
   guint scale;
 
-  if (!tp_proxy_prepare_finish (conn, res, &error))
-    {
-      DEBUG ("Failed to prepare Balance: %s", error->message);
-      g_error_free (error);
-      return;
-    }
+  g_object_get (self->priv->handler,
+      "call-channel", &call,
+      NULL);
+
+  conn = tp_channel_borrow_connection (call);
+  g_object_unref (call);
 
   uri = tp_connection_get_balance_uri (conn);
 
@@ -3182,14 +3179,7 @@ empathy_call_window_state_changed_cb (EmpathyCallHandler *handler,
   if (state == TPY_CALL_STATE_ENDED &&
       !tp_strdiff (reason, TP_ERROR_STR_INSUFFICIENT_BALANCE))
     {
-      TpConnection *conn;
-      GQuark features[] = { TP_CONNECTION_FEATURE_BALANCE, 0 };
-
-      g_object_get (self->priv->handler, "call-channel", &call, NULL);
-      conn = tp_channel_borrow_connection (TP_CHANNEL (call));
-      g_object_unref (call);
-
-      tp_proxy_prepare_async (conn, features, show_balance_error, self);
+      show_balance_error (self);
       return;
     }
 
