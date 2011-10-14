@@ -3155,16 +3155,18 @@ show_balance_error (GObject *object,
       g_free (money);
     }
 
+  tmp = g_strdup_printf (_("Your current balance is %s."), balance),
+
   display_error (self,
       NULL,
       _("Sorry, you don’t have enough credit for that call."),
-      tmp = g_strdup_printf (_("Your current balance is %s."),
-          balance),
-      NULL,
+      tmp, NULL,
       _("Top Up"),
       uri,
       EMP_RESPONSE_BALANCE);
+
   g_free (tmp);
+  g_free (balance);
 }
 
 static void
