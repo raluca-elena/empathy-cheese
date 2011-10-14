@@ -1071,15 +1071,6 @@ contact_list_store_add_contact (EmpathyContactListStore *store,
 
 		if (!priv->show_groups) {
 			parent = NULL;
-		} else if (!tp_strdiff (protocol_name, "local-xmpp")) {
-			/* these are People Nearby */
-			contact_list_store_get_group (store,
-				EMPATHY_CONTACT_LIST_STORE_PEOPLE_NEARBY,
-				&iter_group, NULL, NULL, TRUE);
-		} else {
-			contact_list_store_get_group (store,
-				EMPATHY_CONTACT_LIST_STORE_UNGROUPED,
-				&iter_group, NULL, NULL, TRUE);
 		}
 
 		add_contact_to_store (GTK_TREE_STORE (store), &iter, parent,
@@ -1098,17 +1089,6 @@ contact_list_store_add_contact (EmpathyContactListStore *store,
 		g_free (l->data);
 	}
 	g_list_free (groups);
-
-	if (priv->show_groups &&
-	    empathy_contact_list_is_favourite (priv->list, contact)) {
-	/* Add contact to the fake 'Favorites' group */
-		GtkTreeIter iter_group;
-
-		contact_list_store_get_group (store, EMPATHY_CONTACT_LIST_STORE_FAVORITE,
-			&iter_group, NULL, NULL, TRUE);
-
-		add_contact_to_store (GTK_TREE_STORE (store), &iter, &iter_group, contact, flags);
-	}
 
 	contact_list_store_contact_update (store, contact);
 }
@@ -1487,20 +1467,6 @@ contact_list_store_get_group (EmpathyContactListStore *store,
 }
 
 static gint
-get_position (const char **strv,
-	      const char *str)
-{
-	int i;
-
-	for (i = 0; strv[i] != NULL; i++) {
-		if (!tp_strdiff (strv[i], str))
-			return i;
-	}
-
-	return -1;
-}
-
-static gint
 compare_separator_and_groups (gboolean is_separator_a,
 			      gboolean is_separator_b,
 			      const gchar *name_a,
@@ -1510,18 +1476,6 @@ compare_separator_and_groups (gboolean is_separator_a,
 			      gboolean fake_group_a,
 			      gboolean fake_group_b)
 {
-	/* these two lists are the sorted list of fake groups to include at the
-	 * top and bottom of the roster */
-	const char *top_groups[] = {
-		EMPATHY_CONTACT_LIST_STORE_FAVORITE,
-		NULL
-	};
-
-	const char *bottom_groups[] = {
-		EMPATHY_CONTACT_LIST_STORE_UNGROUPED,
-		NULL
-	};
-
 	if (is_separator_a || is_separator_b) {
 		/* We have at least one separator */
 		if (is_separator_a) {
@@ -1537,34 +1491,7 @@ compare_separator_and_groups (gboolean is_separator_a,
 	} else if (contact_a && !contact_b) {
 		return -1;
 	} else if (!contact_a && !contact_b) {
-		gboolean a_in_top, b_in_top, a_in_bottom, b_in_bottom;
-
-		a_in_top = fake_group_a &&
-			tp_strv_contains (top_groups, name_a);
-		b_in_top = fake_group_b &&
-			tp_strv_contains (top_groups, name_b);
-		a_in_bottom = fake_group_a &&
-			tp_strv_contains (bottom_groups, name_a);
-		b_in_bottom = fake_group_b &&
-			tp_strv_contains (bottom_groups, name_b);
-
-		if (a_in_top && b_in_top) {
-			/* compare positions */
-			return CLAMP (get_position (top_groups, name_a) -
-				      get_position (top_groups, name_b),
-				      -1, 1);
-		} else if (a_in_bottom && b_in_bottom) {
-			/* compare positions */
-			return CLAMP (get_position (bottom_groups, name_a) -
-				      get_position (bottom_groups, name_b),
-				      -1, 1);
-		} else if (a_in_top || b_in_bottom) {
-			return -1;
-		} else if (b_in_top || a_in_bottom) {
-			return 1;
-		} else {
-			return g_utf8_collate (name_a, name_b);
-		}
+		return g_utf8_collate (name_a, name_b);
 	}
 
 	/* Two contacts, ordering depends of the sorting policy */

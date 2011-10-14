@@ -68,10 +68,6 @@ typedef enum {
 	EMPATHY_CONTACT_LIST_STORE_COL_COUNT,
 } EmpathyContactListStoreCol;
 
-#define EMPATHY_CONTACT_LIST_STORE_UNGROUPED _("Ungrouped")
-#define EMPATHY_CONTACT_LIST_STORE_FAVORITE  _("Favorite People")
-#define EMPATHY_CONTACT_LIST_STORE_PEOPLE_NEARBY _("People Nearby")
-
 struct _EmpathyContactListStore {
 	GtkTreeStore parent;
 	gpointer priv;

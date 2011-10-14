@@ -331,47 +331,12 @@ contact_list_view_drag_got_contact (TpConnection            *connection,
 
 	list = empathy_contact_list_store_get_list_iface (priv->store);
 
-	if (!tp_strdiff (data->new_group, EMPATHY_CONTACT_LIST_STORE_FAVORITE)) {
-		/* Mark contact as favourite */
-		empathy_contact_list_add_to_favourites (list, contact);
-		return;
-	}
-
-	if (!tp_strdiff (data->old_group, EMPATHY_CONTACT_LIST_STORE_FAVORITE)) {
-		/* Remove contact as favourite */
-		empathy_contact_list_remove_from_favourites (list, contact);
-		/* Don't try to remove it */
-		g_free (data->old_group);
-		data->old_group = NULL;
-	}
-
 	if (data->new_group) {
 		empathy_contact_list_add_to_group (list, contact, data->new_group);
 	}
 	if (data->old_group && data->action == GDK_ACTION_MOVE) {
 		empathy_contact_list_remove_from_group (list, contact, data->old_group);
 	}
-}
-
-static gboolean
-group_can_be_modified (const gchar *name,
-		       gboolean     is_fake_group,
-		       gboolean     adding)
-{
-	/* Real groups can always be modified */
-	if (!is_fake_group)
-		return TRUE;
-
-	/* The favorite fake group can be modified so users can
-	 * add/remove favorites using DnD */
-	if (!tp_strdiff (name, EMPATHY_CONTACT_LIST_STORE_FAVORITE))
-		return TRUE;
-
-	/* We can remove contacts from the 'ungrouped' fake group */
-	if (!adding && !tp_strdiff (name, EMPATHY_CONTACT_LIST_STORE_UNGROUPED))
-		return TRUE;
-
-	return FALSE;
 }
 
 static gboolean
@@ -401,9 +366,6 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 	new_group = empathy_contact_list_store_get_parent_group (model,
 								 path, NULL, &new_group_is_fake);
 
-	if (!group_can_be_modified (new_group, new_group_is_fake, TRUE))
-		return FALSE;
-
 	/* Get source group information. */
 	if (priv->drag_row) {
 		source_path = gtk_tree_row_reference_get_path (priv->drag_row);
@@ -413,9 +375,6 @@ contact_list_view_contact_drag_received (GtkWidget         *view,
 			gtk_tree_path_free (source_path);
 		}
 	}
-
-	if (!group_can_be_modified (old_group, old_group_is_fake, FALSE))
-		return FALSE;
 
 	if (!tp_strdiff (old_group, new_group)) {
 		g_free (new_group);
@@ -1035,15 +994,6 @@ contact_list_view_group_icon_cell_data_func (GtkTreeViewColumn     *tree_column,
 
 	if (!is_group)
 		goto out;
-
-	if (!tp_strdiff (name, EMPATHY_CONTACT_LIST_STORE_FAVORITE)) {
-		pixbuf = empathy_pixbuf_from_icon_name ("emblem-favorite",
-			GTK_ICON_SIZE_MENU);
-	}
-	else if (!tp_strdiff (name, EMPATHY_CONTACT_LIST_STORE_PEOPLE_NEARBY)) {
-		pixbuf = empathy_pixbuf_from_icon_name ("im-local-xmpp",
-			GTK_ICON_SIZE_MENU);
-	}
 
 out:
 	g_object_set (cell,
