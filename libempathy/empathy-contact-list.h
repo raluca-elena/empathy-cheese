@@ -74,12 +74,6 @@ struct _EmpathyContactListIface {
 					       const gchar	  *group);
 	EmpathyContactListFlags
 			 (*get_flags)         (EmpathyContactList *list);
-	gboolean         (*is_favourite)      (EmpathyContactList *list,
-					       EmpathyContact     *contact);
-	void             (*add_favourite)     (EmpathyContactList *list,
-					       EmpathyContact     *contact);
-	void             (*remove_favourite)  (EmpathyContactList *list,
-					       EmpathyContact     *contact);
 	void             (*set_blocked)       (EmpathyContactList *list,
 			                       EmpathyContact     *contact,
 					       gboolean            blocked,
@@ -114,16 +108,6 @@ void	 empathy_contact_list_remove_group	(EmpathyContactList *list,
 
 EmpathyContactListFlags
          empathy_contact_list_get_flags		(EmpathyContactList *list);
-
-gboolean empathy_contact_list_is_favourite      (EmpathyContactList *list,
-						 EmpathyContact     *contact);
-
-void     empathy_contact_list_add_to_favourites (EmpathyContactList *list,
-						 EmpathyContact     *contact);
-
-void     empathy_contact_list_remove_from_favourites
-                                                (EmpathyContactList *list,
-						 EmpathyContact     *contact);
 
 void     empathy_contact_list_set_blocked       (EmpathyContactList *list,
 		                                 EmpathyContact     *contact,

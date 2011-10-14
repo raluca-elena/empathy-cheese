@@ -72,15 +72,6 @@ contact_list_base_init (gpointer klass)
 			      5, EMPATHY_TYPE_CONTACT, EMPATHY_TYPE_CONTACT,
 			      G_TYPE_UINT, G_TYPE_STRING, G_TYPE_BOOLEAN);
 
-		g_signal_new ("favourites-changed",
-			      G_TYPE_FROM_CLASS (klass),
-			      G_SIGNAL_RUN_LAST,
-			      0,
-			      NULL, NULL,
-			      g_cclosure_marshal_generic,
-			      G_TYPE_NONE,
-			      2, EMPATHY_TYPE_CONTACT, G_TYPE_BOOLEAN);
-
 		g_signal_new ("pendings-changed",
 			      G_TYPE_FROM_CLASS (klass),
 			      G_SIGNAL_RUN_LAST,
@@ -243,38 +234,6 @@ empathy_contact_list_get_flags (EmpathyContactList *list)
 		return EMPATHY_CONTACT_LIST_GET_IFACE (list)->get_flags (list);
 	} else {
 		return 0;
-	}
-}
-
-gboolean
-empathy_contact_list_is_favourite (EmpathyContactList *list,
-                                   EmpathyContact     *contact)
-{
-	if (EMPATHY_CONTACT_LIST_GET_IFACE (list)->is_favourite) {
-		return EMPATHY_CONTACT_LIST_GET_IFACE (list)->is_favourite (
-			list, contact);
-	}
-
-	return FALSE;
-}
-
-void
-empathy_contact_list_add_to_favourites (EmpathyContactList *list,
-                                        EmpathyContact     *contact)
-{
-	if (EMPATHY_CONTACT_LIST_GET_IFACE (list)->add_favourite) {
-		EMPATHY_CONTACT_LIST_GET_IFACE (list)->add_favourite (list,
-			contact);
-	}
-}
-
-void
-empathy_contact_list_remove_from_favourites (EmpathyContactList *list,
-                                             EmpathyContact     *contact)
-{
-	if (EMPATHY_CONTACT_LIST_GET_IFACE (list)->remove_favourite) {
-		EMPATHY_CONTACT_LIST_GET_IFACE (list)->remove_favourite (list,
-			contact);
 	}
 }
 
