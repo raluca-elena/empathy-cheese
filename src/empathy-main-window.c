@@ -735,6 +735,134 @@ main_window_error_close_clicked_cb (GtkButton         *button,
 }
 
 static void
+main_window_error_upgrade_sw_clicked_cb (GtkButton         *button,
+					 EmpathyMainWindow *window)
+{
+	TpAccount *account;
+	GtkWidget *dialog;
+
+	account = g_object_get_data (G_OBJECT (button), "account");
+	main_window_remove_error (window, account);
+
+	dialog = gtk_message_dialog_new (GTK_WINDOW (window),
+		GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR,
+		GTK_BUTTONS_OK,
+		_("Sorry, %s accounts can’t be used until your %s software is updated."),
+		tp_account_get_protocol (account),
+		tp_account_get_protocol (account));
+
+	g_signal_connect_swapped (dialog, "response",
+		G_CALLBACK (gtk_widget_destroy),
+		dialog);
+
+	gtk_widget_show (dialog);
+}
+
+static void
+main_window_upgrade_software_error (EmpathyMainWindow *window,
+				    TpAccount         *account)
+{
+	EmpathyMainWindowPriv *priv = GET_PRIV (window);
+	GtkWidget *info_bar;
+	GtkWidget *content_area;
+	GtkWidget *label;
+	GtkWidget *image;
+	GtkWidget *upgrade_button;
+	GtkWidget *close_button;
+	GtkWidget *action_area;
+	GtkWidget *action_table;
+	gchar     *str;
+	const gchar     *icon_name;
+	const gchar *error_message;
+	gboolean user_requested;
+
+	error_message =
+		empathy_account_get_error_message (account, &user_requested);
+
+	if (user_requested) {
+		return;
+	}
+
+	str = g_markup_printf_escaped ("<b>%s</b>\n%s",
+					       tp_account_get_display_name (account),
+					       error_message);
+
+	/* If there are other errors, remove them */
+	main_window_remove_error (window, account);
+
+	info_bar = gtk_info_bar_new ();
+	gtk_info_bar_set_message_type (GTK_INFO_BAR (info_bar), GTK_MESSAGE_ERROR);
+
+	gtk_widget_set_no_show_all (info_bar, TRUE);
+	gtk_box_pack_start (GTK_BOX (priv->errors_vbox), info_bar, FALSE, TRUE, 0);
+	gtk_widget_show (info_bar);
+
+	icon_name = tp_account_get_icon_name (account);
+	image = gtk_image_new_from_icon_name (icon_name, GTK_ICON_SIZE_SMALL_TOOLBAR);
+	gtk_widget_show (image);
+
+	label = gtk_label_new (str);
+	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
+	gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+	gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
+	gtk_widget_show (label);
+	g_free (str);
+
+	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
+	gtk_box_pack_start (GTK_BOX (content_area), image, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (content_area), label, TRUE, TRUE, 0);
+
+	image = gtk_image_new_from_stock (GTK_STOCK_REFRESH, GTK_ICON_SIZE_BUTTON);
+	upgrade_button = gtk_button_new ();
+	gtk_button_set_image (GTK_BUTTON (upgrade_button), image);
+	gtk_widget_set_tooltip_text (upgrade_button, _("Update software..."));
+	gtk_widget_show (upgrade_button);
+
+	image = gtk_image_new_from_stock (GTK_STOCK_CLOSE, GTK_ICON_SIZE_BUTTON);
+	close_button = gtk_button_new ();
+	gtk_button_set_image (GTK_BUTTON (close_button), image);
+	gtk_widget_set_tooltip_text (close_button, _("Close"));
+	gtk_widget_show (close_button);
+
+	action_table = gtk_table_new (1, 2, FALSE);
+	gtk_table_set_col_spacings (GTK_TABLE (action_table), 2);
+	gtk_widget_show (action_table);
+
+	action_area = gtk_info_bar_get_action_area (GTK_INFO_BAR (info_bar));
+	gtk_box_pack_start (GTK_BOX (action_area), action_table, FALSE, FALSE, 0);
+
+	gtk_table_attach (GTK_TABLE (action_table), upgrade_button, 0, 1, 0, 1,
+										(GtkAttachOptions) (GTK_SHRINK),
+										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
+	gtk_table_attach (GTK_TABLE (action_table), close_button, 1, 2, 0, 1,
+										(GtkAttachOptions) (GTK_SHRINK),
+										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
+
+	g_object_set_data (G_OBJECT (info_bar), "label", label);
+	g_object_set_data_full (G_OBJECT (info_bar),
+				"account", g_object_ref (account),
+				g_object_unref);
+	g_object_set_data_full (G_OBJECT (upgrade_button),
+				"account", g_object_ref (account),
+				g_object_unref);
+	g_object_set_data_full (G_OBJECT (close_button),
+				"account", g_object_ref (account),
+				g_object_unref);
+
+	g_signal_connect (upgrade_button, "clicked",
+			  G_CALLBACK (main_window_error_upgrade_sw_clicked_cb),
+			  window);
+	g_signal_connect (close_button, "clicked",
+			  G_CALLBACK (main_window_error_close_clicked_cb),
+			  window);
+
+	gtk_widget_set_tooltip_text (priv->errors_vbox, error_message);
+	gtk_widget_show (priv->errors_vbox);
+
+	g_hash_table_insert (priv->errors, g_object_ref (account), info_bar);
+}
+
+static void
 main_window_error_display (EmpathyMainWindow *window,
 			   TpAccount         *account)
 {
@@ -752,6 +880,12 @@ main_window_error_display (EmpathyMainWindow *window,
 	const gchar     *icon_name;
 	const gchar *error_message;
 	gboolean user_requested;
+
+	if (!tp_strdiff (TP_ERROR_STR_SOFTWARE_UPGRADE_REQUIRED,
+			 tp_account_get_detailed_error (account, NULL))) {
+		main_window_upgrade_software_error (window, account);
+		return;
+	}
 
 	error_message =
 		empathy_account_get_error_message (account, &user_requested);
