@@ -107,8 +107,7 @@ empathy_contact_menu_new (EmpathyContact             *contact,
 
 	/* Separator */
 	if (features & (EMPATHY_CONTACT_FEATURE_EDIT |
-			EMPATHY_CONTACT_FEATURE_INFO |
-			EMPATHY_CONTACT_FEATURE_FAVOURITE)) {
+			EMPATHY_CONTACT_FEATURE_INFO)) {
 		item = gtk_separator_menu_item_new ();
 		gtk_menu_shell_append (shell, item);
 		gtk_widget_show (item);
@@ -131,13 +130,6 @@ empathy_contact_menu_new (EmpathyContact             *contact,
 	/* Info */
 	if (features & EMPATHY_CONTACT_FEATURE_INFO) {
 		item = empathy_contact_info_menu_item_new (contact);
-		gtk_menu_shell_append (shell, item);
-		gtk_widget_show (item);
-	}
-
-	/* Favorite checkbox */
-	if (features & EMPATHY_CONTACT_FEATURE_FAVOURITE) {
-		item = empathy_contact_favourite_menu_item_new (contact);
 		gtk_menu_shell_append (shell, item);
 		gtk_widget_show (item);
 	}
@@ -494,46 +486,6 @@ empathy_contact_share_my_desktop_menu_item_new (EmpathyContact *contact)
 				  G_CALLBACK (empathy_share_my_desktop_share_with_contact),
 				  contact);
 
-	return item;
-}
-
-static void
-favourite_menu_item_toggled_cb (GtkCheckMenuItem *item,
-	EmpathyContact *contact)
-{
-	EmpathyContactManager *manager;
-	EmpathyContactList *list;
-
-	manager = empathy_contact_manager_dup_singleton ();
-	list = EMPATHY_CONTACT_LIST (manager);
-
-	if (gtk_check_menu_item_get_active (item)) {
-		empathy_contact_list_add_to_favourites (list, contact);
-	} else {
-		empathy_contact_list_remove_from_favourites (list, contact);
-	}
-
-	g_object_unref (manager);
-}
-
-GtkWidget *
-empathy_contact_favourite_menu_item_new (EmpathyContact *contact)
-{
-	GtkWidget *item;
-	EmpathyContactManager *manager;
-
-	item = gtk_check_menu_item_new_with_label (_("Favorite"));
-
-	manager = empathy_contact_manager_dup_singleton ();
-	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item),
-		empathy_contact_list_is_favourite (EMPATHY_CONTACT_LIST (manager),
-						   contact));
-
-	g_signal_connect (item, "toggled",
-			  G_CALLBACK (favourite_menu_item_toggled_cb),
-			  contact);
-
-	g_object_unref (manager);
 	return item;
 }
 

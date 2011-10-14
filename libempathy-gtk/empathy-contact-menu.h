@@ -35,7 +35,6 @@ typedef enum {
 	EMPATHY_CONTACT_FEATURE_LOG = 1 << 2,
 	EMPATHY_CONTACT_FEATURE_EDIT = 1 << 3,
 	EMPATHY_CONTACT_FEATURE_INFO = 1 << 4,
-	EMPATHY_CONTACT_FEATURE_FAVOURITE = 1 << 5,
 	EMPATHY_CONTACT_FEATURE_FT = 1 << 6,
 	EMPATHY_CONTACT_FEATURE_BLOCK = 1 << 7,
 	EMPATHY_CONTACT_FEATURE_ALL = (1 << 8) - 1,
@@ -53,7 +52,6 @@ GtkWidget * empathy_contact_edit_menu_item_new (EmpathyContact             *cont
 GtkWidget * empathy_contact_invite_menu_item_new (EmpathyContact *contact);
 GtkWidget * empathy_contact_file_transfer_menu_item_new (EmpathyContact    *contact);
 GtkWidget * empathy_contact_share_my_desktop_menu_item_new (EmpathyContact *contact);
-GtkWidget * empathy_contact_favourite_menu_item_new (EmpathyContact *contact);
 
 G_END_DECLS
 
