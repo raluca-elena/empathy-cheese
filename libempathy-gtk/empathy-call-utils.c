@@ -55,6 +55,8 @@ get_error_display_message (GError *error)
         return _("The specified contact is not valid");
       case TP_ERROR_EMERGENCY_CALLS_NOT_SUPPORTED:
         return _("Emergency calls are not supported on this protocol");
+      case TP_ERROR_INSUFFICIENT_BALANCE:
+        return _("You don't have enough credit in order to place this call");
     }
 
   return _("There was an error starting the call");

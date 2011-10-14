@@ -2260,13 +2260,14 @@ empathy_call_window_constructed (GObject *object)
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (object);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   TpyCallChannel *call;
+  TpyCallState state;
 
   g_assert (priv->handler != NULL);
 
   g_object_get (priv->handler, "call-channel", &call, NULL);
-  priv->outgoing = (call == NULL);
-  if (call != NULL)
-    g_object_unref (call);
+  state = tpy_call_channel_get_state (call, NULL, NULL);
+  priv->outgoing = (state == TPY_CALL_STATE_PENDING_INITIATOR);
+  tp_clear_object (&call);
 
   g_object_get (priv->handler, "target-contact", &priv->contact, NULL);
   g_assert (priv->contact != NULL);
