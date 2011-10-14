@@ -1941,8 +1941,16 @@ empathy_adium_data_new_with_info (const gchar *path, GHashTable *info)
 	/* template -> empathy's template */
 	data->custom_template = (template_html != NULL);
 	if (template_html == NULL) {
+		GError *error = NULL;
+
 		tmp = empathy_file_lookup ("Template.html", "data");
-		g_file_get_contents (tmp, &template_html, NULL, NULL);
+
+		if (!g_file_get_contents (tmp, &template_html, NULL, &error)) {
+			g_warning ("couldn't load Empathy's default theme "
+				"template: %s", error->message);
+			g_return_val_if_reached (data);
+		}
+
 		g_free (tmp);
 	}
 
