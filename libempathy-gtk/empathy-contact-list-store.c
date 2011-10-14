@@ -100,10 +100,6 @@ static void             contact_list_store_members_changed_cb        (EmpathyCon
 								      gchar                         *message,
 								      gboolean                       is_member,
 								      EmpathyContactListStore       *store);
-static void             contact_list_store_favourites_changed_cb     (EmpathyContactList            *list_iface,
-								      EmpathyContact                *contact,
-								      gboolean                       is_favourite,
-								      EmpathyContactListStore       *store);
 static void             contact_list_store_member_renamed_cb         (EmpathyContactList            *list_iface,
 								      EmpathyContact                *old_contact,
 								      EmpathyContact                *new_contact,
@@ -206,10 +202,6 @@ contact_list_store_iface_setup (gpointer user_data)
 	g_signal_connect (priv->list,
 			  "members-changed",
 			  G_CALLBACK (contact_list_store_members_changed_cb),
-			  store);
-	g_signal_connect (priv->list,
-			  "favourites-changed",
-			  G_CALLBACK (contact_list_store_favourites_changed_cb),
 			  store);
 	g_signal_connect (priv->list,
 			  "groups-changed",
@@ -377,9 +369,6 @@ contact_list_store_dispose (GObject *object)
 					      object);
 	g_signal_handlers_disconnect_by_func (priv->list,
 					      G_CALLBACK (contact_list_store_members_changed_cb),
-					      object);
-	g_signal_handlers_disconnect_by_func (priv->list,
-					      G_CALLBACK (contact_list_store_favourites_changed_cb),
 					      object);
 	g_signal_handlers_disconnect_by_func (priv->list,
 					      G_CALLBACK (contact_list_store_groups_changed_cb),
@@ -934,21 +923,6 @@ contact_list_store_members_changed_cb (EmpathyContactList      *list_iface,
 	} else {
 		contact_list_store_remove_contact_and_disconnect (store, contact);
 	}
-}
-
-static void
-contact_list_store_favourites_changed_cb (EmpathyContactList      *list_iface,
-					  EmpathyContact          *contact,
-					  gboolean                 is_favourite,
-					  EmpathyContactListStore *store)
-{
-	DEBUG ("Contact %s (%d) is %s a favourite",
-		empathy_contact_get_id (contact),
-		empathy_contact_get_handle (contact),
-		is_favourite ? "now" : "no longer");
-
-	contact_list_store_remove_contact (store, contact);
-	contact_list_store_add_contact (store, contact);
 }
 
 static void
