@@ -3161,7 +3161,7 @@ show_balance_error (GObject *object,
       tmp = g_strdup_printf (_("Your current balance is %s."),
           balance),
       NULL,
-      _("Get credit..."),
+      _("Top Up"),
       uri,
       EMP_RESPONSE_BALANCE);
   g_free (tmp);
