@@ -2861,3 +2861,20 @@ empathy_individual_view_refilter (EmpathyIndividualView *self)
 
   gtk_tree_model_filter_refilter (priv->filter);
 }
+
+void
+empathy_individual_view_select_first (EmpathyIndividualView *self)
+{
+  EmpathyIndividualViewPriv *priv = GET_PRIV (self);
+  GtkTreeIter iter;
+
+  gtk_tree_model_filter_refilter (priv->filter);
+
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (priv->filter), &iter))
+    {
+      GtkTreeSelection *selection = gtk_tree_view_get_selection (
+          GTK_TREE_VIEW (self));
+
+      gtk_tree_selection_select_iter (selection, &iter);
+    }
+}

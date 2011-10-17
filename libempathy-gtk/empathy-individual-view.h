@@ -135,5 +135,7 @@ void empathy_individual_view_set_custom_filter (EmpathyIndividualView *self,
 
 void empathy_individual_view_refilter (EmpathyIndividualView *self);
 
+void empathy_individual_view_select_first (EmpathyIndividualView *self);
+
 G_END_DECLS
 #endif /* __EMPATHY_INDIVIDUAL_VIEW_H__ */
