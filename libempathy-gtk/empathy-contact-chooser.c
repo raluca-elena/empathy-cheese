@@ -219,6 +219,9 @@ get_contacts_cb (TpConnection *connection,
 
   individual_store_add_individual_and_connect (self->priv->store, individual);
 
+  /* Make sure that the first matching item is selected */
+  empathy_individual_view_select_first (self->priv->view);
+
   g_clear_object (&persona_new);
   g_clear_object (&personas);
   g_object_unref (store);
