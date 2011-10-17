@@ -97,6 +97,13 @@ selection_changed_cb (GtkWidget *treeview,
   gtk_widget_set_sensitive (self->priv->invite_button, selected != NULL);
 }
 
+static void
+activate_cb (GtkWidget *chooser,
+    EmpathyInviteParticipantDialog *self)
+{
+  gtk_dialog_response (GTK_DIALOG (self), GTK_RESPONSE_ACCEPT);
+}
+
 /* Return the TpContact of @individual which is on the same connection as the
  * EmpathyTpChat */
 static TpContact *
@@ -197,6 +204,8 @@ invite_participant_dialog_constructed (GObject *object)
 
   g_signal_connect (self->priv->chooser, "selection-changed",
       G_CALLBACK (selection_changed_cb), self);
+  g_signal_connect (self->priv->chooser, "activate",
+      G_CALLBACK (activate_cb), self);
 
   self->priv->invite_button = gtk_dialog_add_button (dialog, _("Invite"),
       GTK_RESPONSE_ACCEPT);
