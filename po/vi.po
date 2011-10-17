@@ -10,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=empathy&keywords=I18N+L10N&component=General\n"
 "POT-Creation-Date: 2011-10-14 17:48+0000\n"
-"PO-Revision-Date: 2011-08-03 18:28+0700\n"
+"PO-Revision-Date: 2011-10-17 19:51+1100\n"
 "Last-Translator: Ngô Chin <ndtrung4419@gmail.com>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -49,16 +49,14 @@ msgid "Call volume, as a percentage."
 msgstr "Âm lượng cuộc gọi, theo phần trăm."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:4
-#, fuzzy
 #| msgid "Camera On"
 msgid "Camera device"
-msgstr "Bật máy quay"
+msgstr "Máy quay"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:5
-#, fuzzy
 #| msgid "Camera On"
 msgid "Camera position"
-msgstr "Bật máy quay"
+msgstr "Vị trí máy quay"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:6
 msgid ""
@@ -125,7 +123,7 @@ msgstr ""
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:19
 msgid "Echo cancellation support"
-msgstr ""
+msgstr "Hỗ trợ khử tiếng vang"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:20
 msgid "Empathy can publish the user's location"
@@ -790,16 +788,15 @@ msgid "%s:"
 msgstr "%s:"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1192
-#, fuzzy
 #| msgid "Launch My Web Accounts"
 msgid "My Web Accounts"
-msgstr "Chạy May Web Accounts"
+msgstr "Tài khoản Web của mình"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1209
-#, fuzzy, c-format
+#, c-format
 #| msgid "The account %s is edited via My Web Accounts."
 msgid "The account %s is edited via %s."
-msgstr "Tài khoản %s bị sửa bởi My Web Accounts."
+msgstr "Tài khoản %s bị sửa bởi %s."
 
 #: ../libempathy-gtk/empathy-account-widget.c:1215
 #, c-format
@@ -812,10 +809,10 @@ msgstr "Chạy May Web Accounts"
 
 #. general handler
 #: ../libempathy-gtk/empathy-account-widget.c:1242
-#, fuzzy, c-format
+#, c-format
 #| msgid "_Edit"
 msgid "Edit %s"
-msgstr "_Sửa"
+msgstr "Sửa %s"
 
 #: ../libempathy-gtk/empathy-account-widget.c:1592
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
@@ -1242,7 +1239,7 @@ msgstr "Phương tiện:"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:21
 msgid "Use this account to call _landlines and mobile phones"
-msgstr ""
+msgstr "Dùng tài khoản này để gọi điện thoại _bàn và di động"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:22
 msgid "What is your SIP account password?"
@@ -1286,10 +1283,9 @@ msgid "None of the accepted image formats are supported on your system"
 msgstr "Không có định dạng ảnh được hỗ trợ nào trên hệ thống này"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:819
-#, fuzzy
 #| msgid "Couldn't save pixbuf to png"
 msgid "Couldn't save picture to file"
-msgstr "Không thể lưu pixbuf thành tập tin ảnh png"
+msgstr "Không thể lưu ảnh vào tập tin"
 
 #: ../libempathy-gtk/empathy-avatar-chooser.c:939
 msgid "Select Your Avatar Image"
@@ -1874,11 +1870,11 @@ msgstr "Không tìm thấy liên lạc"
 
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:627
 msgid "Your message introducing yourself:"
-msgstr ""
+msgstr "Thông điệp giới thiệu bản thân:"
 
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:635
 msgid "Please let me see when you're online. Thanks!"
-msgstr ""
+msgstr "Cho mình biết khi bạn lên mạng nhé. Cám ơn!"
 
 #: ../libempathy-gtk/empathy-contact-selector.c:129
 msgid "Select a contact"
@@ -2188,7 +2184,7 @@ msgstr "%s (%s)"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:309
 msgid "Select account to use to place the call"
-msgstr ""
+msgstr "Chọn tài khoản dùng để gọi điện"
 
 #. translators: Call is a noun. This string is used in the window
 #. * title
@@ -2200,16 +2196,14 @@ msgid "Call"
 msgstr "Gọi"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:378
-#, fuzzy
 #| msgid "Profile"
 msgid "Mobile"
-msgstr "Hồ sơ"
+msgstr "Di động"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:380
-#, fuzzy
 #| msgid "Word"
 msgid "Work"
-msgstr "Từ"
+msgstr "Công việc"
 
 #: ../libempathy-gtk/empathy-individual-menu.c:382
 msgid "HOME"
@@ -2370,20 +2364,20 @@ msgid "<b>%s:</b> %s"
 msgstr "<b>%s:</b> %s"
 
 #: ../libempathy-gtk/empathy-log-window.c:1382
-#, fuzzy, c-format
+#, c-format
 #| msgid "%d second ago"
 #| msgid_plural "%d seconds ago"
 msgid "%s second"
 msgid_plural "%s seconds"
-msgstr[0] "%d giây trước"
+msgstr[0] "%s giây"
 
 #: ../libempathy-gtk/empathy-log-window.c:1389
-#, fuzzy, c-format
+#, c-format
 #| msgid "%d minute ago"
 #| msgid_plural "%d minutes ago"
 msgid "%s minute"
 msgid_plural "%s minutes"
-msgstr[0] "%d phút trước"
+msgstr[0] "%s phút"
 
 #: ../libempathy-gtk/empathy-log-window.c:1397
 #, c-format
@@ -2400,7 +2394,6 @@ msgstr "Hôm qua"
 
 #. Translators: A date such as '23 May 2010' (strftime format)
 #: ../libempathy-gtk/empathy-log-window.c:1748
-#, fuzzy
 #| msgctxt ""
 #| "A date such as '23 May 2010', %e is the day, %B the month and %Y the year"
 #| msgid "%e %B %Y"
@@ -2592,10 +2585,9 @@ msgid "Find:"
 msgstr "Tìm:"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:2
-#, fuzzy
 #| msgid "Match case"
 msgid "Mat_ch case"
-msgstr "Phân biệt hoa thường"
+msgstr "_Phân biệt hoa thường"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:3
 msgid "Phrase not found"
@@ -2606,10 +2598,9 @@ msgid "_Next"
 msgstr "_Tiếp"
 
 #: ../libempathy-gtk/empathy-search-bar.ui.h:5
-#, fuzzy
 #| msgid "_Previous Tab"
 msgid "_Previous"
-msgstr "Thẻ t_rước"
+msgstr "T_rước"
 
 #: ../libempathy-gtk/empathy-sound-manager.c:51
 msgid "Received an instant message"
@@ -3570,10 +3561,9 @@ msgid "Start an audio call"
 msgstr "Thực hiện cuộc gọi thoại"
 
 #: ../src/empathy-call-window.ui.h:18
-#, fuzzy
 #| msgid "Disable camera"
 msgid "Swap camera"
-msgstr "Tắt camera"
+msgstr "Tráo đổi camera"
 
 #: ../src/empathy-call-window.ui.h:19
 #: ../src/empathy-streamed-media-window.ui.h:17
@@ -3601,10 +3591,9 @@ msgid "_Call"
 msgstr "_Gọi"
 
 #: ../src/empathy-call-window.ui.h:25
-#, fuzzy
 #| msgid "Camera On"
 msgid "_Camera"
-msgstr "Bật máy quay"
+msgstr "_Camera"
 
 #: ../src/empathy-call-window.ui.h:26 ../src/empathy-chat-window.ui.h:9
 #: ../src/empathy-main-window-menubar.ui.h:18
@@ -3626,10 +3615,9 @@ msgid "_Microphone"
 msgstr "_Micrô"
 
 #: ../src/empathy-call-window.ui.h:31
-#, fuzzy
 #| msgid "<b>Settings</b>"
 msgid "_Settings"
-msgstr "<b>Thiết lập</b>"
+msgstr "_Thiết lập"
 
 #: ../src/empathy-call-window.ui.h:32
 #: ../src/empathy-main-window-menubar.ui.h:30
@@ -4297,6 +4285,9 @@ msgid ""
 "hear strange noises or glitches during calls, try turning echo cancellation "
 "off and restarting the call."
 msgstr ""
+"Khử tiếng vang giúp người bên kia nghe bạn rõ hơn, nhưng có thể có vấn đề "
+"với một số máy. Nếu bạn hoặc người bên kia nghe tiếng ồn lạ hoặc giựt cục "
+"khi gọi, thử tắt khử tiếng vang và gọi lại."
 
 #: ../src/empathy-preferences.ui.h:10
 msgid "Enable notifications when a contact comes online"
@@ -4319,16 +4310,14 @@ msgid "General"
 msgstr "Chung"
 
 #: ../src/empathy-preferences.ui.h:15
-#, fuzzy
 #| msgid "Input level"
 msgid "Input level:"
-msgstr "Mức đầu vào"
+msgstr "Mức đầu vào:"
 
 #: ../src/empathy-preferences.ui.h:16
-#, fuzzy
 #| msgid "Input volume"
 msgid "Input volume:"
-msgstr "Âm lượng vào"
+msgstr "Âm lượng vào:"
 
 #: ../src/empathy-preferences.ui.h:18
 msgid "Location sources:"
@@ -4389,7 +4378,7 @@ msgstr "Sắc thái"
 
 #: ../src/empathy-preferences.ui.h:30
 msgid "Use _echo cancellation to improve call quality"
-msgstr ""
+msgstr "Dùng _khử tiếng vang để cải thiện chất lượng cuộc gọi"
 
 #: ../src/empathy-preferences.ui.h:31
 msgid "Variant:"
@@ -4597,13 +4586,12 @@ msgstr "Tài khoản Empathy"
 
 #: ../src/empathy-debugger.c:70
 msgid "Show a particular service"
-msgstr ""
+msgstr "Hiện dịch vụ nhất định"
 
 #: ../src/empathy-debugger.c:75
-#, fuzzy
 #| msgid "Empathy Debugger"
 msgid "- Empathy Debugger"
-msgstr "Trình gỡ lỗi Empathy"
+msgstr "- Trình gỡ lỗi Empathy"
 
 #: ../src/empathy-debugger.c:114
 msgid "Empathy Debugger"
