@@ -22,6 +22,7 @@ G_DEFINE_TYPE (EmpathyContactChooser,
 
 enum {
   SIG_SELECTION_CHANGED,
+  SIG_ACTIVATE,
   LAST_SIGNAL
 };
 
@@ -122,6 +123,15 @@ empathy_contact_chooser_class_init (
             g_cclosure_marshal_generic,
             G_TYPE_NONE,
             1, FOLKS_TYPE_INDIVIDUAL);
+
+  signals[SIG_ACTIVATE] = g_signal_new ("activate",
+            G_TYPE_FROM_CLASS (klass),
+            G_SIGNAL_RUN_LAST,
+            0,
+            NULL, NULL,
+            g_cclosure_marshal_generic,
+            G_TYPE_NONE,
+            0);
 }
 
 static void
@@ -284,6 +294,13 @@ search_text_changed (GtkEntry *entry,
 }
 
 static void
+search_activate_cb (GtkEntry *entry,
+    EmpathyContactChooser *self)
+{
+  g_signal_emit (self, signals[SIG_ACTIVATE], 0);
+}
+
+static void
 empathy_contact_chooser_init (EmpathyContactChooser *self)
 {
   EmpathyIndividualManager *mgr;
@@ -309,6 +326,8 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 
   g_signal_connect (self->priv->search_entry, "changed",
       G_CALLBACK (search_text_changed), self);
+  g_signal_connect (self->priv->search_entry, "activate",
+      G_CALLBACK (search_activate_cb), self);
 
   /* Add the treeview */
   mgr = empathy_individual_manager_dup_singleton ();
