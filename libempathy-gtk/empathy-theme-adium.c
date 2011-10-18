@@ -782,7 +782,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	EmpathyContact        *sender;
 	TpMessage             *tp_msg;
 	TpAccount             *account;
-	gchar                 *body_escaped;
+	gchar                 *body_escaped, *name_escaped;
 	const gchar           *name;
 	const gchar           *contact_id;
 	EmpathyAvatar         *avatar;
@@ -947,8 +947,10 @@ theme_adium_append_message (EmpathyChatView *view,
 		}
 	}
 
+	name_escaped = g_markup_escape_text (name, -1);
+
 	theme_adium_append_html (theme, func, html, body_escaped,
-				 avatar_filename, name, contact_id,
+				 avatar_filename, name_escaped, contact_id,
 				 service_name, message_classes->str,
 				 timestamp, is_backlog, empathy_contact_is_user (sender));
 
@@ -961,6 +963,7 @@ theme_adium_append_message (EmpathyChatView *view,
 	priv->last_is_backlog = is_backlog;
 
 	g_free (body_escaped);
+	g_free (name_escaped);
 	g_string_free (message_classes, TRUE);
 }
 
