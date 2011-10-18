@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyNewCallDialog EmpathyNewCallDialog;
 typedef struct _EmpathyNewCallDialogClass EmpathyNewCallDialogClass;
+typedef struct _EmpathyNewCallDialogPriv EmpathyNewCallDialogPriv;
 
 struct _EmpathyNewCallDialogClass {
     GtkDialogClass parent_class;
@@ -35,6 +36,8 @@ struct _EmpathyNewCallDialogClass {
 
 struct _EmpathyNewCallDialog {
     GtkDialog parent;
+
+    EmpathyNewCallDialogPriv *priv;
 };
 
 GType empathy_new_call_dialog_get_type (void);
