@@ -151,7 +151,7 @@ empathy_new_message_dialog_response (GtkDialog *dialog,
     int response_id)
 {
   EmpathyNewMessageDialog *self = (EmpathyNewMessageDialog *) dialog;
-  FolksIndividual *individual;
+  FolksIndividual *individual = NULL;
   EmpathyContact *contact;
 
   if (response_id < EMP_NEW_MESSAGE_TEXT)
