@@ -80,6 +80,7 @@ dtmf_dialpad_button_pressed_cb (GtkWidget *button,
   g_signal_emit (self, signals[START_TONE], 0, tone);
 
   gtk_entry_buffer_insert_text (buffer, -1, label, -1);
+  gtk_editable_set_position (GTK_EDITABLE (self->priv->entry), -1);
 
   return FALSE;
 }
