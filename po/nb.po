@@ -5,10 +5,10 @@
 # Torstein Adolf Winterseth <kvikende@fsfe.org>, 2010.
 msgid ""
 msgstr ""
-"Project-Id-Version: empathy 3.1.x\n"
+"Project-Id-Version: empathy 3.3.x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-18 07:38+0200\n"
-"PO-Revision-Date: 2011-10-18 07:40+0200\n"
+"POT-Creation-Date: 2011-10-19 22:27+0200\n"
+"PO-Revision-Date: 2011-10-19 22:29+0200\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian Bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: no\n"
@@ -594,7 +594,7 @@ msgstr "Status er satt til frakoblet"
 
 #: ../libempathy/empathy-utils.c:288 ../libempathy/empathy-utils.c:322
 #: ../libempathy-gtk/empathy-call-utils.c:49
-#: ../libempathy-gtk/empathy-new-message-dialog.c:75
+#: ../libempathy-gtk/empathy-new-message-dialog.c:82
 msgid "Network error"
 msgstr "Nettverksfeil"
 
@@ -1336,7 +1336,7 @@ msgstr "Nødsamtaler er ikke støttet på denne protokollen"
 
 #: ../libempathy-gtk/empathy-call-utils.c:59
 msgid "You don't have enough credit in order to place this call"
-msgstr ""
+msgstr "Du har ikke nok kreditt til å starte denne samtalen"
 
 #: ../libempathy-gtk/empathy-chat.c:706
 msgid "Failed to open private chat"
@@ -1794,8 +1794,10 @@ msgstr "_Legg til kontakt …"
 msgid "_Block Contact"
 msgstr "_Blokker kontakt"
 
+#. add chat button
 #: ../libempathy-gtk/empathy-contact-menu.c:321
 #: ../libempathy-gtk/empathy-individual-menu.c:758
+#: ../libempathy-gtk/empathy-new-message-dialog.c:319
 #: ../src/empathy-main-window-menubar.ui.h:16
 msgid "_Chat"
 msgstr "_Prat"
@@ -2209,9 +2211,9 @@ msgstr "Arbeid"
 msgid "HOME"
 msgstr "Hjemme"
 
-#. add an SMS button
+#. add SMS button
 #: ../libempathy-gtk/empathy-individual-menu.c:805
-#: ../libempathy-gtk/empathy-new-message-dialog.c:295
+#: ../libempathy-gtk/empathy-new-message-dialog.c:313
 msgid "_SMS"
 msgstr "_SMS"
 
@@ -2496,72 +2498,72 @@ msgstr "side 2"
 msgid "Contact ID:"
 msgstr "KontaktID:"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:77
+#: ../libempathy-gtk/empathy-new-message-dialog.c:84
 msgid "The contact is offline"
 msgstr "Kontakten er koblet fra"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:79
+#: ../libempathy-gtk/empathy-new-message-dialog.c:86
 msgid "The specified contact is either invalid or unknown"
 msgstr "Valgt kontakt er ugyldig eller ukjent"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:81
+#: ../libempathy-gtk/empathy-new-message-dialog.c:88
 msgid "The contact does not support this kind of conversation"
 msgstr "Kontakten støtter ikke denne type samtale"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:83
+#: ../libempathy-gtk/empathy-new-message-dialog.c:90
 msgid "The requested functionality is not implemented for this protocol"
-msgstr ""
+msgstr "Forespurt funksjonalitet er ikke implementert for denne protokollen"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:89
+#: ../libempathy-gtk/empathy-new-message-dialog.c:96
 msgid "Could not start a conversation with the given contact"
-msgstr ""
+msgstr "Kunne ikke starte en samtale med oppgitt kontakt"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:91
+#: ../libempathy-gtk/empathy-new-message-dialog.c:98
 msgid "You are banned from this channel"
-msgstr ""
+msgstr "Du er bannlyst fra denne kanalen"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:93
+#: ../libempathy-gtk/empathy-new-message-dialog.c:100
 msgid "This channel is full"
 msgstr "Kanalen er full"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:95
+#: ../libempathy-gtk/empathy-new-message-dialog.c:102
 msgid "You must be invited to join this channel"
 msgstr "Du må bli invitert til å bli med i denne kanalen"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:97
+#: ../libempathy-gtk/empathy-new-message-dialog.c:104
 msgid "Can't proceed while disconnected"
 msgstr "Kan ikke fortsette da du er koblet fra"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:99
+#: ../libempathy-gtk/empathy-new-message-dialog.c:106
 msgid "Permission denied"
 msgstr "Tilgang nektet"
 
-#: ../libempathy-gtk/empathy-new-message-dialog.c:105
+#: ../libempathy-gtk/empathy-new-message-dialog.c:112
 msgid "There was an error starting the conversation"
 msgstr "Det oppsto en feil ved start av samtalen"
 
-#. add chat button
-#: ../libempathy-gtk/empathy-new-message-dialog.c:305
-msgid "C_hat"
-msgstr "_Prat"
+#: ../libempathy-gtk/empathy-new-message-dialog.c:291
+#: ../libempathy-gtk/empathy-new-call-dialog.c:203
+msgid "Enter a contact identifier or phone number:"
+msgstr "Oppgi en kontaktidentifikator eller telefonnummer:"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-message-dialog.c:324
+#: ../libempathy-gtk/empathy-new-message-dialog.c:333
 msgid "New Conversation"
 msgstr "Ny samtale"
 
-#. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:204
-msgid "Send _Video"
-msgstr "Send _video"
+#. add video button
+#: ../libempathy-gtk/empathy-new-call-dialog.c:225
+msgid "_Video Call"
+msgstr "_Videosamtale"
 
-#. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:215
-msgid "C_all"
-msgstr "S_amtale"
+#. add audio button
+#: ../libempathy-gtk/empathy-new-call-dialog.c:235
+msgid "_Audio Call"
+msgstr "_Lydsamtale"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:225
+#: ../libempathy-gtk/empathy-new-call-dialog.c:245
 msgid "New Call"
 msgstr "Ny samtale"
 
@@ -2684,12 +2686,12 @@ msgstr "Samtale avsluttet"
 msgid "Edit Custom Messages"
 msgstr "Rediger egendefinerte meldinger"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1044
+#: ../libempathy-gtk/empathy-theme-adium.c:1047
 #, c-format
 msgid "Message edited at %s"
 msgstr "Melding redigert %s"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1749
+#: ../libempathy-gtk/empathy-theme-adium.c:1752
 msgid "Normal"
 msgstr "Normal"
 
@@ -4016,7 +4018,7 @@ msgstr "Ingen treff funnet"
 #: ../src/empathy-main-window.c:750
 #, c-format
 msgid "Sorry, %s accounts can’t be used until your %s software is updated."
-msgstr ""
+msgstr "Beklager %s-kontoer kan ikke brukes før %s-programvaren er oppdatert."
 
 #: ../src/empathy-main-window.c:818
 msgid "Update software..."
@@ -4412,7 +4414,7 @@ msgstr "Temaer"
 
 #: ../src/empathy-preferences.ui.h:30
 msgid "Use _echo cancellation to improve call quality"
-msgstr ""
+msgstr "Bruk _ekkokansellering for å forbedre kvaliteten på samtalen"
 
 #: ../src/empathy-preferences.ui.h:31
 msgid "Variant:"
@@ -4578,16 +4580,16 @@ msgid ""
 msgstr ""
 "Valgt tilkoblingshåndterer støtter ikke utvidelse for ekstern feilsøking."
 
-#: ../src/empathy-invite-participant-dialog.c:179
-#: ../src/empathy-invite-participant-dialog.c:205
+#: ../src/empathy-invite-participant-dialog.c:186
+#: ../src/empathy-invite-participant-dialog.c:214
 msgid "Invite Participant"
 msgstr "Inviter deltaker"
 
-#: ../src/empathy-invite-participant-dialog.c:180
+#: ../src/empathy-invite-participant-dialog.c:187
 msgid "Choose a contact to invite into the conversation:"
 msgstr "Velg en kontakt å invitere til samtalen:"
 
-#: ../src/empathy-invite-participant-dialog.c:201
+#: ../src/empathy-invite-participant-dialog.c:210
 msgid "Invite"
 msgstr "Inviter"
 
@@ -4707,9 +4709,3 @@ msgstr "%s – %d:%02dm"
 #: ../libempathy-gtk/empathy-search-bar.c:243
 msgid "_Match case"
 msgstr "Skill _mellom små/store bokstaver"
-
-#~ msgid "Ungrouped"
-#~ msgstr "Ikke gruppert"
-
-#~ msgid "Favorite People"
-#~ msgstr "Favorittpersoner"
