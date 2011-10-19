@@ -38,6 +38,7 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy-gtk/empathy-avatar-image.h>
+#include <libempathy-gtk/empathy-dialpad-widget.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-sound-manager.h>
 #include <libempathy-gtk/empathy-geometry.h>
@@ -335,18 +336,14 @@ empathy_streamed_media_window_setup_toolbar (EmpathyStreamedMediaWindow *self)
 }
 
 static void
-dtmf_button_pressed_cb (GtkButton *button, EmpathyStreamedMediaWindow *window)
+dtmf_start_tone_cb (EmpathyDialpadWidget *dialpad,
+    TpDTMFEvent event,
+    EmpathyStreamedMediaWindow *window)
 {
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
-  GQuark button_quark;
-  TpDTMFEvent event;
 
   g_object_get (priv->handler, "tp-call", &call, NULL);
-
-  button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
-  event = GPOINTER_TO_UINT (g_object_get_qdata (G_OBJECT (button),
-    button_quark));
 
   empathy_tp_streamed_media_start_tone (call, event);
 
@@ -354,7 +351,9 @@ dtmf_button_pressed_cb (GtkButton *button, EmpathyStreamedMediaWindow *window)
 }
 
 static void
-dtmf_button_released_cb (GtkButton *button, EmpathyStreamedMediaWindow *window)
+dtmf_stop_tone_cb (EmpathyDialpadWidget *self,
+    TpDTMFEvent event,
+    EmpathyStreamedMediaWindow *window)
 {
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (window);
   EmpathyTpStreamedMedia *call;
@@ -1133,9 +1132,11 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "video-input",
       _("Video input"), page);
 
-  priv->dtmf_panel = empathy_create_dtmf_dialpad (G_OBJECT (self),
-      G_CALLBACK (dtmf_button_pressed_cb),
-      G_CALLBACK (dtmf_button_released_cb));
+  priv->dtmf_panel = empathy_dialpad_widget_new ();
+  g_signal_connect (priv->dtmf_panel, "start-tone",
+      G_CALLBACK (dtmf_start_tone_cb), self);
+  g_signal_connect (priv->dtmf_panel, "stop-tone",
+      G_CALLBACK (dtmf_stop_tone_cb), self);
   ev_sidebar_add_page (EV_SIDEBAR (priv->sidebar), "dialpad",
       _("Dialpad"), priv->dtmf_panel);
 

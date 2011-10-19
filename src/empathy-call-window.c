@@ -47,6 +47,7 @@
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-avatar-image.h>
+#include <libempathy-gtk/empathy-dialpad-widget.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-sound-manager.h>
 #include <libempathy-gtk/empathy-geometry.h>
@@ -397,27 +398,15 @@ empathy_call_window_tones_stopped_cb (TpChannel *proxy,
 }
 
 static void
-dtmf_button_pressed_cb (GtkButton *button,
+dtmf_start_tone_cb (EmpathyDialpadWidget *dialpad,
+    TpDTMFEvent event,
     EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GQuark button_quark;
-  TpDTMFEvent event;
-
-  button_quark = g_quark_from_static_string (EMPATHY_DTMF_BUTTON_ID);
-  event = GPOINTER_TO_UINT (g_object_get_qdata (G_OBJECT (button),
-    button_quark));
 
   g_string_append_c (priv->tones, tp_dtmf_event_to_char (event));
 
   empathy_call_window_maybe_emit_tones (self);
-}
-
-/* empathy_create_dtmf_dialpad() requires a callback, even if empty */
-static void
-dtmf_button_released_cb (GtkButton *button,
-    EmpathyCallWindow *self)
-{
 }
 
 static void
@@ -1819,9 +1808,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
 
-  priv->dtmf_panel = empathy_create_dtmf_dialpad (G_OBJECT (self),
-      G_CALLBACK (dtmf_button_pressed_cb),
-      G_CALLBACK (dtmf_button_released_cb));
+  priv->dtmf_panel = empathy_dialpad_widget_new ();
+  g_signal_connect (priv->dtmf_panel, "start-tone",
+      G_CALLBACK (dtmf_start_tone_cb), self);
 
   priv->tones = g_string_new ("");
 
