@@ -49,8 +49,6 @@ G_BEGIN_DECLS
 					    (x) < gdk_screen_width () && \
 					    (y) < gdk_screen_height ())
 
-#define EMPATHY_DTMF_BUTTON_ID "empathy-call-dtmf-button-id"
-
 typedef void (*EmpathyPixbufAvatarFromIndividualCb) (FolksIndividual *individual,
 		GdkPixbuf *pixbuf,
 		gpointer user_data);
@@ -143,9 +141,6 @@ void        empathy_send_file_from_uri_list             (EmpathyContact   *conta
 							 const gchar      *uri_list);
 void        empathy_send_file_with_file_chooser         (EmpathyContact   *contact);
 void        empathy_receive_file_with_file_chooser      (EmpathyFTHandler *handler);
-GtkWidget * empathy_create_dtmf_dialpad                 (GObject *self,
-							 GCallback pressed_cb,
-							 GCallback released_cb);
 
 /* Misc */
 void        empathy_make_color_whiter                   (GdkRGBA *color);
