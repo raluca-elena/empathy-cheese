@@ -307,7 +307,8 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *self)
       G_CALLBACK (selection_activate_cb), self);
 
   /* close button */
-  gtk_dialog_add_buttons (GTK_DIALOG (self), GTK_STOCK_CLOSE, NULL);
+  gtk_dialog_add_button (GTK_DIALOG (self),
+      GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
 
   /* add SMS button */
   self->priv->button_sms = gtk_button_new_with_mnemonic (_("_SMS"));
