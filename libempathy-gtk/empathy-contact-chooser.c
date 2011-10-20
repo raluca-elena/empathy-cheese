@@ -229,8 +229,11 @@ get_contacts_cb (TpConnection *connection,
 
   individual_store_add_individual_and_connect (self->priv->store, individual);
 
-  /* Make sure that the first matching item is selected */
-  empathy_individual_view_select_first (self->priv->view);
+  /* if nothing is selected, select the first matching node */
+  if (!gtk_tree_selection_get_selected (
+        gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view)),
+        NULL, NULL))
+    empathy_individual_view_select_first (self->priv->view);
 
   g_clear_object (&persona_new);
   g_clear_object (&personas);
