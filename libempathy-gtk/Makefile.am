@@ -49,7 +49,6 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-linking-dialog.c		\
 	empathy-live-search.c			\
 	empathy-contact-search-dialog.c		\
-	empathy-contact-selector-dialog.c \
 	empathy-contact-widget.c		\
 	empathy-dialpad-widget.c		\
 	empathy-geometry.c			\
@@ -116,7 +115,6 @@ libempathy_gtk_headers =			\
 	empathy-linking-dialog.h		\
 	empathy-live-search.h			\
 	empathy-contact-search-dialog.h		\
-	empathy-contact-selector-dialog.h \
 	empathy-contact-widget.h		\
 	empathy-dialpad-widget.h		\
 	empathy-geometry.h			\
@@ -209,7 +207,6 @@ ui_DATA = 					\
 	empathy-status-preset-dialog.ui		\
 	empathy-log-window.ui			\
 	empathy-chat.ui				\
-	empathy-contact-selector-dialog.ui      \
 	empathy-search-bar.ui			\
 	empathy-individual-widget.ui
 

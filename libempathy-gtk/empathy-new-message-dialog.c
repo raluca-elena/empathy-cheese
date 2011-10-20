@@ -307,7 +307,8 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *self)
       G_CALLBACK (selection_activate_cb), self);
 
   /* close button */
-  gtk_dialog_add_buttons (GTK_DIALOG (self), GTK_STOCK_CLOSE, NULL);
+  gtk_dialog_add_button (GTK_DIALOG (self),
+      GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
 
   /* add SMS button */
   self->priv->button_sms = gtk_button_new_with_mnemonic (_("_SMS"));
@@ -321,13 +322,13 @@ empathy_new_message_dialog_init (EmpathyNewMessageDialog *self)
       GTK_ICON_SIZE_BUTTON);
   gtk_button_set_image (GTK_BUTTON (self->priv->button_chat), image);
 
-  gtk_dialog_add_action_widget (GTK_DIALOG (self), self->priv->button_chat,
-      EMP_NEW_MESSAGE_TEXT);
-  gtk_widget_show (self->priv->button_chat);
-
   gtk_dialog_add_action_widget (GTK_DIALOG (self), self->priv->button_sms,
       EMP_NEW_MESSAGE_SMS);
   gtk_widget_show (self->priv->button_sms);
+
+  gtk_dialog_add_action_widget (GTK_DIALOG (self), self->priv->button_chat,
+      EMP_NEW_MESSAGE_TEXT);
+  gtk_widget_show (self->priv->button_chat);
 
   /* Tweak the dialog */
   gtk_window_set_title (GTK_WINDOW (self), _("New Conversation"));

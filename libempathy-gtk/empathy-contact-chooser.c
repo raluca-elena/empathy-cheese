@@ -229,8 +229,11 @@ get_contacts_cb (TpConnection *connection,
 
   individual_store_add_individual_and_connect (self->priv->store, individual);
 
-  /* Make sure that the first matching item is selected */
-  empathy_individual_view_select_first (self->priv->view);
+  /* if nothing is selected, select the first matching node */
+  if (!gtk_tree_selection_get_selected (
+        gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view)),
+        NULL, NULL))
+    empathy_individual_view_select_first (self->priv->view);
 
   g_clear_object (&persona_new);
   g_clear_object (&personas);
@@ -301,6 +304,69 @@ search_activate_cb (GtkEntry *entry,
 }
 
 static void
+view_activate_cb (GtkTreeView *view,
+    GtkTreePath *path,
+    GtkTreeViewColumn *column,
+    EmpathyContactChooser *self)
+{
+  g_signal_emit (self, signals[SIG_ACTIVATE], 0);
+}
+
+static gboolean
+search_key_press_cb (GtkEntry *entry,
+    GdkEventKey *event,
+    EmpathyContactChooser *self)
+{
+  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
+  if (event->state != 0)
+    return FALSE;
+
+  switch (event->keyval)
+    {
+      case GDK_KEY_Down:
+      case GDK_KEY_KP_Down:
+      case GDK_KEY_Up:
+      case GDK_KEY_KP_Up:
+        break;
+
+      default:
+        return FALSE;
+    }
+
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view));
+
+  if (!gtk_tree_selection_get_selected (selection, &model, &iter))
+    return TRUE;
+
+  switch (event->keyval)
+    {
+      case GDK_KEY_Down:
+      case GDK_KEY_KP_Down:
+        if (!gtk_tree_model_iter_next (model, &iter))
+          return TRUE;
+
+        break;
+
+      case GDK_KEY_Up:
+      case GDK_KEY_KP_Up:
+        if (!gtk_tree_model_iter_previous (model, &iter))
+          return TRUE;
+
+        break;
+
+      default:
+        g_assert_not_reached ();
+    }
+
+  gtk_tree_selection_select_iter (selection, &iter);
+
+  return TRUE;
+}
+
+static void
 empathy_contact_chooser_init (EmpathyContactChooser *self)
 {
   EmpathyIndividualManager *mgr;
@@ -328,6 +394,8 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
       G_CALLBACK (search_text_changed), self);
   g_signal_connect (self->priv->search_entry, "activate",
       G_CALLBACK (search_activate_cb), self);
+  g_signal_connect (self->priv->search_entry, "key-press-event",
+      G_CALLBACK (search_key_press_cb), self);
 
   /* Add the treeview */
   mgr = empathy_individual_manager_dup_singleton ();
@@ -346,6 +414,8 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 
   g_signal_connect (selection, "changed",
       G_CALLBACK (view_selection_changed_cb), self);
+  g_signal_connect (self->priv->view, "row-activated",
+      G_CALLBACK (view_activate_cb), self);
 
   scroll = gtk_scrolled_window_new (NULL, NULL);
 

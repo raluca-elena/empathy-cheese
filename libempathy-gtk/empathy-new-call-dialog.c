@@ -219,7 +219,8 @@ empathy_new_call_dialog_init (EmpathyNewCallDialog *self)
       G_CALLBACK (selection_activate_cb), self);
 
   /* close button */
-  gtk_dialog_add_buttons (GTK_DIALOG (self), GTK_STOCK_CLOSE, NULL);
+  gtk_dialog_add_button (GTK_DIALOG (self),
+      GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
 
   /* add video button */
   self->priv->button_video = gtk_button_new_with_mnemonic (_("_Video Call"));
