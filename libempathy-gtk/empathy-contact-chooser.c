@@ -301,6 +301,15 @@ search_activate_cb (GtkEntry *entry,
 }
 
 static void
+view_activate_cb (GtkTreeView *view,
+    GtkTreePath *path,
+    GtkTreeViewColumn *column,
+    EmpathyContactChooser *self)
+{
+  g_signal_emit (self, signals[SIG_ACTIVATE], 0);
+}
+
+static void
 empathy_contact_chooser_init (EmpathyContactChooser *self)
 {
   EmpathyIndividualManager *mgr;
@@ -346,6 +355,8 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 
   g_signal_connect (selection, "changed",
       G_CALLBACK (view_selection_changed_cb), self);
+  g_signal_connect (self->priv->view, "row-activated",
+      G_CALLBACK (view_activate_cb), self);
 
   scroll = gtk_scrolled_window_new (NULL, NULL);
 
