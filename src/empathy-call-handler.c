@@ -190,13 +190,18 @@ static void
 on_call_state_changed_cb (TpyCallChannel *call,
   TpyCallState state,
   TpyCallFlags flags,
-   const GValueArray *call_state_reason,
+  const GValueArray *call_state_reason,
   GHashTable *call_state_details,
   EmpathyCallHandler *handler)
 {
   EmpathyCallHandlerPriv *priv = handler->priv;
+  gchar *dbus_reason;
+  guint actor, reason;
 
-  g_signal_emit (handler, signals[STATE_CHANGED], 0, state);
+  tp_value_array_unpack ((GValueArray *) call_state_reason, 3,
+      &actor, &reason, &dbus_reason);
+
+  g_signal_emit (handler, signals[STATE_CHANGED], 0, state, dbus_reason);
 
   if (state == TPY_CALL_STATE_ENDED)
     {
@@ -505,7 +510,7 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
     g_signal_new ("state-changed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
-      G_TYPE_NONE, 1, G_TYPE_UINT);
+      G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_STRING);
 }
 
 EmpathyCallHandler *
