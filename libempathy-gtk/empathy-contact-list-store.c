@@ -80,6 +80,7 @@ typedef struct {
 	EmpathyContactListStore *store;
 	EmpathyContact          *contact;
 	gboolean                remove;
+	guint                   timeout;
 } ShowActiveData;
 
 static void             contact_list_store_dispose                  (GObject                       *object);
@@ -1256,7 +1257,7 @@ contact_list_store_contact_update (EmpathyContactListStore *store,
 
 		if (do_set_active) {
 			data = contact_list_store_contact_active_new (store, contact, do_remove);
-			g_timeout_add_seconds (ACTIVE_USER_SHOW_TIME,
+			data->timeout = g_timeout_add_seconds (ACTIVE_USER_SHOW_TIME,
 					       (GSourceFunc) contact_list_store_contact_active_cb,
 					       data);
 		}
@@ -1315,6 +1316,24 @@ contact_list_store_contact_set_active (EmpathyContactListStore *store,
 
 }
 
+static void
+store_contact_active_invalidated (ShowActiveData *data,
+	GObject *old_object)
+{
+	/* Remove the timeout and free the struct, since the contact or contact
+	 * store has disappeared. */
+	g_source_remove (data->timeout);
+
+	 if (old_object == (GObject *) data->store)
+		data->store = NULL;
+	 else if (old_object == (GObject *) data->contact)
+		data->contact = NULL;
+	 else
+		g_assert_not_reached ();
+
+	contact_list_store_contact_active_free (data);
+}
+
 static ShowActiveData *
 contact_list_store_contact_active_new (EmpathyContactListStore *store,
 				       EmpathyContact          *contact,
@@ -1328,9 +1347,18 @@ contact_list_store_contact_active_new (EmpathyContactListStore *store,
 
 	data = g_slice_new0 (ShowActiveData);
 
-	data->store = g_object_ref (store);
-	data->contact = g_object_ref (contact);
+	/* We don't actually want to force either the IndividualStore or the
+	 * Individual to stay alive, since the user could quit Empathy or disable
+	 * the account before the contact_active timeout is fired. */
+	g_object_weak_ref (G_OBJECT (store),
+		(GWeakNotify) store_contact_active_invalidated, data);
+	g_object_weak_ref (G_OBJECT (contact),
+		(GWeakNotify) store_contact_active_invalidated, data);
+
+	data->store = store;
+	data->contact = contact;
 	data->remove = remove_;
+	data->timeout = 0;
 
 	return data;
 }
@@ -1338,8 +1366,13 @@ contact_list_store_contact_active_new (EmpathyContactListStore *store,
 static void
 contact_list_store_contact_active_free (ShowActiveData *data)
 {
-	g_object_unref (data->contact);
-	g_object_unref (data->store);
+	if (data->store != NULL)
+		g_object_weak_unref (G_OBJECT (data->store),
+			(GWeakNotify) store_contact_active_invalidated, data);
+
+	if (data->contact != NULL)
+		g_object_weak_unref (G_OBJECT (data->contact),
+			(GWeakNotify) store_contact_active_invalidated, data);
 
 	g_slice_free (ShowActiveData, data);
 }
