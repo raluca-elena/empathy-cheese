@@ -510,7 +510,7 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
     g_signal_new ("state-changed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
-      G_TYPE_NONE, 1, G_TYPE_UINT);
+      G_TYPE_NONE, 2, G_TYPE_UINT, G_TYPE_STRING);
 }
 
 EmpathyCallHandler *
