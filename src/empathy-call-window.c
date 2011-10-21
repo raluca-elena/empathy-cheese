@@ -2935,8 +2935,7 @@ display_error (EmpathyCallWindow *self,
   gchar *txt;
 
   /* Create info bar */
-  info_bar = gtk_info_bar_new_with_buttons (GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
-      NULL);
+  info_bar = gtk_info_bar_new ();
 
   if (button_text != NULL)
     {
@@ -2945,6 +2944,9 @@ display_error (EmpathyCallWindow *self,
       g_object_set_data_full (G_OBJECT (info_bar),
           "uri", g_strdup (uri), g_free);
     }
+
+  gtk_info_bar_add_button (GTK_INFO_BAR (info_bar),
+      GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
 
   gtk_info_bar_set_message_type (GTK_INFO_BAR (info_bar), GTK_MESSAGE_WARNING);
 
