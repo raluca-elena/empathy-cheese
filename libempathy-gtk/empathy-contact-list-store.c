@@ -375,12 +375,14 @@ contact_list_store_dispose (GObject *object)
 					      object);
 	g_object_unref (priv->list);
 
-	if (priv->inhibit_active) {
+	if (priv->inhibit_active != 0) {
 		g_source_remove (priv->inhibit_active);
+		priv->inhibit_active = 0;
 	}
 
 	if (priv->setup_idle_id != 0) {
 		g_source_remove (priv->setup_idle_id);
+		priv->setup_idle_id = 0;
 	}
 
 	g_hash_table_destroy (priv->status_icons);
