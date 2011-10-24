@@ -3700,10 +3700,10 @@ log_window_logger_clear_account_cb (TpProxy *proxy,
   gtk_tree_store_clear (self->priv->store_events);
   log_window_who_populate (self);
 
-  /* Re-filter the account chooser so the accounts without logs get greyed out */
-  empathy_account_chooser_set_filter (
-      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser),
-      empathy_account_chooser_filter_has_logs, NULL);
+  /* Re-filter the account chooser so the accounts without logs get
+   * greyed out */
+  empathy_account_chooser_refilter (
+      EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser));
 }
 
 static void
@@ -3731,8 +3731,8 @@ log_window_delete_menu_clicked_cb (GtkMenuItem *menuitem,
 
   account_chooser = (EmpathyAccountChooser *) empathy_account_chooser_new ();
   empathy_account_chooser_set_has_all_option (account_chooser, TRUE);
-  empathy_account_chooser_set_filter (account_chooser,
-      empathy_account_chooser_filter_has_logs, NULL);
+
+  empathy_account_chooser_refilter (account_chooser);
 
   /* Select the same account as in the history window */
   if (empathy_account_chooser_is_ready (account_chooser))
