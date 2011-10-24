@@ -126,16 +126,6 @@ enum {
   COL_ACCOUNT_COUNT
 };
 
-static void account_chooser_constructed (GObject *object);
-static void account_chooser_finalize (GObject *object);
-static void account_chooser_get_property (GObject *object,
-    guint param_id,
-    GValue *value,
-    GParamSpec *pspec);
-static void account_chooser_set_property (GObject *object,
-    guint param_id,
-    const GValue *value,
-    GParamSpec *pspec);
 static void account_chooser_setup (EmpathyAccountChooser *self);
 static void account_chooser_account_validity_changed_cb (
     TpAccountManager *manager,
@@ -180,42 +170,6 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 G_DEFINE_TYPE (EmpathyAccountChooser, empathy_account_chooser,
     GTK_TYPE_COMBO_BOX)
-
-static void
-empathy_account_chooser_class_init (EmpathyAccountChooserClass *klass)
-{
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  object_class->constructed = account_chooser_constructed;
-  object_class->finalize = account_chooser_finalize;
-  object_class->get_property = account_chooser_get_property;
-  object_class->set_property = account_chooser_set_property;
-
-  /**
-   * EmpathyAccountChooser:has-all-option:
-   *
-   * Have an additional option in the list to mean all accounts.
-   */
-  g_object_class_install_property (object_class,
-      PROP_HAS_ALL_OPTION,
-      g_param_spec_boolean ("has-all-option",
-        "Has All Option",
-        "Have a separate option in the list to mean ALL accounts",
-        FALSE,
-        G_PARAM_READWRITE));
-
-  signals[READY] =
-    g_signal_new ("ready",
-        G_OBJECT_CLASS_TYPE (object_class),
-        G_SIGNAL_RUN_LAST,
-        0,
-        NULL, NULL,
-        g_cclosure_marshal_generic,
-        G_TYPE_NONE,
-        0);
-
-  g_type_class_add_private (object_class, sizeof (EmpathyAccountChooserPriv));
-}
 
 static void
 empathy_account_chooser_init (EmpathyAccountChooser *self)
@@ -300,6 +254,42 @@ account_chooser_set_property (GObject *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
     };
+}
+
+static void
+empathy_account_chooser_class_init (EmpathyAccountChooserClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->constructed = account_chooser_constructed;
+  object_class->finalize = account_chooser_finalize;
+  object_class->get_property = account_chooser_get_property;
+  object_class->set_property = account_chooser_set_property;
+
+  /**
+   * EmpathyAccountChooser:has-all-option:
+   *
+   * Have an additional option in the list to mean all accounts.
+   */
+  g_object_class_install_property (object_class,
+      PROP_HAS_ALL_OPTION,
+      g_param_spec_boolean ("has-all-option",
+        "Has All Option",
+        "Have a separate option in the list to mean ALL accounts",
+        FALSE,
+        G_PARAM_READWRITE));
+
+  signals[READY] =
+    g_signal_new ("ready",
+        G_OBJECT_CLASS_TYPE (object_class),
+        G_SIGNAL_RUN_LAST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_generic,
+        G_TYPE_NONE,
+        0);
+
+  g_type_class_add_private (object_class, sizeof (EmpathyAccountChooserPriv));
 }
 
 /**
