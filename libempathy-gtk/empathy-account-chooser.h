@@ -61,13 +61,14 @@ typedef void (* EmpathyAccountChooserFilterFunc) (
 
 typedef struct _EmpathyAccountChooser EmpathyAccountChooser;
 typedef struct _EmpathyAccountChooserClass EmpathyAccountChooserClass;
+typedef struct _EmpathyAccountChooserPriv EmpathyAccountChooserPriv;
 
 struct _EmpathyAccountChooser
 {
   GtkComboBox parent;
 
   /*<private>*/
-  gpointer priv;
+  EmpathyAccountChooserPriv *priv;
 };
 
 struct _EmpathyAccountChooserClass
