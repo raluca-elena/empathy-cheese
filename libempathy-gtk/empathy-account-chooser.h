@@ -106,6 +106,10 @@ void empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
     EmpathyAccountChooserFilterFunc filter,
     gpointer user_data);
 
+gboolean empathy_account_chooser_is_ready (EmpathyAccountChooser *self);
+
+/* Pre-defined filters */
+
 void empathy_account_chooser_filter_is_connected (TpAccount *account,
     EmpathyAccountChooserFilterResultCallback callback,
     gpointer callback_data,
@@ -115,8 +119,6 @@ void empathy_account_chooser_filter_supports_chatrooms (TpAccount *account,
     EmpathyAccountChooserFilterResultCallback callback,
     gpointer callback_data,
     gpointer user_data);
-
-gboolean empathy_account_chooser_is_ready (EmpathyAccountChooser *self);
 
 G_END_DECLS
 

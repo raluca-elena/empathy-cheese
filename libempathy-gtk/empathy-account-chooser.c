@@ -945,6 +945,34 @@ empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
  * Return value: whether the account indicated by @account is visible.
  */
 
+gboolean
+empathy_account_chooser_is_ready (EmpathyAccountChooser *self)
+{
+  return self->priv->ready;
+}
+
+TpAccount *
+empathy_account_chooser_get_account (EmpathyAccountChooser *self)
+{
+  TpAccount *account;
+
+  account = empathy_account_chooser_dup_account (self);
+  if (account == NULL)
+    return NULL;
+
+  g_object_unref (account);
+
+  return account;
+}
+
+TpAccountManager *
+empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self)
+{
+  return self->priv->manager;
+}
+
+/* Pre-defined filters */
+
 /**
  * empathy_account_chooser_filter_is_connected:
  * @account: a #TpAccount
@@ -1006,30 +1034,4 @@ empathy_account_chooser_filter_supports_chatrooms (TpAccount *account,
 
 out:
   callback (supported, callback_data);
-}
-
-gboolean
-empathy_account_chooser_is_ready (EmpathyAccountChooser *self)
-{
-  return self->priv->ready;
-}
-
-TpAccount *
-empathy_account_chooser_get_account (EmpathyAccountChooser *self)
-{
-  TpAccount *account;
-
-  account = empathy_account_chooser_dup_account (self);
-  if (account == NULL)
-    return NULL;
-
-  g_object_unref (account);
-
-  return account;
-}
-
-TpAccountManager *
-empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self)
-{
-  return self->priv->manager;
 }
