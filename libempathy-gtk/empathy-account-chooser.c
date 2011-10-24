@@ -126,7 +126,6 @@ enum {
   COL_ACCOUNT_COUNT
 };
 
-static void account_chooser_setup (EmpathyAccountChooser *self);
 static void account_chooser_account_validity_changed_cb (
     TpAccountManager *manager,
     TpAccount *account,
@@ -193,12 +192,140 @@ empathy_account_chooser_init (EmpathyAccountChooser *self)
       self);
 }
 
+static gint
+account_cmp (GtkTreeModel *model,
+    GtkTreeIter *a,
+    GtkTreeIter *b,
+    gpointer user_data)
+{
+  RowType a_type, b_type;
+  gboolean a_enabled, b_enabled;
+  gchar *a_text, *b_text;
+  gint result;
+
+  gtk_tree_model_get (model, a,
+      COL_ACCOUNT_ENABLED, &a_enabled,
+      COL_ACCOUNT_ROW_TYPE, &a_type,
+      -1);
+  gtk_tree_model_get (model, b,
+      COL_ACCOUNT_ENABLED, &b_enabled,
+      COL_ACCOUNT_ROW_TYPE, &b_type,
+      -1);
+
+  /* This assumes that we have at most one of each special row type. */
+  if (a_type != b_type)
+    /* Display higher-numbered special row types first. */
+    return (b_type - a_type);
+
+  /* Enabled accounts are displayed first */
+  if (a_enabled != b_enabled)
+    return a_enabled ? -1: 1;
+
+  gtk_tree_model_get (model, a, COL_ACCOUNT_TEXT, &a_text, -1);
+  gtk_tree_model_get (model, b, COL_ACCOUNT_TEXT, &b_text, -1);
+
+  if (a_text == b_text)
+    result = 0;
+  else if (a_text == NULL)
+    result = 1;
+  else if (b_text == NULL)
+    result = -1;
+  else
+    result = g_ascii_strcasecmp (a_text, b_text);
+
+  g_free (a_text);
+  g_free (b_text);
+
+  return result;
+}
+
+static void
+account_manager_prepared_cb (GObject *source_object,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  GList *accounts, *l;
+  TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
+  EmpathyAccountChooser *self = user_data;
+  EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+  GError *error = NULL;
+
+  if (!tp_proxy_prepare_finish (manager, result, &error))
+    {
+      DEBUG ("Failed to prepare account manager: %s", error->message);
+      g_error_free (error);
+      return;
+    }
+
+  accounts = tp_account_manager_get_valid_accounts (manager);
+
+  for (l = accounts; l != NULL; l = l->next)
+    {
+      TpAccount *account = l->data;
+
+      account_chooser_account_add_foreach (account, self);
+
+      tp_g_signal_connect_object (account, "status-changed",
+          G_CALLBACK (account_chooser_status_changed_cb),
+          self, 0);
+    }
+
+  g_list_free (accounts);
+
+  priv->ready = TRUE;
+  g_signal_emit (self, signals[READY], 0);
+}
+
 static void
 account_chooser_constructed (GObject *object)
 {
   EmpathyAccountChooser *self = (EmpathyAccountChooser *) object;
+  EmpathyAccountChooserPriv *priv;
+  GtkListStore *store;
+  GtkCellRenderer *renderer;
+  GtkComboBox *combobox;
 
-  account_chooser_setup (self);
+  priv = GET_PRIV (self);
+
+  /* Set up combo box with new store */
+  combobox = GTK_COMBO_BOX (self);
+
+  gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
+
+  store = gtk_list_store_new (COL_ACCOUNT_COUNT,
+      GDK_TYPE_PIXBUF,  /* Image */
+      G_TYPE_STRING,    /* Name */
+      G_TYPE_BOOLEAN,   /* Enabled */
+      G_TYPE_UINT,      /* Row type */
+      TP_TYPE_ACCOUNT);
+
+  gtk_tree_sortable_set_default_sort_func (GTK_TREE_SORTABLE (store),
+    account_cmp, self, NULL);
+  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
+    GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
+
+  gtk_combo_box_set_model (combobox, GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_pixbuf_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
+      "pixbuf", COL_ACCOUNT_IMAGE,
+      "sensitive", COL_ACCOUNT_ENABLED,
+      NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
+      "text", COL_ACCOUNT_TEXT,
+      "sensitive", COL_ACCOUNT_ENABLED,
+      NULL);
+
+  /* Populate accounts */
+  tp_proxy_prepare_async (priv->manager, NULL, account_manager_prepared_cb,
+      self);
+
+  g_object_unref (store);
+
 }
 
 static void
@@ -555,140 +682,6 @@ empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *self,
   }
 
   g_object_notify (G_OBJECT (self), "has-all-option");
-}
-
-static void
-account_manager_prepared_cb (GObject *source_object,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  GList *accounts, *l;
-  TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
-  EmpathyAccountChooser *self = user_data;
-  EmpathyAccountChooserPriv *priv = GET_PRIV (self);
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (manager, result, &error))
-    {
-      DEBUG ("Failed to prepare account manager: %s", error->message);
-      g_error_free (error);
-      return;
-    }
-
-  accounts = tp_account_manager_get_valid_accounts (manager);
-
-  for (l = accounts; l != NULL; l = l->next)
-    {
-      TpAccount *account = l->data;
-
-      account_chooser_account_add_foreach (account, self);
-
-      tp_g_signal_connect_object (account, "status-changed",
-          G_CALLBACK (account_chooser_status_changed_cb),
-          self, 0);
-    }
-
-  g_list_free (accounts);
-
-  priv->ready = TRUE;
-  g_signal_emit (self, signals[READY], 0);
-}
-
-static gint
-account_cmp (GtkTreeModel *model,
-    GtkTreeIter *a,
-    GtkTreeIter *b,
-    gpointer user_data)
-{
-  RowType a_type, b_type;
-  gboolean a_enabled, b_enabled;
-  gchar *a_text, *b_text;
-  gint result;
-
-  gtk_tree_model_get (model, a,
-      COL_ACCOUNT_ENABLED, &a_enabled,
-      COL_ACCOUNT_ROW_TYPE, &a_type,
-      -1);
-  gtk_tree_model_get (model, b,
-      COL_ACCOUNT_ENABLED, &b_enabled,
-      COL_ACCOUNT_ROW_TYPE, &b_type,
-      -1);
-
-  /* This assumes that we have at most one of each special row type. */
-  if (a_type != b_type)
-    /* Display higher-numbered special row types first. */
-    return (b_type - a_type);
-
-  /* Enabled accounts are displayed first */
-  if (a_enabled != b_enabled)
-    return a_enabled ? -1: 1;
-
-  gtk_tree_model_get (model, a, COL_ACCOUNT_TEXT, &a_text, -1);
-  gtk_tree_model_get (model, b, COL_ACCOUNT_TEXT, &b_text, -1);
-
-  if (a_text == b_text)
-    result = 0;
-  else if (a_text == NULL)
-    result = 1;
-  else if (b_text == NULL)
-    result = -1;
-  else
-    result = g_ascii_strcasecmp (a_text, b_text);
-
-  g_free (a_text);
-  g_free (b_text);
-
-  return result;
-}
-
-static void
-account_chooser_setup (EmpathyAccountChooser *self)
-{
-  EmpathyAccountChooserPriv *priv;
-  GtkListStore *store;
-  GtkCellRenderer *renderer;
-  GtkComboBox *combobox;
-
-  priv = GET_PRIV (self);
-
-  /* Set up combo box with new store */
-  combobox = GTK_COMBO_BOX (self);
-
-  gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
-
-  store = gtk_list_store_new (COL_ACCOUNT_COUNT,
-      GDK_TYPE_PIXBUF,  /* Image */
-      G_TYPE_STRING,    /* Name */
-      G_TYPE_BOOLEAN,   /* Enabled */
-      G_TYPE_UINT,      /* Row type */
-      TP_TYPE_ACCOUNT);
-
-  gtk_tree_sortable_set_default_sort_func (GTK_TREE_SORTABLE (store),
-    account_cmp, self, NULL);
-  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
-    GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
-
-  gtk_combo_box_set_model (combobox, GTK_TREE_MODEL (store));
-
-  renderer = gtk_cell_renderer_pixbuf_new ();
-  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
-  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
-      "pixbuf", COL_ACCOUNT_IMAGE,
-      "sensitive", COL_ACCOUNT_ENABLED,
-      NULL);
-
-  renderer = gtk_cell_renderer_text_new ();
-  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
-  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
-      "text", COL_ACCOUNT_TEXT,
-      "sensitive", COL_ACCOUNT_ENABLED,
-      NULL);
-
-  /* Populate accounts */
-  tp_proxy_prepare_async (priv->manager, NULL, account_manager_prepared_cb,
-      self);
-
-  g_object_unref (store);
 }
 
 static void
