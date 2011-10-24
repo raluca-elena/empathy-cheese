@@ -171,6 +171,8 @@ G_DEFINE_TYPE (EmpathyAccountChooser, empathy_account_chooser,
 static void
 empathy_account_chooser_init (EmpathyAccountChooser *self)
 {
+  TpSimpleClientFactory *factory;
+
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
     EMPATHY_TYPE_ACCOUNT_CHOOSER, EmpathyAccountChooserPriv);
 
@@ -186,6 +188,14 @@ empathy_account_chooser_init (EmpathyAccountChooser *self)
 
   tp_g_signal_connect_object (self->priv->manager, "account-removed",
       G_CALLBACK (account_chooser_account_removed_cb), self, 0);
+
+  /* Make sure we'll have the capabilities feature on TpAccount's connection */
+  factory = tp_proxy_get_factory (self->priv->manager);
+
+  tp_simple_client_factory_add_account_features_varargs (factory,
+      TP_ACCOUNT_FEATURE_CONNECTION, NULL);
+  tp_simple_client_factory_add_connection_features_varargs (factory,
+      TP_CONNECTION_FEATURE_CAPABILITIES, NULL);
 }
 
 static gint
