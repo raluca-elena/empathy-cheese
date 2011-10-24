@@ -321,13 +321,13 @@ account_chooser_constructed (GObject *object)
 }
 
 static void
-account_chooser_finalize (GObject *object)
+account_chooser_dispose (GObject *object)
 {
-  EmpathyAccountChooser *self = (EmpathyAccountChooser *) object;
+  EmpathyAccountChooser *self = EMPATHY_ACCOUNT_CHOOSER (object);
 
-  g_object_unref (self->priv->manager);
+  g_clear_object (&self->priv->manager);
 
-  G_OBJECT_CLASS (empathy_account_chooser_parent_class)->finalize (object);
+  G_OBJECT_CLASS (empathy_account_chooser_parent_class)->dispose (object);
 }
 
 static void
@@ -373,7 +373,7 @@ empathy_account_chooser_class_init (EmpathyAccountChooserClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->constructed = account_chooser_constructed;
-  object_class->finalize = account_chooser_finalize;
+  object_class->dispose = account_chooser_dispose;
   object_class->get_property = account_chooser_get_property;
   object_class->set_property = account_chooser_set_property;
 
