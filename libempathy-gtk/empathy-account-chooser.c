@@ -152,6 +152,8 @@ static gboolean account_chooser_set_account_foreach (GtkTreeModel *model,
     GtkTreePath *path,
     GtkTreeIter *iter,
     SetAccountData *data);
+static void update_account (EmpathyAccountChooser *self,
+    TpAccount *account);
 
 enum {
   PROP_0,
@@ -852,6 +854,16 @@ account_chooser_update_iter (EmpathyAccountChooser *self,
 }
 
 static void
+update_account (EmpathyAccountChooser *self,
+    TpAccount *account)
+{
+  GtkTreeIter iter;
+
+  if (account_chooser_find_account (self, account, &iter))
+    account_chooser_update_iter (self, &iter);
+}
+
+static void
 account_chooser_status_changed_cb (TpAccount *account,
     guint old_status,
     guint new_status,
@@ -861,10 +873,8 @@ account_chooser_status_changed_cb (TpAccount *account,
     gpointer user_data)
 {
   EmpathyAccountChooser *self = user_data;
-  GtkTreeIter iter;
 
-  if (account_chooser_find_account (self, account, &iter))
-    account_chooser_update_iter (self, &iter);
+  update_account (self, account);
 }
 
 static gboolean
