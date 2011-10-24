@@ -248,6 +248,14 @@ account_cmp (GtkTreeModel *model,
 }
 
 static void
+account_connection_notify_cb (TpAccount *account,
+    GParamSpec *spec,
+    EmpathyAccountChooser *self)
+{
+  update_account (self, account);
+}
+
+static void
 account_manager_prepared_cb (GObject *source_object,
     GAsyncResult *result,
     gpointer user_data)
@@ -274,6 +282,14 @@ account_manager_prepared_cb (GObject *source_object,
 
       tp_g_signal_connect_object (account, "status-changed",
           G_CALLBACK (account_chooser_status_changed_cb),
+          self, 0);
+
+      /* We generally use the TpConnection from the account to filter it so,
+       * just relying on the account status is not enough. In some case we the
+       * status change can be notified while the TpConnection is still
+       * preparing. */
+      tp_g_signal_connect_object (account, "notify::connection",
+          G_CALLBACK (account_connection_notify_cb),
           self, 0);
     }
 
