@@ -441,6 +441,7 @@ ui_set_custom_state (EmpathyPresenceChooser *self,
 	EmpathyPresenceChooserPriv *priv = GET_PRIV (self);
 	GtkWidget *entry;
 	const char *icon_name;
+	const gchar *status_tooltip;
 
 	entry = gtk_bin_get_child (GTK_BIN (self));
 
@@ -451,7 +452,9 @@ ui_set_custom_state (EmpathyPresenceChooser *self,
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry),
 					   GTK_ENTRY_ICON_PRIMARY,
 					   icon_name);
-	gtk_entry_set_text (GTK_ENTRY (entry), status == NULL ? "" : status);
+	status_tooltip = status == NULL ? "" : status;
+	gtk_entry_set_text (GTK_ENTRY (entry), status_tooltip);
+	gtk_widget_set_tooltip_text (GTK_WIDGET (entry), status_tooltip);
 	presence_chooser_set_favorite_icon (self);
 
 	priv->block_changed--;
@@ -859,6 +862,7 @@ presence_chooser_constructed (GObject *object)
 	EmpathyPresenceChooserPriv *priv = chooser->priv;
 	GtkWidget *entry;
 	GtkCellRenderer *renderer;
+	const gchar *status_tooltip;
 
 	tp_g_signal_connect_object (gtk_icon_theme_get_default (), "changed",
 				     G_CALLBACK (icon_theme_changed_cb),
@@ -938,9 +942,8 @@ presence_chooser_constructed (GObject *object)
 		G_CALLBACK (presence_chooser_account_manager_account_changed_cb),
 		chooser, 0);
 
-	/* FIXME: this string sucks */
-	gtk_widget_set_tooltip_text (GTK_WIDGET (chooser),
-		_("Set your presence and current status"));
+	status_tooltip = gtk_entry_get_text (GTK_ENTRY (entry));
+	gtk_widget_set_tooltip_text (GTK_WIDGET (chooser), status_tooltip);
 
 	priv->connectivity = empathy_connectivity_dup_singleton ();
 	tp_g_signal_connect_object (priv->connectivity,
@@ -1075,6 +1078,7 @@ presence_chooser_presence_changed_cb (EmpathyPresenceChooser *chooser)
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry),
 	      GTK_ENTRY_ICON_PRIMARY,
 	      empathy_icon_name_for_presence (state));
+	gtk_widget_set_tooltip_text (GTK_WIDGET (entry), status);
 
 	entry = gtk_bin_get_child (GTK_BIN (chooser));
 	gtk_editable_set_editable (GTK_EDITABLE (entry),
