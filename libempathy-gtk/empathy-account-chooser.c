@@ -907,6 +907,16 @@ account_chooser_filter_foreach (GtkTreeModel *model,
   return FALSE;
 }
 
+void
+empathy_account_chooser_refilter (EmpathyAccountChooser *self)
+{
+  GtkTreeModel *model;
+
+  self->priv->set_active_item = FALSE;
+  model = gtk_combo_box_get_model (GTK_COMBO_BOX (self));
+  gtk_tree_model_foreach (model, account_chooser_filter_foreach, self);
+}
+
 /**
  * empathy_account_chooser_set_filter:
  * @self: an #EmpathyAccountChooser
@@ -921,17 +931,13 @@ empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
     EmpathyAccountChooserFilterFunc filter,
     gpointer user_data)
 {
-  GtkTreeModel *model;
-
   g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self));
 
   self->priv->filter = filter;
   self->priv->filter_data = user_data;
 
   /* Refilter existing data */
-  self->priv->set_active_item = FALSE;
-  model = gtk_combo_box_get_model (GTK_COMBO_BOX (self));
-  gtk_tree_model_foreach (model, account_chooser_filter_foreach, self);
+  empathy_account_chooser_refilter (self);
 }
 
 /**

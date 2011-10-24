@@ -108,6 +108,8 @@ void empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
 
 gboolean empathy_account_chooser_is_ready (EmpathyAccountChooser *self);
 
+void empathy_account_chooser_refilter (EmpathyAccountChooser *self);
+
 /* Pre-defined filters */
 
 void empathy_account_chooser_filter_is_connected (TpAccount *account,
