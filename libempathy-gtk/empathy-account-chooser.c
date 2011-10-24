@@ -1,7 +1,6 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2005-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -58,50 +57,54 @@
  */
 
 #define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyAccountChooser)
-typedef struct {
-	TpAccountManager               *manager;
-	gboolean                        set_active_item;
-	gboolean			account_manually_set;
-	gboolean                        has_all_option;
-	EmpathyAccountChooserFilterFunc filter;
-	gpointer                        filter_data;
-	gboolean                        ready;
+
+typedef struct
+{
+  TpAccountManager *manager;
+  gboolean set_active_item;
+  gboolean account_manually_set;
+  gboolean has_all_option;
+  EmpathyAccountChooserFilterFunc filter;
+  gpointer filter_data;
+  gboolean ready;
 } EmpathyAccountChooserPriv;
 
-typedef struct {
-	EmpathyAccountChooser *chooser;
-	TpAccount             *account;
-	gboolean               set;
+typedef struct
+{
+  EmpathyAccountChooser *self;
+  TpAccount *account;
+  gboolean set;
 } SetAccountData;
 
-typedef struct {
-	EmpathyAccountChooser *chooser;
-	TpAccount             *account;
-	GtkTreeIter           *iter;
+typedef struct
+{
+  EmpathyAccountChooser *self;
+  TpAccount *account;
+  GtkTreeIter *iter;
 } FilterResultCallbackData;
 
 static FilterResultCallbackData *
-filter_result_callback_data_new (EmpathyAccountChooser *chooser,
-				 TpAccount             *account,
-				 GtkTreeIter           *iter)
+filter_result_callback_data_new (EmpathyAccountChooser *self,
+    TpAccount *account,
+    GtkTreeIter *iter)
 {
-	FilterResultCallbackData *data;
+  FilterResultCallbackData *data;
 
-	data = g_slice_new0 (FilterResultCallbackData);
-	data->chooser = g_object_ref (chooser);
-	data->account = g_object_ref (account);
-	data->iter = gtk_tree_iter_copy (iter);
+  data = g_slice_new0 (FilterResultCallbackData);
+  data->self = g_object_ref (self);
+  data->account = g_object_ref (account);
+  data->iter = gtk_tree_iter_copy (iter);
 
-	return data;
+  return data;
 }
 
 static void
 filter_result_callback_data_free (FilterResultCallbackData *data)
 {
-	g_object_unref (data->chooser);
-	g_object_unref (data->account);
-	gtk_tree_iter_free (data->iter);
-	g_slice_free (FilterResultCallbackData, data);
+  g_object_unref (data->self);
+  g_object_unref (data->account);
+  gtk_tree_iter_free (data->iter);
+  g_slice_free (FilterResultCallbackData, data);
 }
 
 /* Distinguishes between store entries which are actually accounts, and special
@@ -109,190 +112,194 @@ filter_result_callback_data_free (FilterResultCallbackData *data)
  * correctly. Higher-numbered entries will sort earlier.
  */
 typedef enum {
-	ROW_ACCOUNT = 0,
-	ROW_SEPARATOR,
-	ROW_ALL
+  ROW_ACCOUNT = 0,
+  ROW_SEPARATOR,
+  ROW_ALL
 } RowType;
 
 enum {
-	COL_ACCOUNT_IMAGE,
-	COL_ACCOUNT_TEXT,
-	COL_ACCOUNT_ENABLED, /* Usually tied to connected state */
-	COL_ACCOUNT_ROW_TYPE,
-	COL_ACCOUNT_POINTER,
-	COL_ACCOUNT_COUNT
+  COL_ACCOUNT_IMAGE,
+  COL_ACCOUNT_TEXT,
+  COL_ACCOUNT_ENABLED, /* Usually tied to connected state */
+  COL_ACCOUNT_ROW_TYPE,
+  COL_ACCOUNT_POINTER,
+  COL_ACCOUNT_COUNT
 };
 
-static void     account_chooser_constructed            (GObject                  *object);
-static void     account_chooser_finalize               (GObject                  *object);
-static void     account_chooser_get_property           (GObject                  *object,
-							guint                     param_id,
-							GValue                   *value,
-							GParamSpec               *pspec);
-static void     account_chooser_set_property           (GObject                  *object,
-							guint                     param_id,
-							const GValue             *value,
-							GParamSpec               *pspec);
-static void     account_chooser_setup                  (EmpathyAccountChooser    *chooser);
-static void     account_chooser_account_validity_changed_cb (TpAccountManager    *manager,
-							TpAccount                *account,
-							gboolean                  valid,
-							EmpathyAccountChooser    *chooser);
-static void     account_chooser_account_add_foreach    (TpAccount                *account,
-							EmpathyAccountChooser    *chooser);
-static void     account_chooser_account_removed_cb     (TpAccountManager         *manager,
-							TpAccount                *account,
-							EmpathyAccountChooser    *chooser);
-static void     account_chooser_account_remove_foreach (TpAccount                *account,
-							EmpathyAccountChooser    *chooser);
-static void     account_chooser_update_iter            (EmpathyAccountChooser    *chooser,
-							GtkTreeIter              *iter);
-static void     account_chooser_status_changed_cb      (TpAccount  *account,
-							guint       old_status,
-							guint       new_status,
-							guint       reason,
-							gchar      *dbus_error_name,
-							GHashTable *details,
-							gpointer    user_data);
-static gboolean account_chooser_separator_func         (GtkTreeModel             *model,
-							GtkTreeIter              *iter,
-							EmpathyAccountChooser    *chooser);
-static gboolean account_chooser_set_account_foreach    (GtkTreeModel             *model,
-							GtkTreePath              *path,
-							GtkTreeIter              *iter,
-							SetAccountData           *data);
+static void account_chooser_constructed (GObject *object);
+static void account_chooser_finalize (GObject *object);
+static void account_chooser_get_property (GObject *object,
+    guint param_id,
+    GValue *value,
+    GParamSpec *pspec);
+static void account_chooser_set_property (GObject *object,
+    guint param_id,
+    const GValue *value,
+    GParamSpec *pspec);
+static void account_chooser_setup (EmpathyAccountChooser *self);
+static void account_chooser_account_validity_changed_cb (
+    TpAccountManager *manager,
+    TpAccount *account,
+    gboolean valid,
+    EmpathyAccountChooser *self);
+static void account_chooser_account_add_foreach (TpAccount *account,
+    EmpathyAccountChooser *self);
+static void account_chooser_account_removed_cb (TpAccountManager *manager,
+    TpAccount *account,
+    EmpathyAccountChooser *self);
+static void account_chooser_account_remove_foreach (TpAccount *account,
+    EmpathyAccountChooser*self);
+static void account_chooser_update_iter (EmpathyAccountChooser *self,
+    GtkTreeIter *iter);
+static void account_chooser_status_changed_cb (TpAccount *account,
+    guint old_status,
+    guint new_status,
+    guint reason,
+    gchar *dbus_error_name,
+    GHashTable *details,
+    gpointer user_data);
+static gboolean account_chooser_separator_func (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    EmpathyAccountChooser *self);
+static gboolean account_chooser_set_account_foreach (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    SetAccountData *data);
 
 enum {
-	PROP_0,
-	PROP_HAS_ALL_OPTION,
+  PROP_0,
+  PROP_HAS_ALL_OPTION,
 };
 
 enum {
-	READY,
-	LAST_SIGNAL
+  READY,
+  LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-G_DEFINE_TYPE (EmpathyAccountChooser, empathy_account_chooser, GTK_TYPE_COMBO_BOX);
+G_DEFINE_TYPE (EmpathyAccountChooser, empathy_account_chooser,
+    GTK_TYPE_COMBO_BOX)
 
 static void
 empathy_account_chooser_class_init (EmpathyAccountChooserClass *klass)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-	object_class->constructed = account_chooser_constructed;
-	object_class->finalize = account_chooser_finalize;
-	object_class->get_property = account_chooser_get_property;
-	object_class->set_property = account_chooser_set_property;
+  object_class->constructed = account_chooser_constructed;
+  object_class->finalize = account_chooser_finalize;
+  object_class->get_property = account_chooser_get_property;
+  object_class->set_property = account_chooser_set_property;
 
-	/**
-	 * EmpathyAccountChooser:has-all-option:
-	 *
-	 * Have an additional option in the list to mean all accounts.
-	 */
-	g_object_class_install_property (object_class,
-					 PROP_HAS_ALL_OPTION,
-					 g_param_spec_boolean ("has-all-option",
-							       "Has All Option",
-							       "Have a separate option in the list to mean ALL accounts",
-							       FALSE,
-							       G_PARAM_READWRITE));
+  /**
+   * EmpathyAccountChooser:has-all-option:
+   *
+   * Have an additional option in the list to mean all accounts.
+   */
+  g_object_class_install_property (object_class,
+      PROP_HAS_ALL_OPTION,
+      g_param_spec_boolean ("has-all-option",
+        "Has All Option",
+        "Have a separate option in the list to mean ALL accounts",
+        FALSE,
+        G_PARAM_READWRITE));
 
-	signals[READY] =
-		g_signal_new ("ready",
-			      G_OBJECT_CLASS_TYPE (object_class),
-			      G_SIGNAL_RUN_LAST,
-			      0,
-			      NULL, NULL,
-			      g_cclosure_marshal_generic,
-			      G_TYPE_NONE,
-			      0);
+  signals[READY] =
+    g_signal_new ("ready",
+        G_OBJECT_CLASS_TYPE (object_class),
+        G_SIGNAL_RUN_LAST,
+        0,
+        NULL, NULL,
+        g_cclosure_marshal_generic,
+        G_TYPE_NONE,
+        0);
 
-	g_type_class_add_private (object_class, sizeof (EmpathyAccountChooserPriv));
+  g_type_class_add_private (object_class, sizeof (EmpathyAccountChooserPriv));
 }
 
 static void
-empathy_account_chooser_init (EmpathyAccountChooser *chooser)
+empathy_account_chooser_init (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (chooser,
-		EMPATHY_TYPE_ACCOUNT_CHOOSER, EmpathyAccountChooserPriv);
+  EmpathyAccountChooserPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+    EMPATHY_TYPE_ACCOUNT_CHOOSER, EmpathyAccountChooserPriv);
 
-	chooser->priv = priv;
-	priv->set_active_item = FALSE;
-	priv->account_manually_set = FALSE;
-	priv->filter = NULL;
-	priv->filter_data = NULL;
+  self->priv = priv;
+  priv->set_active_item = FALSE;
+  priv->account_manually_set = FALSE;
+  priv->filter = NULL;
+  priv->filter_data = NULL;
 
-	priv->manager = tp_account_manager_dup ();
+  priv->manager = tp_account_manager_dup ();
 
-	g_signal_connect (priv->manager, "account-validity-changed",
-			  G_CALLBACK (account_chooser_account_validity_changed_cb),
-			  chooser);
-	g_signal_connect (priv->manager, "account-removed",
-			  G_CALLBACK (account_chooser_account_removed_cb),
-			  chooser);
+  g_signal_connect (priv->manager, "account-validity-changed",
+      G_CALLBACK (account_chooser_account_validity_changed_cb),
+      self);
+  g_signal_connect (priv->manager, "account-removed",
+      G_CALLBACK (account_chooser_account_removed_cb),
+      self);
 }
 
 static void
 account_chooser_constructed (GObject *object)
 {
-	EmpathyAccountChooser *self = (EmpathyAccountChooser *) object;
+  EmpathyAccountChooser *self = (EmpathyAccountChooser *) object;
 
-	account_chooser_setup (self);
+  account_chooser_setup (self);
 }
 
 static void
 account_chooser_finalize (GObject *object)
 {
-	EmpathyAccountChooserPriv *priv = GET_PRIV (object);
+  EmpathyAccountChooserPriv *priv = GET_PRIV (object);
 
-	g_signal_handlers_disconnect_by_func (priv->manager,
-					      account_chooser_account_validity_changed_cb,
-					      object);
-	g_signal_handlers_disconnect_by_func (priv->manager,
-					      account_chooser_account_removed_cb,
-					      object);
-	g_object_unref (priv->manager);
+  g_signal_handlers_disconnect_by_func (priv->manager,
+      account_chooser_account_validity_changed_cb,
+      object);
+  g_signal_handlers_disconnect_by_func (priv->manager,
+      account_chooser_account_removed_cb,
+      object);
+  g_object_unref (priv->manager);
 
-	G_OBJECT_CLASS (empathy_account_chooser_parent_class)->finalize (object);
+  G_OBJECT_CLASS (empathy_account_chooser_parent_class)->finalize (object);
 }
 
 static void
-account_chooser_get_property (GObject    *object,
-			      guint       param_id,
-			      GValue     *value,
-			      GParamSpec *pspec)
+account_chooser_get_property (GObject *object,
+    guint param_id,
+    GValue *value,
+    GParamSpec *pspec)
 {
-	EmpathyAccountChooserPriv *priv;
+  EmpathyAccountChooserPriv *priv;
 
-	priv = GET_PRIV (object);
+  priv = GET_PRIV (object);
 
-	switch (param_id) {
-	case PROP_HAS_ALL_OPTION:
-		g_value_set_boolean (value, priv->has_all_option);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-		break;
-	};
+  switch (param_id)
+    {
+      case PROP_HAS_ALL_OPTION:
+        g_value_set_boolean (value, priv->has_all_option);
+        break;
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    };
 }
 
 static void
-account_chooser_set_property (GObject      *object,
-			      guint         param_id,
-			      const GValue *value,
-			      GParamSpec   *pspec)
+account_chooser_set_property (GObject *object,
+    guint param_id,
+    const GValue *value,
+    GParamSpec *pspec)
 {
-	switch (param_id) {
-	case PROP_HAS_ALL_OPTION:
-		empathy_account_chooser_set_has_all_option (EMPATHY_ACCOUNT_CHOOSER (object),
-							   g_value_get_boolean (value));
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-		break;
-	};
+  switch (param_id)
+    {
+      case PROP_HAS_ALL_OPTION:
+        empathy_account_chooser_set_has_all_option (
+            EMPATHY_ACCOUNT_CHOOSER (object), g_value_get_boolean (value));
+        break;
+      default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    };
 }
 
 /**
@@ -305,40 +312,39 @@ account_chooser_set_property (GObject      *object,
 GtkWidget *
 empathy_account_chooser_new (void)
 {
-	GtkWidget                *chooser;
+  GtkWidget *self;
 
-	chooser = g_object_new (EMPATHY_TYPE_ACCOUNT_CHOOSER, NULL);
+  self = g_object_new (EMPATHY_TYPE_ACCOUNT_CHOOSER, NULL);
 
-	return chooser;
+  return self;
 }
 
 gboolean
-empathy_account_chooser_has_all_selected (EmpathyAccountChooser *chooser)
+empathy_account_chooser_has_all_selected (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkTreeModel              *model;
-	GtkTreeIter                iter;
-	RowType                    type;
+  EmpathyAccountChooserPriv *priv;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  RowType type;
 
-	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), FALSE);
+  g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self), FALSE);
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	g_return_val_if_fail (priv->has_all_option == TRUE, FALSE);
+  g_return_val_if_fail (priv->has_all_option == TRUE, FALSE);
 
-	model = gtk_combo_box_get_model (GTK_COMBO_BOX (chooser));
-	if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (chooser), &iter)) {
-		return FALSE;
-	}
+  model = gtk_combo_box_get_model (GTK_COMBO_BOX (self));
+  if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (self), &iter))
+    return FALSE;
 
-	gtk_tree_model_get (model, &iter, COL_ACCOUNT_ROW_TYPE, &type, -1);
+  gtk_tree_model_get (model, &iter, COL_ACCOUNT_ROW_TYPE, &type, -1);
 
-	return type == ROW_ALL;
+  return type == ROW_ALL;
 }
 
 /**
  * empathy_account_chooser_dup_account:
- * @chooser: an #EmpathyAccountChooser
+ * @self: an #EmpathyAccountChooser
  *
  * Returns the account which is currently selected in the chooser or %NULL
  * if there is no account selected. The #TpAccount returned should be
@@ -347,61 +353,59 @@ empathy_account_chooser_has_all_selected (EmpathyAccountChooser *chooser)
  * Return value: a new ref to the #TpAccount currently selected, or %NULL.
  */
 TpAccount *
-empathy_account_chooser_dup_account (EmpathyAccountChooser *chooser)
+empathy_account_chooser_dup_account (EmpathyAccountChooser *self)
 {
-	TpAccount                 *account;
-	GtkTreeModel             *model;
-	GtkTreeIter               iter;
+  TpAccount *account;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
 
-	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), NULL);
+  g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self), NULL);
 
-	model = gtk_combo_box_get_model (GTK_COMBO_BOX (chooser));
-	if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (chooser), &iter)) {
-		return NULL;
-	}
+  model = gtk_combo_box_get_model (GTK_COMBO_BOX (self));
+  if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (self), &iter))
+    return NULL;
 
-	gtk_tree_model_get (model, &iter, COL_ACCOUNT_POINTER, &account, -1);
+  gtk_tree_model_get (model, &iter, COL_ACCOUNT_POINTER, &account, -1);
 
-	return account;
+  return account;
 }
 
 /**
  * empathy_account_chooser_get_connection:
- * @chooser: an #EmpathyAccountChooser
+ * @self: an #EmpathyAccountChooser
  *
  * Returns a borrowed reference to the #TpConnection associated with the
- * account currently selected. The caller must reference the returned object with
- * g_object_ref() if it will be kept
+ * account currently selected. The caller must reference the returned object
+ * with g_object_ref() if it will be kept
  *
  * Return value: a borrowed reference to the #TpConnection associated with the
  * account curently selected.
  */
 TpConnection *
-empathy_account_chooser_get_connection (EmpathyAccountChooser *chooser)
+empathy_account_chooser_get_connection (EmpathyAccountChooser *self)
 {
-	TpAccount                 *account;
-	TpConnection              *connection;
+  TpAccount *account;
+  TpConnection *connection;
 
-	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), NULL);
+  g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self), NULL);
 
-	account = empathy_account_chooser_dup_account (chooser);
+  account = empathy_account_chooser_dup_account (self);
 
-	/* if the returned account is NULL, then the account manager probably
-	 * hasn't been prepared yet. It should be safe to return NULL here
-	 * though. */
-	if (account == NULL) {
-		return NULL;
-	}
+  /* if the returned account is NULL, then the account manager probably
+   * hasn't been prepared yet. It should be safe to return NULL here
+   * though. */
+  if (account == NULL)
+    return NULL;
 
-	connection = tp_account_get_connection (account);
-	g_object_unref (account);
+  connection = tp_account_get_connection (account);
+  g_object_unref (account);
 
-	return connection;
+  return connection;
 }
 
 /**
  * empathy_account_chooser_set_account:
- * @chooser: an #EmpathyAccountChooser
+ * @self: an #EmpathyAccountChooser
  * @account: a #TpAccount
  *
  * Sets the currently selected account to @account, if it exists in the list.
@@ -409,576 +413,582 @@ empathy_account_chooser_get_connection (EmpathyAccountChooser *chooser)
  * Return value: whether the chooser was set to @account.
  */
 gboolean
-empathy_account_chooser_set_account (EmpathyAccountChooser *chooser,
-				     TpAccount             *account)
+empathy_account_chooser_set_account (EmpathyAccountChooser *self,
+    TpAccount *account)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkComboBox    *combobox;
-	GtkTreeModel   *model;
-	GtkTreeIter     iter;
-	SetAccountData  data;
+  EmpathyAccountChooserPriv *priv;
+  GtkComboBox *combobox;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  SetAccountData data;
 
-	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), FALSE);
+  g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self), FALSE);
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	combobox = GTK_COMBO_BOX (chooser);
-	model = gtk_combo_box_get_model (combobox);
-	gtk_combo_box_get_active_iter (combobox, &iter);
+  combobox = GTK_COMBO_BOX (self);
+  model = gtk_combo_box_get_model (combobox);
+  gtk_combo_box_get_active_iter (combobox, &iter);
 
-	data.chooser = chooser;
-	data.account = account;
-	data.set = FALSE;
+  data.self = self;
+  data.account = account;
+  data.set = FALSE;
 
-	gtk_tree_model_foreach (model,
-				(GtkTreeModelForeachFunc) account_chooser_set_account_foreach,
-				&data);
+  gtk_tree_model_foreach (model,
+      (GtkTreeModelForeachFunc) account_chooser_set_account_foreach,
+      &data);
 
-	priv->account_manually_set = data.set;
+  priv->account_manually_set = data.set;
 
-	return data.set;
+  return data.set;
 }
 
 void
-empathy_account_chooser_set_all (EmpathyAccountChooser *chooser)
+empathy_account_chooser_set_all (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkComboBox    *combobox;
-	GtkTreeModel   *model;
-	GtkTreeIter     iter;
+  EmpathyAccountChooserPriv *priv;
+  GtkComboBox *combobox;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
 
-	g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser));
+  g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self));
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	g_return_if_fail (priv->has_all_option);
+  g_return_if_fail (priv->has_all_option);
 
-	combobox = GTK_COMBO_BOX (chooser);
-	model = gtk_combo_box_get_model (combobox);
+  combobox = GTK_COMBO_BOX (self);
+  model = gtk_combo_box_get_model (combobox);
 
-	if (gtk_tree_model_get_iter_first (model, &iter)) {
-		/* 'All accounts' is the first row */
-		gtk_combo_box_set_active_iter (combobox, &iter);
-		priv->account_manually_set = TRUE;
-	}
+  if (gtk_tree_model_get_iter_first (model, &iter))
+    {
+      /* 'All accounts' is the first row */
+      gtk_combo_box_set_active_iter (combobox, &iter);
+      priv->account_manually_set = TRUE;
+    }
 }
 
 /**
  * empathy_account_chooser_get_has_all_option:
- * @chooser: an #EmpathyAccountChooser
+ * @self: an #EmpathyAccountChooser
  *
- * Returns whether @chooser has the #EmpathyAccountChooser:has-all-option property
- * set to true.
+ * Returns whether @self has the #EmpathyAccountChooser:has-all-option
+ * property set to true.
  *
- * Return value: whether @chooser has the #EmpathyAccountChooser:has-all-option property
- * enabled.
+ * Return value: whether @self has the #EmpathyAccountChooser:has-all-option
+ * property enabled.
  */
 gboolean
-empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *chooser)
+empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv;
+  EmpathyAccountChooserPriv *priv;
 
-	g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser), FALSE);
+  g_return_val_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self), FALSE);
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	return priv->has_all_option;
+  return priv->has_all_option;
 }
 
 /**
  * empathy_account_chooser_set_has_all_option:
- * @chooser: an #EmpathyAccountChooser
- * @has_all_option: a new value for the #EmpathyAccountChooser:has-all-option property
+ * @self: an #EmpathyAccountChooser
+ * @has_all_option: a new value for the #EmpathyAccountChooser:has-all-option
+ * property
  *
  * Sets the #EmpathyAccountChooser:has-all-option property.
  */
 void
-empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
-					   gboolean              has_all_option)
+empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *self,
+    gboolean has_all_option)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkComboBox              *combobox;
-	GtkListStore             *store;
-	GtkTreeModel             *model;
-	GtkTreeIter               iter;
+  EmpathyAccountChooserPriv *priv;
+  GtkComboBox *combobox;
+  GtkListStore *store;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
 
-	g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser));
+  g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self));
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	if (priv->has_all_option == has_all_option) {
-		return;
-	}
+  if (priv->has_all_option == has_all_option)
+    return;
 
-	combobox = GTK_COMBO_BOX (chooser);
-	model = gtk_combo_box_get_model (combobox);
-	store = GTK_LIST_STORE (model);
+  combobox = GTK_COMBO_BOX (self);
+  model = gtk_combo_box_get_model (combobox);
+  store = GTK_LIST_STORE (model);
 
-	priv->has_all_option = has_all_option;
+  priv->has_all_option = has_all_option;
 
-	/*
-	 * The first 2 options are the ALL and separator
-	 */
+  /*
+   * The first 2 options are the ALL and separator
+   */
 
-	if (has_all_option) {
-		gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (chooser),
-						      (GtkTreeViewRowSeparatorFunc)
-						      account_chooser_separator_func,
-						      chooser,
-						      NULL);
+  if (has_all_option)
+    {
+      gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (self),
+          (GtkTreeViewRowSeparatorFunc)
+          account_chooser_separator_func,
+          self,
+          NULL);
 
-		gtk_list_store_prepend (store, &iter);
-		gtk_list_store_set (store, &iter,
-				    COL_ACCOUNT_TEXT, NULL,
-				    COL_ACCOUNT_ENABLED, TRUE,
-				    COL_ACCOUNT_POINTER, NULL,
-				    COL_ACCOUNT_ROW_TYPE, ROW_SEPARATOR,
-				    -1);
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_ACCOUNT_TEXT, NULL,
+          COL_ACCOUNT_ENABLED, TRUE,
+          COL_ACCOUNT_POINTER, NULL,
+          COL_ACCOUNT_ROW_TYPE, ROW_SEPARATOR,
+          -1);
 
-		gtk_list_store_prepend (store, &iter);
-		gtk_list_store_set (store, &iter,
-				    COL_ACCOUNT_TEXT, _("All accounts"),
-				    COL_ACCOUNT_ENABLED, TRUE,
-				    COL_ACCOUNT_POINTER, NULL,
-				    COL_ACCOUNT_ROW_TYPE, ROW_ALL,
-				    -1);
-	} else {
-		if (gtk_tree_model_get_iter_first (model, &iter)) {
-			if (gtk_list_store_remove (GTK_LIST_STORE (model), &iter)) {
-				gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
-			}
-		}
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_ACCOUNT_TEXT, _("All accounts"),
+          COL_ACCOUNT_ENABLED, TRUE,
+          COL_ACCOUNT_POINTER, NULL,
+          COL_ACCOUNT_ROW_TYPE, ROW_ALL,
+          -1);
+    }
+  else
+    {
+      if (gtk_tree_model_get_iter_first (model, &iter))
+        {
+          if (gtk_list_store_remove (GTK_LIST_STORE (model), &iter))
+            gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+        }
 
-		gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (chooser),
-						      (GtkTreeViewRowSeparatorFunc)
-						      NULL,
-						      NULL,
-						      NULL);
-	}
+    gtk_combo_box_set_row_separator_func (GTK_COMBO_BOX (self),
+        (GtkTreeViewRowSeparatorFunc)
+        NULL,
+        NULL,
+        NULL);
+  }
 
-	g_object_notify (G_OBJECT (chooser), "has-all-option");
+  g_object_notify (G_OBJECT (self), "has-all-option");
 }
 
 static void
 account_manager_prepared_cb (GObject *source_object,
-			     GAsyncResult *result,
-			     gpointer user_data)
+    GAsyncResult *result,
+    gpointer user_data)
 {
-	GList *accounts, *l;
-	TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
-	EmpathyAccountChooser *chooser = user_data;
-	EmpathyAccountChooserPriv *priv = GET_PRIV (chooser);
-	GError *error = NULL;
+  GList *accounts, *l;
+  TpAccountManager *manager = TP_ACCOUNT_MANAGER (source_object);
+  EmpathyAccountChooser *self = user_data;
+  EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+  GError *error = NULL;
 
-	if (!tp_proxy_prepare_finish (manager, result, &error)) {
-		DEBUG ("Failed to prepare account manager: %s", error->message);
-		g_error_free (error);
-		return;
-	}
+  if (!tp_proxy_prepare_finish (manager, result, &error))
+    {
+      DEBUG ("Failed to prepare account manager: %s", error->message);
+      g_error_free (error);
+      return;
+    }
 
-	accounts = tp_account_manager_get_valid_accounts (manager);
+  accounts = tp_account_manager_get_valid_accounts (manager);
 
-	for (l = accounts; l != NULL; l = l->next) {
-		TpAccount *account = l->data;
+  for (l = accounts; l != NULL; l = l->next)
+    {
+      TpAccount *account = l->data;
 
-		account_chooser_account_add_foreach (account, chooser);
+      account_chooser_account_add_foreach (account, self);
 
-		tp_g_signal_connect_object (account, "status-changed",
-					     G_CALLBACK (account_chooser_status_changed_cb),
-					     chooser, 0);
-	}
+      tp_g_signal_connect_object (account, "status-changed",
+          G_CALLBACK (account_chooser_status_changed_cb),
+          self, 0);
+    }
 
-	g_list_free (accounts);
+  g_list_free (accounts);
 
-	priv->ready = TRUE;
-	g_signal_emit (chooser, signals[READY], 0);
+  priv->ready = TRUE;
+  g_signal_emit (self, signals[READY], 0);
 }
 
 static gint
 account_cmp (GtkTreeModel *model,
-	     GtkTreeIter *a,
-	     GtkTreeIter *b,
-	     gpointer user_data)
+    GtkTreeIter *a,
+    GtkTreeIter *b,
+    gpointer user_data)
 {
-	RowType a_type, b_type;
-	gboolean a_enabled, b_enabled;
-	gchar *a_text, *b_text;
-	gint result;
+  RowType a_type, b_type;
+  gboolean a_enabled, b_enabled;
+  gchar *a_text, *b_text;
+  gint result;
 
-	gtk_tree_model_get (model, a,
-		COL_ACCOUNT_ENABLED, &a_enabled,
-		COL_ACCOUNT_ROW_TYPE, &a_type,
-		-1);
-	gtk_tree_model_get (model, b,
-		COL_ACCOUNT_ENABLED, &b_enabled,
-		COL_ACCOUNT_ROW_TYPE, &b_type,
-		-1);
+  gtk_tree_model_get (model, a,
+      COL_ACCOUNT_ENABLED, &a_enabled,
+      COL_ACCOUNT_ROW_TYPE, &a_type,
+      -1);
+  gtk_tree_model_get (model, b,
+      COL_ACCOUNT_ENABLED, &b_enabled,
+      COL_ACCOUNT_ROW_TYPE, &b_type,
+      -1);
 
-	/* This assumes that we have at most one of each special row type. */
-	if (a_type != b_type) {
-		/* Display higher-numbered special row types first. */
-		return (b_type - a_type);
-	}
+  /* This assumes that we have at most one of each special row type. */
+  if (a_type != b_type)
+    /* Display higher-numbered special row types first. */
+    return (b_type - a_type);
 
-	/* Enabled accounts are displayed first */
-	if (a_enabled != b_enabled)
-		return a_enabled ? -1: 1;
+  /* Enabled accounts are displayed first */
+  if (a_enabled != b_enabled)
+    return a_enabled ? -1: 1;
 
-	gtk_tree_model_get (model, a, COL_ACCOUNT_TEXT, &a_text, -1);
-	gtk_tree_model_get (model, b, COL_ACCOUNT_TEXT, &b_text, -1);
+  gtk_tree_model_get (model, a, COL_ACCOUNT_TEXT, &a_text, -1);
+  gtk_tree_model_get (model, b, COL_ACCOUNT_TEXT, &b_text, -1);
 
-	if (a_text == b_text)
-		result = 0;
-	else if (a_text == NULL)
-		result = 1;
-	else if (b_text == NULL)
-		result = -1;
-	else
-		result = g_ascii_strcasecmp (a_text, b_text);
+  if (a_text == b_text)
+    result = 0;
+  else if (a_text == NULL)
+    result = 1;
+  else if (b_text == NULL)
+    result = -1;
+  else
+    result = g_ascii_strcasecmp (a_text, b_text);
 
-	g_free (a_text);
-	g_free (b_text);
+  g_free (a_text);
+  g_free (b_text);
 
-	return result;
+  return result;
 }
 
 static void
-account_chooser_setup (EmpathyAccountChooser *chooser)
+account_chooser_setup (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkListStore             *store;
-	GtkCellRenderer          *renderer;
-	GtkComboBox              *combobox;
+  EmpathyAccountChooserPriv *priv;
+  GtkListStore *store;
+  GtkCellRenderer *renderer;
+  GtkComboBox *combobox;
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	/* Set up combo box with new store */
-	combobox = GTK_COMBO_BOX (chooser);
+  /* Set up combo box with new store */
+  combobox = GTK_COMBO_BOX (self);
 
-	gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
+  gtk_cell_layout_clear (GTK_CELL_LAYOUT (combobox));
 
-	store = gtk_list_store_new (COL_ACCOUNT_COUNT,
-				    GDK_TYPE_PIXBUF,    /* Image */
-				    G_TYPE_STRING,    /* Name */
-				    G_TYPE_BOOLEAN,   /* Enabled */
-				    G_TYPE_UINT,      /* Row type */
-				    TP_TYPE_ACCOUNT);
+  store = gtk_list_store_new (COL_ACCOUNT_COUNT,
+      GDK_TYPE_PIXBUF,  /* Image */
+      G_TYPE_STRING,    /* Name */
+      G_TYPE_BOOLEAN,   /* Enabled */
+      G_TYPE_UINT,      /* Row type */
+      TP_TYPE_ACCOUNT);
 
-	gtk_tree_sortable_set_default_sort_func (GTK_TREE_SORTABLE (store),
-		account_cmp, chooser, NULL);
-	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
-		GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
+  gtk_tree_sortable_set_default_sort_func (GTK_TREE_SORTABLE (store),
+    account_cmp, self, NULL);
+  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (store),
+    GTK_TREE_SORTABLE_DEFAULT_SORT_COLUMN_ID, GTK_SORT_ASCENDING);
 
-	gtk_combo_box_set_model (combobox, GTK_TREE_MODEL (store));
+  gtk_combo_box_set_model (combobox, GTK_TREE_MODEL (store));
 
-	renderer = gtk_cell_renderer_pixbuf_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
-					"pixbuf", COL_ACCOUNT_IMAGE,
-					"sensitive", COL_ACCOUNT_ENABLED,
-					NULL);
+  renderer = gtk_cell_renderer_pixbuf_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, FALSE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
+      "pixbuf", COL_ACCOUNT_IMAGE,
+      "sensitive", COL_ACCOUNT_ENABLED,
+      NULL);
 
-	renderer = gtk_cell_renderer_text_new ();
-	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
-	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
-					"text", COL_ACCOUNT_TEXT,
-					"sensitive", COL_ACCOUNT_ENABLED,
-					NULL);
+  renderer = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combobox), renderer, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combobox), renderer,
+      "text", COL_ACCOUNT_TEXT,
+      "sensitive", COL_ACCOUNT_ENABLED,
+      NULL);
 
-	/* Populate accounts */
-	tp_proxy_prepare_async (priv->manager, NULL,
-					  account_manager_prepared_cb, chooser);
+  /* Populate accounts */
+  tp_proxy_prepare_async (priv->manager, NULL, account_manager_prepared_cb,
+      self);
 
-	g_object_unref (store);
+  g_object_unref (store);
 }
 
 static void
-account_chooser_account_validity_changed_cb (TpAccountManager      *manager,
-					     TpAccount             *account,
-					     gboolean               valid,
-					     EmpathyAccountChooser *chooser)
+account_chooser_account_validity_changed_cb (TpAccountManager *manager,
+    TpAccount *account,
+    gboolean valid,
+    EmpathyAccountChooser *self)
 {
-	if (valid) {
-		account_chooser_account_add_foreach (account, chooser);
-	} else {
-		account_chooser_account_remove_foreach (account, chooser);
-	}
+  if (valid)
+    account_chooser_account_add_foreach (account, self);
+  else
+    account_chooser_account_remove_foreach (account, self);
 }
 
 static void
-account_chooser_account_add_foreach (TpAccount             *account,
-				     EmpathyAccountChooser *chooser)
+account_chooser_account_add_foreach (TpAccount *account,
+    EmpathyAccountChooser *self)
 {
-	GtkListStore *store;
-	GtkComboBox  *combobox;
-	GtkTreeIter   iter;
-	gint          position;
+  GtkListStore *store;
+  GtkComboBox *combobox;
+  GtkTreeIter iter;
+  gint position;
 
-	combobox = GTK_COMBO_BOX (chooser);
-	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+  combobox = GTK_COMBO_BOX (self);
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	position = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (store), NULL);
-	gtk_list_store_insert_with_values (store, &iter, position,
-					   COL_ACCOUNT_POINTER, account,
-					   -1);
-	account_chooser_update_iter (chooser, &iter);
+  position = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (store), NULL);
+  gtk_list_store_insert_with_values (store, &iter, position,
+      COL_ACCOUNT_POINTER, account,
+      -1);
+
+  account_chooser_update_iter (self, &iter);
 }
 
 static void
-account_chooser_account_removed_cb (TpAccountManager      *manager,
-				    TpAccount             *account,
-				    EmpathyAccountChooser *chooser)
+account_chooser_account_removed_cb (TpAccountManager *manager,
+    TpAccount *account,
+    EmpathyAccountChooser *self)
 {
-	account_chooser_account_remove_foreach (account, chooser);
+  account_chooser_account_remove_foreach (account, self);
 }
 
-typedef struct {
-	TpAccount   *account;
-	GtkTreeIter *iter;
-	gboolean     found;
+typedef struct
+{
+  TpAccount *account;
+  GtkTreeIter *iter;
+  gboolean found;
 } FindAccountData;
 
 static gboolean
 account_chooser_find_account_foreach (GtkTreeModel *model,
-				      GtkTreePath  *path,
-				      GtkTreeIter  *iter,
-				      gpointer      user_data)
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    gpointer user_data)
 {
-	FindAccountData *data = user_data;
-	TpAccount  *account;
-	RowType type;
+  FindAccountData *data = user_data;
+  TpAccount *account;
+  RowType type;
 
-	gtk_tree_model_get (model, iter,
-		COL_ACCOUNT_POINTER, &account,
-		COL_ACCOUNT_ROW_TYPE, &type,
-		 -1);
+  gtk_tree_model_get (model, iter,
+    COL_ACCOUNT_POINTER, &account,
+    COL_ACCOUNT_ROW_TYPE, &type,
+     -1);
 
-	if (type != ROW_ACCOUNT)
-		return FALSE;
+  if (type != ROW_ACCOUNT)
+    return FALSE;
 
-	if (account == data->account) {
-		data->found = TRUE;
-		*(data->iter) = *iter;
-		g_object_unref (account);
+  if (account == data->account)
+    {
+      data->found = TRUE;
+      *(data->iter) = *iter;
+      g_object_unref (account);
 
-		return TRUE;
-	}
+      return TRUE;
+    }
 
-	g_object_unref (account);
+  g_object_unref (account);
 
-	return FALSE;
+  return FALSE;
 }
 
 static gboolean
-account_chooser_find_account (EmpathyAccountChooser *chooser,
-			      TpAccount             *account,
-			      GtkTreeIter           *iter)
+account_chooser_find_account (EmpathyAccountChooser *self,
+    TpAccount *account,
+    GtkTreeIter*iter)
 {
-	GtkListStore    *store;
-	GtkComboBox     *combobox;
-	FindAccountData  data;
+  GtkListStore *store;
+  GtkComboBox *combobox;
+  FindAccountData data;
 
-	combobox = GTK_COMBO_BOX (chooser);
-	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+  combobox = GTK_COMBO_BOX (self);
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	data.account = account;
-	data.iter = iter;
-	gtk_tree_model_foreach (GTK_TREE_MODEL (store),
-				account_chooser_find_account_foreach,
-				&data);
+  data.account = account;
+  data.iter = iter;
+  gtk_tree_model_foreach (GTK_TREE_MODEL (store),
+        account_chooser_find_account_foreach,
+        &data);
 
-	return data.found;
+  return data.found;
 }
 
 static void
-account_chooser_account_remove_foreach (TpAccount             *account,
-					EmpathyAccountChooser *chooser)
+account_chooser_account_remove_foreach (TpAccount *account,
+    EmpathyAccountChooser *self)
 {
-	GtkListStore *store;
-	GtkComboBox  *combobox;
-	GtkTreeIter   iter;
+  GtkListStore *store;
+  GtkComboBox *combobox;
+  GtkTreeIter iter;
 
-	combobox = GTK_COMBO_BOX (chooser);
-	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+  combobox = GTK_COMBO_BOX (self);
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	if (account_chooser_find_account (chooser, account, &iter)) {
-		gtk_list_store_remove (store, &iter);
-	}
+  if (account_chooser_find_account (self, account, &iter))
+    gtk_list_store_remove (store, &iter);
 }
 
 static void
 account_chooser_filter_ready_cb (gboolean is_enabled,
-				 gpointer data)
+    gpointer data)
 {
-	FilterResultCallbackData  *fr_data = data;
-	EmpathyAccountChooser     *chooser;
-	EmpathyAccountChooserPriv *priv;
-	TpAccount                 *account;
-	GtkTreeIter               *iter;
-	GtkListStore              *store;
-	GtkComboBox               *combobox;
-	const gchar               *icon_name;
-	GdkPixbuf                 *pixbuf;
+  FilterResultCallbackData *fr_data = data;
+  EmpathyAccountChooser *self;
+  EmpathyAccountChooserPriv *priv;
+  TpAccount *account;
+  GtkTreeIter *iter;
+  GtkListStore *store;
+  GtkComboBox *combobox;
+  const gchar *icon_name;
+  GdkPixbuf *pixbuf;
 
-	chooser = fr_data->chooser;
-	priv = GET_PRIV (chooser);
-	account = fr_data->account;
-	iter = fr_data->iter;
-	combobox = GTK_COMBO_BOX (chooser);
-	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+  self = fr_data->self;
+  priv = GET_PRIV (self);
+  account = fr_data->account;
+  iter = fr_data->iter;
+  combobox = GTK_COMBO_BOX (self);
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	icon_name = tp_account_get_icon_name (account);
-	pixbuf = empathy_pixbuf_from_icon_name (icon_name,
-		GTK_ICON_SIZE_BUTTON);
+  icon_name = tp_account_get_icon_name (account);
+  pixbuf = empathy_pixbuf_from_icon_name (icon_name,
+    GTK_ICON_SIZE_BUTTON);
 
-	gtk_list_store_set (store, iter,
-			    COL_ACCOUNT_IMAGE, pixbuf,
-			    COL_ACCOUNT_TEXT, tp_account_get_display_name (account),
-			    COL_ACCOUNT_ENABLED, is_enabled,
-			    -1);
+  gtk_list_store_set (store, iter,
+          COL_ACCOUNT_IMAGE, pixbuf,
+          COL_ACCOUNT_TEXT, tp_account_get_display_name (account),
+          COL_ACCOUNT_ENABLED, is_enabled,
+          -1);
 
-	if (pixbuf != NULL)
-		g_object_unref (pixbuf);
+  if (pixbuf != NULL)
+    g_object_unref (pixbuf);
 
-	/* set first connected account as active account */
-	if (priv->account_manually_set == FALSE &&
-	    priv->set_active_item == FALSE && is_enabled) {
-		priv->set_active_item = TRUE;
-		gtk_combo_box_set_active_iter (combobox, iter);
-	}
+  /* set first connected account as active account */
+  if (priv->account_manually_set == FALSE &&
+      priv->set_active_item == FALSE && is_enabled)
+    {
+      priv->set_active_item = TRUE;
+      gtk_combo_box_set_active_iter (combobox, iter);
+    }
 
-	filter_result_callback_data_free (fr_data);
+  filter_result_callback_data_free (fr_data);
 }
 
 static void
-account_chooser_update_iter (EmpathyAccountChooser *chooser,
-			     GtkTreeIter           *iter)
+account_chooser_update_iter (EmpathyAccountChooser *self,
+    GtkTreeIter *iter)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkListStore              *store;
-	GtkComboBox               *combobox;
-	TpAccount                 *account;
-	FilterResultCallbackData  *data;
+  EmpathyAccountChooserPriv *priv;
+  GtkListStore *store;
+  GtkComboBox *combobox;
+  TpAccount *account;
+  FilterResultCallbackData *data;
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	combobox = GTK_COMBO_BOX (chooser);
-	store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
+  combobox = GTK_COMBO_BOX (self);
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combobox));
 
-	gtk_tree_model_get (GTK_TREE_MODEL (store), iter,
-			    COL_ACCOUNT_POINTER, &account,
-			    -1);
+  gtk_tree_model_get (GTK_TREE_MODEL (store), iter,
+          COL_ACCOUNT_POINTER, &account,
+          -1);
 
-	/* Skip rows without account associated */
-	if (account == NULL)
-		return;
+  /* Skip rows without account associated */
+  if (account == NULL)
+    return;
 
-	data = filter_result_callback_data_new (chooser, account, iter);
+  data = filter_result_callback_data_new (self, account, iter);
 
-	if (priv->filter)
-		priv->filter (account, account_chooser_filter_ready_cb,
-			      (gpointer) data, priv->filter_data);
-	else
-		account_chooser_filter_ready_cb (TRUE, (gpointer) data);
+  if (priv->filter)
+    priv->filter (account, account_chooser_filter_ready_cb,
+            (gpointer) data, priv->filter_data);
+  else
+    account_chooser_filter_ready_cb (TRUE, (gpointer) data);
 
-	g_object_unref (account);
+  g_object_unref (account);
 }
 
 static void
-account_chooser_status_changed_cb (TpAccount  *account,
-				   guint       old_status,
-				   guint       new_status,
-				   guint       reason,
-				   gchar      *dbus_error_name,
-				   GHashTable *details,
-				   gpointer    user_data)
+account_chooser_status_changed_cb (TpAccount *account,
+    guint old_status,
+    guint new_status,
+    guint reason,
+    gchar *dbus_error_name,
+    GHashTable *details,
+    gpointer user_data)
 {
-	EmpathyAccountChooser *chooser = user_data;
-	GtkTreeIter iter;
+  EmpathyAccountChooser *self = user_data;
+  GtkTreeIter iter;
 
-	if (account_chooser_find_account (chooser, account, &iter)) {
-		account_chooser_update_iter (chooser, &iter);
-	}
+  if (account_chooser_find_account (self, account, &iter))
+    account_chooser_update_iter (self, &iter);
 }
 
 static gboolean
-account_chooser_separator_func (GtkTreeModel         *model,
-				GtkTreeIter          *iter,
-				EmpathyAccountChooser *chooser)
+account_chooser_separator_func (GtkTreeModel *model,
+    GtkTreeIter *iter,
+    EmpathyAccountChooser *self)
 {
-	RowType row_type;
+  RowType row_type;
 
-	gtk_tree_model_get (model, iter, COL_ACCOUNT_ROW_TYPE, &row_type, -1);
-	return (row_type == ROW_SEPARATOR);
+  gtk_tree_model_get (model, iter, COL_ACCOUNT_ROW_TYPE, &row_type, -1);
+  return (row_type == ROW_SEPARATOR);
 }
 
 static gboolean
-account_chooser_set_account_foreach (GtkTreeModel   *model,
-				     GtkTreePath    *path,
-				     GtkTreeIter    *iter,
-				     SetAccountData *data)
+account_chooser_set_account_foreach (GtkTreeModel *model,
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    SetAccountData *data)
 {
-	TpAccount *account;
-	gboolean   equal;
+  TpAccount *account;
+  gboolean equal;
 
-	gtk_tree_model_get (model, iter, COL_ACCOUNT_POINTER, &account, -1);
+  gtk_tree_model_get (model, iter, COL_ACCOUNT_POINTER, &account, -1);
 
-	equal = (data->account == account);
+  equal = (data->account == account);
 
-	if (account) {
-		g_object_unref (account);
-	}
+  if (account)
+    g_object_unref (account);
 
-	if (equal) {
-		GtkComboBox *combobox;
+  if (equal)
+    {
+      GtkComboBox *combobox;
 
-		combobox = GTK_COMBO_BOX (data->chooser);
-		gtk_combo_box_set_active_iter (combobox, iter);
+      combobox = GTK_COMBO_BOX (data->self);
+      gtk_combo_box_set_active_iter (combobox, iter);
 
-		data->set = TRUE;
-	}
+      data->set = TRUE;
+    }
 
-	return equal;
+  return equal;
 }
 
 static gboolean
 account_chooser_filter_foreach (GtkTreeModel *model,
-				GtkTreePath  *path,
-				GtkTreeIter  *iter,
-				gpointer      chooser)
+    GtkTreePath *path,
+    GtkTreeIter *iter,
+    gpointer self)
 {
-	account_chooser_update_iter (chooser, iter);
-	return FALSE;
+  account_chooser_update_iter (self, iter);
+  return FALSE;
 }
 
 /**
  * empathy_account_chooser_set_filter:
- * @chooser: an #EmpathyAccountChooser
+ * @self: an #EmpathyAccountChooser
  * @filter: a filter
  * @user_data: data to pass to @filter, or %NULL
  *
- * Sets a filter on the @chooser so only accounts that are %TRUE in the eyes
- * of the filter are visible in the @chooser.
+ * Sets a filter on the @self so only accounts that are %TRUE in the eyes
+ * of the filter are visible in the @self.
  */
 void
-empathy_account_chooser_set_filter (EmpathyAccountChooser           *chooser,
-                                    EmpathyAccountChooserFilterFunc  filter,
-                                    gpointer                         user_data)
+empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
+    EmpathyAccountChooserFilterFunc filter,
+    gpointer user_data)
 {
-	EmpathyAccountChooserPriv *priv;
-	GtkTreeModel *model;
+  EmpathyAccountChooserPriv *priv;
+  GtkTreeModel *model;
 
-	g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (chooser));
+  g_return_if_fail (EMPATHY_IS_ACCOUNT_CHOOSER (self));
 
-	priv = GET_PRIV (chooser);
+  priv = GET_PRIV (self);
 
-	priv->filter = filter;
-	priv->filter_data = user_data;
+  priv->filter = filter;
+  priv->filter_data = user_data;
 
-	/* Refilter existing data */
-	priv->set_active_item = FALSE;
-	model = gtk_combo_box_get_model (GTK_COMBO_BOX (chooser));
-	gtk_tree_model_foreach (model, account_chooser_filter_foreach, chooser);
+  /* Refilter existing data */
+  priv->set_active_item = FALSE;
+  model = gtk_combo_box_get_model (GTK_COMBO_BOX (self));
+  gtk_tree_model_foreach (model, account_chooser_filter_foreach, self);
 }
 
 /**
@@ -1005,16 +1015,16 @@ empathy_account_chooser_set_filter (EmpathyAccountChooser           *chooser,
  * Returns (via the callback) TRUE is @account is connected
  */
 void
-empathy_account_chooser_filter_is_connected (
-	TpAccount                                 *account,
-	EmpathyAccountChooserFilterResultCallback  callback,
-	gpointer                                   callback_data,
-	gpointer                                   user_data)
+empathy_account_chooser_filter_is_connected (TpAccount *account,
+  EmpathyAccountChooserFilterResultCallback callback,
+  gpointer callback_data,
+  gpointer user_data)
 {
-	gboolean is_connected =
-		tp_account_get_connection_status (account, NULL)
-		== TP_CONNECTION_STATUS_CONNECTED;
-	callback (is_connected, callback_data);
+  gboolean is_connected =
+    tp_account_get_connection_status (account, NULL)
+    == TP_CONNECTION_STATUS_CONNECTED;
+
+  callback (is_connected, callback_data);
 }
 
 /**
@@ -1027,60 +1037,60 @@ empathy_account_chooser_filter_is_connected (
  * An #EmpathyAccountChooserFilterFunc that returns accounts that both
  * support multiuser text chat and are connected.
  *
- * Returns (via the callback) TRUE if @account both supports muc and is connected
+ * Returns (via the callback) TRUE if @account both supports muc and
+ * is connected
  */
 void
-empathy_account_chooser_filter_supports_chatrooms (
-	TpAccount                                 *account,
-	EmpathyAccountChooserFilterResultCallback  callback,
-	gpointer                                   callback_data,
-	gpointer                                   user_data)
+empathy_account_chooser_filter_supports_chatrooms (TpAccount *account,
+  EmpathyAccountChooserFilterResultCallback callback,
+  gpointer callback_data,
+  gpointer user_data)
 {
-	TpConnection       *connection;
-	gboolean           supported = FALSE;
-	TpCapabilities     *caps;
+  TpConnection *connection;
+  gboolean supported = FALSE;
+  TpCapabilities *caps;
 
-	/* check if CM supports multiuser text chat */
-	connection = tp_account_get_connection (account);
-	if (connection == NULL)
-		goto out;
+  /* check if CM supports multiuser text chat */
+  connection = tp_account_get_connection (account);
+  if (connection == NULL)
+    goto out;
 
-	caps = tp_connection_get_capabilities (connection);
-	if (caps == NULL)
-		goto out;
+  caps = tp_connection_get_capabilities (connection);
+  if (caps == NULL)
+    goto out;
 
-	supported = tp_capabilities_supports_text_chatrooms (caps);
+  supported = tp_capabilities_supports_text_chatrooms (caps);
 
 out:
-	callback (supported, callback_data);
+  callback (supported, callback_data);
 }
 
 gboolean
 empathy_account_chooser_is_ready (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+  EmpathyAccountChooserPriv *priv = GET_PRIV (self);
 
-	return priv->ready;
+  return priv->ready;
 }
 
 TpAccount *
-empathy_account_chooser_get_account (EmpathyAccountChooser *chooser)
+empathy_account_chooser_get_account (EmpathyAccountChooser *self)
 {
-	TpAccount *account;
+  TpAccount *account;
 
-	account = empathy_account_chooser_dup_account (chooser);
-	if (account == NULL)
-		return NULL;
+  account = empathy_account_chooser_dup_account (self);
+  if (account == NULL)
+    return NULL;
 
-	g_object_unref (account);
+  g_object_unref (account);
 
-	return account;
+  return account;
 }
 
 TpAccountManager *
 empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self)
 {
-	EmpathyAccountChooserPriv *priv = GET_PRIV (self);
+  EmpathyAccountChooserPriv *priv = GET_PRIV (self);
 
-	return priv->manager;
+  return priv->manager;
 }

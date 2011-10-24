@@ -1,7 +1,6 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2005-2007 Imendio AB
- * Copyright (C) 2007-2008 Collabora Ltd.
+ * Copyright (C) 2007-2011 Collabora Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -44,7 +43,7 @@ G_BEGIN_DECLS
  * @user_data: user data passed to the callback
  */
 typedef void (* EmpathyAccountChooserFilterResultCallback) (gboolean is_enabled,
-							    gpointer user_data);
+    gpointer user_data);
 
 /**
  * EmpathyAccountChooserFilterFunc:
@@ -54,54 +53,70 @@ typedef void (* EmpathyAccountChooserFilterResultCallback) (gboolean is_enabled,
  * @user_data: user data passed to the callback
  */
 typedef void (* EmpathyAccountChooserFilterFunc) (
-	TpAccount                                 *account,
-	EmpathyAccountChooserFilterResultCallback  callback,
-	gpointer                                   callback_data,
-	gpointer                                   user_data);
+  TpAccount *account,
+  EmpathyAccountChooserFilterResultCallback callback,
+  gpointer callback_data,
+  gpointer user_data);
 
 
-typedef struct _EmpathyAccountChooser      EmpathyAccountChooser;
+typedef struct _EmpathyAccountChooser EmpathyAccountChooser;
 typedef struct _EmpathyAccountChooserClass EmpathyAccountChooserClass;
 
-struct _EmpathyAccountChooser {
-	GtkComboBox parent;
+struct _EmpathyAccountChooser
+{
+  GtkComboBox parent;
 
-	/*<private>*/
-	gpointer priv;
+  /*<private>*/
+  gpointer priv;
 };
 
-struct _EmpathyAccountChooserClass {
-	GtkComboBoxClass parent_class;
+struct _EmpathyAccountChooserClass
+{
+  GtkComboBoxClass parent_class;
 };
 
-GType          empathy_account_chooser_get_type           (void) G_GNUC_CONST;
-GtkWidget *    empathy_account_chooser_new                (void);
-TpAccount *    empathy_account_chooser_dup_account        (EmpathyAccountChooser *chooser);
-TpAccount *    empathy_account_chooser_get_account        (EmpathyAccountChooser *chooser);
-TpConnection * empathy_account_chooser_get_connection     (EmpathyAccountChooser *chooser);
-gboolean       empathy_account_chooser_set_account        (EmpathyAccountChooser *chooser,
-							   TpAccount             *account);
-void           empathy_account_chooser_set_all            (EmpathyAccountChooser *chooser);
-TpAccountManager * empathy_account_chooser_get_account_manager (EmpathyAccountChooser *self);
-gboolean       empathy_account_chooser_get_has_all_option (EmpathyAccountChooser *chooser);
-void           empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *chooser,
-							   gboolean               has_all_option);
-gboolean       empathy_account_chooser_has_all_selected   (EmpathyAccountChooser *chooser);
-void           empathy_account_chooser_set_filter         (EmpathyAccountChooser *chooser,
-							   EmpathyAccountChooserFilterFunc filter,
-							   gpointer               user_data);
-void           empathy_account_chooser_filter_is_connected (TpAccount             *account,
-							   EmpathyAccountChooserFilterResultCallback callback,
-							   gpointer               callback_data,
-							   gpointer               user_data);
-void           empathy_account_chooser_filter_supports_chatrooms (TpAccount       *account,
-							   EmpathyAccountChooserFilterResultCallback callback,
-							   gpointer               callback_data,
-							   gpointer               user_data);
+GType empathy_account_chooser_get_type (void) G_GNUC_CONST;
 
-gboolean       empathy_account_chooser_is_ready (EmpathyAccountChooser *chooser);
+GtkWidget * empathy_account_chooser_new (void);
+
+TpAccount * empathy_account_chooser_dup_account (EmpathyAccountChooser *self);
+TpAccount * empathy_account_chooser_get_account (EmpathyAccountChooser *self);
+
+gboolean empathy_account_chooser_set_account (EmpathyAccountChooser *self,
+    TpAccount *account);
+
+TpConnection * empathy_account_chooser_get_connection (
+    EmpathyAccountChooser *self);
+
+void empathy_account_chooser_set_all (EmpathyAccountChooser *self);
+
+TpAccountManager * empathy_account_chooser_get_account_manager (
+    EmpathyAccountChooser *self);
+
+gboolean empathy_account_chooser_get_has_all_option (
+    EmpathyAccountChooser *self);
+
+void empathy_account_chooser_set_has_all_option (EmpathyAccountChooser *self,
+    gboolean has_all_option);
+
+gboolean empathy_account_chooser_has_all_selected (EmpathyAccountChooser *self);
+
+void empathy_account_chooser_set_filter (EmpathyAccountChooser *self,
+    EmpathyAccountChooserFilterFunc filter,
+    gpointer user_data);
+
+void empathy_account_chooser_filter_is_connected (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    gpointer user_data);
+
+void empathy_account_chooser_filter_supports_chatrooms (TpAccount *account,
+    EmpathyAccountChooserFilterResultCallback callback,
+    gpointer callback_data,
+    gpointer user_data);
+
+gboolean empathy_account_chooser_is_ready (EmpathyAccountChooser *self);
 
 G_END_DECLS
 
 #endif /* __EMPATHY_ACCOUNT_CHOOSER_H__ */
-
