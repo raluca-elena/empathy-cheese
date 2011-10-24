@@ -181,12 +181,11 @@ empathy_account_chooser_init (EmpathyAccountChooser *self)
 
   self->priv->manager = tp_account_manager_dup ();
 
-  g_signal_connect (self->priv->manager, "account-validity-changed",
-      G_CALLBACK (account_chooser_account_validity_changed_cb),
-      self);
-  g_signal_connect (self->priv->manager, "account-removed",
-      G_CALLBACK (account_chooser_account_removed_cb),
-      self);
+  tp_g_signal_connect_object (self->priv->manager, "account-validity-changed",
+      G_CALLBACK (account_chooser_account_validity_changed_cb), self, 0);
+
+  tp_g_signal_connect_object (self->priv->manager, "account-removed",
+      G_CALLBACK (account_chooser_account_removed_cb), self, 0);
 }
 
 static gint
@@ -326,12 +325,6 @@ account_chooser_finalize (GObject *object)
 {
   EmpathyAccountChooser *self = (EmpathyAccountChooser *) object;
 
-  g_signal_handlers_disconnect_by_func (self->priv->manager,
-      account_chooser_account_validity_changed_cb,
-      object);
-  g_signal_handlers_disconnect_by_func (self->priv->manager,
-      account_chooser_account_removed_cb,
-      object);
   g_object_unref (self->priv->manager);
 
   G_OBJECT_CLASS (empathy_account_chooser_parent_class)->finalize (object);
