@@ -1,3 +1,81 @@
+NEW in 3.3.1 (24/10/2011)
+============
+
+The "So Long, and Thanks for all the Koalas" release.
+
+This is the first 3.3 development release which will lead to 3.4 in March
+2012. It contains all the fixes from 3.2.1.1, including the HTML injection
+security bug (CVE-2011-3635).
+
+The "New Call" and "New Conversation" dialogs have been re-written and the
+experimental Call UI has been improved.
+
+This release is also the first one shipping our brand new xmpp link-local
+icon. Here is a tribute to the hypno-koala who will no longer appear in your
+accounts dialog: http://t.co/9OTilx3K
+
+Bugs fixed:
+ - Fixed #646630, account-widgets: fix glade sizing issues (Xavier Claessens)
+ - Fixed #662035, HTML injection in nicknames (Guillaume Desmottes)
+ - Fixed #662211, contact_list_store_contact_active_cb may be called after the destruction of the store (Guillaume Desmottes)
+ - Fixed #661981, new message/call dialog: use EmpathyContactChooser (Guillaume Desmottes)
+ - Fixed #574879, remember which account/server I joined a chat on last (Juan R. Garcia Blanco)
+ - Fixed #619186, That hypno-koala thing in the accounts dialog is freaking scary (Damien Lespiau)
+ - Fixed #629517, Nautilus-sendto plugin: use libfolks (Guillaume Desmottes)
+ - Fixed #650861, Unify contact selection (Guillaume Desmottes)
+ - Fixed #656884, Give more feedback when changing camera (Emilio Pozuelo Monfort)
+ - Fixed #656907, Make video preview jump around smoothly. (Emilio Pozuelo Monfort)
+ - Fixed #658245, Use TpFileTransferChannel (Guillaume Desmottes)
+ - Fixed #658542, Use new Subject and RoomConfig APIs rather than Telepathy.Properties (Will Thompson)
+ - Fixed #659144, Over-contextualization of 'unknown' string (Guillaume Desmottes)
+ - Fixed #659207, Some preferences are obscure or obsolete with gnome 3 (Juan R. Garcia Blanco)
+ - Fixed #659474, Gtk-WARNING **: Overriding tab label for notebook (Guillaume Desmottes)
+ - Fixed #659594, Shouldn't try requesting Call channel if built without Call support (Guillaume Desmottes)
+ - Fixed #659807, auth request contacts not included in contact list (Xavier Claessens)
+ - Fixed #659816, Presence misaligned in muc user tooltips (Guillaume Desmottes)
+ - Fixed #659952, Added shortcut CTRL + J for joining a new chat (Bernhard Posselt)
+ - Fixed #660124, editing of local accounts fails (Guillaume Desmottes)
+ - Fixed #660429, Stop using GtkTable (Guillaume Desmottes)
+ - Fixed #660449, empathy-accounts still uses goa-prefs.desktop (Guillaume Desmottes)
+ - Fixed #660586, setting to third party Adium theme leads to crash (Guillaume Desmottes)
+ - Fixed #661464, [Call] Use dark theme by default? (Guillaume Desmottes)
+ - Fixed #661489, Should just use Folks to get favorites (Guillaume Desmottes)
+ - Fixed #661734, Report insufficient balance for calls (Emilio Pozuelo Monfort, Danielle Madeley)
+ - Fixed #661756, String "Use echo cancellation to improve call quality" is untranslated (Gabor Kelemen)
+ - Fixed #661993, invite dialog: invite first selected contact when hitting 'enter' after typing (Guillaume Desmottes)
+ - Fixed #662250, contact-chooser does not activate after down-arrow (Danielle Madeley)
+ - Fixed #612555, Remove butterfly workarounds (Jonny Lamb)
+
+Translations:
+ - Updated be Translation (Ihar Hrachyshka)
+ - Updated bg Translation (Alexander Shopov)
+ - Updated ca Translation (Gil Forcada)
+ - Updated ca@valencia Translation (Carles Ferrando)
+ - Updated de Translation (Paul Seyfert, Mario Blättermann)
+ - Updated en_GB Translation (Bruce Cowan)
+ - Updated eo Translation (Kristjan SCHMIDT)
+ - Updated es Translation (Daniel Mustieles)
+ - Updated fa Translation (Arash Mousavi)
+ - Updated gl Translation (Fran Dieguez)
+ - Updated he Translation (Yaron Shahrabani)
+ - Updated hu Translation (Gabor Kelemen)
+ - Updated it Translation (Luca Ferretti)
+ - Updated ko Translation (Changwoo Ryu)
+ - Updated lt Translation (Algimantas Margevičius)
+ - Updated lv Translation (Rudolfs Mazurs)
+ - Updated nb Translation (Kjartan Maraas)
+ - Updated pl Translation (Piotr Drąg)
+ - Updated sk Translation (Pavol Klačanský)
+ - Updated sl Translation (Matej Urbančič)
+ - Updated sv Translation (Daniel Nylander)
+ - Updated tr Translation (Muhammet Kara)
+ - Updated vi Translation (Nguyễn Thái Ngọc Duy)
+ - Updated zh_CN Translation (Aron Xu)
+
+Documentation translations:
+ - Updated fr Documentation translation (Bruno Brouard)
+ - Updated hu Documentation translation (Gabor Kelemen)
+
 NEW in 3.2.0 (26/09/2011)
 ============
 
