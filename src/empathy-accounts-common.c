@@ -85,28 +85,30 @@ empathy_accounts_has_accounts (TpAccountManager *manager)
 static void
 do_show_accounts_ui (TpAccountManager *manager,
     TpAccount *account,
-    GCallback window_destroyed_cb)
+    GApplication *app)
 {
   static GtkWidget *accounts_window = NULL;
 
   if (accounts_window == NULL)
-    accounts_window = empathy_accounts_dialog_show (NULL, account);
+    {
+      accounts_window = empathy_accounts_dialog_show (NULL, account);
 
-  if (window_destroyed_cb)
-    g_signal_connect (accounts_window, "destroy", window_destroyed_cb, NULL);
+      gtk_application_add_window (GTK_APPLICATION (app),
+          GTK_WINDOW (accounts_window));
+    }
 
   gtk_window_present (GTK_WINDOW (accounts_window));
 }
 
 static GtkWidget *
 show_account_assistant (EmpathyConnectionManagers *connection_mgrs,
-    GCallback assistant_destroy_cb)
+    GApplication *app)
 {
   GtkWidget *assistant;
 
   assistant = empathy_account_assistant_show (NULL, connection_mgrs);
-  if (assistant_destroy_cb)
-    g_signal_connect (assistant, "destroy", assistant_destroy_cb, NULL);
+
+  gtk_application_add_window (GTK_APPLICATION (app), GTK_WINDOW (assistant));
 
   return assistant;
 }
@@ -117,23 +119,24 @@ connection_managers_prepare_for_accounts (GObject *source,
     gpointer user_data)
 {
   EmpathyConnectionManagers *cm_mgr = EMPATHY_CONNECTION_MANAGERS (source);
-  GCallback assistant_destroy_cb = G_CALLBACK (user_data);
+  GApplication *app = user_data;
 
   if (!empathy_connection_managers_prepare_finish (cm_mgr, result, NULL))
     goto out;
 
-  show_account_assistant (cm_mgr, assistant_destroy_cb);
+  show_account_assistant (cm_mgr, app);
   DEBUG ("would show the account assistant");
 
 out:
   g_object_unref (cm_mgr);
+  g_application_release (app);
 }
 
 void
 empathy_accounts_show_accounts_ui (TpAccountManager *manager,
     TpAccount *account,
     gboolean assistant,
-    GCallback window_destroyed_cb)
+    GApplication *app)
 {
   g_return_if_fail (TP_IS_ACCOUNT_MANAGER (manager));
   g_return_if_fail (!account || TP_IS_ACCOUNT (account));
@@ -141,7 +144,7 @@ empathy_accounts_show_accounts_ui (TpAccountManager *manager,
   if ((empathy_accounts_has_non_salut_accounts (manager) && !assistant) ||
           account != NULL)
     {
-      do_show_accounts_ui (manager, account, window_destroyed_cb);
+      do_show_accounts_ui (manager, account, app);
     }
   else
     {
@@ -149,7 +152,10 @@ empathy_accounts_show_accounts_ui (TpAccountManager *manager,
 
       cm_mgr = empathy_connection_managers_dup_singleton ();
 
+      /* Hold the application while preparing cm_mgr */
+      g_application_hold (app);
+
       empathy_connection_managers_prepare_async (cm_mgr,
-          connection_managers_prepare_for_accounts, window_destroyed_cb);
+          connection_managers_prepare_for_accounts, app);
     }
 }
