@@ -64,6 +64,11 @@ NETWORK_MANAGER_REQUIRED=0.7.0
 #ifelse(empathy_released, 1, [], [enable_maintainer_mode="yes"])
 #GNOME_MAINTAINER_MODE_DEFINES
 
+# Disable GLib deprecation warnings for now; we don't want to bump the GLib dep
+# and make things harder for contributiors without good reason. We'll re-enable
+# those warnings later during the cycle (bgo #662662)
+AC_DEFINE(GLIB_DISABLE_DEPRECATION_WARNINGS, 1, [])
+
 # telepathy-yell
 prev_top_build_prefix=$ac_top_build_prefix
 prev_ac_configure_args=$ac_configure_args
