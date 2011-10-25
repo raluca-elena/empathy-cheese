@@ -67,7 +67,7 @@ NETWORK_MANAGER_REQUIRED=0.7.0
 # Disable GLib deprecation warnings for now; we don't want to bump the GLib dep
 # and make things harder for contributiors without good reason. We'll re-enable
 # those warnings later during the cycle (bgo #662662)
-AC_DEFINE(GLIB_DISABLE_DEPRECATION_WARNINGS, 1, [])
+AC_DEFINE(GLIB_DISABLE_DEPRECATION_WARNINGS, 1, [Build with GLib deprecated])
 
 # telepathy-yell
 prev_top_build_prefix=$ac_top_build_prefix
