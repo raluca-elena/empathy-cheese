@@ -320,7 +320,9 @@ static void
 status_icon_quit_cb (GtkAction         *action,
 		     EmpathyStatusIcon *icon)
 {
-	gtk_main_quit ();
+	EmpathyStatusIconPriv *priv = GET_PRIV (icon);
+
+	gtk_widget_destroy (priv->window);
 }
 
 static void

@@ -1433,7 +1433,7 @@ static void
 main_window_chat_quit_cb (GtkAction         *action,
 			  EmpathyMainWindow *window)
 {
-	gtk_main_quit ();
+	gtk_widget_destroy (GTK_WIDGET (window));
 }
 
 static void

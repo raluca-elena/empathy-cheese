@@ -181,9 +181,6 @@ empathy_app_finalize (GObject *object)
 
   g_free (self->preferences_tab);
 
-  if (self->window != NULL)
-    gtk_widget_destroy (self->window);
-
   if (finalize != NULL)
     finalize (object);
 }
@@ -351,11 +348,13 @@ empathy_app_command_line (GApplication *app,
           g_error_free (error);
         }
 
-      g_application_hold (G_APPLICATION (app));
       self->activated = TRUE;
 
       /* Setting up UI */
       self->window = empathy_main_window_dup ();
+
+      gtk_application_add_window (GTK_APPLICATION (app),
+          GTK_WINDOW (self->window));
 
       /* check if Shell is running */
       dbus = tp_dbus_daemon_dup (&error);
