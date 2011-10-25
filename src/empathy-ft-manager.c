@@ -262,11 +262,11 @@ ft_manager_format_progress_bytes_and_percentage (guint64 current,
   char *total_str, *current_str, *retval;
   char *speed_str = NULL;
 
-  total_str = g_format_size_for_display (total);
-  current_str = g_format_size_for_display (current);
+  total_str = g_format_size (total);
+  current_str = g_format_size (current);
 
   if (speed > 0)
-    speed_str = g_format_size_for_display ((goffset) speed);
+    speed_str = g_format_size ((goffset) speed);
 
   /* translators: first %s is the currently processed size, second %s is
    * the total file size */
