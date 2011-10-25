@@ -73,8 +73,6 @@ stripped_char (gunichar ch)
 {
   gunichar retval = 0;
   GUnicodeType utype;
-  gunichar *decomp;
-  gsize dlen;
 
   utype = g_unichar_type (ch);
 
@@ -114,12 +112,7 @@ stripped_char (gunichar ch)
     case G_UNICODE_SPACE_SEPARATOR:
     default:
       ch = g_unichar_tolower (ch);
-      decomp = g_unicode_canonical_decomposition (ch, &dlen);
-      if (decomp != NULL)
-        {
-          retval = decomp[0];
-          g_free (decomp);
-        }
+      g_unichar_fully_decompose (ch, FALSE, &retval, 1);
     }
 
   return retval;
