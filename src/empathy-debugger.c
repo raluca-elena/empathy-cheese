@@ -38,10 +38,9 @@ activate_cb (GApplication *app)
   if (window == NULL)
     {
       window = empathy_debug_window_new (NULL);
-      g_signal_connect (window, "destroy", gtk_main_quit, NULL);
 
-      /* don't let this application exit automatically */
-      g_application_hold (G_APPLICATION (app));
+      gtk_application_add_window (GTK_APPLICATION (app),
+          GTK_WINDOW (window));
     }
   else
     {
