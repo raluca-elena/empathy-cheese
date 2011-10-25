@@ -1907,8 +1907,8 @@ file_manager_receive_file_response_cb (GtkDialog *dialog,
 				_("Insufficient free space to save file"));
 			char *file_size_str, *free_space_str;
 
-			file_size_str = g_format_size_for_display (file_size);
-			free_space_str = g_format_size_for_display (free_space);
+			file_size_str = g_format_size (file_size);
+			free_space_str = g_format_size (free_space);
 
 			gtk_message_dialog_format_secondary_text (
 				GTK_MESSAGE_DIALOG (message),
