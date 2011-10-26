@@ -187,6 +187,14 @@ out:
 }
 
 static void
+contact_capabilities_changed (TpContact *contact,
+    GParamSpec *pspec,
+    EmpathyContactChooser *self)
+{
+  empathy_individual_view_refilter (self->priv->view);
+}
+
+static void
 get_contacts_cb (TpConnection *connection,
     guint n_contacts,
     TpContact * const *contacts,
@@ -223,6 +231,10 @@ get_contacts_cb (TpConnection *connection,
       tpf_persona_new (contacts[0], store));
 
   individual = folks_individual_new (personas);
+
+  /* listen for updates to the capabilities */
+  tp_g_signal_connect_object (contacts[0], "notify::capabilities",
+      G_CALLBACK (contact_capabilities_changed), self, 0);
 
   /* Pass ownership to the list */
   ctx->individuals = g_list_prepend (ctx->individuals, individual);
