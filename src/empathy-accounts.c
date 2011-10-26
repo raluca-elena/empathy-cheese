@@ -58,27 +58,6 @@ static gboolean account_manager_prepared = FALSE;
 static gboolean assistant = FALSE;
 
 static void
-account_prepare_cb (GObject *source_object,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  TpAccountManager *manager = TP_ACCOUNT_MANAGER (user_data);
-  TpAccount *account = TP_ACCOUNT (source_object);
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (account, result, &error))
-    {
-      DEBUG ("Failed to prepare account: %s", error->message);
-      g_error_free (error);
-
-      account = NULL;
-    }
-
-  empathy_accounts_show_accounts_ui (manager, account, assistant,
-      G_CALLBACK (gtk_main_quit));
-}
-
-static void
 maybe_show_accounts_ui (TpAccountManager *manager)
 {
   if (hidden ||
@@ -86,6 +65,27 @@ maybe_show_accounts_ui (TpAccountManager *manager)
     gtk_main_quit ();
   else
     empathy_accounts_show_accounts_ui (manager, NULL, assistant, gtk_main_quit);
+}
+
+static TpAccount *
+find_account (TpAccountManager *mgr,
+    const gchar *path)
+{
+  GList *accounts, *l;
+  TpAccount *found = NULL;
+
+  accounts = tp_account_manager_get_valid_accounts (mgr);
+  for (l = accounts; l != NULL; l = g_list_next (l))
+    {
+      if (!tp_strdiff (tp_proxy_get_object_path (l->data), path))
+        {
+          found = l->data;
+          break;
+        }
+    }
+
+  g_list_free (accounts);
+  return found;
 }
 
 static void
@@ -108,8 +108,7 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
   if (selected_account_name != NULL)
     {
       gchar *account_path;
-      TpAccount *account = NULL;
-      TpDBusDaemon *bus;
+      TpAccount *account;
 
       /* create and prep the corresponding TpAccount so it's fully ready by the
        * time we try to select it in the accounts dialog */
@@ -119,23 +118,24 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
         account_path = g_strdup_printf ("%s%s", TP_ACCOUNT_OBJECT_PATH_BASE,
             selected_account_name);
 
-      bus = tp_dbus_daemon_dup (NULL);
-      if ((account = tp_account_new (bus, account_path, &error)))
+      account = find_account (manager, account_path);
+
+      if (account != NULL)
         {
-          tp_proxy_prepare_async (account, NULL, account_prepare_cb, manager);
-          g_object_unref (bus);
+          empathy_accounts_show_accounts_ui (manager, account, assistant,
+              G_CALLBACK (gtk_main_quit));
+
           return;
         }
       else
         {
-          DEBUG ("Failed to find account with path %s: %s", account_path,
-              error->message);
+          DEBUG ("Failed to find account with path %s", account_path);
+
           g_clear_error (&error);
 
           maybe_show_accounts_ui (manager);
         }
 
-      g_object_unref (bus);
       g_free (account_path);
     }
   else
