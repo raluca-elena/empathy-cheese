@@ -299,16 +299,6 @@ ctx_free (Ctx *ctx)
 }
 
 static void
-account_chooser_ready_cb (EmpathyAccountChooser *chooser,
-    EmpathyLogWindow *self)
-{
-  /* We'll display the account once the model has been populate with the chats
-   * of this account. */
-  empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
-      self->priv->account_chooser), self->priv->selected_account);
-}
-
-static void
 select_account_once_ready (EmpathyLogWindow *self,
     TpAccount *account,
     const gchar *chat_id,
@@ -326,12 +316,8 @@ select_account_once_ready (EmpathyLogWindow *self,
 
   self->priv->selected_is_chatroom = is_chatroom;
 
-  if (empathy_account_chooser_is_ready (account_chooser))
-    account_chooser_ready_cb (account_chooser, self);
-  else
-    /* Chat will be selected once the account chooser is ready */
-    g_signal_connect (account_chooser, "ready",
-        G_CALLBACK (account_chooser_ready_cb), self);
+  empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
+      self->priv->account_chooser), self->priv->selected_account);
 }
 
 static void
@@ -3707,18 +3693,6 @@ log_window_logger_clear_account_cb (TpProxy *proxy,
 }
 
 static void
-log_window_clear_logs_chooser_select_account (EmpathyAccountChooser *chooser,
-    EmpathyLogWindow *self)
-{
-  EmpathyAccountChooser *account_chooser;
-
-  account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser);
-
-  empathy_account_chooser_set_account (chooser,
-      empathy_account_chooser_get_account (account_chooser));
-}
-
-static void
 log_window_delete_menu_clicked_cb (GtkMenuItem *menuitem,
     EmpathyLogWindow *self)
 {
@@ -3735,11 +3709,9 @@ log_window_delete_menu_clicked_cb (GtkMenuItem *menuitem,
   empathy_account_chooser_refilter (account_chooser);
 
   /* Select the same account as in the history window */
-  if (empathy_account_chooser_is_ready (account_chooser))
-    log_window_clear_logs_chooser_select_account (account_chooser, self);
-  else
-    g_signal_connect (account_chooser, "ready",
-        G_CALLBACK (log_window_clear_logs_chooser_select_account), self);
+  empathy_account_chooser_set_account (account_chooser,
+      empathy_account_chooser_get_account (
+        EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser)));
 
   dialog = gtk_message_dialog_new_with_markup (GTK_WINDOW (self),
       GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING,

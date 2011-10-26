@@ -65,6 +65,8 @@ struct _EmpathyAccountChooserPriv
   EmpathyAccountChooserFilterFunc filter;
   gpointer filter_data;
   gboolean ready;
+
+  TpAccount *select_when_ready;
 };
 
 typedef struct
@@ -153,6 +155,8 @@ static gboolean account_chooser_set_account_foreach (GtkTreeModel *model,
     GtkTreeIter *iter,
     SetAccountData *data);
 static void update_account (EmpathyAccountChooser *self,
+    TpAccount *account);
+static gboolean select_account (EmpathyAccountChooser *self,
     TpAccount *account);
 
 enum {
@@ -295,6 +299,13 @@ account_manager_prepared_cb (GObject *source_object,
 
   g_list_free (accounts);
 
+  if (self->priv->select_when_ready != NULL)
+    {
+      select_account (self, self->priv->select_when_ready);
+
+      g_clear_object (&self->priv->select_when_ready);
+    }
+
   self->priv->ready = TRUE;
   g_signal_emit (self, signals[READY], 0);
 }
@@ -354,6 +365,7 @@ account_chooser_dispose (GObject *object)
   EmpathyAccountChooser *self = EMPATHY_ACCOUNT_CHOOSER (object);
 
   g_clear_object (&self->priv->manager);
+  g_clear_object (&self->priv->select_when_ready);
 
   G_OBJECT_CLASS (empathy_account_chooser_parent_class)->dispose (object);
 }
@@ -570,7 +582,17 @@ gboolean
 empathy_account_chooser_set_account (EmpathyAccountChooser *self,
     TpAccount *account)
 {
-  return select_account (self, account);
+  if (self->priv->ready)
+    return select_account (self, account);
+
+  /* Account chooser is not ready yet, we'll try selecting the account once it
+   * is */
+  g_clear_object (&self->priv->select_when_ready);
+
+  if (account != NULL)
+    self->priv->select_when_ready = g_object_ref (account);
+
+  return FALSE;
 }
 
 void
