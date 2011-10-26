@@ -54,7 +54,6 @@
 static gboolean only_if_needed = FALSE;
 static gboolean hidden = FALSE;
 static gchar *selected_account_name = NULL;
-static gboolean account_manager_prepared = FALSE;
 static gboolean assistant = FALSE;
 
 static void
@@ -103,8 +102,6 @@ account_manager_ready_for_accounts_cb (GObject *source_object,
       return;
     }
 
-  account_manager_prepared = TRUE;
-
   if (selected_account_name != NULL)
     {
       gchar *account_path;
@@ -148,20 +145,16 @@ static int
 app_command_line_cb (GApplication *app,
     GApplicationCommandLine *cmdline)
 {
+  TpAccountManager *account_manager;
+
   g_application_hold (app);
 
-  /* if the window is ready, present it; otherwise, it will be presented when
-   * the accounts manager is prepared */
-  if (account_manager_prepared)
-    {
-      TpAccountManager *account_manager;
+  account_manager = tp_account_manager_dup ();
 
-      account_manager = tp_account_manager_dup ();
-      empathy_accounts_show_accounts_ui (account_manager, NULL, assistant,
-              G_CALLBACK (gtk_main_quit));
+  tp_proxy_prepare_async (account_manager, NULL,
+    account_manager_ready_for_accounts_cb, NULL);
 
-      g_object_unref (account_manager);
-    }
+  g_object_unref (account_manager);
 
   return 0;
 }
@@ -223,12 +216,9 @@ local_cmdline (GApplication *app,
   return retval;
 }
 
-#define COMMAND_ACCOUNTS_DIALOG 1
-
 int
 main (int argc, char *argv[])
 {
-  TpAccountManager *account_manager;
   GtkApplication *app;
   GObjectClass *app_class;
   gint retval;
@@ -251,17 +241,11 @@ main (int argc, char *argv[])
   app_class = G_OBJECT_GET_CLASS (app);
   G_APPLICATION_CLASS (app_class)->local_command_line = local_cmdline;
 
-  account_manager = tp_account_manager_dup ();
-
-  tp_proxy_prepare_async (account_manager, NULL,
-    account_manager_ready_for_accounts_cb, NULL);
-
   g_signal_connect (app, "command-line", G_CALLBACK (app_command_line_cb),
       NULL);
 
   retval = g_application_run (G_APPLICATION (app), argc, argv);
 
-  g_object_unref (account_manager);
   g_object_unref (app);
 
   return retval;
