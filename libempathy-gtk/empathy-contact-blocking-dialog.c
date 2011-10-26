@@ -47,9 +47,6 @@ G_DEFINE_TYPE (EmpathyContactBlockingDialog, empathy_contact_blocking_dialog,
 
 struct _EmpathyContactBlockingDialogPrivate
 {
-  /* a map of all active connections to their 'deny' channel */
-  GHashTable *channels; /* reffed TpConnection* -> reffed TpChannel* */
-
   guint block_account_changed;
 
   GtkListStore *blocked_contacts;
@@ -62,12 +59,14 @@ struct _EmpathyContactBlockingDialogPrivate
   GtkWidget *info_bar;
   GtkWidget *info_bar_label;
   GtkWidget *remove_button;
+
+  TpConnection *current_conn;
 };
 
 enum /* blocked-contacts columns */
 {
   COL_BLOCKED_IDENTIFIER,
-  COL_BLOCKED_HANDLE,
+  COL_BLOCKED_CONTACT,
   N_BLOCKED_COLUMNS
 };
 
@@ -90,13 +89,13 @@ contact_blocking_dialog_filter_account_chooser (TpAccount *account,
     gpointer callback_data,
     gpointer user_data)
 {
-  EmpathyContactBlockingDialog *self = user_data;
   TpConnection *conn = tp_account_get_connection (account);
   gboolean enable;
 
   enable =
     conn != NULL &&
-    g_hash_table_lookup (self->priv->channels, conn) != NULL;
+    tp_proxy_has_interface_by_id (conn,
+      TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING);
 
   callback (enable, callback_data);
 }
@@ -124,7 +123,8 @@ contact_blocking_dialog_refilter_account_chooser (
   conn = empathy_account_chooser_get_connection (chooser);
   enabled = (empathy_account_chooser_get_account (chooser) != NULL &&
              conn != NULL &&
-             g_hash_table_lookup (self->priv->channels, conn) != NULL);
+             tp_proxy_has_interface_by_id (conn,
+               TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING));
 
   if (!enabled)
     DEBUG ("No account selected");
@@ -135,55 +135,62 @@ contact_blocking_dialog_refilter_account_chooser (
   contact_blocking_dialog_account_changed (self->priv->account_chooser, self);
 }
 
-static void contact_blocking_dialog_inspected_handles (TpConnection *,
-    const char **, const GError *, gpointer, GObject *);
-
 static void
-contact_blocking_dialog_add_contacts_to_list (
+contact_blocking_dialog_add_blocked (
     EmpathyContactBlockingDialog *self,
-    TpConnection *conn,
-    GArray *handles)
-{
-  if (handles->len > 0)
-    tp_cli_connection_call_inspect_handles (conn, -1,
-        TP_HANDLE_TYPE_CONTACT, handles,
-        contact_blocking_dialog_inspected_handles,
-        g_boxed_copy (DBUS_TYPE_G_UINT_ARRAY, handles),
-        (GDestroyNotify) g_array_unref, G_OBJECT (self));
-}
-
-static void
-contact_blocking_dialog_inspected_handles (TpConnection *conn,
-    const char **identifiers,
-    const GError *in_error,
-    gpointer user_data,
-    GObject *self)
+    GPtrArray *blocked)
 {
   EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
-  GArray *handles = user_data;
   guint i;
 
-  if (in_error != NULL)
-    {
-      DEBUG ("Failed to inspect handles: %s", in_error->message);
-      return;
-    }
+  if (blocked == NULL)
+    return;
 
-  DEBUG ("Adding %u identifiers", handles->len);
-
-  for (i = 0; i < handles->len; i++)
+  for (i = 0; i < blocked->len; i++)
     {
-      const char *identifier = identifiers[i];
-      TpHandle handle = g_array_index (handles, TpHandle, i);
+      TpContact *contact = g_ptr_array_index (blocked, i);
 
       gtk_list_store_insert_with_values (priv->blocked_contacts, NULL, -1,
-          COL_BLOCKED_IDENTIFIER, identifier,
-          COL_BLOCKED_HANDLE, handle,
+          COL_BLOCKED_IDENTIFIER, tp_contact_get_identifier (contact),
+          COL_BLOCKED_CONTACT, contact,
           -1);
     }
 }
 
-DECLARE_CALLBACK (contact_blocking_dialog_connection_prepared);
+static void
+blocked_contacts_changed_cb (TpConnection *conn,
+    GPtrArray *added,
+    GPtrArray *removed,
+    EmpathyContactBlockingDialog *self)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (self->priv->blocked_contacts);
+  GtkTreeIter iter;
+  gboolean valid;
+
+  DEBUG ("blocked contacts changed on %s: %u added, %u removed",
+      get_pretty_conn_name (conn), added->len, removed->len);
+
+  /* add contacts */
+  contact_blocking_dialog_add_blocked (self, added);
+
+  /* remove contacts */
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      TpContact *contact;
+
+      gtk_tree_model_get (model, &iter,
+          COL_BLOCKED_CONTACT, &contact,
+          -1);
+
+      if (tp_g_ptr_array_contains (removed, contact))
+        valid = gtk_list_store_remove (self->priv->blocked_contacts, &iter);
+      else
+        valid = gtk_tree_model_iter_next (model, &iter);
+
+      g_object_unref (contact);
+    }
+}
 
 static void
 contact_blocking_dialog_connection_status_changed (TpAccount *account,
@@ -201,8 +208,6 @@ contact_blocking_dialog_connection_status_changed (TpAccount *account,
       case TP_CONNECTION_STATUS_DISCONNECTED:
         DEBUG ("Connection %s invalidated", get_pretty_conn_name (conn));
 
-        /* remove the channel from the hash table */
-        g_hash_table_remove (self->priv->channels, conn);
         contact_blocking_dialog_refilter_account_chooser (self);
         break;
 
@@ -212,64 +217,9 @@ contact_blocking_dialog_connection_status_changed (TpAccount *account,
       case TP_CONNECTION_STATUS_CONNECTED:
         DEBUG ("Connection %s reconnected", get_pretty_conn_name (conn));
 
-        tp_proxy_prepare_async (conn, NULL,
-            contact_blocking_dialog_connection_prepared, self);
+        contact_blocking_dialog_refilter_account_chooser (self);
     }
 }
-
-static void
-contact_blocking_dialog_deny_channel_members_changed (TpChannel *channel,
-    const char *message,
-    GArray *added,
-    GArray *removed,
-    GArray *local_pending,
-    GArray *remote_pending,
-    TpHandle actor,
-    guint reason,
-    EmpathyContactBlockingDialog *self)
-{
-  TpConnection *conn = tp_channel_borrow_connection (channel);
-  GtkTreeModel *model = GTK_TREE_MODEL (self->priv->blocked_contacts);
-  GtkTreeIter iter;
-  TpIntset *removed_set;
-  gboolean valid;
-
-  /* we only care about changes to the selected connection */
-  /* FIXME: can we compare proxy pointers directly? */
-  if (tp_strdiff (
-        tp_proxy_get_object_path (tp_channel_borrow_connection (channel)),
-        tp_proxy_get_object_path (empathy_account_chooser_get_connection (
-            EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser)))))
-    return;
-
-  DEBUG ("deny list changed on %s: %u added, %u removed",
-      get_pretty_conn_name (conn), added->len, removed->len);
-
-  /* add contacts */
-  contact_blocking_dialog_add_contacts_to_list (self, conn, added);
-
-  /* remove contacts */
-  removed_set = tp_intset_from_array (removed);
-
-  valid = gtk_tree_model_get_iter_first (model, &iter);
-  while (valid)
-    {
-      TpHandle handle;
-
-      gtk_tree_model_get (model, &iter,
-          COL_BLOCKED_HANDLE, &handle,
-          -1);
-
-      if (tp_intset_is_member (removed_set, handle))
-        valid = gtk_list_store_remove (self->priv->blocked_contacts, &iter);
-      else
-        valid = gtk_tree_model_iter_next (model, &iter);
-    }
-
-  tp_intset_destroy (removed_set);
-}
-
-DECLARE_CALLBACK (contact_blocking_dialog_connection_prepared);
 
 static void
 contact_blocking_dialog_am_prepared (GObject *am,
@@ -292,136 +242,15 @@ contact_blocking_dialog_am_prepared (GObject *am,
   for (ptr = accounts; ptr != NULL; ptr = ptr->next)
     {
       TpAccount *account = ptr->data;
-      TpConnection *conn;
 
       tp_g_signal_connect_object (account, "status-changed",
           G_CALLBACK (contact_blocking_dialog_connection_status_changed),
           self, 0);
 
-      conn = tp_account_get_connection (TP_ACCOUNT (account));
-
-      if (conn != NULL)
-        {
-          tp_proxy_prepare_async (conn, NULL,
-              contact_blocking_dialog_connection_prepared, self);
-        }
+      contact_blocking_dialog_refilter_account_chooser (self);
     }
 
   g_list_free (accounts);
-}
-
-static void contact_blocking_dialog_got_deny_channel (TpConnection *,
-    gboolean, const char *, GHashTable *, const GError *, gpointer, GObject *);
-
-static void
-contact_blocking_dialog_connection_prepared (GObject *conn,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  EmpathyContactBlockingDialog *self = user_data;
-  GHashTable *request;
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (conn, result, &error))
-    {
-      DEBUG ("Failed to prepare connection %s: %s",
-          get_pretty_conn_name ((TpConnection *) conn), error->message);
-      g_error_free (error);
-      return;
-    }
-
-  /* request the deny channel */
-  request = tp_asv_new (
-      TP_PROP_CHANNEL_CHANNEL_TYPE,
-      G_TYPE_STRING,
-      TP_IFACE_CHANNEL_TYPE_CONTACT_LIST,
-
-      TP_PROP_CHANNEL_TARGET_HANDLE_TYPE,
-      G_TYPE_UINT,
-      TP_HANDLE_TYPE_LIST,
-
-      TP_PROP_CHANNEL_TARGET_ID,
-      G_TYPE_STRING,
-      "deny",
-
-      NULL);
-
-  tp_cli_connection_interface_requests_call_ensure_channel (
-      TP_CONNECTION (conn), -1, request,
-      contact_blocking_dialog_got_deny_channel, NULL, NULL, G_OBJECT (self));
-
-  g_hash_table_destroy (request);
-}
-
-DECLARE_CALLBACK (contact_blocking_dialog_deny_channel_prepared);
-
-static void
-contact_blocking_dialog_got_deny_channel (TpConnection *conn,
-    gboolean yours,
-    const char *channel_path,
-    GHashTable *props,
-    const GError *in_error,
-    gpointer user_data,
-    GObject *self)
-{
-  TpChannel *channel;
-  GError *error = NULL;
-
-  const GQuark features[] = {
-      TP_CHANNEL_FEATURE_CORE,
-      TP_CHANNEL_FEATURE_GROUP,
-      0 };
-
-  if (in_error != NULL)
-    {
-      DEBUG ("Failed to get 'deny' channel on %s: %s",
-          get_pretty_conn_name (conn), in_error->message);
-      return;
-    }
-
-  channel = tp_channel_new_from_properties (conn, channel_path, props, &error);
-
-  if (error != NULL)
-    {
-      DEBUG ("Failed to create channel proxy on %s: %s",
-          get_pretty_conn_name (conn), in_error->message);
-      g_error_free (error);
-      return;
-    }
-
-  tp_proxy_prepare_async (channel, features,
-      contact_blocking_dialog_deny_channel_prepared, self);
-}
-
-static void
-contact_blocking_dialog_deny_channel_prepared (GObject *channel,
-    GAsyncResult *result,
-    gpointer user_data)
-{
-  EmpathyContactBlockingDialog *self = user_data;
-  TpConnection *conn;
-  GError *error = NULL;
-
-  if (!tp_proxy_prepare_finish (channel, result, &error))
-    {
-      DEBUG ("Failed to prepare channel %s: %s",
-          tp_proxy_get_object_path (channel), error->message);
-      g_error_free (error);
-      return;
-    }
-
-  conn = tp_channel_borrow_connection (TP_CHANNEL (channel));
-
-  DEBUG ("Channel %s prepared for connection %s",
-      tp_proxy_get_object_path (channel), get_pretty_conn_name (conn));
-
-  g_hash_table_insert (self->priv->channels,
-      g_object_ref (conn), channel);
-  contact_blocking_dialog_refilter_account_chooser (self);
-
-  tp_g_signal_connect_object (channel, "group-members-changed",
-      G_CALLBACK (contact_blocking_dialog_deny_channel_members_changed),
-      self, 0);
 }
 
 static void
@@ -449,8 +278,63 @@ contact_blocking_dialog_set_error (EmpathyContactBlockingDialog *self,
   gtk_widget_show (self->priv->info_bar);
 }
 
-static void contact_blocking_dialog_add_contact_got_handle (TpConnection *,
-    const GArray *, const GError *, gpointer, GObject *);
+static void
+block_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  EmpathyContactBlockingDialog *self = user_data;
+  GError *error = NULL;
+
+  if (!tp_contact_block_finish (TP_CONTACT (source), result,
+        &error))
+    {
+      DEBUG ("Error blocking contacts: %s", error->message);
+
+      contact_blocking_dialog_set_error (
+          EMPATHY_CONTACT_BLOCKING_DIALOG (self), error);
+
+      g_error_free (error);
+      return;
+    }
+
+  DEBUG ("Contact blocked");
+}
+
+static void
+block_contact_got_contact(TpConnection *conn,
+    guint n_contacts,
+    TpContact * const *contacts,
+    const gchar * const *requested_ids,
+    GHashTable *failed_id_errors,
+    const GError *error,
+    gpointer user_data,
+    GObject *weak_object)
+{
+  EmpathyContactBlockingDialog *self =
+    EMPATHY_CONTACT_BLOCKING_DIALOG (weak_object);
+  gchar *id = user_data;
+
+  if (error != NULL)
+    goto error;
+
+  error = g_hash_table_lookup (failed_id_errors, id);
+  if (error != NULL)
+    goto error;
+
+  tp_contact_block_async (contacts[0], FALSE, block_cb, self);
+  goto finally;
+
+error:
+  DEBUG ("Error getting contact on %s: %s",
+      get_pretty_conn_name (conn), error->message);
+
+  contact_blocking_dialog_set_error (
+      EMPATHY_CONTACT_BLOCKING_DIALOG (self), error);
+
+finally:
+  g_free (id);
+}
 
 static void
 contact_blocking_dialog_add_contact (GtkWidget *widget,
@@ -466,73 +350,36 @@ contact_blocking_dialog_add_contact (GtkWidget *widget,
   DEBUG ("Looking up handle for '%s' on %s",
       identifiers[0], get_pretty_conn_name (conn));
 
-  tp_cli_connection_call_request_handles (conn, -1,
-      TP_HANDLE_TYPE_CONTACT, identifiers,
-      contact_blocking_dialog_add_contact_got_handle,
-      NULL, NULL, G_OBJECT (self));
+  tp_connection_get_contacts_by_id (conn, 1, identifiers,
+      0, NULL, block_contact_got_contact,
+      g_strdup (identifiers[0]), NULL, G_OBJECT (self));
 
   gtk_entry_set_text (GTK_ENTRY (self->priv->add_contact_entry), "");
   gtk_widget_hide (self->priv->info_bar);
 }
 
 static void
-contact_blocking_dialog_added_contact (TpChannel *, const GError *,
-    gpointer, GObject *);
-
-static void
-contact_blocking_dialog_add_contact_got_handle (TpConnection *conn,
-    const GArray *handles,
-    const GError *in_error,
-    gpointer user_data,
-    GObject *self)
+unblock_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
 {
-  EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
-  TpChannel *channel = g_hash_table_lookup (priv->channels, conn);
+  EmpathyContactBlockingDialog *self = user_data;
+  GError *error = NULL;
 
-  if (in_error != NULL)
+  if (!tp_connection_unblock_contacts_finish (TP_CONNECTION (source), result,
+        &error))
     {
-      DEBUG ("Error getting handle on %s: %s",
-          get_pretty_conn_name (conn), in_error->message);
+      DEBUG ("Error unblocking contacts: %s", error->message);
 
       contact_blocking_dialog_set_error (
-          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
+          EMPATHY_CONTACT_BLOCKING_DIALOG (self), error);
 
+      g_error_free (error);
       return;
     }
 
-  g_return_if_fail (handles->len == 1);
-
-  DEBUG ("Adding handle %u to deny channel on %s",
-      g_array_index (handles, TpHandle, 0), get_pretty_conn_name (conn));
-
-  tp_cli_channel_interface_group_call_add_members (channel, -1,
-      handles, "",
-      contact_blocking_dialog_added_contact, NULL, NULL, self);
+  DEBUG ("Contacts unblocked");
 }
-
-static void
-contact_blocking_dialog_added_contact (TpChannel *channel,
-    const GError *in_error,
-    gpointer user_data,
-    GObject *self)
-{
-  if (in_error != NULL)
-    {
-      DEBUG ("Error adding contact to deny list %s: %s",
-          tp_proxy_get_object_path (channel), in_error->message);
-
-      contact_blocking_dialog_set_error (
-          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
-
-      return;
-    }
-
-  DEBUG ("Contact added to %s", tp_proxy_get_object_path (channel));
-}
-
-static void
-contact_blocking_dialog_removed_contacts (TpChannel *,
-    const GError *, gpointer, GObject *);
 
 static void
 contact_blocking_dialog_remove_contacts (GtkWidget *button,
@@ -540,62 +387,43 @@ contact_blocking_dialog_remove_contacts (GtkWidget *button,
 {
   TpConnection *conn = empathy_account_chooser_get_connection (
       EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser));
-  TpChannel *channel = g_hash_table_lookup (self->priv->channels, conn);
   GtkTreeModel *model;
   GList *rows, *ptr;
-  GArray *handles = g_array_new (FALSE, FALSE, sizeof (TpHandle));
+  GPtrArray *contacts;
 
   rows = gtk_tree_selection_get_selected_rows (self->priv->selection, &model);
+
+  contacts = g_ptr_array_new_with_free_func (g_object_unref);
 
   for (ptr = rows; ptr != NULL; ptr = ptr->next)
     {
       GtkTreePath *path = ptr->data;
       GtkTreeIter iter;
-      TpHandle handle;
+      TpContact *contact;
 
       if (!gtk_tree_model_get_iter (model, &iter, path))
         continue;
 
       gtk_tree_model_get (model, &iter,
-          COL_BLOCKED_HANDLE, &handle,
+          COL_BLOCKED_CONTACT, &contact,
           -1);
 
-      g_array_append_val (handles, handle);
+      g_ptr_array_add (contacts, contact);
+
       gtk_tree_path_free (path);
     }
 
   g_list_free (rows);
 
-  if (handles->len > 0)
+  if (contacts->len > 0)
     {
-      DEBUG ("Removing %u handles", handles->len);
+      DEBUG ("Unblocking %u contacts", contacts->len);
 
-      tp_cli_channel_interface_group_call_remove_members (channel, -1,
-          handles, "",
-          contact_blocking_dialog_removed_contacts,
-          NULL, NULL, G_OBJECT (self));
+      tp_connection_unblock_contacts_async (conn, contacts->len,
+          (TpContact * const *) contacts->pdata, unblock_cb, self);
     }
 
-  g_array_unref (handles);
-}
-
-static void
-contact_blocking_dialog_removed_contacts (TpChannel *channel,
-    const GError *in_error,
-    gpointer user_data,
-    GObject *self)
-{
-  if (in_error != NULL)
-    {
-      DEBUG ("Error removing contacts from deny list: %s", in_error->message);
-
-      contact_blocking_dialog_set_error (
-          EMPATHY_CONTACT_BLOCKING_DIALOG (self), in_error);
-
-      return;
-    }
-
-  DEBUG ("Contacts removed");
+  g_ptr_array_unref (contacts);
 }
 
 static void
@@ -604,8 +432,7 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
 {
   TpConnection *conn = empathy_account_chooser_get_connection (
       EMPATHY_ACCOUNT_CHOOSER (account_chooser));
-  TpChannel *channel;
-  GArray *blocked;
+  GPtrArray *blocked;
   EmpathyContactManager *contact_manager;
   EmpathyTpContactList *contact_list;
   GList *members, *ptr;
@@ -613,29 +440,37 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
   if (self->priv->block_account_changed > 0)
     return;
 
+  if (conn == self->priv->current_conn)
+    return;
+
   /* clear the lists of contacts */
   gtk_list_store_clear (self->priv->blocked_contacts);
   gtk_list_store_clear (self->priv->completion_contacts);
+
+  if (self->priv->current_conn != NULL)
+    {
+      g_signal_handlers_disconnect_by_func (self->priv->current_conn,
+          blocked_contacts_changed_cb, self);
+
+      g_clear_object (&self->priv->current_conn);
+    }
 
   if (conn == NULL)
     return;
 
   DEBUG ("Account changed: %s", get_pretty_conn_name (conn));
 
-  /* load the deny list */
-  channel = g_hash_table_lookup (self->priv->channels, conn);
+  self->priv->current_conn = g_object_ref (conn);
 
-  if (channel == NULL)
-    return;
+  tp_g_signal_connect_object (conn, "blocked-contacts-changed",
+      G_CALLBACK (blocked_contacts_changed_cb), self, 0);
 
-  g_return_if_fail (TP_IS_CHANNEL (channel));
+  blocked = tp_connection_get_blocked_contacts (conn);
 
-  blocked = tp_intset_to_array (tp_channel_group_get_members (channel));
+  DEBUG ("%u contacts blocked on %s",
+      blocked != NULL ? blocked->len : 0, get_pretty_conn_name (conn));
 
-  DEBUG ("%u contacts on blocked list", blocked->len);
-
-  contact_blocking_dialog_add_contacts_to_list (self, conn, blocked);
-  g_array_unref (blocked);
+  contact_blocking_dialog_add_blocked (self, blocked);
 
   /* load the completion list */
   g_return_if_fail (empathy_contact_manager_initialized ());
@@ -750,7 +585,7 @@ contact_blocking_dialog_dispose (GObject *self)
 {
   EmpathyContactBlockingDialogPrivate *priv = GET_PRIVATE (self);
 
-  tp_clear_pointer (&priv->channels, g_hash_table_destroy);
+  g_clear_object (&priv->current_conn);
 
   G_OBJECT_CLASS (empathy_contact_blocking_dialog_parent_class)->dispose (self);
 }
@@ -778,13 +613,11 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   GtkEntryCompletion *completion;
   TpAccountManager *am;
   GtkStyleContext *context;
+  TpSimpleClientFactory *factory;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_CONTACT_BLOCKING_DIALOG,
       EmpathyContactBlockingDialogPrivate);
-
-  self->priv->channels = g_hash_table_new_full (NULL, NULL,
-      g_object_unref, g_object_unref);
 
   gtk_window_set_title (GTK_WINDOW (self), _("Edit Blocked Contacts"));
   gtk_dialog_add_button (GTK_DIALOG (self),
@@ -833,8 +666,9 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
   /* build the contact entry */
   self->priv->completion_contacts = gtk_list_store_new (N_COMPLETION_COLUMNS,
       G_TYPE_STRING, /* id */
-      G_TYPE_UINT, /* handle */
-      G_TYPE_STRING); /* text */
+      G_TYPE_STRING, /* text */
+      TP_TYPE_CONTACT); /* contact */
+
   completion = gtk_entry_completion_new ();
   gtk_entry_completion_set_model (completion,
       GTK_TREE_MODEL (self->priv->completion_contacts));
@@ -874,6 +708,11 @@ empathy_contact_blocking_dialog_init (EmpathyContactBlockingDialog *self)
 
   /* prepare the account manager */
   am = tp_account_manager_dup ();
+
+  factory = tp_proxy_get_factory (am);
+  tp_simple_client_factory_add_connection_features_varargs (factory,
+      TP_CONNECTION_FEATURE_CONTACT_BLOCKING, NULL);
+
   tp_proxy_prepare_async (am, NULL, contact_blocking_dialog_am_prepared, self);
   g_object_unref (am);
 
