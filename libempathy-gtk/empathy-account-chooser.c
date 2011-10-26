@@ -529,17 +529,8 @@ empathy_account_chooser_get_connection (EmpathyAccountChooser *self)
   return connection;
 }
 
-/**
- * empathy_account_chooser_set_account:
- * @self: an #EmpathyAccountChooser
- * @account: a #TpAccount
- *
- * Sets the currently selected account to @account, if it exists in the list.
- *
- * Return value: whether the chooser was set to @account.
- */
-gboolean
-empathy_account_chooser_set_account (EmpathyAccountChooser *self,
+static gboolean
+select_account (EmpathyAccountChooser *self,
     TpAccount *account)
 {
   GtkComboBox *combobox;
@@ -564,6 +555,22 @@ empathy_account_chooser_set_account (EmpathyAccountChooser *self,
   self->priv->account_manually_set = data.set;
 
   return data.set;
+}
+
+/**
+ * empathy_account_chooser_set_account:
+ * @self: an #EmpathyAccountChooser
+ * @account: a #TpAccount
+ *
+ * Sets the currently selected account to @account, if it exists in the list.
+ *
+ * Return value: whether the chooser was set to @account.
+ */
+gboolean
+empathy_account_chooser_set_account (EmpathyAccountChooser *self,
+    TpAccount *account)
+{
+  return select_account (self, account);
 }
 
 void
