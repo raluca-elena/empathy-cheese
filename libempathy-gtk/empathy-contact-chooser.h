@@ -64,6 +64,9 @@ void empathy_contact_chooser_set_filter_func (EmpathyContactChooser *self,
 void empathy_contact_chooser_show_search_entry (EmpathyContactChooser *self,
     gboolean show);
 
+void empathy_contact_chooser_show_tree_view (EmpathyContactChooser *self,
+    gboolean show);
+
 G_END_DECLS
 
 #endif

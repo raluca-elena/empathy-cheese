@@ -37,6 +37,7 @@ struct _EmpathyContactChooserPrivate
   EmpathyIndividualStore *store;
   EmpathyIndividualView *view;
   GtkWidget *search_entry;
+  GtkWidget *scroll_view;
 
   GPtrArray *search_words;
   gchar *search_str;
@@ -383,7 +384,6 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 {
   EmpathyIndividualManager *mgr;
   GtkTreeSelection *selection;
-  GtkWidget *scroll;
   GQuark features[] = { TP_ACCOUNT_MANAGER_FEATURE_CORE, 0 };
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, EMPATHY_TYPE_CONTACT_CHOOSER,
@@ -429,13 +429,14 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
   g_signal_connect (self->priv->view, "row-activated",
       G_CALLBACK (view_activate_cb), self);
 
-  scroll = gtk_scrolled_window_new (NULL, NULL);
+  self->priv->scroll_view = gtk_scrolled_window_new (NULL, NULL);
 
-  gtk_container_add (GTK_CONTAINER (scroll), GTK_WIDGET (self->priv->view));
+  gtk_container_add (GTK_CONTAINER (self->priv->scroll_view),
+      GTK_WIDGET (self->priv->view));
 
-  gtk_box_pack_start (GTK_BOX (self), scroll, TRUE, TRUE, 6);
+  gtk_box_pack_start (GTK_BOX (self), self->priv->scroll_view, TRUE, TRUE, 6);
   gtk_widget_show (GTK_WIDGET (self->priv->view));
-  gtk_widget_show (scroll);
+  gtk_widget_show (self->priv->scroll_view);
 }
 
 GtkWidget *
@@ -468,4 +469,11 @@ empathy_contact_chooser_show_search_entry (EmpathyContactChooser *self,
     gboolean show)
 {
   gtk_widget_set_visible (self->priv->search_entry, show);
+}
+
+void
+empathy_contact_chooser_show_tree_view (EmpathyContactChooser *self,
+    gboolean show)
+{
+  gtk_widget_set_visible (GTK_WIDGET (self->priv->scroll_view), show);
 }
