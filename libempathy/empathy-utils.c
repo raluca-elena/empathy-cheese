@@ -1148,3 +1148,18 @@ while_finish:
   if (can_video_call != NULL)
     *can_video_call = can_video;
 }
+
+gboolean
+empathy_sasl_channel_supports_mechanism (TpChannel *channel,
+    const gchar *mechanism)
+{
+  GHashTable *props;
+  const gchar * const *available_mechanisms;
+
+  props = tp_channel_borrow_immutable_properties (channel);
+  available_mechanisms = tp_asv_get_boxed (props,
+      TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_AVAILABLE_MECHANISMS,
+      G_TYPE_STRV);
+
+  return tp_strv_contains (available_mechanisms, mechanism);
+}

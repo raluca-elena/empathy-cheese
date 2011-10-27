@@ -27,6 +27,7 @@
 #include "empathy-keyring.h"
 #include "empathy-server-sasl-handler.h"
 #include "empathy-server-tls-handler.h"
+#include "empathy-goa-auth-handler.h"
 #include "empathy-utils.h"
 
 #include "extensions/extensions.h"
@@ -42,6 +43,7 @@ struct _EmpathyAuthFactoryPriv {
    * reffed (EmpathyServerSASLHandler *)
    * */
   GHashTable *sasl_handlers;
+  EmpathyGoaAuthHandler *goa_handler;
 
   gboolean dispose_run;
 };
@@ -190,8 +192,6 @@ common_checks (EmpathyAuthFactory *self,
 {
   EmpathyAuthFactoryPriv *priv = GET_PRIV (self);
   TpChannel *channel;
-  GHashTable *props;
-  const gchar * const *available_mechanisms;
   const GError *dbus_error;
   EmpathyServerSASLHandler *handler;
 
@@ -244,23 +244,7 @@ common_checks (EmpathyAuthFactory *self,
       return FALSE;
     }
 
-  props = tp_channel_borrow_immutable_properties (channel);
-  available_mechanisms = tp_asv_get_boxed (props,
-      TP_PROP_CHANNEL_INTERFACE_SASL_AUTHENTICATION_AVAILABLE_MECHANISMS,
-      G_TYPE_STRV);
-
-  if (tp_channel_get_channel_type_id (channel) ==
-      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION
-      && !tp_strv_contains (available_mechanisms, "X-TELEPATHY-PASSWORD"))
-    {
-      g_set_error_literal (error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
-          "Only the X-TELEPATHY-PASSWORD SASL mechanism is supported");
-
-      return FALSE;
-    }
-
   dbus_error = tp_proxy_get_invalidated (channel);
-
   if (dbus_error != NULL)
     {
       *error = g_error_copy (dbus_error);
@@ -296,6 +280,20 @@ handle_channels (TpBaseClient *handler,
 
   /* The common checks above have checked this is fine. */
   channel = channels->data;
+
+  /* Only password authentication is supported from here */
+  if (tp_channel_get_channel_type_id (channel) ==
+      TP_IFACE_QUARK_CHANNEL_TYPE_SERVER_AUTHENTICATION &&
+      !empathy_sasl_channel_supports_mechanism (channel,
+          "X-TELEPATHY-PASSWORD"))
+    {
+      g_set_error_literal (&error, TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+          "Only the X-TELEPATHY-PASSWORD SASL mechanism is supported");
+      DEBUG ("%s", error->message);
+      tp_handle_channels_context_fail (context, error);
+      g_clear_error (&error);
+      return;
+    }
 
   data = handler_context_data_new (self, context);
   tp_handle_channels_context_delay (context);
@@ -335,7 +333,7 @@ observe_channels_data_free (ObserveChannelsData *data)
 }
 
 static void
-claim_cb (GObject *source,
+password_claim_cb (GObject *source,
     GAsyncResult *result,
     gpointer user_data)
 {
@@ -387,10 +385,34 @@ get_password_cb (GObject *source,
           tp_proxy_get_object_path (source));
 
       tp_channel_dispatch_operation_claim_with_async (data->dispatch_operation,
-          TP_BASE_CLIENT (data->self), claim_cb, data);
+          TP_BASE_CLIENT (data->self), password_claim_cb, data);
 
       tp_observe_channels_context_accept (data->context);
     }
+}
+
+static void
+goa_claim_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  ObserveChannelsData *data = user_data;
+  EmpathyAuthFactory *self = data->self;
+  GError *error = NULL;
+
+  if (!tp_channel_dispatch_operation_claim_with_finish (data->dispatch_operation,
+          result, &error))
+    {
+      DEBUG ("Failed to claim: %s", error->message);
+      g_clear_error (&error);
+    }
+  else
+    {
+      empathy_goa_auth_handler_start (self->priv->goa_handler,
+          data->channel, data->account);
+    }
+
+  observe_channels_data_free (data);
 }
 
 static void
@@ -417,9 +439,7 @@ observe_channels (TpBaseClient *client,
       return;
     }
 
-  /* We're now sure this is a server auth channel using the SASL auth
-   * type and X-TELEPATHY-PASSWORD is available. Great. */
-
+  /* The common checks above have checked this is fine. */
   channel = channels->data;
 
   data = g_slice_new0 (ObserveChannelsData);
@@ -429,9 +449,35 @@ observe_channels (TpBaseClient *client,
   data->account = g_object_ref (account);
   data->channel = g_object_ref (channel);
 
-  empathy_keyring_get_account_password_async (account, get_password_cb, data);
+  /* GOA auth? */
+  if (empathy_goa_auth_handler_supports (self->priv->goa_handler, channel, account))
+    {
+      DEBUG ("Supported GOA account (%s), claim SASL channel",
+          tp_proxy_get_object_path (account));
 
-  tp_observe_channels_context_delay (context);
+      tp_channel_dispatch_operation_claim_with_async (dispatch_operation,
+          client, goa_claim_cb, data);
+      tp_observe_channels_context_accept (context);
+      return;
+    }
+
+  /* Password auth? */
+  if (empathy_sasl_channel_supports_mechanism (data->channel,
+          "X-TELEPATHY-PASSWORD"))
+    {
+      empathy_keyring_get_account_password_async (data->account,
+          get_password_cb, data);
+      tp_observe_channels_context_delay (context);
+      return;
+    }
+
+  /* Unknown auth */
+  error = g_error_new_literal (TP_ERROR, TP_ERROR_INVALID_ARGUMENT,
+      "Unknown auth mechanism");
+  tp_observe_channels_context_fail (context, error);
+  g_clear_error (&error);
+
+  observe_channels_data_free (data);
 }
 
 static GObject *
@@ -465,6 +511,7 @@ empathy_auth_factory_init (EmpathyAuthFactory *self)
 
   self->priv->sasl_handlers = g_hash_table_new_full (g_str_hash, g_str_equal,
       NULL, g_object_unref);
+  self->priv->goa_handler = empathy_goa_auth_handler_new ();
 }
 
 static void
@@ -526,6 +573,7 @@ empathy_auth_factory_dispose (GObject *object)
   priv->dispose_run = TRUE;
 
   g_hash_table_unref (priv->sasl_handlers);
+  g_object_unref (priv->goa_handler);
 
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->dispose (object);
 }

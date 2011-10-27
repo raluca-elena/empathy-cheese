@@ -23,6 +23,8 @@
  *    Danielle Madeley <danielle.madeley@collabora.co.uk>
  */
 
+#include "config.h"
+
 #include <glib/gi18n.h>
 
 #include <telepathy-glib/util.h>
@@ -40,7 +42,7 @@
 #define PLUGIN_NAME "goa"
 #define PLUGIN_PRIORITY (MCP_ACCOUNT_STORAGE_PLUGIN_PRIO_KEYRING + 10)
 #define PLUGIN_DESCRIPTION "Provide Telepathy Accounts from GOA"
-#define PLUGIN_PROVIDER "org.gnome.OnlineAccounts"
+#define PLUGIN_PROVIDER EMPATHY_GOA_PROVIDER
 
 #define INITIAL_COMMENT "Parameters of GOA Telepathy accounts"
 
@@ -125,14 +127,32 @@ get_tp_parameters (GoaAccount *account)
       PARAM ("param-extra-certificate-identities", "talk.google.com");
       PARAM ("param-require-encryption", "true");
     }
+  else if (!tp_strdiff (type, "facebook"))
+    {
+      PARAM ("manager", "gabble");
+      PARAM ("protocol", "jabber");
+      PARAM ("Icon", "im-facebook");
+      PARAM ("Service", "facebook");
+
+      PARAM ("param-account", "chat.facebook.com");
+      PARAM ("param-require-encryption", "true");
+    }
+  else if (!tp_strdiff (type, "windows_live"))
+    {
+      PARAM ("manager", "gabble");
+      PARAM ("protocol", "jabber");
+      PARAM ("Icon", "im-msn");
+      PARAM ("Service", "windows-live");
+
+      PARAM ("param-account", "messenger.live.com");
+      PARAM ("param-require-encryption", "true");
+    }
   else
     {
-      /* unknown account type */
+      DEBUG ("Unknown account type %s", type);
       g_hash_table_destroy (params);
       return NULL;
     }
-
-  /* TODO: add Facebook support */
 
   /* generic properties */
   PARAM ("DisplayName", goa_account_get_presentation_identity (account));

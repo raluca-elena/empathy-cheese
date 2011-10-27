@@ -47,6 +47,7 @@ TELEPATHY_FARSIGHT_REQUIRED=0.0.14
 TELEPATHY_GLIB_REQUIRED=0.16.0
 TELEPATHY_LOGGER=0.2.10
 WEBKIT_REQUIRED=1.3.13
+GOA_REQUIRED=3.3.0
 
 # Optional deps
 CLUTTER_REQUIRED=1.7.14
@@ -199,6 +200,8 @@ PKG_CHECK_MODULES(EMPATHY,
    libpulse
    libpulse-mainloop-glib
    webkitgtk-3.0 >= $WEBKIT_REQUIRED
+   libsoup-2.4
+   goa-1.0 >= $GOA_REQUIRED
 ])
 
 PKG_CHECK_MODULES(YELL, [telepathy-yell])
@@ -208,6 +211,9 @@ PKG_CHECK_MODULES(EMPATHY_AV,
    farsight2-0.10
    telepathy-farsight >= $TELEPATHY_FARSIGHT_REQUIRED
 ])
+
+AC_DEFINE(EMPATHY_GOA_PROVIDER, "org.gnome.OnlineAccounts",
+   [Name of provider for accounts imported from GOA])
 
 # -----------------------------------------------------------
 # Call interface
