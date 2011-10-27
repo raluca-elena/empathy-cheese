@@ -2177,8 +2177,8 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   GtkBuilder                   *gui;
   gchar                        *filename;
   EmpathyAccountsDialogPriv    *priv = GET_PRIV (dialog);
-  GtkWidget                    *content_area;
-  GtkWidget *action_area, *vbox, *hbox, *align;
+  GtkWidget *content_area, *action_area;
+  GtkWidget *grid;
   GtkWidget *alig;
   GtkWidget *sw, *toolbar;
   GtkStyleContext *context;
@@ -2264,36 +2264,20 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
       priv->infobar);
   gtk_widget_show (priv->infobar);
 
-  content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (priv->infobar));
+  grid = gtk_grid_new ();
+  gtk_container_add (
+      GTK_CONTAINER (gtk_info_bar_get_content_area (
+          GTK_INFO_BAR (priv->infobar))),
+      grid);
 
   priv->image_type = gtk_image_new_from_stock (GTK_STOCK_CUT,
       GTK_ICON_SIZE_DIALOG);
   gtk_misc_set_alignment (GTK_MISC (priv->image_type), 0.0, 0.5);
-  gtk_box_pack_start (GTK_BOX (content_area), priv->image_type, FALSE, FALSE, 0);
-  gtk_widget_show (priv->image_type);
-
-  vbox = gtk_vbox_new (FALSE, 6);
-  gtk_box_pack_start (GTK_BOX (content_area), vbox, TRUE, TRUE, 0);
-  gtk_widget_show (vbox);
+  gtk_grid_attach (GTK_GRID (grid), priv->image_type, 0, 0, 1, 2);
 
   /* first row */
-  align = gtk_alignment_new (0.5, 0.0, 0.0, 0.0);
-  gtk_widget_show (align);
-
   priv->label_name = gtk_label_new (NULL);
-  gtk_container_add (GTK_CONTAINER (align), priv->label_name);
-  gtk_widget_show (priv->label_name);
-
-  gtk_box_pack_start (GTK_BOX (vbox), align, TRUE, TRUE, 0);
-
-  /* second row */
-  align = gtk_alignment_new (0.5, 0.0, 0.0, 0.0);
-  gtk_widget_show (align);
-  hbox = gtk_hbox_new (FALSE, 6);
-  gtk_widget_show (hbox);
-  gtk_container_add (GTK_CONTAINER (align), hbox);
-
-  gtk_box_pack_start (GTK_BOX (vbox), align, TRUE, TRUE, 0);
+  gtk_grid_attach (GTK_GRID (grid), priv->label_name, 1, 0, 3, 1);
 
   /* set up spinner */
   priv->throbber = gtk_spinner_new ();
@@ -2304,21 +2288,20 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
 
   priv->label_status = gtk_label_new (NULL);
   gtk_label_set_line_wrap (GTK_LABEL (priv->label_status), TRUE);
-  gtk_widget_show (priv->label_status);
+  gtk_widget_set_hexpand (priv->label_status, TRUE);
 
-  gtk_box_pack_start (GTK_BOX (hbox), priv->throbber, FALSE, FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->image_status, FALSE, FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), priv->label_status, TRUE, TRUE, 0);
+  gtk_grid_attach (GTK_GRID (grid), priv->throbber, 1, 1, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), priv->image_status, 2, 1, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), priv->label_status, 3, 1, 1, 1);
 
   /* enabled switch */
-  align = gtk_alignment_new (0.5, 0.5, 1., 0.);
-  gtk_box_pack_start (GTK_BOX (content_area), align, FALSE, TRUE, 0);
-
   priv->enabled_switch = gtk_switch_new ();
-  gtk_container_add (GTK_CONTAINER (align), priv->enabled_switch);
+  gtk_widget_set_valign (priv->enabled_switch, GTK_ALIGN_CENTER);
   g_signal_connect (priv->enabled_switch, "notify::active",
       G_CALLBACK (accounts_dialog_enable_switch_active_cb), dialog);
-  gtk_widget_show_all (align);
+  gtk_grid_attach (GTK_GRID (grid), priv->enabled_switch, 4, 0, 1, 2);
+
+  gtk_widget_show_all (grid);
 
   /* Tweak the dialog */
   gtk_window_set_title (GTK_WINDOW (dialog), _("Messaging and VoIP Accounts"));
