@@ -168,6 +168,17 @@ filter_individual (EmpathyContactChooser *chooser,
   return display;
 }
 
+static gboolean
+has_contact_list (EmpathyInviteParticipantDialog *self)
+{
+  TpConnection *conn;
+
+  conn = tp_channel_borrow_connection (TP_CHANNEL (self->priv->tp_chat));
+
+  return tp_proxy_has_interface_by_id (conn,
+      TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_LIST);
+}
+
 static void
 invite_participant_dialog_constructed (GObject *object)
 {
@@ -214,8 +225,17 @@ invite_participant_dialog_constructed (GObject *object)
   gtk_window_set_title (GTK_WINDOW (self), _("Invite Participant"));
   gtk_window_set_role (GTK_WINDOW (self), "invite_participant");
 
-  /* Set a default height so a few contacts are displayed */
-  gtk_window_set_default_size (GTK_WINDOW (self), -1, 400);
+  if (has_contact_list (self))
+    {
+      /* Set a default height so a few contacts are displayed */
+      gtk_window_set_default_size (GTK_WINDOW (self), -1, 400);
+    }
+  else
+    {
+      /* No need to display an empty treeview (ie IRC) */
+      empathy_contact_chooser_show_tree_view (
+          EMPATHY_CONTACT_CHOOSER (self->priv->chooser), FALSE);
+    }
 }
 
 static void
