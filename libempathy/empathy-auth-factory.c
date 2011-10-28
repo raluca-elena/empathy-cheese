@@ -59,6 +59,7 @@ struct _EmpathyAuthFactoryPriv {
 enum {
   NEW_SERVER_TLS_HANDLER,
   NEW_SERVER_SASL_HANDLER,
+  AUTH_PASSWORD_FAILED,
   LAST_SIGNAL,
 };
 
@@ -146,6 +147,18 @@ sasl_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
 }
 
 static void
+sasl_handler_auth_password_failed_cb (EmpathyServerSASLHandler *handler,
+    const gchar *password,
+    EmpathyAuthFactory *self)
+{
+  TpAccount *account;
+
+  account = empathy_server_sasl_handler_get_account (handler);
+
+  g_signal_emit (self, signals[AUTH_PASSWORD_FAILED], 0, account, password);
+}
+
+static void
 server_sasl_handler_ready_cb (GObject *source,
     GAsyncResult *res,
     gpointer user_data)
@@ -184,6 +197,9 @@ server_sasl_handler_ready_cb (GObject *source,
 
       tp_g_signal_connect_object (handler, "invalidated",
           G_CALLBACK (sasl_handler_invalidated_cb), data->self, 0);
+
+      tp_g_signal_connect_object (handler, "auth-password-failed",
+          G_CALLBACK (sasl_handler_auth_password_failed_cb), data->self, 0);
 
       g_signal_emit (data->self, signals[NEW_SERVER_SASL_HANDLER], 0,
           handler);
@@ -626,6 +642,15 @@ empathy_auth_factory_class_init (EmpathyAuthFactoryClass *klass)
       g_cclosure_marshal_generic,
       G_TYPE_NONE,
       1, EMPATHY_TYPE_SERVER_SASL_HANDLER);
+
+  signals[AUTH_PASSWORD_FAILED] =
+    g_signal_new ("auth-password-failed",
+      G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0,
+      NULL, NULL,
+      g_cclosure_marshal_generic,
+      G_TYPE_NONE,
+      2, TP_TYPE_ACCOUNT, G_TYPE_STRING);
 }
 
 EmpathyAuthFactory *
