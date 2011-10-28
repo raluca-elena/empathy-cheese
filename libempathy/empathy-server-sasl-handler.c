@@ -37,6 +37,7 @@ enum {
 
 /* signal enum */
 enum {
+  AUTH_PASSWORD_FAILED,
   INVALIDATED,
   LAST_SIGNAL,
 };
@@ -98,6 +99,7 @@ sasl_status_changed_cb (TpChannel *channel,
     gpointer user_data,
     GObject *weak_object)
 {
+  EmpathyServerSASLHandler *self = EMPATHY_SERVER_SASL_HANDLER (weak_object);
   EmpathyServerSASLHandlerPriv *priv = EMPATHY_SERVER_SASL_HANDLER (weak_object)->priv;
 
   /* buh boh */
@@ -130,6 +132,13 @@ sasl_status_changed_cb (TpChannel *channel,
       tp_cli_channel_call_close (priv->channel, -1,
           NULL, NULL, NULL, NULL);
     }
+  else if (status == TP_SASL_STATUS_SERVER_FAILED)
+   {
+     if (!tp_strdiff (error, TP_ERROR_STR_AUTHENTICATION_FAILED))
+       {
+         g_signal_emit (self, signals[AUTH_PASSWORD_FAILED], 0, priv->password);
+       }
+   }
 }
 
 static gboolean
@@ -332,6 +341,13 @@ empathy_server_sasl_handler_class_init (EmpathyServerSASLHandlerClass *klass)
       TP_TYPE_ACCOUNT,
       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (oclass, PROP_ACCOUNT, pspec);
+
+  signals[AUTH_PASSWORD_FAILED] = g_signal_new ("auth-password-failed",
+      G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST, 0,
+      NULL, NULL,
+      g_cclosure_marshal_generic,
+      G_TYPE_NONE, 1, G_TYPE_STRING);
 
   signals[INVALIDATED] = g_signal_new ("invalidated",
       G_TYPE_FROM_CLASS (klass),
