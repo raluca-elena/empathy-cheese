@@ -33,6 +33,7 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-account-widget.c		\
 	empathy-avatar-chooser.c		\
 	empathy-avatar-image.c			\
+	empathy-base-password-dialog.c 		\
 	empathy-call-utils.c			\
 	empathy-cell-renderer-activatable.c	\
 	empathy-cell-renderer-expander.c	\
@@ -100,6 +101,7 @@ libempathy_gtk_headers =			\
 	empathy-account-widget.h		\
 	empathy-avatar-chooser.h		\
 	empathy-avatar-image.h			\
+	empathy-base-password-dialog.h 		\
 	empathy-call-utils.h			\
 	empathy-cell-renderer-activatable.h	\
 	empathy-cell-renderer-expander.h	\

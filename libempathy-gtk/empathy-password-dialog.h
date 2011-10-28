@@ -25,6 +25,8 @@
 
 #include <libempathy/empathy-server-sasl-handler.h>
 
+#include <libempathy-gtk/empathy-base-password-dialog.h>
+
 #include <extensions/extensions.h>
 
 G_BEGIN_DECLS
@@ -34,11 +36,11 @@ typedef struct _EmpathyPasswordDialogClass EmpathyPasswordDialogClass;
 typedef struct _EmpathyPasswordDialogPriv EmpathyPasswordDialogPriv;
 
 struct _EmpathyPasswordDialogClass {
-    GtkMessageDialogClass parent_class;
+    EmpathyBasePasswordDialogClass parent_class;
 };
 
 struct _EmpathyPasswordDialog {
-    GtkMessageDialog parent;
+    EmpathyBasePasswordDialog parent;
     EmpathyPasswordDialogPriv *priv;
 };
 
