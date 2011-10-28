@@ -137,7 +137,7 @@ static void account_chooser_account_removed_cb (TpAccountManager *manager,
     TpAccount *account,
     EmpathyAccountChooser *self);
 static void account_chooser_account_remove_foreach (TpAccount *account,
-    EmpathyAccountChooser*self);
+    EmpathyAccountChooser *self);
 static void account_chooser_update_iter (EmpathyAccountChooser *self,
     GtkTreeIter *iter);
 static void account_chooser_status_changed_cb (TpAccount *account,
@@ -791,7 +791,7 @@ account_chooser_find_account_foreach (GtkTreeModel *model,
 static gboolean
 account_chooser_find_account (EmpathyAccountChooser *self,
     TpAccount *account,
-    GtkTreeIter*iter)
+    GtkTreeIter *iter)
 {
   GtkListStore *store;
   GtkComboBox *combobox;
