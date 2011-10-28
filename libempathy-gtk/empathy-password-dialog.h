@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyPasswordDialog EmpathyPasswordDialog;
 typedef struct _EmpathyPasswordDialogClass EmpathyPasswordDialogClass;
+typedef struct _EmpathyPasswordDialogPriv EmpathyPasswordDialogPriv;
 
 struct _EmpathyPasswordDialogClass {
     GtkMessageDialogClass parent_class;
@@ -38,7 +39,7 @@ struct _EmpathyPasswordDialogClass {
 
 struct _EmpathyPasswordDialog {
     GtkMessageDialog parent;
-    gpointer priv;
+    EmpathyPasswordDialogPriv *priv;
 };
 
 GType empathy_password_dialog_get_type (void);

@@ -36,7 +36,7 @@ enum {
   LAST_PROPERTY,
 };
 
-typedef struct {
+struct _EmpathyPasswordDialogPriv {
   EmpathyServerSASLHandler *handler;
 
   GtkWidget *entry;
@@ -46,7 +46,7 @@ typedef struct {
   gboolean grabbing;
 
   gboolean dispose_run;
-} EmpathyPasswordDialogPriv;
+};
 
 static void
 empathy_password_dialog_get_property (GObject *object,
@@ -54,12 +54,12 @@ empathy_password_dialog_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
+  EmpathyPasswordDialog *self = (EmpathyPasswordDialog *) object;
 
   switch (property_id)
     {
     case PROP_HANDLER:
-      g_value_set_object (value, priv->handler);
+      g_value_set_object (value, self->priv->handler);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -73,13 +73,13 @@ empathy_password_dialog_set_property (GObject *object,
     const GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
+  EmpathyPasswordDialog *self = (EmpathyPasswordDialog *) object;
 
   switch (property_id)
     {
     case PROP_HANDLER:
-      g_assert (priv->handler == NULL); /* construct only */
-      priv->handler = g_value_dup_object (value);
+      g_assert (self->priv->handler == NULL); /* construct only */
+      self->priv->handler = g_value_dup_object (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -90,14 +90,14 @@ empathy_password_dialog_set_property (GObject *object,
 static void
 empathy_password_dialog_dispose (GObject *object)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (object)->priv;
+  EmpathyPasswordDialog *self = (EmpathyPasswordDialog *) object;
 
-  if (priv->dispose_run)
+  if (self->priv->dispose_run)
     return;
 
-  priv->dispose_run = TRUE;
+  self->priv->dispose_run = TRUE;
 
-  tp_clear_object (&priv->handler);
+  tp_clear_object (&self->priv->handler);
 
   G_OBJECT_CLASS (empathy_password_dialog_parent_class)->dispose (object);
 }
@@ -107,17 +107,17 @@ password_dialog_response_cb (GtkDialog *dialog,
     gint response,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
+  EmpathyPasswordDialog *self = (EmpathyPasswordDialog *) dialog;
 
   if (response == GTK_RESPONSE_OK)
     {
-      empathy_server_sasl_handler_provide_password (priv->handler,
-          gtk_entry_get_text (GTK_ENTRY (priv->entry)),
-          gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->ticky)));
+      empathy_server_sasl_handler_provide_password (self->priv->handler,
+          gtk_entry_get_text (GTK_ENTRY (self->priv->entry)),
+          gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (self->priv->ticky)));
     }
   else
     {
-      empathy_server_sasl_handler_cancel (priv->handler);
+      empathy_server_sasl_handler_cancel (self->priv->handler);
     }
 
   gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -136,7 +136,7 @@ static void
 password_entry_changed_cb (GtkEditable *entry,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
+  EmpathyPasswordDialog *self = user_data;
   const gchar *str;
 
   str = gtk_entry_get_text (GTK_ENTRY (entry));
@@ -144,7 +144,7 @@ password_entry_changed_cb (GtkEditable *entry,
   gtk_entry_set_icon_sensitive (GTK_ENTRY (entry),
       GTK_ENTRY_ICON_SECONDARY, !EMP_STR_EMPTY (str));
 
-  gtk_widget_set_sensitive (priv->ok_button,
+  gtk_widget_set_sensitive (self->priv->ok_button,
       !EMP_STR_EMPTY (str));
 }
 
@@ -160,9 +160,9 @@ password_dialog_grab_keyboard (GtkWidget *widget,
     GdkEvent *event,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
+  EmpathyPasswordDialog *self = user_data;
 
-  if (!priv->grabbing)
+  if (!self->priv->grabbing)
     {
       GdkDevice *device = gdk_event_get_device (event);
 
@@ -179,7 +179,7 @@ password_dialog_grab_keyboard (GtkWidget *widget,
           if (status != GDK_GRAB_SUCCESS)
             DEBUG ("Could not grab keyboard; grab status was %u", status);
           else
-            priv->grabbing = TRUE;
+            self->priv->grabbing = TRUE;
         }
       else
         DEBUG ("Could not get the event device!");
@@ -193,16 +193,16 @@ password_dialog_ungrab_keyboard (GtkWidget *widget,
     GdkEvent *event,
     gpointer user_data)
 {
-  EmpathyPasswordDialogPriv *priv = EMPATHY_PASSWORD_DIALOG (user_data)->priv;
+  EmpathyPasswordDialog *self = user_data;
 
-  if (priv->grabbing)
+  if (self->priv->grabbing)
     {
       GdkDevice *device = gdk_event_get_device (event);
 
       if (device != NULL)
         {
           gdk_device_ungrab (device, gdk_event_get_time (event));
-          priv->grabbing = FALSE;
+          self->priv->grabbing = FALSE;
         }
       else
         DEBUG ("Could not get the event device!");
@@ -243,91 +243,90 @@ password_dialog_handler_invalidated_cb (EmpathyServerSASLHandler *handler,
 static void
 empathy_password_dialog_constructed (GObject *object)
 {
-  EmpathyPasswordDialog *dialog;
-  EmpathyPasswordDialogPriv *priv;
+  EmpathyPasswordDialog *self;
   TpAccount *account;
   GtkWidget *icon;
   GtkBox *box;
   gchar *text;
 
-  dialog = EMPATHY_PASSWORD_DIALOG (object);
-  priv = dialog->priv;
+  self = EMPATHY_PASSWORD_DIALOG (object);
 
-  g_assert (priv->handler != NULL);
+  g_assert (self->priv->handler != NULL);
 
-  priv->grabbing = FALSE;
+  self->priv->grabbing = FALSE;
 
-  account = empathy_server_sasl_handler_get_account (priv->handler);
+  account = empathy_server_sasl_handler_get_account (self->priv->handler);
 
-  tp_g_signal_connect_object (priv->handler, "invalidated",
+  tp_g_signal_connect_object (self->priv->handler, "invalidated",
       G_CALLBACK (password_dialog_handler_invalidated_cb),
       object, 0);
 
   /* dialog */
-  gtk_dialog_add_button (GTK_DIALOG (dialog),
+  gtk_dialog_add_button (GTK_DIALOG (self),
       GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
 
-  priv->ok_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
+  self->priv->ok_button = gtk_dialog_add_button (GTK_DIALOG (self),
       GTK_STOCK_OK, GTK_RESPONSE_OK);
-  gtk_widget_set_sensitive (priv->ok_button, FALSE);
+  gtk_widget_set_sensitive (self->priv->ok_button, FALSE);
 
   text = g_strdup_printf (_("Enter your password for account\n<b>%s</b>"),
       tp_account_get_display_name (account));
-  gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (dialog), text);
+  gtk_message_dialog_set_markup (GTK_MESSAGE_DIALOG (self), text);
   g_free (text);
 
-  gtk_window_set_icon_name (GTK_WINDOW (dialog),
+  gtk_window_set_icon_name (GTK_WINDOW (self),
       GTK_STOCK_DIALOG_AUTHENTICATION);
 
-  box = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (dialog)));
+  box = GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (self)));
 
   /* dialog icon */
   icon = gtk_image_new_from_icon_name (tp_account_get_icon_name (account),
       GTK_ICON_SIZE_DIALOG);
-  gtk_message_dialog_set_image (GTK_MESSAGE_DIALOG (dialog), icon);
+  gtk_message_dialog_set_image (GTK_MESSAGE_DIALOG (self), icon);
   gtk_widget_show (icon);
 
   /* entry */
-  priv->entry = gtk_entry_new ();
-  gtk_entry_set_visibility (GTK_ENTRY (priv->entry), FALSE);
+  self->priv->entry = gtk_entry_new ();
+  gtk_entry_set_visibility (GTK_ENTRY (self->priv->entry), FALSE);
 
   /* entry clear icon */
-  gtk_entry_set_icon_from_stock (GTK_ENTRY (priv->entry),
+  gtk_entry_set_icon_from_stock (GTK_ENTRY (self->priv->entry),
       GTK_ENTRY_ICON_SECONDARY, GTK_STOCK_CLEAR);
-  gtk_entry_set_icon_sensitive (GTK_ENTRY (priv->entry),
+  gtk_entry_set_icon_sensitive (GTK_ENTRY (self->priv->entry),
       GTK_ENTRY_ICON_SECONDARY, FALSE);
 
-  g_signal_connect (priv->entry, "icon-release",
+  g_signal_connect (self->priv->entry, "icon-release",
       G_CALLBACK (clear_icon_released_cb), NULL);
-  g_signal_connect (priv->entry, "changed",
-      G_CALLBACK (password_entry_changed_cb), dialog);
-  g_signal_connect (priv->entry, "activate",
-      G_CALLBACK (password_entry_activate_cb), dialog);
+  g_signal_connect (self->priv->entry, "changed",
+      G_CALLBACK (password_entry_changed_cb), self);
+  g_signal_connect (self->priv->entry, "activate",
+      G_CALLBACK (password_entry_activate_cb), self);
 
-  gtk_box_pack_start (box, priv->entry, FALSE, FALSE, 0);
-  gtk_widget_show (priv->entry);
+  gtk_box_pack_start (box, self->priv->entry, FALSE, FALSE, 0);
+  gtk_widget_show (self->priv->entry);
 
   /* remember password ticky box */
-  priv->ticky = gtk_check_button_new_with_label (_("Remember password"));
+  self->priv->ticky = gtk_check_button_new_with_label (_("Remember password"));
 
-  gtk_box_pack_start (box, priv->ticky, FALSE, FALSE, 0);
+  gtk_box_pack_start (box, self->priv->ticky, FALSE, FALSE, 0);
 
   /* only show it if we actually support it */
-  if (empathy_server_sasl_handler_can_save_response_somewhere (priv->handler))
-    gtk_widget_show (priv->ticky);
+  if (empathy_server_sasl_handler_can_save_response_somewhere (
+        self->priv->handler))
+    gtk_widget_show (self->priv->ticky);
 
-  g_signal_connect (dialog, "response",
-      G_CALLBACK (password_dialog_response_cb), dialog);
-  g_signal_connect (dialog, "window-state-event",
-      G_CALLBACK (password_dialog_window_state_changed), dialog);
-  g_signal_connect (dialog, "map-event",
-      G_CALLBACK (password_dialog_grab_keyboard), dialog);
-  g_signal_connect (dialog, "unmap-event",
-      G_CALLBACK (password_dialog_ungrab_keyboard), dialog);
+  g_signal_connect (self, "response",
+      G_CALLBACK (password_dialog_response_cb), self);
+  g_signal_connect (self, "window-state-event",
+      G_CALLBACK (password_dialog_window_state_changed), self);
+  g_signal_connect (self, "map-event",
+      G_CALLBACK (password_dialog_grab_keyboard), self);
+  g_signal_connect (self, "unmap-event",
+      G_CALLBACK (password_dialog_ungrab_keyboard), self);
 
-  gtk_widget_grab_focus (priv->entry);
+  gtk_widget_grab_focus (self->priv->entry);
 
-  gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER_ALWAYS);
+  gtk_window_set_position (GTK_WINDOW (self), GTK_WIN_POS_CENTER_ALWAYS);
 }
 
 static void
