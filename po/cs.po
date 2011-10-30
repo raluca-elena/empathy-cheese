@@ -2,6 +2,7 @@
 # Copyright (C) 2003, 2004, 2008, 2009, 2010 the author(s) of empathy.
 # Copyright (C) 2003, 2004 Miloslav Trmac <mitr@volny.cz>.
 # This file is distributed under the same license as the empathy package.
+#
 # Miloslav Trmac <mitr@volny.cz>, 2003, 2004.
 # Lucas Lommer <llommer@svn.gnome.org>, 2008, 2009, 2010.
 # Adrian Guniš <andygun@seznam.cz>, 2008.
@@ -9,16 +10,18 @@
 # Jan Drábek <repli2dev@gmail.com>, 2009.
 # Lukáš Ručka <lukassoftwares.backup@gmail.com>, 2010.
 # Jiri Eischmann <jiri@eischmann.cz>, 2010.
-# Petr Kovar <pknbe@volny.cz>, 2008, 2009, 2010, 2011.
 # Pavel Šefránek <pavel@sefranek2.cz>, 2011.
+# Petr Kovar <pknbe@volny.cz>, 2008, 2009, 2010, 2011.
 # Marek Černocký <marek@manet.cz>, 2010, 2011.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-26 02:00+0200\n"
-"PO-Revision-Date: 2011-09-26 02:00+0200\n"
-"Last-Translator: Petr Kovar <pknbe@volny.cz>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=empathy&keywords=I18N+L10N&component=General\n"
+"POT-Creation-Date: 2011-10-28 07:54+0000\n"
+"PO-Revision-Date: 2011-10-30 12:10+0100\n"
+"Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
@@ -99,28 +102,34 @@ msgid "Contact list sort criterion"
 msgstr "Kritérium pro řazení seznamu kontaktů"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:13
+msgid "D-Bus object path of the last account selected to join a room."
+msgstr ""
+"Cesta objektu D-Bus pro účet, který byl vybrán jako poslední pro vstup do "
+"místnosti."
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:14
 msgid "Default camera device to use in video calls, e.g. /dev/video0."
 msgstr ""
 "Výchozí zařízení kamery, které se má používat pro videohovory, např. /dev/"
 "video0."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:14
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:15
 msgid "Default directory to select an avatar image from"
 msgstr "Výchozí adresář pro výběr obrázku avataru"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:15
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:16
 msgid "Disable popup notifications when away"
 msgstr "Zakázat vyskakující upozornění v případě mé nepřítomnosti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:16
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:17
 msgid "Disable sounds when away"
 msgstr "Zakázat zvuky v případě mé nepřítomnosti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:17
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:18
 msgid "Display incoming events in the status area"
 msgstr "Zobrazovat příchozí události ve stavové oblasti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:18
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:19
 msgid ""
 "Display incoming events in the status area. If false, present them to the "
 "user immediately."
@@ -128,33 +137,29 @@ msgstr ""
 "Zobrazovat příchozí události ve stavové oblasti. Když je něco špatně, tak se "
 "to uživatel ihned dozví."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:19
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:20
 msgid "Echo cancellation support"
 msgstr "Podpora potlačení ozvěny"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:20
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:21
 msgid "Empathy can publish the user's location"
 msgstr "Empathy může zveřejnit polohu uživatele"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:21
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:22
 msgid "Empathy can use the GPS to guess the location"
 msgstr "Empathy se může pokusit určit vaši polohu pomocí GPS"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:22
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:23
 msgid "Empathy can use the cellular network to guess the location"
 msgstr "Empathy se může pokusit určit vaši polohu pomocí mobilní sítě"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:23
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:24
 msgid "Empathy can use the network to guess the location"
 msgstr "Empathy se může pokusit určit vaši polohu pomocí sítě"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:24
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:25
 msgid "Empathy default download folder"
 msgstr "Výchozí adresář pro stahování aplikace Empathy"
-
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:25
-msgid "Empathy has migrated butterfly logs"
-msgstr "Empathy migrovala záznamy butterfly"
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:26
 msgid "Empathy should auto-away when idle"
@@ -193,153 +198,153 @@ msgid "Hide the main window."
 msgstr "Skrýt hlavní okno."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:35
+msgid "Last account selected in Join Room dialog"
+msgstr "Poslední účet vybraný v dialogovém okně pro vstup do místnosti"
+
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:36
 msgid "Nick completed character"
 msgstr "Znak doplňování přezdívek"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:36
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:37
 msgid "Open new chats in separate windows"
 msgstr "Otevírat nové konverzace v oddělených oknech"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:37
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:38
 msgid "Path of the Adium theme to use"
 msgstr "Cesta k požadovanému motivu Adium"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:38
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:39
 msgid "Path of the Adium theme to use if the theme used for chat is Adium."
 msgstr ""
 "Cesta k motivu Adium, který bude v případě, že Adium používáte, vybrán."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:39
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:40
 msgid "Play a sound for incoming messages"
 msgstr "Přehrávat zvuk pro příchozí zprávy"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:40
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:41
 msgid "Play a sound for new conversations"
 msgstr "Přehrát zvuk při nové konverzaci"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:41
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:42
 msgid "Play a sound for outgoing messages"
 msgstr "Přehrávat zvuk pro odchozí zprávy"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:42
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:43
 msgid "Play a sound when a contact logs in"
 msgstr "Přehrávat zvuk, když se kontakt přihlásí"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:43
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:44
 msgid "Play a sound when a contact logs out"
 msgstr "Přehrát zvuk, pokud se kontakt odhlásí"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:44
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:45
 msgid "Play a sound when we log in"
 msgstr "Přehrávat zvuk, když se přihlásím"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:45
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:46
 msgid "Play a sound when we log out"
 msgstr "Přehrávat zvuk, když se odhlásím"
 
 # is chat different than conversation?
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:46
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:47
 msgid "Pop up notifications if the chat isn't focused"
 msgstr "Vyskakující upozornění, pokud není vybrána konverzace"
 
 # is chat different than conversation?
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:47
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:48
 msgid "Pop up notifications when a contact logs in"
 msgstr "Vyskakující upozornění při přihlášení kontaktu"
 
 # is chat different than conversation?
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:48
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:49
 msgid "Pop up notifications when a contact logs out"
 msgstr "Vyskakující upozornění při odhlášení kontaktu"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:49
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:50
 msgid "Position the camera preview should be during a call."
 msgstr "Poloha náhledové kamery, jak by měla být během hovoru."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:50
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:51
 msgid "Show Balance in contact list"
 msgstr "Zobrazovat zůstatek kreditu v seznamu kontaktů"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:51
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:52
 msgid "Show avatars"
 msgstr "Zobrazovat avatary"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:52
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:53
 msgid "Show contact list in rooms"
 msgstr "Zobrazit seznam kontaktů v diskuzních místnostech"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:53
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:54
 msgid "Show hint about closing the main window"
 msgstr "Zobrazovat nápovědu, pokud se chystáte zavřít hlavní okno"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:54
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:55
 msgid "Show offline contacts"
 msgstr "Zobrazovat odpojené kontakty"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:55
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:56
 msgid "Show protocols"
 msgstr "Zobrazovat protokoly"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:56
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:57
 msgid "Spell checking languages"
 msgstr "Jazyky s kontrolovaným pravopisem"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:57
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:58
 msgid "The default folder to save file transfers in."
 msgstr "Výchozí adresář pro ukládání přenášených souborů."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:58
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:59
 msgid "The last directory that an avatar image was chosen from."
 msgstr "Poslední adresář, ze kterého byl vybrán obrázek avataru."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:59
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:60
 msgid "The position for the chat window side pane"
 msgstr "Poloha pro postranní panel okna s konverzací"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:60
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:61
 msgid "The stored position (in pixels) of the chat window side pane."
 msgstr "Uložená poloha (v pixelech) postranního panelu okna s konverzací"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:61
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:62
 msgid "The theme that is used to display the conversation in chat windows."
 msgstr "Motiv, který je používán pro zobrazení konverzací v oknech konverzací."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:62
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:63
 msgid ""
 "The theme variant that is used to display the conversation in chat windows."
 msgstr "Motiv, který je používán pro zobrazení konverzací v oknech konverzací."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:63
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:64
 msgid "Use graphical smileys"
 msgstr "Používat grafické smajlíky"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:64
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:65
 msgid "Use notification sounds"
 msgstr "Používat zvuková upozornění"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:65
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:66
 msgid "Use theme for chat rooms"
 msgstr "Používat motiv pro diskuzní místnosti"
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:66
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:67
 msgid "Whether Empathy can publish the user's location to their contacts."
 msgstr "Jestli může Empathy zveřejňovat kontaktům vaši polohu."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:67
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:68
 msgid "Whether Empathy can use the GPS to guess the location."
 msgstr "Jestli může Empathy používat GPS k určení polohy."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:68
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:69
 msgid "Whether Empathy can use the cellular network to guess the location."
 msgstr "Jestli může Empathy použít mobilní síť k určení polohy."
 
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:69
+#: ../data/org.gnome.Empathy.gschema.xml.in.h:70
 msgid "Whether Empathy can use the network to guess the location."
 msgstr "Zda může Empathy použít sít k určení polohy."
-
-#: ../data/org.gnome.Empathy.gschema.xml.in.h:70
-msgid "Whether Empathy has migrated butterfly logs."
-msgstr "Jestli aplikace Empathy migrovala záznamy butterfly."
 
 #: ../data/org.gnome.Empathy.gschema.xml.in.h:71
 msgid "Whether Empathy should automatically log into your accounts on startup."
@@ -511,23 +516,23 @@ msgstr "Spravovat účty IM a VoIP"
 
 #. Tweak the dialog
 #: ../data/empathy-accounts.desktop.in.in.h:2
-#: ../src/empathy-accounts-dialog.c:2324
+#: ../src/empathy-accounts-dialog.c:2307
 msgid "Messaging and VoIP Accounts"
 msgstr "Účty IM a VoIP"
 
-#: ../libempathy/empathy-ft-handler.c:825
+#: ../libempathy/empathy-ft-handler.c:838
 msgid "File transfer completed, but the file was corrupted"
 msgstr "Přenos souboru byl dokončen, ale soubor byl poškozen"
 
-#: ../libempathy/empathy-ft-handler.c:1111
+#: ../libempathy/empathy-ft-handler.c:1124
 msgid "File transfer not supported by remote contact"
 msgstr "Přenos souborů není podporován vzdálenou stranou"
 
-#: ../libempathy/empathy-ft-handler.c:1167
+#: ../libempathy/empathy-ft-handler.c:1180
 msgid "The selected file is not a regular file"
 msgstr "Vybraný soubor není běžným souborem"
 
-#: ../libempathy/empathy-ft-handler.c:1176
+#: ../libempathy/empathy-ft-handler.c:1189
 msgid "The selected file is empty"
 msgstr "Vybraný soubor je prázdný"
 
@@ -547,35 +552,35 @@ msgstr "Hovor s kontaktem %s"
 msgid "Call from %s"
 msgstr "Příchozí hovor od kontaktu %s"
 
-#: ../libempathy/empathy-tp-file.c:268
+#: ../libempathy/empathy-tp-file.c:258
 msgid "Socket type not supported"
 msgstr "Typ soketu není podporován"
 
-#: ../libempathy/empathy-tp-file.c:387
+#: ../libempathy/empathy-tp-file.c:377
 msgid "No reason was specified"
 msgstr "Nebyl udán žádný důvod"
 
-#: ../libempathy/empathy-tp-file.c:390
+#: ../libempathy/empathy-tp-file.c:380
 msgid "The change in state was requested"
 msgstr "Byla vyžádána změna stavu"
 
-#: ../libempathy/empathy-tp-file.c:393
+#: ../libempathy/empathy-tp-file.c:383
 msgid "You canceled the file transfer"
 msgstr "Zrušili jste přenos souboru"
 
-#: ../libempathy/empathy-tp-file.c:396
+#: ../libempathy/empathy-tp-file.c:386
 msgid "The other participant canceled the file transfer"
 msgstr "Protistrana zrušila přenos souboru"
 
-#: ../libempathy/empathy-tp-file.c:399
+#: ../libempathy/empathy-tp-file.c:389
 msgid "Error while trying to transfer the file"
 msgstr "Chyba při pokusu o odeslání souboru"
 
-#: ../libempathy/empathy-tp-file.c:402
+#: ../libempathy/empathy-tp-file.c:392
 msgid "The other participant is unable to transfer the file"
 msgstr "Protistrana není schopna přenosu souborů"
 
-#: ../libempathy/empathy-tp-file.c:405 ../libempathy/empathy-utils.c:312
+#: ../libempathy/empathy-tp-file.c:395 ../libempathy/empathy-utils.c:312
 msgid "Unknown reason"
 msgstr "Neznámý důvod"
 
@@ -615,6 +620,7 @@ msgstr "Stav nastaven na „Odhlášen“"
 
 #: ../libempathy/empathy-utils.c:288 ../libempathy/empathy-utils.c:322
 #: ../libempathy-gtk/empathy-call-utils.c:49
+#: ../libempathy-gtk/empathy-new-message-dialog.c:82
 msgid "Network error"
 msgstr "Chyba sítě"
 
@@ -718,20 +724,23 @@ msgstr ""
 "Délka certifikátu serveru nebo délka zřetězených certifikátů serveru "
 "přesáhla omezení dané kryptografickou knihovnou"
 
-#: ../libempathy/empathy-utils.c:529
-#: ../libempathy-gtk/empathy-contact-list-store.h:73
+#: ../libempathy/empathy-utils.c:372
+msgid "Your software is too old"
+msgstr "Váš software je příliš zastaralý"
+
+#: ../libempathy/empathy-utils.c:531
 msgid "People Nearby"
 msgstr "Lidé v okolí"
 
-#: ../libempathy/empathy-utils.c:534
+#: ../libempathy/empathy-utils.c:536
 msgid "Yahoo! Japan"
 msgstr "Yahoo! Japan"
 
-#: ../libempathy/empathy-utils.c:563
+#: ../libempathy/empathy-utils.c:565
 msgid "Google Talk"
 msgstr "Google Talk"
 
-#: ../libempathy/empathy-utils.c:564
+#: ../libempathy/empathy-utils.c:566
 msgid "Facebook Chat"
 msgstr "Facebook Chat"
 
@@ -787,7 +796,7 @@ msgstr[2] "před %d měsíci"
 msgid "in the future"
 msgstr "v budoucnosti"
 
-#: ../libempathy-gtk/empathy-account-chooser.c:540
+#: ../libempathy-gtk/empathy-account-chooser.c:659
 msgid "All accounts"
 msgstr "Všechny účty"
 
@@ -820,48 +829,48 @@ msgstr "%s:"
 msgid "My Web Accounts"
 msgstr "My Web Accounts"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1208
+#: ../libempathy-gtk/empathy-account-widget.c:1209
 #, c-format
 msgid "The account %s is edited via %s."
 msgstr "Účet %s je upravován přes %s."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1214
+#: ../libempathy-gtk/empathy-account-widget.c:1215
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
 msgstr "Účet %s nelze upravovat v aplikaci Empathy."
 
-#: ../libempathy-gtk/empathy-account-widget.c:1233
+#: ../libempathy-gtk/empathy-account-widget.c:1234
 msgid "Launch My Web Accounts"
 msgstr "Spustit My Web Accounts"
 
 #. general handler
-#: ../libempathy-gtk/empathy-account-widget.c:1241
+#: ../libempathy-gtk/empathy-account-widget.c:1242
 #, c-format
 msgid "Edit %s"
 msgstr "Upravit %s"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1591
+#: ../libempathy-gtk/empathy-account-widget.c:1592
 #: ../libempathy-gtk/empathy-account-widget-irc.ui.h:11
 msgid "Username:"
 msgstr "Uživatelské jméno:"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1909
+#: ../libempathy-gtk/empathy-account-widget.c:1910
 msgid "A_pply"
 msgstr "_Použít"
 
-#: ../libempathy-gtk/empathy-account-widget.c:1939
+#: ../libempathy-gtk/empathy-account-widget.c:1940
 msgid "L_og in"
 msgstr "Přip_ojit"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2013
+#: ../libempathy-gtk/empathy-account-widget.c:2014
 msgid "This account already exists on the server"
 msgstr "Takový účet již existuje"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2016
+#: ../libempathy-gtk/empathy-account-widget.c:2017
 msgid "Create a new account on the server"
 msgstr "Vytvořit nový účet na serveru"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2208
+#: ../libempathy-gtk/empathy-account-widget.c:2209
 msgid "Ca_ncel"
 msgstr "_Zrušit"
 
@@ -870,19 +879,19 @@ msgstr "_Zrušit"
 #. * like: "MyUserName on freenode".
 #. * You should reverse the order of these arguments if the
 #. * server should come before the login id in your locale.
-#: ../libempathy-gtk/empathy-account-widget.c:2486
+#: ../libempathy-gtk/empathy-account-widget.c:2487
 #, c-format
 msgid "%1$s on %2$s"
 msgstr "%1$s na %2$s"
 
 #. To translators: The parameter is the protocol name. The resulting
 #. * string will be something like: "Jabber Account"
-#: ../libempathy-gtk/empathy-account-widget.c:2512
+#: ../libempathy-gtk/empathy-account-widget.c:2513
 #, c-format
 msgid "%s Account"
 msgstr "Účet služby %s"
 
-#: ../libempathy-gtk/empathy-account-widget.c:2516
+#: ../libempathy-gtk/empathy-account-widget.c:2517
 msgid "New account"
 msgstr "Nový účet"
 
@@ -1256,7 +1265,7 @@ msgid "STUN Server:"
 msgstr "Server STUN:"
 
 #: ../libempathy-gtk/empathy-account-widget-sip.ui.h:19
-#: ../libempathy-gtk/empathy-contact-widget.c:347
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:112
 msgid "Server:"
 msgstr "Server:"
 
@@ -1338,7 +1347,7 @@ msgid "Click to enlarge"
 msgstr "Kliknutím zvětšíte"
 
 #: ../libempathy-gtk/empathy-call-utils.c:44
-#: ../libempathy-gtk/empathy-call-utils.c:60
+#: ../libempathy-gtk/empathy-call-utils.c:62
 msgid "There was an error starting the call"
 msgstr "Nepodařilo se navázat spojení"
 
@@ -1358,40 +1367,44 @@ msgstr "Vybraný kontakt není platný"
 msgid "Emergency calls are not supported on this protocol"
 msgstr "Tento protokol nepodporuje tísňová volání"
 
-#: ../libempathy-gtk/empathy-chat.c:704
+#: ../libempathy-gtk/empathy-call-utils.c:59
+msgid "You don't have enough credit in order to place this call"
+msgstr "Nemáte dostatečný kredit k provedení tohoto volání"
+
+#: ../libempathy-gtk/empathy-chat.c:706
 msgid "Failed to open private chat"
 msgstr "Nepovedlo se otevřít soukromou konverzaci"
 
-#: ../libempathy-gtk/empathy-chat.c:765
+#: ../libempathy-gtk/empathy-chat.c:764
 msgid "Topic not supported on this conversation"
 msgstr "Tato konverzace toto téma nepodporuje"
 
-#: ../libempathy-gtk/empathy-chat.c:771
+#: ../libempathy-gtk/empathy-chat.c:770
 msgid "You are not allowed to change the topic"
 msgstr "Nemáte oprávnění potřebná pro změnu tématu"
 
-#: ../libempathy-gtk/empathy-chat.c:975
+#: ../libempathy-gtk/empathy-chat.c:971
 #, c-format
 msgid "“%s” is not a valid contact ID"
 msgstr "„%s“ není platné ID kontaktu"
 
-#: ../libempathy-gtk/empathy-chat.c:1060
+#: ../libempathy-gtk/empathy-chat.c:1066
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: vymazat všechny zprávy z této konverzace"
 
-#: ../libempathy-gtk/empathy-chat.c:1063
+#: ../libempathy-gtk/empathy-chat.c:1069
 msgid "/topic <topic>: set the topic of the current conversation"
 msgstr "/topic <téma>: nastavit téma aktuální konverzace"
 
-#: ../libempathy-gtk/empathy-chat.c:1066
+#: ../libempathy-gtk/empathy-chat.c:1072
 msgid "/join <chat room ID>: join a new chat room"
 msgstr "/join <ID místnosti>: vstoupit do nové místnosti"
 
-#: ../libempathy-gtk/empathy-chat.c:1069
+#: ../libempathy-gtk/empathy-chat.c:1075
 msgid "/j <chat room ID>: join a new chat room"
 msgstr "/j <ID místnosti>: vstoupit do nové místnosti"
 
-#: ../libempathy-gtk/empathy-chat.c:1073
+#: ../libempathy-gtk/empathy-chat.c:1079
 msgid ""
 "/part [<chat room ID>] [<reason>]: leave the chat room, by default the "
 "current one"
@@ -1399,23 +1412,23 @@ msgstr ""
 "/part [<ID místnosti>] [<důvod>]: opustit místnost, bez udání tu právě "
 "aktuální"
 
-#: ../libempathy-gtk/empathy-chat.c:1077
+#: ../libempathy-gtk/empathy-chat.c:1083
 msgid "/query <contact ID> [<message>]: open a private chat"
 msgstr "/query <ID kontaktu> [<zpráva>]: otevřít novou soukromou konverzaci"
 
-#: ../libempathy-gtk/empathy-chat.c:1080
+#: ../libempathy-gtk/empathy-chat.c:1086
 msgid "/msg <contact ID> <message>: open a private chat"
 msgstr "/msg <ID kontaktu> <zpráva>: otevřít novou soukromou konverzaci"
 
-#: ../libempathy-gtk/empathy-chat.c:1083
+#: ../libempathy-gtk/empathy-chat.c:1089
 msgid "/nick <nickname>: change your nickname on the current server"
 msgstr "/nick <přezdívka>: změnit svoji přezdívku na aktuálním serveru"
 
-#: ../libempathy-gtk/empathy-chat.c:1086
+#: ../libempathy-gtk/empathy-chat.c:1092
 msgid "/me <message>: send an ACTION message to the current conversation"
 msgstr "/me <zpráva>: zaslat zprávu AKCE do aktuální konverzace"
 
-#: ../libempathy-gtk/empathy-chat.c:1089
+#: ../libempathy-gtk/empathy-chat.c:1095
 msgid ""
 "/say <message>: send <message> to the current conversation. This is used to "
 "send a message starting with a '/'. For example: \"/say /join is used to "
@@ -1425,11 +1438,11 @@ msgstr ""
 "posílání zpráv začínajících s „/“. Například: „/say /join je použito pro "
 "připojení do místnosti“"
 
-#: ../libempathy-gtk/empathy-chat.c:1094
+#: ../libempathy-gtk/empathy-chat.c:1100
 msgid "/whois <contact ID>: display information about a contact"
 msgstr "/whois <ID kontaktu>: zobrazit informace o kontaktu"
 
-#: ../libempathy-gtk/empathy-chat.c:1097
+#: ../libempathy-gtk/empathy-chat.c:1103
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -1437,113 +1450,120 @@ msgstr ""
 "/help [<příkaz>]: vypsat seznam podporovaných příkazů. Pokud je zadán "
 "<příkaz>, vypsat jeho použití."
 
-#: ../libempathy-gtk/empathy-chat.c:1114
+#: ../libempathy-gtk/empathy-chat.c:1122
 #, c-format
 msgid "Usage: %s"
 msgstr "Použití: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1159
+#: ../libempathy-gtk/empathy-chat.c:1167
 msgid "Unknown command"
 msgstr "Neznámý příkaz"
 
-#: ../libempathy-gtk/empathy-chat.c:1285
+#: ../libempathy-gtk/empathy-chat.c:1293
 msgid "Unknown command; see /help for the available commands"
 msgstr "Neznámý příkaz, pro výpis dostupných příkazů použijte /help"
 
-#. translators: error used when user doesn't have enough credit on his
-#. * account to send the message.
-#: ../libempathy-gtk/empathy-chat.c:1455
+#: ../libempathy-gtk/empathy-chat.c:1457
 msgid "insufficient balance to send message"
 msgstr "Nemáte dostatečný kredit k poslání zprávy"
 
-#: ../libempathy-gtk/empathy-chat.c:1457
-msgid "not capable"
-msgstr "není k dispozici"
-
-#: ../libempathy-gtk/empathy-chat.c:1464
-msgid "offline"
-msgstr "odpojen"
-
-#: ../libempathy-gtk/empathy-chat.c:1467
-msgid "invalid contact"
-msgstr "neplatný kontakt"
-
-#: ../libempathy-gtk/empathy-chat.c:1470
-msgid "permission denied"
-msgstr "oprávnění odepřeno"
-
-#: ../libempathy-gtk/empathy-chat.c:1473
-msgid "too long message"
-msgstr "příliš dlouhá zpráva"
-
-#: ../libempathy-gtk/empathy-chat.c:1476
-msgid "not implemented"
-msgstr "neimplementováno"
-
-#: ../libempathy-gtk/empathy-chat.c:1480
-msgid "unknown"
-msgstr "neznámý"
-
-#: ../libempathy-gtk/empathy-chat.c:1486
+#: ../libempathy-gtk/empathy-chat.c:1461 ../libempathy-gtk/empathy-chat.c:1475
+#: ../libempathy-gtk/empathy-chat.c:1538
 #, c-format
 msgid "Error sending message '%s': %s"
 msgstr "Chyba při odesílání zprávy „%s“: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1490
+#: ../libempathy-gtk/empathy-chat.c:1463 ../libempathy-gtk/empathy-chat.c:1480
+#: ../libempathy-gtk/empathy-chat.c:1542
 #, c-format
 msgid "Error sending message: %s"
 msgstr "Chyba při odesílání zprávy: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1551 ../src/empathy-chat-window.c:761
+#. translators: error used when user doesn't have enough credit on his
+#. * account to send the message.
+#: ../libempathy-gtk/empathy-chat.c:1469
+#, c-format
+msgid "insufficient balance to send message. <a href='%s'>Top up</a>."
+msgstr "nedostatečný zůstatek k zaslání zprávy. <a href='%s'>Dobít.</a>."
+
+#: ../libempathy-gtk/empathy-chat.c:1509
+msgid "not capable"
+msgstr "není k dispozici"
+
+#: ../libempathy-gtk/empathy-chat.c:1516
+msgid "offline"
+msgstr "odpojen"
+
+#: ../libempathy-gtk/empathy-chat.c:1519
+msgid "invalid contact"
+msgstr "neplatný kontakt"
+
+#: ../libempathy-gtk/empathy-chat.c:1522
+msgid "permission denied"
+msgstr "oprávnění odepřeno"
+
+#: ../libempathy-gtk/empathy-chat.c:1525
+msgid "too long message"
+msgstr "příliš dlouhá zpráva"
+
+#: ../libempathy-gtk/empathy-chat.c:1528
+msgid "not implemented"
+msgstr "neimplementováno"
+
+#: ../libempathy-gtk/empathy-chat.c:1532
+msgid "unknown"
+msgstr "neznámý"
+
+#: ../libempathy-gtk/empathy-chat.c:1599 ../src/empathy-chat-window.c:761
 msgid "Topic:"
 msgstr "Téma:"
 
-#: ../libempathy-gtk/empathy-chat.c:1563
+#: ../libempathy-gtk/empathy-chat.c:1611
 #, c-format
 msgid "Topic set to: %s"
 msgstr "Nastavit téma na: %s"
 
-#: ../libempathy-gtk/empathy-chat.c:1565
+#: ../libempathy-gtk/empathy-chat.c:1613
 msgid "No topic defined"
 msgstr "Nestanoveno žádné téma"
 
-#: ../libempathy-gtk/empathy-chat.c:2074
+#: ../libempathy-gtk/empathy-chat.c:2126
 msgid "(No Suggestions)"
 msgstr "(Žádné návrhy)"
 
 #. translators: %s is the selected word
-#: ../libempathy-gtk/empathy-chat.c:2142
+#: ../libempathy-gtk/empathy-chat.c:2194
 #, c-format
 msgid "Add '%s' to Dictionary"
 msgstr "Přidat „%s“ do slovníku"
 
 #. translators: first %s is the selected word,
 #. * second %s is the language name of the target dictionary
-#: ../libempathy-gtk/empathy-chat.c:2179
+#: ../libempathy-gtk/empathy-chat.c:2231
 #, c-format
 msgid "Add '%s' to %s Dictionary"
 msgstr "Přidat „%s“ do slovníku %s"
 
-#: ../libempathy-gtk/empathy-chat.c:2249
+#: ../libempathy-gtk/empathy-chat.c:2301
 msgid "Insert Smiley"
 msgstr "Vložit smajlíka"
 
 #. send button
-#: ../libempathy-gtk/empathy-chat.c:2267
-#: ../libempathy-gtk/empathy-ui-utils.c:1839
+#: ../libempathy-gtk/empathy-chat.c:2319
+#: ../libempathy-gtk/empathy-ui-utils.c:1843
 msgid "_Send"
 msgstr "_Odeslat"
 
 #. Spelling suggestions
-#: ../libempathy-gtk/empathy-chat.c:2321
+#: ../libempathy-gtk/empathy-chat.c:2373
 msgid "_Spelling Suggestions"
 msgstr "Návrhy pravopi_sných oprav"
 
-#: ../libempathy-gtk/empathy-chat.c:2410
+#: ../libempathy-gtk/empathy-chat.c:2462
 msgid "Failed to retrieve recent logs"
 msgstr "Nepovedlo se získat záznam nedávné historie"
 
-#: ../libempathy-gtk/empathy-chat.c:2547
+#: ../libempathy-gtk/empathy-chat.c:2599
 #, c-format
 msgid "%s has disconnected"
 msgstr "%s se odpojil"
@@ -1551,12 +1571,12 @@ msgstr "%s se odpojil"
 #. translators: reverse the order of these arguments
 #. * if the kicked should come before the kicker in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2554
+#: ../libempathy-gtk/empathy-chat.c:2606
 #, c-format
 msgid "%1$s was kicked by %2$s"
 msgstr "%1$s byl vyhozen uživatelem %2$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2557
+#: ../libempathy-gtk/empathy-chat.c:2609
 #, c-format
 msgid "%s was kicked"
 msgstr "%s byl vyhozen"
@@ -1564,17 +1584,17 @@ msgstr "%s byl vyhozen"
 #. translators: reverse the order of these arguments
 #. * if the banned should come before the banner in your locale.
 #.
-#: ../libempathy-gtk/empathy-chat.c:2565
+#: ../libempathy-gtk/empathy-chat.c:2617
 #, c-format
 msgid "%1$s was banned by %2$s"
 msgstr "%1$s byl zakázán uživatelem %2$s"
 
-#: ../libempathy-gtk/empathy-chat.c:2568
+#: ../libempathy-gtk/empathy-chat.c:2620
 #, c-format
 msgid "%s was banned"
 msgstr "%s byl zakázán"
 
-#: ../libempathy-gtk/empathy-chat.c:2572
+#: ../libempathy-gtk/empathy-chat.c:2624
 #, c-format
 msgid "%s has left the room"
 msgstr "%s opustil místnost"
@@ -1584,17 +1604,17 @@ msgstr "%s opustil místnost"
 #. * given by the user living the room. If this poses a problem,
 #. * please let us know. :-)
 #.
-#: ../libempathy-gtk/empathy-chat.c:2581
+#: ../libempathy-gtk/empathy-chat.c:2633
 #, c-format
 msgid " (%s)"
 msgstr " (%s)"
 
-#: ../libempathy-gtk/empathy-chat.c:2606
+#: ../libempathy-gtk/empathy-chat.c:2658
 #, c-format
 msgid "%s has joined the room"
 msgstr "%s se připojil do místnosti"
 
-#: ../libempathy-gtk/empathy-chat.c:2631
+#: ../libempathy-gtk/empathy-chat.c:2683
 #, c-format
 msgid "%s is now known as %s"
 msgstr "%s je teď znám jako %s"
@@ -1602,79 +1622,79 @@ msgstr "%s je teď znám jako %s"
 #. We don't know if the incoming call has been accepted or not, so we
 #. * assume it hasn't and if it has, we'll set the proper status when
 #. * we get the new handler.
-#: ../libempathy-gtk/empathy-chat.c:2784
-#: ../src/empathy-streamed-media-window.c:1894
-#: ../src/empathy-event-manager.c:1240 ../src/empathy-call-window.c:1432
-#: ../src/empathy-call-window.c:1482 ../src/empathy-call-window.c:2527
+#: ../libempathy-gtk/empathy-chat.c:2836
+#: ../src/empathy-streamed-media-window.c:1896
+#: ../src/empathy-event-manager.c:1260 ../src/empathy-call-window.c:1536
+#: ../src/empathy-call-window.c:1586 ../src/empathy-call-window.c:2632
 msgid "Disconnected"
 msgstr "Odpojen"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3428
+#: ../libempathy-gtk/empathy-chat.c:3482
 msgid "Would you like to store this password?"
 msgstr "Přejete si uchovat toto heslo?"
 
-#: ../libempathy-gtk/empathy-chat.c:3434
+#: ../libempathy-gtk/empathy-chat.c:3488
 msgid "Remember"
 msgstr "Zapamatovat"
 
-#: ../libempathy-gtk/empathy-chat.c:3444
+#: ../libempathy-gtk/empathy-chat.c:3498
 msgid "Not now"
 msgstr "Nyní ne"
 
-#: ../libempathy-gtk/empathy-chat.c:3488
+#: ../libempathy-gtk/empathy-chat.c:3542
 msgid "Retry"
 msgstr "Opakovat"
 
-#: ../libempathy-gtk/empathy-chat.c:3492
+#: ../libempathy-gtk/empathy-chat.c:3546
 msgid "Wrong password; please try again:"
 msgstr "Špatné heslo, zkuste to prosím znovu:"
 
 #. Add message
-#: ../libempathy-gtk/empathy-chat.c:3622
+#: ../libempathy-gtk/empathy-chat.c:3676
 msgid "This room is protected by a password:"
 msgstr "Tato místnost je chráněna heslem:"
 
-#: ../libempathy-gtk/empathy-chat.c:3649
+#: ../libempathy-gtk/empathy-chat.c:3703
 msgid "Join"
 msgstr "Připojit"
 
-#: ../libempathy-gtk/empathy-chat.c:3851 ../src/empathy-event-manager.c:1261
+#: ../libempathy-gtk/empathy-chat.c:3891 ../src/empathy-event-manager.c:1281
 msgid "Connected"
 msgstr "Připojen"
 
-#: ../libempathy-gtk/empathy-chat.c:3906
+#: ../libempathy-gtk/empathy-chat.c:3946
 msgid "Conversation"
 msgstr "Konverzace"
 
 #. Translators: this string is a something like
 #. * "Escher Cat (SMS)"
-#: ../libempathy-gtk/empathy-chat.c:3911
+#: ../libempathy-gtk/empathy-chat.c:3951
 #, c-format
 msgid "%s (SMS)"
 msgstr "%s (SMS)"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:424
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:430
 msgid "Unknown or invalid identifier"
 msgstr "Neznámý nebo neplatný identifikátor"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:426
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:432
 msgid "Contact blocking temporarily unavailable"
 msgstr "Blokování kontaktů není dočasně k dispozici"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:428
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:434
 msgid "Contact blocking unavailable"
 msgstr "Blokování kontaktů není k dispozici"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:430
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:436
 msgid "Permission Denied"
 msgstr "Oprávnění odepřeno"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:434
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:440
 msgid "Could not block contact"
 msgstr "Nelze blokovat kontakt"
 
-#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:774
+#: ../libempathy-gtk/empathy-contact-blocking-dialog.c:783
 msgid "Edit Blocked Contacts"
 msgstr "Upravit blokované kontakty"
 
@@ -1682,8 +1702,7 @@ msgstr "Upravit blokované kontakty"
 #: ../libempathy-gtk/empathy-contact-blocking-dialog.ui.h:1
 #: ../libempathy-gtk/empathy-contact-search-dialog.c:512
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:2
-#: ../libempathy-gtk/empathy-individual-widget.c:1489
-#: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:1
+#: ../libempathy-gtk/empathy-individual-widget.c:1441
 #: ../src/empathy-chatrooms-window.ui.h:1
 #: ../src/empathy-new-chatroom-dialog.ui.h:1
 msgid "Account:"
@@ -1769,112 +1788,99 @@ msgstr "Požadavek na přihlášení"
 msgid "_Block User"
 msgstr "_Blokovat uživatele"
 
-#: ../libempathy-gtk/empathy-contact-list-store.h:71
-msgid "Ungrouped"
-msgstr "Nezařazené do skupiny"
-
-#: ../libempathy-gtk/empathy-contact-list-store.h:72
-msgid "Favorite People"
-msgstr "Oblíbení lidé"
-
-#: ../libempathy-gtk/empathy-contact-list-view.c:1986
-#: ../libempathy-gtk/empathy-individual-view.c:2376
+#: ../libempathy-gtk/empathy-contact-list-view.c:1935
+#: ../libempathy-gtk/empathy-individual-view.c:2375
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Opravdu chcete odstranit skupinu „%s“?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:1988
-#: ../libempathy-gtk/empathy-individual-view.c:2379
+#: ../libempathy-gtk/empathy-contact-list-view.c:1937
+#: ../libempathy-gtk/empathy-individual-view.c:2378
 msgid "Removing group"
 msgstr "Skupina  se odstraňuje"
 
 #. Remove
-#: ../libempathy-gtk/empathy-contact-list-view.c:2037
-#: ../libempathy-gtk/empathy-contact-list-view.c:2114
-#: ../libempathy-gtk/empathy-individual-view.c:2434
-#: ../libempathy-gtk/empathy-individual-view.c:2637
+#: ../libempathy-gtk/empathy-contact-list-view.c:1986
+#: ../libempathy-gtk/empathy-contact-list-view.c:2063
+#: ../libempathy-gtk/empathy-individual-view.c:2433
+#: ../libempathy-gtk/empathy-individual-view.c:2636
 msgid "_Remove"
 msgstr "_Odstranit"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2067
-#: ../libempathy-gtk/empathy-individual-view.c:2501
+#: ../libempathy-gtk/empathy-contact-list-view.c:2016
+#: ../libempathy-gtk/empathy-individual-view.c:2500
 #, c-format
 msgid "Do you really want to remove the contact '%s'?"
 msgstr "Opravdu chcete odstranit kontakt „%s“?"
 
-#: ../libempathy-gtk/empathy-contact-list-view.c:2069
-#: ../libempathy-gtk/empathy-individual-view.c:2522
+#: ../libempathy-gtk/empathy-contact-list-view.c:2018
+#: ../libempathy-gtk/empathy-individual-view.c:2521
 msgid "Removing contact"
 msgstr "Kontakt se odstraňuje"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:220
+#: ../libempathy-gtk/empathy-contact-menu.c:212
 #: ../src/empathy-main-window-menubar.ui.h:14
 msgid "_Add Contact…"
 msgstr "_Přidat kontakt…"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:300
+#: ../libempathy-gtk/empathy-contact-menu.c:292
 msgid "_Block Contact"
 msgstr "_Blokovat kontakt"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:329
+#. add chat button
+#: ../libempathy-gtk/empathy-contact-menu.c:321
 #: ../libempathy-gtk/empathy-individual-menu.c:758
+#: ../libempathy-gtk/empathy-new-message-dialog.c:320
 #: ../src/empathy-main-window-menubar.ui.h:16
 msgid "_Chat"
 msgstr "_Diskuze"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:361
-#: ../libempathy-gtk/empathy-individual-menu.c:849
+#: ../libempathy-gtk/empathy-contact-menu.c:353
+#: ../libempathy-gtk/empathy-individual-menu.c:850
 msgctxt "menu item"
 msgid "_Audio Call"
 msgstr "_Audiohovor"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:394
-#: ../libempathy-gtk/empathy-individual-menu.c:894
+#: ../libempathy-gtk/empathy-contact-menu.c:386
+#: ../libempathy-gtk/empathy-individual-menu.c:895
 msgctxt "menu item"
 msgid "_Video Call"
 msgstr "_Videohovor"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:440
-#: ../libempathy-gtk/empathy-individual-menu.c:947
+#: ../libempathy-gtk/empathy-contact-menu.c:432
+#: ../libempathy-gtk/empathy-individual-menu.c:948
 #: ../src/empathy-main-window-menubar.ui.h:27
 msgid "_Previous Conversations"
 msgstr "_Předchozí konverzace"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:462
-#: ../libempathy-gtk/empathy-individual-menu.c:988
+#: ../libempathy-gtk/empathy-contact-menu.c:454
+#: ../libempathy-gtk/empathy-individual-menu.c:989
 msgid "Send File"
 msgstr "Odeslat soubor"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:485
-#: ../libempathy-gtk/empathy-individual-menu.c:1030
+#: ../libempathy-gtk/empathy-contact-menu.c:477
+#: ../libempathy-gtk/empathy-individual-menu.c:1031
 msgid "Share My Desktop"
 msgstr "Sdílet moji plochu"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:525
-#: ../libempathy-gtk/empathy-contact-widget.c:1886
-#: ../libempathy-gtk/empathy-individual-menu.c:1065
-#: ../libempathy-gtk/empathy-individual-widget.c:1372
-msgid "Favorite"
-msgstr "Oblíbený"
-
-#: ../libempathy-gtk/empathy-contact-menu.c:554
-#: ../libempathy-gtk/empathy-individual-menu.c:1093
+#: ../libempathy-gtk/empathy-contact-menu.c:506
+#: ../libempathy-gtk/empathy-individual-menu.c:1094
 msgid "Infor_mation"
 msgstr "Infor_mace"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:600
+#: ../libempathy-gtk/empathy-contact-menu.c:552
 msgctxt "Edit contact (contextual menu)"
 msgid "_Edit"
 msgstr "_Upravit"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:654
-#: ../libempathy-gtk/empathy-individual-menu.c:1284
+#: ../libempathy-gtk/empathy-contact-menu.c:606
+#: ../libempathy-gtk/empathy-individual-menu.c:1285
 #: ../src/empathy-chat-window.c:1011
 msgid "Inviting you to this room"
 msgstr "Pozvání do místnosti"
 
-#: ../libempathy-gtk/empathy-contact-menu.c:685
-#: ../libempathy-gtk/empathy-individual-menu.c:1330
+#: ../libempathy-gtk/empathy-contact-menu.c:637
+#: ../libempathy-gtk/empathy-individual-menu.c:1331
 msgid "_Invite to Chat Room"
 msgstr "Pozvat do diskuzní místnost_i"
 
@@ -1903,207 +1909,230 @@ msgstr "Vaše zpráva, kterou se představujete:"
 msgid "Please let me see when you're online. Thanks!"
 msgstr "Dejte mi prosím vědět, až budete připojen. Děkuji!"
 
-#: ../libempathy-gtk/empathy-contact-selector.c:129
-msgid "Select a contact"
-msgstr "Vybrat kontakt"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:336
-#: ../libempathy-gtk/empathy-individual-widget.c:153
-msgid "Full name:"
-msgstr "Celé jméno:"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:337
-#: ../libempathy-gtk/empathy-individual-widget.c:154
-msgid "Phone number:"
-msgstr "Telefonní číslo:"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:338
-#: ../libempathy-gtk/empathy-individual-widget.c:155
-msgid "E-mail address:"
-msgstr "E-mailová adresa nenalezena: "
-
-#: ../libempathy-gtk/empathy-contact-widget.c:339
-#: ../libempathy-gtk/empathy-individual-widget.c:156
-msgid "Website:"
-msgstr "Webová stránka:"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:340
-#: ../libempathy-gtk/empathy-individual-widget.c:157
-msgid "Birthday:"
-msgstr "Narozeniny:"
-
-#. Note to translators: this is the caption for a string of the form "5
-#. * minutes ago", and refers to the time since the contact last interacted
-#. * with their IM client.
-#.
-#: ../libempathy-gtk/empathy-contact-widget.c:346
-msgid "Last seen:"
-msgstr "Naposledy spatřen:"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:348
-msgid "Connected from:"
-msgstr "Připojen z:"
-
-#. FIXME: once Idle implements SimplePresence using this information, we can
-#. * and should bin this.
-#.
-#: ../libempathy-gtk/empathy-contact-widget.c:353
-msgid "Away message:"
-msgstr "Zpráva v nepřítomnosti:"
-
-#: ../libempathy-gtk/empathy-contact-widget.c:606
+#: ../libempathy-gtk/empathy-contact-widget.c:502
 msgid "Channels:"
 msgstr "Kanály:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:897
-#: ../libempathy-gtk/empathy-individual-widget.c:469
+#: ../libempathy-gtk/empathy-contact-widget.c:797
+#: ../libempathy-gtk/empathy-individual-widget.c:421
 msgid "Country ISO Code:"
 msgstr "Kód země ISO:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:899
-#: ../libempathy-gtk/empathy-individual-widget.c:471
+#: ../libempathy-gtk/empathy-contact-widget.c:799
+#: ../libempathy-gtk/empathy-individual-widget.c:423
 msgid "Country:"
 msgstr "Země:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:901
-#: ../libempathy-gtk/empathy-individual-widget.c:473
+#: ../libempathy-gtk/empathy-contact-widget.c:801
+#: ../libempathy-gtk/empathy-individual-widget.c:425
 msgid "State:"
 msgstr "Kraj:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:903
-#: ../libempathy-gtk/empathy-individual-widget.c:475
+#: ../libempathy-gtk/empathy-contact-widget.c:803
+#: ../libempathy-gtk/empathy-individual-widget.c:427
 msgid "City:"
 msgstr "Město:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:905
-#: ../libempathy-gtk/empathy-individual-widget.c:477
+#: ../libempathy-gtk/empathy-contact-widget.c:805
+#: ../libempathy-gtk/empathy-individual-widget.c:429
 msgid "Area:"
 msgstr "Oblast:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:907
-#: ../libempathy-gtk/empathy-individual-widget.c:479
+#: ../libempathy-gtk/empathy-contact-widget.c:807
+#: ../libempathy-gtk/empathy-individual-widget.c:431
 msgid "Postal Code:"
 msgstr "PSČ:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:909
-#: ../libempathy-gtk/empathy-individual-widget.c:481
+#: ../libempathy-gtk/empathy-contact-widget.c:809
+#: ../libempathy-gtk/empathy-individual-widget.c:433
 msgid "Street:"
 msgstr "Ulice:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:911
-#: ../libempathy-gtk/empathy-individual-widget.c:483
+#: ../libempathy-gtk/empathy-contact-widget.c:811
+#: ../libempathy-gtk/empathy-individual-widget.c:435
 msgid "Building:"
 msgstr "Budova:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:913
-#: ../libempathy-gtk/empathy-individual-widget.c:485
+#: ../libempathy-gtk/empathy-contact-widget.c:813
+#: ../libempathy-gtk/empathy-individual-widget.c:437
 msgid "Floor:"
 msgstr "Podlaží:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:915
-#: ../libempathy-gtk/empathy-individual-widget.c:487
+#: ../libempathy-gtk/empathy-contact-widget.c:815
+#: ../libempathy-gtk/empathy-individual-widget.c:439
 msgid "Room:"
 msgstr "Místnost:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:917
-#: ../libempathy-gtk/empathy-individual-widget.c:489
+#: ../libempathy-gtk/empathy-contact-widget.c:817
+#: ../libempathy-gtk/empathy-individual-widget.c:441
 msgid "Text:"
 msgstr "Text:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:919
-#: ../libempathy-gtk/empathy-individual-widget.c:491
+#: ../libempathy-gtk/empathy-contact-widget.c:819
+#: ../libempathy-gtk/empathy-individual-widget.c:443
 msgid "Description:"
 msgstr "Popis:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:921
-#: ../libempathy-gtk/empathy-individual-widget.c:493
+#: ../libempathy-gtk/empathy-contact-widget.c:821
+#: ../libempathy-gtk/empathy-individual-widget.c:445
 msgid "URI:"
 msgstr "URI:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:923
-#: ../libempathy-gtk/empathy-individual-widget.c:495
+#: ../libempathy-gtk/empathy-contact-widget.c:823
+#: ../libempathy-gtk/empathy-individual-widget.c:447
 msgid "Accuracy Level:"
 msgstr "Úroveň přesnosti:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:925
-#: ../libempathy-gtk/empathy-individual-widget.c:497
+#: ../libempathy-gtk/empathy-contact-widget.c:825
+#: ../libempathy-gtk/empathy-individual-widget.c:449
 msgid "Error:"
 msgstr "Chyba:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:927
-#: ../libempathy-gtk/empathy-individual-widget.c:499
+#: ../libempathy-gtk/empathy-contact-widget.c:827
+#: ../libempathy-gtk/empathy-individual-widget.c:451
 msgid "Vertical Error (meters):"
 msgstr "Vertikální chyba (v metrech):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:929
-#: ../libempathy-gtk/empathy-individual-widget.c:501
+#: ../libempathy-gtk/empathy-contact-widget.c:829
+#: ../libempathy-gtk/empathy-individual-widget.c:453
 msgid "Horizontal Error (meters):"
 msgstr "Horizontální chyba (v metrech):"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:931
-#: ../libempathy-gtk/empathy-individual-widget.c:503
+#: ../libempathy-gtk/empathy-contact-widget.c:831
+#: ../libempathy-gtk/empathy-individual-widget.c:455
 msgid "Speed:"
 msgstr "Rychlost:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:933
-#: ../libempathy-gtk/empathy-individual-widget.c:505
+#: ../libempathy-gtk/empathy-contact-widget.c:833
+#: ../libempathy-gtk/empathy-individual-widget.c:457
 msgid "Bearing:"
 msgstr "Azimut:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:935
-#: ../libempathy-gtk/empathy-individual-widget.c:507
+#: ../libempathy-gtk/empathy-contact-widget.c:835
+#: ../libempathy-gtk/empathy-individual-widget.c:459
 msgid "Climb Speed:"
 msgstr "Rychlost stoupání:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:937
-#: ../libempathy-gtk/empathy-individual-widget.c:509
+#: ../libempathy-gtk/empathy-contact-widget.c:837
+#: ../libempathy-gtk/empathy-individual-widget.c:461
 msgid "Last Updated on:"
 msgstr "Poslední aktualizace:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:939
-#: ../libempathy-gtk/empathy-individual-widget.c:511
+#: ../libempathy-gtk/empathy-contact-widget.c:839
+#: ../libempathy-gtk/empathy-individual-widget.c:463
 msgid "Longitude:"
 msgstr "Zeměpisná délka:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:941
-#: ../libempathy-gtk/empathy-individual-widget.c:513
+#: ../libempathy-gtk/empathy-contact-widget.c:841
+#: ../libempathy-gtk/empathy-individual-widget.c:465
 msgid "Latitude:"
 msgstr "Zeměpisná šířka:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:943
-#: ../libempathy-gtk/empathy-individual-widget.c:515
+#: ../libempathy-gtk/empathy-contact-widget.c:843
+#: ../libempathy-gtk/empathy-individual-widget.c:467
 msgid "Altitude:"
 msgstr "Nadmořská výška:"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:996
-#: ../libempathy-gtk/empathy-contact-widget.c:1011
-#: ../libempathy-gtk/empathy-individual-widget.c:607
-#: ../libempathy-gtk/empathy-individual-widget.c:622
+#: ../libempathy-gtk/empathy-contact-widget.c:896
+#: ../libempathy-gtk/empathy-contact-widget.c:911
+#: ../libempathy-gtk/empathy-individual-widget.c:559
+#: ../libempathy-gtk/empathy-individual-widget.c:574
 #: ../src/empathy-preferences.ui.h:17
 msgid "Location"
 msgstr "Poloha"
 
 #. translators: format is "Location, $date"
-#: ../libempathy-gtk/empathy-contact-widget.c:1013
-#: ../libempathy-gtk/empathy-individual-widget.c:624
+#: ../libempathy-gtk/empathy-contact-widget.c:913
+#: ../libempathy-gtk/empathy-individual-widget.c:576
 #, c-format
 msgid "%s, %s"
 msgstr "%s, %s"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1065
-#: ../libempathy-gtk/empathy-individual-widget.c:673
+#: ../libempathy-gtk/empathy-contact-widget.c:965
+#: ../libempathy-gtk/empathy-individual-widget.c:625
 msgid "%B %e, %Y at %R UTC"
 msgstr "%B %e, %Y v %R UTC"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1147
-#: ../libempathy-gtk/empathy-individual-widget.c:915
+#: ../libempathy-gtk/empathy-contact-widget.c:1047
+#: ../libempathy-gtk/empathy-individual-widget.c:867
 msgid "Save Avatar"
 msgstr "Uložit avatar"
 
-#: ../libempathy-gtk/empathy-contact-widget.c:1203
-#: ../libempathy-gtk/empathy-individual-widget.c:973
+#: ../libempathy-gtk/empathy-contact-widget.c:1103
+#: ../libempathy-gtk/empathy-individual-widget.c:925
 msgid "Unable to save avatar"
 msgstr "Nelze uložit avatar"
+
+#: ../libempathy-gtk/empathy-contact-widget.c:1787
+#: ../libempathy-gtk/empathy-individual-menu.c:1066
+#: ../libempathy-gtk/empathy-individual-widget.c:1324
+msgid "Favorite"
+msgstr "Oblíbený"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:102
+msgid "Full name"
+msgstr "Celé jméno"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:103
+msgid "Phone number"
+msgstr "Telefonní číslo"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:104
+msgid "E-mail address"
+msgstr "E-mailová adresa"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:105
+msgid "Website"
+msgstr "Webové stránky"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:106
+msgid "Birthday"
+msgstr "Narozeniny"
+
+#. Note to translators: this is the caption for a string of the form "5
+#. * minutes ago", and refers to the time since the contact last interacted
+#. * with their IM client.
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:111
+msgid "Last seen:"
+msgstr "Naposledy spatřen:"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:113
+msgid "Connected from:"
+msgstr "Připojen z:"
+
+#. FIXME: once Idle implements SimplePresence using this information, we can
+#. * and should bin this.
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:117
+msgid "Away message:"
+msgstr "Zpráva v nepřítomnosti:"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:130
+msgid "work"
+msgstr "pracovní"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:131
+msgid "home"
+msgstr "domů"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:132
+msgid "mobile"
+msgstr "mobilní"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:133
+msgid "voice"
+msgstr "hlasový"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:134
+msgid "preferred"
+msgstr "upřednostňovaný"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:135
+msgid "postal"
+msgstr "poštovní"
+
+#: ../libempathy-gtk/empathy-contactinfo-utils.c:136
+msgid "parcel"
+msgstr "doručovací"
 
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:1
 msgid "<b>Location</b> at (date)\t"
@@ -2111,7 +2140,7 @@ msgstr "<b>Poloha</b> (dne)\t"
 
 #. Alias
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:3
-#: ../libempathy-gtk/empathy-individual-widget.c:1308
+#: ../libempathy-gtk/empathy-individual-widget.c:1260
 msgid "Alias:"
 msgstr "Alias:"
 
@@ -2131,7 +2160,7 @@ msgstr "Podrobnosti o kontaktu"
 #. Identifier to connect to Instant Messaging network
 #. Translators: Identifier to connect to Instant Messaging network
 #: ../libempathy-gtk/empathy-contact-widget.ui.h:8
-#: ../libempathy-gtk/empathy-individual-widget.c:1517
+#: ../libempathy-gtk/empathy-individual-widget.c:1469
 msgid "Identifier:"
 msgstr "Identifikátor:"
 
@@ -2170,7 +2199,7 @@ msgid "Select"
 msgstr "Vybrat"
 
 #: ../libempathy-gtk/empathy-groups-widget.c:409
-#: ../src/empathy-main-window.c:1807
+#: ../src/empathy-main-window.c:1967
 msgid "Group"
 msgstr "Skupina"
 
@@ -2221,7 +2250,7 @@ msgstr "Výběr účtu pro umístění volání"
 #. * title
 #: ../libempathy-gtk/empathy-individual-menu.c:313
 #: ../libempathy-gtk/empathy-log-window.ui.h:2
-#: ../src/empathy-streamed-media-window.c:1299
+#: ../src/empathy-streamed-media-window.c:1301
 #: ../src/empathy-call-window.ui.h:2
 msgid "Call"
 msgstr "Hovor"
@@ -2238,29 +2267,29 @@ msgstr "Pracovní"
 msgid "HOME"
 msgstr "Soukromý"
 
-#. add an SMS button
-#: ../libempathy-gtk/empathy-individual-menu.c:804
-#: ../libempathy-gtk/empathy-new-message-dialog.c:215
+#. add SMS button
+#: ../libempathy-gtk/empathy-individual-menu.c:805
+#: ../libempathy-gtk/empathy-new-message-dialog.c:314
 msgid "_SMS"
 msgstr "_SMS"
 
-#: ../libempathy-gtk/empathy-individual-menu.c:1142
+#: ../libempathy-gtk/empathy-individual-menu.c:1143
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
 msgstr "_Upravit"
 
 #. Translators: this is a verb meaning "to connect two contacts together
 #. * to form a meta-contact".
-#: ../libempathy-gtk/empathy-individual-menu.c:1168
+#: ../libempathy-gtk/empathy-individual-menu.c:1169
 msgctxt "Link individual (contextual menu)"
 msgid "_Link Contacts…"
 msgstr "Po_spojovat kontakty…"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2341
+#: ../libempathy-gtk/empathy-individual-view.c:2340
 msgid "Delete and _Block"
 msgstr "Smazat a _blokovat"
 
-#: ../libempathy-gtk/empathy-individual-view.c:2510
+#: ../libempathy-gtk/empathy-individual-view.c:2509
 #, c-format
 msgid ""
 "Do you really want to remove the linked contact '%s'? Note that this will "
@@ -2269,7 +2298,7 @@ msgstr ""
 "Opravdu chcete odstranit pospojovaný kontakt „%s“? Uvědomte si, že tím se "
 "odstraní všechny kontakty, které tento pospojovaný kontakt tvoří."
 
-#: ../libempathy-gtk/empathy-individual-widget.c:1656
+#: ../libempathy-gtk/empathy-individual-widget.c:1608
 #, c-format
 msgid "Linked contact containing %u contact"
 msgid_plural "Linked contacts containing %u contacts"
@@ -2524,32 +2553,72 @@ msgstr "_Soubor"
 msgid "page 2"
 msgstr "strana 2"
 
-#: ../libempathy-gtk/empathy-contact-selector-dialog.ui.h:2
-msgid "Contact ID:"
-msgstr "ID kontaktu:"
+#: ../libempathy-gtk/empathy-new-message-dialog.c:84
+msgid "The contact is offline"
+msgstr "Kontakt je odpojen"
 
-#. add chat button
-#: ../libempathy-gtk/empathy-new-message-dialog.c:225
-msgid "C_hat"
-msgstr "_Diskuze"
+#: ../libempathy-gtk/empathy-new-message-dialog.c:86
+msgid "The specified contact is either invalid or unknown"
+msgstr "Vybraný kontakt buď není platný nebo je neznámý"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:88
+msgid "The contact does not support this kind of conversation"
+msgstr "Kontakt nepodporuje tento druh konverzace"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:90
+msgid "The requested functionality is not implemented for this protocol"
+msgstr "Požadovaná funkcionalita není pro tento protokol implementována"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:96
+msgid "Could not start a conversation with the given contact"
+msgstr "Nelze začít konverzaci s daným kontaktem"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:98
+msgid "You are banned from this channel"
+msgstr "Na tomto kanálu máte zákaz"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:100
+msgid "This channel is full"
+msgstr "Tento kanál je plný"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:102
+msgid "You must be invited to join this channel"
+msgstr "Abyste se mohl připojit k tomuto kanálu, musíte mít pozvání"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:104
+msgid "Can't proceed while disconnected"
+msgstr "Nelze pokračovat bez připojení"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:106
+msgid "Permission denied"
+msgstr "Oprávnění odepřeno"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:112
+msgid "There was an error starting the conversation"
+msgstr "Při spouštění konverzace došlo k chybě"
+
+#: ../libempathy-gtk/empathy-new-message-dialog.c:291
+#: ../libempathy-gtk/empathy-new-call-dialog.c:203
+msgid "Enter a contact identifier or phone number:"
+msgstr "Zadejte identifikátor kontaktu nebo telefonní číslo:"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-message-dialog.c:244
+#: ../libempathy-gtk/empathy-new-message-dialog.c:334
 msgid "New Conversation"
 msgstr "Nová konverzace"
 
-#. add video toggle
-#: ../libempathy-gtk/empathy-new-call-dialog.c:204
-msgid "Send _Video"
-msgstr "Přenášet _video"
+#. add video button
+#: ../libempathy-gtk/empathy-new-call-dialog.c:226
+msgid "_Video Call"
+msgstr "_Videohovor"
 
-#. add chat button
-#: ../libempathy-gtk/empathy-new-call-dialog.c:215
-msgid "C_all"
-msgstr "Vol_at"
+#. add audio button
+#: ../libempathy-gtk/empathy-new-call-dialog.c:236
+msgid "_Audio Call"
+msgstr "Hl_asový hovor"
 
 #. Tweak the dialog
-#: ../libempathy-gtk/empathy-new-call-dialog.c:225
+#: ../libempathy-gtk/empathy-new-call-dialog.c:246
 msgid "New Call"
 msgstr "Nový hovor"
 
@@ -2590,12 +2659,8 @@ msgstr "Kliknutím přidáte stav do oblíbených"
 msgid "Set status"
 msgstr "Nastavit stav"
 
-#: ../libempathy-gtk/empathy-presence-chooser.c:943
-msgid "Set your presence and current status"
-msgstr "Nastavit přítomnost a aktuální stav"
-
 #. Custom messages
-#: ../libempathy-gtk/empathy-presence-chooser.c:1131
+#: ../libempathy-gtk/empathy-presence-chooser.c:1135
 msgid "Custom messages…"
 msgstr "Vlastní zprávy…"
 
@@ -2672,12 +2737,12 @@ msgstr "Hovor ukončen"
 msgid "Edit Custom Messages"
 msgstr "Upravit vlastní zprávy"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1036
+#: ../libempathy-gtk/empathy-theme-adium.c:1047
 #, c-format
 msgid "Message edited at %s"
 msgstr "Zpráva upravena %s"
 
-#: ../libempathy-gtk/empathy-theme-adium.c:1726
+#: ../libempathy-gtk/empathy-theme-adium.c:1752
 msgid "Normal"
 msgstr "Normální"
 
@@ -2768,19 +2833,19 @@ msgstr "Zapamatovat tuto volbu pro budoucí připojení"
 msgid "Certificate Details"
 msgstr "Podrobnosti certifikátu"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1735
+#: ../libempathy-gtk/empathy-ui-utils.c:1738
 msgid "Unable to open URI"
 msgstr "Nelze otevřít URI"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1831
+#: ../libempathy-gtk/empathy-ui-utils.c:1835
 msgid "Select a file"
 msgstr "Vybrat soubor"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1903
+#: ../libempathy-gtk/empathy-ui-utils.c:1907
 msgid "Insufficient free space to save file"
 msgstr "Nedostatek volného místa pro uložení souboru"
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1911
+#: ../libempathy-gtk/empathy-ui-utils.c:1915
 #, c-format
 msgid ""
 "%s of free space are required to save this file, but only %s is available. "
@@ -2789,7 +2854,7 @@ msgstr ""
 "Pro uložení tohoto souboru je zapotřebí %s volného místa, ale k dispozici je "
 "jen %s. Zvolte prosím jiné umístění."
 
-#: ../libempathy-gtk/empathy-ui-utils.c:1955
+#: ../libempathy-gtk/empathy-ui-utils.c:1959
 #, c-format
 msgid "Incoming file from %s"
 msgstr "Příchozí soubor od %s"
@@ -2961,39 +3026,31 @@ msgstr "západní"
 msgid "Vietnamese"
 msgstr "vietnamské"
 
-#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:108
-msgid "The selected contact cannot receive files."
-msgstr "Vybraný kontakt nemůže přijímat soubory."
-
-#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:114
-msgid "The selected contact is offline."
-msgstr "Vybraný kontakt je odpojen."
-
-#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:169
+#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:203
 msgid "No error message"
 msgstr "Není dostupné chybové hlášení"
 
-#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:242
+#: ../nautilus-sendto-plugin/empathy-nautilus-sendto.c:276
 msgid "Instant Message (Empathy)"
 msgstr "Rychlá zpráva (Empathy)"
 
-#: ../src/empathy.c:431
+#: ../src/empathy.c:433
 msgid "Don't connect on startup"
 msgstr "Nepřipojovat se po spuštění"
 
-#: ../src/empathy.c:435
+#: ../src/empathy.c:437
 msgid "Don't display the contact list or any other dialogs on startup"
 msgstr "Nezobrazovat seznam kontaktů nebo žádné jiné dialogy po spuštění"
 
-#: ../src/empathy.c:450
+#: ../src/empathy.c:452
 msgid "- Empathy IM Client"
 msgstr "– komunikátor Empathy"
 
-#: ../src/empathy.c:637
+#: ../src/empathy.c:639
 msgid "Error contacting the Account Manager"
 msgstr "Chyba při kontaktování správce účtu"
 
-#: ../src/empathy.c:639
+#: ../src/empathy.c:641
 #, c-format
 msgid ""
 "There was an error while trying to connect to the Telepathy Account Manager. "
@@ -3150,8 +3207,8 @@ msgid "Select the accounts you want to import:"
 msgstr "Vyberte účty, které mají být importovány:"
 
 #: ../src/empathy-account-assistant.c:813
-#: ../src/empathy-new-chatroom-dialog.c:555
-#: ../src/empathy-new-chatroom-dialog.c:556
+#: ../src/empathy-new-chatroom-dialog.c:625
+#: ../src/empathy-new-chatroom-dialog.c:626
 msgid "Yes"
 msgstr "Ano"
 
@@ -3227,7 +3284,7 @@ msgstr "Váš nový účet ještě není uložen."
 
 #: ../src/empathy-accounts-dialog.c:345
 #: ../src/empathy-streamed-media-window.c:754
-#: ../src/empathy-call-window.c:1216
+#: ../src/empathy-call-window.c:1320
 msgid "Connecting…"
 msgstr "Probíhá připojování…"
 
@@ -3335,11 +3392,11 @@ msgstr "Klient Empathy na ověření totožnosti"
 msgid "People nearby"
 msgstr "Lidé v okolí"
 
-#: ../src/empathy-av.c:118 ../src/empathy-call.c:192
+#: ../src/empathy-av.c:118 ../src/empathy-call.c:193
 msgid "- Empathy Audio/Video Client"
 msgstr "– audio/videoklient Empathy"
 
-#: ../src/empathy-av.c:134 ../src/empathy-call.c:217
+#: ../src/empathy-av.c:134 ../src/empathy-call.c:218
 msgid "Empathy Audio/Video Client"
 msgstr "Audio/videoklient Empathy"
 
@@ -3371,80 +3428,68 @@ msgstr "Vstup zvuku"
 msgid "Video input"
 msgstr "Vstup videa"
 
-#: ../src/empathy-streamed-media-window.c:1140
+#: ../src/empathy-streamed-media-window.c:1142
 msgid "Dialpad"
 msgstr "Tlačítka vytáčení"
 
-#: ../src/empathy-streamed-media-window.c:1151
+#: ../src/empathy-streamed-media-window.c:1153
 msgid "Details"
 msgstr "Podrobnosti"
 
 #. translators: Call is a noun and %s is the contact name. This string
 #. * is used in the window title
-#: ../src/empathy-streamed-media-window.c:1220
-#: ../src/empathy-call-window.c:1825
+#: ../src/empathy-streamed-media-window.c:1222
+#: ../src/empathy-call-window.c:1929
 #, c-format
 msgid "Call with %s"
 msgstr "Hovor s %s"
 
-#: ../src/empathy-streamed-media-window.c:1453
-#: ../src/empathy-call-window.c:2069
+#: ../src/empathy-streamed-media-window.c:1455
+#: ../src/empathy-call-window.c:2173
 msgid "The IP address as seen by the machine"
 msgstr "Adresa IP, jak ji vidí počítač"
 
-#: ../src/empathy-streamed-media-window.c:1455
-#: ../src/empathy-call-window.c:2071
+#: ../src/empathy-streamed-media-window.c:1457
+#: ../src/empathy-call-window.c:2175
 msgid "The IP address as seen by a server on the Internet"
 msgstr "Adresa IP, jak ji vidí server v Internetu"
 
-#: ../src/empathy-streamed-media-window.c:1457
-#: ../src/empathy-call-window.c:2073
+#: ../src/empathy-streamed-media-window.c:1459
+#: ../src/empathy-call-window.c:2177
 msgid "The IP address of the peer as seen by the other side"
 msgstr "Adresa IP vzájemného spojení, jak ji vidí druhá strana"
 
-#: ../src/empathy-streamed-media-window.c:1459
-#: ../src/empathy-call-window.c:2075
+#: ../src/empathy-streamed-media-window.c:1461
+#: ../src/empathy-call-window.c:2179
 msgid "The IP address of a relay server"
 msgstr "Adresa IP přenosového serveru"
 
-#: ../src/empathy-streamed-media-window.c:1461
-#: ../src/empathy-call-window.c:2077
+#: ../src/empathy-streamed-media-window.c:1463
+#: ../src/empathy-call-window.c:2181
 msgid "The IP address of the multicast group"
 msgstr "Adresa IP vysílací skupiny"
 
-#: ../src/empathy-streamed-media-window.c:1843
-msgctxt "encoding video codec"
-msgid "Unknown"
-msgstr "Neznámý"
-
-#: ../src/empathy-streamed-media-window.c:1846
-msgctxt "encoding audio codec"
-msgid "Unknown"
-msgstr "Neznámý"
-
-#: ../src/empathy-streamed-media-window.c:1849
-msgctxt "decoding video codec"
-msgid "Unknown"
-msgstr "Neznámý"
-
-#: ../src/empathy-streamed-media-window.c:1852
-msgctxt "decoding audio codec"
+#: ../src/empathy-streamed-media-window.c:1845
+#: ../src/empathy-streamed-media-window.c:1848
+#: ../src/empathy-streamed-media-window.c:1851
+#: ../src/empathy-streamed-media-window.c:1854
+msgctxt "codec"
 msgid "Unknown"
 msgstr "Neznámý"
 
 #. Translators: number of minutes:seconds the caller has been connected
-#: ../src/empathy-streamed-media-window.c:2144
+#: ../src/empathy-streamed-media-window.c:2146
 #, c-format
 msgid "Connected — %d:%02dm"
 msgstr "Připojeno — %d:%02dm"
 
-#: ../src/empathy-streamed-media-window.c:2205
-#: ../src/empathy-call-window.c:2846
+#: ../src/empathy-streamed-media-window.c:2207
+#: ../src/empathy-call-window.c:2984
 msgid "Technical Details"
 msgstr "Technické podrobnosti"
 
-#: ../src/empathy-streamed-media-window.c:2243
-#: ../src/empathy-call-window.c:2884
+#: ../src/empathy-streamed-media-window.c:2245
+#: ../src/empathy-call-window.c:3023
 #, c-format
 msgid ""
 "%s's software does not understand any of the audio formats supported by your "
@@ -3453,8 +3498,8 @@ msgstr ""
 "Software používaný kontaktem „%s“ nerozumí žádnému z formátů zvuku, který je "
 "podporován na vašem počítači"
 
-#: ../src/empathy-streamed-media-window.c:2248
-#: ../src/empathy-call-window.c:2889
+#: ../src/empathy-streamed-media-window.c:2250
+#: ../src/empathy-call-window.c:3028
 #, c-format
 msgid ""
 "%s's software does not understand any of the video formats supported by your "
@@ -3463,8 +3508,8 @@ msgstr ""
 "Software používaný kontaktem „%s“ nerozumí žádnému z formátů videa, který je "
 "podporován na vašem počítači"
 
-#: ../src/empathy-streamed-media-window.c:2254
-#: ../src/empathy-call-window.c:2895
+#: ../src/empathy-streamed-media-window.c:2256
+#: ../src/empathy-call-window.c:3034
 #, c-format
 msgid ""
 "Can't establish a connection to %s. One of you might be on a network that "
@@ -3473,29 +3518,29 @@ msgstr ""
 "Nelze navázat spojení s %s. Někdo z vás není nejspíš v síti, která podporuje "
 "přímá spojení."
 
-#: ../src/empathy-streamed-media-window.c:2260
-#: ../src/empathy-call-window.c:2901
+#: ../src/empathy-streamed-media-window.c:2262
+#: ../src/empathy-call-window.c:3040
 msgid "There was a failure on the network"
 msgstr "Někde na síti došlo k selhání"
 
-#: ../src/empathy-streamed-media-window.c:2264
-#: ../src/empathy-call-window.c:2905
+#: ../src/empathy-streamed-media-window.c:2266
+#: ../src/empathy-call-window.c:3044
 msgid ""
 "The audio formats necessary for this call are not installed on your computer"
 msgstr ""
 "Nemáte nainstalovánu podporu žádného z formátů zvuku potřebného pro tento "
 "hovor"
 
-#: ../src/empathy-streamed-media-window.c:2267
-#: ../src/empathy-call-window.c:2908
+#: ../src/empathy-streamed-media-window.c:2269
+#: ../src/empathy-call-window.c:3047
 msgid ""
 "The video formats necessary for this call are not installed on your computer"
 msgstr ""
 "Nemáte nainstalovánu podporu žádného z formátů videa potřebného pro tento "
 "hovor"
 
-#: ../src/empathy-streamed-media-window.c:2277
-#: ../src/empathy-call-window.c:2920
+#: ../src/empathy-streamed-media-window.c:2279
+#: ../src/empathy-call-window.c:3059
 #, c-format
 msgid ""
 "Something unexpected happened in a Telepathy component. Please <a href=\"%s"
@@ -3506,23 +3551,23 @@ msgstr ""
 "prosím tuto chybu</a> a přiložte chybové zprávy získané z odlaďovacího okna "
 "v nabídce „Nápověda“."
 
-#: ../src/empathy-streamed-media-window.c:2285
-#: ../src/empathy-call-window.c:2929
+#: ../src/empathy-streamed-media-window.c:2287
+#: ../src/empathy-call-window.c:3068
 msgid "There was a failure in the call engine"
 msgstr "Selhala funkce pro volání"
 
-#: ../src/empathy-streamed-media-window.c:2288
-#: ../src/empathy-call-window.c:2932
+#: ../src/empathy-streamed-media-window.c:2290
+#: ../src/empathy-call-window.c:3071
 msgid "The end of the stream was reached"
 msgstr "Byl dosažen konec proudu"
 
-#: ../src/empathy-streamed-media-window.c:2328
-#: ../src/empathy-call-window.c:2972
+#: ../src/empathy-streamed-media-window.c:2330
+#: ../src/empathy-call-window.c:3111
 msgid "Can't establish audio stream"
 msgstr "Nelze navázat spojení pro přenos zvuku"
 
-#: ../src/empathy-streamed-media-window.c:2338
-#: ../src/empathy-call-window.c:2982
+#: ../src/empathy-streamed-media-window.c:2340
+#: ../src/empathy-call-window.c:3121
 msgid "Can't establish video stream"
 msgstr "Nelze navázat spojení pro přenos obrazu"
 
@@ -3613,8 +3658,8 @@ msgstr "Přepnout vysílání obrazu"
 
 #: ../src/empathy-call-window.ui.h:21
 #: ../src/empathy-streamed-media-window.ui.h:18
-#: ../src/empathy-call-window.c:2476 ../src/empathy-call-window.c:2477
-#: ../src/empathy-call-window.c:2478 ../src/empathy-call-window.c:2479
+#: ../src/empathy-call-window.c:2581 ../src/empathy-call-window.c:2582
+#: ../src/empathy-call-window.c:2583 ../src/empathy-call-window.c:2584
 msgid "Unknown"
 msgstr "Neznámo"
 
@@ -3788,7 +3833,7 @@ msgstr "Spravovat oblíbené místnosti"
 msgid "Incoming video call"
 msgstr "Příchozí videohovor"
 
-#: ../src/empathy-event-manager.c:521 ../src/empathy-call-window.c:1449
+#: ../src/empathy-event-manager.c:521 ../src/empathy-call-window.c:1553
 msgid "Incoming call"
 msgstr "Příchozí hovor"
 
@@ -3803,7 +3848,7 @@ msgid "%s is calling you. Do you want to answer?"
 msgstr "Volá vám %s, chcete to zvednout?"
 
 #: ../src/empathy-event-manager.c:529 ../src/empathy-event-manager.c:730
-#: ../src/empathy-event-manager.c:763 ../src/empathy-call-window.c:1455
+#: ../src/empathy-event-manager.c:763 ../src/empathy-call-window.c:1559
 #, c-format
 msgid "Incoming call from %s"
 msgstr "Příchozí hovor od %s"
@@ -3821,7 +3866,7 @@ msgid "_Answer with video"
 msgstr "_Videohovor"
 
 #: ../src/empathy-event-manager.c:730 ../src/empathy-event-manager.c:763
-#: ../src/empathy-call-window.c:1455
+#: ../src/empathy-call-window.c:1559
 #, c-format
 msgid "Incoming video call from %s"
 msgstr "Příchozí videohovor od %s"
@@ -3864,16 +3909,16 @@ msgstr "Byli jste pozváni do %s"
 msgid "Incoming file transfer from %s"
 msgstr "Příchozí přenos souboru od %s"
 
-#: ../src/empathy-event-manager.c:1134 ../src/empathy-main-window.c:375
+#: ../src/empathy-event-manager.c:1145 ../src/empathy-main-window.c:378
 msgid "Password required"
 msgstr "Požadováno heslo"
 
-#: ../src/empathy-event-manager.c:1190
+#: ../src/empathy-event-manager.c:1210
 #, c-format
 msgid "%s would like permission to see when you are online"
 msgstr "%s by chtěl oprávnění vidět, když jste dostupný"
 
-#: ../src/empathy-event-manager.c:1194
+#: ../src/empathy-event-manager.c:1214
 #, c-format
 msgid ""
 "\n"
@@ -4018,51 +4063,61 @@ msgstr "Protokol"
 msgid "Source"
 msgstr "Zdroj"
 
-#: ../src/empathy-main-window.c:392
+#: ../src/empathy-main-window.c:395
 msgid "Provide Password"
 msgstr "Poskytnout heslo"
 
-#: ../src/empathy-main-window.c:398
+#: ../src/empathy-main-window.c:401
 msgid "Disconnect"
 msgstr "Odpojit"
 
-#: ../src/empathy-main-window.c:622
+#: ../src/empathy-main-window.c:642
 msgid "No match found"
 msgstr "Nic nenalezeno"
 
-#: ../src/empathy-main-window.c:777
-msgid "Reconnect"
-msgstr "Znovu připojit"
+#: ../src/empathy-main-window.c:750
+#, c-format
+msgid "Sorry, %s accounts can’t be used until your %s software is updated."
+msgstr ""
+"Účet %s nemůže být bohužel použit, dokud nebude váš software %s aktualizován."
 
-#: ../src/empathy-main-window.c:783
-msgid "Edit Account"
-msgstr "Upravit účet"
+#: ../src/empathy-main-window.c:818
+msgid "Update software..."
+msgstr "Aktualizovat software…"
 
-#: ../src/empathy-main-window.c:789
+#: ../src/empathy-main-window.c:824 ../src/empathy-main-window.c:949
 msgid "Close"
 msgstr "Zavřít"
 
+#: ../src/empathy-main-window.c:937
+msgid "Reconnect"
+msgstr "Znovu připojit"
+
+#: ../src/empathy-main-window.c:943
+msgid "Edit Account"
+msgstr "Upravit účet"
+
 #. Translators: this string will be something like:
 #. *   Top up My Account ($1.23)..."
-#: ../src/empathy-main-window.c:928
+#: ../src/empathy-main-window.c:1088
 #, c-format
 msgid "Top up %s (%s)..."
 msgstr "Dobít kredit %s (%s)…"
 
-#: ../src/empathy-main-window.c:975
+#: ../src/empathy-main-window.c:1135
 msgid "Top up account credit"
 msgstr "Dobít kredit účtu"
 
 #. top up button
-#: ../src/empathy-main-window.c:1046
+#: ../src/empathy-main-window.c:1206
 msgid "Top Up..."
 msgstr "Dobít kredit…"
 
-#: ../src/empathy-main-window.c:1789
+#: ../src/empathy-main-window.c:1949
 msgid "Contact"
 msgstr "Kontakt"
 
-#: ../src/empathy-main-window.c:2121
+#: ../src/empathy-main-window.c:2324
 msgid "Contact List"
 msgstr "Seznam kontaktů"
 
@@ -4155,17 +4210,17 @@ msgstr "_Místnost"
 msgid "_Search for Contacts…"
 msgstr "_Hledat kontakty…"
 
-#: ../src/empathy-new-chatroom-dialog.c:337
+#: ../src/empathy-new-chatroom-dialog.c:369
 msgid "Chat Room"
 msgstr "Diskuzní místnost"
 
-#: ../src/empathy-new-chatroom-dialog.c:353
+#: ../src/empathy-new-chatroom-dialog.c:385
 msgid "Members"
 msgstr "Členové"
 
 #. Translators: Room/Join's roomlist tooltip. Parameters are a channel name,
 #. yes/no, yes/no and a number.
-#: ../src/empathy-new-chatroom-dialog.c:553
+#: ../src/empathy-new-chatroom-dialog.c:623
 #, c-format
 msgid ""
 "%s\n"
@@ -4178,16 +4233,16 @@ msgstr ""
 "Je vyžadováno heslo: %s\n"
 "Členové: %s"
 
-#: ../src/empathy-new-chatroom-dialog.c:555
-#: ../src/empathy-new-chatroom-dialog.c:556
+#: ../src/empathy-new-chatroom-dialog.c:625
+#: ../src/empathy-new-chatroom-dialog.c:626
 msgid "No"
 msgstr "Ne"
 
-#: ../src/empathy-new-chatroom-dialog.c:584
+#: ../src/empathy-new-chatroom-dialog.c:654
 msgid "Could not start room listing"
 msgstr "Nelze začít s výpisem místností"
 
-#: ../src/empathy-new-chatroom-dialog.c:594
+#: ../src/empathy-new-chatroom-dialog.c:664
 msgid "Could not stop room listing"
 msgstr "Nelze skončit s výpisem místností"
 
@@ -4294,7 +4349,7 @@ msgstr "Mám ještě poslouchat? Či odpovím?"
 msgid "Juliet has disconnected"
 msgstr "Julie se odpojila"
 
-#: ../src/empathy-preferences.c:1166
+#: ../src/empathy-preferences.c:1175
 msgid "Preferences"
 msgstr "Nastavení"
 
@@ -4420,43 +4475,47 @@ msgid "Themes"
 msgstr "Motivy"
 
 #: ../src/empathy-preferences.ui.h:30
+msgid "Use _echo cancellation to improve call quality"
+msgstr "Použít potlač_ení ozvěny ke zvýšení kvality volání"
+
+#: ../src/empathy-preferences.ui.h:31
 msgid "Variant:"
 msgstr "Varianta:"
 
-#: ../src/empathy-preferences.ui.h:31
+#: ../src/empathy-preferences.ui.h:32
 msgid "_Automatically connect on startup"
 msgstr "Připojovat se _automaticky po spuštění "
 
-#: ../src/empathy-preferences.ui.h:32
+#: ../src/empathy-preferences.ui.h:33
 msgid "_Cellphone"
 msgstr "_Mobil"
 
-#: ../src/empathy-preferences.ui.h:33
+#: ../src/empathy-preferences.ui.h:34
 msgid "_Enable bubble notifications"
 msgstr "P_ovolit bublinová upozornění"
 
-#: ../src/empathy-preferences.ui.h:34
+#: ../src/empathy-preferences.ui.h:35
 msgid "_Enable sound notifications"
 msgstr "_Povolit zvuková upozornění"
 
-#: ../src/empathy-preferences.ui.h:35
+#: ../src/empathy-preferences.ui.h:36
 msgid "_GPS"
 msgstr "_GPS"
 
-#: ../src/empathy-preferences.ui.h:36
+#: ../src/empathy-preferences.ui.h:37
 msgid "_Network (IP, Wi-Fi)"
 msgstr "_Síť (IP, Wi-Fi)"
 
-#: ../src/empathy-preferences.ui.h:37
+#: ../src/empathy-preferences.ui.h:38
 msgid "_Open new chats in separate windows"
 msgstr "_Otevírat nové diskuze v oddělených oknech"
 
-#: ../src/empathy-preferences.ui.h:38
+#: ../src/empathy-preferences.ui.h:39
 msgid "_Publish location to my contacts"
 msgstr "Zveřejnit _kontaktům polohu"
 
 #. To translators: The longitude and latitude are rounded to closest 0,1 degrees, so for example 146,2345° is rounded to round(146,2345*10)/10 = 146,2 degrees.
-#: ../src/empathy-preferences.ui.h:40
+#: ../src/empathy-preferences.ui.h:41
 msgid "_Reduce location accuracy"
 msgstr "O_mezit přesnost polohy"
 
@@ -4582,16 +4641,16 @@ msgid ""
 "extension."
 msgstr "Vybraný správce připojení nepodporuje rozšíření pro vzdálené ladění."
 
-#: ../src/empathy-invite-participant-dialog.c:179
-#: ../src/empathy-invite-participant-dialog.c:205
+#: ../src/empathy-invite-participant-dialog.c:197
+#: ../src/empathy-invite-participant-dialog.c:225
 msgid "Invite Participant"
 msgstr "Přizvat účastníka"
 
-#: ../src/empathy-invite-participant-dialog.c:180
+#: ../src/empathy-invite-participant-dialog.c:198
 msgid "Choose a contact to invite into the conversation:"
 msgstr "Zvolte kontakt, který chcete přizvat do konverzace: "
 
-#: ../src/empathy-invite-participant-dialog.c:201
+#: ../src/empathy-invite-participant-dialog.c:221
 msgid "Invite"
 msgstr "Pozvat"
 
@@ -4616,23 +4675,27 @@ msgstr ""
 msgid "<account-id>"
 msgstr "<ID účtu>"
 
-#: ../src/empathy-accounts.c:198
+#: ../src/empathy-accounts.c:196
+msgid "Show account assistant"
+msgstr "Zobrazit průvodce účtem"
+
+#: ../src/empathy-accounts.c:202
 msgid "- Empathy Accounts"
 msgstr "– Účty Empathy"
 
-#: ../src/empathy-accounts.c:237
+#: ../src/empathy-accounts.c:238
 msgid "Empathy Accounts"
 msgstr "Účty Empathy"
 
-#: ../src/empathy-debugger.c:70
+#: ../src/empathy-debugger.c:69
 msgid "Show a particular service"
 msgstr "Zobrazit konkrétní službu"
 
-#: ../src/empathy-debugger.c:75
+#: ../src/empathy-debugger.c:74
 msgid "- Empathy Debugger"
 msgstr "– Ladění Empathy"
 
-#: ../src/empathy-debugger.c:114
+#: ../src/empathy-debugger.c:113
 msgid "Empathy Debugger"
 msgstr "Ladění Empathy"
 
@@ -4645,13 +4708,13 @@ msgid "Respond"
 msgstr "Odpovědět"
 
 #: ../src/empathy-notifications-approver.c:217
-#: ../src/empathy-call-window.c:1459
+#: ../src/empathy-call-window.c:1563
 msgid "Reject"
 msgstr "Odmítnout"
 
 #: ../src/empathy-notifications-approver.c:222
 #: ../src/empathy-notifications-approver.c:227
-#: ../src/empathy-call-window.c:1460
+#: ../src/empathy-call-window.c:1564
 msgid "Answer"
 msgstr "Zvednout"
 
@@ -4683,27 +4746,40 @@ msgstr "%s vám právě zkouší volat, ale vy máte jiný hovor."
 
 #. Translators: this is an "Info" label. It should be as short
 #. * as possible.
-#: ../src/empathy-call-window.c:1088 ../src/empathy-call-window.c:1111
+#: ../src/empathy-call-window.c:1173 ../src/empathy-call-window.c:1196
 msgid "i"
 msgstr "i"
 
-#: ../src/empathy-call-window.c:2775
+#: ../src/empathy-call-window.c:2880
 msgid "On hold"
 msgstr "Čeká na lince"
 
-#: ../src/empathy-call-window.c:2778
+#: ../src/empathy-call-window.c:2883
 msgid "Mute"
 msgstr "Ztišit"
 
-#: ../src/empathy-call-window.c:2780
+#: ../src/empathy-call-window.c:2885
 msgid "Duration"
 msgstr "Doba"
 
 #. Translators: 'status - minutes:seconds' the caller has been connected
-#: ../src/empathy-call-window.c:2783
+#: ../src/empathy-call-window.c:2888
 #, c-format
 msgid "%s — %d:%02dm"
 msgstr "%s — %d:%02dm"
+
+#: ../src/empathy-call-window.c:3158
+#, c-format
+msgid "Your current balance is %s."
+msgstr "Váš aktuální zůstatek je %s."
+
+#: ../src/empathy-call-window.c:3162
+msgid "Sorry, you don’t have enough credit for that call."
+msgstr "Pro toto volání nemáte bohužel dostatečný kredit."
+
+#: ../src/empathy-call-window.c:3164
+msgid "Top Up"
+msgstr "Dobití kreditu"
 
 #: ../libempathy-gtk/empathy-search-bar.c:243
 msgid "_Match case"
