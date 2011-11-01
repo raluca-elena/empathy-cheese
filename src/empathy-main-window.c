@@ -354,7 +354,7 @@ main_window_auth_display (EmpathyMainWindow *window,
 	GtkWidget *add_button;
 	GtkWidget *close_button;
 	GtkWidget *action_area;
-	GtkWidget *action_table;
+	GtkWidget *action_grid;
 	const gchar *icon_name;
 	gchar *str;
 
@@ -401,19 +401,15 @@ main_window_auth_display (EmpathyMainWindow *window,
 	gtk_widget_set_tooltip_text (close_button, _("Disconnect"));
 	gtk_widget_show (close_button);
 
-	action_table = gtk_table_new (1, 2, FALSE);
-	gtk_table_set_col_spacings (GTK_TABLE (action_table), 6);
-	gtk_widget_show (action_table);
+	action_grid = gtk_grid_new ();
+	gtk_grid_set_column_spacing (GTK_GRID (action_grid), 6);
+	gtk_widget_show (action_grid);
 
 	action_area = gtk_info_bar_get_action_area (GTK_INFO_BAR (info_bar));
-	gtk_box_pack_start (GTK_BOX (action_area), action_table, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (action_area), action_grid, FALSE, FALSE, 0);
 
-	gtk_table_attach (GTK_TABLE (action_table), add_button, 0, 1, 0, 1,
-			  (GtkAttachOptions) (GTK_SHRINK),
-			  (GtkAttachOptions) (GTK_SHRINK), 0, 0);
-	gtk_table_attach (GTK_TABLE (action_table), close_button, 1, 2, 0, 1,
-			  (GtkAttachOptions) (GTK_SHRINK),
-			  (GtkAttachOptions) (GTK_SHRINK), 0, 0);
+	gtk_grid_attach (GTK_GRID (action_grid), add_button, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (action_grid), close_button, 1, 0, 1, 1);
 
 	g_object_set_data_full (G_OBJECT (info_bar),
 				"event", event, NULL);
@@ -770,7 +766,7 @@ main_window_upgrade_software_error (EmpathyMainWindow *window,
 	GtkWidget *upgrade_button;
 	GtkWidget *close_button;
 	GtkWidget *action_area;
-	GtkWidget *action_table;
+	GtkWidget *action_grid;
 	gchar     *str;
 	const gchar     *icon_name;
 	const gchar *error_message;
@@ -824,19 +820,15 @@ main_window_upgrade_software_error (EmpathyMainWindow *window,
 	gtk_widget_set_tooltip_text (close_button, _("Close"));
 	gtk_widget_show (close_button);
 
-	action_table = gtk_table_new (1, 2, FALSE);
-	gtk_table_set_col_spacings (GTK_TABLE (action_table), 2);
-	gtk_widget_show (action_table);
+	action_grid = gtk_grid_new ();
+	gtk_grid_set_column_spacing (GTK_GRID (action_grid), 2);
+	gtk_widget_show (action_grid);
 
 	action_area = gtk_info_bar_get_action_area (GTK_INFO_BAR (info_bar));
-	gtk_box_pack_start (GTK_BOX (action_area), action_table, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (action_area), action_grid, FALSE, FALSE, 0);
 
-	gtk_table_attach (GTK_TABLE (action_table), upgrade_button, 0, 1, 0, 1,
-										(GtkAttachOptions) (GTK_SHRINK),
-										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
-	gtk_table_attach (GTK_TABLE (action_table), close_button, 1, 2, 0, 1,
-										(GtkAttachOptions) (GTK_SHRINK),
-										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
+	gtk_grid_attach (GTK_GRID (action_grid), upgrade_button, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (action_grid), close_button, 1, 0, 1, 1);
 
 	g_object_set_data (G_OBJECT (info_bar), "label", label);
 	g_object_set_data_full (G_OBJECT (info_bar),
@@ -875,7 +867,7 @@ main_window_error_display (EmpathyMainWindow *window,
 	GtkWidget *edit_button;
 	GtkWidget *close_button;
 	GtkWidget *action_area;
-	GtkWidget *action_table;
+	GtkWidget *action_grid;
 	gchar     *str;
 	const gchar     *icon_name;
 	const gchar *error_message;
@@ -949,22 +941,16 @@ main_window_error_display (EmpathyMainWindow *window,
 	gtk_widget_set_tooltip_text (close_button, _("Close"));
 	gtk_widget_show (close_button);
 
-	action_table = gtk_table_new (1, 3, FALSE);
-	gtk_table_set_col_spacings (GTK_TABLE (action_table), 2);
-	gtk_widget_show (action_table);
+	action_grid = gtk_grid_new ();
+	gtk_grid_set_column_spacing (GTK_GRID (action_grid), 2);
+	gtk_widget_show (action_grid);
 
 	action_area = gtk_info_bar_get_action_area (GTK_INFO_BAR (info_bar));
-	gtk_box_pack_start (GTK_BOX (action_area), action_table, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (action_area), action_grid, FALSE, FALSE, 0);
 
-	gtk_table_attach (GTK_TABLE (action_table), retry_button, 0, 1, 0, 1,
-										(GtkAttachOptions) (GTK_SHRINK),
-										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
-	gtk_table_attach (GTK_TABLE (action_table), edit_button, 1, 2, 0, 1,
-										(GtkAttachOptions) (GTK_SHRINK),
-										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
-	gtk_table_attach (GTK_TABLE (action_table), close_button, 2, 3, 0, 1,
-										(GtkAttachOptions) (GTK_SHRINK),
-										(GtkAttachOptions) (GTK_SHRINK), 0, 0);
+	gtk_grid_attach (GTK_GRID (action_grid), retry_button, 0, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (action_grid), edit_button, 1, 0, 1, 1);
+	gtk_grid_attach (GTK_GRID (action_grid), close_button, 2, 0, 1, 1);
 
 	g_object_set_data (G_OBJECT (info_bar), "label", label);
 	g_object_set_data_full (G_OBJECT (info_bar),
