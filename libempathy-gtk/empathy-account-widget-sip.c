@@ -111,12 +111,12 @@ checkbutton_tel_toggled (
 void
 empathy_account_widget_sip_build (EmpathyAccountWidget *self,
     const char *filename,
-    GtkWidget **table_common_settings)
+    GtkWidget **grid_common_settings)
 {
   EmpathyAccountWidgetSip *settings;
   GtkWidget *vbox_settings;
   gboolean is_simple;
-  GtkWidget *table_advanced;
+  GtkWidget *grid_advanced;
 
   g_object_get (self, "simple", &is_simple, NULL);
 
@@ -144,8 +144,8 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
       settings->self = self;
 
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_settings", table_common_settings,
-          "table_advanced_sip_settings", &table_advanced,
+          "grid_common_settings", grid_common_settings,
+          "grid_advanced_sip_settings", &grid_advanced,
           "vbox_sip_settings", &vbox_settings,
           "label_stun-server", &settings->label_stun_server,
           "entry_stun-server", &settings->entry_stun_server,
@@ -217,8 +217,8 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
       empathy_account_widget_setup_widget (self, settings->combobox_transport,
           "transport");
 
-      gtk_table_attach_defaults (GTK_TABLE (table_advanced),
-          settings->combobox_transport, 1, 4, 11, 12);
+      gtk_grid_attach (GTK_GRID (grid_advanced), settings->combobox_transport,
+          1, 11, 3, 1);
 
       gtk_widget_show (settings->combobox_transport);
 
@@ -257,8 +257,9 @@ empathy_account_widget_sip_build (EmpathyAccountWidget *self,
       empathy_account_widget_setup_widget (self,
           settings->combobox_keep_alive_mechanism, "keepalive-mechanism");
 
-      gtk_table_attach_defaults (GTK_TABLE (table_advanced),
-          settings->combobox_keep_alive_mechanism, 1, 4, 7, 8);
+      gtk_grid_attach (GTK_GRID (grid_advanced),
+          settings->combobox_keep_alive_mechanism,
+          1, 7, 3, 1);
 
       gtk_widget_show (settings->combobox_keep_alive_mechanism);
     }

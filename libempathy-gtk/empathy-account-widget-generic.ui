@@ -7,20 +7,10 @@
     <property name="orientation">vertical</property>
     <property name="spacing">6</property>
     <child>
-      <object class="GtkTable" id="table_common_settings">
+      <object class="GtkGrid" id="grid_common_settings">
         <property name="visible">True</property>
-        <property name="n_columns">3</property>
         <property name="column_spacing">12</property>
         <property name="row_spacing">6</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
       </object>
       <packing>
         <property name="expand">False</property>
@@ -43,20 +33,10 @@
                 <property name="visible">True</property>
                 <property name="resize_mode">queue</property>
                 <child>
-                  <object class="GtkTable" id="table_advanced_settings">
+                  <object class="GtkGrid" id="grid_advanced_settings">
                     <property name="visible">True</property>
-                    <property name="n_columns">3</property>
                     <property name="column_spacing">12</property>
                     <property name="row_spacing">6</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                 </child>
               </object>

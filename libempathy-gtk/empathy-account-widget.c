@@ -74,7 +74,7 @@ static ServiceInfo services_infos[N_SERVICES] = {
 typedef struct {
   EmpathyAccountSettings *settings;
 
-  GtkWidget *table_common_settings;
+  GtkWidget *grid_common_settings;
   GtkWidget *apply_button;
   GtkWidget *cancel_button;
   GtkWidget *entry_password;
@@ -735,32 +735,39 @@ account_widget_generic_format_param_name (const gchar *param_name)
 
 static void
 accounts_widget_generic_setup (EmpathyAccountWidget *self,
-    GtkWidget *table_common_settings,
-    GtkWidget *table_advanced_settings)
+    GtkWidget *grid_common_settings,
+    GtkWidget *grid_advanced_settings)
 {
   TpConnectionManagerParam *params, *param;
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
+  guint row_common = 0, row_advanced = 0;
 
   params = empathy_account_settings_get_tp_params (priv->settings);
 
   for (param = params; param != NULL && param->name != NULL; param++)
     {
-      GtkWidget       *table_settings;
-      guint            n_rows = 0;
+      GtkWidget       *grid_settings;
+      guint           row;
       GtkWidget       *widget = NULL;
       gchar           *param_name_formatted;
 
       if (param->flags & TP_CONN_MGR_PARAM_FLAG_REQUIRED)
-        table_settings = table_common_settings;
+        {
+          grid_settings = grid_common_settings;
+          row = row_common++;
+        }
       else if (priv->simple)
-        return;
+        {
+          return;
+        }
       else
-        table_settings = table_advanced_settings;
+        {
+          grid_settings = grid_advanced_settings;
+          row = row_advanced++;
+        }
 
       param_name_formatted = account_widget_generic_format_param_name
         (param->name);
-      g_object_get (table_settings, "n-rows", &n_rows, NULL);
-      gtk_table_resize (GTK_TABLE (table_settings), ++n_rows, 2);
 
       if (param->dbus_signature[0] == 's')
         {
@@ -771,12 +778,9 @@ accounts_widget_generic_setup (EmpathyAccountWidget *self,
           gtk_misc_set_alignment (GTK_MISC (widget), 0, 0.5);
           g_free (str);
 
-          gtk_table_attach (GTK_TABLE (table_settings),
-              widget,
-              0, 1,
-              n_rows - 1, n_rows,
-              GTK_FILL, 0,
-              0, 0);
+          gtk_grid_attach (GTK_GRID (grid_settings),
+              widget, 0, row, 1, 1);
+
           gtk_widget_show (widget);
 
           widget = gtk_entry_new ();
@@ -786,12 +790,10 @@ accounts_widget_generic_setup (EmpathyAccountWidget *self,
                   G_CALLBACK (gtk_widget_grab_focus),
                   NULL);
             }
-          gtk_table_attach (GTK_TABLE (table_settings),
-              widget,
-              1, 2,
-              n_rows - 1, n_rows,
-              GTK_FILL | GTK_EXPAND, 0,
-              0, 0);
+
+          gtk_grid_attach (GTK_GRID (grid_settings),
+              widget, 1, row, 1, 1);
+
           gtk_widget_show (widget);
         }
       /* int types: ynqiuxt. double type is 'd' */
@@ -828,32 +830,20 @@ accounts_widget_generic_setup (EmpathyAccountWidget *self,
           gtk_misc_set_alignment (GTK_MISC (widget), 0, 0.5);
           g_free (str);
 
-          gtk_table_attach (GTK_TABLE (table_settings),
-              widget,
-              0, 1,
-              n_rows - 1, n_rows,
-              GTK_FILL, 0,
-              0, 0);
+          gtk_grid_attach (GTK_GRID (grid_settings),
+              widget, 0, row, 1, 1);
           gtk_widget_show (widget);
 
           widget = gtk_spin_button_new_with_range (minint, maxint, step);
-          gtk_table_attach (GTK_TABLE (table_settings),
-              widget,
-              1, 2,
-              n_rows - 1, n_rows,
-              GTK_FILL | GTK_EXPAND, 0,
-              0, 0);
+          gtk_grid_attach (GTK_GRID (grid_settings),
+              widget, 1, row, 1, 1);
           gtk_widget_show (widget);
         }
       else if (param->dbus_signature[0] == 'b')
         {
           widget = gtk_check_button_new_with_label (param_name_formatted);
-          gtk_table_attach (GTK_TABLE (table_settings),
-              widget,
-              0, 2,
-              n_rows - 1, n_rows,
-              GTK_FILL | GTK_EXPAND, 0,
-              0, 0);
+          gtk_grid_attach (GTK_GRID (grid_settings),
+              widget, 0, row, 2, 1);
           gtk_widget_show (widget);
         }
       else
@@ -1043,16 +1033,16 @@ account_widget_apply_clicked_cb (GtkWidget *button,
 static void
 account_widget_setup_generic (EmpathyAccountWidget *self)
 {
-  GtkWidget *table_common_settings;
-  GtkWidget *table_advanced_settings;
+  GtkWidget *grid_common_settings;
+  GtkWidget *grid_advanced_settings;
 
-  table_common_settings = GTK_WIDGET (gtk_builder_get_object
-      (self->ui_details->gui, "table_common_settings"));
-  table_advanced_settings = GTK_WIDGET (gtk_builder_get_object
-      (self->ui_details->gui, "table_advanced_settings"));
+  grid_common_settings = GTK_WIDGET (gtk_builder_get_object
+      (self->ui_details->gui, "grid_common_settings"));
+  grid_advanced_settings = GTK_WIDGET (gtk_builder_get_object
+      (self->ui_details->gui, "grid_advanced_settings"));
 
-  accounts_widget_generic_setup (self, table_common_settings,
-      table_advanced_settings);
+  accounts_widget_generic_setup (self, grid_common_settings,
+      grid_advanced_settings);
 
   g_object_unref (self->ui_details->gui);
 }
@@ -1077,7 +1067,7 @@ account_widget_build_generic (EmpathyAccountWidget *self,
   GtkWidget *expander_advanced;
 
   self->ui_details->gui = empathy_builder_get_file (filename,
-      "table_common_settings", &priv->table_common_settings,
+      "grid_common_settings", &priv->grid_common_settings,
       "vbox_generic_settings", &self->ui_details->widget,
       "expander_advanced_settings", &expander_advanced,
       NULL);
@@ -1183,7 +1173,7 @@ account_widget_build_external (EmpathyAccountWidget *self,
   GDesktopAppInfo *desktop_info = NULL;
 
   self->ui_details->widget = gtk_vbox_new (FALSE, 6);
-  priv->table_common_settings = gtk_table_new (1, 2, FALSE);
+  priv->grid_common_settings = gtk_grid_new ();
 
   provider = tp_account_get_storage_provider (account);
 
@@ -1256,7 +1246,7 @@ account_widget_build_external (EmpathyAccountWidget *self,
   gtk_box_pack_start (GTK_BOX (self->ui_details->widget), bar,
       FALSE, TRUE, 0);
   gtk_box_pack_start (GTK_BOX (self->ui_details->widget),
-      priv->table_common_settings, FALSE, TRUE, 0);
+      priv->grid_common_settings, FALSE, TRUE, 0);
 
   gtk_widget_show_all (self->ui_details->widget);
 
@@ -1271,7 +1261,7 @@ account_widget_build_salut (EmpathyAccountWidget *self,
   GtkWidget *expander_advanced;
 
   self->ui_details->gui = empathy_builder_get_file (filename,
-      "table_common_settings", &priv->table_common_settings,
+      "grid_common_settings", &priv->grid_common_settings,
       "vbox_salut_settings", &self->ui_details->widget,
       "expander_advanced_settings", &expander_advanced,
       NULL);
@@ -1310,7 +1300,7 @@ account_widget_build_irc (EmpathyAccountWidget *self,
   else
     {
       priv->irc_network_chooser = empathy_account_widget_irc_build (self,
-          filename, &priv->table_common_settings);
+          filename, &priv->grid_common_settings);
     }
 }
 
@@ -1320,7 +1310,7 @@ account_widget_build_sip (EmpathyAccountWidget *self,
 {
   EmpathyAccountWidgetPriv *priv = GET_PRIV (self);
   empathy_account_widget_sip_build (self, filename,
-    &priv->table_common_settings);
+    &priv->grid_common_settings);
 
   if (priv->simple)
     {
@@ -1362,7 +1352,7 @@ account_widget_build_msn (EmpathyAccountWidget *self,
   else
     {
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_msn_settings", &priv->table_common_settings,
+          "grid_common_msn_settings", &priv->grid_common_settings,
           "vbox_msn_settings", &self->ui_details->widget,
           NULL);
 
@@ -1565,7 +1555,7 @@ account_widget_build_jabber (EmpathyAccountWidget *self,
 
       /* Full widget for XMPP, Google Talk and Facebook*/
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_settings", &priv->table_common_settings,
+          "grid_common_settings", &priv->grid_common_settings,
           "vbox_jabber_settings", &self->ui_details->widget,
           "spinbutton_port", &spinbutton_port,
           "checkbutton_ssl", &checkbutton_ssl,
@@ -1659,7 +1649,7 @@ account_widget_build_icq (EmpathyAccountWidget *self,
   else
     {
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_settings", &priv->table_common_settings,
+          "grid_common_settings", &priv->grid_common_settings,
           "vbox_icq_settings", &self->ui_details->widget,
           "spinbutton_port", &spinbutton_port,
           NULL);
@@ -1705,7 +1695,7 @@ account_widget_build_aim (EmpathyAccountWidget *self,
   else
     {
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_settings", &priv->table_common_settings,
+          "grid_common_settings", &priv->grid_common_settings,
           "vbox_aim_settings", &self->ui_details->widget,
           "spinbutton_port", &spinbutton_port,
           NULL);
@@ -1752,7 +1742,7 @@ account_widget_build_yahoo (EmpathyAccountWidget *self,
   else
     {
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_settings", &priv->table_common_settings,
+          "grid_common_settings", &priv->grid_common_settings,
           "vbox_yahoo_settings", &self->ui_details->widget,
           NULL);
 
@@ -1797,7 +1787,7 @@ account_widget_build_groupwise (EmpathyAccountWidget *self,
   else
     {
       self->ui_details->gui = empathy_builder_get_file (filename,
-          "table_common_groupwise_settings", &priv->table_common_settings,
+          "grid_common_groupwise_settings", &priv->grid_common_settings,
           "vbox_groupwise_settings", &self->ui_details->widget,
           NULL);
 
