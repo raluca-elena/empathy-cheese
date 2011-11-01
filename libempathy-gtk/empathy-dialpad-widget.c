@@ -101,7 +101,7 @@ dtmf_dialpad_button_released_cb (GtkWidget *button,
 static void
 empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
 {
-  GtkWidget *table;
+  GtkWidget *grid;
   int i;
 
   struct {
@@ -134,7 +134,7 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
 
   gtk_box_pack_start (GTK_BOX (self), self->priv->entry, FALSE, FALSE, 3);
 
-  table = gtk_table_new (4, 3, TRUE);
+  grid = gtk_grid_new ();
 
   for (i = 0; dtmfbuttons[i].label != NULL; i++)
     {
@@ -164,8 +164,8 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
 
       gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, TRUE, 0);
 
-      gtk_table_attach (GTK_TABLE (table), button, i % 3, i % 3 + 1,
-        i / 3, i / 3 + 1, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 1, 1);
+      gtk_grid_attach (GTK_GRID (grid), button, i % 3, i / 3,
+          1, 1);
 
       g_object_set_data (G_OBJECT (button), "dtmf-value",
         GUINT_TO_POINTER (dtmfbuttons[i].event));
@@ -178,7 +178,7 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
         G_CALLBACK (dtmf_dialpad_button_released_cb), self);
     }
 
-  gtk_box_pack_start (GTK_BOX (self), table, FALSE, FALSE, 3);
+  gtk_box_pack_start (GTK_BOX (self), grid, FALSE, FALSE, 3);
 }
 
 GtkWidget *
