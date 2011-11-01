@@ -95,7 +95,7 @@ typedef struct {
   /* Location */
   GtkWidget *vbox_location;
   GtkWidget *subvbox_location;
-  GtkWidget *table_location;
+  GtkWidget *grid_location;
   GtkWidget *label_location;
 #ifdef HAVE_LIBCHAMPLAIN
   GtkWidget *viewport_map;
@@ -581,12 +581,12 @@ location_update (EmpathyIndividualWidget *self)
     }
 
   /* Prepare the location information table */
-  if (priv->table_location != NULL)
-    gtk_widget_destroy (priv->table_location);
+  if (priv->grid_location != NULL)
+    gtk_widget_destroy (priv->grid_location);
 
-  priv->table_location = gtk_table_new (1, 2, FALSE);
+  priv->grid_location = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (priv->subvbox_location),
-      priv->table_location, FALSE, FALSE, 5);
+      priv->grid_location, FALSE, FALSE, 5);
 
 
   for (i = 0; (skey = ordered_geolocation_keys[i]); i++)
@@ -603,8 +603,8 @@ location_update (EmpathyIndividualWidget *self)
 
       label = gtk_label_new (user_label);
       gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-      gtk_table_attach (GTK_TABLE (priv->table_location),
-          label, 0, 1, row, row + 1, GTK_FILL, GTK_FILL, 10, 0);
+      gtk_grid_attach (GTK_GRID (priv->grid_location),
+          label, 0, row, 1, 1);
       gtk_widget_show (label);
 
       if (G_VALUE_TYPE (gvalue) == G_TYPE_DOUBLE)
@@ -628,8 +628,8 @@ location_update (EmpathyIndividualWidget *self)
       if (svalue != NULL)
         {
           label = gtk_label_new (svalue);
-          gtk_table_attach_defaults (GTK_TABLE (priv->table_location),
-              label, 1, 2, row, row + 1);
+          gtk_grid_attach (GTK_GRID (priv->grid_location),
+              label, 1, row, 1, 1);
           gtk_misc_set_alignment (GTK_MISC (label), 0, 0);
           gtk_widget_show (label);
 
@@ -658,7 +658,7 @@ location_update (EmpathyIndividualWidget *self)
   if (row > 0)
     {
       /* We can display some fields */
-      gtk_widget_show (priv->table_location);
+      gtk_widget_show (priv->grid_location);
     }
   else if (display_map == FALSE)
     {
@@ -1943,7 +1943,7 @@ empathy_individual_widget_init (EmpathyIndividualWidget *self)
       NULL);
   g_free (filename);
 
-  priv->table_location = NULL;
+  priv->grid_location = NULL;
 
   gtk_box_pack_start (GTK_BOX (self), priv->vbox_individual_widget, TRUE, TRUE,
       0);
