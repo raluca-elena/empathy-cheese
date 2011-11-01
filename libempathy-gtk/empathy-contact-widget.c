@@ -102,14 +102,14 @@ typedef struct
   GtkWidget *hbox_presence;
   GtkWidget *image_state;
   GtkWidget *label_status;
-  GtkWidget *table_contact;
+  GtkWidget *grid_contact;
   GtkWidget *vbox_avatar;
   GtkWidget *favourite_checkbox;
 
   /* Location */
   GtkWidget *vbox_location;
   GtkWidget *subvbox_location;
-  GtkWidget *table_location;
+  GtkWidget *grid_location;
   GtkWidget *label_location;
 #ifdef HAVE_LIBCHAMPLAIN
   GtkWidget *viewport_map;
@@ -122,7 +122,7 @@ typedef struct
 
   /* Details */
   GtkWidget *vbox_details;
-  GtkWidget *table_details;
+  GtkWidget *grid_details;
   GtkWidget *hbox_details_requested;
   GtkWidget *spinner_details;
   GList *details_to_set;
@@ -131,7 +131,7 @@ typedef struct
 
   /* Client */
   GtkWidget *vbox_client;
-  GtkWidget *table_client;
+  GtkWidget *grid_client;
   GtkWidget *hbox_client_requested;
 } EmpathyContactWidget;
 
@@ -418,8 +418,9 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
       w = gtk_label_new (title);
       g_free (title);
 
-      gtk_table_attach (GTK_TABLE (information->table_details),
-          w, 0, 1, n_rows, n_rows + 1, GTK_FILL, 0, 0, 0);
+      gtk_grid_attach (GTK_GRID (information->grid_details),
+          w, 0, n_rows, 1, 1);
+
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
       gtk_widget_show (w);
 
@@ -442,8 +443,9 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
                       g_date_get_day (&date));
                 }
             }
-          gtk_table_attach_defaults (GTK_TABLE (information->table_details),
-              w, 1, 2, n_rows, n_rows + 1);
+
+          gtk_grid_attach (GTK_GRID (information->grid_details),
+              w, 1, n_rows, 1, 1);
           gtk_widget_show (w);
 
           g_object_set_data ((GObject *) w, DATA_FIELD, field);
@@ -458,8 +460,8 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
           w = gtk_entry_new ();
           gtk_entry_set_text (GTK_ENTRY (w),
               field->field_value[0] ? field->field_value[0] : "");
-          gtk_table_attach_defaults (GTK_TABLE (information->table_details),
-              w, 1, 2, n_rows, n_rows + 1);
+          gtk_grid_attach (GTK_GRID (information->grid_details),
+              w, 1, n_rows, 1, 1);
           gtk_widget_show (w);
 
           g_object_set_data ((GObject *) w, DATA_FIELD, field);
@@ -500,8 +502,8 @@ add_channel_list (
   guint i;
 
   w = gtk_label_new (_("Channels:"));
-  gtk_table_attach (GTK_TABLE (information->table_details),
-      w, 0, 1, row, row + 1, GTK_FILL, 0, 0, 0);
+  gtk_grid_attach (GTK_GRID (information->grid_details),
+      w, 0, row, 1, 1);
   gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
   gtk_widget_show (w);
 
@@ -529,8 +531,8 @@ add_channel_list (
   gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
   g_signal_connect (w, "activate-link",
       (GCallback) channel_name_activated_cb, information);
-  gtk_table_attach_defaults (GTK_TABLE (information->table_details),
-      w, 1, 2, row, row + 1);
+  gtk_grid_attach (GTK_GRID (information->grid_details),
+      w, 1, row, 1, 1);
   gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
   gtk_widget_show (w);
 
@@ -591,8 +593,8 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       w = gtk_label_new (title);
       g_free (title);
 
-      gtk_table_attach (GTK_TABLE (information->table_details),
-          w, 0, 1, n_rows, n_rows + 1, GTK_FILL, 0, 0, 0);
+      gtk_grid_attach (GTK_GRID (information->grid_details),
+          w, 0, n_rows, 1, 1);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
       gtk_widget_show (w);
 
@@ -607,8 +609,8 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       if ((information->flags & EMPATHY_CONTACT_WIDGET_FOR_TOOLTIP) == 0)
         gtk_label_set_selectable (GTK_LABEL (w), TRUE);
 
-      gtk_table_attach_defaults (GTK_TABLE (information->table_details),
-          w, 1, 2, n_rows, n_rows + 1);
+      gtk_grid_attach (GTK_GRID (information->grid_details),
+          w, 1, n_rows, 1, 1);
       gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
       gtk_widget_show (w);
 
@@ -632,7 +634,7 @@ contact_widget_details_notify_cb (EmpathyContactWidget *information)
 {
   guint n_rows;
 
-  gtk_container_foreach (GTK_CONTAINER (information->table_details),
+  gtk_container_foreach (GTK_CONTAINER (information->grid_details),
       (GtkCallback) gtk_widget_destroy, NULL);
 
   if ((information->flags & EMPATHY_CONTACT_WIDGET_EDIT_DETAILS) != 0)
@@ -643,7 +645,7 @@ contact_widget_details_notify_cb (EmpathyContactWidget *information)
   if (n_rows > 0)
     {
       gtk_widget_show (information->vbox_details);
-      gtk_widget_show (information->table_details);
+      gtk_widget_show (information->grid_details);
     }
   else
     {
@@ -717,7 +719,7 @@ fetch_contact_information (EmpathyContactWidget *information,
   /* Request the contact's info */
   gtk_widget_show (information->vbox_details);
   gtk_widget_show (information->hbox_details_requested);
-  gtk_widget_hide (information->table_details);
+  gtk_widget_hide (information->grid_details);
   gtk_spinner_start (GTK_SPINNER (information->spinner_details));
 
   contact = empathy_contact_get_tp_contact (information->contact);
@@ -918,15 +920,15 @@ contact_widget_location_update (EmpathyContactWidget *information)
     }
 
 
-  /* Prepare the location information table */
-  if (information->table_location != NULL)
+  /* Prepare the location information grid */
+  if (information->grid_location != NULL)
     {
-      gtk_widget_destroy (information->table_location);
+      gtk_widget_destroy (information->grid_location);
     }
 
-  information->table_location = gtk_table_new (1, 2, FALSE);
+  information->grid_location = gtk_grid_new ();
   gtk_box_pack_start (GTK_BOX (information->subvbox_location),
-      information->table_location, FALSE, FALSE, 5);
+      information->grid_location, FALSE, FALSE, 5);
 
 
   for (i = 0; (skey = ordered_geolocation_keys[i]); i++)
@@ -943,8 +945,8 @@ contact_widget_location_update (EmpathyContactWidget *information)
 
       label = gtk_label_new (user_label);
       gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
-      gtk_table_attach (GTK_TABLE (information->table_location),
-          label, 0, 1, row, row + 1, GTK_FILL, GTK_FILL, 10, 0);
+      gtk_grid_attach (GTK_GRID (information->grid_location),
+          label, 0, row, 1, 1);
       gtk_widget_show (label);
 
       if (G_VALUE_TYPE (gvalue) == G_TYPE_DOUBLE)
@@ -968,8 +970,8 @@ contact_widget_location_update (EmpathyContactWidget *information)
       if (svalue != NULL)
         {
           label = gtk_label_new (svalue);
-          gtk_table_attach_defaults (GTK_TABLE (information->table_location),
-              label, 1, 2, row, row + 1);
+          gtk_grid_attach (GTK_GRID (information->grid_location),
+              label, 1, row, 1, 1);
           gtk_misc_set_alignment (GTK_MISC (label), 0, 0);
           gtk_widget_show (label);
 
@@ -994,7 +996,7 @@ contact_widget_location_update (EmpathyContactWidget *information)
   if (row > 0)
     {
       /* We can display some fields */
-      gtk_widget_show (information->table_location);
+      gtk_widget_show (information->grid_location);
     }
   else if (!display_map)
     {
@@ -1688,9 +1690,11 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
       gtk_box_pack_start (GTK_BOX (information->widget_account),
           information->label_account, FALSE, TRUE, 0);
     }
-  gtk_table_attach_defaults (GTK_TABLE (information->table_contact),
-           information->widget_account,
-           1, 2, 0, 1);
+
+  gtk_grid_attach (GTK_GRID (information->grid_contact),
+      information->widget_account,
+      1, 0, 1, 1);
+
   gtk_widget_show (information->widget_account);
 
   /* Set up avatar chooser/display */
@@ -1745,9 +1749,10 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
       }
       gtk_misc_set_alignment (GTK_MISC (information->widget_id), 0, 0.5);
     }
-  gtk_table_attach_defaults (GTK_TABLE (information->table_contact),
-           information->widget_id,
-           1, 2, 1, 2);
+
+  gtk_grid_attach (GTK_GRID (information->grid_contact), information->widget_id,
+      1, 1, 1, 1);
+
   gtk_widget_show (information->widget_id);
 
   /* Setup alias label/entry */
@@ -1772,9 +1777,10 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
       }
       gtk_misc_set_alignment (GTK_MISC (information->widget_alias), 0, 0.5);
     }
-  gtk_table_attach_defaults (GTK_TABLE (information->table_contact),
-           information->widget_alias,
-           1, 2, 2, 3);
+
+  gtk_grid_attach (GTK_GRID (information->grid_contact),
+      information->widget_alias, 1, 2, 1, 1);
+
   if (information->flags & EMPATHY_CONTACT_WIDGET_FOR_TOOLTIP) {
     gtk_label_set_selectable (GTK_LABEL (information->label_status), FALSE);
   }
@@ -1789,8 +1795,8 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
       g_signal_connect (information->favourite_checkbox, "toggled",
           G_CALLBACK (favourite_toggled_cb), information);
 
-      gtk_table_attach_defaults (GTK_TABLE (information->table_contact),
-           information->favourite_checkbox, 0, 2, 3, 4);
+      gtk_grid_attach (GTK_GRID (information->grid_contact),
+           information->favourite_checkbox, 0, 3, 1, 1);
 
       information->fav_sig_id = g_signal_connect (information->manager,
           "favourites-changed",
@@ -1849,7 +1855,7 @@ empathy_contact_widget_new (EmpathyContact *contact,
        "hbox_presence", &information->hbox_presence,
        "label_alias", &information->label_alias,
        "image_state", &information->image_state,
-       "table_contact", &information->table_contact,
+       "grid_contact", &information->grid_contact,
        "vbox_avatar", &information->vbox_avatar,
        "vbox_location", &information->vbox_location,
        "subvbox_location", &information->subvbox_location,
@@ -1859,10 +1865,10 @@ empathy_contact_widget_new (EmpathyContact *contact,
 #endif
        "groups_widget", &information->groups_widget,
        "vbox_details", &information->vbox_details,
-       "table_details", &information->table_details,
+       "grid_details", &information->grid_details,
        "hbox_details_requested", &information->hbox_details_requested,
        "vbox_client", &information->vbox_client,
-       "table_client", &information->table_client,
+       "grid_client", &information->grid_client,
        "hbox_client_requested", &information->hbox_client_requested,
        NULL);
   g_free (filename);
@@ -1870,7 +1876,7 @@ empathy_contact_widget_new (EmpathyContact *contact,
   empathy_builder_connect (gui, information,
       "vbox_contact_widget", "destroy", contact_widget_destroy_cb,
       NULL);
-  information->table_location = NULL;
+  information->grid_location = NULL;
 
   g_object_set_data (G_OBJECT (information->vbox_contact_widget),
       "EmpathyContactWidget",
