@@ -182,8 +182,6 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
     GdkPixbuf *avatar,
     gboolean *abusive)
 {
-  EmpathyContactManager *contact_manager =
-    empathy_contact_manager_dup_singleton ();
   GtkWidget *dialog;
   GtkWidget *abusive_check = NULL;
   GeeSet *personas;
@@ -214,9 +212,9 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
     {
       TpfPersona *persona = gee_iterator_get (iter);
       TpContact *contact;
-      EmpathyContactListFlags flags;
       GString *s;
       char *str;
+      TpConnection *conn;
 
       if (!TPF_IS_PERSONA (persona))
           goto while_finish;
@@ -225,10 +223,10 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
       if (contact == NULL)
         goto while_finish;
 
-      flags = empathy_contact_manager_get_flags_for_connection (
-          contact_manager, tp_contact_get_connection (contact));
+      conn = tp_contact_get_connection (contact);
 
-      if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+      if (tp_proxy_has_interface_by_id (conn,
+            TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING))
         {
           s = blocked_str;
           npersonas_blocked++;
@@ -239,7 +237,7 @@ empathy_block_individual_dialog_show (GtkWindow *parent,
           npersonas_notblocked++;
         }
 
-      if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE)
+      if (tp_connection_can_report_abusive (conn))
         can_report_abuse = TRUE;
 
       str = contact_pretty_name (contact);
@@ -291,7 +289,6 @@ while_finish:
       gtk_widget_show (abusive_check);
     }
 
-  g_object_unref (contact_manager);
   g_string_free (text, TRUE);
   g_string_free (blocked_str, TRUE);
   g_string_free (notblocked_str, TRUE);
