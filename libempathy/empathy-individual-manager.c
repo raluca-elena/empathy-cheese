@@ -546,7 +546,6 @@ empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
     {
       TpfPersona *persona = gee_iterator_get (iter);
       TpConnection *conn;
-      EmpathyContactManager *manager;
 
       if (TPF_IS_PERSONA (persona))
         {
@@ -556,14 +555,10 @@ empathy_individual_manager_supports_blocking (EmpathyIndividualManager *self,
           if (tp_contact != NULL)
             {
               conn = tp_contact_get_connection (tp_contact);
-              manager = empathy_contact_manager_dup_singleton ();
 
-              if (empathy_contact_manager_get_flags_for_connection (
-                    manager, conn) &
-                  EMPATHY_CONTACT_LIST_CAN_BLOCK)
+              if (tp_proxy_has_interface_by_id (conn,
+                    TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING))
                 retval = TRUE;
-
-              g_object_unref (manager);
             }
         }
       g_clear_object (&persona);
@@ -589,31 +584,26 @@ empathy_individual_manager_set_blocked (EmpathyIndividualManager *self,
   while (gee_iterator_next (iter))
     {
       TpfPersona *persona = gee_iterator_get (iter);
-      EmpathyContact *contact;
-      EmpathyContactManager *manager;
-      EmpathyContactListFlags flags;
 
       if (TPF_IS_PERSONA (persona))
         {
           TpContact *tp_contact;
+          TpConnection *conn;
 
           tp_contact = tpf_persona_get_contact (persona);
-          if (tp_contact != NULL)
-            {
-              contact = empathy_contact_dup_from_tp_contact (tp_contact);
-              empathy_contact_set_persona (contact, FOLKS_PERSONA (persona));
-              manager = empathy_contact_manager_dup_singleton ();
-              flags = empathy_contact_manager_get_flags_for_connection (manager,
-                  empathy_contact_get_connection (contact));
+          if (tp_contact == NULL)
+            continue;
 
-              if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
-                empathy_contact_list_set_blocked (
-                    EMPATHY_CONTACT_LIST (manager),
-                    contact, blocked, abusive);
+          conn = tp_contact_get_connection (tp_contact);
 
-              g_object_unref (manager);
-              g_object_unref (contact);
-            }
+          if (!tp_proxy_has_interface_by_id (conn,
+                TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING))
+            continue;
+
+          if (blocked)
+            tp_contact_block_async (tp_contact, abusive, NULL, NULL);
+          else
+            tp_contact_unblock_async (tp_contact, NULL, NULL);
         }
       g_clear_object (&persona);
     }
