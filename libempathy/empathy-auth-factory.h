@@ -64,6 +64,10 @@ EmpathyAuthFactory * empathy_auth_factory_new (TpSimpleClientFactory *factory);
 gboolean empathy_auth_factory_register (EmpathyAuthFactory *self,
     GError **error);
 
+void empathy_auth_factory_save_retry_password (EmpathyAuthFactory *self,
+    TpAccount *account,
+    const gchar *password);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_AUTH_FACTORY_H__*/

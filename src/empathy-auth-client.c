@@ -36,6 +36,7 @@
 #include <libempathy/empathy-tls-verifier.h>
 #include <libempathy/empathy-utils.h>
 
+#include <libempathy-gtk/empathy-bad-password-dialog.h>
 #include <libempathy-gtk/empathy-password-dialog.h>
 #include <libempathy-gtk/empathy-tls-dialog.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -235,6 +236,38 @@ auth_factory_new_sasl_handler_cb (EmpathyAuthFactory *factory,
     }
 }
 
+static void
+retry_account_cb (GtkWidget *dialog,
+    TpAccount *account,
+    const gchar *password,
+    EmpathyAuthFactory *factory)
+{
+  DEBUG ("Try reconnecting to %s", tp_account_get_path_suffix (account));
+
+  empathy_auth_factory_save_retry_password (factory, account, password);
+
+  tp_account_reconnect_async (account, NULL, NULL);
+}
+
+static void
+auth_factory_auth_passsword_failed (EmpathyAuthFactory *factory,
+    TpAccount *account,
+    const gchar *password,
+    gpointer user_data)
+{
+  GtkWidget *dialog;
+
+  DEBUG ("Authentification on %s failed, popup password dialog",
+      tp_account_get_path_suffix (account));
+
+  dialog = empathy_bad_password_dialog_new (account, password);
+
+  tp_g_signal_connect_object (dialog, "retry",
+      G_CALLBACK (retry_account_cb), factory, 0);
+
+  gtk_widget_show (dialog);
+}
+
 int
 main (int argc,
     char **argv)
@@ -293,6 +326,9 @@ main (int argc,
 
   g_signal_connect (factory, "new-server-sasl-handler",
       G_CALLBACK (auth_factory_new_sasl_handler_cb), NULL);
+
+  g_signal_connect (factory, "auth-password-failed",
+      G_CALLBACK (auth_factory_auth_passsword_failed), NULL);
 
   if (!empathy_auth_factory_register (factory, &error))
     {

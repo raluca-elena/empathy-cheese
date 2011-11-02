@@ -53,6 +53,13 @@ struct _EmpathyAuthFactoryPriv {
   EmpathyGoaAuthHandler *goa_handler;
 #endif /* HAVE_GOA */
 
+  /* If an account failed to connect and user enters a new password to try, we
+   * store it in this hash table and will try to use it next time the account
+   * attemps to connect.
+   *
+   * reffed TpAccount -> owned password (gchar *) */
+  GHashTable *retry_passwords;
+
   gboolean dispose_run;
 };
 
@@ -184,6 +191,8 @@ server_sasl_handler_ready_cb (GObject *source,
   else
     {
       TpChannel *channel;
+      const gchar *password;
+      TpAccount *account;
 
       if (data->context != NULL)
         tp_handle_channels_context_accept (data->context);
@@ -200,6 +209,29 @@ server_sasl_handler_ready_cb (GObject *source,
 
       tp_g_signal_connect_object (handler, "auth-password-failed",
           G_CALLBACK (sasl_handler_auth_password_failed_cb), data->self, 0);
+
+      /* Is there a retry password? */
+      account = empathy_server_sasl_handler_get_account (handler);
+
+      password = g_hash_table_lookup (data->self->priv->retry_passwords,
+          account);
+      if (password != NULL)
+        {
+          gboolean save;
+
+          DEBUG ("Use retry password");
+
+          /* We want to save this new password only if there is another
+           * (wrong) password saved. The SASL handler will only save it if it
+           * manages to connect. */
+          save = empathy_server_sasl_handler_has_password (handler);
+
+          empathy_server_sasl_handler_provide_password (handler,
+              password, save);
+
+          /* We only want to try this password once */
+          g_hash_table_remove (data->self->priv->retry_passwords, account);
+        }
 
       g_signal_emit (data->self, signals[NEW_SERVER_SASL_HANDLER], 0,
           handler);
@@ -493,6 +525,18 @@ observe_channels (TpBaseClient *client,
   if (empathy_sasl_channel_supports_mechanism (data->channel,
           "X-TELEPATHY-PASSWORD"))
     {
+      if (g_hash_table_lookup (self->priv->retry_passwords, account) != NULL)
+        {
+          DEBUG ("We have a retry password for account %s, calling Claim",
+              tp_account_get_path_suffix (account));
+
+          tp_channel_dispatch_operation_claim_with_async (dispatch_operation,
+              client, password_claim_cb, data);
+
+          tp_observe_channels_context_accept (context);
+          return;
+        }
+
       empathy_keyring_get_account_password_async (data->account,
           get_password_cb, data);
       tp_observe_channels_context_delay (context);
@@ -539,9 +583,13 @@ empathy_auth_factory_init (EmpathyAuthFactory *self)
 
   self->priv->sasl_handlers = g_hash_table_new_full (g_str_hash, g_str_equal,
       NULL, g_object_unref);
+
 #ifdef HAVE_GOA
   self->priv->goa_handler = empathy_goa_auth_handler_new ();
 #endif /* HAVE_GOA */
+
+  self->priv->retry_passwords = g_hash_table_new_full (NULL, NULL,
+      g_object_unref, g_free);
 }
 
 static void
@@ -603,9 +651,12 @@ empathy_auth_factory_dispose (GObject *object)
   priv->dispose_run = TRUE;
 
   g_hash_table_unref (priv->sasl_handlers);
+
 #ifdef HAVE_GOA
   g_object_unref (priv->goa_handler);
 #endif /* HAVE_GOA */
+
+  g_hash_table_unref (priv->retry_passwords);
 
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->dispose (object);
 }
@@ -667,4 +718,13 @@ empathy_auth_factory_register (EmpathyAuthFactory *self,
     GError **error)
 {
   return tp_base_client_register (TP_BASE_CLIENT (self), error);
+}
+
+void
+empathy_auth_factory_save_retry_password (EmpathyAuthFactory *self,
+    TpAccount *account,
+    const gchar *password)
+{
+  g_hash_table_insert (self->priv->retry_passwords,
+      g_object_ref (account), g_strdup (password));
 }
