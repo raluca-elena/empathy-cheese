@@ -226,8 +226,8 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 					 EmpathyContact   *contact)
 {
 	static guint block_signal = 0;
-	EmpathyContactManager *manager;
 	gboolean blocked, abusive;
+	TpContact *tp_contact;
 
 	if (block_signal > 0)
 		return;
@@ -252,10 +252,12 @@ empathy_contact_block_menu_item_toggled (GtkCheckMenuItem *item,
 			return;
 	}
 
-	manager = empathy_contact_manager_dup_singleton ();
-	empathy_contact_list_set_blocked (EMPATHY_CONTACT_LIST (manager),
-					  contact, blocked, abusive);
-	g_object_unref (manager);
+	tp_contact = empathy_contact_get_tp_contact (contact);
+
+	if (blocked)
+		tp_contact_block_async (tp_contact, abusive, NULL, NULL);
+	else
+		tp_contact_unblock_async (tp_contact, NULL, NULL);
 
 	/* update the toggle with the blocked status */
 	block_signal++;
@@ -269,8 +271,7 @@ empathy_contact_block_menu_item_new (EmpathyContact *contact)
 	GtkWidget *item;
 	EmpathyContactManager *manager;
 	TpConnection *connection;
-	EmpathyContactListFlags flags;
-	gboolean blocked;
+	TpContact *tp_contact;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
 
@@ -282,19 +283,16 @@ empathy_contact_block_menu_item_new (EmpathyContact *contact)
 
 	connection = empathy_contact_get_connection (contact);
 
-	flags = empathy_contact_manager_get_flags_for_connection (manager,
-			connection);
-
-	if (!(flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)) {
+	if (!tp_proxy_has_interface_by_id (connection,
+		TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING))
 		return NULL;
-	}
 
 	item = gtk_check_menu_item_new_with_mnemonic (_("_Block Contact"));
-	blocked = empathy_contact_list_get_blocked (
-			EMPATHY_CONTACT_LIST (manager),
-			contact);
 
-	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item), blocked);
+	tp_contact = empathy_contact_get_tp_contact (contact);
+
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (item),
+			tp_contact_is_blocked (tp_contact));
 
 	g_signal_connect (item, "toggled",
 			G_CALLBACK (empathy_contact_block_menu_item_toggled),
