@@ -90,12 +90,15 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		/* confirm the blocking */
 		if (empathy_block_contact_dialog_show (GTK_WINDOW (dialog), contact,
 						       NULL, &abusive)) {
+			TpContact *tp_contact;
+
 			empathy_contact_list_remove (
 					EMPATHY_CONTACT_LIST (manager),
 					contact, "");
-			empathy_contact_list_set_blocked (
-					EMPATHY_CONTACT_LIST (manager),
-					contact, TRUE, abusive);
+
+			tp_contact = empathy_contact_get_tp_contact (contact);
+
+			tp_contact_block_async (tp_contact, abusive, NULL, NULL);
 		} else {
 			/* if they don't confirm, return back to the
 			 * first dialog */
@@ -123,10 +126,7 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	GtkWidget *block_user_button;
 	GList     *l;
 	gchar     *filename;
-	EmpathyContactManager *manager;
-	EmpathyContactListFlags flags;
-
-	manager = empathy_contact_manager_dup_singleton ();
+	TpConnection *conn;
 
 	g_return_if_fail (EMPATHY_IS_CONTACT (contact));
 
@@ -188,17 +188,16 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 			  G_CALLBACK (subscription_dialog_response_cb),
 			  contact_widget);
 
-	flags = empathy_contact_manager_get_flags_for_connection (manager,
-				empathy_contact_get_connection (contact));
+	conn = empathy_contact_get_connection (contact);
 
-	if (flags & EMPATHY_CONTACT_LIST_CAN_BLOCK)
+	if (tp_proxy_has_interface_by_id (conn,
+		TP_IFACE_QUARK_CONNECTION_INTERFACE_CONTACT_BLOCKING))
 		gtk_widget_show (block_user_button);
 
 	if (parent) {
 		gtk_window_set_transient_for (GTK_WINDOW (dialog), parent);
 	}
 
-	g_object_unref (manager);
 	gtk_widget_show (dialog);
 }
 
@@ -517,15 +516,10 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 				   GdkPixbuf      *avatar,
 				   gboolean       *abusive)
 {
-	EmpathyContactManager *manager;
-	EmpathyContactListFlags flags;
 	GtkWidget *dialog;
 	GtkWidget *abusive_check = NULL;
 	int res;
-
-	manager = empathy_contact_manager_dup_singleton ();
-	flags = empathy_contact_manager_get_flags_for_connection (manager,
-			empathy_contact_get_connection (contact));
+	TpConnection *conn;
 
 	dialog = gtk_message_dialog_new (parent,
 			GTK_DIALOG_MODAL,
@@ -549,8 +543,10 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 		gtk_widget_show (image);
 	}
 
+	conn = empathy_contact_get_connection (contact);
+
 	/* ask the user if they want to also report the contact as abusive */
-	if (flags & EMPATHY_CONTACT_LIST_CAN_REPORT_ABUSIVE) {
+	if (tp_connection_can_report_abusive (conn)) {
 		GtkWidget *vbox;
 
 		vbox = gtk_message_dialog_get_message_area (
@@ -574,7 +570,6 @@ empathy_block_contact_dialog_show (GtkWindow      *parent,
 	}
 
 	gtk_widget_destroy (dialog);
-	g_object_unref (manager);
 
 	return res == GTK_RESPONSE_REJECT;
 }
