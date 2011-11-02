@@ -316,8 +316,8 @@ select_account_once_ready (EmpathyLogWindow *self,
 
   self->priv->selected_is_chatroom = is_chatroom;
 
-  empathy_account_chooser_set_account (EMPATHY_ACCOUNT_CHOOSER (
-      self->priv->account_chooser), self->priv->selected_account);
+  empathy_account_chooser_set_account (account_chooser,
+      self->priv->selected_account);
 }
 
 static void
