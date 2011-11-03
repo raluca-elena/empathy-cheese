@@ -138,6 +138,9 @@ EmpathyContact * empathy_contact_dup_best_for_action (
     FolksIndividual *individual,
     EmpathyActionType action_type);
 
+void empathy_contact_add_to_contact_list (EmpathyContact *self,
+    const gchar *message);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_CONTACT_H__ */

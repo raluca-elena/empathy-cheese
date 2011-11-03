@@ -2071,3 +2071,41 @@ while_finish:
 
   return best_contact;
 }
+
+#define declare_contact_cb(name) \
+static void \
+contact_##name##_cb (GObject *source, \
+    GAsyncResult *result, \
+    gpointer user_data) \
+{ \
+  TpContact *contact = (TpContact *) source; \
+  GError *error = NULL; \
+  \
+  if (!tp_contact_##name##_finish (contact, result, &error)) \
+    { \
+      DEBUG ("Failed to ##name## on %s\n", \
+          tp_contact_get_identifier (contact)); \
+      g_error_free (error); \
+    } \
+}
+
+declare_contact_cb(request_subscription)
+declare_contact_cb(authorize_publication)
+declare_contact_cb(unblock)
+
+void
+empathy_contact_add_to_contact_list (EmpathyContact *self,
+    const gchar *message)
+{
+  EmpathyContactPriv *priv = GET_PRIV (self);
+
+  g_return_if_fail (priv->tp_contact != NULL);
+
+  tp_contact_request_subscription_async (priv->tp_contact, message,
+      contact_request_subscription_cb, NULL);
+
+  tp_contact_authorize_publication_async (priv->tp_contact,
+      contact_authorize_publication_cb, NULL);
+
+  tp_contact_unblock_async (priv->tp_contact, contact_unblock_cb, NULL);
+}
