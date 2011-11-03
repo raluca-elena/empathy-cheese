@@ -2109,3 +2109,15 @@ empathy_contact_add_to_contact_list (EmpathyContact *self,
 
   tp_contact_unblock_async (priv->tp_contact, contact_unblock_cb, NULL);
 }
+
+declare_contact_cb(remove)
+
+void
+empathy_contact_remove_from_contact_list (EmpathyContact *self)
+{
+  EmpathyContactPriv *priv = GET_PRIV (self);
+
+  g_return_if_fail (priv->tp_contact != NULL);
+
+  tp_contact_remove_async (priv->tp_contact, contact_remove_cb, NULL);
+}

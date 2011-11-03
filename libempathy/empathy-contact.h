@@ -141,6 +141,8 @@ EmpathyContact * empathy_contact_dup_best_for_action (
 void empathy_contact_add_to_contact_list (EmpathyContact *self,
     const gchar *message);
 
+void empathy_contact_remove_from_contact_list (EmpathyContact *self);
+
 G_END_DECLS
 
 #endif /* __EMPATHY_CONTACT_H__ */
