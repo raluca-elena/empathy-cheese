@@ -27,7 +27,6 @@
 
 #include <telepathy-yell/telepathy-yell.h>
 
-#include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-streamed-media.h>
 
 #include <libempathy-gtk/empathy-notify-manager.h>
@@ -158,18 +157,12 @@ notification_decline_subscription_cb (NotifyNotification *notification,
     gchar *action,
     EmpathyNotificationsApprover *self)
 {
-  EmpathyContactManager *manager;
-
   if (self->priv->event == NULL)
     return;
 
-  manager = empathy_contact_manager_dup_singleton ();
-  empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
-      self->priv->event->contact, "");
+  empathy_contact_remove_from_contact_list (self->priv->event->contact);
 
   empathy_event_remove (self->priv->event);
-
-  g_object_unref (manager);
 }
 
 static void
@@ -177,18 +170,12 @@ notification_accept_subscription_cb (NotifyNotification *notification,
     gchar *action,
     EmpathyNotificationsApprover *self)
 {
-  EmpathyContactManager *manager;
-
   if (self->priv->event == NULL)
     return;
 
-  manager = empathy_contact_manager_dup_singleton ();
-  empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager),
-      self->priv->event->contact, "");
+  empathy_contact_add_to_contact_list (self->priv->event->contact, "");
 
   empathy_event_remove (self->priv->event);
-
-  g_object_unref (manager);
 }
 
 static void
