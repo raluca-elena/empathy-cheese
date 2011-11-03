@@ -576,25 +576,3 @@ contact_manager_iface_init (EmpathyContactListIface *iface)
 	iface->rename_group      = contact_manager_rename_group;
 	iface->remove_group	 = contact_manager_remove_group;
 }
-
-EmpathyContactListFlags
-empathy_contact_manager_get_flags_for_connection (
-				EmpathyContactManager *manager,
-				TpConnection          *connection)
-{
-	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
-	EmpathyContactList        *list;
-	EmpathyContactListFlags    flags;
-
-	g_return_val_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager), FALSE);
-	g_return_val_if_fail (connection != NULL, FALSE);
-
-	list = g_hash_table_lookup (priv->lists, connection);
-	if (list == NULL) {
-		return FALSE;
-	}
-	flags = empathy_contact_list_get_flags (list);
-
-	return flags;
-}
-
