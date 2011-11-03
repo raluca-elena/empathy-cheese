@@ -28,8 +28,8 @@
 
 #include <telepathy-glib/telepathy-glib.h>
 
-#include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
+#include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-account-chooser.h>
 #include <libempathy-gtk/empathy-cell-renderer-text.h>
@@ -142,7 +142,6 @@ on_get_contact_factory_get_from_id_cb (TpConnection *connection,
     gpointer user_data,
     GObject *object)
 {
-    EmpathyContactManager *manager = empathy_contact_manager_dup_singleton ();
     const gchar *message = user_data;
 
     if (error != NULL)
@@ -151,8 +150,7 @@ on_get_contact_factory_get_from_id_cb (TpConnection *connection,
         return;
       }
 
-    empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager), contact,
-        message);
+    empathy_contact_add_to_contact_list (contact, message);
 }
 
 static void
@@ -342,15 +340,11 @@ check_request_message_available (EmpathyContactSearchDialog *self,
     TpConnection *conn)
 {
   EmpathyContactSearchDialogPrivate *priv = GET_PRIVATE (self);
-  EmpathyContactManager *manager = empathy_contact_manager_dup_singleton ();
-  EmpathyContactListFlags flags;
-
-  flags = empathy_contact_manager_get_flags_for_connection (manager, conn);
 
   gtk_widget_set_visible (priv->message_window,
-      flags & EMPATHY_CONTACT_LIST_MESSAGE_ADD);
+      tp_connection_get_can_change_contact_list (conn));
   gtk_widget_set_visible (priv->message_label,
-      flags & EMPATHY_CONTACT_LIST_MESSAGE_ADD);
+      tp_connection_get_can_change_contact_list (conn));
 }
 
 static void
