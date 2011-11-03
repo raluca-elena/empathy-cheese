@@ -30,8 +30,6 @@
 
 #include <telepathy-glib/account-manager.h>
 
-#include <libempathy/empathy-contact-manager.h>
-#include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
 
@@ -67,22 +65,18 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 				 gint       response,
 				 GtkWidget *contact_widget)
 {
-	EmpathyContactManager *manager;
 	EmpathyContact        *contact;
 
-	manager = empathy_contact_manager_dup_singleton ();
 	contact = empathy_contact_widget_get_contact (contact_widget);
 
 	if (response == GTK_RESPONSE_YES) {
-		empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager),
-					  contact, "");
+		empathy_contact_add_to_contact_list (contact, "");
 
 		empathy_contact_set_alias (contact,
 			empathy_contact_widget_get_alias (contact_widget));
 	}
 	else if (response == GTK_RESPONSE_NO) {
-		empathy_contact_list_remove (EMPATHY_CONTACT_LIST (manager),
-					     contact, "");
+		empathy_contact_remove_from_contact_list (contact);
 	}
 	else if (response == GTK_RESPONSE_REJECT) {
 		gboolean abusive;
@@ -92,9 +86,7 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 						       NULL, &abusive)) {
 			TpContact *tp_contact;
 
-			empathy_contact_list_remove (
-					EMPATHY_CONTACT_LIST (manager),
-					contact, "");
+			empathy_contact_remove_from_contact_list (contact);
 
 			tp_contact = empathy_contact_get_tp_contact (contact);
 
@@ -102,15 +94,12 @@ subscription_dialog_response_cb (GtkDialog *dialog,
 		} else {
 			/* if they don't confirm, return back to the
 			 * first dialog */
-			goto finally;
+			return;
 		}
 	}
 
 	subscription_dialogs = g_list_remove (subscription_dialogs, dialog);
 	gtk_widget_destroy (GTK_WIDGET (dialog));
-
-finally:
-	g_object_unref (manager);
 }
 
 void
@@ -394,7 +383,6 @@ can_add_contact_to_account (TpAccount                                 *account,
 			    gpointer                                   callback_data,
 			    gpointer                                   user_data)
 {
-	EmpathyContactManager *contact_manager;
 	TpConnection          *connection;
 	gboolean               result;
 
@@ -404,10 +392,7 @@ can_add_contact_to_account (TpAccount                                 *account,
 		return;
 	}
 
-	contact_manager = empathy_contact_manager_dup_singleton ();
-	result = empathy_contact_manager_get_flags_for_connection (
-		contact_manager, connection) & EMPATHY_CONTACT_LIST_CAN_ADD;
-	g_object_unref (contact_manager);
+	result = tp_connection_get_can_change_contact_list (connection);
 
 	callback (result, callback_data);
 }
@@ -417,20 +402,16 @@ new_contact_response_cb (GtkDialog *dialog,
 			 gint       response,
 			 GtkWidget *contact_widget)
 {
-	EmpathyContactManager *manager;
 	EmpathyContact         *contact;
 
-	manager = empathy_contact_manager_dup_singleton ();
 	contact = empathy_contact_widget_get_contact (contact_widget);
 
 	if (contact && response == GTK_RESPONSE_OK) {
-		empathy_contact_list_add (EMPATHY_CONTACT_LIST (manager),
-					  contact, "");
+		empathy_contact_add_to_contact_list (contact, "");
 	}
 
 	new_contact_dialog = NULL;
 	gtk_widget_destroy (GTK_WIDGET (dialog));
-	g_object_unref (manager);
 }
 
 void
