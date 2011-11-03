@@ -174,7 +174,6 @@ empathy_contact_add_menu_item_new (EmpathyContact *contact)
 	TpConnection *connection;
 	GList *l, *members;
 	gboolean found = FALSE;
-	EmpathyContactListFlags flags;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
 
@@ -185,12 +184,8 @@ empathy_contact_add_menu_item_new (EmpathyContact *contact)
 	manager = empathy_contact_manager_dup_singleton ();
 	connection = empathy_contact_get_connection (contact);
 
-	flags = empathy_contact_manager_get_flags_for_connection (manager,
-			connection);
-
-	if (!(flags & EMPATHY_CONTACT_LIST_CAN_ADD)) {
+	if (!tp_connection_get_can_change_contact_list (connection))
 		return NULL;
-	}
 
 	members = empathy_contact_list_get_members (EMPATHY_CONTACT_LIST (manager));
 	for (l = members; l; l = l->next) {
@@ -520,7 +515,6 @@ contact_edit_menu_item_activate_cb (EmpathyContact *contact)
 GtkWidget *
 empathy_contact_edit_menu_item_new (EmpathyContact *contact)
 {
-	EmpathyContactManager *manager;
 	GtkWidget *item;
 	GtkWidget *image;
 	gboolean enable = FALSE;
@@ -529,17 +523,12 @@ empathy_contact_edit_menu_item_new (EmpathyContact *contact)
 
 	if (empathy_contact_manager_initialized ()) {
 		TpConnection *connection;
-		EmpathyContactListFlags flags;
 
-		manager = empathy_contact_manager_dup_singleton ();
 		connection = empathy_contact_get_connection (contact);
-		flags = empathy_contact_manager_get_flags_for_connection (
-				manager, connection);
 
-		enable = (flags & EMPATHY_CONTACT_LIST_CAN_ALIAS ||
-		          flags & EMPATHY_CONTACT_LIST_CAN_GROUP);
-
-		g_object_unref (manager);
+		enable = (tp_connection_can_set_contact_alias (connection) ||
+		          tp_connection_get_group_storage (connection) !=
+			                 TP_CONTACT_METADATA_STORAGE_TYPE_NONE);
 	}
 
 	item = gtk_image_menu_item_new_with_mnemonic (
