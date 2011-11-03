@@ -2477,7 +2477,7 @@ empathy_account_widget_get_default_display_name (EmpathyAccountWidget *self)
           default_display_name = g_strdup_printf (_("%1$s on %2$s"),
               login_id, empathy_irc_network_get_name (network));
         }
-      else if (service == FACEBOOK_SERVICE)
+      else if (service == FACEBOOK_SERVICE && priv->jid_suffix != NULL)
         {
           gchar *tmp;
 
