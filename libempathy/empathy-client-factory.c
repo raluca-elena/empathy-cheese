@@ -161,6 +161,12 @@ empathy_client_factory_dup_connection_features (TpSimpleClientFactory *factory,
   feature = TP_CONNECTION_FEATURE_CONTACT_BLOCKING;
   g_array_append_val (features, feature);
 
+  /* Most empathy-* may allow user to add a contact to his contact list. We
+   * need this property to check if the connection allows it. It's cheap to
+   * prepare anyway as it will just call GetAll() on the ContactList iface. */
+  feature = TP_CONNECTION_FEATURE_CONTACT_LIST_PROPERTIES;
+  g_array_append_val (features, feature);
+
   return features;
 }
 
