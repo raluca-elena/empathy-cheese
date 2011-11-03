@@ -2003,7 +2003,6 @@ static void
 contact_list_view_remove_activate_cb (GtkMenuItem            *menuitem,
 				      EmpathyContactListView *view)
 {
-	EmpathyContactListViewPriv *priv = GET_PRIV (view);
 	EmpathyContact             *contact;
 
 	contact = empathy_contact_list_view_dup_selected (view);
@@ -2016,10 +2015,7 @@ contact_list_view_remove_activate_cb (GtkMenuItem            *menuitem,
 		text = g_strdup_printf (_("Do you really want to remove the contact '%s'?"),
 					empathy_contact_get_alias (contact));
 		if (contact_list_view_remove_dialog_show (parent, _("Removing contact"), text)) {
-			EmpathyContactList *list;
-
-			list = empathy_contact_list_store_get_list_iface (priv->store);
-			empathy_contact_list_remove (list, contact, "");
+			empathy_contact_remove_from_contact_list (contact);
 		}
 
 		g_free (text);
