@@ -54,12 +54,12 @@ struct _EmpathyGstVideoSrcPrivate
   GstElement *src;
   /* Element implementing a ColorBalance interface */
   GstElement *balance;
-  /* Element for resolution and framerate adjustment */
+  /* Elements for resolution and framerate adjustment */
   GstElement *capsfilter;
+  GstElement *videorate;
   guint width;
   guint height;
   guint framerate;
-  gboolean has_videomaxrate;
 };
 
 #define EMPATHY_GST_VIDEO_SRC_GET_PRIVATE(o) \
@@ -146,19 +146,27 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
   gst_pad_add_event_probe (src, G_CALLBACK (empathy_video_src_drop_eos), NULL);
   gst_object_unref (src);
 
-  /* videomaxrate is optional as it's part of gst-plugins-bad. So don't
-   * fail if it doesn't exist. */
+  /* videorate with the required properties optional as it needs a currently
+   * unreleased gst-plugins-base 0.10.36 */
   element_back = element;
-  if ((element = empathy_gst_add_to_bin (GST_BIN (obj),
-      element, "videomaxrate")) == NULL)
+  element = empathy_gst_add_to_bin (GST_BIN (obj), element, "videorate");
+
+  if (element != NULL && g_object_class_find_property (
+      G_OBJECT_GET_CLASS (element), "max-rate") != NULL)
     {
-      g_message ("Couldn't add \"videomaxrate\" (gst-plugins-bad missing?)");
-      element = element_back;
-      priv->has_videomaxrate = TRUE;
+      priv->videorate = element;
+      g_object_set (G_OBJECT (element),
+        "drop-only", TRUE,
+        "average-period", GST_SECOND/2,
+        NULL);
     }
   else
     {
-      priv->has_videomaxrate = TRUE;
+      g_message ("videorate missing or doesn't have max-rate property, not"
+        "doing dynamic framerate changes (Needs gst-plugins-base >= 0.10.36)");
+      /* Refcount owned by the bin */
+      gst_bin_remove (GST_BIN (obj), element);
+      element = element_back;
     }
 
   gst_caps_set_simple (caps,
@@ -420,20 +428,10 @@ empathy_video_src_set_framerate (GstElement *src,
     guint framerate)
 {
   EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
-  GstCaps *caps;
 
-  if (priv->has_videomaxrate)
+  if (priv->videorate)
     {
-      g_return_if_fail (priv->capsfilter != NULL);
-
-      g_object_get (priv->capsfilter, "caps", &caps, NULL);
-      caps = gst_caps_make_writable (caps);
-
-      gst_caps_set_simple (caps,
-          "framerate", GST_TYPE_FRACTION, framerate, 1,
-          NULL);
-
-      g_object_set (priv->capsfilter, "caps", caps, NULL);
+      g_object_set (G_OBJECT (priv->videorate), "max-rate", framerate, NULL);
     }
 }
 
