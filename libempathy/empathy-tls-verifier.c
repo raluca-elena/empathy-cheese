@@ -526,7 +526,7 @@ empathy_tls_verifier_verify_async (EmpathyTLSVerifier *self,
   chain = gcr_certificate_chain_new ();
   for (idx = 0; idx < cert_data->len; ++idx) {
     data = g_ptr_array_index (cert_data, idx);
-    cert = gcr_simple_certificate_new (data->data, data->len);
+    cert = gcr_simple_certificate_new ((guchar*)data->data, data->len);
     gcr_certificate_chain_add (chain, cert);
     g_object_unref (cert);
   }
