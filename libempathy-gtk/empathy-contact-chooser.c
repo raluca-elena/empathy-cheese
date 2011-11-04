@@ -211,7 +211,7 @@ get_contacts_cb (TpConnection *connection,
   TpAccount *account;
   TpfPersonaStore *store;
   FolksIndividual *individual;
-  TpfPersona *persona_new;
+  TpfPersona *persona;
   GeeSet *personas;
 
   if (self->priv->add_temp_ctx != ctx)
@@ -227,9 +227,10 @@ get_contacts_cb (TpConnection *connection,
   personas = GEE_SET (
       gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref, g_object_unref,
       g_direct_hash, g_direct_equal));
-  persona_new = tpf_persona_new (contacts[0], store);
-  gee_collection_add (GEE_COLLECTION (personas),
-      tpf_persona_new (contacts[0], store));
+
+  persona = tpf_persona_new (contacts[0], store);
+
+  gee_collection_add (GEE_COLLECTION (personas), persona);
 
   individual = folks_individual_new (personas);
 
@@ -248,7 +249,7 @@ get_contacts_cb (TpConnection *connection,
         NULL, NULL))
     empathy_individual_view_select_first (self->priv->view);
 
-  g_clear_object (&persona_new);
+  g_clear_object (&persona);
   g_clear_object (&personas);
   g_object_unref (store);
 }
