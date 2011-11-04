@@ -444,12 +444,19 @@ empathy_video_src_set_resolution (GstElement *src,
 {
   EmpathyGstVideoSrcPrivate *priv = EMPATHY_GST_VIDEO_SRC_GET_PRIVATE (src);
   GstCaps *caps;
-  GstClock *gst_clock;
+  GstPad *srcpad, *peer;
 
   g_return_if_fail (priv->capsfilter != NULL);
 
   gst_element_set_locked_state (priv->src, TRUE);
   gst_element_set_state (priv->src, GST_STATE_NULL);
+
+  srcpad = gst_element_get_static_pad (priv->src, "src");
+  peer = gst_pad_get_peer (srcpad);
+
+  /* Keep a ref as removing it from the bin will loose our reference */
+  gst_object_ref (priv->src);
+  gst_bin_remove (GST_BIN (src), priv->src);
 
   g_object_get (priv->capsfilter, "caps", &caps, NULL);
   caps = gst_caps_make_writable (caps);
@@ -461,13 +468,15 @@ empathy_video_src_set_resolution (GstElement *src,
 
   g_object_set (priv->capsfilter, "caps", caps, NULL);
 
-  /* Reset clock an base time, this is require for videotestsrc and hopefully
-   * has no side effect */
-  gst_clock = gst_element_get_clock (src);
-  gst_element_set_clock (priv->src, gst_clock);
-  gst_element_set_base_time (priv->src, gst_element_get_base_time (src));
-  gst_object_unref (gst_clock);
+  gst_bin_add (GST_BIN (src), priv->src);
+  /* We as the bin own the source again, so drop the temporary ref */
+  gst_object_unref (priv->src);
+
+  gst_pad_link (srcpad, peer);
 
   gst_element_set_locked_state (priv->src, FALSE);
   gst_element_sync_state_with_parent (priv->src);
+
+  gst_object_unref (srcpad);
+  gst_object_unref (peer);
 }
