@@ -179,6 +179,10 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
     }
 
   gtk_box_pack_start (GTK_BOX (self), grid, FALSE, FALSE, 3);
+
+  /* show everything but the packing box */
+  gtk_widget_show_all (GTK_WIDGET (self));
+  gtk_widget_hide (GTK_WIDGET (self));
 }
 
 GtkWidget *
