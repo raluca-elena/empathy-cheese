@@ -135,6 +135,8 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
   gtk_box_pack_start (GTK_BOX (self), self->priv->entry, FALSE, FALSE, 3);
 
   grid = gtk_grid_new ();
+  gtk_grid_set_column_homogeneous (GTK_GRID (grid), TRUE);
+  gtk_grid_set_row_homogeneous (GTK_GRID (grid), TRUE);
 
   for (i = 0; dtmfbuttons[i].label != NULL; i++)
     {
