@@ -14,6 +14,8 @@
 
 #include "empathy-contact-chooser.h"
 
+#include <libempathy/empathy-utils.h>
+
 #include <libempathy-gtk/empathy-individual-store-manager.h>
 #include <libempathy-gtk/empathy-individual-view.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -209,11 +211,7 @@ get_contacts_cb (TpConnection *connection,
   EmpathyContactChooser *self =
     (EmpathyContactChooser *) weak_object;
   AddTemporaryIndividualCtx *ctx = user_data;
-  TpAccount *account;
-  TpfPersonaStore *store;
   FolksIndividual *individual;
-  TpfPersona *persona;
-  GeeSet *personas;
 
   if (self->priv->add_temp_ctx != ctx)
     /* another request has been started */
@@ -222,18 +220,7 @@ get_contacts_cb (TpConnection *connection,
   if (n_contacts != 1)
     return;
 
-  account = tp_connection_get_account (connection);
-
-  store = tpf_persona_store_new (account);
-  personas = GEE_SET (
-      gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref, g_object_unref,
-      g_direct_hash, g_direct_equal));
-
-  persona = tpf_persona_new (contacts[0], store);
-
-  gee_collection_add (GEE_COLLECTION (personas), persona);
-
-  individual = folks_individual_new (personas);
+  individual =  empathy_create_individual_from_tp_contact (contacts[0]);
 
   /* listen for updates to the capabilities */
   tp_g_signal_connect_object (contacts[0], "notify::capabilities",
@@ -249,10 +236,6 @@ get_contacts_cb (TpConnection *connection,
         gtk_tree_view_get_selection (GTK_TREE_VIEW (self->priv->view)),
         NULL, NULL))
     empathy_individual_view_select_first (self->priv->view);
-
-  g_clear_object (&persona);
-  g_clear_object (&personas);
-  g_object_unref (store);
 }
 
 static void

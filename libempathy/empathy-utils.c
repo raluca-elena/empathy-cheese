@@ -1163,3 +1163,35 @@ empathy_sasl_channel_supports_mechanism (TpChannel *channel,
 
   return tp_strv_contains (available_mechanisms, mechanism);
 }
+
+FolksIndividual *
+empathy_create_individual_from_tp_contact (TpContact *contact)
+{
+  TpAccount *account;
+  TpConnection *connection;
+  TpfPersonaStore *store;
+  GeeSet *personas;
+  TpfPersona *persona;
+  FolksIndividual *individual;
+
+  connection = tp_contact_get_connection (contact);
+  account = tp_connection_get_account (connection);
+
+  store = tpf_persona_store_new (account);
+
+  personas = GEE_SET (
+      gee_hash_set_new (FOLKS_TYPE_PERSONA, g_object_ref, g_object_unref,
+      g_direct_hash, g_direct_equal));
+
+  persona = tpf_persona_new (contact, store);
+
+  gee_collection_add (GEE_COLLECTION (personas), persona);
+
+  individual = folks_individual_new (personas);
+
+  g_clear_object (&persona);
+  g_clear_object (&personas);
+  g_object_unref (store);
+
+  return individual;
+}

@@ -121,6 +121,9 @@ void empathy_individual_can_audio_video_call (FolksIndividual *individual,
 gboolean empathy_sasl_channel_supports_mechanism (TpChannel *channel,
     const gchar *mechanism);
 
+FolksIndividual * empathy_create_individual_from_tp_contact (
+    TpContact *contact);
+
 /* Copied from wocky/wocky-utils.h */
 
 #define empathy_implement_finish_void(source, tag) \
