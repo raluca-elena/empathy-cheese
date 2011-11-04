@@ -1165,7 +1165,7 @@ create_video_preview (EmpathyCallWindow *self)
 
   g_object_set (priv->video_preview_sink,
       "sync", FALSE,
-      "async", TRUE,
+      "async", FALSE,
       NULL);
 
   /* Translators: this is an "Info" label. It should be as short
