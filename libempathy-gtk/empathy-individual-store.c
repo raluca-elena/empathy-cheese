@@ -57,8 +57,7 @@
 /* Time in seconds after connecting which we wait before active users are enabled */
 #define ACTIVE_USER_WAIT_TO_ENABLE_TIME 5
 
-#define GET_PRIV(obj) EMPATHY_GET_PRIV (obj, EmpathyIndividualStore)
-typedef struct
+struct _EmpathyIndividualStorePriv
 {
   EmpathyIndividualManager *manager;
   gboolean show_avatars;
@@ -77,7 +76,7 @@ typedef struct
   GHashTable                  *folks_individual_cache;
   /* Hash: char *groupname -> GtkTreeIter * */
   GHashTable                  *empathy_group_cache;
-} EmpathyIndividualStorePriv;
+};
 
 typedef struct
 {
@@ -148,12 +147,12 @@ while_finish:
 }
 
 static void
-add_individual_to_store (GtkTreeStore *self,
+add_individual_to_store (GtkTreeStore *store,
     GtkTreeIter *iter,
     GtkTreeIter *parent,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
+  EmpathyIndividualStore *self = EMPATHY_INDIVIDUAL_STORE (store);
   gboolean can_audio_call, can_video_call;
   const gchar * const *types;
   GQueue *queue;
@@ -163,7 +162,7 @@ add_individual_to_store (GtkTreeStore *self,
 
   types = individual_get_client_types (individual);
 
-  gtk_tree_store_insert_with_values (self, iter, parent, 0,
+  gtk_tree_store_insert_with_values (store, iter, parent, 0,
       EMPATHY_INDIVIDUAL_STORE_COL_NAME,
       folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)),
       EMPATHY_INDIVIDUAL_STORE_COL_INDIVIDUAL, individual,
@@ -174,7 +173,7 @@ add_individual_to_store (GtkTreeStore *self,
       EMPATHY_INDIVIDUAL_STORE_COL_CLIENT_TYPES, types,
       -1);
 
-  queue = g_hash_table_lookup (priv->folks_individual_cache, individual);
+  queue = g_hash_table_lookup (self->priv->folks_individual_cache, individual);
   if (queue)
     {
       g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
@@ -183,7 +182,7 @@ add_individual_to_store (GtkTreeStore *self,
     {
       queue = g_queue_new ();
       g_queue_push_tail (queue, gtk_tree_iter_copy (iter));
-      g_hash_table_insert (priv->folks_individual_cache, individual,
+      g_hash_table_insert (self->priv->folks_individual_cache, individual,
           queue);
     }
 }
@@ -196,14 +195,13 @@ individual_store_get_group (EmpathyIndividualStore *self,
     gboolean *created,
     gboolean is_fake_group)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
   GtkTreeModel *model;
   GtkTreeIter iter_group;
   GtkTreeIter iter_separator;
   GtkTreeIter *iter;
 
   model = GTK_TREE_MODEL (self);
-  iter = g_hash_table_lookup (priv->empathy_group_cache, name);
+  iter = g_hash_table_lookup (self->priv->empathy_group_cache, name);
 
   if (iter == NULL)
     {
@@ -220,7 +218,7 @@ individual_store_get_group (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_FAKE_GROUP, is_fake_group,
           -1);
 
-      g_hash_table_insert (priv->empathy_group_cache, g_strdup (name),
+      g_hash_table_insert (self->priv->empathy_group_cache, g_strdup (name),
           gtk_tree_iter_copy (&iter_group));
 
       if (iter_group_to_set)
@@ -261,12 +259,11 @@ static GList *
 individual_store_find_contact (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
   GQueue *row_refs_queue;
   GList *i;
   GList *iters_list = NULL;
 
-  row_refs_queue = g_hash_table_lookup (priv->folks_individual_cache,
+  row_refs_queue = g_hash_table_lookup (self->priv->folks_individual_cache,
       individual);
   if (!row_refs_queue)
     return NULL;
@@ -292,12 +289,12 @@ static void
 individual_store_remove_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
   GtkTreeModel *model;
   GQueue *row_refs;
   GList *l;
 
-  row_refs = g_hash_table_lookup (priv->folks_individual_cache, individual);
+  row_refs = g_hash_table_lookup (self->priv->folks_individual_cache,
+      individual);
   if (!row_refs)
     return;
 
@@ -320,7 +317,7 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
           gtk_tree_model_get (model, &parent,
               EMPATHY_CONTACT_LIST_STORE_COL_NAME, &group_name,
               -1);
-          g_hash_table_remove (priv->empathy_group_cache,
+          g_hash_table_remove (self->priv->empathy_group_cache,
               group_name);
           gtk_tree_store_remove (GTK_TREE_STORE (self), &parent);
         }
@@ -330,24 +327,21 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
         }
     }
 
-  g_hash_table_remove (priv->folks_individual_cache, individual);
+  g_hash_table_remove (self->priv->folks_individual_cache, individual);
 }
 
 static void
 individual_store_add_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeIter iter;
   GeeIterator *group_iter = NULL;
-
-  priv = GET_PRIV (self);
 
   if (EMP_STR_EMPTY (folks_alias_details_get_alias (
           FOLKS_ALIAS_DETAILS (individual))))
     return;
 
-  if (priv->show_groups)
+  if (self->priv->show_groups)
     {
       GeeSet *group_set = NULL;
 
@@ -375,7 +369,7 @@ individual_store_add_individual (EmpathyIndividualStore *self,
           tp_connection_parse_object_path (connection, &protocol_name, NULL);
         }
 
-      if (!priv->show_groups)
+      if (!self->priv->show_groups)
         parent = NULL;
       else if (!tp_strdiff (protocol_name, "local-xmpp"))
         {
@@ -414,7 +408,7 @@ individual_store_add_individual (EmpathyIndividualStore *self,
     }
   g_clear_object (&group_iter);
 
-  if (priv->show_groups &&
+  if (self->priv->show_groups &&
       folks_favourite_details_get_is_favourite (
           FOLKS_FAVOURITE_DETAILS (individual)))
     {
@@ -594,12 +588,10 @@ individual_avatar_pixbuf_received_cb (FolksIndividual *individual,
   /* Free things */
   if (data->store != NULL)
     {
-      EmpathyIndividualStorePriv *priv = GET_PRIV (data->store);
-
       g_object_remove_weak_pointer (G_OBJECT (data->store),
           (gpointer *) &data->store);
-      priv->avatar_cancellables = g_list_remove (priv->avatar_cancellables,
-          data->cancellable);
+      data->store->priv->avatar_cancellables = g_list_remove (
+          data->store->priv->avatar_cancellables, data->cancellable);
     }
 
   tp_clear_object (&pixbuf);
@@ -611,7 +603,6 @@ static void
 individual_store_contact_update (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  EmpathyIndividualStorePriv *priv;
   ShowActiveData *data;
   GtkTreeModel *model;
   GList *iters, *l;
@@ -625,8 +616,6 @@ individual_store_contact_update (EmpathyIndividualStore *self,
   gboolean show_avatar = FALSE;
   GdkPixbuf *pixbuf_status;
   LoadAvatarData *load_avatar_data;
-
-  priv = GET_PRIV (self);
 
   model = GTK_TREE_MODEL (self);
 
@@ -651,7 +640,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
 
       individual_store_add_individual (self, individual);
 
-      if (priv->show_active)
+      if (self->priv->show_active)
         {
           do_set_active = TRUE;
 
@@ -671,7 +660,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
         }
 
       /* Is this really an update or an online/offline. */
-      if (priv->show_active)
+      if (self->priv->show_active)
         {
           if (was_online != now_online)
             {
@@ -694,7 +683,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
       set_model = TRUE;
     }
 
-  if (priv->show_avatars && !priv->is_compact)
+  if (self->priv->show_avatars && !self->priv->is_compact)
     {
       show_avatar = TRUE;
     }
@@ -706,8 +695,9 @@ individual_store_contact_update (EmpathyIndividualStore *self,
       (gpointer *) &load_avatar_data->store);
   load_avatar_data->cancellable = g_cancellable_new ();
 
-  priv->avatar_cancellables = g_list_prepend (priv->avatar_cancellables,
-      load_avatar_data->cancellable);
+  self->priv->avatar_cancellables = g_list_prepend (
+      self->priv->avatar_cancellables, load_avatar_data->cancellable);
+
   empathy_pixbuf_avatar_from_individual_scaled_async (individual, 32, 32,
       load_avatar_data->cancellable,
       (GAsyncReadyCallback) individual_avatar_pixbuf_received_cb,
@@ -737,7 +727,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           EMPATHY_INDIVIDUAL_STORE_COL_STATUS,
             folks_presence_details_get_presence_message (
                 FOLKS_PRESENCE_DETAILS (individual)),
-          EMPATHY_INDIVIDUAL_STORE_COL_COMPACT, priv->is_compact,
+          EMPATHY_INDIVIDUAL_STORE_COL_COMPACT, self->priv->is_compact,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_GROUP, FALSE,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_ONLINE, now_online,
           EMPATHY_INDIVIDUAL_STORE_COL_IS_SEPARATOR, FALSE,
@@ -747,7 +737,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           -1);
     }
 
-  if (priv->show_active && do_set_active)
+  if (self->priv->show_active && do_set_active)
     {
       individual_store_contact_set_active (self, individual, do_set_active,
           do_set_refresh);
@@ -969,10 +959,7 @@ individual_store_groups_changed_cb (EmpathyIndividualManager *manager,
     gboolean is_member,
     EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
   gboolean show_active;
-
-  priv = GET_PRIV (self);
 
   DEBUG ("Updating groups for individual %s",
       folks_individual_get_id (individual));
@@ -981,18 +968,17 @@ individual_store_groups_changed_cb (EmpathyIndividualManager *manager,
    * would have to check the groups already set up for each
    * contact and then see what has been updated.
    */
-  show_active = priv->show_active;
-  priv->show_active = FALSE;
+  show_active = self->priv->show_active;
+  self->priv->show_active = FALSE;
   individual_store_remove_individual (self, individual);
   individual_store_add_individual (self, individual);
-  priv->show_active = show_active;
+  self->priv->show_active = show_active;
 }
 
 static gboolean
 individual_store_manager_setup (gpointer user_data)
 {
   EmpathyIndividualStore *self = user_data;
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
   GList *individuals;
 
   /* Signal connection. */
@@ -1000,24 +986,24 @@ individual_store_manager_setup (gpointer user_data)
   /* TODO: implement */
   DEBUG ("handling individual renames unimplemented");
 
-  g_signal_connect (priv->manager,
+  g_signal_connect (self->priv->manager,
       "members-changed",
       G_CALLBACK (individual_store_members_changed_cb), self);
 
-  g_signal_connect (priv->manager,
+  g_signal_connect (self->priv->manager,
       "groups-changed",
       G_CALLBACK (individual_store_groups_changed_cb), self);
 
   /* Add contacts already created. */
-  individuals = empathy_individual_manager_get_members (priv->manager);
+  individuals = empathy_individual_manager_get_members (self->priv->manager);
   if (individuals != NULL && FOLKS_IS_INDIVIDUAL (individuals->data))
     {
-      individual_store_members_changed_cb (priv->manager, "initial add",
+      individual_store_members_changed_cb (self->priv->manager, "initial add",
           individuals, NULL, 0, self);
       g_list_free (individuals);
     }
 
-  priv->setup_idle_id = 0;
+  self->priv->setup_idle_id = 0;
   return FALSE;
 }
 
@@ -1025,12 +1011,10 @@ static void
 individual_store_set_individual_manager (EmpathyIndividualStore *self,
     EmpathyIndividualManager *manager)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (self);
-
-  priv->manager = g_object_ref (manager);
+  self->priv->manager = g_object_ref (manager);
 
   /* Let a chance to have all properties set before populating */
-  priv->setup_idle_id = g_idle_add (individual_store_manager_setup, self);
+  self->priv->setup_idle_id = g_idle_add (individual_store_manager_setup, self);
 }
 
 static void
@@ -1055,22 +1039,22 @@ individual_store_member_renamed_cb (EmpathyIndividualManager *manager,
 static void
 individual_store_dispose (GObject *object)
 {
-  EmpathyIndividualStorePriv *priv = GET_PRIV (object);
+  EmpathyIndividualStore *self = EMPATHY_INDIVIDUAL_STORE (object);
   GList *individuals, *l;
 
-  if (priv->dispose_has_run)
+  if (self->priv->dispose_has_run)
     return;
-  priv->dispose_has_run = TRUE;
+  self->priv->dispose_has_run = TRUE;
 
   /* Cancel any pending avatar load operations */
-  for (l = priv->avatar_cancellables; l != NULL; l = l->next)
+  for (l = self->priv->avatar_cancellables; l != NULL; l = l->next)
     {
       /* The cancellables are freed in individual_avatar_pixbuf_received_cb() */
       g_cancellable_cancel (G_CANCELLABLE (l->data));
     }
-  g_list_free (priv->avatar_cancellables);
+  g_list_free (self->priv->avatar_cancellables);
 
-  individuals = empathy_individual_manager_get_members (priv->manager);
+  individuals = empathy_individual_manager_get_members (self->priv->manager);
   for (l = individuals; l; l = l->next)
     {
       individual_store_disconnect_individual (EMPATHY_INDIVIDUAL_STORE (object),
@@ -1078,27 +1062,27 @@ individual_store_dispose (GObject *object)
     }
   g_list_free (individuals);
 
-  g_signal_handlers_disconnect_by_func (priv->manager,
+  g_signal_handlers_disconnect_by_func (self->priv->manager,
       G_CALLBACK (individual_store_member_renamed_cb), object);
-  g_signal_handlers_disconnect_by_func (priv->manager,
+  g_signal_handlers_disconnect_by_func (self->priv->manager,
       G_CALLBACK (individual_store_members_changed_cb), object);
-  g_signal_handlers_disconnect_by_func (priv->manager,
+  g_signal_handlers_disconnect_by_func (self->priv->manager,
       G_CALLBACK (individual_store_groups_changed_cb), object);
-  g_object_unref (priv->manager);
+  g_object_unref (self->priv->manager);
 
-  if (priv->inhibit_active)
+  if (self->priv->inhibit_active)
     {
-      g_source_remove (priv->inhibit_active);
+      g_source_remove (self->priv->inhibit_active);
     }
 
-  if (priv->setup_idle_id != 0)
+  if (self->priv->setup_idle_id != 0)
     {
-      g_source_remove (priv->setup_idle_id);
+      g_source_remove (self->priv->setup_idle_id);
     }
 
-  g_hash_table_destroy (priv->status_icons);
-  g_hash_table_destroy (priv->folks_individual_cache);
-  g_hash_table_destroy (priv->empathy_group_cache);
+  g_hash_table_destroy (self->priv->status_icons);
+  g_hash_table_destroy (self->priv->folks_individual_cache);
+  g_hash_table_destroy (self->priv->empathy_group_cache);
   G_OBJECT_CLASS (empathy_individual_store_parent_class)->dispose (object);
 }
 
@@ -1108,29 +1092,27 @@ individual_store_get_property (GObject *object,
     GValue *value,
     GParamSpec *pspec)
 {
-  EmpathyIndividualStorePriv *priv;
-
-  priv = GET_PRIV (object);
+  EmpathyIndividualStore *self = EMPATHY_INDIVIDUAL_STORE (object);
 
   switch (param_id)
     {
     case PROP_INDIVIDUAL_MANAGER:
-      g_value_set_object (value, priv->manager);
+      g_value_set_object (value, self->priv->manager);
       break;
     case PROP_SHOW_AVATARS:
-      g_value_set_boolean (value, priv->show_avatars);
+      g_value_set_boolean (value, self->priv->show_avatars);
       break;
     case PROP_SHOW_PROTOCOLS:
-      g_value_set_boolean (value, priv->show_protocols);
+      g_value_set_boolean (value, self->priv->show_protocols);
       break;
     case PROP_SHOW_GROUPS:
-      g_value_set_boolean (value, priv->show_groups);
+      g_value_set_boolean (value, self->priv->show_groups);
       break;
     case PROP_IS_COMPACT:
-      g_value_set_boolean (value, priv->is_compact);
+      g_value_set_boolean (value, self->priv->is_compact);
       break;
     case PROP_SORT_CRITERIUM:
-      g_value_set_enum (value, priv->sort_criterium);
+      g_value_set_enum (value, self->priv->sort_criterium);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -1484,7 +1466,6 @@ individual_store_name_sort_func (GtkTreeModel *model,
 static void
 individual_store_setup (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
   GType types[] = {
     GDK_TYPE_PIXBUF,            /* Status pixbuf */
     GDK_TYPE_PIXBUF,            /* Avatar pixbuf */
@@ -1505,8 +1486,6 @@ individual_store_setup (EmpathyIndividualStore *self)
     G_TYPE_UINT,                /* Event count */
   };
 
-  priv = GET_PRIV (self);
-
   gtk_tree_store_set_column_types (GTK_TREE_STORE (self),
       EMPATHY_INDIVIDUAL_STORE_COL_COUNT, types);
 
@@ -1518,19 +1497,17 @@ individual_store_setup (EmpathyIndividualStore *self)
       EMPATHY_INDIVIDUAL_STORE_COL_STATUS,
       individual_store_state_sort_func, self, NULL);
 
-  priv->sort_criterium = EMPATHY_INDIVIDUAL_STORE_SORT_NAME;
-  empathy_individual_store_set_sort_criterium (self, priv->sort_criterium);
+  self->priv->sort_criterium = EMPATHY_INDIVIDUAL_STORE_SORT_NAME;
+
+  empathy_individual_store_set_sort_criterium (self,
+      self->priv->sort_criterium);
 }
 
 static gboolean
 individual_store_inhibit_active_cb (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
-  priv = GET_PRIV (self);
-
-  priv->show_active = TRUE;
-  priv->inhibit_active = 0;
+  self->priv->show_active = TRUE;
+  self->priv->inhibit_active = 0;
 
   return FALSE;
 }
@@ -1546,21 +1523,20 @@ g_queue_free_full_iter (gpointer data)
 static void
 empathy_individual_store_init (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
+  self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_INDIVIDUAL_STORE, EmpathyIndividualStorePriv);
 
-  self->priv = priv;
-  priv->show_avatars = TRUE;
-  priv->show_groups = TRUE;
-  priv->show_protocols = FALSE;
-  priv->inhibit_active =
+  self->priv->show_avatars = TRUE;
+  self->priv->show_groups = TRUE;
+  self->priv->show_protocols = FALSE;
+  self->priv->inhibit_active =
       g_timeout_add_seconds (ACTIVE_USER_WAIT_TO_ENABLE_TIME,
       (GSourceFunc) individual_store_inhibit_active_cb, self);
-  priv->status_icons =
+  self->priv->status_icons =
       g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
-  priv->folks_individual_cache = g_hash_table_new_full (NULL, NULL, NULL,
+  self->priv->folks_individual_cache = g_hash_table_new_full (NULL, NULL, NULL,
       g_queue_free_full_iter);
-  priv->empathy_group_cache = g_hash_table_new_full (g_str_hash,
+  self->priv->empathy_group_cache = g_hash_table_new_full (g_str_hash,
       g_str_equal, g_free, (GDestroyNotify) gtk_tree_iter_free);
   individual_store_setup (self);
 }
@@ -1577,25 +1553,17 @@ empathy_individual_store_new (EmpathyIndividualManager *manager)
 EmpathyIndividualManager *
 empathy_individual_store_get_manager (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), FALSE);
 
-  priv = GET_PRIV (self);
-
-  return priv->manager;
+  return self->priv->manager;
 }
 
 gboolean
 empathy_individual_store_get_show_avatars (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), TRUE);
 
-  priv = GET_PRIV (self);
-
-  return priv->show_avatars;
+  return self->priv->show_avatars;
 }
 
 static gboolean
@@ -1604,14 +1572,11 @@ individual_store_update_list_mode_foreach (GtkTreeModel *model,
     GtkTreeIter *iter,
     EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
   gboolean show_avatar = FALSE;
   FolksIndividual *individual;
   GdkPixbuf *pixbuf_status;
 
-  priv = GET_PRIV (self);
-
-  if (priv->show_avatars && !priv->is_compact)
+  if (self->priv->show_avatars && !self->priv->is_compact)
     {
       show_avatar = TRUE;
     }
@@ -1630,7 +1595,7 @@ individual_store_update_list_mode_foreach (GtkTreeModel *model,
   gtk_tree_store_set (GTK_TREE_STORE (self), iter,
       EMPATHY_INDIVIDUAL_STORE_COL_ICON_STATUS, pixbuf_status,
       EMPATHY_INDIVIDUAL_STORE_COL_PIXBUF_AVATAR_VISIBLE, show_avatar,
-      EMPATHY_INDIVIDUAL_STORE_COL_COMPACT, priv->is_compact, -1);
+      EMPATHY_INDIVIDUAL_STORE_COL_COMPACT, self->priv->is_compact, -1);
 
   g_object_unref (individual);
 
@@ -1641,14 +1606,11 @@ void
 empathy_individual_store_set_show_avatars (EmpathyIndividualStore *self,
     gboolean show_avatars)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
 
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
 
-  priv = GET_PRIV (self);
-
-  priv->show_avatars = show_avatars;
+  self->priv->show_avatars = show_avatars;
 
   model = GTK_TREE_MODEL (self);
 
@@ -1662,27 +1624,20 @@ empathy_individual_store_set_show_avatars (EmpathyIndividualStore *self,
 gboolean
 empathy_individual_store_get_show_protocols (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), TRUE);
 
-  priv = GET_PRIV (self);
-
-  return priv->show_protocols;
+  return self->priv->show_protocols;
 }
 
 void
 empathy_individual_store_set_show_protocols (EmpathyIndividualStore *self,
     gboolean show_protocols)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
 
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
 
-  priv = GET_PRIV (self);
-
-  priv->show_protocols = show_protocols;
+  self->priv->show_protocols = show_protocols;
 
   model = GTK_TREE_MODEL (self);
 
@@ -1696,33 +1651,25 @@ empathy_individual_store_set_show_protocols (EmpathyIndividualStore *self,
 gboolean
 empathy_individual_store_get_show_groups (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), TRUE);
 
-  priv = GET_PRIV (self);
-
-  return priv->show_groups;
+  return self->priv->show_groups;
 }
 
 void
 empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
     gboolean show_groups)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
 
-  priv = GET_PRIV (self);
-
-  if (priv->show_groups == show_groups)
+  if (self->priv->show_groups == show_groups)
     {
       return;
     }
 
-  priv->show_groups = show_groups;
+  self->priv->show_groups = show_groups;
 
-  if (priv->setup_idle_id == 0)
+  if (self->priv->setup_idle_id == 0)
     {
       /* Remove all contacts and add them back, not optimized but
        * that's the easy way :)
@@ -1734,12 +1681,12 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
 
       gtk_tree_store_clear (GTK_TREE_STORE (self));
       /* Also clear the cache */
-      g_hash_table_remove_all (priv->folks_individual_cache);
-      g_hash_table_remove_all (priv->empathy_group_cache);
+      g_hash_table_remove_all (self->priv->folks_individual_cache);
+      g_hash_table_remove_all (self->priv->empathy_group_cache);
 
-      contacts = empathy_individual_manager_get_members (priv->manager);
+      contacts = empathy_individual_manager_get_members (self->priv->manager);
 
-      individual_store_members_changed_cb (priv->manager,
+      individual_store_members_changed_cb (self->priv->manager,
           "re-adding members: toggled group visibility",
           contacts, NULL, 0, self);
       g_list_free (contacts);
@@ -1751,27 +1698,20 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
 gboolean
 empathy_individual_store_get_is_compact (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), TRUE);
 
-  priv = GET_PRIV (self);
-
-  return priv->is_compact;
+  return self->priv->is_compact;
 }
 
 void
 empathy_individual_store_set_is_compact (EmpathyIndividualStore *self,
     gboolean is_compact)
 {
-  EmpathyIndividualStorePriv *priv;
   GtkTreeModel *model;
 
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
 
-  priv = GET_PRIV (self);
-
-  priv->is_compact = is_compact;
+  self->priv->is_compact = is_compact;
 
   model = GTK_TREE_MODEL (self);
 
@@ -1785,26 +1725,18 @@ empathy_individual_store_set_is_compact (EmpathyIndividualStore *self,
 EmpathyIndividualStoreSort
 empathy_individual_store_get_sort_criterium (EmpathyIndividualStore *self)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), 0);
 
-  priv = GET_PRIV (self);
-
-  return priv->sort_criterium;
+  return self->priv->sort_criterium;
 }
 
 void
 empathy_individual_store_set_sort_criterium (EmpathyIndividualStore *self,
     EmpathyIndividualStoreSort sort_criterium)
 {
-  EmpathyIndividualStorePriv *priv;
-
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
 
-  priv = GET_PRIV (self);
-
-  priv->sort_criterium = sort_criterium;
+  self->priv->sort_criterium = sort_criterium;
 
   switch (sort_criterium)
     {
@@ -1908,7 +1840,6 @@ individual_store_get_individual_status_icon_with_icon_name (
     const gchar *status_icon_name)
 {
   GdkPixbuf *pixbuf_status;
-  EmpathyIndividualStorePriv *priv;
   const gchar *protocol_name = NULL;
   gchar *icon_name = NULL;
   GeeSet *personas;
@@ -1916,8 +1847,6 @@ individual_store_get_individual_status_icon_with_icon_name (
   guint contact_count = 0;
   EmpathyContact *contact = NULL;
   gboolean show_protocols_here;
-
-  priv = GET_PRIV (self);
 
   personas = folks_individual_get_personas (individual);
   iter = gee_iterable_iterator (GEE_ITERABLE (personas));
@@ -1934,7 +1863,7 @@ individual_store_get_individual_status_icon_with_icon_name (
     }
   g_clear_object (&iter);
 
-  show_protocols_here = (priv->show_protocols && (contact_count == 1));
+  show_protocols_here = (self->priv->show_protocols && (contact_count == 1));
   if (show_protocols_here)
     {
       contact = empathy_contact_dup_from_folks_individual (individual);
@@ -1958,7 +1887,7 @@ individual_store_get_individual_status_icon_with_icon_name (
       icon_name = g_strdup_printf ("%s", status_icon_name);
     }
 
-  pixbuf_status = g_hash_table_lookup (priv->status_icons, icon_name);
+  pixbuf_status = g_hash_table_lookup (self->priv->status_icons, icon_name);
 
   if (pixbuf_status == NULL)
     {
@@ -1969,7 +1898,7 @@ individual_store_get_individual_status_icon_with_icon_name (
       if (pixbuf_status != NULL)
         {
           /* pass the reference to the hash table */
-          g_hash_table_insert (priv->status_icons,
+          g_hash_table_insert (self->priv->status_icons,
               g_strdup (icon_name), pixbuf_status);
         }
     }

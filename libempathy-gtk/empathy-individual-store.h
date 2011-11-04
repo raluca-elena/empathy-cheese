@@ -38,8 +38,10 @@ G_BEGIN_DECLS
 #define EMPATHY_IS_INDIVIDUAL_STORE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), EMPATHY_TYPE_INDIVIDUAL_STORE))
 #define EMPATHY_IS_INDIVIDUAL_STORE_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_INDIVIDUAL_STORE))
 #define EMPATHY_INDIVIDUAL_STORE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_INDIVIDUAL_STORE, EmpathyIndividualStoreClass))
+
 typedef struct _EmpathyIndividualStore EmpathyIndividualStore;
 typedef struct _EmpathyIndividualStoreClass EmpathyIndividualStoreClass;
+typedef struct _EmpathyIndividualStorePriv EmpathyIndividualStorePriv;
 
 typedef enum
 {
@@ -76,7 +78,7 @@ typedef enum
 struct _EmpathyIndividualStore
 {
   GtkTreeStore parent;
-  gpointer priv;
+  EmpathyIndividualStorePriv *priv;
 };
 
 struct _EmpathyIndividualStoreClass
