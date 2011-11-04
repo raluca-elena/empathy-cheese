@@ -111,6 +111,11 @@ error:
   return NULL;
 }
 
+static gboolean
+empathy_video_src_drop_eos (GstPad *pad, GstEvent *event, gpointer user_data)
+{
+  return GST_EVENT_TYPE (event) != GST_EVENT_EOS;
+}
 
 static void
 empathy_video_src_init (EmpathyGstVideoSrc *obj)
@@ -134,6 +139,12 @@ empathy_video_src_init (EmpathyGstVideoSrc *obj)
 
   /* we need to save our source to priv->src */
   priv->src = element;
+
+  /* Drop EOS events, so that our sinks don't get confused when we restart the
+   * source (triggering an EOS) */
+  src = gst_element_get_static_pad (element, "src");
+  gst_pad_add_event_probe (src, G_CALLBACK (empathy_video_src_drop_eos), NULL);
+  gst_object_unref (src);
 
   /* videomaxrate is optional as it's part of gst-plugins-bad. So don't
    * fail if it doesn't exist. */
