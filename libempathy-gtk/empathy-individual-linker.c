@@ -35,6 +35,7 @@
 
 #include "empathy-individual-linker.h"
 #include "empathy-individual-store.h"
+#include "empathy-individual-store-manager.h"
 #include "empathy-individual-view.h"
 #include "empathy-individual-widget.h"
 #include "empathy-persona-store.h"
@@ -376,7 +377,8 @@ set_up (EmpathyIndividualLinker *self)
 
   /* Individual selector */
   individual_manager = empathy_individual_manager_dup_singleton ();
-  priv->individual_store = empathy_individual_store_new (individual_manager);
+  priv->individual_store = EMPATHY_INDIVIDUAL_STORE (
+      empathy_individual_store_manager_new (individual_manager));
   g_object_unref (individual_manager);
 
   empathy_individual_store_set_show_protocols (priv->individual_store, FALSE);

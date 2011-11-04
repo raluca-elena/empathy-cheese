@@ -54,6 +54,7 @@
 #include <libempathy-gtk/empathy-gtk-enum-types.h>
 #include <libempathy-gtk/empathy-individual-dialogs.h>
 #include <libempathy-gtk/empathy-individual-store.h>
+#include <libempathy-gtk/empathy-individual-store-manager.h>
 #include <libempathy-gtk/empathy-individual-view.h>
 #include <libempathy-gtk/empathy-new-message-dialog.h>
 #include <libempathy-gtk/empathy-new-call-dialog.h>
@@ -2461,8 +2462,8 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	priv->contact_manager = EMPATHY_CONTACT_LIST (
 			empathy_contact_manager_dup_singleton ());
 	individual_manager = empathy_individual_manager_dup_singleton ();
-	priv->individual_store = empathy_individual_store_new (
-			individual_manager);
+	priv->individual_store = EMPATHY_INDIVIDUAL_STORE (
+			empathy_individual_store_manager_new (individual_manager));
 	g_object_unref (individual_manager);
 
 	/* For the moment, we disallow Persona drops onto the main contact list (e.g. from things such as

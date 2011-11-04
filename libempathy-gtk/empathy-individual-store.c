@@ -38,7 +38,6 @@
 
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-enum-types.h>
-#include <libempathy/empathy-individual-manager.h>
 
 #include "empathy-individual-store.h"
 #include "empathy-ui-utils.h"
@@ -59,7 +58,6 @@
 
 struct _EmpathyIndividualStorePriv
 {
-  EmpathyIndividualManager *manager;
   gboolean show_avatars;
   gboolean show_groups;
   gboolean is_compact;
@@ -87,7 +85,6 @@ typedef struct
 enum
 {
   PROP_0,
-  PROP_INDIVIDUAL_MANAGER,
   PROP_SHOW_AVATARS,
   PROP_SHOW_PROTOCOLS,
   PROP_SHOW_GROUPS,
@@ -926,119 +923,10 @@ individual_store_remove_individual_and_disconnect (
 }
 
 static void
-individual_store_members_changed_cb (EmpathyIndividualManager *manager,
-    const gchar *message,
-    GList *added,
-    GList *removed,
-    guint reason,
-    EmpathyIndividualStore *self)
-{
-  GList *l;
-
-  for (l = added; l; l = l->next)
-    {
-      DEBUG ("Individual %s %s", folks_individual_get_id (l->data), "added");
-
-      individual_store_add_individual_and_connect (self, l->data);
-    }
-  for (l = removed; l; l = l->next)
-    {
-      DEBUG ("Individual %s %s",
-          folks_individual_get_id (l->data), "removed");
-
-      individual_store_remove_individual_and_disconnect (self, l->data);
-    }
-}
-
-static void
-individual_store_groups_changed_cb (EmpathyIndividualManager *manager,
-    FolksIndividual *individual,
-    gchar *group,
-    gboolean is_member,
-    EmpathyIndividualStore *self)
-{
-  gboolean show_active;
-
-  DEBUG ("Updating groups for individual %s",
-      folks_individual_get_id (individual));
-
-  /* We do this to make sure the groups are correct, if not, we
-   * would have to check the groups already set up for each
-   * contact and then see what has been updated.
-   */
-  show_active = self->show_active;
-  self->show_active = FALSE;
-  empathy_individual_store_remove_individual (self, individual);
-  empathy_individual_store_add_individual (self, individual);
-  self->show_active = show_active;
-}
-
-static gboolean
-individual_store_manager_setup (gpointer user_data)
-{
-  EmpathyIndividualStore *self = user_data;
-  GList *individuals;
-
-  /* Signal connection. */
-
-  /* TODO: implement */
-  DEBUG ("handling individual renames unimplemented");
-
-  g_signal_connect (self->priv->manager,
-      "members-changed",
-      G_CALLBACK (individual_store_members_changed_cb), self);
-
-  g_signal_connect (self->priv->manager,
-      "groups-changed",
-      G_CALLBACK (individual_store_groups_changed_cb), self);
-
-  /* Add contacts already created. */
-  individuals = empathy_individual_manager_get_members (self->priv->manager);
-  if (individuals != NULL && FOLKS_IS_INDIVIDUAL (individuals->data))
-    {
-      individual_store_members_changed_cb (self->priv->manager, "initial add",
-          individuals, NULL, 0, self);
-      g_list_free (individuals);
-    }
-
-  self->setup_idle_id = 0;
-  return FALSE;
-}
-
-static void
-individual_store_set_individual_manager (EmpathyIndividualStore *self,
-    EmpathyIndividualManager *manager)
-{
-  self->priv->manager = g_object_ref (manager);
-
-  /* Let a chance to have all properties set before populating */
-  self->setup_idle_id = g_idle_add (individual_store_manager_setup, self);
-}
-
-static void
-individual_store_member_renamed_cb (EmpathyIndividualManager *manager,
-    FolksIndividual *old_individual,
-    FolksIndividual *new_individual,
-    guint reason,
-    const gchar *message,
-    EmpathyIndividualStore *self)
-{
-  DEBUG ("Individual %s renamed to %s",
-      folks_individual_get_id (old_individual),
-      folks_individual_get_id (new_individual));
-
-  /* add the new contact */
-  individual_store_add_individual_and_connect (self, new_individual);
-
-  /* remove old contact */
-  individual_store_remove_individual_and_disconnect (self, old_individual);
-}
-
-static void
 individual_store_dispose (GObject *object)
 {
   EmpathyIndividualStore *self = EMPATHY_INDIVIDUAL_STORE (object);
-  GList *individuals, *l;
+  GList *l;
 
   if (self->priv->dispose_has_run)
     return;
@@ -1051,22 +939,6 @@ individual_store_dispose (GObject *object)
       g_cancellable_cancel (G_CANCELLABLE (l->data));
     }
   g_list_free (self->priv->avatar_cancellables);
-
-  individuals = empathy_individual_manager_get_members (self->priv->manager);
-  for (l = individuals; l; l = l->next)
-    {
-      empathy_individual_store_disconnect_individual (self,
-          FOLKS_INDIVIDUAL (l->data));
-    }
-  g_list_free (individuals);
-
-  g_signal_handlers_disconnect_by_func (self->priv->manager,
-      G_CALLBACK (individual_store_member_renamed_cb), object);
-  g_signal_handlers_disconnect_by_func (self->priv->manager,
-      G_CALLBACK (individual_store_members_changed_cb), object);
-  g_signal_handlers_disconnect_by_func (self->priv->manager,
-      G_CALLBACK (individual_store_groups_changed_cb), object);
-  g_object_unref (self->priv->manager);
 
   if (self->priv->inhibit_active)
     {
@@ -1094,9 +966,6 @@ individual_store_get_property (GObject *object,
 
   switch (param_id)
     {
-    case PROP_INDIVIDUAL_MANAGER:
-      g_value_set_object (value, self->priv->manager);
-      break;
     case PROP_SHOW_AVATARS:
       g_value_set_boolean (value, self->priv->show_avatars);
       break;
@@ -1126,10 +995,6 @@ individual_store_set_property (GObject *object,
 {
   switch (param_id)
     {
-    case PROP_INDIVIDUAL_MANAGER:
-      individual_store_set_individual_manager (EMPATHY_INDIVIDUAL_STORE
-          (object), g_value_get_object (value));
-      break;
     case PROP_SHOW_AVATARS:
       empathy_individual_store_set_show_avatars (EMPATHY_INDIVIDUAL_STORE
           (object), g_value_get_boolean (value));
@@ -1165,13 +1030,6 @@ empathy_individual_store_class_init (EmpathyIndividualStoreClass *klass)
   object_class->get_property = individual_store_get_property;
   object_class->set_property = individual_store_set_property;
 
-  g_object_class_install_property (object_class,
-      PROP_INDIVIDUAL_MANAGER,
-      g_param_spec_object ("individual-manager",
-          "The individual manager",
-          "The individual manager",
-          EMPATHY_TYPE_INDIVIDUAL_MANAGER,
-          G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
   g_object_class_install_property (object_class,
       PROP_SHOW_AVATARS,
       g_param_spec_boolean ("show-avatars",
@@ -1539,23 +1397,6 @@ empathy_individual_store_init (EmpathyIndividualStore *self)
   individual_store_setup (self);
 }
 
-EmpathyIndividualStore *
-empathy_individual_store_new (EmpathyIndividualManager *manager)
-{
-  g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_MANAGER (manager), NULL);
-
-  return g_object_new (EMPATHY_TYPE_INDIVIDUAL_STORE,
-      "individual-manager", manager, NULL);
-}
-
-EmpathyIndividualManager *
-empathy_individual_store_get_manager (EmpathyIndividualStore *self)
-{
-  g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self), FALSE);
-
-  return self->priv->manager;
-}
-
 gboolean
 empathy_individual_store_get_show_avatars (EmpathyIndividualStore *self)
 {
@@ -1675,19 +1516,15 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
        * This is only done if there's not a pending setup idle
        * callback, otherwise it will race and the contacts will get
        * added twice */
-      GList *contacts;
+      EmpathyIndividualStoreClass *klass = EMPATHY_INDIVIDUAL_STORE_GET_CLASS (
+          self);
 
       gtk_tree_store_clear (GTK_TREE_STORE (self));
       /* Also clear the cache */
       g_hash_table_remove_all (self->priv->folks_individual_cache);
       g_hash_table_remove_all (self->priv->empathy_group_cache);
 
-      contacts = empathy_individual_manager_get_members (self->priv->manager);
-
-      individual_store_members_changed_cb (self->priv->manager,
-          "re-adding members: toggled group visibility",
-          contacts, NULL, 0, self);
-      g_list_free (contacts);
+      klass->reload_individuals (self);
     }
 
   g_object_notify (G_OBJECT (self), "show-groups");

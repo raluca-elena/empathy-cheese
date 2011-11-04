@@ -62,6 +62,7 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-individual-linker.c		\
 	empathy-individual-menu.c		\
 	empathy-individual-store.c		\
+	empathy-individual-store-manager.c		\
 	empathy-individual-view.c		\
 	empathy-individual-widget.c		\
 	empathy-input-text-view.c		\
@@ -132,6 +133,7 @@ libempathy_gtk_headers =			\
 	empathy-individual-linker.h		\
 	empathy-individual-menu.h		\
 	empathy-individual-store.h		\
+	empathy-individual-store-manager.h		\
 	empathy-individual-view.h		\
 	empathy-individual-widget.h		\
 	empathy-input-text-view.h		\

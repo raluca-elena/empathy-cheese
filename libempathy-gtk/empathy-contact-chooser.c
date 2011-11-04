@@ -14,6 +14,7 @@
 
 #include "empathy-contact-chooser.h"
 
+#include <libempathy-gtk/empathy-individual-store-manager.h>
 #include <libempathy-gtk/empathy-individual-view.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
@@ -412,7 +413,8 @@ empathy_contact_chooser_init (EmpathyContactChooser *self)
 
   /* Add the treeview */
   mgr = empathy_individual_manager_dup_singleton ();
-  self->priv->store = empathy_individual_store_new (mgr);
+  self->priv->store = EMPATHY_INDIVIDUAL_STORE (
+      empathy_individual_store_manager_new (mgr));
   g_object_unref (mgr);
 
   empathy_individual_store_set_show_groups (self->priv->store, FALSE);

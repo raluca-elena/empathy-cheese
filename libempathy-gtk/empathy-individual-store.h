@@ -29,8 +29,6 @@
 
 #include <gtk/gtk.h>
 
-#include <libempathy/empathy-individual-manager.h>
-
 G_BEGIN_DECLS
 #define EMPATHY_TYPE_INDIVIDUAL_STORE         (empathy_individual_store_get_type ())
 #define EMPATHY_INDIVIDUAL_STORE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), EMPATHY_TYPE_INDIVIDUAL_STORE, EmpathyIndividualStore))
@@ -88,16 +86,12 @@ struct _EmpathyIndividualStore
 struct _EmpathyIndividualStoreClass
 {
   GtkTreeStoreClass parent_class;
+
+  void (*reload_individuals) (EmpathyIndividualStore *self);
 };
 
 GType
 empathy_individual_store_get_type (void) G_GNUC_CONST;
-
-EmpathyIndividualStore *empathy_individual_store_new (
-    EmpathyIndividualManager *manager);
-
-EmpathyIndividualManager *empathy_individual_store_get_manager (
-    EmpathyIndividualStore *store);
 
 gboolean empathy_individual_store_get_show_avatars (
     EmpathyIndividualStore *store);
