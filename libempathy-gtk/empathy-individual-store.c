@@ -64,10 +64,8 @@ struct _EmpathyIndividualStorePriv
   gboolean show_groups;
   gboolean is_compact;
   gboolean show_protocols;
-  gboolean show_active;
   EmpathyIndividualStoreSort sort_criterium;
   guint inhibit_active;
-  guint setup_idle_id;
   gboolean dispose_has_run;
   GHashTable *status_icons;
   /* List of owned GCancellables for each pending avatar load operation */
@@ -285,8 +283,8 @@ free_iters (GList *iters)
   g_list_free (iters);
 }
 
-static void
-individual_store_remove_individual (EmpathyIndividualStore *self,
+void
+empathy_individual_store_remove_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
   GtkTreeModel *model;
@@ -330,8 +328,8 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
   g_hash_table_remove (self->priv->folks_individual_cache, individual);
 }
 
-static void
-individual_store_add_individual (EmpathyIndividualStore *self,
+void
+empathy_individual_store_add_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
   GtkTreeIter iter;
@@ -533,7 +531,7 @@ individual_store_contact_active_cb (ShowActiveData *data)
       DEBUG ("Individual'%s' active timeout, removing item",
           folks_alias_details_get_alias (
             FOLKS_ALIAS_DETAILS (data->individual)));
-      individual_store_remove_individual (data->self, data->individual);
+      empathy_individual_store_remove_individual (data->self, data->individual);
     }
 
   DEBUG ("Individual'%s' no longer active",
@@ -638,9 +636,9 @@ individual_store_contact_update (EmpathyIndividualStore *self,
       DEBUG ("Individual'%s' in list:NO, should be:YES",
           folks_alias_details_get_alias (FOLKS_ALIAS_DETAILS (individual)));
 
-      individual_store_add_individual (self, individual);
+      empathy_individual_store_add_individual (self, individual);
 
-      if (self->priv->show_active)
+      if (self->show_active)
         {
           do_set_active = TRUE;
 
@@ -660,7 +658,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
         }
 
       /* Is this really an update or an online/offline. */
-      if (self->priv->show_active)
+      if (self->show_active)
         {
           if (was_online != now_online)
             {
@@ -737,7 +735,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           -1);
     }
 
-  if (self->priv->show_active && do_set_active)
+  if (self->show_active && do_set_active)
     {
       individual_store_contact_set_active (self, individual, do_set_active,
           do_set_refresh);
@@ -868,8 +866,8 @@ individual_store_favourites_changed_cb (FolksIndividual *individual,
       folks_favourite_details_get_is_favourite (
         FOLKS_FAVOURITE_DETAILS (individual)) ? "now" : "no longer");
 
-  individual_store_remove_individual (self, individual);
-  individual_store_add_individual (self, individual);
+  empathy_individual_store_remove_individual (self, individual);
+  empathy_individual_store_add_individual (self, individual);
 }
 
 void
@@ -878,7 +876,7 @@ individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
 {
   GeeSet *empty_set = gee_set_empty (G_TYPE_NONE, NULL, NULL);
 
-  individual_store_add_individual (self, individual);
+  empathy_individual_store_add_individual (self, individual);
 
   g_signal_connect (individual, "notify::avatar",
       (GCallback) individual_store_individual_updated_cb, self);
@@ -899,8 +897,8 @@ individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
   g_clear_object (&empty_set);
 }
 
-static void
-individual_store_disconnect_individual (EmpathyIndividualStore *self,
+void
+empathy_individual_store_disconnect_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
   GeeSet *empty_set = gee_set_empty (G_TYPE_NONE, NULL, NULL);
@@ -923,8 +921,8 @@ individual_store_remove_individual_and_disconnect (
     EmpathyIndividualStore *self,
     FolksIndividual *individual)
 {
-  individual_store_disconnect_individual (self, individual);
-  individual_store_remove_individual (self, individual);
+  empathy_individual_store_disconnect_individual (self, individual);
+  empathy_individual_store_remove_individual (self, individual);
 }
 
 static void
@@ -968,11 +966,11 @@ individual_store_groups_changed_cb (EmpathyIndividualManager *manager,
    * would have to check the groups already set up for each
    * contact and then see what has been updated.
    */
-  show_active = self->priv->show_active;
-  self->priv->show_active = FALSE;
-  individual_store_remove_individual (self, individual);
-  individual_store_add_individual (self, individual);
-  self->priv->show_active = show_active;
+  show_active = self->show_active;
+  self->show_active = FALSE;
+  empathy_individual_store_remove_individual (self, individual);
+  empathy_individual_store_add_individual (self, individual);
+  self->show_active = show_active;
 }
 
 static gboolean
@@ -1003,7 +1001,7 @@ individual_store_manager_setup (gpointer user_data)
       g_list_free (individuals);
     }
 
-  self->priv->setup_idle_id = 0;
+  self->setup_idle_id = 0;
   return FALSE;
 }
 
@@ -1014,7 +1012,7 @@ individual_store_set_individual_manager (EmpathyIndividualStore *self,
   self->priv->manager = g_object_ref (manager);
 
   /* Let a chance to have all properties set before populating */
-  self->priv->setup_idle_id = g_idle_add (individual_store_manager_setup, self);
+  self->setup_idle_id = g_idle_add (individual_store_manager_setup, self);
 }
 
 static void
@@ -1057,7 +1055,7 @@ individual_store_dispose (GObject *object)
   individuals = empathy_individual_manager_get_members (self->priv->manager);
   for (l = individuals; l; l = l->next)
     {
-      individual_store_disconnect_individual (EMPATHY_INDIVIDUAL_STORE (object),
+      empathy_individual_store_disconnect_individual (self,
           FOLKS_INDIVIDUAL (l->data));
     }
   g_list_free (individuals);
@@ -1075,9 +1073,9 @@ individual_store_dispose (GObject *object)
       g_source_remove (self->priv->inhibit_active);
     }
 
-  if (self->priv->setup_idle_id != 0)
+  if (self->setup_idle_id != 0)
     {
-      g_source_remove (self->priv->setup_idle_id);
+      g_source_remove (self->setup_idle_id);
     }
 
   g_hash_table_unref (self->priv->status_icons);
@@ -1506,7 +1504,7 @@ individual_store_setup (EmpathyIndividualStore *self)
 static gboolean
 individual_store_inhibit_active_cb (EmpathyIndividualStore *self)
 {
-  self->priv->show_active = TRUE;
+  self->show_active = TRUE;
   self->priv->inhibit_active = 0;
 
   return FALSE;
@@ -1669,7 +1667,7 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
 
   self->priv->show_groups = show_groups;
 
-  if (self->priv->setup_idle_id == 0)
+  if (self->setup_idle_id == 0)
     {
       /* Remove all contacts and add them back, not optimized but
        * that's the easy way :)

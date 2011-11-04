@@ -79,6 +79,10 @@ struct _EmpathyIndividualStore
 {
   GtkTreeStore parent;
   EmpathyIndividualStorePriv *priv;
+
+  /* protected */
+  gboolean show_active;
+  guint setup_idle_id;
 };
 
 struct _EmpathyIndividualStoreClass
@@ -145,6 +149,18 @@ void individual_store_add_individual_and_connect (EmpathyIndividualStore *self,
 
 void individual_store_remove_individual_and_disconnect (
     EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
+/* protected */
+
+void empathy_individual_store_disconnect_individual (
+    EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
+void empathy_individual_store_remove_individual (EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
+void empathy_individual_store_add_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual);
 
 G_END_DECLS
