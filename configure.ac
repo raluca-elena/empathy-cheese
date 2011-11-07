@@ -606,6 +606,7 @@ if test "x$enable_goa" != "xno"; then
    AC_MSG_CHECKING([Mission Control plugins dir])
    MISSION_CONTROL_PLUGINS_DIR=`pkg-config --variable=plugindir mission-control-plugins`
 
+   AC_MSG_RESULT([$MISSION_CONTROL_PLUGINS_DIR])
    AC_SUBST(MISSION_CONTROL_PLUGINS_DIR)
 else
    have_goa=no
