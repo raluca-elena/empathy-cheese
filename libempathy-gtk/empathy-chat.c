@@ -49,8 +49,8 @@
 #include "empathy-chat.h"
 #include "empathy-spell.h"
 #include "empathy-contact-dialogs.h"
-#include "empathy-contact-list-store.h"
-#include "empathy-contact-list-view.h"
+#include "empathy-individual-store-channel.h"
+#include "empathy-individual-view.h"
 #include "empathy-contact-menu.h"
 #include "empathy-input-text-view.h"
 #include "empathy-search-bar.h"
@@ -2728,7 +2728,7 @@ chat_update_contacts_visibility (EmpathyChat *chat,
 	}
 
 	if (show && priv->contact_list_view == NULL) {
-		EmpathyContactListStore *store;
+		EmpathyIndividualStore *store;
 		gint                     min_width;
 		GtkAllocation            allocation;
 
@@ -2749,19 +2749,27 @@ chat_update_contacts_visibility (EmpathyChat *chat,
 		priv->contacts_visible_id = g_timeout_add (500,
 			chat_contacts_visible_timeout_cb, chat);
 
-		store = empathy_contact_list_store_new (
-				EMPATHY_CONTACT_LIST (priv->tp_chat));
-		empathy_contact_list_store_set_show_groups (
-				EMPATHY_CONTACT_LIST_STORE (store), FALSE);
+		store = EMPATHY_INDIVIDUAL_STORE (
+				empathy_individual_store_channel_new ((TpChannel *) priv->tp_chat));
 
-		priv->contact_list_view = GTK_WIDGET (empathy_contact_list_view_new (store,
-			EMPATHY_CONTACT_LIST_FEATURE_CONTACT_TOOLTIP,
-			EMPATHY_CONTACT_FEATURE_CHAT |
-			EMPATHY_CONTACT_FEATURE_CALL |
-			EMPATHY_CONTACT_FEATURE_LOG |
-			EMPATHY_CONTACT_FEATURE_INFO));
+		empathy_individual_store_set_show_groups (store, FALSE);
+
+		priv->contact_list_view = GTK_WIDGET (empathy_individual_view_new (store,
+			EMPATHY_INDIVIDUAL_VIEW_FEATURE_INDIVIDUAL_TOOLTIP,
+			EMPATHY_INDIVIDUAL_FEATURE_ADD_CONTACT |
+			EMPATHY_INDIVIDUAL_FEATURE_CHAT |
+			EMPATHY_INDIVIDUAL_FEATURE_CALL |
+			EMPATHY_INDIVIDUAL_FEATURE_LOG |
+			EMPATHY_INDIVIDUAL_FEATURE_INFO));
+
+		empathy_individual_view_set_show_offline (
+			EMPATHY_INDIVIDUAL_VIEW (priv->contact_list_view), TRUE);
+		empathy_individual_view_set_show_uninteresting (
+			EMPATHY_INDIVIDUAL_VIEW (priv->contact_list_view), TRUE);
+
 		gtk_container_add (GTK_CONTAINER (priv->scrolled_window_contacts),
 				   priv->contact_list_view);
+
 		gtk_widget_show (priv->contact_list_view);
 		gtk_widget_show (priv->scrolled_window_contacts);
 		g_object_unref (store);
