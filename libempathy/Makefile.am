@@ -16,6 +16,7 @@ AM_CPPFLAGS =                                           \
 	$(NETWORK_MANAGER_CFLAGS)			\
 	$(CONNMAN_CFLAGS)				\
 	$(UDEV_CFLAGS)					\
+	$(GOA_CFLAGS)					\
 	$(WARN_CFLAGS)					\
 	$(DISABLE_DEPRECATED)
 
@@ -29,7 +30,6 @@ libempathy_headers =				\
 	action-chain-internal.h			\
 	empathy-account-settings.h		\
 	empathy-auth-factory.h			\
-	empathy-goa-auth-handler.h		\
 	empathy-camera-monitor.h		\
 	empathy-chatroom-manager.h		\
 	empathy-chatroom.h			\
@@ -73,7 +73,6 @@ libempathy_handwritten_source =				\
 	action-chain.c					\
 	empathy-account-settings.c			\
 	empathy-auth-factory.c				\
-	empathy-goa-auth-handler.c			\
 	empathy-camera-monitor.c			\
 	empathy-chatroom-manager.c			\
 	empathy-chatroom.c				\
@@ -109,9 +108,40 @@ libempathy_handwritten_source =				\
 	empathy-tp-streamed-media.c			\
 	empathy-utils.c
 
+# these are sources that depend on GOA
+goa_sources = \
+	empathy-goa-auth-handler.c \
+	empathy-goa-auth-handler.h \
+	$(NULL)
+
 libempathy_la_SOURCES = \
 	$(libempathy_handwritten_source) \
 	cheese-camera-device-monitor.c cheese-camera-device-monitor.h
+
+dtddir = $(datadir)/empathy
+dtd_DATA = 					\
+	empathy-status-presets.dtd		\
+	empathy-contact-groups.dtd		\
+	empathy-chatroom-manager.dtd		\
+	empathy-irc-networks.dtd
+
+ircnetworksdir = $(datadir)/empathy
+ircnetworks_DATA =		\
+	irc-networks.xml
+
+EXTRA_DIST = 			\
+	$(dtd_DATA)		\
+	$(ircnetworks_DATA)
+
+CLEANFILES = 				\
+	$(BUILT_SOURCES)		\
+	stamp-empathy-enum-types.h
+
+if HAVE_GOA
+libempathy_la_SOURCES += $(goa_sources)
+else
+EXTRA_DIST += $(goa_sources)
+endif
 
 # do not distribute generated files
 nodist_libempathy_la_SOURCES =\
@@ -127,10 +157,14 @@ libempathy_la_LIBADD =		\
 	$(NETWORK_MANAGER_LIBS) \
 	$(CONNMAN_LIBS) \
 	$(UDEV_LIBS) \
+	$(GOA_LIBS) \
 	$(LIBM)
 
 check_c_sources = \
-    $(libempathy_handwritten_source)
+    $(libempathy_handwritten_source) \
+    $(goa_sources) \
+    $(NULL)
+
 include $(top_srcdir)/tools/check-coding-style.mk
 check-local: check-coding-style
 
@@ -171,22 +205,3 @@ empathy-enum-types.c: $(libempathy_headers) Makefile
 		$(libempathy_headers) ) > xgen-gtc \
 	&& cp xgen-gtc $(@F) \
 	&& rm -f xgen-gtc
-
-dtddir = $(datadir)/empathy
-dtd_DATA = 					\
-	empathy-status-presets.dtd		\
-	empathy-contact-groups.dtd		\
-	empathy-chatroom-manager.dtd		\
-	empathy-irc-networks.dtd
-
-ircnetworksdir = $(datadir)/empathy
-ircnetworks_DATA =		\
-	irc-networks.xml
-
-EXTRA_DIST = 			\
-	$(dtd_DATA)		\
-	$(ircnetworks_DATA)
-
-CLEANFILES = 				\
-	$(BUILT_SOURCES)		\
-	stamp-empathy-enum-types.h

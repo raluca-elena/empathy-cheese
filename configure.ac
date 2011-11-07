@@ -201,7 +201,6 @@ PKG_CHECK_MODULES(EMPATHY,
    libpulse-mainloop-glib
    webkitgtk-3.0 >= $WEBKIT_REQUIRED
    libsoup-2.4
-   goa-1.0 >= $GOA_REQUIRED
 ])
 
 PKG_CHECK_MODULES(YELL, [telepathy-yell])
@@ -600,7 +599,7 @@ if test "x$enable_goa" != "xno"; then
    PKG_CHECK_MODULES(GOA,
     [
        mission-control-plugins
-       goa-1.0
+       goa-1.0 >= $GOA_REQUIRED
     ], have_goa="yes", have_goa="no")
 
    AC_MSG_CHECKING([Mission Control plugins dir])
@@ -614,6 +613,10 @@ fi
 
 if test "x$enable_goa" = "xyes" -a "x$have_goa" != "xyes"; then
    AC_MSG_ERROR([Could not find GOA dependencies.])
+fi
+
+if test "x$have_goa" = "xyes"; then
+   AC_DEFINE(HAVE_GOA, 1, [Define to 1 to enable GNOME Online Accounts])
 fi
 
 AM_CONDITIONAL(HAVE_GOA, test "x$have_goa" = "xyes")

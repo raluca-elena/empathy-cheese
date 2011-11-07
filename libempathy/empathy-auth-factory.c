@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <config.h>
+
 #include "empathy-auth-factory.h"
 
 #include <telepathy-glib/telepathy-glib.h>
@@ -27,8 +29,11 @@
 #include "empathy-keyring.h"
 #include "empathy-server-sasl-handler.h"
 #include "empathy-server-tls-handler.h"
-#include "empathy-goa-auth-handler.h"
 #include "empathy-utils.h"
+
+#ifdef HAVE_GOA
+#include "empathy-goa-auth-handler.h"
+#endif /* HAVE_GOA */
 
 #include "extensions/extensions.h"
 
@@ -43,7 +48,10 @@ struct _EmpathyAuthFactoryPriv {
    * reffed (EmpathyServerSASLHandler *)
    * */
   GHashTable *sasl_handlers;
+
+#ifdef HAVE_GOA
   EmpathyGoaAuthHandler *goa_handler;
+#endif /* HAVE_GOA */
 
   gboolean dispose_run;
 };
@@ -391,6 +399,7 @@ get_password_cb (GObject *source,
     }
 }
 
+#ifdef HAVE_GOA
 static void
 goa_claim_cb (GObject *source,
     GAsyncResult *result,
@@ -414,6 +423,7 @@ goa_claim_cb (GObject *source,
 
   observe_channels_data_free (data);
 }
+#endif /* HAVE_GOA */
 
 static void
 observe_channels (TpBaseClient *client,
@@ -449,6 +459,7 @@ observe_channels (TpBaseClient *client,
   data->account = g_object_ref (account);
   data->channel = g_object_ref (channel);
 
+#ifdef HAVE_GOA
   /* GOA auth? */
   if (empathy_goa_auth_handler_supports (self->priv->goa_handler, channel, account))
     {
@@ -460,6 +471,7 @@ observe_channels (TpBaseClient *client,
       tp_observe_channels_context_accept (context);
       return;
     }
+#endif /* HAVE_GOA */
 
   /* Password auth? */
   if (empathy_sasl_channel_supports_mechanism (data->channel,
@@ -511,7 +523,9 @@ empathy_auth_factory_init (EmpathyAuthFactory *self)
 
   self->priv->sasl_handlers = g_hash_table_new_full (g_str_hash, g_str_equal,
       NULL, g_object_unref);
+#ifdef HAVE_GOA
   self->priv->goa_handler = empathy_goa_auth_handler_new ();
+#endif /* HAVE_GOA */
 }
 
 static void
@@ -573,7 +587,9 @@ empathy_auth_factory_dispose (GObject *object)
   priv->dispose_run = TRUE;
 
   g_hash_table_unref (priv->sasl_handlers);
+#ifdef HAVE_GOA
   g_object_unref (priv->goa_handler);
+#endif /* HAVE_GOA */
 
   G_OBJECT_CLASS (empathy_auth_factory_parent_class)->dispose (object);
 }
