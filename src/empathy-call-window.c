@@ -3507,7 +3507,13 @@ start_call (EmpathyCallWindow *self)
       TpySendingState s;
 
       g_object_get (priv->handler, "call-channel", &call, NULL);
-      s = tpy_call_channel_get_video_state (call);
+      /* If the call channel isn't set yet we're requesting it, if we're
+       * requesting it with initial video it should be PENDING_SEND when we get
+       * it */
+      if (call == NULL)
+        s = TPY_SENDING_STATE_PENDING_SEND;
+      else
+        s = tpy_call_channel_get_video_state (call);
 
       if (s == TPY_SENDING_STATE_PENDING_SEND ||
           s == TPY_SENDING_STATE_SENDING)
@@ -3528,7 +3534,8 @@ start_call (EmpathyCallWindow *self)
             }
         }
 
-      g_object_unref (call);
+      if (call != NULL)
+        g_object_unref (call);
     }
 }
 
