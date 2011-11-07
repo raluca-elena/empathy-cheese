@@ -491,7 +491,10 @@ empathy_pixbuf_from_avatar_scaled (EmpathyAvatar *avatar,
 			  G_CALLBACK (pixbuf_from_avatar_size_prepared_cb),
 			  &data);
 
-	if (!gdk_pixbuf_loader_write (loader, avatar->data, avatar->len, &error)) {
+	if (avatar->len == 0) {
+		g_warning ("Avatar has 0 length");
+		return NULL;
+	} else if (!gdk_pixbuf_loader_write (loader, avatar->data, avatar->len, &error)) {
 		g_warning ("Couldn't write avatar image:%p with "
 			   "length:%" G_GSIZE_FORMAT " to pixbuf loader: %s",
 			   avatar->data, avatar->len, error->message);
