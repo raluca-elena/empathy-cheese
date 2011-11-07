@@ -465,6 +465,7 @@ empathy_video_src_set_resolution (GstElement *src,
       NULL);
 
   g_object_set (priv->capsfilter, "caps", caps, NULL);
+  gst_caps_unref (caps);
 
   gst_bin_add (GST_BIN (src), priv->src);
   /* We as the bin own the source again, so drop the temporary ref */
