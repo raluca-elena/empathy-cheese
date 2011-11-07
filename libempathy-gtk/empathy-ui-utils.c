@@ -1825,6 +1825,27 @@ file_manager_send_file_response_cb (GtkDialog      *widget,
 	gtk_widget_destroy (GTK_WIDGET (widget));
 }
 
+static gboolean
+filter_cb (const GtkFileFilterInfo *filter_info,
+		gpointer data)
+{
+	/* filter out socket files */
+	return tp_strdiff (filter_info->mime_type, "inode/socket");
+}
+
+static GtkFileFilter *
+create_file_filter (void)
+{
+	GtkFileFilter *filter;
+
+	filter = gtk_file_filter_new ();
+
+	gtk_file_filter_add_custom (filter, GTK_FILE_FILTER_MIME_TYPE, filter_cb,
+		NULL, NULL);
+
+	return filter;
+}
+
 void
 empathy_send_file_with_file_chooser (EmpathyContact *contact)
 {
@@ -1858,6 +1879,9 @@ empathy_send_file_with_file_chooser (EmpathyContact *contact)
 
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (widget),
 		g_get_home_dir ());
+
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (widget),
+		create_file_filter ());
 
 	g_signal_connect (widget, "response",
 			  G_CALLBACK (file_manager_send_file_response_cb),
