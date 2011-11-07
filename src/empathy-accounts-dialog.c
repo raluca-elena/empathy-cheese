@@ -2178,7 +2178,7 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
   gchar                        *filename;
   EmpathyAccountsDialogPriv    *priv = GET_PRIV (dialog);
   GtkWidget *content_area, *action_area;
-  GtkWidget *grid;
+  GtkWidget *grid, *hbox;
   GtkWidget *alig;
   GtkWidget *sw, *toolbar;
   GtkStyleContext *context;
@@ -2277,7 +2277,13 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
 
   /* first row */
   priv->label_name = gtk_label_new (NULL);
-  gtk_grid_attach (GTK_GRID (grid), priv->label_name, 1, 0, 3, 1);
+  gtk_grid_attach (GTK_GRID (grid), priv->label_name, 1, 0, 1, 1);
+
+  /* second row */
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+  gtk_widget_set_hexpand (hbox, TRUE);
+  gtk_widget_set_halign (hbox, GTK_ALIGN_CENTER);
+  gtk_grid_attach (GTK_GRID (grid), hbox, 1, 1, 1, 1);
 
   /* set up spinner */
   priv->throbber = gtk_spinner_new ();
@@ -2288,18 +2294,17 @@ accounts_dialog_build_ui (EmpathyAccountsDialog *dialog)
 
   priv->label_status = gtk_label_new (NULL);
   gtk_label_set_line_wrap (GTK_LABEL (priv->label_status), TRUE);
-  gtk_widget_set_hexpand (priv->label_status, TRUE);
 
-  gtk_grid_attach (GTK_GRID (grid), priv->throbber, 1, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), priv->image_status, 2, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID (grid), priv->label_status, 3, 1, 1, 1);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->throbber, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->image_status, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), priv->label_status, FALSE, FALSE, 0);
 
   /* enabled switch */
   priv->enabled_switch = gtk_switch_new ();
   gtk_widget_set_valign (priv->enabled_switch, GTK_ALIGN_CENTER);
   g_signal_connect (priv->enabled_switch, "notify::active",
       G_CALLBACK (accounts_dialog_enable_switch_active_cb), dialog);
-  gtk_grid_attach (GTK_GRID (grid), priv->enabled_switch, 4, 0, 1, 2);
+  gtk_grid_attach (GTK_GRID (grid), priv->enabled_switch, 2, 0, 1, 2);
 
   gtk_widget_show_all (grid);
 
