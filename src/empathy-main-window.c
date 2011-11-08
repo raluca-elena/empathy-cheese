@@ -47,8 +47,6 @@
 #include <libempathy/empathy-tp-contact-factory.h>
 
 #include <libempathy-gtk/empathy-contact-dialogs.h>
-#include <libempathy-gtk/empathy-contact-list-store.h>
-#include <libempathy-gtk/empathy-contact-list-view.h>
 #include <libempathy-gtk/empathy-live-search.h>
 #include <libempathy-gtk/empathy-contact-blocking-dialog.h>
 #include <libempathy-gtk/empathy-contact-search-dialog.h>
@@ -569,7 +567,7 @@ main_window_load_events_idle_cb (gpointer user_data)
 }
 
 static void
-main_window_row_activated_cb (EmpathyContactListView *view,
+main_window_row_activated_cb (EmpathyIndividualView *view,
 			      GtkTreePath            *path,
 			      GtkTreeViewColumn      *col,
 			      EmpathyMainWindow      *window)
@@ -1519,7 +1517,7 @@ main_window_view_sort_contacts_cb (GtkRadioAction    *action,
 				   EmpathyMainWindow *window)
 {
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
-	EmpathyContactListStoreSort value;
+	EmpathyIndividualStoreSort value;
 	GSList      *group;
 	GType        type;
 	GEnumClass  *enum_class;
