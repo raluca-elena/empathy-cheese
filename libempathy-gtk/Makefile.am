@@ -45,8 +45,6 @@ libempathy_gtk_handwritten_source =            	\
 	empathy-contact-blocking-dialog.c	\
 	empathy-contact-dialogs.c		\
 	empathy-contact-chooser.c		\
-	empathy-contact-list-store.c		\
-	empathy-contact-list-view.c		\
 	empathy-contact-menu.c			\
 	empathy-contactinfo-utils.c		\
 	empathy-linking-dialog.c		\
@@ -116,8 +114,6 @@ libempathy_gtk_headers =			\
 	empathy-contact-blocking-dialog.h	\
 	empathy-contact-dialogs.h		\
 	empathy-contact-chooser.h		\
-	empathy-contact-list-store.h		\
-	empathy-contact-list-view.h		\
 	empathy-contact-menu.h			\
 	empathy-linking-dialog.h		\
 	empathy-live-search.h			\

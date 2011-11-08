@@ -39,7 +39,6 @@
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-theme-manager.h>
 #include <libempathy-gtk/empathy-spell.h>
-#include <libempathy-gtk/empathy-contact-list-store.h>
 #include <libempathy-gtk/empathy-gtk-enum-types.h>
 #include <libempathy-gtk/empathy-theme-adium.h>
 

@@ -26,8 +26,6 @@
 
 #include <gtk/gtk.h>
 
-#include "empathy-contact-list-store.h"
-
 G_BEGIN_DECLS
 
 #define EMPATHY_TYPE_LIVE_SEARCH         (empathy_live_search_get_type ())
