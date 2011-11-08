@@ -315,7 +315,7 @@ individual_store_remove_individual (EmpathyIndividualStore *self,
         {
           gchar *group_name;
           gtk_tree_model_get (model, &parent,
-              EMPATHY_CONTACT_LIST_STORE_COL_NAME, &group_name,
+              EMPATHY_INDIVIDUAL_STORE_COL_NAME, &group_name,
               -1);
           g_hash_table_remove (self->priv->empathy_group_cache,
               group_name);
