@@ -224,15 +224,3 @@ empathy_contact_list_remove_group (EmpathyContactList *list,
 		EMPATHY_CONTACT_LIST_GET_IFACE (list)->remove_group (list, group);
 	}
 }
-
-EmpathyContactListFlags
-empathy_contact_list_get_flags (EmpathyContactList *list)
-{
-	g_return_val_if_fail (EMPATHY_IS_CONTACT_LIST (list), 0);
-
-	if (EMPATHY_CONTACT_LIST_GET_IFACE (list)->get_flags) {
-		return EMPATHY_CONTACT_LIST_GET_IFACE (list)->get_flags (list);
-	} else {
-		return 0;
-	}
-}
