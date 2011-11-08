@@ -35,6 +35,7 @@
 #include <telepathy-glib/util.h>
 
 #include <gst/farsight/fs-element-added-notifier.h>
+#include <gst/farsight/fs-utils.h>
 
 #include <libempathy/empathy-tp-contact-factory.h>
 #include <libempathy/empathy-utils.h>
@@ -981,8 +982,6 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   GtkWidget *arrow;
   GtkWidget *page;
   gchar *filename;
-  GKeyFile *keyfile;
-  GError *error = NULL;
   GtkWidget *scroll;
 
   filename = empathy_file_lookup ("empathy-streamed-media-window.ui", "src");
@@ -1083,21 +1082,6 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
-
-  keyfile = g_key_file_new ();
-  filename = empathy_file_lookup ("element-properties", "data");
-  if (g_key_file_load_from_file (keyfile, filename, G_KEY_FILE_NONE, &error))
-    {
-      fs_element_added_notifier_set_properties_from_keyfile (priv->fsnotifier,
-          keyfile);
-    }
-  else
-    {
-      g_warning ("Could not load element-properties file: %s", error->message);
-      g_key_file_free (keyfile);
-      g_clear_error (&error);
-    }
-  g_free (filename);
 
   priv->vbox = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (priv->content_hbox), priv->vbox,
@@ -1759,6 +1743,12 @@ empathy_streamed_media_window_conference_added_cb (EmpathyStreamedMediaHandler *
 {
   EmpathyStreamedMediaWindow *self = EMPATHY_STREAMED_MEDIA_WINDOW (user_data);
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
+  GKeyFile *keyfile;
+
+  keyfile = fs_utils_get_default_element_properties (conference);
+  if (keyfile != NULL)
+    fs_element_added_notifier_set_properties_from_keyfile (priv->fsnotifier,
+        keyfile);
 
   gst_bin_add (GST_BIN (priv->pipeline), conference);
 

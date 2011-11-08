@@ -708,27 +708,6 @@ empathy_streamed_media_handler_tf_channel_closed_cb (TfChannel *tfchannel,
   g_signal_emit (G_OBJECT (handler), signals[CLOSED], 0);
 }
 
-static GList *
-empathy_streamed_media_handler_tf_channel_codec_config_cb (TfChannel *channel,
-  guint stream_id, FsMediaType media_type, guint direction, gpointer user_data)
-{
-  gchar *filename = empathy_file_lookup ("codec-preferences", "data");
-  GList *codecs;
-  GError *error = NULL;
-
-  codecs = fs_codec_list_from_keyfile (filename, &error);
-  g_free (filename);
-
-  if (!codecs)
-    {
-      g_warning ("No codec-preferences file: %s",
-          error ? error->message : "No error message");
-    }
-  g_clear_error (&error);
-
-  return codecs;
-}
-
 static void
 empathy_streamed_media_handler_start_tpfs (EmpathyStreamedMediaHandler *self)
 {
@@ -748,8 +727,6 @@ empathy_streamed_media_handler_start_tpfs (EmpathyStreamedMediaHandler *self)
       G_CALLBACK (empathy_streamed_media_handler_tf_channel_stream_created_cb), self);
   g_signal_connect (priv->tfchannel, "closed",
       G_CALLBACK (empathy_streamed_media_handler_tf_channel_closed_cb), self);
-  g_signal_connect (priv->tfchannel, "stream-get-codec-config",
-      G_CALLBACK (empathy_streamed_media_handler_tf_channel_codec_config_cb), self);
 
   g_object_unref (channel);
 }

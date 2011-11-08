@@ -19,11 +19,6 @@ convertdir = $(datarootdir)/GConf/gsettings
 convert_DATA = \
 	empathy.convert
 
-streamingprefsdir =  $(datadir)/empathy
-streamingprefs_DATA =		\
-	codec-preferences	\
-	element-properties
-
 servicefiledir = $(datadir)/dbus-1/services
 servicefile_in_files = \
 	org.freedesktop.Telepathy.Client.Empathy.Chat.service.in \
@@ -76,7 +71,6 @@ EXTRA_DIST = 				\
 	$(desktop_in_files)		\
 	$(desktop_DATA)			\
 	$(schemas_DATA)			\
-	$(streamingprefs_DATA)		\
 	$(html_DATA)			\
 	$(clientfile_DATA)		\
 	$(servicefile_in_files)		\
