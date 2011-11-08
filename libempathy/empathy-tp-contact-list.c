@@ -69,8 +69,6 @@ typedef struct {
 	GHashTable     *groups;
 	/* group name: owned (gchar *) => owned GArray of TpHandle */
 	GHashTable     *add_to_group;
-
-	EmpathyContactListFlags flags;
 } EmpathyTpContactListPriv;
 
 typedef enum {
@@ -578,64 +576,6 @@ tp_contact_list_publish_group_members_changed_cb (TpChannel     *channel,
 }
 
 static void
-tp_contact_list_get_alias_flags_cb (TpConnection *connection,
-				    guint         flags,
-				    const GError *error,
-				    gpointer      user_data,
-				    GObject      *list)
-{
-	EmpathyTpContactListPriv *priv = GET_PRIV (list);
-
-	if (error) {
-		DEBUG ("Error: %s", error->message);
-		return;
-	}
-
-	if (flags & TP_CONNECTION_ALIAS_FLAG_USER_SET) {
-		priv->flags |= EMPATHY_CONTACT_LIST_CAN_ALIAS;
-	}
-}
-
-static void
-tp_contact_list_get_requestablechannelclasses_cb (TpProxy      *connection,
-						  const GValue *value,
-						  const GError *error,
-						  gpointer      user_data,
-						  GObject      *list)
-{
-	EmpathyTpContactListPriv *priv = GET_PRIV (list);
-	GPtrArray *classes;
-	guint i;
-
-	if (error) {
-		DEBUG ("Error: %s", error->message);
-		return;
-	}
-
-	classes = g_value_get_boxed (value);
-	for (i = 0; i < classes->len; i++) {
-		GValueArray *class = g_ptr_array_index (classes, i);
-		GHashTable *props;
-		const char *channel_type;
-		guint handle_type;
-
-		props = g_value_get_boxed (g_value_array_get_nth (class, 0));
-
-		channel_type = tp_asv_get_string (props,
-				TP_IFACE_CHANNEL ".ChannelType");
-		handle_type = tp_asv_get_uint32 (props,
-				TP_IFACE_CHANNEL ".TargetHandleType", NULL);
-
-		if (!tp_strdiff (channel_type, TP_IFACE_CHANNEL_TYPE_CONTACT_LIST) &&
-		    handle_type == TP_HANDLE_TYPE_GROUP) {
-			DEBUG ("Got channel class for a contact group");
-			priv->flags |= EMPATHY_CONTACT_LIST_CAN_GROUP;
-			break;
-		}
-	}
-}
-
-static void
 tp_contact_list_subscribe_group_members_changed_cb (TpChannel     *channel,
 						    gchar         *message,
 						    GArray        *added,
@@ -924,32 +864,6 @@ static void
 tp_contact_list_constructed (GObject *list)
 {
 	EmpathyTpContactListPriv *priv = GET_PRIV (list);
-
-	/* call GetAliasFlags */
-	if (tp_proxy_has_interface_by_id (priv->connection,
-				TP_IFACE_QUARK_CONNECTION_INTERFACE_ALIASING)) {
-		tp_cli_connection_interface_aliasing_call_get_alias_flags (
-				priv->connection,
-				-1,
-				tp_contact_list_get_alias_flags_cb,
-				NULL, NULL,
-				G_OBJECT (list));
-	}
-
-	/* lookup RequestableChannelClasses */
-	if (tp_proxy_has_interface_by_id (priv->connection,
-				TP_IFACE_QUARK_CONNECTION_INTERFACE_REQUESTS)) {
-		tp_cli_dbus_properties_call_get (priv->connection,
-				-1,
-				TP_IFACE_CONNECTION_INTERFACE_REQUESTS,
-				"RequestableChannelClasses",
-				tp_contact_list_get_requestablechannelclasses_cb,
-				NULL, NULL,
-				G_OBJECT (list));
-	} else {
-		/* we just don't know... better mark the flag just in case */
-		priv->flags |= EMPATHY_CONTACT_LIST_CAN_GROUP;
-	}
 
 	tp_connection_call_when_ready (priv->connection, conn_ready_cb,
 		g_object_ref (list));
@@ -1284,38 +1198,6 @@ tp_contact_list_remove_group (EmpathyContactList *list,
 	g_array_unref (handles);
 }
 
-static EmpathyContactListFlags
-tp_contact_list_get_flags (EmpathyContactList *list)
-{
-	EmpathyTpContactListPriv *priv;
-	EmpathyContactListFlags flags;
-
-	g_return_val_if_fail (EMPATHY_IS_TP_CONTACT_LIST (list), FALSE);
-
-	priv = GET_PRIV (list);
-	flags = priv->flags;
-
-	if (priv->subscribe != NULL) {
-		TpChannelGroupFlags group_flags;
-
-		group_flags = tp_channel_group_get_flags (priv->subscribe);
-
-		if (group_flags & TP_CHANNEL_GROUP_FLAG_CAN_ADD) {
-			flags |= EMPATHY_CONTACT_LIST_CAN_ADD;
-		}
-
-		if (group_flags & TP_CHANNEL_GROUP_FLAG_CAN_REMOVE) {
-			flags |= EMPATHY_CONTACT_LIST_CAN_REMOVE;
-		}
-
-		if (group_flags & TP_CHANNEL_GROUP_FLAG_MESSAGE_ADD) {
-			flags |= EMPATHY_CONTACT_LIST_MESSAGE_ADD;
-		}
-	}
-
-	return flags;
-}
-
 static void
 tp_contact_list_iface_init (EmpathyContactListIface *iface)
 {
@@ -1329,7 +1211,6 @@ tp_contact_list_iface_init (EmpathyContactListIface *iface)
 	iface->remove_from_group = tp_contact_list_remove_from_group;
 	iface->rename_group      = tp_contact_list_rename_group;
 	iface->remove_group	 = tp_contact_list_remove_group;
-	iface->get_flags	 = tp_contact_list_get_flags;
 }
 
 void
