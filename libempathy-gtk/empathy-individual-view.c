@@ -2650,7 +2650,8 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
     }
   g_clear_object (&iter);
 
-  menu = empathy_individual_menu_new (individual, priv->individual_features);
+  menu = empathy_individual_menu_new (individual, priv->individual_features,
+      priv->store);
 
   /* Remove contact */
   if ((priv->view_features &

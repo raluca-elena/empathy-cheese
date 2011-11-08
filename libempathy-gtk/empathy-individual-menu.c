@@ -49,6 +49,7 @@
 #include "empathy-share-my-desktop.h"
 #include "empathy-linking-dialog.h"
 #include "empathy-call-utils.h"
+#include "empathy-individual-store-channel.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_CONTACT
 #include <libempathy/empathy-debug.h>
@@ -58,11 +59,13 @@
 typedef struct {
   FolksIndividual *individual; /* owned */
   EmpathyIndividualFeatureFlags features;
+  EmpathyIndividualStore *store;
 } EmpathyIndividualMenuPriv;
 
 enum {
   PROP_INDIVIDUAL = 1,
   PROP_FEATURES,
+  PROP_STORE,
 };
 
 enum {
@@ -454,6 +457,17 @@ constructed (GObject *object)
   individual = priv->individual;
   features = priv->features;
 
+  /* Add contact */
+  if (features & EMPATHY_INDIVIDUAL_FEATURE_ADD_CONTACT)
+    {
+      item = empathy_individual_add_menu_item_new (self, individual);
+      if (item != NULL)
+        {
+          gtk_menu_shell_append (GTK_MENU_SHELL (shell), item);
+          gtk_widget_show (item);
+        }
+    }
+
   /* Chat */
   if (features & EMPATHY_INDIVIDUAL_FEATURE_CHAT)
     {
@@ -586,6 +600,9 @@ get_property (GObject *object,
       case PROP_FEATURES:
         g_value_set_flags (value, priv->features);
         break;
+      case PROP_STORE:
+        g_value_set_object (value, priv->store);
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -610,6 +627,9 @@ set_property (GObject *object,
       case PROP_FEATURES:
         priv->features = g_value_get_flags (value);
         break;
+      case PROP_STORE:
+        priv->store = g_value_dup_object (value); /* read only */
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -622,6 +642,7 @@ dispose (GObject *object)
   EmpathyIndividualMenuPriv *priv = GET_PRIV (object);
 
   tp_clear_object (&priv->individual);
+  tp_clear_object (&priv->store);
 
   G_OBJECT_CLASS (empathy_individual_menu_parent_class)->dispose (object);
 }
@@ -661,6 +682,13 @@ empathy_individual_menu_class_init (EmpathyIndividualMenuClass *klass)
           EMPATHY_INDIVIDUAL_FEATURE_NONE,
           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (object_class, PROP_STORE,
+      g_param_spec_object ("store",
+          "Store",
+          "The EmpathyIndividualStore to use to get contact owner",
+          EMPATHY_TYPE_INDIVIDUAL_STORE,
+          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+
   signals[SIGNAL_LINK_CONTACTS_ACTIVATED] =
       g_signal_new ("link-contacts-activated", G_OBJECT_CLASS_TYPE (klass),
           G_SIGNAL_RUN_LAST, 0, NULL, NULL,
@@ -672,14 +700,17 @@ empathy_individual_menu_class_init (EmpathyIndividualMenuClass *klass)
 
 GtkWidget *
 empathy_individual_menu_new (FolksIndividual *individual,
-    EmpathyIndividualFeatureFlags features)
+    EmpathyIndividualFeatureFlags features,
+    EmpathyIndividualStore *store)
 {
   g_return_val_if_fail (FOLKS_IS_INDIVIDUAL (individual), NULL);
+  g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (store), NULL);
   g_return_val_if_fail (features != EMPATHY_INDIVIDUAL_FEATURE_NONE, NULL);
 
   return g_object_new (EMPATHY_TYPE_INDIVIDUAL_MENU,
       "individual", individual,
       "features", features,
+      "store", store,
       NULL);
 }
 
@@ -1424,6 +1455,113 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
   g_object_unref (mgr);
   g_list_free (names);
   g_list_free (rooms);
+
+  return item;
+}
+
+static void
+add_menu_item_activated (GtkMenuItem *item,
+    TpContact *tp_contact)
+{
+  GtkWidget *toplevel;
+  EmpathyContact *contact;
+
+  toplevel = gtk_widget_get_toplevel (GTK_WIDGET (item));
+  if (!gtk_widget_is_toplevel (toplevel) || !GTK_IS_WINDOW (toplevel))
+    toplevel = NULL;
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact);
+
+  empathy_new_contact_dialog_show_with_contact (GTK_WINDOW (toplevel),
+      contact);
+
+  g_object_unref (contact);
+}
+
+GtkWidget *
+empathy_individual_add_menu_item_new (EmpathyIndividualMenu *self,
+    FolksIndividual *individual)
+{
+  EmpathyIndividualMenuPriv *priv = GET_PRIV (self);
+  GtkWidget *item, *image;
+  GeeSet *personas;
+  GeeIterator *iter;
+  TpContact *to_add = NULL;
+
+  /* find the first of this Individual's personas which are not in our contact
+   * list. */
+  personas = folks_individual_get_personas (individual);
+  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+  while (gee_iterator_next (iter))
+    {
+      TpfPersona *persona = gee_iterator_get (iter);
+      TpContact *contact;
+      TpConnection *conn;
+
+      if (!TPF_IS_PERSONA (persona))
+        goto next;
+
+      contact = tpf_persona_get_contact (persona);
+      if (contact == NULL)
+        goto next;
+
+      /* be sure to use a not channel specific contact.
+       * TODO: Ideally tp-glib should do this for us (fdo #42702)*/
+      if (EMPATHY_IS_INDIVIDUAL_STORE_CHANNEL (priv->store))
+        {
+          TpChannel *channel;
+          TpChannelGroupFlags flags;
+
+          channel = empathy_individual_store_channel_get_channel (
+              EMPATHY_INDIVIDUAL_STORE_CHANNEL (priv->store));
+
+          flags = tp_channel_group_get_flags (channel);
+          if ((flags & TP_CHANNEL_GROUP_FLAG_CHANNEL_SPECIFIC_HANDLES) != 0)
+            {
+              /* Channel uses channel specific handles (thanks XMPP...) */
+              contact = tp_channel_group_get_contact_owner (channel, contact);
+
+              /* If we don't know the owner, we can't add the contact */
+              if (contact == NULL)
+                goto next;
+            }
+        }
+
+      conn = tp_contact_get_connection (contact);
+      if (conn == NULL)
+        goto next;
+
+      /* No point to try adding a contact if the CM doesn't support it */
+      if (!tp_connection_get_can_change_contact_list (conn))
+        goto next;
+
+      /* Can't add ourself */
+      if (tp_connection_get_self_contact (conn) == contact)
+        goto next;
+
+      if (tp_contact_get_subscribe_state (contact) == TP_SUBSCRIPTION_STATE_YES)
+        goto next;
+
+      g_object_unref (persona);
+      to_add = contact;
+      break;
+
+next:
+      g_object_unref (persona);
+    }
+
+  g_object_unref (iter);
+
+  if (to_add == NULL)
+    return NULL;
+
+  item = gtk_image_menu_item_new_with_mnemonic (_("_Add Contact…"));
+  image = gtk_image_new_from_icon_name (GTK_STOCK_ADD, GTK_ICON_SIZE_MENU);
+  gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), image);
+
+  g_signal_connect_data (item, "activate",
+      G_CALLBACK (add_menu_item_activated),
+      g_object_ref (to_add), (GClosureNotify) g_object_unref, 0);
 
   return item;
 }

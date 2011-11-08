@@ -25,6 +25,8 @@
 
 #include <gtk/gtk.h>
 
+#include "empathy-individual-store.h"
+
 G_BEGIN_DECLS
 
 typedef enum {
@@ -38,7 +40,8 @@ typedef enum {
 	EMPATHY_INDIVIDUAL_FEATURE_LINK = 1 << 6,
 	EMPATHY_INDIVIDUAL_FEATURE_SMS = 1 << 7,
 	EMPATHY_INDIVIDUAL_FEATURE_CALL_PHONE = 1 << 8,
-	EMPATHY_INDIVIDUAL_FEATURE_ALL = (1 << 9) - 1,
+	EMPATHY_INDIVIDUAL_FEATURE_ADD_CONTACT = 1 << 9,
+	EMPATHY_INDIVIDUAL_FEATURE_ALL = (1 << 10) - 1,
 } EmpathyIndividualFeatureFlags;
 
 #define EMPATHY_TYPE_INDIVIDUAL_MENU (empathy_individual_menu_get_type ())
@@ -68,7 +71,8 @@ typedef struct {
 GType empathy_individual_menu_get_type (void) G_GNUC_CONST;
 
 GtkWidget * empathy_individual_menu_new (FolksIndividual *individual,
-    EmpathyIndividualFeatureFlags features);
+    EmpathyIndividualFeatureFlags features,
+    EmpathyIndividualStore *store);
 GtkWidget * empathy_individual_chat_menu_item_new (FolksIndividual *individual,
     EmpathyContact *contact);
 GtkWidget * empathy_individual_sms_menu_item_new (FolksIndividual *individual,
@@ -94,6 +98,8 @@ GtkWidget * empathy_individual_share_my_desktop_menu_item_new (
     FolksIndividual *individual,
     EmpathyContact *contact);
 GtkWidget * empathy_individual_favourite_menu_item_new (
+    FolksIndividual *individual);
+GtkWidget * empathy_individual_add_menu_item_new (EmpathyIndividualMenu *self,
     FolksIndividual *individual);
 
 G_END_DECLS

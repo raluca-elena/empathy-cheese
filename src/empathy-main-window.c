@@ -2472,7 +2472,7 @@ empathy_main_window_init (EmpathyMainWindow *window)
 	priv->individual_view = empathy_individual_view_new (
 			priv->individual_store,
 			EMPATHY_INDIVIDUAL_VIEW_FEATURE_ALL ^ EMPATHY_INDIVIDUAL_VIEW_FEATURE_PERSONA_DROP,
-			EMPATHY_INDIVIDUAL_FEATURE_ALL);
+			EMPATHY_INDIVIDUAL_FEATURE_ALL ^ EMPATHY_INDIVIDUAL_FEATURE_ADD_CONTACT);
 
 	gtk_widget_show (GTK_WIDGET (priv->individual_view));
 	gtk_container_add (GTK_CONTAINER (sw),
