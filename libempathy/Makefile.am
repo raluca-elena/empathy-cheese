@@ -62,7 +62,6 @@ libempathy_headers =				\
 	empathy-tp-chat.h			\
 	empathy-tp-contact-factory.h		\
 	empathy-tp-contact-list.h		\
-	empathy-tp-file.h			\
 	empathy-tp-roomlist.h			\
 	empathy-tp-streamed-media.h		\
 	empathy-types.h				\
