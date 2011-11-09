@@ -2691,6 +2691,23 @@ empathy_call_window_channel_closed_cb (EmpathyCallHandler *handler,
 }
 
 static gboolean
+empathy_call_window_content_is_raw (TfContent *content)
+{
+  FsConference *conference;
+  gboolean israw;
+
+  g_object_get (content, "fs-conference", &conference, NULL);
+  g_assert (conference != NULL);
+
+  /* FIXME: Ugly hack, update when moving a packetization property into
+   * farstream */
+  israw = g_str_has_prefix (GST_OBJECT_NAME (conference), "fsrawconf");
+  gst_object_unref (conference);
+
+  return israw;
+}
+
+static gboolean
 empathy_call_window_content_removed_cb (EmpathyCallHandler *handler,
     TfContent *content,
     EmpathyCallWindow *self)
@@ -3420,6 +3437,14 @@ empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
   switch (media_type)
     {
       case FS_MEDIA_TYPE_AUDIO:
+
+        /* For raw audio conferences assume that the receiver of the raw data
+         * wants it unprocessed, so turn off any echo cancellation and any
+         * other audio improvements that come with it */
+        empathy_audio_src_set_echo_cancel (
+          EMPATHY_GST_AUDIO_SRC (priv->audio_input),
+          !empathy_call_window_content_is_raw (content));
+
         if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_input))
           {
             g_warning ("Could not add audio source to pipeline");

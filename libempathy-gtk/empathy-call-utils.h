@@ -40,7 +40,8 @@ GHashTable * empathy_call_create_streamed_media_request (const gchar *contact,
     gboolean initial_audio,
     gboolean initial_video);
 
-void empathy_call_set_stream_properties (GstElement *element);
+void empathy_call_set_stream_properties (GstElement *element,
+    gboolean echo_cancellation);
 
 G_END_DECLS
 

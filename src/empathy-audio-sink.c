@@ -217,7 +217,7 @@ create_sink (void)
   if (sink == NULL)
     return NULL;
 
-  empathy_call_set_stream_properties (sink);
+  empathy_call_set_stream_properties (sink, TRUE);
 
   return sink;
 }

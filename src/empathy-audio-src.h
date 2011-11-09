@@ -29,6 +29,8 @@ G_BEGIN_DECLS
 
 typedef struct _EmpathyGstAudioSrc EmpathyGstAudioSrc;
 typedef struct _EmpathyGstAudioSrcClass EmpathyGstAudioSrcClass;
+typedef struct _EmpathyGstAudioSrcPrivate EmpathyGstAudioSrcPrivate;
+
 
 struct _EmpathyGstAudioSrcClass {
     GstBinClass parent_class;
@@ -36,6 +38,7 @@ struct _EmpathyGstAudioSrcClass {
 
 struct _EmpathyGstAudioSrc {
     GstBin parent;
+    EmpathyGstAudioSrcPrivate *priv;
 };
 
 GType empathy_audio_src_get_type (void);
@@ -58,6 +61,9 @@ GType empathy_audio_src_get_type (void);
     EmpathyGstAudioSrcClass))
 
 GstElement *empathy_audio_src_new (void);
+
+void empathy_audio_src_set_echo_cancel (EmpathyGstAudioSrc *src, gboolean
+  enable);
 
 void empathy_audio_src_set_volume (EmpathyGstAudioSrc *src, gdouble volume);
 gdouble empathy_audio_src_get_volume (EmpathyGstAudioSrc *src);

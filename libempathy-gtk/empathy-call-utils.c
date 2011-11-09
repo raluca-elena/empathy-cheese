@@ -250,15 +250,16 @@ empathy_call_new_with_streams (const gchar *contact,
 }
 
 void
-empathy_call_set_stream_properties (GstElement *element)
+empathy_call_set_stream_properties (GstElement *element,
+  gboolean echo_cancellation)
 {
   GstStructure *props;
   GSettings *gsettings_call;
-  gboolean echo_cancellation;
 
   gsettings_call = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
 
-  echo_cancellation = g_settings_get_boolean (gsettings_call,
+  echo_cancellation = echo_cancellation &&
+    g_settings_get_boolean (gsettings_call,
       EMPATHY_PREFS_CALL_ECHO_CANCELLATION);
 
   props = gst_structure_new ("props",

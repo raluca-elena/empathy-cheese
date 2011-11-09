@@ -53,8 +53,6 @@ enum {
 };
 
 /* private structure */
-typedef struct _EmpathyGstAudioSrcPrivate EmpathyGstAudioSrcPrivate;
-
 struct _EmpathyGstAudioSrcPrivate
 {
   gboolean dispose_has_run;
@@ -207,7 +205,7 @@ create_src (void)
   if (src == NULL)
     return NULL;
 
-  empathy_call_set_stream_properties (src);
+  empathy_call_set_stream_properties (src, TRUE);
 
   return src;
 }
@@ -220,6 +218,7 @@ empathy_audio_src_init (EmpathyGstAudioSrc *obj)
   GstElement *capsfilter;
   GstCaps *caps;
 
+  obj->priv = priv;
   priv->peak_level = -G_MAXDOUBLE;
   priv->lock = g_mutex_new ();
 
@@ -514,6 +513,13 @@ empathy_audio_src_new (void)
     registered = TRUE;
   }
   return gst_element_factory_make ("empathyaudiosrc", NULL);
+}
+
+void
+empathy_audio_src_set_echo_cancel (EmpathyGstAudioSrc *src,
+  gboolean enable)
+{
+  empathy_call_set_stream_properties (src->priv->src, enable);
 }
 
 void
