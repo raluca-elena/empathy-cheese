@@ -102,7 +102,6 @@ libempathy_handwritten_source =				\
 	empathy-tp-chat.c				\
 	empathy-tp-contact-factory.c			\
 	empathy-tp-contact-list.c			\
-	empathy-tp-file.c				\
 	empathy-tp-roomlist.c				\
 	empathy-tp-streamed-media.c			\
 	empathy-utils.c
