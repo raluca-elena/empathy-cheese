@@ -63,6 +63,8 @@ GstElement *empathy_audio_sink_new (void);
 void empathy_audio_sink_set_volume (EmpathyGstAudioSink *sink, gdouble volume);
 
 gdouble empathy_audio_sink_get_volume (EmpathyGstAudioSink *sink);
+void empathy_audio_sink_set_echo_cancel (EmpathyGstAudioSink *sink,
+  gboolean echo_cancel);
 
 G_END_DECLS
 

@@ -2868,7 +2868,8 @@ empathy_call_window_get_video_sink_pad (EmpathyCallWindow *self)
 
 /* Called with global lock held */
 static GstPad *
-empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self)
+empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self,
+  TfContent *content)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   GstPad *pad;
@@ -2892,6 +2893,13 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self)
           goto error;
         }
     }
+
+  /* For raw audio conferences assume that the producer of the raw data
+   * has already processed it, so turn off any echo cancellation and any
+   * other audio improvements that come with it */
+  empathy_audio_sink_set_echo_cancel (
+    EMPATHY_GST_AUDIO_SINK (priv->audio_output),
+    !empathy_call_window_content_is_raw (content));
 
   template = gst_element_class_get_pad_template (
     GST_ELEMENT_GET_CLASS (priv->audio_output), "sink%d");
@@ -3343,20 +3351,23 @@ empathy_call_window_video_probe_cb (GstPad *pad,
 /* Called from the streaming thread */
 static gboolean
 empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
-  GstPad *src, guint media_type, gpointer user_data)
+  TfContent *content, GstPad *src, gpointer user_data)
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
   gboolean retval = FALSE;
+  guint media_type;
 
   GstPad *pad;
 
   g_mutex_lock (priv->lock);
 
+  g_object_get (content, "media-type", &media_type, NULL);
+
   switch (media_type)
     {
       case TP_MEDIA_STREAM_TYPE_AUDIO:
-        pad = empathy_call_window_get_audio_sink_pad (self);
+        pad = empathy_call_window_get_audio_sink_pad (self, content);
         break;
       case TP_MEDIA_STREAM_TYPE_VIDEO:
         g_idle_add (empathy_call_window_show_video_output_cb, self);

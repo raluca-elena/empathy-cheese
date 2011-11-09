@@ -519,6 +519,7 @@ void
 empathy_audio_src_set_echo_cancel (EmpathyGstAudioSrc *src,
   gboolean enable)
 {
+  DEBUG ("Src echo cancellation setting: %s", enable ? "on" : "off");
   empathy_call_set_stream_properties (src->priv->src, enable);
 }
 

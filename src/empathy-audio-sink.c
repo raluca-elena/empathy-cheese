@@ -61,6 +61,7 @@ enum {
 struct _EmpathyGstAudioSinkPrivate
 {
   GstElement *sink;
+  gboolean echo_cancel;
 };
 
 #define EMPATHY_GST_AUDIO_SINK_GET_PRIVATE(o) \
@@ -71,6 +72,7 @@ static void
 empathy_audio_sink_init (EmpathyGstAudioSink *self)
 {
   self->priv = EMPATHY_GST_AUDIO_SINK_GET_PRIVATE (self);
+  self->priv->echo_cancel = TRUE;
 }
 
 static GstPad * empathy_audio_sink_request_new_pad (GstElement *self,
@@ -191,7 +193,7 @@ empathy_audio_sink_get_volume (EmpathyGstAudioSink *sink)
 }
 
 static GstElement *
-create_sink (void)
+create_sink (EmpathyGstAudioSink *self)
 {
   GstElement *sink;
   const gchar *description;
@@ -217,7 +219,7 @@ create_sink (void)
   if (sink == NULL)
     return NULL;
 
-  empathy_call_set_stream_properties (sink, TRUE);
+  empathy_call_set_stream_properties (sink, self->priv->echo_cancel);
 
   return sink;
 }
@@ -258,7 +260,7 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   gst_bin_add (GST_BIN (bin), volume);
 
-  self->priv->sink = create_sink ();
+  self->priv->sink = create_sink (self);
   if (self->priv->sink == NULL)
     goto error;
 
@@ -310,4 +312,15 @@ empathy_audio_sink_release_pad (GstElement *element,
 {
   gst_pad_set_active (pad, FALSE);
   gst_element_remove_pad (element, pad);
+}
+
+void
+empathy_audio_sink_set_echo_cancel (EmpathyGstAudioSink *sink,
+  gboolean echo_cancel)
+{
+  DEBUG ("Sink echo cancellation setting: %s", echo_cancel ? "on" : "off");
+  sink->priv->echo_cancel = echo_cancel;
+  if (sink->priv->sink != NULL)
+    empathy_call_set_stream_properties (sink->priv->sink,
+      sink->priv->echo_cancel);
 }

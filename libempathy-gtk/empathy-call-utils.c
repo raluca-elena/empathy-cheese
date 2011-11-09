@@ -255,18 +255,23 @@ empathy_call_set_stream_properties (GstElement *element,
 {
   GstStructure *props;
   GSettings *gsettings_call;
+  gboolean echo_cancellation_setting;
 
   gsettings_call = g_settings_new (EMPATHY_PREFS_CALL_SCHEMA);
 
-  echo_cancellation = echo_cancellation &&
-    g_settings_get_boolean (gsettings_call,
+  echo_cancellation_setting = g_settings_get_boolean (gsettings_call,
       EMPATHY_PREFS_CALL_ECHO_CANCELLATION);
+
+  DEBUG ("Echo cancellation: element allowed: %s, user enabled: %s",
+    echo_cancellation ? " yes" : "no",
+    echo_cancellation_setting ? " yes" : "no");
+
 
   props = gst_structure_new ("props",
       PA_PROP_MEDIA_ROLE, G_TYPE_STRING, "phone",
       NULL);
 
-  if (echo_cancellation)
+  if (echo_cancellation && echo_cancellation_setting)
     {
       gst_structure_set (props,
           "filter.want", G_TYPE_STRING, "echo-cancel",

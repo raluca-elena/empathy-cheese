@@ -479,7 +479,7 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
-      2, GST_TYPE_PAD, G_TYPE_UINT);
+      2, TF_TYPE_CONTENT, GST_TYPE_PAD);
 
   signals[CONTENT_ADDED] =
     g_signal_new ("content-added", G_TYPE_FROM_CLASS (klass),
@@ -763,13 +763,10 @@ on_tf_content_src_pad_added_cb (TfContent *content,
   FsCodec *codec,
   EmpathyCallHandler *handler)
 {
-  guint media_type;
   gboolean retval;
 
-  g_object_get (content, "media-type", &media_type, NULL);
-
   g_signal_emit (G_OBJECT (handler), signals[SRC_PAD_ADDED], 0,
-      pad, media_type, &retval);
+      content, pad, &retval);
 
   if (!retval)
     g_idle_add (src_pad_added_error_idle, g_object_ref (content));
