@@ -36,7 +36,6 @@
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-chat.h>
 #include <libempathy/empathy-tp-streamed-media.h>
-#include <libempathy/empathy-tp-file.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-gsettings.h>
 
@@ -422,9 +421,9 @@ reject_channel_claim_cb (GObject *source,
     {
       empathy_tp_chat_leave (user_data, "");
     }
-  else if (EMPATHY_IS_TP_FILE (user_data))
+  else if (TP_IS_FILE_TRANSFER_CHANNEL (user_data))
     {
-      empathy_tp_file_close (user_data);
+      tp_channel_close_async (user_data, NULL, NULL);
     }
 
 out:
@@ -1115,7 +1114,7 @@ approve_channels (TpSimpleApprover *approver,
         event_manager_call_channel_got_contact_cb,
         approval, NULL, G_OBJECT (self));
     }
-  else if (EMPATHY_IS_TP_FILE (channel))
+  else if (channel_type == TP_IFACE_QUARK_CHANNEL_TYPE_FILE_TRANSFER)
     {
       TpHandle handle;
 

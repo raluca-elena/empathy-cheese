@@ -182,7 +182,7 @@ handle_channels_cb (TpSimpleHandler *handler,
       if (tp_proxy_get_invalidated (channel) != NULL)
         continue;
 
-      if (!EMPATHY_IS_TP_FILE (channel))
+      if (!TP_IS_FILE_TRANSFER_CHANNEL (channel))
         continue;
 
       /* We handle only incoming FT */
