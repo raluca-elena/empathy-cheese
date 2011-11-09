@@ -76,7 +76,7 @@ G_DEFINE_TYPE (EmpathyFTHandler, empathy_ft_handler, G_TYPE_OBJECT)
 #define BUFFER_SIZE 4096
 
 enum {
-  PROP_TP_FILE = 1,
+  PROP_CHANNEL = 1,
   PROP_G_FILE,
   PROP_CONTACT,
   PROP_CONTENT_TYPE,
@@ -120,7 +120,7 @@ typedef struct {
   gboolean dispose_run;
 
   GFile *gfile;
-  EmpathyTpFile *tpfile;
+  TpFileTransferChannel *channel;
   GCancellable *cancellable;
   gboolean use_hash;
 
@@ -188,8 +188,8 @@ do_get_property (GObject *object,
       case PROP_G_FILE:
         g_value_set_object (value, priv->gfile);
         break;
-      case PROP_TP_FILE:
-        g_value_set_object (value, priv->tpfile);
+      case PROP_CHANNEL:
+        g_value_set_object (value, priv->channel);
         break;
       case PROP_USER_ACTION_TIME:
         g_value_set_int64 (value, priv->user_action_time);
@@ -233,8 +233,8 @@ do_set_property (GObject *object,
       case PROP_G_FILE:
         priv->gfile = g_value_dup_object (value);
         break;
-      case PROP_TP_FILE:
-        priv->tpfile = g_value_dup_object (value);
+      case PROP_CHANNEL:
+        priv->channel = g_value_dup_object (value);
         break;
       case PROP_USER_ACTION_TIME:
         priv->user_action_time = g_value_get_int64 (value);
@@ -264,10 +264,10 @@ do_dispose (GObject *object)
     priv->gfile = NULL;
   }
 
-  if (priv->tpfile != NULL) {
-    empathy_tp_file_close (priv->tpfile);
-    g_object_unref (priv->tpfile);
-    priv->tpfile = NULL;
+  if (priv->channel != NULL) {
+    tp_channel_close_async (TP_CHANNEL (priv->channel), NULL, NULL);
+    g_object_unref (priv->channel);
+    priv->channel = NULL;
   }
 
   if (priv->cancellable != NULL) {
@@ -410,15 +410,15 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   g_object_class_install_property (object_class, PROP_G_FILE, param_spec);
 
   /**
-   * EmpathyFTHandler:tp-file:
+   * EmpathyFTHandler:channel:
    *
-   * The underlying #EmpathyTpFile managing the transfer
+   * The underlying #TpFileTransferChannel managing the transfer
    */
-  param_spec = g_param_spec_object ("tp-file",
-    "tp-file", "The file's channel wrapper",
-    EMPATHY_TYPE_TP_FILE,
+  param_spec = g_param_spec_object ("channel",
+    "channel", "The file transfer channel",
+    TP_TYPE_FILE_TRANSFER_CHANNEL,
     G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
-  g_object_class_install_property (object_class, PROP_TP_FILE, param_spec);
+  g_object_class_install_property (object_class, PROP_CHANNEL, param_spec);
 
   param_spec = g_param_spec_int64 ("user-action-time", "user action time",
     "User action time",
@@ -432,7 +432,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
   /**
    * EmpathyFTHandler::transfer-started
    * @handler: the object which has received the signal
-   * @tp_file: the #EmpathyTpFile for which the transfer has started
+   * @channel: the #TpFileTransferChannel for which the transfer has started
    *
    * This signal is emitted when the actual transfer starts.
    */
@@ -441,12 +441,12 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
         g_cclosure_marshal_generic,
         G_TYPE_NONE,
-        1, EMPATHY_TYPE_TP_FILE);
+        1, TP_TYPE_FILE_TRANSFER_CHANNEL);
 
   /**
    * EmpathyFTHandler::transfer-done
    * @handler: the object which has received the signal
-   * @tp_file: the #EmpathyTpFile for which the transfer has started
+   * @channel: the #TpFileTransferChannel for which the transfer has started
    *
    * This signal will be emitted when the actual transfer is completed
    * successfully.
@@ -456,7 +456,7 @@ empathy_ft_handler_class_init (EmpathyFTHandlerClass *klass)
         G_SIGNAL_RUN_LAST, 0, NULL, NULL,
         g_cclosure_marshal_generic,
         G_TYPE_NONE,
-        1, EMPATHY_TYPE_TP_FILE);
+        1, TP_TYPE_FILE_TRANSFER_CHANNEL);
 
   /**
    * EmpathyFTHandler::transfer-error
@@ -635,34 +635,6 @@ emit_error_signal (EmpathyFTHandler *handler,
 }
 
 static void
-ft_transfer_operation_callback (EmpathyTpFile *tp_file,
-    const GError *error,
-    gpointer user_data)
-{
-  EmpathyFTHandler *handler = user_data;
-  EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
-
-  DEBUG ("Transfer operation callback, error %p", error);
-
-  if (error != NULL)
-    {
-      emit_error_signal (handler, error);
-    }
-  else
-    {
-      priv->is_completed = TRUE;
-      g_signal_emit (handler, signals[TRANSFER_DONE], 0, tp_file);
-
-      empathy_tp_file_close (tp_file);
-
-      if (empathy_ft_handler_is_incoming (handler) && priv->use_hash)
-        {
-          check_hash_incoming (handler);
-        }
-    }
-}
-
-static void
 update_remaining_time_and_speed (EmpathyFTHandler *handler,
     guint64 transferred_bytes)
 {
@@ -690,29 +662,132 @@ update_remaining_time_and_speed (EmpathyFTHandler *handler,
 }
 
 static void
-ft_transfer_progress_callback (EmpathyTpFile *tp_file,
-    guint64 transferred_bytes,
-    gpointer user_data)
+ft_transfer_transferred_bytes_cb (TpFileTransferChannel *channel,
+    GParamSpec *pspec,
+    EmpathyFTHandler *handler)
 {
-  EmpathyFTHandler *handler = user_data;
   EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
+  guint64 bytes;
 
   if (empathy_ft_handler_is_cancelled (handler))
     return;
 
-  if (transferred_bytes == 0)
+  bytes = tp_file_transfer_channel_get_transferred_bytes (channel);
+
+  if (priv->transferred_bytes == 0)
     {
       priv->last_update_time = empathy_time_get_current ();
-      g_signal_emit (handler, signals[TRANSFER_STARTED], 0, tp_file);
+      g_signal_emit (handler, signals[TRANSFER_STARTED], 0, channel);
     }
 
-  if (priv->transferred_bytes != transferred_bytes)
+  if (priv->transferred_bytes != bytes)
     {
-      update_remaining_time_and_speed (handler, transferred_bytes);
+      update_remaining_time_and_speed (handler, bytes);
 
       g_signal_emit (handler, signals[TRANSFER_PROGRESS], 0,
-          transferred_bytes, priv->total_bytes, priv->remaining_time,
+          bytes, priv->total_bytes, priv->remaining_time,
           priv->speed);
+    }
+}
+
+static void
+ft_transfer_provide_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpFileTransferChannel *channel = TP_FILE_TRANSFER_CHANNEL (source);
+  EmpathyFTHandler *handler = user_data;
+  GError *error = NULL;
+
+  if (!tp_file_transfer_channel_provide_file_finish (channel, result, &error))
+    {
+      emit_error_signal (handler, error);
+      g_clear_error (&error);
+    }
+}
+
+static void
+ft_transfer_accept_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  TpFileTransferChannel *channel = TP_FILE_TRANSFER_CHANNEL (source);
+  EmpathyFTHandler *handler = user_data;
+  GError *error = NULL;
+
+  if (!tp_file_transfer_channel_accept_file_finish (channel, result, &error))
+    {
+      emit_error_signal (handler, error);
+      g_clear_error (&error);
+    }
+}
+
+static GError *
+error_from_state_change_reason (TpFileTransferStateChangeReason reason)
+{
+  const char *string;
+  GError *retval = NULL;
+
+  string = NULL;
+
+  switch (reason)
+    {
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_NONE:
+        string = _("No reason was specified");
+        break;
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_REQUESTED:
+        string = _("The change in state was requested");
+        break;
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_LOCAL_STOPPED:
+        string = _("You canceled the file transfer");
+        break;
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_REMOTE_STOPPED:
+        string = _("The other participant canceled the file transfer");
+        break;
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_LOCAL_ERROR:
+        string = _("Error while trying to transfer the file");
+        break;
+      case TP_FILE_TRANSFER_STATE_CHANGE_REASON_REMOTE_ERROR:
+        string = _("The other participant is unable to transfer the file");
+        break;
+      default:
+        string = _("Unknown reason");
+        break;
+    }
+
+  retval = g_error_new_literal (EMPATHY_FT_ERROR_QUARK,
+      EMPATHY_FT_ERROR_TP_ERROR, string);
+
+  return retval;
+}
+
+static void
+ft_transfer_state_cb (TpFileTransferChannel *channel,
+    GParamSpec *pspec,
+    EmpathyFTHandler *handler)
+{
+  EmpathyFTHandlerPriv *priv = GET_PRIV (handler);
+  TpFileTransferStateChangeReason reason;
+  TpFileTransferState state = tp_file_transfer_channel_get_state (
+      channel, &reason);
+
+  if (state == TP_FILE_TRANSFER_STATE_COMPLETED)
+    {
+      priv->is_completed = TRUE;
+      g_signal_emit (handler, signals[TRANSFER_DONE], 0, channel);
+
+      tp_channel_close_async (TP_CHANNEL (channel), NULL, NULL);
+
+      if (empathy_ft_handler_is_incoming (handler) && priv->use_hash)
+        {
+          check_hash_incoming (handler);
+        }
+    }
+  else if (state == TP_FILE_TRANSFER_STATE_CANCELLED)
+    {
+      GError *error = error_from_state_change_reason (reason);
+      emit_error_signal (handler, error);
+      g_clear_error (&error);
     }
 }
 
@@ -745,11 +820,15 @@ ft_handler_create_channel_cb (GObject *source,
       return;
     }
 
-  priv->tpfile = EMPATHY_TP_FILE (channel);
+  priv->channel = TP_FILE_TRANSFER_CHANNEL (channel);
 
-  empathy_tp_file_offer (priv->tpfile, priv->gfile, priv->cancellable,
-      ft_transfer_progress_callback, handler,
-      ft_transfer_operation_callback, handler);
+  tp_g_signal_connect_object (priv->channel, "notify::state",
+      G_CALLBACK (ft_transfer_state_cb), handler, 0);
+  tp_g_signal_connect_object (priv->channel, "notify::transferred-bytes",
+      G_CALLBACK (ft_transfer_transferred_bytes_cb), handler, 0);
+
+  tp_file_transfer_channel_provide_file_async (priv->channel, priv->gfile,
+      ft_transfer_provide_cb, handler);
 }
 
 static void
@@ -1332,7 +1411,7 @@ empathy_ft_handler_new_outgoing (EmpathyContact *contact,
 
 /**
  * empathy_ft_handler_new_incoming:
- * @tp_file: the #EmpathyTpFile wrapping the incoming channel
+ * @channel: the #TpFileTransferChannel proxy to the incoming channel
  * @callback: callback to be called when the handler has been created
  * @user_data: user data to be passed to @callback
  *
@@ -1342,19 +1421,18 @@ empathy_ft_handler_new_outgoing (EmpathyContact *contact,
  * is ready.
  */
 void
-empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
+empathy_ft_handler_new_incoming (TpFileTransferChannel *channel,
     EmpathyFTHandlerReadyCallback callback,
     gpointer user_data)
 {
   EmpathyFTHandler *handler;
   CallbacksData *data;
-  TpFileTransferChannel *ft_chan = (TpFileTransferChannel *) tp_file;
   EmpathyFTHandlerPriv *priv;
 
-  g_return_if_fail (EMPATHY_IS_TP_FILE (tp_file));
+  g_return_if_fail (TP_IS_FILE_TRANSFER_CHANNEL (channel));
 
   handler = g_object_new (EMPATHY_TYPE_FT_HANDLER,
-      "tp-file", tp_file, NULL);
+      "channel", channel, NULL);
 
   priv = GET_PRIV (handler);
 
@@ -1363,20 +1441,20 @@ empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
   data->user_data = user_data;
   data->handler = g_object_ref (handler);
 
-  priv->total_bytes = tp_file_transfer_channel_get_size (ft_chan);
+  priv->total_bytes = tp_file_transfer_channel_get_size (channel);
 
   priv->transferred_bytes = tp_file_transfer_channel_get_transferred_bytes (
-      ft_chan);
+      channel);
 
-  priv->filename = g_strdup (tp_file_transfer_channel_get_filename (ft_chan));
+  priv->filename = g_strdup (tp_file_transfer_channel_get_filename (channel));
 
   priv->content_type = g_strdup (tp_file_transfer_channel_get_mime_type (
-      ft_chan));
+      channel));
 
   priv->description = g_strdup (tp_file_transfer_channel_get_description (
-      ft_chan));
+      channel));
 
-  tp_cli_dbus_properties_call_get_all (tp_file,
+  tp_cli_dbus_properties_call_get_all (channel,
       -1, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER,
       channel_get_all_properties_cb, data, NULL, G_OBJECT (handler));
 }
@@ -1397,16 +1475,20 @@ empathy_ft_handler_start_transfer (EmpathyFTHandler *handler)
 
   priv = GET_PRIV (handler);
 
-  if (priv->tpfile == NULL)
+  if (priv->channel == NULL)
     {
       ft_handler_complete_request (handler);
     }
   else
     {
       /* TODO: add support for resume. */
-      empathy_tp_file_accept (priv->tpfile, 0, priv->gfile, priv->cancellable,
-          ft_transfer_progress_callback, handler,
-          ft_transfer_operation_callback, handler);
+      tp_file_transfer_channel_accept_file_async (priv->channel,
+          priv->gfile, 0, ft_transfer_accept_cb, handler);
+
+      tp_g_signal_connect_object (priv->channel, "notify::state",
+          G_CALLBACK (ft_transfer_state_cb), handler, 0);
+      tp_g_signal_connect_object (priv->channel, "notify::transferred-bytes",
+          G_CALLBACK (ft_transfer_transferred_bytes_cb), handler, 0);
     }
 }
 
@@ -1427,13 +1509,13 @@ empathy_ft_handler_cancel_transfer (EmpathyFTHandler *handler)
 
   priv = GET_PRIV (handler);
 
-  /* if we don't have an EmpathyTpFile, we are hashing, so
+  /* if we don't have a channel, we are hashing, so
    * we can just cancel the GCancellable to stop it.
    */
-  if (priv->tpfile == NULL)
+  if (priv->channel == NULL)
     g_cancellable_cancel (priv->cancellable);
   else
-    empathy_tp_file_cancel (priv->tpfile);
+    tp_channel_close_async (TP_CHANNEL (priv->channel), NULL, NULL);
 }
 
 /**
@@ -1587,10 +1669,10 @@ empathy_ft_handler_is_incoming (EmpathyFTHandler *handler)
 
   priv = GET_PRIV (handler);
 
-  if (priv->tpfile == NULL)
+  if (priv->channel == NULL)
     return FALSE;
 
-  return !tp_channel_get_requested ((TpChannel *) priv->tpfile);
+  return !tp_channel_get_requested ((TpChannel *) priv->channel);
 }
 
 /**

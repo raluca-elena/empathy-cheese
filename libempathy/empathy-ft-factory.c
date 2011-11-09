@@ -186,7 +186,7 @@ handle_channels_cb (TpSimpleHandler *handler,
         continue;
 
       /* We handle only incoming FT */
-      empathy_ft_handler_new_incoming ((EmpathyTpFile *) channel,
+      empathy_ft_handler_new_incoming ((TpFileTransferChannel *) channel,
           ft_handler_incoming_ready_cb, self);
     }
 
