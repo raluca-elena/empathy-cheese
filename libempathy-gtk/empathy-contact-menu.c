@@ -269,13 +269,10 @@ static GtkWidget *
 empathy_contact_block_menu_item_new (EmpathyContact *contact)
 {
 	GtkWidget *item;
-	EmpathyContactManager *manager;
 	TpConnection *connection;
 	TpContact *tp_contact;
 
 	g_return_val_if_fail (EMPATHY_IS_CONTACT (contact), NULL);
-
-	manager = empathy_contact_manager_dup_singleton ();
 
 	if (!empathy_contact_manager_initialized ()) {
 		return NULL;
