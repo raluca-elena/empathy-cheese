@@ -2691,14 +2691,16 @@ empathy_call_window_channel_closed_cb (EmpathyCallHandler *handler,
 }
 
 static gboolean
-empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
-    GstPad *sink,
-    FsMediaType media_type,
+empathy_call_window_content_removed_cb (EmpathyCallHandler *handler,
+    TfContent *content,
     EmpathyCallWindow *self)
 {
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
+  FsMediaType media_type;
 
   DEBUG ("removing content");
+
+  g_object_get (content, "media-type", &media_type, NULL);
 
   /*
    * This assumes that there is only one video stream per channel...
@@ -2718,7 +2720,6 @@ empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
           gst_bin_remove (GST_BIN (priv->pipeline), output);
           gst_bin_remove (GST_BIN (priv->pipeline), priv->funnel);
           priv->funnel = NULL;
-          return TRUE;
         }
     }
   else if (media_type == FS_MEDIA_TYPE_AUDIO)
@@ -2729,11 +2730,14 @@ empathy_call_window_sink_removed_cb (EmpathyCallHandler *handler,
 
           gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_output);
           priv->audio_output = NULL;
-          return TRUE;
         }
     }
+  else
+    {
+      g_assert_not_reached ();
+    }
 
-  return FALSE;
+  return TRUE;
 }
 
 static void
@@ -3401,13 +3405,17 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
 }
 
 static gboolean
-empathy_call_window_sink_added_cb (EmpathyCallHandler *handler,
-  GstPad *sink, FsMediaType media_type, gpointer user_data)
+empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
+  TfContent *content, gpointer user_data)
 {
   EmpathyCallWindow *self = EMPATHY_CALL_WINDOW (user_data);
   EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  GstPad *pad;
+  GstPad *sink, *pad;
+  FsMediaType media_type;
   gboolean retval = FALSE;
+
+  g_object_get (content, "media-type", &media_type, "sink-pad", &sink, NULL);
+  g_assert (sink != NULL);
 
   switch (media_type)
     {
@@ -3461,6 +3469,7 @@ empathy_call_window_sink_added_cb (EmpathyCallHandler *handler,
         g_assert_not_reached ();
     }
 
+  gst_object_unref (sink);
   return retval;
 }
 
@@ -3705,10 +3714,10 @@ empathy_call_window_connect_handler (EmpathyCallWindow *self)
     G_CALLBACK (empathy_call_window_channel_closed_cb), self);
   g_signal_connect (priv->handler, "src-pad-added",
     G_CALLBACK (empathy_call_window_src_added_cb), self);
-  g_signal_connect (priv->handler, "sink-pad-added",
-    G_CALLBACK (empathy_call_window_sink_added_cb), self);
-  g_signal_connect (priv->handler, "sink-pad-removed",
-    G_CALLBACK (empathy_call_window_sink_removed_cb), self);
+  g_signal_connect (priv->handler, "content-added",
+    G_CALLBACK (empathy_call_window_content_added_cb), self);
+  g_signal_connect (priv->handler, "content-removed",
+    G_CALLBACK (empathy_call_window_content_removed_cb), self);
 
   /* We connect to ::call-channel unconditionally since we'll
    * get new channels if we hangup and redial or if we reuse the

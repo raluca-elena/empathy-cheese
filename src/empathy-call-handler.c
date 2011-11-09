@@ -47,8 +47,8 @@ enum {
   CONFERENCE_ADDED,
   CONFERENCE_REMOVED,
   SRC_PAD_ADDED,
-  SINK_PAD_ADDED,
-  SINK_PAD_REMOVED,
+  CONTENT_ADDED,
+  CONTENT_REMOVED,
   CLOSED,
   CANDIDATES_CHANGED,
   STATE_CHANGED,
@@ -481,19 +481,19 @@ empathy_call_handler_class_init (EmpathyCallHandlerClass *klass)
       G_TYPE_BOOLEAN,
       2, GST_TYPE_PAD, G_TYPE_UINT);
 
-  signals[SINK_PAD_ADDED] =
-    g_signal_new ("sink-pad-added", G_TYPE_FROM_CLASS (klass),
+  signals[CONTENT_ADDED] =
+    g_signal_new ("content-added", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
-      2, GST_TYPE_PAD, G_TYPE_UINT);
+      1, TF_TYPE_CONTENT);
 
-  signals[SINK_PAD_REMOVED] =
-    g_signal_new ("sink-pad-removed", G_TYPE_FROM_CLASS (klass),
+  signals[CONTENT_REMOVED] =
+    g_signal_new ("content-removed", G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       g_cclosure_marshal_generic,
       G_TYPE_BOOLEAN,
-      2, GST_TYPE_PAD, G_TYPE_UINT);
+      1, TF_TYPE_CONTENT);
 
   signals[CLOSED] =
     g_signal_new ("closed", G_TYPE_FROM_CLASS (klass),
@@ -806,7 +806,6 @@ on_tf_channel_content_added_cb (TfChannel *tfchannel,
   EmpathyCallHandler *handler)
 {
   FsMediaType mtype;
-  GstPad *spad;
   FsSession *session;
 //  FsStream *fs_stream;
   FsCodec *codec;
@@ -822,11 +821,8 @@ on_tf_channel_content_added_cb (TfChannel *tfchannel,
       G_CALLBACK (on_tf_content_stop_sending_cb), handler);
 #endif
 
-  g_object_get (content, "media-type", &mtype,
-    "sink-pad", &spad, NULL);
-
-  g_signal_emit (G_OBJECT (handler), signals[SINK_PAD_ADDED], 0,
-      spad, mtype, &retval);
+  g_signal_emit (G_OBJECT (handler), signals[CONTENT_ADDED], 0,
+    content, &retval);
 
  if (!retval)
       tf_content_error (content, 0 /* FIXME */,
@@ -851,6 +847,8 @@ on_tf_channel_content_added_cb (TfChannel *tfchannel,
  fs_codec_list_destroy (codecs);
  tp_clear_object (&fs_stream);
 */
+
+  g_object_get (content, "media-type", &mtype, NULL);
 
  if (mtype == FS_MEDIA_TYPE_VIDEO)
    {
@@ -878,8 +876,6 @@ on_tf_channel_content_added_cb (TfChannel *tfchannel,
        g_signal_emit (G_OBJECT (handler), signals[RESOLUTION_CHANGED], 0,
            width, height);
    }
-
- gst_object_unref (spad);
 }
 
 static void
@@ -887,17 +883,12 @@ on_tf_channel_content_removed_cb (TfChannel *tfchannel,
   TfContent *content,
   EmpathyCallHandler *handler)
 {
-  FsMediaType mtype;
-  GstPad *spad;
   gboolean retval;
 
   DEBUG ("removing content");
 
-  g_object_get (content, "media-type", &mtype,
-    "sink-pad", &spad, NULL);
-
-  g_signal_emit (G_OBJECT (handler), signals[SINK_PAD_REMOVED], 0,
-      spad, mtype, &retval);
+  g_signal_emit (G_OBJECT (handler), signals[CONTENT_REMOVED], 0,
+      content, &retval);
 
   if (!retval)
     {
