@@ -1532,7 +1532,7 @@ expand_idle_foreach_cb (GtkTreeModel *model,
       EMPATHY_INDIVIDUAL_STORE_COL_NAME, &name,
       -1);
 
-  if (is_group == FALSE)
+  if (!is_group)
     {
       g_free (name);
       return FALSE;
@@ -1541,9 +1541,9 @@ expand_idle_foreach_cb (GtkTreeModel *model,
   priv = GET_PRIV (self);
 
   if (g_hash_table_lookup_extended (priv->expand_groups, name, NULL,
-      &should_expand) == TRUE)
+      &should_expand))
     {
-      if (GPOINTER_TO_INT (should_expand) == TRUE)
+      if (GPOINTER_TO_INT (should_expand))
         gtk_tree_view_expand_row (GTK_TREE_VIEW (self), path, FALSE);
       else
         gtk_tree_view_collapse_row (GTK_TREE_VIEW (self), path);
@@ -1622,8 +1622,8 @@ individual_view_row_has_child_toggled_cb (GtkTreeModel *model,
    * gtk_tree_model_filter_refilter (). We add the rows to expand/contract to
    * a hash table, and expand or contract them as appropriate all at once in
    * an idle handler which iterates over all the group rows. */
-  if (g_hash_table_lookup_extended (priv->expand_groups, name, NULL,
-      &will_expand) == FALSE ||
+  if (!g_hash_table_lookup_extended (priv->expand_groups, name, NULL,
+      &will_expand) ||
       GPOINTER_TO_INT (will_expand) != should_expand)
     {
       g_hash_table_insert (priv->expand_groups, g_strdup (name),
@@ -1709,7 +1709,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
 
   /* We're only giving the visibility wrt filtering here, not things like
    * presence. */
-  if (priv->show_untrusted == FALSE &&
+  if (!priv->show_untrusted &&
       folks_individual_get_trust_level (individual) == FOLKS_TRUST_LEVEL_NONE)
     {
       return FALSE;
@@ -1729,12 +1729,12 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
     }
   g_clear_object (&iter);
 
-  if (contains_interesting_persona == FALSE)
+  if (!contains_interesting_persona)
     return FALSE;
 
   is_favorite = folks_favourite_details_get_is_favourite (
       FOLKS_FAVOURITE_DETAILS (individual));
-  if (is_searching == FALSE) {
+  if (!is_searching) {
     if (is_favorite && is_fake_group &&
         !tp_strdiff (group, EMPATHY_INDIVIDUAL_STORE_FAVORITE))
         /* Always display favorite contacts in the favorite group */
@@ -1813,7 +1813,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       g_free (group);
 
       /* FIXME: Work around bgo#626552/bgo#621076 */
-      if (visible == TRUE)
+      if (visible)
         {
           GtkTreePath *path = gtk_tree_model_get_path (model, iter);
           individual_view_verify_group_visibility (self, path);
@@ -1854,7 +1854,7 @@ individual_view_filter_visible_func (GtkTreeModel *model,
       g_free (group);
 
       /* show group if it has at least one visible contact in it */
-      if (visible == TRUE)
+      if (visible)
         return TRUE;
     }
 
