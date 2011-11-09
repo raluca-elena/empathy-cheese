@@ -2627,6 +2627,9 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
   if (individual == NULL)
     return NULL;
 
+  if (!empathy_folks_individual_contains_contact (individual))
+    goto out;
+
   /* If any of the Individual's personas can be removed, add an option to
    * remove. This will act as a best-effort option. If any Personas cannot be
    * removed from the server, then this option will just be inactive upon
@@ -2681,6 +2684,7 @@ empathy_individual_view_get_individual_menu (EmpathyIndividualView *view)
   g_signal_connect (menu, "link-contacts-activated",
       (GCallback) individual_menu_link_contacts_activated_cb, view);
 
+out:
   g_object_unref (individual);
 
   return menu;
