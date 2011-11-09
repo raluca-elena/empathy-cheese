@@ -74,6 +74,7 @@ typedef struct
 
   gboolean show_offline;
   gboolean show_untrusted;
+  gboolean show_uninteresting;
 
   GtkTreeModelFilter *filter;
   GtkWidget *search_widget;
@@ -114,6 +115,7 @@ enum
   PROP_INDIVIDUAL_FEATURES,
   PROP_SHOW_OFFLINE,
   PROP_SHOW_UNTRUSTED,
+  PROP_SHOW_UNINTERESTING,
 };
 
 /* TODO: re-add DRAG_TYPE_CONTACT_ID, for the case that we're dragging around
@@ -1701,7 +1703,7 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
   EmpathyLiveSearch *live = EMPATHY_LIVE_SEARCH (priv->search_widget);
   GeeSet *personas;
   GeeIterator *iter;
-  gboolean is_favorite, contains_interesting_persona = FALSE;
+  gboolean is_favorite;
 
   /* Always display individuals having pending events */
   if (event_count > 0)
@@ -1715,22 +1717,28 @@ individual_view_is_visible_individual (EmpathyIndividualView *self,
       return FALSE;
     }
 
-  /* Hide all individuals which consist entirely of uninteresting personas */
-  personas = folks_individual_get_personas (individual);
-  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
-  while (!contains_interesting_persona && gee_iterator_next (iter))
+  if (!priv->show_uninteresting)
     {
-      FolksPersona *persona = gee_iterator_get (iter);
+      gboolean contains_interesting_persona = FALSE;
 
-      if (empathy_folks_persona_is_interesting (persona))
-        contains_interesting_persona = TRUE;
+      /* Hide all individuals which consist entirely of uninteresting
+       * personas */
+      personas = folks_individual_get_personas (individual);
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (!contains_interesting_persona && gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
 
-      g_clear_object (&persona);
+          if (empathy_folks_persona_is_interesting (persona))
+            contains_interesting_persona = TRUE;
+
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter);
+
+      if (!contains_interesting_persona)
+        return FALSE;
     }
-  g_clear_object (&iter);
-
-  if (!contains_interesting_persona)
-    return FALSE;
 
   is_favorite = folks_favourite_details_get_is_favourite (
       FOLKS_FAVOURITE_DETAILS (individual));
@@ -2078,6 +2086,9 @@ individual_view_get_property (GObject *object,
     case PROP_SHOW_UNTRUSTED:
       g_value_set_boolean (value, priv->show_untrusted);
       break;
+    case PROP_SHOW_UNINTERESTING:
+      g_value_set_boolean (value, priv->show_uninteresting);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
       break;
@@ -2112,6 +2123,9 @@ individual_view_set_property (GObject *object,
       empathy_individual_view_set_show_untrusted (view,
           g_value_get_boolean (value));
       break;
+    case PROP_SHOW_UNINTERESTING:
+      empathy_individual_view_set_show_uninteresting (view,
+          g_value_get_boolean (value));
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
       break;
@@ -2198,6 +2212,13 @@ empathy_individual_view_class_init (EmpathyIndividualViewClass *klass)
           "Whether the view should display untrusted individuals; "
           "those who could not be who they say they are.",
           TRUE, G_PARAM_READWRITE));
+  g_object_class_install_property (object_class,
+      PROP_SHOW_UNINTERESTING,
+      g_param_spec_boolean ("show-uninteresting",
+          "Show Uninteresting Individuals",
+          "Whether the view should not filter out individuals using "
+          "empathy_folks_persona_is_interesting.",
+          FALSE, G_PARAM_READWRITE));
 
   g_type_class_add_private (object_class, sizeof (EmpathyIndividualViewPriv));
 }
@@ -2211,6 +2232,7 @@ empathy_individual_view_init (EmpathyIndividualView *view)
   view->priv = priv;
 
   priv->show_untrusted = TRUE;
+  priv->show_uninteresting = FALSE;
 
   /* Get saved group states. */
   empathy_contact_groups_get_all ();
@@ -2452,12 +2474,12 @@ got_avatar (GObject *source_object,
 {
   FolksIndividual *individual = FOLKS_INDIVIDUAL (source_object);
   EmpathyIndividualView *view = user_data;
+  EmpathyIndividualViewPriv *priv = GET_PRIV (view);
   GdkPixbuf *avatar;
   EmpathyIndividualManager *manager;
   gchar *text;
   GtkWindow *parent;
   GeeSet *personas;
-  GeeIterator *iter;
   guint persona_count = 0;
   gboolean can_block;
   GError *error = NULL;
@@ -2476,21 +2498,31 @@ got_avatar (GObject *source_object,
    * so we still display the remove dialog. */
 
   personas = folks_individual_get_personas (individual);
-  iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+
+  if (priv->show_uninteresting)
+    {
+      persona_count = gee_collection_get_size (GEE_COLLECTION (personas));
+    }
+  else
+    {
+      GeeIterator *iter;
+
+      iter = gee_iterable_iterator (GEE_ITERABLE (personas));
+      while (persona_count < 2 && gee_iterator_next (iter))
+        {
+          FolksPersona *persona = gee_iterator_get (iter);
+
+          if (empathy_folks_persona_is_interesting (persona))
+            persona_count++;
+
+          g_clear_object (&persona);
+        }
+      g_clear_object (&iter);
+    }
 
   /* If we have more than one TpfPersona, display a different message
    * ensuring the user knows that *all* of the meta-contacts' personas will
    * be removed. */
-  while (persona_count < 2 && gee_iterator_next (iter))
-    {
-      FolksPersona *persona = gee_iterator_get (iter);
-
-      if (empathy_folks_persona_is_interesting (persona))
-        persona_count++;
-
-      g_clear_object (&persona);
-    }
-  g_clear_object (&iter);
 
   if (persona_count < 2)
     {
@@ -2877,4 +2909,20 @@ empathy_individual_view_select_first (EmpathyIndividualView *self)
 
       gtk_tree_selection_select_iter (selection, &iter);
     }
+}
+
+void
+empathy_individual_view_set_show_uninteresting (EmpathyIndividualView *self,
+    gboolean show_uninteresting)
+{
+  EmpathyIndividualViewPriv *priv;
+
+  g_return_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (self));
+
+  priv = GET_PRIV (self);
+
+  priv->show_uninteresting = show_uninteresting;
+
+  g_object_notify (G_OBJECT (self), "show-uninteresting");
+  gtk_tree_model_filter_refilter (priv->filter);
 }
