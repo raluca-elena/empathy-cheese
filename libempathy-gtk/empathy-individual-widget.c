@@ -235,6 +235,9 @@ details_update_show (EmpathyIndividualWidget *self,
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (self);
   GList *info, *l;
   guint n_rows = 0;
+  GtkWidget *channels_label;
+  TpConnection *conn;
+  TpAccount *account;
 
   info = tp_contact_get_contact_info (contact);
   info = g_list_sort (info, (GCompareFunc) empathy_contact_info_field_cmp);
@@ -287,6 +290,25 @@ details_update_show (EmpathyIndividualWidget *self,
 
       n_rows++;
     }
+
+  conn = tp_contact_get_connection (contact);
+  account = tp_connection_get_account (conn);
+
+  channels_label = empathy_contact_info_create_channel_list_label (account,
+      info, n_rows);
+
+  if (channels_label != NULL)
+    {
+      GtkWidget *title_widget;
+
+      title_widget =  gtk_label_new (_("Channels:"));
+
+      add_row (GTK_GRID (priv->grid_details), n_rows, title_widget,
+          channels_label);
+
+      n_rows++;
+    }
+
   g_list_free (info);
 
   return n_rows;
