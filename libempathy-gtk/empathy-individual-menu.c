@@ -36,6 +36,7 @@
 #include <libempathy/empathy-individual-manager.h>
 #include <libempathy/empathy-chatroom-manager.h>
 #include <libempathy/empathy-utils.h>
+#include <libempathy/empathy-contact-list.h>
 
 #include "empathy-account-selector-dialog.h"
 #include "empathy-individual-menu.h"
