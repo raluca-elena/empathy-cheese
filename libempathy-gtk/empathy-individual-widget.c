@@ -243,6 +243,10 @@ details_update_show (EmpathyIndividualWidget *self,
           continue;
         }
 
+      /* Skip empty field */
+      if (tp_str_empty (value))
+        continue;
+
       /* Add Title */
       title = empathy_contact_info_field_label (field->field_name,
           field->parameters);
