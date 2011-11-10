@@ -151,7 +151,7 @@ chat_text_view_event_cb (EmpathyChatTextView *view,
 		return FALSE;
 	}
 
-	gdk_window_get_pointer (win, &x, &y, NULL);
+	gdk_window_get_device_position (win, event->device, &x, &y, NULL);
 
 	/* Get the iter where the cursor is at */
 	gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (view), type,
