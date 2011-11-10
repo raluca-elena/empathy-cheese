@@ -2331,7 +2331,10 @@ chat_input_populate_popup_cb (GtkTextView *view,
 	switch (priv->most_recent_event_type) {
 	    case GDK_BUTTON_PRESS:
 		/* get the location from the pointer */
-		gtk_widget_get_pointer (GTK_WIDGET (view), &x, &y);
+		gdk_window_get_device_position (gtk_widget_get_window (GTK_WIDGET (view)),
+			gdk_device_manager_get_client_pointer (gdk_display_get_device_manager (
+				gtk_widget_get_display (GTK_WIDGET (view)))), &x, &y, NULL);
+
 		gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (view),
 						       GTK_TEXT_WINDOW_WIDGET,
 						       x, y,

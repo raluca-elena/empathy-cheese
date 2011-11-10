@@ -286,7 +286,9 @@ chat_text_view_populate_popup (EmpathyChatTextView *view,
 	table = gtk_text_buffer_get_tag_table (priv->buffer);
 	tag = gtk_text_tag_table_lookup (table, EMPATHY_CHAT_TEXT_VIEW_TAG_LINK);
 
-	gtk_widget_get_pointer (GTK_WIDGET (view), &x, &y);
+	gdk_window_get_device_position (gtk_widget_get_window (GTK_WIDGET (view)),
+		gdk_device_manager_get_client_pointer (gdk_display_get_device_manager (
+			gtk_widget_get_display (GTK_WIDGET (view)))), &x, &y, NULL);
 
 	gtk_text_view_window_to_buffer_coords (GTK_TEXT_VIEW (view),
 					       GTK_TEXT_WINDOW_WIDGET,
