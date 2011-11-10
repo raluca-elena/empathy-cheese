@@ -189,7 +189,7 @@ update_weak_contact (EmpathyIndividualWidget *self)
               presence_type_cur = folks_presence_details_get_presence_type (
                   presence);
 
-              if (folks_presence_details_typecmp (
+              if (tp_contact == NULL || folks_presence_details_typecmp (
                     presence_type_cur, presence_type) > 0)
                 {
                   presence_type = presence_type_cur;
