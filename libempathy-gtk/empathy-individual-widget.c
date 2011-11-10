@@ -213,6 +213,21 @@ update_weak_contact (EmpathyIndividualWidget *self)
     }
 }
 
+static void
+add_row (GtkGrid *grid,
+    guint row,
+    GtkWidget *title,
+    GtkWidget *value)
+{
+  gtk_grid_attach (grid, title, 0, row, 1, 1);
+  gtk_misc_set_alignment (GTK_MISC (title), 0, 0.5);
+  gtk_widget_show (title);
+
+  gtk_grid_attach (grid, value, 1, row, 1, 1);
+  gtk_misc_set_alignment (GTK_MISC (value), 0, 0.5);
+  gtk_widget_show (value);
+}
+
 static guint
 details_update_show (EmpathyIndividualWidget *self,
     TpContact *contact)
@@ -229,7 +244,7 @@ details_update_show (EmpathyIndividualWidget *self,
       gchar *title;
       const gchar *value;
       EmpathyContactInfoFormatFunc format;
-      GtkWidget *w;
+      GtkWidget *title_widget, *value_widget;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
         continue;
@@ -250,32 +265,25 @@ details_update_show (EmpathyIndividualWidget *self,
       /* Add Title */
       title = empathy_contact_info_field_label (field->field_name,
           field->parameters);
-      w = gtk_label_new (title);
-      g_free (title);
-      gtk_grid_attach (GTK_GRID (priv->grid_details),
-          w, 0, n_rows, 1, 1);
-      gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-      gtk_widget_show (w);
+      title_widget = gtk_label_new (title);
 
       /* Add Value */
-      w = gtk_label_new (value);
+      value_widget = gtk_label_new (value);
 
       if (format != NULL)
         {
           gchar *markup;
 
           markup = format (field->field_value);
-          gtk_label_set_markup (GTK_LABEL (w), markup);
+          gtk_label_set_markup (GTK_LABEL (value_widget), markup);
           g_free (markup);
         }
 
-      gtk_label_set_selectable (GTK_LABEL (w),
+      gtk_label_set_selectable (GTK_LABEL (value_widget),
           (priv->flags & EMPATHY_INDIVIDUAL_WIDGET_FOR_TOOLTIP) ? FALSE : TRUE);
 
-      gtk_grid_attach (GTK_GRID (priv->grid_details),
-          w, 1, n_rows, 1, 1);
-      gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-      gtk_widget_show (w);
+      add_row (GTK_GRID (priv->grid_details), n_rows, title_widget,
+          value_widget);
 
       n_rows++;
     }
