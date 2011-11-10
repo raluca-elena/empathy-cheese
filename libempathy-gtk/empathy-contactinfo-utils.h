@@ -22,6 +22,8 @@
 #define __EMPATHY_CONTACTINFO_UTILS_H__
 
 #include <glib.h>
+#include <gtk/gtk.h>
+
 #include <telepathy-glib/connection.h>
 
 G_BEGIN_DECLS
@@ -38,6 +40,10 @@ gint empathy_contact_info_field_cmp (TpContactInfoField *field1,
     TpContactInfoField *field2);
 gint empathy_contact_info_field_spec_cmp (TpContactInfoFieldSpec *spec1,
     TpContactInfoFieldSpec *spec2);
+
+GtkWidget * empathy_contact_info_create_channel_list_label (TpAccount *account,
+    GList *info,
+    guint row);
 
 G_END_DECLS
 

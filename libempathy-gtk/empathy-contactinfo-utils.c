@@ -30,9 +30,11 @@
 #include <telepathy-glib/util.h>
 
 #include <libempathy/empathy-time.h>
+#include <libempathy/empathy-request-util.h>
 
 #include "empathy-contactinfo-utils.h"
 #include "empathy-string-parser.h"
+#include "empathy-ui-utils.h"
 
 static gchar *
 linkify_first_value (GStrv values)
@@ -263,4 +265,69 @@ empathy_contact_info_field_spec_cmp (TpContactInfoFieldSpec *spec1,
     TpContactInfoFieldSpec *spec2)
 {
     return contact_info_field_name_cmp (spec1->name, spec2->name);
+}
+
+static gboolean
+channel_name_activated_cb (
+    GtkLabel *label,
+    gchar *uri,
+    TpAccount *account)
+{
+  empathy_join_muc (account, uri, empathy_get_current_action_time ());
+  return TRUE;
+}
+
+GtkWidget *
+empathy_contact_info_create_channel_list_label (TpAccount *account,
+    GList *info,
+    guint row)
+{
+  GtkWidget *label = NULL;
+  GString *label_markup = g_string_new ("");
+  guint i;
+  GPtrArray *channels;
+  GList *l;
+
+  /* Is there channels? */
+  channels = g_ptr_array_new ();
+
+  for (l = info; l != NULL; l = l->next)
+    {
+      TpContactInfoField *field = l->data;
+
+      if (!tp_strdiff (field->field_name, "x-irc-channel"))
+        g_ptr_array_add (channels, (gpointer) field->field_value[0]);
+    }
+
+  if (channels->len == 0)
+    goto out;
+
+  for (i = 0; i < channels->len; i++)
+    {
+      const gchar *channel_name = g_ptr_array_index (channels, i);
+      /* We abuse the URI of the link to hold the channel name. It seems to
+       * be okay to just use it essentially verbatim, rather than trying to
+       * ensure it's actually a valid URI. */
+      gchar *escaped = g_markup_escape_text (channel_name, -1);
+
+      if (i > 0)
+        g_string_append (label_markup, ", ");
+
+      g_string_append_printf (label_markup, "<a href='%s'>%s</a>",
+          escaped, channel_name);
+      g_free (escaped);
+    }
+
+  label = gtk_label_new (NULL);
+  gtk_label_set_markup (GTK_LABEL (label), label_markup->str);
+  gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
+
+  g_signal_connect (label, "activate-link",
+      (GCallback) channel_name_activated_cb, account);
+
+out:
+  g_ptr_array_unref (channels);
+  g_string_free (label_markup, TRUE);
+
+  return label;
 }

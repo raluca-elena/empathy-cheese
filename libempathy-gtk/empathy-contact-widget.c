@@ -40,7 +40,6 @@
 #include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-contact-list.h>
 #include <libempathy/empathy-location.h>
-#include <libempathy/empathy-request-util.h>
 #include <libempathy/empathy-time.h>
 #include <libempathy/empathy-utils.h>
 
@@ -479,64 +478,19 @@ contact_widget_details_update_edit (EmpathyContactWidget *information)
   return n_rows;
 }
 
-static gboolean
-channel_name_activated_cb (
-    GtkLabel *label,
-    gchar *uri,
-    EmpathyContactWidget *information)
-{
-  TpAccount *account = empathy_contact_get_account (information->contact);
-
-  empathy_join_muc (account, uri, empathy_get_current_action_time ());
-  return TRUE;
-}
-
 static void
-add_channel_list (
-    EmpathyContactWidget *information,
-    GPtrArray *channels,
-    guint row)
+add_row (GtkGrid *grid,
+    guint row,
+    GtkWidget *title,
+    GtkWidget *value)
 {
-  GtkWidget *w;
-  GString *label_markup = g_string_new ("");
-  guint i;
+  gtk_grid_attach (grid, title, 0, row, 1, 1);
+  gtk_misc_set_alignment (GTK_MISC (title), 0, 0.5);
+  gtk_widget_show (title);
 
-  w = gtk_label_new (_("Channels:"));
-  gtk_grid_attach (GTK_GRID (information->grid_details),
-      w, 0, row, 1, 1);
-  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-  gtk_widget_show (w);
-
-  for (i = 0; i < channels->len; i++)
-    {
-      const gchar *channel_name = g_ptr_array_index (channels, i);
-      /* We abuse the URI of the link to hold the channel name. It seems to
-       * be okay to just use it essentially verbatim, rather than trying to
-       * ensure it's actually a valid URI.  g_string_append_uri_escaped()
-       * escapes way more than we actually need to; so we're just using
-       * g_markup_escape_text directly.
-       */
-      gchar *escaped = g_markup_escape_text (channel_name, -1);
-
-      if (i > 0)
-        g_string_append (label_markup, ", ");
-
-      g_string_append_printf (label_markup, "<a href='%s'>%s</a>",
-          escaped, channel_name);
-      g_free (escaped);
-    }
-
-  w = gtk_label_new (NULL);
-  gtk_label_set_markup (GTK_LABEL (w), label_markup->str);
-  gtk_label_set_line_wrap (GTK_LABEL (w), TRUE);
-  g_signal_connect (w, "activate-link",
-      (GCallback) channel_name_activated_cb, information);
-  gtk_grid_attach (GTK_GRID (information->grid_details),
-      w, 1, row, 1, 1);
-  gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-  gtk_widget_show (w);
-
-  g_string_free (label_markup, TRUE);
+  gtk_grid_attach (grid, value, 1, row, 1, 1);
+  gtk_misc_set_alignment (GTK_MISC (value), 0, 0.5);
+  gtk_widget_show (value);
 }
 
 static guint
@@ -545,7 +499,8 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
   TpContact *contact;
   GList *info, *l;
   guint n_rows = 0;
-  GPtrArray *channels = g_ptr_array_new ();
+  GtkWidget *channels_label;
+  TpAccount *account;
 
   contact = empathy_contact_get_tp_contact (information->contact);
   info = tp_contact_get_contact_info (contact);
@@ -555,19 +510,13 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       TpContactInfoField *field = l->data;
       const gchar *value;
       gchar *markup = NULL, *title;
-      GtkWidget *w;
+      GtkWidget *title_widget, *value_widget;
       EmpathyContactInfoFormatFunc format;
 
       if (field->field_value == NULL || field->field_value[0] == NULL)
         continue;
 
       value = field->field_value[0];
-
-      if (!tp_strdiff (field->field_name, "x-irc-channel"))
-        {
-          g_ptr_array_add (channels, (gpointer) field->field_value[0]);
-          continue;
-        }
 
       if (!empathy_contact_info_lookup_field (field->field_name, NULL, &format))
         {
@@ -590,42 +539,45 @@ contact_widget_details_update_show (EmpathyContactWidget *information)
       /* Add Title */
       title = empathy_contact_info_field_label (field->field_name,
           field->parameters);
-      w = gtk_label_new (title);
+      title_widget = gtk_label_new (title);
       g_free (title);
 
-      gtk_grid_attach (GTK_GRID (information->grid_details),
-          w, 0, n_rows, 1, 1);
-      gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-      gtk_widget_show (w);
-
       /* Add Value */
-      w = gtk_label_new (value);
+      value_widget = gtk_label_new (value);
       if (markup != NULL)
         {
-          gtk_label_set_markup (GTK_LABEL (w), markup);
+          gtk_label_set_markup (GTK_LABEL (value_widget), markup);
           g_free (markup);
         }
 
       if ((information->flags & EMPATHY_CONTACT_WIDGET_FOR_TOOLTIP) == 0)
-        gtk_label_set_selectable (GTK_LABEL (w), TRUE);
+        gtk_label_set_selectable (GTK_LABEL (value_widget), TRUE);
 
-      gtk_grid_attach (GTK_GRID (information->grid_details),
-          w, 1, n_rows, 1, 1);
-      gtk_misc_set_alignment (GTK_MISC (w), 0, 0.5);
-      gtk_widget_show (w);
+      add_row (GTK_GRID (information->grid_details), n_rows, title_widget,
+          value_widget);
+
+      n_rows++;
+    }
+
+  account = empathy_contact_get_account (information->contact);
+
+  channels_label = empathy_contact_info_create_channel_list_label (account,
+      info, n_rows);
+
+  if (channels_label != NULL)
+    {
+      GtkWidget *title_widget;
+
+      title_widget =  gtk_label_new (_("Channels:"));
+
+      add_row (GTK_GRID (information->grid_details), n_rows, title_widget,
+          channels_label);
 
       n_rows++;
     }
 
   g_list_free (info);
 
-  if (channels->len > 0)
-    {
-      add_channel_list (information, channels, n_rows);
-      n_rows++;
-    }
-
-  g_ptr_array_unref (channels);
   return n_rows;
 }
 
