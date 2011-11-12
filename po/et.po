@@ -4,22 +4,22 @@
 # Copyright (C) 2005–2011 Free Software Foundation, Inc.
 #
 # Ivar Smolin <okul linux ee>, 2005–2011.
-# Mattias Põldaru <mahfiaz gmail com>, 2009–2011.
+# Mattias Põldaru <mahfiaz@gmail.com>, 2009, 2010, 2011.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: empathy MASTER\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=empathy&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2011-03-30 17:38+0000\n"
-"PO-Revision-Date: 2011-04-03 13:19+0300\n"
+"product=empathy&keywords=I18N+L10N&component=General\n"
+"POT-Creation-Date: 2011-11-05 01:30+0000\n"
+"PO-Revision-Date: 2011-11-06 11:28+0200\n"
 "Last-Translator: Mattias Põldaru <mahfiaz@gmail.com>\n"
-"Language-Team: Estonian <et@li.org>\n"
+"Language-Team: Estonian <>\n"
 "Language: et\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: 8bits\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "X-Poedit-Language: Estonian\n"
 "X-Poedit-Country: ESTONIA\n"
 
@@ -40,6 +40,18 @@ msgstr "Välksõnumiklient"
 msgid "Always open a separate chat window for new chats."
 msgstr "Uutele vestlustele avatakse alati eraldi aken."
 
+msgid "Call volume"
+msgstr "Kõne valjus"
+
+msgid "Call volume, as a percentage."
+msgstr "Kõne valjus protsentides."
+
+msgid "Camera device"
+msgstr "Kaameraseade"
+
+msgid "Camera position"
+msgstr "Kaamera asukoht"
+
 msgid ""
 "Character to add after nickname when using nick completion (tab) in group "
 "chat."
@@ -48,6 +60,9 @@ msgstr ""
 "automaatlõpetust (tab-klahv)."
 
 msgid "Chat window theme"
+msgstr "Jututoaakende teema"
+
+msgid "Chat window theme variant"
 msgstr "Jututoaakende teema"
 
 msgid ""
@@ -63,6 +78,13 @@ msgstr "Kas peab ühenduste haldureid kasutama"
 
 msgid "Contact list sort criterion"
 msgstr "Kontaktide nimekirja sortimise alus"
+
+msgid "D-Bus object path of the last account selected to join a room."
+msgstr "Toaga ühinemiseks viimati valitud konto D-Busi objekti asukoht"
+
+msgid "Default camera device to use in video calls, e.g. /dev/video0."
+msgstr ""
+"Vaikimisi kaameraseade, mida kasutatakse videokõnede jaoks, nt /dev/video0"
 
 msgid "Default directory to select an avatar image from"
 msgstr "Vaikimisi kataloog, millest valida avatari pilti"
@@ -83,6 +105,9 @@ msgstr ""
 "Saabuvate sündmuste kuvamine teatealal. Kui väär, näidatakse neid kasutajale "
 "otse."
 
+msgid "Echo cancellation support"
+msgstr "Kaja vähendamise tugi"
+
 msgid "Empathy can publish the user's location"
 msgstr "Empathy tohib näidata kasutaja asukohta"
 
@@ -97,9 +122,6 @@ msgstr "Empathy tohib kasutada võrku asukoha arvamiseks"
 
 msgid "Empathy default download folder"
 msgstr "Empathy vaikimisi allalaadimiste kataloog"
-
-msgid "Empathy has migrated butterfly logs"
-msgstr "Empathy on üle kandnud butterfly logid"
 
 msgid "Empathy should auto-away when idle"
 msgstr "Empathy peaks jõudeoleku korral automaatselt eemaloleku määrama"
@@ -127,6 +149,9 @@ msgstr "Peida peaaken"
 
 msgid "Hide the main window."
 msgstr "Peaakna peitmine."
+
+msgid "Last account selected in Join Room dialog"
+msgstr "Viimane konto, mis valiti \"Ühine jututoaga\" dialoogis"
 
 msgid "Nick completed character"
 msgstr "Nimele lisamise märk"
@@ -170,6 +195,12 @@ msgstr "Kui kontakt siseneb, kuvatakse hüpikteade"
 msgid "Pop up notifications when a contact logs out"
 msgstr "Kui kontakt väljub, kuvatakse hüpikteade"
 
+msgid "Position the camera preview should be during a call."
+msgstr "Enda kaamera pildi asukoht kõne ajal."
+
+msgid "Show Balance in contact list"
+msgstr "Kontaktide nimekirjas näidatakse kontojääki"
+
 msgid "Show avatars"
 msgstr "Näidatakse avatare"
 
@@ -203,6 +234,10 @@ msgstr "Vestlusakna külgpaneeli asukoht (pikslites)."
 msgid "The theme that is used to display the conversation in chat windows."
 msgstr "Kujundus, mida kasutatakse jututoaakende vestluste kuvamisel."
 
+msgid ""
+"The theme variant that is used to display the conversation in chat windows."
+msgstr "Kujundus, mida kasutatakse jututoaakende vestluste kuvamisel."
+
 msgid "Use graphical smileys"
 msgstr "Tujunägudele kasutatakse pilte"
 
@@ -223,9 +258,6 @@ msgstr "Kas Empathy võib kasutada mobiilivõrku asukoha arvamiseks."
 
 msgid "Whether Empathy can use the network to guess the location."
 msgstr "Kas Empathy võib kasutada võrku asukoha arvamiseks."
-
-msgid "Whether Empathy has migrated butterfly logs."
-msgstr "Kas Empathy on üle kandnud butterfly logid."
 
 msgid "Whether Empathy should automatically log into your accounts on startup."
 msgstr "Kas Empathy peaks käivitumisel ise kontodesse sisse logima."
@@ -261,6 +293,9 @@ msgstr ""
 
 msgid "Whether to convert smileys into graphical images in conversations."
 msgstr "Kas tujunäod tuleks teisendada vestlustes piltideks."
+
+msgid "Whether to enable Pulseaudio's echo cancellation filter."
+msgstr "Kas lubada Pulseaudio kaja vähendamise filter."
 
 msgid "Whether to play a sound to notify of contacts logging into the network."
 msgstr "Kas esitada heli kontakti sisenemisest märkuandmiseks."
@@ -305,6 +340,9 @@ msgstr ""
 
 msgid "Whether to show a popup notification when receiving a new message."
 msgstr "Kas näidata hüpikteadet uue teate vastuvõtmisest märkuandmiseks."
+
+msgid "Whether to show account balances in the contact list."
+msgstr "Kas näidata kontaktide nimekirjas kontojääki."
 
 msgid ""
 "Whether to show avatars for contacts in the contact list and chat windows."
@@ -362,8 +400,21 @@ msgstr "Valitud fail pole harilik fail"
 msgid "The selected file is empty"
 msgstr "Valitud fail on tühi"
 
+#, c-format
+msgid "Missed call from %s"
+msgstr "Vastamata kõne kasutajalt %s"
+
+#. Translators: this is an outgoing call, e.g. 'Called Alice'
+#, c-format
+msgid "Called %s"
+msgstr "Helistad kasutajale %s"
+
+#, c-format
+msgid "Call from %s"
+msgstr "Kõne kasutajalt %s"
+
 msgid "Socket type not supported"
-msgstr "Sokli pole toetatud."
+msgstr "Sokli liik pole toetatud."
 
 msgid "No reason was specified"
 msgstr "Põhjendust pole määratud."
@@ -402,10 +453,7 @@ msgid "Offline"
 msgstr "Ühendamata"
 
 #. translators: presence type is unknown
-#. translators: encoding video codec is unknown
-#. translators: encoding audio codec is unknown
-#. translators: decoding video codec is unknown
-#. translators: decoding audio codec is unknown
+msgctxt "presence"
 msgid "Unknown"
 msgstr "Tundmatu"
 
@@ -495,6 +543,9 @@ msgstr ""
 "Serveri sertifikaadi pikkus või sertifikaatide keti pikkus ületas "
 "krüptograafiateegi eelduslikud piirid"
 
+msgid "Your software is too old"
+msgstr "Sinu tarkvara on liiga vana"
+
 msgid "People Nearby"
 msgstr "Lähedalasuvad inimesed"
 
@@ -546,8 +597,8 @@ msgstr[1] "%d kuud tagasi"
 msgid "in the future"
 msgstr "tulevikus"
 
-msgid "All"
-msgstr "Kõik"
+msgid "All accounts"
+msgstr "Kõik kontod"
 
 msgid "Account"
 msgstr "Konto"
@@ -565,9 +616,12 @@ msgstr "Port"
 msgid "%s:"
 msgstr "%s:"
 
+msgid "My Web Accounts"
+msgstr "Minu veebikontod"
+
 #, c-format
-msgid "The account %s is edited via My Web Accounts."
-msgstr "Kontot %s muudetakse Minu Veebikontode kaudu."
+msgid "The account %s is edited via %s."
+msgstr "Kontot %s muudetakse %s kaudu."
 
 #, c-format
 msgid "The account %s cannot be edited in Empathy."
@@ -575,6 +629,11 @@ msgstr "Kontot %s pole võimalik Empathy abil muuta."
 
 msgid "Launch My Web Accounts"
 msgstr "Käivita Minu Veebikontod"
+
+#. general handler
+#, c-format
+msgid "Edit %s"
+msgstr "Muuda %s"
 
 msgid "Username:"
 msgstr "Kasutajanimi:"
@@ -584,15 +643,6 @@ msgstr "_Rakenda"
 
 msgid "L_og in"
 msgstr "Logi _sisse"
-
-#. Account and Identifier
-msgid "Account:"
-msgstr "Konto:"
-
-#. translators: this is the label of a checkbox used to enable/disable IM
-#. * accounts
-msgid "_Enabled"
-msgstr "_Lubatud"
 
 msgid "This account already exists on the server"
 msgstr "See konto on serveris juba olemas"
@@ -706,6 +756,13 @@ msgstr "Puudub"
 
 msgid "Character set:"
 msgstr "Kooditabel:"
+
+msgid ""
+"Most IRC servers don't need a password, so if you're not sure, don't enter a "
+"password."
+msgstr ""
+"Enamik IRC servereid ei vaja parooli. Kui sa pole kindel, ära sisesta "
+"parooli."
 
 msgid "Network"
 msgstr "Võrk"
@@ -833,6 +890,9 @@ msgstr "Seonduse avastamine"
 msgid "Discover the STUN server automatically"
 msgstr "STUN-serveri automaatne tuvastus"
 
+msgid "Ignore TLS Errors"
+msgstr "TLS vigasid eiratakse"
+
 msgid "Interval (seconds)"
 msgstr "Intervall (sekundites)"
 
@@ -866,6 +926,9 @@ msgstr "Server:"
 msgid "Transport:"
 msgstr "Transport:"
 
+msgid "Use this account to call _landlines and mobile phones"
+msgstr "Seda kontot kasutatakse _fiksvõrku ja mobiiltelefonidele helistamiseks"
+
 msgid "What is your SIP account password?"
 msgstr "Mis on sinu SIP-konto parool?"
 
@@ -896,8 +959,14 @@ msgstr "Pole võimalik pilti teisendada"
 msgid "None of the accepted image formats are supported on your system"
 msgstr "Sinu süsteem ei toeta ühtegi sobivatest pildivormingutest"
 
+msgid "Couldn't save picture to file"
+msgstr "Pilti pole võimalik salvestada faili"
+
 msgid "Select Your Avatar Image"
 msgstr "Vali oma avatari pilt"
+
+msgid "Take a picture..."
+msgstr "Tee pilt..."
 
 msgid "No Image"
 msgstr "Pilti pole"
@@ -911,6 +980,24 @@ msgstr "Kõik failid"
 msgid "Click to enlarge"
 msgstr "Klõpsa suurendamiseks"
 
+msgid "There was an error starting the call"
+msgstr "Kõne alustamisel esines viga"
+
+msgid "The specified contact doesn't support calls"
+msgstr "Valitud kontakt ei toeta kõnesid"
+
+msgid "The specified contact is offline"
+msgstr "Valitud kontakt pole võrku ühendatud"
+
+msgid "The specified contact is not valid"
+msgstr "Valitud kontakt pole korrektne"
+
+msgid "Emergency calls are not supported on this protocol"
+msgstr "See protokoll ei toeta hädaabikõnesid"
+
+msgid "You don't have enough credit in order to place this call"
+msgstr "Sul pole selle kõne tegemiseks piisavalt krediiti"
+
 msgid "Failed to open private chat"
 msgstr "Privaatvestluse avamine nurjus"
 
@@ -919,6 +1006,10 @@ msgstr "Selles vestluses ei ole teemad toetatud"
 
 msgid "You are not allowed to change the topic"
 msgstr "Sul puudub õigus teemat vahetada"
+
+#, c-format
+msgid "“%s” is not a valid contact ID"
+msgstr "\"%s\" ei ole sobiv kontakti ID"
 
 msgid "/clear: clear all messages from the current conversation"
 msgstr "/clear: sellest vestluse kõigi sõnumite kustutamine"
@@ -960,6 +1051,9 @@ msgstr ""
 "algava sõnumi saatmiseks, näiteks: \"/say /join abil saad uued jututoaga "
 "liituda\""
 
+msgid "/whois <contact ID>: display information about a contact"
+msgstr "/whois <kontakti ID>: kontakti kohta andmete kuvamine"
+
 msgid ""
 "/help [<command>]: show all supported commands. If <command> is defined, "
 "show its usage."
@@ -976,6 +1070,27 @@ msgstr "Tundmatu käsk"
 
 msgid "Unknown command; see /help for the available commands"
 msgstr "Tundmatu käsk; kirjuta /help, et näha saadaolevaid käske"
+
+msgid "insufficient balance to send message"
+msgstr "sõnumi saatmiseks pole piisavalt krediiti"
+
+#, c-format
+msgid "Error sending message '%s': %s"
+msgstr "Viga teate '%s' saatmisel: %s"
+
+#, c-format
+msgid "Error sending message: %s"
+msgstr "Viga teate saatmisel: %s"
+
+#. translators: error used when user doesn't have enough credit on his
+#. * account to send the message.
+#, c-format
+msgid "insufficient balance to send message. <a href='%s'>Top up</a>."
+msgstr ""
+"sõnumi saatmiseks pole piisavalt krediiti. <a href='%s'>Lae kontot</a>."
+
+msgid "not capable"
+msgstr "pole võimeline"
 
 msgid "offline"
 msgstr "ühendamata"
@@ -994,10 +1109,6 @@ msgstr "pole veel teostatud"
 
 msgid "unknown"
 msgstr "tundmatu"
-
-#, c-format
-msgid "Error sending message '%s': %s"
-msgstr "Viga teate '%s' saatmisel: %s"
 
 msgid "Topic:"
 msgstr "Teema:"
@@ -1084,6 +1195,9 @@ msgstr "%s sisenes tuppa"
 msgid "%s is now known as %s"
 msgstr "%s on nüüd nimega %s"
 
+#. We don't know if the incoming call has been accepted or not, so we
+#. * assume it hasn't and if it has, we'll set the proper status when
+#. * we get the new handler.
 msgid "Disconnected"
 msgstr "Ühendus katkestatud"
 
@@ -1116,6 +1230,12 @@ msgstr "Ühendatud"
 msgid "Conversation"
 msgstr "Vestlus"
 
+#. Translators: this string is a something like
+#. * "Escher Cat (SMS)"
+#, c-format
+msgid "%s (SMS)"
+msgstr "%s (SMS)"
+
 msgid "Unknown or invalid identifier"
 msgstr "Tundmatu või sobimatu identifikaator"
 
@@ -1133,6 +1253,16 @@ msgstr "Kontakti polnud võimalik blokeerida"
 
 msgid "Edit Blocked Contacts"
 msgstr "Blokitud kontaktide muutmine"
+
+#. Account and Identifier
+msgid "Account:"
+msgstr "Konto:"
+
+msgid "Blocked Contacts"
+msgstr "Blokitud kontaktid"
+
+msgid "Remove"
+msgstr "Eemalda"
 
 #. Copy Link Address menu item
 msgid "_Copy Link Address"
@@ -1183,12 +1313,6 @@ msgstr "Tellimuse päring"
 msgid "_Block User"
 msgstr "_Blokeeri kasutaja"
 
-msgid "Ungrouped"
-msgstr "Grupeerimata"
-
-msgid "Favorite People"
-msgstr "Lemmikud"
-
 #, c-format
 msgid "Do you really want to remove the group '%s'?"
 msgstr "Kas tahad tõesti eemaldada grupi '%s'?"
@@ -1213,6 +1337,7 @@ msgstr "Lisa _kontakt…"
 msgid "_Block Contact"
 msgstr "_Blokeeri kontakt"
 
+#. add chat button
 msgid "_Chat"
 msgstr "_Vestlus"
 
@@ -1232,9 +1357,6 @@ msgstr "Faili saatmine"
 
 msgid "Share My Desktop"
 msgstr "Jaga minu töölauda"
-
-msgid "Favorite"
-msgstr "Lemmik"
 
 msgid "Infor_mation"
 msgstr "_Andmed"
@@ -1262,23 +1384,14 @@ msgstr "Lisa _kontakt…"
 msgid "No contacts found"
 msgstr "Kontakte ei leitud"
 
-msgid "Select a contact"
-msgstr "Vali kontakt"
+msgid "Your message introducing yourself:"
+msgstr "Sind tutvustav teade:"
 
-msgid "Full name:"
-msgstr "Täisnimi:"
+msgid "Please let me see when you're online. Thanks!"
+msgstr "Palun luba mul näha, kui sa oled sisse logitud. Aitäh!"
 
-msgid "Phone number:"
-msgstr "Telefoninumber:"
-
-msgid "E-mail address:"
-msgstr "Meiliaadress:"
-
-msgid "Website:"
-msgstr "Veebileht:"
-
-msgid "Birthday:"
-msgstr "Sünnipäev:"
+msgid "Channels:"
+msgstr "Kanalid:"
 
 msgid "Country ISO Code:"
 msgstr "Riigi ISO-kood:"
@@ -1369,6 +1482,59 @@ msgstr "Avatari salvestamine"
 msgid "Unable to save avatar"
 msgstr "Avatari salvestamine pole võimalik"
 
+msgid "Favorite"
+msgstr "Lemmik"
+
+msgid "Full name"
+msgstr "Täisnimi"
+
+msgid "Phone number"
+msgstr "Telefoninumber"
+
+msgid "E-mail address"
+msgstr "Meiliaadress"
+
+msgid "Website"
+msgstr "Veebileht"
+
+msgid "Birthday"
+msgstr "Sünnipäev"
+
+#. Note to translators: this is the caption for a string of the form "5
+#. * minutes ago", and refers to the time since the contact last interacted
+#. * with their IM client.
+msgid "Last seen:"
+msgstr "Viimati nähti:"
+
+msgid "Connected from:"
+msgstr "Ühendusviis:"
+
+#. FIXME: once Idle implements SimplePresence using this information, we can
+#. * and should bin this.
+msgid "Away message:"
+msgstr "Eemalolekuteade:"
+
+msgid "work"
+msgstr "töö"
+
+msgid "home"
+msgstr "kodu"
+
+msgid "mobile"
+msgstr "mobiil"
+
+msgid "voice"
+msgstr "häälega"
+
+msgid "preferred"
+msgstr "eelistatud"
+
+msgid "postal"
+msgstr "postipakk"
+
+msgid "parcel"
+msgstr "kullerpakk"
+
 msgid "<b>Location</b> at (date)\t"
 msgstr "<b>Asukoht</b> kuupäeval\t"
 
@@ -1448,6 +1614,27 @@ msgstr "Vasakul nimekirjas olevad kontaktid liidetakse kokku."
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
+
+msgid "Select account to use to place the call"
+msgstr "Vali konto, mille kaudu kõne teha"
+
+#. translators: Call is a noun. This string is used in the window
+#. * title
+msgid "Call"
+msgstr "Kõne"
+
+msgid "Mobile"
+msgstr "Mobiil"
+
+msgid "Work"
+msgstr "Töö"
+
+msgid "HOME"
+msgstr "KODU"
+
+#. add SMS button
+msgid "_SMS"
+msgstr "_SMS"
 
 msgctxt "Edit individual (contextual menu)"
 msgid "_Edit"
@@ -1537,48 +1724,177 @@ msgctxt "Unlink individual (button)"
 msgid "_Unlink"
 msgstr "_Eralda"
 
-msgid "Date"
-msgstr "Kuupäev"
+msgid "History"
+msgstr "Ajalugu"
 
-#. Tab Label
-msgid "Conversations"
-msgstr "Vestlused"
+msgid "Show"
+msgstr "Näita"
 
-msgid "Find Next"
-msgstr "Otsi järgmine"
-
-msgid "Find Previous"
-msgstr "Otsi eelmine"
-
-msgid "Previous Conversations"
-msgstr "Eelmised vestlused"
-
-#. Tab Label
 msgid "Search"
 msgstr "Otsing"
 
-#. Searching *for* something
-msgid "_For:"
-msgstr "_Otsing:"
+#, c-format
+msgid "Chat in %s"
+msgstr "Vestlus kohas %s"
 
-msgid "Contact ID:"
-msgstr "Kontakti ID:"
+#, c-format
+msgid "Chat with %s"
+msgstr "Vestlus kasutajaga %s"
 
-#. add chat button
-msgid "C_hat"
-msgstr "_Vestle"
+msgctxt "A date with the time"
+msgid "%A, %e %B %Y %X"
+msgstr "%A, %d. %B %Y %X"
+
+#. Translators: this is an emote: '* Danielle waves'
+#, c-format
+msgid "<i>* %s %s</i>"
+msgstr "<i>* %s %s</i>"
+
+#. Translators: this is a message: 'Danielle: hello'
+#. * The string in bold is the sender's name
+#, c-format
+msgid "<b>%s:</b> %s"
+msgstr "<b>%s:</b> %s"
+
+#, c-format
+msgid "%s second"
+msgid_plural "%s seconds"
+msgstr[0] "%s sekund"
+msgstr[1] "%s sekundit"
+
+#, c-format
+msgid "%s minute"
+msgid_plural "%s minutes"
+msgstr[0] "%s minut"
+msgstr[1] "%s minutit"
+
+#, c-format
+msgid "Call took %s, ended at %s"
+msgstr "Kõne algus %s, lõpp %s"
+
+msgid "Today"
+msgstr "Täna"
+
+msgid "Yesterday"
+msgstr "Eile"
+
+#. Translators: A date such as '23 May 2010' (strftime format)
+msgid "%e %B %Y"
+msgstr "%d. %B %Y"
+
+msgid "Anytime"
+msgstr "Millal tahes"
+
+msgid "Anyone"
+msgstr "Kes tahes"
+
+msgid "Who"
+msgstr "Kes"
+
+msgid "When"
+msgstr "Millal"
+
+msgid "Anything"
+msgstr "Kõik liigid"
+
+msgid "Text chats"
+msgstr "Tekstivestlused"
+
+msgid "Calls"
+msgstr "Kõned"
+
+msgid "Incoming calls"
+msgstr "Sissetulevad kõned"
+
+msgid "Outgoing calls"
+msgstr "Väljuvad kõned"
+
+msgid "Missed calls"
+msgstr "Vastamata kõned"
+
+msgid "What"
+msgstr "Mis"
+
+msgid "Are you sure you want to delete all logs of previous conversations?"
+msgstr "Kas oled kindel, et tahad kustutada kõigi eelmiste vestluste logid?"
+
+msgid "Clear All"
+msgstr "Puhasta kõik"
+
+msgid "Delete from:"
+msgstr "Kustuta kust:"
+
+msgid "<span size=\"x-large\">Loading...</span>"
+msgstr "<span size=\"x-large\">Laadimine...</span>"
+
+msgid "Chat"
+msgstr "Vestlus"
+
+msgid "Delete All History..."
+msgstr "Kogu ajaloo kustutamine..."
+
+msgid "Profile"
+msgstr "Profiil"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "_Edit"
+msgstr "_Redaktor"
+
+msgid "_File"
+msgstr "_Fail"
+
+msgid "page 2"
+msgstr "leht 2"
+
+msgid "The contact is offline"
+msgstr "Kontakt pole võrku ühendatud"
+
+msgid "The specified contact is either invalid or unknown"
+msgstr "Määratud kontakt on kas vigane või tundmatu"
+
+msgid "The contact does not support this kind of conversation"
+msgstr "Kontakt ei toeta seda laadi vestlust"
+
+msgid "The requested functionality is not implemented for this protocol"
+msgstr "Päritud võimalused ei ole selle protokolli jaoks teostatud"
+
+msgid "Could not start a conversation with the given contact"
+msgstr "Antud kontaktiga pole võimalik vestlust alustada"
+
+msgid "You are banned from this channel"
+msgstr "Sind blokeeriti sellel kanalil"
+
+msgid "This channel is full"
+msgstr "See kanal on täis"
+
+msgid "You must be invited to join this channel"
+msgstr "Selle kanaliga ühinemiseks vajad kutset"
+
+msgid "Can't proceed while disconnected"
+msgstr "Ilma ühenduseta pole võimalik jätkata"
+
+msgid "Permission denied"
+msgstr "Ligipääs keelatud"
+
+msgid "There was an error starting the conversation"
+msgstr "Vesetluse alustamisel esines viga"
+
+msgid "Enter a contact identifier or phone number:"
+msgstr "Sisesta kontakti identifitseerif info või telefoninumber:"
 
 #. Tweak the dialog
 msgid "New Conversation"
 msgstr "Uus vestlus"
 
-#. add video toggle
-msgid "Send _Video"
-msgstr "Saada _video"
+#. add video button
+msgid "_Video Call"
+msgstr "_Videokõne"
 
-#. add chat button
-msgid "C_all"
-msgstr "_Helista"
+#. add audio button
+msgid "_Audio Call"
+msgstr "_Audiokõne"
 
 #. Tweak the dialog
 msgid "New Call"
@@ -1613,9 +1929,6 @@ msgstr "Klõpsa selle oleku lisamiseks lemmikutesse"
 msgid "Set status"
 msgstr "Määra olek"
 
-msgid "Set your presence and current status"
-msgstr "Kohalolu ja praeguse oleku määramine"
-
 #. Custom messages
 msgid "Custom messages…"
 msgstr "Muud teated…"
@@ -1631,11 +1944,17 @@ msgstr "Uus %s konto"
 msgid "Find:"
 msgstr "Otsi:"
 
-msgid "Match case"
-msgstr "Tõstutundlik"
+msgid "Mat_ch case"
+msgstr "_Tõstutundlik"
 
 msgid "Phrase not found"
 msgstr "Fraasi ei leitud"
+
+msgid "_Next"
+msgstr "_Järgmine"
+
+msgid "_Previous"
+msgstr "_Eelmine"
 
 msgid "Received an instant message"
 msgstr "Võeti vastu välksõnum"
@@ -1667,17 +1986,15 @@ msgstr "Väljuv kõne"
 msgid "Voice call ended"
 msgstr "Kõne lõpetati"
 
-msgid "Enter Custom Message"
-msgstr "Sisesta oma teade"
-
 msgid "Edit Custom Messages"
 msgstr "Teadete muutmine"
 
-msgid "Save _New Status Message"
-msgstr "Salvesta _uus olekusõnum"
+#, c-format
+msgid "Message edited at %s"
+msgstr "Sõnumit muudeti kohas %s"
 
-msgid "Saved Status Messages"
-msgstr "Salvestatud olekuteated"
+msgid "Normal"
+msgstr "Tavaline"
 
 msgid "Classic"
 msgstr "Klassikaline"
@@ -1858,12 +2175,6 @@ msgstr "Lääne"
 
 msgid "Vietnamese"
 msgstr "Vietnami"
-
-msgid "The selected contact cannot receive files."
-msgstr "Valitud kontakt pole suuteline faile vastu võtma."
-
-msgid "The selected contact is offline."
-msgstr "Valitud kontakt pole võrku ühendatud."
 
 msgid "No error message"
 msgstr "Veateade puudub"
@@ -2123,6 +2434,9 @@ msgstr ""
 "Sa oled akent sulgemas ja see tühistab tehtud muudatused\n"
 "Kas sa soovid seda teha?"
 
+msgid "Add…"
+msgstr "Lisa…"
+
 msgid "Loading account information"
 msgstr "Konto andmete laadimine"
 
@@ -2138,9 +2452,6 @@ msgid ""
 msgstr ""
 "Uue konto lisamiseks pead paigaldama tugiprogrammi iga protokolli jaoks, "
 "mida tahad kasutada."
-
-msgid "_Add…"
-msgstr "_Lisa…"
 
 msgid "_Import…"
 msgstr "_Impordi…"
@@ -2193,11 +2504,6 @@ msgstr "Üksikasjad"
 msgid "Call with %s"
 msgstr "Kõne kasutajaga %s"
 
-#. translators: Call is a noun. This string is used in the window
-#. * title
-msgid "Call"
-msgstr "Kõne"
-
 msgid "The IP address as seen by the machine"
 msgstr "IP-aadress, nagu masin seda näeb"
 
@@ -2212,6 +2518,10 @@ msgstr "Edastusserveri IP-aadress"
 
 msgid "The IP address of the multicast group"
 msgstr "Multicast grupi IP-aadress"
+
+msgctxt "codec"
+msgid "Unknown"
+msgstr "Tundmatu"
 
 #. Translators: number of minutes:seconds the caller has been connected
 #, c-format
@@ -2283,26 +2593,14 @@ msgstr "Videovoogu pole võimalik alustada"
 msgid "Audio"
 msgstr "Audio"
 
-msgid "Call the contact again"
-msgstr "Helista kontaktile uuesti"
-
-msgid "Camera Off"
-msgstr "Kaamera väljas"
-
-msgid "Camera On"
-msgstr "Kaamera sees"
-
 msgid "Decoding Codec:"
 msgstr "Dekodeeriv koodek:"
 
-msgid "Disable camera and stop sending video"
-msgstr "Keela kaamera ja lõpeta video saatmine"
+msgid "Disable camera"
+msgstr "Keela kaamera"
 
-msgid "Enable camera and send video"
-msgstr "Kaamera lubamine ja video saatmine"
-
-msgid "Enable camera but don't send video"
-msgstr "Kaamera lubamine ilma video saatmiseta"
+msgid "Display the dialpad"
+msgstr "Kuva sõrmlaud"
 
 msgid "Encoding Codec:"
 msgstr "Kodeeriv koodek:"
@@ -2316,11 +2614,11 @@ msgstr "Praeguse kõne lõpetamine"
 msgid "Local Candidate:"
 msgstr "Kohalik kandidaat:"
 
-msgid "Preview"
-msgstr "Eelvaade"
+msgid "Maximise me"
+msgstr "Maksimeeri mind"
 
-msgid "Redial"
-msgstr "Vali uuesti"
+msgid "Minimise me"
+msgstr "Minimeeri mind"
 
 msgid "Remote Candidate:"
 msgstr "Kaugkandidaat:"
@@ -2328,26 +2626,53 @@ msgstr "Kaugkandidaat:"
 msgid "Send Audio"
 msgstr "Saada heli"
 
+msgid "Send Video"
+msgstr "Video saatmine"
+
+msgid "Show dialpad"
+msgstr "Sõrmlaua näitamine"
+
+msgid "Start a video call"
+msgstr "Videokõne alustamine"
+
+msgid "Start an audio call"
+msgstr "Audiokõne alustamine"
+
+msgid "Swap camera"
+msgstr "Kaamera vahetamine"
+
 msgid "Toggle audio transmission"
 msgstr "Heliedastuse lüliti"
 
-msgid "V_ideo"
-msgstr "V_ideo"
+msgid "Toggle video transmission"
+msgstr "Videoedastuse lüliti"
 
-msgid "Video"
-msgstr "Video"
+msgid "Unknown"
+msgstr "Tundmatu"
 
-msgid "Video Off"
-msgstr "Video väljas"
-
-msgid "Video On"
-msgstr "Video sees"
-
-msgid "Video Preview"
-msgstr "Video eelvaade"
+msgid "Video call"
+msgstr "Videokõne"
 
 msgid "_Call"
 msgstr "_Helista"
+
+msgid "_Camera"
+msgstr "_Kaamera"
+
+msgid "_Contents"
+msgstr "_Sisukord"
+
+msgid "_Debug"
+msgstr "Si_lumine"
+
+msgid "_Help"
+msgstr "A_bi"
+
+msgid "_Microphone"
+msgstr "_Mikrofon"
+
+msgid "_Settings"
+msgstr "_Seaded"
 
 msgid "_View"
 msgstr "_Vaade"
@@ -2376,6 +2701,15 @@ msgid_plural "%s (%d unread from all)"
 msgstr[0] "%s (%d lugemata kõigilt)"
 msgstr[1] "%s (%d lugemata kõigilt)"
 
+msgid "SMS:"
+msgstr "SMS:"
+
+#, c-format
+msgid "Sending %d message"
+msgid_plural "Sending %d messages"
+msgstr[0] "%d sõnumi saatmine"
+msgstr[1] "%d sõnumi saatmine"
+
 msgid "Typing a message."
 msgstr "Kirjutab sõnumit."
 
@@ -2384,9 +2718,6 @@ msgstr "_Puhasta"
 
 msgid "C_ontact"
 msgstr "_Kontakt"
-
-msgid "Chat"
-msgstr "Vestlus"
 
 msgid "Insert _Smiley"
 msgstr "Lisa _tujunägu"
@@ -2403,23 +2734,14 @@ msgstr "Tõsta kaart _paremale"
 msgid "Notify for All Messages"
 msgstr "Teavitamine kõigist sõnumitest"
 
-msgid "_Contents"
-msgstr "_Sisukord"
-
 msgid "_Conversation"
 msgstr "_Vestlus"
 
 msgid "_Detach Tab"
 msgstr "_Haagi kaart lahti"
 
-msgid "_Edit"
-msgstr "_Redaktor"
-
 msgid "_Favorite Chat Room"
 msgstr "_Lemmikjututuba"
-
-msgid "_Help"
-msgstr "A_bi"
 
 msgid "_Next Tab"
 msgstr "_Järgmine kaart"
@@ -2471,6 +2793,9 @@ msgstr "_Lükka tagasi"
 
 msgid "_Answer"
 msgstr "_Vasta"
+
+msgid "_Answer with video"
+msgstr "_Vastamine koos videoga"
 
 #, c-format
 msgid "Incoming video call from %s"
@@ -2638,14 +2963,36 @@ msgstr "Katkesta ühendus"
 msgid "No match found"
 msgstr "Vastavust ei leitud"
 
+#, c-format
+msgid "Sorry, %s accounts can’t be used until your %s software is updated."
+msgstr ""
+"Vabandust, %s kontosid ei saa kasutada enne, kui sinu %s tarkvara on "
+"uuendatud."
+
+msgid "Update software..."
+msgstr "Tarkvara uuendamine..."
+
+msgid "Close"
+msgstr "Sulge"
+
 msgid "Reconnect"
 msgstr "Ühendu uuesti"
 
 msgid "Edit Account"
 msgstr "Konto redigeerimine"
 
-msgid "Close"
-msgstr "Sulge"
+#. Translators: this string will be something like:
+#. *   Top up My Account ($1.23)..."
+#, c-format
+msgid "Top up %s (%s)..."
+msgstr "Lae %s kontot (%s)..."
+
+msgid "Top up account credit"
+msgstr "Lisa kontole raha"
+
+#. top up button
+msgid "Top Up..."
+msgstr "Lae kontot..."
 
 msgid "Contact"
 msgstr "Kontakt"
@@ -2653,11 +3000,11 @@ msgstr "Kontakt"
 msgid "Contact List"
 msgstr "Kontaktide nimekiri"
 
-msgid "Show and edit accounts"
-msgstr "Kontode näitamine ja redigeerimine"
-
 msgid "Contacts on a _Map"
 msgstr "Kontaktid _kaardil"
+
+msgid "Credit Balance"
+msgstr "Kontojääk"
 
 msgid "Find in Contact _List"
 msgstr "_Otsi kontaktide nimekirjast"
@@ -2697,9 +3044,6 @@ msgstr "_Blokitud kontaktid"
 
 msgid "_Compact Size"
 msgstr "_Kompaktne"
-
-msgid "_Debug"
-msgstr "Si_lumine"
 
 msgid "_File Transfers"
 msgstr "_Failiülekanded"
@@ -2800,6 +3144,38 @@ msgstr "Konto ühendus katkestatud"
 msgid "Language"
 msgstr "Keel"
 
+#. translators: Contact name for the chat theme preview
+msgid "Juliet"
+msgstr "Julia"
+
+#. translators: Contact name for the chat theme preview
+msgid "Romeo"
+msgstr "Romeo"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "O Romeo, Romeo, wherefore art thou Romeo?"
+msgstr "Oo Romeo! Oo Romeo, miks sa oled Romeo?"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "Deny thy father and refuse thy name;"
+msgstr "Salga oma isa, keeldu oma nimest,"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "Or if thou wilt not, be but sworn my love"
+msgstr "või kui ei taha, vannu mulle armu,"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "And I'll no longer be a Capulet."
+msgstr "ja Capulettiks kauemaks ma ei jää!"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "Shall I hear more, or shall I speak at this?"
+msgstr "Kas peaksin veel kuulama või selle peale rääkima?"
+
+#. translators: Quote from Romeo & Julier, for chat theme preview
+msgid "Juliet has disconnected"
+msgstr "Julia lahkus"
+
 msgid "Preferences"
 msgstr "Eelistused"
 
@@ -2821,6 +3197,17 @@ msgstr "_Eemal- või hõivatud oleku korral on helid keelatud"
 msgid "Display incoming events in the notification area"
 msgstr "Sissetulevaid sündmuseid kuvatakse teatealal"
 
+msgid ""
+"Echo cancellation helps to make your voice sound clearer to the other "
+"person, but may cause problems on some computers. If you or the other person "
+"hear strange noises or glitches during calls, try turning echo cancellation "
+"off and restarting the call."
+msgstr ""
+"Kaja vähendamine teeb sinu hääle teiste jaoks puhtamaks, kuid võib "
+"põhjustada probleeme mõnedel arvutitel. Kui sina või teine kõne osapool "
+"kuuleb imelikku müra või krõpse kõne ajal, proovi kaja vähendamine välja "
+"lülitada ja helista uuesti."
+
 msgid "Enable notifications when a contact comes online"
 msgstr "Teatatakse kontakti sisenemisest"
 
@@ -2835,6 +3222,12 @@ msgstr "Õigekirjakontroll on lubatud järgmistele keeltele:"
 
 msgid "General"
 msgstr "Üldine"
+
+msgid "Input level:"
+msgstr "Sisendtase:"
+
+msgid "Input volume:"
+msgstr "Sisendvaljus:"
 
 msgid "Location sources:"
 msgstr "Asukohaallikad:"
@@ -2881,6 +3274,12 @@ msgstr ""
 msgid "Themes"
 msgstr "Teemad"
 
+msgid "Use _echo cancellation to improve call quality"
+msgstr "_Kaja vähendamine kõne kvaliteedi parendamiseks"
+
+msgid "Variant:"
+msgstr "Variant:"
+
 msgid "_Automatically connect on startup"
 msgstr "_Käivitumisel ühendutakse automaatselt"
 
@@ -2914,6 +3313,42 @@ msgstr "Olek"
 
 msgid "_Quit"
 msgstr "_Lõpeta"
+
+msgid "Call the contact again"
+msgstr "Helista kontaktile uuesti"
+
+msgid "Camera Off"
+msgstr "Kaamera väljas"
+
+msgid "Camera On"
+msgstr "Kaamera sees"
+
+msgid "Disable camera and stop sending video"
+msgstr "Kaamera keelamine ja video saatmise lõpetamine"
+
+msgid "Enable camera and send video"
+msgstr "Kaamera lubamine ja video saatmine"
+
+msgid "Enable camera but don't send video"
+msgstr "Kaamera lubamine ilma video saatmiseta"
+
+msgid "Preview"
+msgstr "Eelvaade"
+
+msgid "Redial"
+msgstr "Vali uuesti"
+
+msgid "V_ideo"
+msgstr "V_ideo"
+
+msgid "Video Off"
+msgstr "Video väljas"
+
+msgid "Video On"
+msgstr "Video sees"
+
+msgid "Video Preview"
+msgstr "Video eelvaade"
 
 msgid "Contact Map View"
 msgstr "Kontaktide kaardivaade"
@@ -2991,11 +3426,20 @@ msgstr "Alguses vali antud konto (nt. gabble/jabber/mingi_40näidis_2eorg0)"
 msgid "<account-id>"
 msgstr "<konto-id>"
 
+msgid "Show account assistant"
+msgstr "Kontoabilise näitamine"
+
 msgid "- Empathy Accounts"
 msgstr "- Empathy kontod"
 
 msgid "Empathy Accounts"
 msgstr "Empathy kontod"
+
+msgid "Show a particular service"
+msgstr "Kindla teenuse näitamine"
+
+msgid "- Empathy Debugger"
+msgstr "- Empathy siluja"
 
 msgid "Empathy Debugger"
 msgstr "Empathy siluja"
@@ -3012,19 +3456,122 @@ msgstr "Lükka tagasi"
 msgid "Answer"
 msgstr "Vasta"
 
+msgid "Answer with video"
+msgstr "Vasta koos videoga"
+
 msgid "Decline"
 msgstr "Lükka tagasi"
 
 msgid "Accept"
 msgstr "Nõustu"
 
-#, c-format
-msgid "Missed call from %s"
-msgstr "Vastamata kõne kasutajalt %s"
+#. translators: the 'Provide' button is displayed in a notification
+#. * bubble when Empathy is asking for an account password; clicking on it
+#. * brings the password popup.
+msgid "Provide"
+msgstr "Sisesta"
 
 #, c-format
 msgid "%s just tried to call you, but you were in another call."
 msgstr "%s proovis sulle helistada ajal, mil Sul oli teine kõne pooleli."
+
+#. Translators: this is an "Info" label. It should be as short
+#. * as possible.
+msgid "i"
+msgstr "i"
+
+msgid "On hold"
+msgstr "Ootel"
+
+msgid "Mute"
+msgstr "Tumm"
+
+msgid "Duration"
+msgstr "Kestus"
+
+#. Translators: 'status - minutes:seconds' the caller has been connected
+#, c-format
+msgid "%s — %d:%02dm"
+msgstr "%s — %d:%02dm"
+
+#, c-format
+msgid "Your current balance is %s."
+msgstr "Konto praegune seis on %s."
+
+msgid "Sorry, you don’t have enough credit for that call."
+msgstr "Kahjuks pole selle kõne jaoks piisavalt krediiti."
+
+msgid "Top Up"
+msgstr "Lae kontot"
+
+msgid "_Match case"
+msgstr "_Tõstutundlik"
+
+#~ msgid "Empathy has migrated butterfly logs"
+#~ msgstr "Empathy on üle kandnud butterfly logid"
+
+#~ msgid "Whether Empathy has migrated butterfly logs."
+#~ msgstr "Kas Empathy on üle kandnud butterfly logid."
+
+#~ msgid "All"
+#~ msgstr "Kõik"
+
+#~ msgid "_Enabled"
+#~ msgstr "_Lubatud"
+
+#~ msgid "Ungrouped"
+#~ msgstr "Grupeerimata"
+
+#~ msgid "Favorite People"
+#~ msgstr "Lemmikud"
+
+#~ msgid "Select a contact"
+#~ msgstr "Vali kontakt"
+
+#~ msgid "Date"
+#~ msgstr "Kuupäev"
+
+#~ msgid "Conversations"
+#~ msgstr "Vestlused"
+
+#~ msgid "Find Next"
+#~ msgstr "Otsi järgmine"
+
+#~ msgid "Find Previous"
+#~ msgstr "Otsi eelmine"
+
+#~ msgid "Previous Conversations"
+#~ msgstr "Eelmised vestlused"
+
+#~ msgid "_For:"
+#~ msgstr "_Otsing:"
+
+#~ msgid "Contact ID:"
+#~ msgstr "Kontakti ID:"
+
+#~ msgid "C_hat"
+#~ msgstr "_Vestle"
+
+#~ msgid "C_all"
+#~ msgstr "_Helista"
+
+#~ msgid "Set your presence and current status"
+#~ msgstr "Kohalolu ja praeguse oleku määramine"
+
+#~ msgid "Enter Custom Message"
+#~ msgstr "Sisesta oma teade"
+
+#~ msgid "Save _New Status Message"
+#~ msgstr "Salvesta _uus olekusõnum"
+
+#~ msgid "Saved Status Messages"
+#~ msgstr "Salvestatud olekuteated"
+
+#~ msgid "The selected contact cannot receive files."
+#~ msgstr "Valitud kontakt pole suuteline faile vastu võtma."
+
+#~ msgid "Show and edit accounts"
+#~ msgstr "Kontode näitamine ja redigeerimine"
 
 #~ msgid "%s is now offline."
 #~ msgstr "%s pole enam ühendatud."
