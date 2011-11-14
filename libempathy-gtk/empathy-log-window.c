@@ -3460,6 +3460,8 @@ log_manager_got_dates_cb (GObject *manager,
 
           g_date_free (date);
         }
+
+      g_free (separator);
     }
 
   g_list_free_full (dates, g_free);
