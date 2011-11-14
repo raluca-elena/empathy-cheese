@@ -603,6 +603,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
   GFile *gfile;
   GtkWidget *vbox, *accounts, *search, *label, *closeitem;
   GtkWidget *scrolledwindow_events;
+  gchar *uri;
 
   self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
       EMPATHY_TYPE_LOG_WINDOW, EmpathyLogWindowPriv);
@@ -745,9 +746,10 @@ empathy_log_window_init (EmpathyLogWindow *self)
   gfile = g_file_new_for_path (filename);
   g_free (filename);
 
-  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->priv->webview),
-      g_file_get_uri (gfile));
+  uri = g_file_get_uri (gfile);
+  webkit_web_view_load_uri (WEBKIT_WEB_VIEW (self->priv->webview), uri);
   g_object_unref (gfile);
+  g_free (uri);
 
   /* handle all navigation externally */
   g_signal_connect (self->priv->webview, "navigation-policy-decision-requested",
