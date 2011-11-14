@@ -1803,17 +1803,26 @@ populate_dates_from_search_hits (GList *accounts,
 
   if (gtk_tree_model_get_iter_first (model, &iter))
     {
-      gtk_list_store_prepend (store, &iter);
-      gtk_list_store_set (store, &iter,
-          COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
-          COL_WHEN_TEXT, "separator",
-          -1);
+      GDate *date;
+
+      date = g_date_new_dmy (1, 1, -1),
 
       gtk_list_store_prepend (store, &iter);
       gtk_list_store_set (store, &iter,
-          COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
+          COL_WHEN_DATE, date,
+          COL_WHEN_TEXT, "separator",
+          -1);
+
+      g_date_free (date);
+
+      date = g_date_new_dmy (2, 1, -1),
+      gtk_list_store_prepend (store, &iter);
+      gtk_list_store_set (store, &iter,
+          COL_WHEN_DATE, date,
           COL_WHEN_TEXT, _("Anytime"),
           -1);
+
+      g_date_free (date);
 
       if (gtk_tree_model_iter_nth_child (model, &iter, NULL, 2))
         gtk_tree_selection_select_iter (selection, &iter);
@@ -3418,17 +3427,27 @@ log_manager_got_dates_cb (GObject *manager,
 
       if (g_strcmp0 (separator, "separator") != 0)
         {
-          gtk_list_store_prepend (store, &iter);
-          gtk_list_store_set (store, &iter,
-              COL_WHEN_DATE, g_date_new_dmy (1, 1, -1),
-              COL_WHEN_TEXT, "separator",
-              -1);
+          GDate *date;
+
+          date = g_date_new_dmy (1, 1, -1);
 
           gtk_list_store_prepend (store, &iter);
           gtk_list_store_set (store, &iter,
-              COL_WHEN_DATE, g_date_new_dmy (2, 1, -1),
+              COL_WHEN_DATE, date,
+              COL_WHEN_TEXT, "separator",
+              -1);
+
+          g_date_free (date);
+
+          date = g_date_new_dmy (2, 1, -1);
+
+          gtk_list_store_prepend (store, &iter);
+          gtk_list_store_set (store, &iter,
+              COL_WHEN_DATE, date,
               COL_WHEN_TEXT, _("Anytime"),
               -1);
+
+          g_date_free (date);
         }
     }
 
