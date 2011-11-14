@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /*
  * Copyright (C) 2008 Collabora Ltd.
  *
@@ -26,35 +25,34 @@
 #include <gtk/gtk.h>
 
 #include <libempathy/empathy-debug.h>
+#include <libempathy/empathy-utils.h>
 #include <libempathy-gtk/empathy-log-window.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
 
 static void
 destroy_cb (GtkWidget *dialog,
-	    gpointer   user_data)
+    gpointer user_data)
 {
-	gtk_main_quit ();
+  gtk_main_quit ();
 }
 
 int
-main (int argc, char *argv[])
+main (int argc,
+    char *argv[])
 {
-	GtkWidget *window;
+  GtkWidget *window;
 
-	g_thread_init (NULL);
-	gtk_init (&argc, &argv);
-	empathy_gtk_init ();
-	g_set_application_name (PACKAGE_NAME);
-	gtk_window_set_default_icon_name ("empathy");
+  g_thread_init (NULL);
+  gtk_init (&argc, &argv);
+  empathy_gtk_init ();
+  g_set_application_name (PACKAGE_NAME);
+  gtk_window_set_default_icon_name ("empathy");
 
-	window = empathy_log_window_show (NULL, NULL, FALSE, NULL);
+  window = empathy_log_window_show (NULL, NULL, FALSE, NULL);
 
-	g_signal_connect (window, "destroy",
-			  G_CALLBACK (destroy_cb),
-			  NULL);
+  g_signal_connect (window, "destroy", G_CALLBACK (destroy_cb), NULL);
 
-	gtk_main ();
+  gtk_main ();
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
-
