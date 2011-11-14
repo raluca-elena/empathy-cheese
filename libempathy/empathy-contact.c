@@ -2089,9 +2089,9 @@ contact_##name##_cb (GObject *source, \
     } \
 }
 
-declare_contact_cb(request_subscription)
-declare_contact_cb(authorize_publication)
-declare_contact_cb(unblock)
+declare_contact_cb (request_subscription)
+declare_contact_cb (authorize_publication)
+declare_contact_cb (unblock)
 
 void
 empathy_contact_add_to_contact_list (EmpathyContact *self,
@@ -2110,7 +2110,7 @@ empathy_contact_add_to_contact_list (EmpathyContact *self,
   tp_contact_unblock_async (priv->tp_contact, contact_unblock_cb, NULL);
 }
 
-declare_contact_cb(remove)
+declare_contact_cb (remove)
 
 void
 empathy_contact_remove_from_contact_list (EmpathyContact *self)

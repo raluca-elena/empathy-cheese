@@ -302,7 +302,7 @@ block_cb (GObject *source,
 }
 
 static void
-block_contact_got_contact(TpConnection *conn,
+block_contact_got_contact (TpConnection *conn,
     guint n_contacts,
     TpContact * const *contacts,
     const gchar * const *requested_ids,
