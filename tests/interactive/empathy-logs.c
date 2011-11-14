@@ -36,11 +36,27 @@ destroy_cb (GtkWidget *dialog,
   gtk_main_quit ();
 }
 
+static void
+account_manager_prepare_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+  GError *error = NULL;
+  GtkWidget *window;
+
+  tp_proxy_prepare_finish (source, result, &error);
+  g_assert_no_error (error);
+
+  window = empathy_log_window_show (NULL, NULL, FALSE, NULL);
+
+  g_signal_connect (window, "destroy", G_CALLBACK (destroy_cb), NULL);
+}
+
 int
 main (int argc,
     char *argv[])
 {
-  GtkWidget *window;
+  TpAccountManager *mgr;
 
   g_thread_init (NULL);
   gtk_init (&argc, &argv);
@@ -48,11 +64,13 @@ main (int argc,
   g_set_application_name (PACKAGE_NAME);
   gtk_window_set_default_icon_name ("empathy");
 
-  window = empathy_log_window_show (NULL, NULL, FALSE, NULL);
+  mgr = tp_account_manager_dup ();
 
-  g_signal_connect (window, "destroy", G_CALLBACK (destroy_cb), NULL);
+  tp_proxy_prepare_async (mgr, NULL, account_manager_prepare_cb, NULL);
 
   gtk_main ();
+
+  g_object_unref (mgr);
 
   return EXIT_SUCCESS;
 }
