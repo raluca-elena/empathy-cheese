@@ -1540,7 +1540,7 @@ add_persona (EmpathyIndividualWidget *self,
   gtk_widget_show (GTK_WIDGET (grid));
 
   /* Pack a separator after the grid */
-  separator = gtk_hseparator_new ();
+  separator = gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
   g_object_set_data (G_OBJECT (grid), "separator", separator);
   gtk_box_pack_start (GTK_BOX (priv->vbox_individual), separator, FALSE, FALSE,
       0);
