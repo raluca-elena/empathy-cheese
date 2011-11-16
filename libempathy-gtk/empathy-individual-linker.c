@@ -358,7 +358,8 @@ set_up (EmpathyIndividualLinker *self)
   top_vbox = gtk_vbox_new (FALSE, 6);
 
   /* Layout panes */
-  paned = GTK_PANED (gtk_hpaned_new ());
+
+  paned = GTK_PANED (gtk_paned_new (GTK_ORIENTATION_HORIZONTAL));
 
   /* Left column heading */
   alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
