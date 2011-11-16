@@ -120,7 +120,7 @@ on_searcher_reset (GObject *source_object,
   gtk_list_store_clear (priv->store);
   tp_contact_search_start (priv->searcher, search);
 
-  g_hash_table_destroy (search);
+  g_hash_table_unref (search);
 }
 
 static void

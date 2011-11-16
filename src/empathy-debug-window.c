@@ -631,7 +631,7 @@ get_cm_display_name (EmpathyDebugWindow *self,
       retval = g_strdup (cm_name);
     }
 
-  g_hash_table_destroy (protocols);
+  g_hash_table_unref (protocols);
 
   return retval;
 }
@@ -1721,7 +1721,7 @@ debug_window_finalize (GObject *object)
       debug_message_list_free (values);
     }
 
-  g_hash_table_destroy (priv->cache);
+  g_hash_table_unref (priv->cache);
 
   (G_OBJECT_CLASS (empathy_debug_window_parent_class)->finalize) (object);
 }

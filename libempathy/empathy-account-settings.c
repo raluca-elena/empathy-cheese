@@ -402,11 +402,11 @@ empathy_account_settings_finalize (GObject *object)
       g_list_free (priv->required_params);
     }
 
-  g_hash_table_destroy (priv->parameters);
-  g_hash_table_destroy (priv->param_regexps);
+  g_hash_table_unref (priv->parameters);
+  g_hash_table_unref (priv->param_regexps);
 
   empathy_account_settings_free_unset_parameters (self);
-  g_array_free (priv->unset_parameters, TRUE);
+  g_array_unref (priv->unset_parameters);
 
   G_OBJECT_CLASS (empathy_account_settings_parent_class)->finalize (object);
 }

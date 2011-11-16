@@ -572,7 +572,7 @@ finalize (GObject *object)
 {
   EmpathyIndividualLinkerPriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->changed_individuals);
+  g_hash_table_unref (priv->changed_individuals);
 
   G_OBJECT_CLASS (empathy_individual_linker_parent_class)->finalize (object);
 }

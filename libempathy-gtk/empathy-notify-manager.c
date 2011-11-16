@@ -89,7 +89,7 @@ notify_manager_finalize (GObject *object)
 {
   EmpathyNotifyManagerPriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->capabilities);
+  g_hash_table_unref (priv->capabilities);
 
   G_OBJECT_CLASS (empathy_notify_manager_parent_class)->finalize (object);
 }

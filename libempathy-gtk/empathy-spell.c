@@ -169,7 +169,7 @@ spell_notify_languages_cb (GSettings   *gsettings,
 
 	/* We just reset the languages list. */
 	if (languages != NULL) {
-		g_hash_table_destroy (languages);
+		g_hash_table_unref (languages);
 		languages = NULL;
 	}
 }

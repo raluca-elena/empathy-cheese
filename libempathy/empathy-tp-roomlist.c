@@ -203,7 +203,7 @@ tp_roomlist_got_rooms_cb (TpChannel       *channel,
 						       chatrooms,
 						       tp_roomlist_chatrooms_free,
 						       list);
-		g_array_free (handles, TRUE);
+		g_array_unref (handles);
 	}
 }
 

@@ -365,7 +365,7 @@ protocol_chooser_finalize (GObject *object)
 
   if (priv->protocols)
     {
-      g_hash_table_destroy (priv->protocols);
+      g_hash_table_unref (priv->protocols);
       priv->protocols = NULL;
     }
 

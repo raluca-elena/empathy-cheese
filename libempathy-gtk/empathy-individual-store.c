@@ -1080,9 +1080,9 @@ individual_store_dispose (GObject *object)
       g_source_remove (self->priv->setup_idle_id);
     }
 
-  g_hash_table_destroy (self->priv->status_icons);
-  g_hash_table_destroy (self->priv->folks_individual_cache);
-  g_hash_table_destroy (self->priv->empathy_group_cache);
+  g_hash_table_unref (self->priv->status_icons);
+  g_hash_table_unref (self->priv->folks_individual_cache);
+  g_hash_table_unref (self->priv->empathy_group_cache);
   G_OBJECT_CLASS (empathy_individual_store_parent_class)->dispose (object);
 }
 

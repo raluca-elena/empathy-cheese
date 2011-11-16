@@ -102,7 +102,7 @@ mock_tls_certificate_finalize (GObject *object)
       &self->rejections);
   g_free (self->cert_type);
   self->cert_type = NULL;
-  g_ptr_array_free (self->cert_data, TRUE);
+  g_ptr_array_unref (self->cert_data);
   self->cert_data = NULL;
 
   G_OBJECT_CLASS (mock_tls_certificate_parent_class)->finalize (object);
@@ -226,7 +226,7 @@ mock_tls_certificate_assert_rejected (MockTLSCertificate *self,
               TP_HASH_TYPE_STRING_VARIANT_MAP, &rejection_details,
               NULL);
       g_free (rejection_error);
-      g_hash_table_destroy (rejection_details);
+      g_hash_table_unref (rejection_details);
 
       if (rejection_reason == reason)
         return;

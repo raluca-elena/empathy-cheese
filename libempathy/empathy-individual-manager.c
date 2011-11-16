@@ -249,7 +249,7 @@ individual_manager_dispose (GObject *object)
 {
   EmpathyIndividualManagerPriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->individuals);
+  g_hash_table_unref (priv->individuals);
 
   g_signal_handlers_disconnect_by_func (priv->aggregator,
       aggregator_individuals_changed_cb, object);
@@ -470,7 +470,7 @@ empathy_individual_manager_add_from_contact (EmpathyIndividualManager *self,
       priv->aggregator, NULL, persona_store, details,
       aggregator_add_persona_from_details_cb, contact);
 
-  g_hash_table_destroy (details);
+  g_hash_table_unref (details);
   g_object_unref (persona_store);
 
 finish:

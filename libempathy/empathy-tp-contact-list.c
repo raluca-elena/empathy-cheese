@@ -273,7 +273,7 @@ tp_contact_list_group_ready_cb (TpChannel *channel,
 	g_assert (members != NULL);
 	arr = tp_intset_to_array (members);
 	contacts_added_to_group (list, channel, arr);
-	g_array_free (arr, TRUE);
+	g_array_unref (arr);
 }
 
 static void
@@ -354,7 +354,7 @@ tp_contact_list_group_add (EmpathyTpContactList *list,
 	if (channel) {
 		tp_cli_channel_interface_group_call_add_members (channel, -1,
 			handles, NULL, NULL, NULL, NULL, NULL);
-		g_array_free (handles, TRUE);
+		g_array_unref (handles);
 		return;
 	}
 
@@ -434,7 +434,7 @@ add_to_members (EmpathyTpContactList *list,
 				got_added_members_cb, NULL, NULL, G_OBJECT (list));
 	}
 
-	g_array_free (request, TRUE);
+	g_array_unref (request);
 }
 
 static void
@@ -684,7 +684,7 @@ tp_contact_list_subscribe_group_members_changed_cb (TpChannel     *channel,
 	tp_cli_channel_interface_group_call_add_members (priv->publish,
 		-1, accept, NULL, NULL, NULL, NULL, NULL);
 
-	g_array_free (accept, TRUE);
+	g_array_unref (accept);
 }
 
 static void
@@ -740,10 +740,10 @@ tp_contact_list_finalize (GObject *object)
 			tp_contact_list_group_invalidated_cb, list);
 	}
 
-	g_hash_table_destroy (priv->groups);
-	g_hash_table_destroy (priv->members);
-	g_hash_table_destroy (priv->pendings);
-	g_hash_table_destroy (priv->add_to_group);
+	g_hash_table_unref (priv->groups);
+	g_hash_table_unref (priv->members);
+	g_hash_table_unref (priv->pendings);
+	g_hash_table_unref (priv->add_to_group);
 
 	G_OBJECT_CLASS (empathy_tp_contact_list_parent_class)->finalize (object);
 }
@@ -1016,7 +1016,7 @@ empathy_tp_contact_list_class_init (EmpathyTpContactListClass *klass)
 static void
 tp_contact_list_array_free (gpointer handles)
 {
-	g_array_free (handles, TRUE);
+	g_array_unref (handles);
 }
 
 static void
@@ -1281,7 +1281,7 @@ tp_contact_list_remove_group (EmpathyContactList *list,
 	tp_cli_channel_interface_group_call_remove_members (channel, -1,
 		handles, NULL, NULL, NULL, NULL, NULL);
 	tp_cli_channel_call_close (channel, -1, NULL, NULL, NULL, NULL);
-	g_array_free (handles, TRUE);
+	g_array_unref (handles);
 }
 
 static EmpathyContactListFlags

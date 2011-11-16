@@ -1372,8 +1372,8 @@ empathy_main_window_finalize (GObject *window)
 	g_object_unref (priv->individual_store);
 	g_object_unref (priv->contact_manager);
 	g_object_unref (priv->sound_mgr);
-	g_hash_table_destroy (priv->errors);
-	g_hash_table_destroy (priv->auths);
+	g_hash_table_unref (priv->errors);
+	g_hash_table_unref (priv->auths);
 
 	/* disconnect all handlers of status-changed signal */
 	g_hash_table_iter_init (&iter, priv->status_changed_handlers);
@@ -1381,7 +1381,7 @@ empathy_main_window_finalize (GObject *window)
 		g_signal_handler_disconnect (TP_ACCOUNT (key),
 					     GPOINTER_TO_UINT (value));
 
-	g_hash_table_destroy (priv->status_changed_handlers);
+	g_hash_table_unref (priv->status_changed_handlers);
 
 	g_signal_handlers_disconnect_by_func (priv->event_manager,
 			  		      main_window_event_added_cb,

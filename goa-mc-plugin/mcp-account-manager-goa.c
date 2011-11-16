@@ -82,7 +82,7 @@ mcp_account_manager_goa_finalize (GObject *self)
 {
   McpAccountManagerGoaPrivate *priv = GET_PRIVATE (self);
 
-  g_hash_table_destroy (priv->accounts);
+  g_hash_table_unref (priv->accounts);
   g_key_file_free (priv->store);
   g_free (priv->filename);
 
@@ -150,7 +150,7 @@ get_tp_parameters (GoaAccount *account)
   else
     {
       DEBUG ("Unknown account type %s", type);
-      g_hash_table_destroy (params);
+      g_hash_table_unref (params);
       return NULL;
     }
 
@@ -179,7 +179,7 @@ get_tp_account_name (GoaAccount *account)
       (char *) g_hash_table_lookup (params, "protocol"),
       type, id);
 
-  g_hash_table_destroy (params);
+  g_hash_table_unref (params);
 
   return name;
 }
@@ -399,7 +399,7 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
       while (g_hash_table_iter_next (&iter, &key, &value))
         mcp_account_manager_set_value (am, acct, key, value);
 
-      g_hash_table_destroy (params);
+      g_hash_table_unref (params);
 
       /* Stored properties */
       keys = g_key_file_get_keys (priv->store, acct, &nkeys, NULL);
@@ -439,7 +439,7 @@ mcp_account_manager_goa_get (const McpAccountStorage *self,
 
       mcp_account_manager_set_value (am, acct, key, value);
 
-      g_hash_table_destroy (params);
+      g_hash_table_unref (params);
       g_free (value);
     }
 

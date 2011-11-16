@@ -762,7 +762,7 @@ tp_chat_finalize (GObject *object)
 
 	g_queue_free (self->priv->messages_queue);
 	g_queue_free (self->priv->pending_messages_queue);
-	g_hash_table_destroy (self->priv->messages_being_sent);
+	g_hash_table_unref (self->priv->messages_being_sent);
 
 	g_free (self->priv->title);
 	g_free (self->priv->subject);
@@ -1441,7 +1441,7 @@ empathy_tp_chat_join (EmpathyTpChat *self)
 	tp_cli_channel_interface_group_call_add_members ((TpChannel *) self, -1, members,
 		"", add_members_cb, NULL, NULL, G_OBJECT (self));
 
-	g_array_free (members, TRUE);
+	g_array_unref (members);
 }
 
 gboolean

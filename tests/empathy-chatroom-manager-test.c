@@ -76,7 +76,7 @@ check_chatrooms_list (EmpathyChatroomManager *mgr,
   fail_if (g_hash_table_size (found) != 0);
 
   g_list_free (chatrooms);
-  g_hash_table_destroy (found);
+  g_hash_table_unref (found);
 }
 
 static gboolean

@@ -261,7 +261,7 @@ tp_streamed_media_request_streams_for_capabilities (EmpathyTpStreamedMedia *call
       handle, stream_types, tp_streamed_media_request_streams_cb, NULL, NULL,
       G_OBJECT (call));
 
-  g_array_free (stream_types, TRUE);
+  g_array_unref (stream_types);
 }
 
 static void

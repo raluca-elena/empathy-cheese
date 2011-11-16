@@ -1054,7 +1054,7 @@ set_content_hash_type_from_classes (EmpathyFTHandler *handler,
 
   if (!support_ft)
     {
-      g_array_free (possible_values, TRUE);
+      g_array_unref (possible_values);
       return FALSE;
     }
 
@@ -1087,7 +1087,7 @@ set_content_hash_type_from_classes (EmpathyFTHandler *handler,
     }
 
 out:
-  g_array_free (possible_values, TRUE);
+  g_array_unref (possible_values);
 
   DEBUG ("Hash enabled %s; setting content hash type as %u",
          priv->use_hash ? "True" : "False", priv->content_hash_type);

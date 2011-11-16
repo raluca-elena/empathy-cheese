@@ -386,9 +386,9 @@ contact_list_store_dispose (GObject *object)
 		priv->setup_idle_id = 0;
 	}
 
-	g_hash_table_destroy (priv->status_icons);
-	g_hash_table_destroy (priv->empathy_contact_cache);
-	g_hash_table_destroy (priv->empathy_group_cache);
+	g_hash_table_unref (priv->status_icons);
+	g_hash_table_unref (priv->empathy_contact_cache);
+	g_hash_table_unref (priv->empathy_group_cache);
 	G_OBJECT_CLASS (empathy_contact_list_store_parent_class)->dispose (object);
 }
 

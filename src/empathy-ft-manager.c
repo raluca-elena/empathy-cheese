@@ -1082,7 +1082,7 @@ empathy_ft_manager_finalize (GObject *object)
 
   DEBUG ("FT Manager %p", object);
 
-  g_hash_table_destroy (priv->ft_handler_to_row_ref);
+  g_hash_table_unref (priv->ft_handler_to_row_ref);
 
   G_OBJECT_CLASS (empathy_ft_manager_parent_class)->finalize (object);
 }

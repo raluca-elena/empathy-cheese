@@ -206,7 +206,7 @@ build_parameters_string (GStrv parameters)
   g_ptr_array_add (output, NULL); /* NULL-terminate */
 
   join = g_strjoinv (", ", (char **) output->pdata);
-  g_ptr_array_free (output, TRUE);
+  g_ptr_array_unref (output);
 
   return join;
 }

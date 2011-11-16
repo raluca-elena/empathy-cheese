@@ -2054,7 +2054,7 @@ individual_view_finalize (GObject *object)
 
   if (priv->expand_groups_idle_handler != 0)
     g_source_remove (priv->expand_groups_idle_handler);
-  g_hash_table_destroy (priv->expand_groups);
+  g_hash_table_unref (priv->expand_groups);
 
   G_OBJECT_CLASS (empathy_individual_view_parent_class)->finalize (object);
 }

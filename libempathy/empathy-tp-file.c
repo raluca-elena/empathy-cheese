@@ -705,7 +705,7 @@ do_finalize (GObject *object)
 
   if (self->priv->socket_address != NULL)
     {
-      g_array_free (self->priv->socket_address, TRUE);
+      g_array_unref (self->priv->socket_address);
       self->priv->socket_address = NULL;
     }
 

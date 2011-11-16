@@ -55,7 +55,7 @@ empathy_import_account_data_free (EmpathyImportAccountData *data)
   if (data->connection_manager != NULL)
     g_free (data->connection_manager);
   if (data->settings != NULL)
-    g_hash_table_destroy (data->settings);
+    g_hash_table_unref (data->settings);
   if (data->source != NULL)
     g_free (data->source);
 

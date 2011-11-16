@@ -155,7 +155,7 @@ empathy_irc_network_manager_finalize (GObject *object)
   g_free (priv->global_file);
   g_free (priv->user_file);
 
-  g_hash_table_destroy (priv->networks);
+  g_hash_table_unref (priv->networks);
 
   G_OBJECT_CLASS (empathy_irc_network_manager_parent_class)->finalize (object);
 }

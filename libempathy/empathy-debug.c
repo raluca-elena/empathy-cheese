@@ -111,7 +111,7 @@ empathy_debug_free (void)
   if (flag_to_keys == NULL)
     return;
 
-  g_hash_table_destroy (flag_to_keys);
+  g_hash_table_unref (flag_to_keys);
   flag_to_keys = NULL;
 }
 

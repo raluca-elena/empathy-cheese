@@ -1420,7 +1420,7 @@ empathy_individual_invite_menu_item_new (FolksIndividual *individual,
 
   gtk_widget_show (image);
 
-  g_hash_table_destroy (name_room_map);
+  g_hash_table_unref (name_room_map);
   g_object_unref (mgr);
   g_list_free (names);
   g_list_free (rooms);

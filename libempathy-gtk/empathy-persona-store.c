@@ -898,8 +898,8 @@ finalize (GObject *object)
 {
   EmpathyPersonaStorePriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->status_icons);
-  g_hash_table_destroy (priv->personas);
+  g_hash_table_unref (priv->status_icons);
+  g_hash_table_unref (priv->personas);
 
   G_OBJECT_CLASS (empathy_persona_store_parent_class)->finalize (object);
 }

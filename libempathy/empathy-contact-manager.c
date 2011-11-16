@@ -198,7 +198,7 @@ contact_manager_finalize (GObject *object)
 	g_hash_table_foreach (priv->lists,
 			      contact_manager_disconnect_foreach,
 			      object);
-	g_hash_table_destroy (priv->lists);
+	g_hash_table_unref (priv->lists);
 
 	g_object_unref (priv->account_manager);
 }

@@ -412,7 +412,7 @@ empathy_map_view_finalize (GObject *object)
   g_signal_handler_disconnect (priv->contact_list,
       priv->members_changed_id);
 
-  g_hash_table_destroy (priv->markers);
+  g_hash_table_unref (priv->markers);
   g_object_unref (priv->contact_list);
   g_object_unref (priv->layer);
 

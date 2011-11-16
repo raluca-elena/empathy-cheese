@@ -2088,7 +2088,7 @@ finalize (GObject *object)
 {
   EmpathyIndividualWidgetPriv *priv = GET_PRIV (object);
 
-  g_hash_table_destroy (priv->persona_grids);
+  g_hash_table_unref (priv->persona_grids);
 
   G_OBJECT_CLASS (empathy_individual_widget_parent_class)->finalize (object);
 }
