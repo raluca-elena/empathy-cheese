@@ -498,11 +498,11 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
   /* Title */
   gtk_window_set_title (GTK_WINDOW (self), _("Search contacts"));
 
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 6);
 
   /* Account chooser */
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   label = gtk_label_new (_("Account:"));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
   gtk_size_group_add_widget (size_group, label);
@@ -525,7 +525,7 @@ empathy_contact_search_dialog_init (EmpathyContactSearchDialog *self)
 #endif
 
   /* Search input */
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   label = gtk_label_new (_("Search: "));
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
   gtk_size_group_add_widget (size_group, label);

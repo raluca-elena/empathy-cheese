@@ -119,11 +119,11 @@ build_error_vbox (const gchar *primary_message,
   GtkWidget *main_vbox, *w, *hbox;
   PangoAttrList *list;
 
-  main_vbox = gtk_vbox_new (FALSE, 12);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
   gtk_widget_show (main_vbox);
 
-  hbox = gtk_hbox_new (FALSE, 12);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
@@ -600,11 +600,11 @@ account_assistant_build_introduction_page (EmpathyAccountAssistant *self)
   GdkPixbuf *pix;
   const gchar *str;
 
-  main_vbox = gtk_vbox_new (FALSE, 12);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_widget_show (main_vbox);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-  hbox_1 = gtk_hbox_new (FALSE, 12);
+  hbox_1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox_1, TRUE, TRUE, 0);
   gtk_widget_show (hbox_1);
 
@@ -638,13 +638,14 @@ account_assistant_build_introduction_page (EmpathyAccountAssistant *self)
   gtk_box_pack_start (GTK_BOX (main_vbox), w, TRUE, TRUE, 0);
   gtk_widget_show (w);
 
-  vbox_1 = gtk_vbox_new (TRUE, 0);
+  vbox_1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_set_homogeneous (vbox_1, TRUE);
   gtk_container_add (GTK_CONTAINER (w), vbox_1);
   gtk_widget_show (vbox_1);
 
   if (empathy_import_accounts_to_import ())
     {
-      hbox_1 = gtk_hbox_new (FALSE, 0);
+      hbox_1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
       gtk_box_pack_start (GTK_BOX (vbox_1), hbox_1, TRUE, TRUE, 0);
       gtk_widget_show (hbox_1);
 
@@ -721,7 +722,7 @@ account_assistant_build_import_page (EmpathyAccountAssistant *self)
   EmpathyImportWidget *iw;
   EmpathyAccountAssistantPriv *priv = GET_PRIV (self);
 
-  main_vbox = gtk_vbox_new (FALSE, 12);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
   w = gtk_label_new (_("Select the accounts you want to import:"));
   gtk_misc_set_alignment (GTK_MISC (w), 0.0, 0.5);
@@ -767,11 +768,11 @@ account_assistant_build_enter_or_create_page (EmpathyAccountAssistant *self)
   EmpathyAccountAssistantPriv *priv = GET_PRIV (self);
   GtkWidget *main_vbox, *w, *chooser, *vbox, *hbox, *radio;
 
-  main_vbox = gtk_vbox_new (FALSE, 12);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
   gtk_widget_show (main_vbox);
 
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
@@ -790,7 +791,7 @@ account_assistant_build_enter_or_create_page (EmpathyAccountAssistant *self)
   gtk_widget_show (chooser);
   priv->chooser = chooser;
 
-  vbox = gtk_vbox_new (FALSE, 6);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   gtk_box_pack_end (GTK_BOX (main_vbox), vbox, FALSE, FALSE, 0);
   gtk_widget_show (vbox);
 
@@ -806,7 +807,7 @@ account_assistant_build_enter_or_create_page (EmpathyAccountAssistant *self)
   gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 0);
   gtk_widget_show (w);
 
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_container_add (GTK_CONTAINER (w), hbox);
   gtk_widget_show (hbox);
 
@@ -1072,11 +1073,11 @@ account_assistant_build_salut_page (EmpathyAccountAssistant *self)
   EmpathyAccountWidget *widget_object;
   gchar *markup;
 
-  main_vbox = gtk_vbox_new (FALSE, 12);
+  main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_widget_show (main_vbox);
   gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 12);
 
-  hbox_1 = gtk_hbox_new (FALSE, 12);
+  hbox_1 = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   gtk_box_pack_start (GTK_BOX (main_vbox), hbox_1, TRUE, TRUE, 0);
   gtk_widget_show (hbox_1);
 

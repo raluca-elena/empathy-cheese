@@ -371,7 +371,7 @@ static GtkWidget *
 empathy_streamed_media_window_create_video_input_add_slider (EmpathyStreamedMediaWindow *self,
   gchar *label_text, GtkWidget *bin)
 {
-   GtkWidget *vbox = gtk_vbox_new (FALSE, 2);
+   GtkWidget *vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 2);
    GtkWidget *scale = gtk_vscale_new_with_range (0, 100, 10);
    GtkWidget *label = gtk_label_new (label_text);
 
@@ -426,7 +426,8 @@ empathy_streamed_media_window_create_video_input (EmpathyStreamedMediaWindow *se
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkWidget *hbox;
 
-  hbox = gtk_hbox_new (TRUE, 3);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
+  gtk_box_set_homogeneous (hbox, TRUE);
 
   priv->video_contrast = empathy_streamed_media_window_create_video_input_add_slider (
     self,  _("Contrast"), hbox);
@@ -533,9 +534,10 @@ empathy_streamed_media_window_create_audio_input (EmpathyStreamedMediaWindow *se
   EmpathyStreamedMediaWindowPriv *priv = GET_PRIV (self);
   GtkWidget *hbox, *vbox, *label;
 
-  hbox = gtk_hbox_new (TRUE, 3);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
+  gtk_box_set_homogeneous (hbox, TRUE);
 
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
 
   priv->volume_scale = gtk_vscale_new_with_range (0, 150, 100);
@@ -1035,7 +1037,8 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 
   gtk_container_add (GTK_CONTAINER (self), top_vbox);
 
-  priv->content_hbox = gtk_hbox_new (FALSE, CONTENT_HBOX_SPACING);
+  priv->content_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL,
+      CONTENT_HBOX_SPACING);
   gtk_container_set_border_width (GTK_CONTAINER (priv->content_hbox),
                                   CONTENT_HBOX_BORDER_WIDTH);
   gtk_paned_pack1 (GTK_PANED (priv->pane), priv->content_hbox, TRUE, FALSE);
@@ -1048,7 +1051,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
       priv->remote_user_output_frame, TRUE, TRUE,
       CONTENT_HBOX_CHILDREN_PACKING_PADDING);
 
-  priv->remote_user_output_hbox = gtk_hbox_new (FALSE, 0);
+  priv->remote_user_output_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
   priv->remote_user_avatar_widget = gtk_image_new ();
 
@@ -1063,7 +1066,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   gtk_widget_set_size_request (priv->self_user_output_frame,
       SELF_VIDEO_SECTION_WIDTH, SELF_VIDEO_SECTION_HEIGTH);
 
-  priv->self_user_output_hbox = gtk_hbox_new (FALSE, 0);
+  priv->self_user_output_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
   priv->self_user_avatar_widget = gtk_image_new ();
   gtk_box_pack_start (GTK_BOX (priv->self_user_output_hbox),
@@ -1083,7 +1086,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
   /* The call will be started as soon the pipeline is playing */
   priv->start_call_when_playing = TRUE;
 
-  priv->vbox = gtk_vbox_new (FALSE, 3);
+  priv->vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_box_pack_start (GTK_BOX (priv->content_hbox), priv->vbox,
       FALSE, FALSE, CONTENT_HBOX_CHILDREN_PACKING_PADDING);
   gtk_box_pack_start (GTK_BOX (priv->vbox), priv->self_user_output_frame,
@@ -1098,7 +1101,7 @@ empathy_streamed_media_window_init (EmpathyStreamedMediaWindow *self)
 
   gtk_button_set_image (GTK_BUTTON (priv->sidebar_button), arrow);
 
-  h = gtk_hbox_new (FALSE, 3);
+  h = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
   gtk_box_pack_end (GTK_BOX (priv->vbox), h, FALSE, FALSE, 3);
   gtk_box_pack_end (GTK_BOX (h), priv->sidebar_button, FALSE, FALSE, 3);
 
@@ -2167,7 +2170,7 @@ display_error (EmpathyStreamedMediaWindow *self,
   content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
 
   /* hbox containing the image and the messages vbox */
-  hbox = gtk_hbox_new (FALSE, 3);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
   gtk_container_add (GTK_CONTAINER (content_area), hbox);
 
   /* Add image */
@@ -2175,7 +2178,7 @@ display_error (EmpathyStreamedMediaWindow *self,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
 
   /* vbox containing the main message and the details expander */
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
 
   /* Add text */

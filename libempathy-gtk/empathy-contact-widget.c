@@ -1625,7 +1625,7 @@ contact_widget_contact_setup (EmpathyContactWidget *information)
   else
     {
       /* Pack the protocol icon with the account name in an hbox */
-      information->widget_account = gtk_hbox_new (FALSE, 6);
+      information->widget_account = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
       information->label_account = gtk_label_new (NULL);
       if (!(information->flags & EMPATHY_CONTACT_WIDGET_FOR_TOOLTIP)) {

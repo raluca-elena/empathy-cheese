@@ -152,15 +152,15 @@ ev_sidebar_init (EvSidebar *ev_sidebar)
 					    G_TYPE_INT);
 
 	/* create a 6 6 6 0 border with GtkBoxes */
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	gtk_box_pack_start (GTK_BOX (ev_sidebar), hbox, TRUE, TRUE, 6);
 
-	vbox = gtk_vbox_new (FALSE, 6);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
-	gtk_box_pack_start (GTK_BOX (hbox), gtk_vbox_new (FALSE, 0), FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), gtk_box_new (GTK_ORIENTATION_VERTICAL, 0), FALSE, FALSE, 0);
 
 	/* top option menu */
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
 	gtk_widget_show (hbox);
 

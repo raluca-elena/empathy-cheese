@@ -269,7 +269,7 @@ chat_window_create_label (EmpathyChatWindow *window,
 	PangoAttribute       *attr;
 
 	/* The spacing between the button and the label. */
-	hbox = gtk_hbox_new (FALSE, 0);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	event_box = gtk_event_box_new ();
 	gtk_event_box_set_visible_window (GTK_EVENT_BOX (event_box), FALSE);
@@ -295,7 +295,7 @@ chat_window_create_label (EmpathyChatWindow *window,
 	status_image = gtk_image_new ();
 
 	/* Spacing between the icon and label. */
-	event_box_hbox = gtk_hbox_new (FALSE, 0);
+	event_box_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
 	gtk_box_pack_start (GTK_BOX (event_box_hbox), status_image, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (event_box_hbox), name_label, TRUE, TRUE, 0);

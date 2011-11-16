@@ -1323,7 +1323,7 @@ alias_presence_avatar_favourite_set_up (EmpathyIndividualWidget *self,
   current_row++;
 
   /* Presence */
-  priv->hbox_presence = gtk_hbox_new (FALSE, 6);
+  priv->hbox_presence = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
   /* Presence image */
   image = gtk_image_new_from_stock (GTK_STOCK_MISSING_IMAGE,
@@ -1478,7 +1478,7 @@ add_persona (EmpathyIndividualWidget *self,
   gtk_widget_show (label);
 
   /* Pack the protocol icon with the account name in an hbox */
-  hbox = GTK_BOX (gtk_hbox_new (FALSE, 6));
+  hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
 
   account_label = gtk_label_new (NULL);
   gtk_label_set_selectable (GTK_LABEL (account_label),

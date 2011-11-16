@@ -657,7 +657,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
       G_CALLBACK (gtk_widget_destroy), self);
 
   /* Account chooser for chats */
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
 
   self->priv->account_chooser = empathy_account_chooser_new ();
   account_chooser = EMPATHY_ACCOUNT_CHOOSER (self->priv->account_chooser);
@@ -687,7 +687,7 @@ empathy_log_window_init (EmpathyLogWindow *self)
   gtk_container_add (GTK_CONTAINER (accounts), vbox);
 
   /* Search entry */
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
 
   self->priv->search_entry = gtk_entry_new ();
   gtk_entry_set_icon_from_icon_name (GTK_ENTRY (self->priv->search_entry),
@@ -3758,7 +3758,7 @@ log_window_delete_menu_clicked_cb (GtkMenuItem *menuitem,
   content_area = gtk_message_dialog_get_message_area (
       GTK_MESSAGE_DIALOG (dialog));
 
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   label = gtk_label_new (_("Delete from:"));
   gtk_box_pack_start (GTK_BOX (hbox), label,
       FALSE, FALSE, 0);

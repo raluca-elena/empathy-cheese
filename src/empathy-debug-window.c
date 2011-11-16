@@ -1439,7 +1439,7 @@ am_prepared_cb (GObject *am,
   g_signal_connect (object, "key-press-event",
       G_CALLBACK (debug_window_key_press_event_cb), NULL);
 
-  vbox = gtk_vbox_new (FALSE, 0);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add (GTK_CONTAINER (object), vbox);
   gtk_widget_show (vbox);
 

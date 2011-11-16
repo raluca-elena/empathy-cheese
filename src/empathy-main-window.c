@@ -1165,7 +1165,7 @@ main_window_setup_balance_create_widget (EmpathyMainWindow *window,
 	EmpathyMainWindowPriv *priv = GET_PRIV (window);
 	GtkWidget *hbox, *image, *label, *button;
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	/* protocol icon */
 	image = gtk_image_new ();

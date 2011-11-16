@@ -355,7 +355,7 @@ set_up (EmpathyIndividualLinker *self)
 
   priv = GET_PRIV (self);
 
-  top_vbox = gtk_vbox_new (FALSE, 6);
+  top_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 
   /* Layout panes */
 
@@ -366,7 +366,7 @@ set_up (EmpathyIndividualLinker *self)
   gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 0, 6);
   gtk_widget_show (alignment);
 
-  vbox = GTK_BOX (gtk_vbox_new (FALSE, 6));
+  vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
   label = gtk_label_new (NULL);
   tmp = g_strdup_printf ("<b>%s</b>", _("Select contacts to link"));
   gtk_label_set_markup (GTK_LABEL (label), tmp);
@@ -440,7 +440,7 @@ set_up (EmpathyIndividualLinker *self)
   gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 6, 0);
   gtk_widget_show (alignment);
 
-  vbox = GTK_BOX (gtk_vbox_new (FALSE, 6));
+  vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
   label = gtk_label_new (NULL);
   tmp = g_strdup_printf ("<b>%s</b>", _("New contact preview"));
   gtk_label_set_markup (GTK_LABEL (label), tmp);

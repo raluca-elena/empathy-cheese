@@ -140,7 +140,7 @@ empathy_dialpad_widget_init (EmpathyDialpadWidget *self)
 
   for (i = 0; dtmfbuttons[i].label != NULL; i++)
     {
-      GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
+      GtkWidget *vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
       GtkWidget *button = gtk_button_new ();
       GtkWidget *label;
       gchar *str;

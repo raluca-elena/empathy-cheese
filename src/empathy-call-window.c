@@ -1702,7 +1702,8 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   gtk_container_add (GTK_CONTAINER (self), top_vbox);
 
-  priv->content_hbox = gtk_hbox_new (FALSE, CONTENT_HBOX_SPACING);
+  priv->content_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL,
+      CONTENT_HBOX_SPACING);
   gtk_container_set_border_width (GTK_CONTAINER (priv->content_hbox),
                                   CONTENT_HBOX_BORDER_WIDTH);
   gtk_box_pack_start (GTK_BOX (priv->pane), priv->content_hbox,
@@ -2999,7 +3000,7 @@ display_error (EmpathyCallWindow *self,
   content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
 
   /* hbox containing the image and the messages vbox */
-  hbox = gtk_hbox_new (FALSE, 3);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
   gtk_container_add (GTK_CONTAINER (content_area), hbox);
 
   /* Add image */
@@ -3007,7 +3008,7 @@ display_error (EmpathyCallWindow *self,
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
 
   /* vbox containing the main message and the details expander */
-  vbox = gtk_vbox_new (FALSE, 3);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
 
   /* Add text */

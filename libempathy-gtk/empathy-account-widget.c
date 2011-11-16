@@ -1172,7 +1172,7 @@ account_widget_build_external (EmpathyAccountWidget *self,
   const gchar *provider, *name = NULL;
   GDesktopAppInfo *desktop_info = NULL;
 
-  self->ui_details->widget = gtk_vbox_new (FALSE, 6);
+  self->ui_details->widget = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   priv->grid_common_settings = gtk_grid_new ();
 
   provider = tp_account_get_storage_provider (account);
@@ -2190,8 +2190,10 @@ do_constructed (GObject *obj)
       !(storage_restrictions &
         TP_STORAGE_RESTRICTION_FLAG_CANNOT_SET_PARAMETERS))
     {
-      GtkWidget *hbox = gtk_hbox_new (TRUE, 3);
+      GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
       GtkWidget *image;
+
+      gtk_box_set_homogeneous (hbox, TRUE);
 
       /*  We can't use the stock button as its accelerator ('C') clashes with
        *  the Close button. */

@@ -137,7 +137,7 @@ empathy_subscription_dialog_show (EmpathyContact *contact,
 	g_free (filename);
 	g_object_unref (gui);
 
-	vbox = gtk_vbox_new (FALSE, 6);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 
 	gtk_box_pack_end (GTK_BOX (hbox_subscription), vbox,
 			  TRUE, TRUE, 0);

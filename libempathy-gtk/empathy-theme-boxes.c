@@ -239,7 +239,7 @@ theme_boxes_maybe_append_header (EmpathyThemeBoxes *theme,
 
 	/* Create a hbox for the header and resize it when the view allocation
 	 * changes */
-	box = gtk_hbox_new (FALSE, 0);
+	box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 	g_signal_connect_object (view, "size-allocate",
 				 G_CALLBACK (table_size_allocate_cb),
 				 box, 0);

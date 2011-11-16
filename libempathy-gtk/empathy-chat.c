@@ -3473,7 +3473,7 @@ chat_prompt_to_save_password (EmpathyChat *self,
 	gtk_info_bar_set_message_type (GTK_INFO_BAR (data->info_bar),
 				       GTK_MESSAGE_QUESTION);
 
-	hbox = gtk_hbox_new (FALSE, 5);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 
 	/* Add image */
@@ -3667,7 +3667,7 @@ display_password_info_bar (EmpathyChat *self)
 
 	content_area = gtk_info_bar_get_content_area (GTK_INFO_BAR (info_bar));
 
-	hbox = gtk_hbox_new (FALSE, 5);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 
 	/* Add image */

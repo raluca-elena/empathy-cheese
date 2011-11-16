@@ -340,7 +340,7 @@ set_up (EmpathyGroupsWidget *self)
   alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
   gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 0, 0, 12, 0);
 
-  vbox = GTK_BOX (gtk_vbox_new (FALSE, 6));
+  vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
 
   label = gtk_label_new (_("Select the groups you want this contact to appear "
       "in.  Note that you can select more than one group or no groups."));
@@ -350,7 +350,7 @@ set_up (EmpathyGroupsWidget *self)
   gtk_box_pack_start (vbox, label, FALSE, FALSE, 0);
   gtk_widget_show (label);
 
-  hbox = GTK_BOX (gtk_hbox_new (FALSE, 12));
+  hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12));
 
   priv->add_group_entry = gtk_entry_new ();
   g_signal_connect (priv->add_group_entry, "changed",

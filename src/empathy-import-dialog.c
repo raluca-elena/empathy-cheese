@@ -78,8 +78,8 @@ import_dialog_show_warning_message (EmpathyImportDialog *self)
 {
   GtkWidget *hbox, *vbox, *w;
 
-  vbox = gtk_vbox_new (FALSE, 12);
-  hbox = gtk_hbox_new (FALSE, 12);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 
   w = gtk_label_new (_("No accounts to import could be found. Empathy "
           "currently only supports importing accounts from Pidgin."));
