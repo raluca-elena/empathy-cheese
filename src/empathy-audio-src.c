@@ -49,6 +49,7 @@ static guint signals[LAST_SIGNAL] = {0};
 
 enum {
     PROP_VOLUME = 1,
+    PROP_MUTE,
     PROP_RMS_LEVEL,
     PROP_PEAK_LEVEL,
     PROP_MICROPHONE,
@@ -72,6 +73,7 @@ struct _EmpathyGstAudioSrcPrivate
   gdouble rms_level;
 
   gdouble volume;
+  gboolean mute;
   /* the mixer track on src we follow and adjust */
   GstMixerTrack *track;
 
@@ -89,7 +91,39 @@ struct _EmpathyGstAudioSrcPrivate
 #define MAX_MIC_CHANNELS 32
 
 static void
-empathy_audio_src_set_hw_volume (EmpathyGstAudioSrc *self, gdouble volume)
+empathy_audio_set_hw_mute (EmpathyGstAudioSrc *self, gboolean mute)
+{
+  g_mutex_lock (self->priv->lock);
+  /* If there is no mixer available ignore the setting */
+  if (self->priv->track == NULL)
+    goto out;
+
+  gst_mixer_set_mute (GST_MIXER (self->priv->src), self->priv->track, mute);
+
+out:
+  g_mutex_unlock (self->priv->lock);
+  self->priv->mute = mute;
+}
+
+static gboolean
+empathy_audio_src_get_hw_mute (EmpathyGstAudioSrc *self)
+{
+  gboolean result = self->priv->mute;
+
+  g_mutex_lock (self->priv->lock);
+  if (self->priv->track == NULL)
+    goto out;
+
+  result = GST_MIXER_TRACK_HAS_FLAG (self->priv->track, GST_MIXER_TRACK_MUTE);
+out:
+  g_mutex_unlock (self->priv->lock);
+
+  return result;
+}
+
+static void
+empathy_audio_src_set_hw_volume (EmpathyGstAudioSrc *self,
+    gdouble volume)
 {
   gint volumes[MAX_MIC_CHANNELS];
   int i;
@@ -377,6 +411,10 @@ empathy_audio_src_set_property (GObject *object,
         empathy_audio_src_set_hw_volume (EMPATHY_GST_AUDIO_SRC (object),
           g_value_get_double (value));
         break;
+      case PROP_MUTE:
+        empathy_audio_set_hw_mute (EMPATHY_GST_AUDIO_SRC (object),
+          g_value_get_boolean (value));
+        break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
@@ -393,6 +431,9 @@ empathy_audio_src_get_property (GObject *object,
     {
       case PROP_VOLUME:
         g_value_set_double (value, priv->volume);
+        break;
+      case PROP_MUTE:
+        g_value_set_boolean (value, priv->mute);
         break;
       case PROP_PEAK_LEVEL:
         g_mutex_lock (priv->lock);
@@ -436,6 +477,11 @@ empathy_audio_src_class_init (EmpathyGstAudioSrcClass
     0.0, 5.0, 1.0,
     G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
   g_object_class_install_property (object_class, PROP_VOLUME, param_spec);
+
+  param_spec = g_param_spec_boolean ("mute", "Mute", "mute contol",
+    FALSE,
+    G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  g_object_class_install_property (object_class, PROP_MUTE, param_spec);
 
   param_spec = g_param_spec_double ("peak-level", "peak level", "peak level",
     -G_MAXDOUBLE, G_MAXDOUBLE, 0,
@@ -531,6 +577,7 @@ empathy_audio_src_volume_changed (gpointer user_data)
   EmpathyGstAudioSrc *self = EMPATHY_GST_AUDIO_SRC (user_data);
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
   gdouble volume;
+  gboolean mute;
 
   g_mutex_lock (priv->lock);
   priv->volume_idle_id = 0;
@@ -544,6 +591,13 @@ empathy_audio_src_volume_changed (gpointer user_data)
       g_object_notify (G_OBJECT (self), "volume");
     }
 
+  mute = empathy_audio_src_get_hw_mute (self);
+  if (mute != priv->mute)
+    {
+      priv->mute = mute;
+      g_object_notify (G_OBJECT (self), "mute");
+    }
+
   return FALSE;
 }
 
@@ -553,8 +607,8 @@ empathy_audio_src_handle_message (GstBin *bin, GstMessage *message)
   EmpathyGstAudioSrc *self = EMPATHY_GST_AUDIO_SRC (bin);
   EmpathyGstAudioSrcPrivate *priv = EMPATHY_GST_AUDIO_SRC_GET_PRIVATE (self);
 
-  if  (GST_MESSAGE_TYPE (message) == GST_MESSAGE_ELEMENT &&
-        GST_MESSAGE_SRC (message) == GST_OBJECT (priv->level))
+  if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_ELEMENT &&
+      GST_MESSAGE_SRC (message) == GST_OBJECT (priv->level))
     {
       const GstStructure *s;
       const gchar *name;
@@ -605,25 +659,28 @@ empathy_audio_src_handle_message (GstBin *bin, GstMessage *message)
 
       g_mutex_unlock (priv->lock);
     }
-  else if  (GST_MESSAGE_TYPE (message) == GST_MESSAGE_ELEMENT &&
+  else if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_ELEMENT &&
         GST_MESSAGE_SRC (message) == GST_OBJECT (priv->src))
     {
-      /* Listen for volume changes on the src element */
+      GstMixerTrack *track = NULL;
+
+      /* Listen for mute or volume changes on the src element */
       if (gst_mixer_message_get_type (message) ==
           GST_MIXER_MESSAGE_VOLUME_CHANGED)
-        {
-          GstMixerTrack *track;
-
-          gst_mixer_message_parse_volume_changed (message, &track,
+        gst_mixer_message_parse_volume_changed (message, &track,
             NULL, NULL);
 
-          g_mutex_lock (priv->lock);
+      if (gst_mixer_message_get_type (message) ==
+          GST_MIXER_MESSAGE_MUTE_TOGGLED)
+        gst_mixer_message_parse_mute_toggled (message, &track, NULL);
 
-          if (track == priv->track && priv->volume_idle_id == 0)
-            priv->volume_idle_id = g_idle_add (
-                empathy_audio_src_volume_changed, self);
-          g_mutex_unlock (priv->lock);
-        }
+      g_mutex_lock (priv->lock);
+
+      if (track != NULL && track == priv->track && priv->volume_idle_id == 0)
+        priv->volume_idle_id = g_idle_add (
+            empathy_audio_src_volume_changed, self);
+
+      g_mutex_unlock (priv->lock);
     }
   else if  (GST_MESSAGE_TYPE (message) == GST_MESSAGE_STATE_CHANGED &&
       GST_MESSAGE_SRC (message) == GST_OBJECT (priv->src))
