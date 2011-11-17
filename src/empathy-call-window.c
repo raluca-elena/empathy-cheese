@@ -167,6 +167,7 @@ struct _EmpathyCallWindowPriv
   GtkWidget *audio_call_button;
   GtkWidget *video_call_button;
   GtkWidget *mic_button;
+  GtkWidget *volume_button;
   GtkWidget *camera_button;
   GtkWidget *dialpad_button;
   GtkWidget *toolbar;
@@ -317,10 +318,6 @@ static void empathy_call_window_status_message (EmpathyCallWindow *window,
 
 static gboolean empathy_call_window_bus_message (GstBus *bus,
   GstMessage *message, gpointer user_data);
-
-static void
-empathy_call_window_volume_changed_cb (GtkScaleButton *button,
-  gdouble value, EmpathyCallWindow *window);
 
 static void
 empathy_call_window_show_hangup_button (EmpathyCallWindow *self,
@@ -1645,6 +1642,7 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "audiocall", &priv->audio_call_button,
     "videocall", &priv->video_call_button,
     "microphone", &priv->mic_button,
+    "volume", &priv->volume_button,
     "camera", &priv->camera_button,
     "hangup", &priv->hangup_button,
     "dialpad", &priv->dialpad_button,
@@ -1673,7 +1671,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "hangup", "clicked", empathy_call_window_hangup_cb,
     "audiocall", "clicked", empathy_call_window_audio_call_cb,
     "videocall", "clicked", empathy_call_window_video_call_cb,
-    "volume", "value-changed", empathy_call_window_volume_changed_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
@@ -2872,6 +2869,11 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self,
     {
       priv->audio_output = empathy_audio_sink_new ();
       g_object_ref_sink (priv->audio_output);
+
+      /* volume button to output volume linking */
+      g_object_bind_property (priv->audio_output, "volume",
+        priv->volume_button, "value",
+        G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
 
       g_object_bind_property_full (content, "requested-output-volume",
         priv->audio_output, "volume",
@@ -4128,19 +4130,6 @@ empathy_call_window_status_message (EmpathyCallWindow *self,
   gchar *message)
 {
   gtk_label_set_label (GTK_LABEL (self->priv->status_label), message);
-}
-
-static void
-empathy_call_window_volume_changed_cb (GtkScaleButton *button,
-  gdouble value, EmpathyCallWindow *window)
-{
-  EmpathyCallWindowPriv *priv = GET_PRIV (window);
-
-  if (priv->audio_output == NULL)
-    return;
-
-  empathy_audio_sink_set_volume (EMPATHY_GST_AUDIO_SINK (priv->audio_output),
-    value);
 }
 
 GtkUIManager *
