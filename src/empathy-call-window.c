@@ -285,9 +285,6 @@ static gboolean empathy_call_window_state_event_cb (GtkWidget *widget,
 static void empathy_call_window_set_send_video (EmpathyCallWindow *window,
   CameraState state);
 
-static void empathy_call_window_mic_toggled_cb (
-  GtkToggleToolButton *toggle, EmpathyCallWindow *window);
-
 static void empathy_call_window_hangup_cb (gpointer object,
   EmpathyCallWindow *window);
 
@@ -510,6 +507,11 @@ create_audio_input (EmpathyCallWindow *self)
   priv->audio_input = empathy_audio_src_new ();
   gst_object_ref (priv->audio_input);
   gst_object_sink (priv->audio_input);
+
+  g_object_bind_property (priv->mic_button, "active",
+    priv->audio_input, "mute",
+    G_BINDING_BIDIRECTIONAL |
+      G_BINDING_INVERT_BOOLEAN | G_BINDING_SYNC_CREATE);
 }
 
 static void
@@ -1672,7 +1674,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
     "audiocall", "clicked", empathy_call_window_audio_call_cb,
     "videocall", "clicked", empathy_call_window_video_call_cb,
     "volume", "value-changed", empathy_call_window_volume_changed_cb,
-    "microphone", "toggled", empathy_call_window_mic_toggled_cb,
     "camera", "toggled", empathy_call_window_camera_toggled_cb,
     "dialpad", "toggled", empathy_call_window_dialpad_cb,
     "menufullscreen", "activate", empathy_call_window_fullscreen_cb,
@@ -3997,40 +3998,6 @@ empathy_call_window_set_send_video (EmpathyCallWindow *window,
   DEBUG ("%s sending video", priv->sending_video ? "start": "stop");
   tpy_call_channel_send_video (call, priv->sending_video);
   g_object_unref (call);
-}
-
-static void
-empathy_call_window_mic_toggled_cb (GtkToggleToolButton *toggle,
-  EmpathyCallWindow *self)
-{
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  gboolean active;
-
-  active = (gtk_toggle_tool_button_get_active (toggle));
-
-  /* We don't want the settings callback to react to this change to avoid
-   * a loop. */
-  g_signal_handlers_block_by_func (priv->settings,
-      empathy_call_window_prefs_volume_changed_cb, self);
-
-  if (active)
-    {
-      g_settings_set_double (priv->settings, EMPATHY_PREFS_CALL_SOUND_VOLUME,
-          priv->volume * 100);
-    }
-  else
-    {
-      /* TODO, Instead of setting the input volume to 0 we should probably
-       * stop sending but this would cause the audio call to drop if both
-       * sides mute at the same time on certain CMs AFAIK. Need to revisit this
-       * in the future. GNOME #574574
-       */
-      g_settings_set_double (priv->settings, EMPATHY_PREFS_CALL_SOUND_VOLUME,
-          0);
-    }
-
-    g_signal_handlers_unblock_by_func (priv->settings,
-      empathy_call_window_prefs_volume_changed_cb, self);
 }
 
 static void
