@@ -62,6 +62,9 @@ struct _EmpathyGstAudioSinkPrivate
 {
   GstElement *sink;
   gboolean echo_cancel;
+  gdouble volume;
+  gint volume_idle_id;
+  GStaticMutex volume_mutex;
 };
 
 #define EMPATHY_GST_AUDIO_SINK_GET_PRIVATE(o) \
@@ -73,6 +76,7 @@ empathy_audio_sink_init (EmpathyGstAudioSink *self)
 {
   self->priv = EMPATHY_GST_AUDIO_SINK_GET_PRIVATE (self);
   self->priv->echo_cancel = TRUE;
+  g_static_mutex_init (&self->priv->volume_mutex);
 }
 
 static GstPad * empathy_audio_sink_request_new_pad (GstElement *self,
@@ -86,11 +90,13 @@ static void
 empathy_audio_sink_set_property (GObject *object,
   guint property_id, const GValue *value, GParamSpec *pspec)
 {
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (object);
   switch (property_id)
     {
       case PROP_VOLUME:
-        empathy_audio_sink_set_volume (EMPATHY_GST_AUDIO_SINK (object),
-          g_value_get_double (value));
+        g_static_mutex_lock (&self->priv->volume_mutex);
+        self->priv->volume = g_value_get_double (value);
+        g_static_mutex_unlock (&self->priv->volume_mutex);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -101,15 +107,32 @@ static void
 empathy_audio_sink_get_property (GObject *object,
   guint property_id, GValue *value, GParamSpec *pspec)
 {
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (object);
   switch (property_id)
     {
       case PROP_VOLUME:
-        g_value_set_double (value,
-          empathy_audio_sink_get_volume (EMPATHY_GST_AUDIO_SINK (object)));
+        g_value_set_double (value, self->priv->volume);
         break;
       default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     }
+}
+
+static void
+empathy_audio_sink_dispose (GObject *object)
+{
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (object);
+  EmpathyGstAudioSinkPrivate *priv = self->priv;
+
+  if (priv->volume_idle_id != 0)
+    g_source_remove (priv->volume_idle_id);
+  priv->volume_idle_id = 0;
+
+  g_static_mutex_free (&self->priv->volume_mutex);
+
+  /* release any references held by the object here */
+  if (G_OBJECT_CLASS (empathy_audio_sink_parent_class)->dispose)
+    G_OBJECT_CLASS (empathy_audio_sink_parent_class)->dispose (object);
 }
 
 static void
@@ -129,6 +152,7 @@ empathy_audio_sink_class_init (EmpathyGstAudioSinkClass
 
   object_class->set_property = empathy_audio_sink_set_property;
   object_class->get_property = empathy_audio_sink_get_property;
+  object_class->dispose = empathy_audio_sink_dispose;
 
   element_class->request_new_pad = empathy_audio_sink_request_new_pad;
   element_class->release_pad = empathy_audio_sink_release_pad;
@@ -153,43 +177,18 @@ empathy_audio_sink_new (void)
   return gst_element_factory_make ("empathyaudiosink", NULL);
 }
 
-static gboolean
-check_volume_support (EmpathyGstAudioSink *self)
-{
-  gchar *name;
-
-  if (GST_IS_STREAM_VOLUME (self->priv->sink))
-    return TRUE;
-
-  name = gst_element_get_name (self->priv->sink);
-  DEBUG ("Element %s doesn't support volume", name);
-
-  g_free (name);
-  return FALSE;
-}
-
 void
 empathy_audio_sink_set_volume (EmpathyGstAudioSink *sink, gdouble volume)
 {
-  EmpathyGstAudioSinkPrivate *priv = EMPATHY_GST_AUDIO_SINK_GET_PRIVATE (sink);
-
-  if (!check_volume_support (sink))
-      return;
-
-  g_object_set (priv->sink, "volume", volume, NULL);
+  g_object_set (sink, "volume", volume, NULL);
 }
 
 gdouble
 empathy_audio_sink_get_volume (EmpathyGstAudioSink *sink)
 {
   EmpathyGstAudioSinkPrivate *priv = EMPATHY_GST_AUDIO_SINK_GET_PRIVATE (sink);
-  gdouble volume;
 
-  if (!check_volume_support (sink))
-      return 1.0;
-
-  g_object_get (priv->sink, "volume", &volume, NULL);
-  return volume;
+  return priv->volume;
 }
 
 static GstElement *
@@ -224,13 +223,50 @@ create_sink (EmpathyGstAudioSink *self)
   return sink;
 }
 
+static gboolean
+empathy_audio_sink_volume_idle_updated (gpointer user_data)
+{
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (user_data);
+
+  g_static_mutex_lock (&self->priv->volume_mutex);
+  self->priv->volume_idle_id = 0;
+  g_static_mutex_unlock (&self->priv->volume_mutex);
+
+  g_object_notify (G_OBJECT (self), "volume");
+
+  return FALSE;
+}
+
+static void
+empathy_audio_sink_volume_updated (GObject *object,
+  GParamSpec *pspec,
+  gpointer user_data)
+{
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (user_data);
+  gdouble volume;
+
+  g_static_mutex_lock (&self->priv->volume_mutex);
+
+  g_object_get (object, "volume", &volume, NULL);
+  if (self->priv->volume == volume)
+    goto out;
+
+  self->priv->volume = volume;
+  if (self->priv->volume_idle_id == 0)
+    self->priv->volume_idle_id = g_idle_add (
+      empathy_audio_sink_volume_idle_updated, self);
+
+out:
+  g_static_mutex_unlock (&self->priv->volume_mutex);
+}
+
 static GstPad *
 empathy_audio_sink_request_new_pad (GstElement *element,
   GstPadTemplate *templ,
   const gchar* name)
 {
   EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (element);
-  GstElement *bin, *volume, *resample, *audioconvert0, *audioconvert1;
+  GstElement *bin, *resample, *audioconvert0, *audioconvert1;
   GstPad *pad = NULL;
   GstPad *subpad, *filterpad;
 
@@ -254,20 +290,37 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   gst_bin_add (GST_BIN (bin), audioconvert1);
 
-  volume = gst_element_factory_make ("volume", NULL);
-  if (volume == NULL)
-    goto error;
-
-  gst_bin_add (GST_BIN (bin), volume);
-
   self->priv->sink = create_sink (self);
   if (self->priv->sink == NULL)
     goto error;
 
+  if (GST_IS_STREAM_VOLUME (self->priv->sink))
+    {
+      gdouble volume;
+      /* We can't do a bidirection bind as the ::notify comes from another
+       * thread, for other bits of empathy it's most simpler if it comes from
+       * the main thread */
+      g_object_bind_property (self, "volume", self->priv->sink, "volume",
+        G_BINDING_DEFAULT);
+
+      /* sync and callback for bouncing */
+      g_object_get (self->priv->sink, "volume", &volume, NULL);
+      g_object_set (self, "volume", volume, NULL);
+      g_signal_connect (self->priv->sink, "notify::volume",
+        G_CALLBACK (empathy_audio_sink_volume_updated), self);
+    }
+  else
+    {
+      gchar *n = gst_element_get_name (self->priv->sink);
+
+      DEBUG ("Element %s doesn't support volume", n);
+      g_free (n);
+    }
+
   gst_bin_add (GST_BIN (bin), self->priv->sink);
 
   if (!gst_element_link_many (audioconvert0, resample, audioconvert1,
-      volume, self->priv->sink, NULL))
+      self->priv->sink, NULL))
     goto error;
 
   filterpad = gst_element_get_static_pad (audioconvert0, "sink");
