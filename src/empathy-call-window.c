@@ -2914,6 +2914,22 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self,
       priv->audio_output = empathy_audio_sink_new ();
       g_object_ref_sink (priv->audio_output);
 
+      g_object_bind_property_full (content, "requested-output-volume",
+        priv->audio_output, "volume",
+        G_BINDING_DEFAULT,
+        audio_control_volume_to_element,
+        element_volume_to_audio_control,
+        NULL, NULL);
+
+      /* Link volumes together, sync the current audio input volume property
+        * back to farstream first */
+      g_object_bind_property_full (priv->audio_output, "volume",
+        content, "reported-output-volume",
+        G_BINDING_SYNC_CREATE,
+        element_volume_to_audio_control,
+        audio_control_volume_to_element,
+        NULL, NULL);
+
       if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_output))
         {
           g_warning ("Could not add audio sink to pipeline");
