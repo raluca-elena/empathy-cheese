@@ -502,6 +502,40 @@ create_video_input (EmpathyCallWindow *self)
   gst_object_sink (priv->video_input);
 }
 
+static gboolean
+audio_control_volume_to_element (GBinding *binding,
+  const GValue *source_value,
+  GValue *target_value,
+  gpointer user_data)
+{
+  /* AudioControl volume is 0-255, with -1 for unknown */
+  gint hv;
+
+  hv = g_value_get_int (source_value);
+  if (hv < 0)
+    return FALSE;
+
+  hv = MIN (hv, 255);
+  g_value_set_double (target_value, hv/255.0);
+
+  return TRUE;
+}
+
+static gboolean
+element_volume_to_audio_control (GBinding *binding,
+  const GValue *source_value,
+  GValue *target_value,
+  gpointer user_data)
+{
+  gdouble ev;
+
+  ev = g_value_get_double (source_value);
+  ev = CLAMP (ev, 0.0, 1.0);
+
+  g_value_set_int (target_value, ev * 255);
+  return TRUE;
+}
+
 static void
 create_audio_input (EmpathyCallWindow *self)
 {
@@ -3455,6 +3489,22 @@ empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
         empathy_audio_src_set_echo_cancel (
           EMPATHY_GST_AUDIO_SRC (priv->audio_input),
           !empathy_call_window_content_is_raw (content));
+
+        /* Link volumes together, sync the current audio input volume property
+         * back to farstream first */
+        g_object_bind_property_full (content, "requested-input-volume",
+          priv->audio_input, "volume",
+          G_BINDING_DEFAULT,
+          audio_control_volume_to_element,
+          element_volume_to_audio_control,
+          NULL, NULL);
+
+        g_object_bind_property_full (priv->audio_input, "volume",
+          content, "reported-input-volume",
+          G_BINDING_SYNC_CREATE,
+          element_volume_to_audio_control,
+          audio_control_volume_to_element,
+          NULL, NULL);
 
         if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_input))
           {
