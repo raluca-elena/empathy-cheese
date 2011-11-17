@@ -51,7 +51,6 @@ G_BEGIN_DECLS
 #define EMPATHY_PREFS_SOUNDS_CONTACT_LOGOUT        "sounds-contact-logout"
 
 #define EMPATHY_PREFS_CALL_SCHEMA EMPATHY_PREFS_SCHEMA ".call"
-#define EMPATHY_PREFS_CALL_SOUND_VOLUME            "volume"
 #define EMPATHY_PREFS_CALL_CAMERA_DEVICE           "camera-device"
 #define EMPATHY_PREFS_CALL_ECHO_CANCELLATION       "echo-cancellation"
 

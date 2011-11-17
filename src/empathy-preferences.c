@@ -83,8 +83,6 @@ struct _EmpathyPreferencesPriv {
 	GtkWidget *checkbutton_notifications_contact_signin;
 	GtkWidget *checkbutton_notifications_contact_signout;
 
-	GtkWidget *scale_call_volume;
-	GtkWidget *adj_call_volume;
 	GtkWidget *echo_cancellation;
 
 	GtkWidget *treeview_spell_checker;
@@ -270,12 +268,6 @@ preferences_setup_widgets (EmpathyPreferences *preferences)
 			 EMPATHY_PREFS_CHAT_SHOW_CONTACTS_IN_ROOMS,
 			 priv->checkbutton_show_contacts_in_rooms,
 			 "active",
-			 G_SETTINGS_BIND_DEFAULT);
-
-	g_settings_bind (priv->gsettings_call,
-			 EMPATHY_PREFS_CALL_SOUND_VOLUME,
-			 priv->adj_call_volume,
-			 "value",
 			 G_SETTINGS_BIND_DEFAULT);
 
 	g_settings_bind (priv->gsettings_call,
@@ -1108,13 +1100,6 @@ preferences_themes_setup (EmpathyPreferences *preferences)
 			  preferences);
 }
 
-static gchar *
-preferences_call_format_volume_cb (GtkScale *scale,
-				   gdouble value)
-{
-	return g_strdup_printf ("%g%%", value);
-}
-
 static void
 empathy_preferences_response (GtkDialog *widget,
 			      gint response)
@@ -1162,8 +1147,6 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 	GtkBuilder                *gui;
 	gchar                     *filename;
 	GtkWidget                 *page;
-	GtkWidget                 *call_volume_scale_box;
-	GtkWidget                 *call_volume_bar_box;
 
 	priv = preferences->priv = G_TYPE_INSTANCE_GET_PRIVATE (preferences,
 			EMPATHY_TYPE_PREFERENCES, EmpathyPreferencesPriv);
@@ -1206,10 +1189,6 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 		"checkbutton_location_resource_network", &priv->checkbutton_location_resource_network,
 		"checkbutton_location_resource_cell", &priv->checkbutton_location_resource_cell,
 		"checkbutton_location_resource_gps", &priv->checkbutton_location_resource_gps,
-		"call_volume_scale_box", &call_volume_scale_box,
-		"call_volume_bar_box", &call_volume_bar_box,
-		"call_volume_scale", &priv->scale_call_volume,
-		"call_volume_adjustment", &priv->adj_call_volume,
 		"call_echo_cancellation", &priv->echo_cancellation,
 		NULL);
 	g_free (filename);
@@ -1234,15 +1213,6 @@ empathy_preferences_init (EmpathyPreferences *preferences)
 			  G_CALLBACK (preferences_preview_theme_changed_cb),
 			  preferences, 0);
 	preferences_preview_theme_changed_cb (priv->theme_manager, preferences);
-
-	g_signal_connect (priv->scale_call_volume, "format-value",
-			  G_CALLBACK (preferences_call_format_volume_cb),
-			  preferences);
-
-#ifndef HAVE_CALL
-	gtk_widget_hide (call_volume_scale_box);
-	gtk_widget_hide (call_volume_bar_box);
-#endif
 
 	preferences_themes_setup (preferences);
 

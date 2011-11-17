@@ -200,8 +200,6 @@ struct _EmpathyCallWindowPriv
   gulong video_output_motion_handler_id;
   guint bus_message_source_id;
 
-  gdouble volume;
-
   /* String that contains the queued tones to send after the current ones
      are sent */
   GString *tones;
@@ -408,39 +406,6 @@ dtmf_start_tone_cb (EmpathyDialpadWidget *dialpad,
   g_string_append_c (priv->tones, tp_dtmf_event_to_char (event));
 
   empathy_call_window_maybe_emit_tones (self);
-}
-
-static void
-empathy_call_window_mic_volume_changed (EmpathyCallWindow *self)
-{
-  EmpathyCallWindowPriv *priv = GET_PRIV (self);
-  gdouble volume;
-
-  volume = g_settings_get_double (priv->settings,
-      EMPATHY_PREFS_CALL_SOUND_VOLUME) / 100.0;
-
-  /* Don't store the volume because of muting */
-  if (volume > 0 || gtk_toggle_tool_button_get_active (
-        GTK_TOGGLE_TOOL_BUTTON (priv->mic_button)))
-    priv->volume = volume;
-
-  /* Ensure that the toggle button is active if the volume is > 0 and inactive
-   * if it's smaller than 0 */
-  if ((volume > 0) != gtk_toggle_tool_button_get_active (
-        GTK_TOGGLE_TOOL_BUTTON (priv->mic_button)))
-    gtk_toggle_tool_button_set_active (
-      GTK_TOGGLE_TOOL_BUTTON (priv->mic_button), volume > 0);
-
-  empathy_audio_src_set_volume (EMPATHY_GST_AUDIO_SRC (priv->audio_input),
-    volume);
-}
-
-static void
-empathy_call_window_prefs_volume_changed_cb (GSettings *settings,
-    gchar *key,
-    EmpathyCallWindow *self)
-{
-  empathy_call_window_mic_volume_changed (self);
 }
 
 static void
@@ -1903,13 +1868,6 @@ empathy_call_window_init (EmpathyCallWindow *self)
   priv->camera_menu = empathy_camera_menu_new (self);
 
   empathy_call_window_show_hangup_button (self, TRUE);
-
-  /* Retrieve initial volume */
-  priv->volume = g_settings_get_double (priv->settings,
-      EMPATHY_PREFS_CALL_SOUND_VOLUME) / 100.0;
-
-  g_signal_connect (priv->settings, "changed::"EMPATHY_PREFS_CALL_SOUND_VOLUME,
-      G_CALLBACK (empathy_call_window_prefs_volume_changed_cb), self);
 
   empathy_geometry_bind (GTK_WINDOW (self), "call-window");
   /* These signals are used to track the window position and save it
@@ -4094,12 +4052,6 @@ empathy_call_window_restart_call (EmpathyCallWindow *window)
       (GtkCallback) gtk_widget_destroy, NULL);
 
   create_video_output_widget (window);
-
-  /* While the call was disconnected, the input volume might have changed.
-   * However, since the audio_input source was destroyed, its volume has not
-   * been updated during that time. That's why we manually update it here */
-  empathy_call_window_mic_volume_changed (window);
-
   priv->outgoing = TRUE;
   empathy_call_window_set_state_connecting (window);
 
