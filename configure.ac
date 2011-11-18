@@ -225,7 +225,7 @@ if test "x$enable_call" != "xno" ; then
    PKG_CHECK_MODULES(EMPATHY_CALL,
    [
       farsight2-0.10
-      telepathy-farstream
+      telepathy-farstream >= 0.1.2
       clutter-1.0 >= $CLUTTER_REQUIRED
       clutter-gtk-1.0
       clutter-gst-1.0
