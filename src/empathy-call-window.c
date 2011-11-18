@@ -228,6 +228,7 @@ struct _EmpathyCallWindowPriv
   GstElement *video_output_sink;
   GstElement *audio_input;
   GstElement *audio_output;
+  gboolean audio_output_added;
   GstElement *pipeline;
   GstElement *video_tee;
 
@@ -2530,6 +2531,7 @@ empathy_call_window_reset_pipeline (EmpathyCallWindow *self)
       if (priv->audio_output != NULL)
         g_object_unref (priv->audio_output);
       priv->audio_output = NULL;
+      priv->audio_output_added = FALSE;
 
       if (priv->video_tee != NULL)
         g_object_unref (priv->video_tee);
@@ -2735,8 +2737,10 @@ empathy_call_window_content_removed_cb (EmpathyCallHandler *handler,
         {
           gst_element_set_state (priv->audio_output, GST_STATE_NULL);
 
-          gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_output);
+          if (priv->audio_output_added)
+            gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_output);
           priv->audio_output = NULL;
+          priv->audio_output_added = FALSE;
         }
     }
   else
@@ -2865,32 +2869,8 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self,
   GstPad *pad;
   GstPadTemplate *template;
 
-  if (priv->audio_output == NULL)
+  if (!priv->audio_output_added)
     {
-      priv->audio_output = empathy_audio_sink_new ();
-      g_object_ref_sink (priv->audio_output);
-
-      /* volume button to output volume linking */
-      g_object_bind_property (priv->audio_output, "volume",
-        priv->volume_button, "value",
-        G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
-
-      g_object_bind_property_full (content, "requested-output-volume",
-        priv->audio_output, "volume",
-        G_BINDING_DEFAULT,
-        audio_control_volume_to_element,
-        element_volume_to_audio_control,
-        NULL, NULL);
-
-      /* Link volumes together, sync the current audio input volume property
-        * back to farstream first */
-      g_object_bind_property_full (priv->audio_output, "volume",
-        content, "reported-output-volume",
-        G_BINDING_SYNC_CREATE,
-        element_volume_to_audio_control,
-        audio_control_volume_to_element,
-        NULL, NULL);
-
       if (!gst_bin_add (GST_BIN (priv->pipeline), priv->audio_output))
         {
           g_warning ("Could not add audio sink to pipeline");
@@ -2904,13 +2884,6 @@ empathy_call_window_get_audio_sink_pad (EmpathyCallWindow *self,
           goto error;
         }
     }
-
-  /* For raw audio conferences assume that the producer of the raw data
-   * has already processed it, so turn off any echo cancellation and any
-   * other audio improvements that come with it */
-  empathy_audio_sink_set_echo_cancel (
-    EMPATHY_GST_AUDIO_SINK (priv->audio_output),
-    !empathy_call_window_content_is_raw (content));
 
   template = gst_element_class_get_pad_template (
     GST_ELEMENT_GET_CLASS (priv->audio_output), "sink%d");
@@ -3443,6 +3416,48 @@ empathy_call_window_src_added_cb (EmpathyCallHandler *handler,
   return TRUE;
 }
 
+static void
+empathy_call_window_prepare_audio_output (EmpathyCallWindow *self,
+  TfContent *content)
+{
+  EmpathyCallWindowPriv *priv = self->priv;
+
+  g_assert (priv->audio_output_added == FALSE);
+  g_assert (priv->audio_output == FALSE);
+
+  priv->audio_output = empathy_audio_sink_new ();
+  g_object_ref_sink (priv->audio_output);
+
+  /* volume button to output volume linking */
+  g_object_bind_property (priv->audio_output, "volume",
+    priv->volume_button, "value",
+    G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
+
+  g_object_bind_property_full (content, "requested-output-volume",
+    priv->audio_output, "volume",
+    G_BINDING_DEFAULT,
+    audio_control_volume_to_element,
+    element_volume_to_audio_control,
+    NULL, NULL);
+
+  /* Link volumes together, sync the current audio input volume property
+    * back to farstream first */
+  g_object_bind_property_full (priv->audio_output, "volume",
+    content, "reported-output-volume",
+    G_BINDING_SYNC_CREATE,
+    element_volume_to_audio_control,
+    audio_control_volume_to_element,
+    NULL, NULL);
+
+  /* For raw audio conferences assume that the producer of the raw data
+   * has already processed it, so turn off any echo cancellation and any
+   * other audio improvements that come with it */
+  empathy_audio_sink_set_echo_cancel (
+    EMPATHY_GST_AUDIO_SINK (priv->audio_output),
+    !empathy_call_window_content_is_raw (content));
+}
+
+
 static gboolean
 empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
   TfContent *content, gpointer user_data)
@@ -3511,6 +3526,9 @@ empathy_call_window_content_added_cb (EmpathyCallHandler *handler,
             gst_bin_remove (GST_BIN (priv->pipeline), priv->audio_input);
             break;
           }
+
+        /* Prepare our audio output, not added yet though */
+        empathy_call_window_prepare_audio_output (self, content);
 
         retval = TRUE;
         break;
