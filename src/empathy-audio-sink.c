@@ -260,6 +260,31 @@ out:
   g_static_mutex_unlock (&self->priv->volume_mutex);
 }
 
+static gboolean
+empathy_audio_sink_volume_idle_setup (gpointer user_data)
+{
+  EmpathyGstAudioSink *self = EMPATHY_GST_AUDIO_SINK (user_data);
+  gdouble volume;
+
+  g_static_mutex_lock (&self->priv->volume_mutex);
+  self->priv->volume_idle_id = 0;
+  g_static_mutex_unlock (&self->priv->volume_mutex);
+
+  /* We can't do a bidirection bind as the ::notify comes from another
+   * thread, for other bits of empathy it's most simpler if it comes from
+   * the main thread */
+  g_object_bind_property (self, "volume", self->priv->sink, "volume",
+    G_BINDING_DEFAULT);
+
+  /* sync and callback for bouncing */
+  g_object_get (self->priv->sink, "volume", &volume, NULL);
+  g_object_set (self, "volume", volume, NULL);
+  g_signal_connect (self->priv->sink, "notify::volume",
+    G_CALLBACK (empathy_audio_sink_volume_updated), self);
+
+  return FALSE;
+}
+
 static GstPad *
 empathy_audio_sink_request_new_pad (GstElement *element,
   GstPadTemplate *templ,
@@ -296,18 +321,11 @@ empathy_audio_sink_request_new_pad (GstElement *element,
 
   if (GST_IS_STREAM_VOLUME (self->priv->sink))
     {
-      gdouble volume;
-      /* We can't do a bidirection bind as the ::notify comes from another
-       * thread, for other bits of empathy it's most simpler if it comes from
-       * the main thread */
-      g_object_bind_property (self, "volume", self->priv->sink, "volume",
-        G_BINDING_DEFAULT);
-
-      /* sync and callback for bouncing */
-      g_object_get (self->priv->sink, "volume", &volume, NULL);
-      g_object_set (self, "volume", volume, NULL);
-      g_signal_connect (self->priv->sink, "notify::volume",
-        G_CALLBACK (empathy_audio_sink_volume_updated), self);
+      g_static_mutex_lock (&self->priv->volume_mutex);
+      if (self->priv->volume_idle_id == 0)
+        self->priv->volume_idle_id = g_idle_add (
+          empathy_audio_sink_volume_idle_setup, self);
+      g_static_mutex_unlock (&self->priv->volume_mutex);
     }
   else
     {
