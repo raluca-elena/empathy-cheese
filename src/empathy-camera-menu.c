@@ -146,9 +146,7 @@ empathy_camera_menu_activate_cb (GtkAction *action,
   if (!tp_strdiff (device, current_device))
     goto out;
 
-  empathy_call_window_play_camera (self->priv->window, FALSE);
-  empathy_video_src_change_device (video, device);
-  empathy_call_window_play_camera (self->priv->window, TRUE);
+  empathy_call_window_change_webcam (self->priv->window, device);
 
  out:
   g_free (current_device);

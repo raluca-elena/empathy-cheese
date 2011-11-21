@@ -78,6 +78,9 @@ EmpathyGstVideoSrc *empathy_call_window_get_video_src (EmpathyCallWindow *window
 void empathy_call_window_play_camera (EmpathyCallWindow *self,
     gboolean play);
 
+void empathy_call_window_change_webcam (EmpathyCallWindow *self,
+    const gchar *device);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_CALL_WINDOW_H__*/

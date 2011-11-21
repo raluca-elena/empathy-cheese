@@ -4175,3 +4175,16 @@ empathy_call_window_get_video_src (EmpathyCallWindow *self)
 {
   return EMPATHY_GST_VIDEO_SRC (self->priv->video_input);
 }
+
+void
+empathy_call_window_change_webcam (EmpathyCallWindow *self,
+    const gchar *device)
+{
+  EmpathyGstVideoSrc *video;
+
+  video = empathy_call_window_get_video_src (self);
+
+  empathy_call_window_play_camera (self, FALSE);
+  empathy_video_src_change_device (video, device);
+  empathy_call_window_play_camera (self, TRUE);
+}
