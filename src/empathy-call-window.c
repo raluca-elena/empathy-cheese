@@ -4181,10 +4181,17 @@ empathy_call_window_change_webcam (EmpathyCallWindow *self,
     const gchar *device)
 {
   EmpathyGstVideoSrc *video;
+  gboolean running;
 
+  /* Restart the camera only if it's already running */
+  running = (self->priv->video_preview != NULL);
   video = empathy_call_window_get_video_src (self);
 
-  empathy_call_window_play_camera (self, FALSE);
+  if (running)
+    empathy_call_window_play_camera (self, FALSE);
+
   empathy_video_src_change_device (video, device);
-  empathy_call_window_play_camera (self, TRUE);
+
+  if (running)
+    empathy_call_window_play_camera (self, TRUE);
 }
