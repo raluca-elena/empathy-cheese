@@ -331,6 +331,9 @@ create_src (void)
 
   empathy_call_set_stream_properties (src, TRUE);
 
+  /* Set latency (buffering on the PulseAudio side) of 20ms */
+  g_object_set (src, "buffer-time", 20000, NULL);
+
   return src;
 }
 

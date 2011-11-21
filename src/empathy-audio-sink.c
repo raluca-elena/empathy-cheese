@@ -220,6 +220,10 @@ create_sink (EmpathyGstAudioSink *self)
 
   empathy_call_set_stream_properties (sink, self->priv->echo_cancel);
 
+  /* Set latency (buffering on the PulseAudio side) of 40ms and transfer data
+   * in 10ms chunks */
+  g_object_set (sink, "buffer-time", 40000, "latency-time", 10000, NULL);
+
   return sink;
 }
 
