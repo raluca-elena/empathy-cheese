@@ -1717,6 +1717,9 @@ empathy_call_window_init (EmpathyCallWindow *self)
 
   priv->video_container = gtk_clutter_embed_new ();
 
+  gtk_widget_set_size_request (priv->video_container,
+      EMPATHY_VIDEO_WIDGET_DEFAULT_WIDTH, EMPATHY_VIDEO_WIDGET_DEFAULT_HEIGHT);
+
   /* Set the background color to that of the rest of the window */
   context = gtk_widget_get_style_context (priv->content_hbox);
   gtk_style_context_get_background_color (context,
