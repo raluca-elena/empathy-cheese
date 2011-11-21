@@ -639,7 +639,7 @@ account_assistant_build_introduction_page (EmpathyAccountAssistant *self)
   gtk_widget_show (w);
 
   vbox_1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  gtk_box_set_homogeneous (vbox_1, TRUE);
+  gtk_box_set_homogeneous (GTK_BOX (vbox_1), TRUE);
   gtk_container_add (GTK_CONTAINER (w), vbox_1);
   gtk_widget_show (vbox_1);
 

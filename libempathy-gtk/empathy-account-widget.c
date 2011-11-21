@@ -2193,7 +2193,7 @@ do_constructed (GObject *obj)
       GtkWidget *hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
       GtkWidget *image;
 
-      gtk_box_set_homogeneous (hbox, TRUE);
+      gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
       /*  We can't use the stock button as its accelerator ('C') clashes with
        *  the Close button. */

@@ -427,7 +427,7 @@ empathy_streamed_media_window_create_video_input (EmpathyStreamedMediaWindow *se
   GtkWidget *hbox;
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
-  gtk_box_set_homogeneous (hbox, TRUE);
+  gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
   priv->video_contrast = empathy_streamed_media_window_create_video_input_add_slider (
     self,  _("Contrast"), hbox);
@@ -535,7 +535,7 @@ empathy_streamed_media_window_create_audio_input (EmpathyStreamedMediaWindow *se
   GtkWidget *hbox, *vbox, *label;
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
-  gtk_box_set_homogeneous (hbox, TRUE);
+  gtk_box_set_homogeneous (GTK_BOX (hbox), TRUE);
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 3);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
