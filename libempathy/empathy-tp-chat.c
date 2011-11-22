@@ -365,7 +365,8 @@ handle_delivery_report (EmpathyTpChat *self,
 		tp_chat_set_delivery_status (self, delivery_token,
 			EMPATHY_DELIVERY_STATUS_NONE);
 		goto out;
-	} else if (delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED) {
+	} else if (delivery_status != TP_DELIVERY_STATUS_PERMANENTLY_FAILED &&
+		   delivery_status != TP_DELIVERY_STATUS_TEMPORARILY_FAILED) {
 		goto out;
 	}
 
