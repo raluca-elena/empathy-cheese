@@ -50,6 +50,7 @@
 struct _EmpathyIndividualStoreManagerPriv
 {
   EmpathyIndividualManager *manager;
+  gboolean setup_idle_id;
 };
 
 enum
@@ -136,7 +137,7 @@ individual_store_manager_manager_setup (gpointer user_data)
       g_list_free (individuals);
     }
 
-  store->setup_idle_id = 0;
+  self->priv->setup_idle_id = 0;
   return FALSE;
 }
 
@@ -151,8 +152,8 @@ individual_store_manager_set_individual_manager (
   self->priv->manager = g_object_ref (manager);
 
   /* Let a chance to have all properties set before populating */
-  store->setup_idle_id = g_idle_add (individual_store_manager_manager_setup,
-      self);
+  self->priv->setup_idle_id = g_idle_add (
+      individual_store_manager_manager_setup, self);
 }
 
 static void
@@ -201,6 +202,12 @@ individual_store_manager_dispose (GObject *object)
       g_signal_handlers_disconnect_by_func (self->priv->manager,
           G_CALLBACK (individual_store_manager_groups_changed_cb), object);
       g_clear_object (&self->priv->manager);
+    }
+
+  if (self->priv->setup_idle_id != 0)
+    {
+      g_source_remove (self->priv->setup_idle_id);
+      self->priv->setup_idle_id = 0;
     }
 
   G_OBJECT_CLASS (empathy_individual_store_manager_parent_class)->dispose (
@@ -262,6 +269,15 @@ individual_store_manager_reload_individuals (EmpathyIndividualStore *store)
   g_list_free (contacts);
 }
 
+static gboolean
+individual_store_manager_initial_loading (EmpathyIndividualStore *store)
+{
+  EmpathyIndividualStoreManager *self = EMPATHY_INDIVIDUAL_STORE_MANAGER (
+      store);
+
+  return self->priv->setup_idle_id != 0;
+}
+
 static void
 empathy_individual_store_manager_class_init (
     EmpathyIndividualStoreManagerClass *klass)
@@ -275,6 +291,7 @@ empathy_individual_store_manager_class_init (
   object_class->set_property = individual_store_manager_set_property;
 
   store_class->reload_individuals = individual_store_manager_reload_individuals;
+  store_class->initial_loading = individual_store_manager_initial_loading;
 
   g_object_class_install_property (object_class,
       PROP_INDIVIDUAL_MANAGER,

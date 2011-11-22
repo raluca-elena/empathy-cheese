@@ -77,9 +77,6 @@ struct _EmpathyIndividualStore
 {
   GtkTreeStore parent;
   EmpathyIndividualStorePriv *priv;
-
-  /* protected */
-  guint setup_idle_id;
 };
 
 struct _EmpathyIndividualStoreClass
@@ -87,6 +84,7 @@ struct _EmpathyIndividualStoreClass
   GtkTreeStoreClass parent_class;
 
   void (*reload_individuals) (EmpathyIndividualStore *self);
+  gboolean (*initial_loading) (EmpathyIndividualStore *self);
 };
 
 GType

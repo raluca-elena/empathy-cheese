@@ -275,6 +275,16 @@ individual_store_channel_reload_individuals (EmpathyIndividualStore *store)
   g_ptr_array_unref (members);
 }
 
+static gboolean
+individual_store_channel_initial_loading (EmpathyIndividualStore *store)
+{
+  EmpathyIndividualStoreChannel *self = EMPATHY_INDIVIDUAL_STORE_CHANNEL (
+      store);
+
+  return !tp_proxy_is_prepared (self->priv->channel,
+      TP_CHANNEL_FEATURE_CONTACTS);
+}
+
 static void
 empathy_individual_store_channel_class_init (
     EmpathyIndividualStoreChannelClass *klass)
@@ -288,6 +298,7 @@ empathy_individual_store_channel_class_init (
   object_class->set_property = individual_store_channel_set_property;
 
   store_class->reload_individuals = individual_store_channel_reload_individuals;
+  store_class->initial_loading = individual_store_channel_initial_loading;
 
   g_object_class_install_property (object_class,
       PROP_CHANNEL,

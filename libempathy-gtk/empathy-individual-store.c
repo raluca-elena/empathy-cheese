@@ -946,11 +946,6 @@ individual_store_dispose (GObject *object)
       g_source_remove (self->priv->inhibit_active);
     }
 
-  if (self->setup_idle_id != 0)
-    {
-      g_source_remove (self->setup_idle_id);
-    }
-
   g_hash_table_unref (self->priv->status_icons);
   g_hash_table_unref (self->priv->folks_individual_cache);
   g_hash_table_unref (self->priv->empathy_group_cache);
@@ -1500,7 +1495,11 @@ void
 empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
     gboolean show_groups)
 {
+  EmpathyIndividualStoreClass *klass;
+
   g_return_if_fail (EMPATHY_IS_INDIVIDUAL_STORE (self));
+
+  klass = EMPATHY_INDIVIDUAL_STORE_GET_CLASS ( self);
 
   if (self->priv->show_groups == show_groups)
     {
@@ -1509,7 +1508,7 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
 
   self->priv->show_groups = show_groups;
 
-  if (self->setup_idle_id == 0)
+  if (!klass->initial_loading (self))
     {
       /* Remove all contacts and add them back, not optimized but
        * that's the easy way :)
@@ -1517,8 +1516,6 @@ empathy_individual_store_set_show_groups (EmpathyIndividualStore *self,
        * This is only done if there's not a pending setup idle
        * callback, otherwise it will race and the contacts will get
        * added twice */
-      EmpathyIndividualStoreClass *klass = EMPATHY_INDIVIDUAL_STORE_GET_CLASS (
-          self);
 
       gtk_tree_store_clear (GTK_TREE_STORE (self));
       /* Also clear the cache */
