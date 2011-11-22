@@ -773,6 +773,8 @@ empathy_log_window_init (EmpathyLogWindow *self)
 
   log_window_update_buttons_sensitivity (self);
   gtk_widget_show (GTK_WIDGET (self));
+
+  empathy_geometry_bind (GTK_WINDOW (self), "log-window");
 }
 
 GtkWidget *
