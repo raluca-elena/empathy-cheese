@@ -72,6 +72,7 @@ struct _EmpathyIndividualStorePriv
   GHashTable                  *folks_individual_cache;
   /* Hash: char *groupname -> GtkTreeIter * */
   GHashTable                  *empathy_group_cache;
+  gboolean show_active;
 };
 
 typedef struct
@@ -635,7 +636,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
 
       empathy_individual_store_add_individual (self, individual);
 
-      if (self->show_active)
+      if (self->priv->show_active)
         {
           do_set_active = TRUE;
 
@@ -655,7 +656,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
         }
 
       /* Is this really an update or an online/offline. */
-      if (self->show_active)
+      if (self->priv->show_active)
         {
           if (was_online != now_online)
             {
@@ -732,7 +733,7 @@ individual_store_contact_update (EmpathyIndividualStore *self,
           -1);
     }
 
-  if (self->show_active && do_set_active)
+  if (self->priv->show_active && do_set_active)
     {
       individual_store_contact_set_active (self, individual, do_set_active,
           do_set_refresh);
@@ -1362,7 +1363,7 @@ individual_store_setup (EmpathyIndividualStore *self)
 static gboolean
 individual_store_inhibit_active_cb (EmpathyIndividualStore *self)
 {
-  self->show_active = TRUE;
+  self->priv->show_active = TRUE;
   self->priv->inhibit_active = 0;
 
   return FALSE;
@@ -1761,4 +1762,17 @@ empathy_individual_store_get_individual_status_icon (
       individual, status_icon_name);
 
   return pixbuf_status;
+}
+
+void
+empathy_individual_store_refresh_individual (EmpathyIndividualStore *self,
+    FolksIndividual *individual)
+{
+  gboolean show_active;
+
+  show_active = self->priv->show_active;
+  self->priv->show_active = FALSE;
+  empathy_individual_store_remove_individual (self, individual);
+  empathy_individual_store_add_individual (self, individual);
+  self->priv->show_active = show_active;
 }

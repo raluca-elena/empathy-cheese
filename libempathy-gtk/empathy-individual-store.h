@@ -79,7 +79,6 @@ struct _EmpathyIndividualStore
   EmpathyIndividualStorePriv *priv;
 
   /* protected */
-  gboolean show_active;
   guint setup_idle_id;
 };
 
@@ -155,6 +154,9 @@ void empathy_individual_store_remove_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual);
 
 void empathy_individual_store_add_individual (EmpathyIndividualStore *self,
+    FolksIndividual *individual);
+
+void empathy_individual_store_refresh_individual (EmpathyIndividualStore *self,
     FolksIndividual *individual);
 
 G_END_DECLS

@@ -96,7 +96,6 @@ individual_store_manager_groups_changed_cb (EmpathyIndividualManager *manager,
     gboolean is_member,
     EmpathyIndividualStoreManager *self)
 {
-  gboolean show_active;
   EmpathyIndividualStore *store = EMPATHY_INDIVIDUAL_STORE (self);
 
   DEBUG ("Updating groups for individual %s",
@@ -106,11 +105,7 @@ individual_store_manager_groups_changed_cb (EmpathyIndividualManager *manager,
    * would have to check the groups already set up for each
    * contact and then see what has been updated.
    */
-  show_active = store->show_active;
-  store->show_active = FALSE;
-  empathy_individual_store_remove_individual (store, individual);
-  empathy_individual_store_add_individual (store, individual);
-  store->show_active = show_active;
+  empathy_individual_store_refresh_individual (store, individual);
 }
 
 static gboolean
