@@ -113,7 +113,6 @@ static gboolean
 individual_store_manager_manager_setup (gpointer user_data)
 {
   EmpathyIndividualStoreManager *self = user_data;
-  EmpathyIndividualStore *store = user_data;
   GList *individuals;
 
   /* Signal connection. */
@@ -146,8 +145,6 @@ individual_store_manager_set_individual_manager (
     EmpathyIndividualStoreManager *self,
     EmpathyIndividualManager *manager)
 {
-  EmpathyIndividualStore *store = EMPATHY_INDIVIDUAL_STORE (self);
-
   g_assert (self->priv->manager == NULL); /* construct only */
   self->priv->manager = g_object_ref (manager);
 
