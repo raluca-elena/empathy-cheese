@@ -188,6 +188,8 @@ theme_manager_create_irc_view (EmpathyThemeManager *manager)
 	return theme;
 }
 
+static void on_style_set_cb (GtkWidget *widget, GtkStyle *previous_style, EmpathyThemeManager *self);
+
 static EmpathyThemeBoxes *
 theme_manager_create_boxes_view (EmpathyThemeManager *manager)
 {
@@ -199,6 +201,9 @@ theme_manager_create_boxes_view (EmpathyThemeManager *manager)
 	g_object_weak_ref (G_OBJECT (theme),
 			   theme_manager_view_weak_notify_cb,
 			   &priv->boxes_views);
+
+	g_signal_connect (G_OBJECT (theme), "style-set",
+			  G_CALLBACK (on_style_set_cb), manager);
 
 	return theme;
 }
@@ -298,13 +303,19 @@ theme_manager_update_boxes_tags (EmpathyThemeBoxes *theme,
 }
 
 static void
-on_style_set_cb (GtkWidget *widget, GtkStyle *previous_style, gpointer data)
+on_style_set_cb (GtkWidget *widget, GtkStyle *previous_style, EmpathyThemeManager *self)
 {
+	EmpathyThemeManagerPriv *priv = GET_PRIV (self);
 	GtkStyle *style;
 	gchar     color1[10];
 	gchar     color2[10];
 	gchar     color3[10];
 	gchar     color4[10];
+
+	/* The simple theme depends on the current GTK+ theme so it has to be
+	 * updated if the theme changes. */
+	if (tp_strdiff (priv->name, "simple"))
+		return;
 
 	style = gtk_widget_get_style (GTK_WIDGET (widget));
 
@@ -333,8 +344,7 @@ theme_manager_update_boxes_theme (EmpathyThemeManager *manager,
 	EmpathyThemeManagerPriv *priv = GET_PRIV (manager);
 
 	if (strcmp (priv->name, "simple") == 0) {
-		g_signal_connect (G_OBJECT (theme), "style-set",
-				  G_CALLBACK (on_style_set_cb), theme);
+		on_style_set_cb (GTK_WIDGET (theme), NULL, manager);
 	}
 	else if (strcmp (priv->name, "clean") == 0) {
 		theme_manager_update_boxes_tags (theme,
