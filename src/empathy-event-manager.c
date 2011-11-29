@@ -33,7 +33,7 @@
 
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
-#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-connection-aggregator.h>
 #include <libempathy/empathy-tp-chat.h>
 #include <libempathy/empathy-tp-streamed-media.h>
 #include <libempathy/empathy-utils.h>
@@ -80,7 +80,7 @@ typedef struct {
 typedef struct {
   TpBaseClient *approver;
   TpBaseClient *auth_approver;
-  EmpathyContactManager *contact_manager;
+  EmpathyConnectionAggregator *conn_aggregator;
   GSList *events;
   /* Ongoing approvals */
   GSList *approvals;
@@ -1169,6 +1169,7 @@ out:
   tp_add_dispatch_operation_context_accept (context);
 }
 
+#if 0
 static void
 event_pending_subscribe_func (EventPriv *event)
 {
@@ -1304,6 +1305,7 @@ event_manager_members_changed_cb (EmpathyContactList  *list,
     g_signal_handlers_disconnect_by_func (contact,
         event_manager_presence_changed_cb, manager);
 }
+#endif
 
 static GObject *
 event_manager_constructor (GType type,
@@ -1337,7 +1339,7 @@ event_manager_finalize (GObject *object)
   g_slist_free (priv->events);
   g_slist_foreach (priv->approvals, (GFunc) event_manager_approval_free, NULL);
   g_slist_free (priv->approvals);
-  g_object_unref (priv->contact_manager);
+  g_object_unref (priv->conn_aggregator);
   g_object_unref (priv->approver);
   g_object_unref (priv->auth_approver);
   g_object_unref (priv->gsettings_notif);
@@ -1385,12 +1387,23 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
 }
 
 static void
+contact_list_changed_cb (EmpathyConnectionAggregator *aggregator,
+    TpConnection *conn,
+    GPtrArray *added,
+    GPtrArray *removed,
+    EmpathyEventManager *self)
+{
+  g_print ("%u added; %u removed on %s\n", added->len, removed->len, tp_proxy_get_object_path (conn));
+}
+
+static void
 empathy_event_manager_init (EmpathyEventManager *manager)
 {
   EmpathyEventManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
     EMPATHY_TYPE_EVENT_MANAGER, EmpathyEventManagerPriv);
   GError *error = NULL;
   TpAccountManager *am;
+  GPtrArray *contacts;
 
   manager->priv = priv;
 
@@ -1399,12 +1412,25 @@ empathy_event_manager_init (EmpathyEventManager *manager)
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
-  priv->contact_manager = empathy_contact_manager_dup_singleton ();
+  priv->conn_aggregator = empathy_connection_aggregator_dup_singleton ();
+
+  tp_g_signal_connect_object (priv->conn_aggregator, "contact-list-changed",
+      G_CALLBACK (contact_list_changed_cb), manager, 0);
+
+#if 0
   g_signal_connect (priv->contact_manager, "pendings-changed",
     G_CALLBACK (event_manager_pendings_changed_cb), manager);
 
   g_signal_connect (priv->contact_manager, "members-changed",
     G_CALLBACK (event_manager_members_changed_cb), manager);
+#endif
+
+  contacts = empathy_connection_aggregator_dup_all_contacts (
+      priv->conn_aggregator);
+
+  g_print ("XXXXXXXXXXXXXXXx %d contacts\n", contacts->len);
+
+  g_ptr_array_unref (contacts);
 
    am = tp_account_manager_dup ();
 

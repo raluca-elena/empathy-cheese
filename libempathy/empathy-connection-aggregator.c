@@ -34,6 +34,13 @@
 G_DEFINE_TYPE (EmpathyConnectionAggregator, empathy_connection_aggregator, 
     G_TYPE_OBJECT);
 
+enum {
+  EVENT_CONTACT_LIST_CHANGED,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
 struct _EmpathyConnectionAggregatorPriv {
   TpAccountManager *mgr;
 
@@ -62,7 +69,27 @@ empathy_connection_aggregator_class_init (
 
   oclass->dispose = empathy_connection_aggregator_dispose;
 
+  signals[EVENT_CONTACT_LIST_CHANGED] =
+    g_signal_new ("contact-list-changed",
+      G_TYPE_FROM_CLASS (klass),
+      G_SIGNAL_RUN_LAST,
+      0,
+      NULL, NULL,
+      g_cclosure_marshal_generic,
+      G_TYPE_NONE,
+      3, TP_TYPE_CONNECTION, G_TYPE_PTR_ARRAY, G_TYPE_PTR_ARRAY);
+
   g_type_class_add_private (klass, sizeof (EmpathyConnectionAggregatorPriv));
+}
+
+static void
+contact_list_changed_cb (TpConnection *conn,
+    GPtrArray *added,
+    GPtrArray *removed,
+    EmpathyConnectionAggregator *self)
+{
+  g_signal_emit (self, signals[EVENT_CONTACT_LIST_CHANGED], 0, conn,
+      added, removed);
 }
 
 static void
@@ -81,11 +108,27 @@ static void
 check_connection (EmpathyConnectionAggregator *self,
     TpConnection *conn)
 {
+  GPtrArray *contacts;
+
   if (g_list_find (self->priv->conns, conn) != NULL)
     return;
 
   self->priv->conns = g_list_prepend (self->priv->conns,
       g_object_ref (conn));
+
+  tp_g_signal_connect_object (conn, "contact-list-changed",
+      G_CALLBACK (contact_list_changed_cb), self, 0);
+
+  contacts = tp_connection_dup_contact_list (conn);
+  if (contacts != NULL)
+    {
+      GPtrArray *empty;
+
+      empty = g_ptr_array_new ();
+
+      contact_list_changed_cb (conn, contacts, empty, self);
+      g_ptr_array_unref (empty);
+    }
 
   tp_g_signal_connect_object (conn, "invalidated",
       G_CALLBACK (conn_invalidated_cb), self, 0);
@@ -215,4 +258,33 @@ empathy_connection_aggregator_get_all_groups (EmpathyConnectionAggregator *self)
   g_hash_table_unref (set);
 
   return keys;
+}
+
+GPtrArray *
+empathy_connection_aggregator_dup_all_contacts (
+    EmpathyConnectionAggregator *self)
+{
+  GPtrArray *result;
+  GList *l;
+
+  result = g_ptr_array_new_with_free_func (g_object_unref);
+
+  for (l = self->priv->conns; l != NULL; l = g_list_next (l))
+    {
+      TpConnection *conn = l->data;
+      GPtrArray *contacts;
+
+      contacts = tp_connection_dup_contact_list (conn);
+      if (contacts == NULL)
+        continue;
+
+      tp_g_ptr_array_extend (result, contacts);
+
+      /* tp_g_ptr_array_extend() doesn't give us an extra ref */
+      g_ptr_array_foreach (contacts, (GFunc) g_object_ref, NULL);
+
+      g_ptr_array_unref (contacts);
+    }
+
+  return result;
 }
