@@ -48,6 +48,8 @@
 
 #include <telepathy-logger/log-manager.h>
 
+#include <libempathy/empathy-client-factory.h>
+#include <libempathy/empathy-connection-aggregator.h>
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-chatroom-manager.h>
@@ -122,6 +124,7 @@ struct _EmpathyApp
   EmpathyConnectivity *connectivity;
   GSettings *gsettings;
   EmpathyNotificationsApprover *notifications_approver;
+  EmpathyConnectionAggregator *conn_aggregator;
 #ifdef HAVE_GEOCLUE
   EmpathyLocationManager *location_manager;
 #endif
@@ -167,6 +170,7 @@ empathy_app_dispose (GObject *object)
   tp_clear_object (&self->ft_factory);
   tp_clear_object (&self->gsettings);
   tp_clear_object (&self->notifications_approver);
+  tp_clear_object (&self->conn_aggregator);
 
   if (dispose != NULL)
     dispose (object);
@@ -808,9 +812,29 @@ empathy_app_constructed (GObject *object)
   self->location_manager = empathy_location_manager_dup_singleton ();
 #endif
 
+  self->conn_aggregator = empathy_connection_aggregator_dup_singleton ();
+
   self->activated = FALSE;
   self->ft_factory = NULL;
   self->window = NULL;
+}
+
+static void
+add_empathy_features (void)
+{
+  /* Add 'empathy' specific feature before doing any preparation */
+  EmpathyClientFactory *factory;
+
+  factory = empathy_client_factory_dup ();
+
+  tp_simple_client_factory_add_connection_features_varargs (
+      TP_SIMPLE_CLIENT_FACTORY (factory),
+      /* empathy_connection_aggregator_get_all_groups(), used by
+       * EmpathyGroupsWidget relies on it */
+      TP_CONNECTION_FEATURE_CONTACT_GROUPS,
+      NULL);
+
+  g_object_unref (factory);
 }
 
 int
@@ -831,6 +855,8 @@ main (int argc, char *argv[])
   empathy_init ();
   gtk_init (&argc, &argv);
   empathy_gtk_init ();
+
+  add_empathy_features ();
 
   app = g_object_new (EMPATHY_TYPE_APP,
       "application-id", EMPATHY_DBUS_NAME,

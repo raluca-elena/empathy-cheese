@@ -32,7 +32,7 @@
 #include <folks/folks.h>
 
 #include <libempathy/empathy-utils.h>
-#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-connection-aggregator.h>
 
 #include "empathy-groups-widget.h"
 #include "empathy-ui-utils.h"
@@ -150,7 +150,7 @@ static void
 populate_data (EmpathyGroupsWidget *self)
 {
   EmpathyGroupsWidgetPriv *priv = GET_PRIV (self);
-  EmpathyContactManager *manager;
+  EmpathyConnectionAggregator *aggregator;
   GtkTreeIter iter;
   GeeSet *member_groups;
   GList *all_groups, *l;
@@ -158,12 +158,12 @@ populate_data (EmpathyGroupsWidget *self)
   /* Remove the old groups */
   gtk_list_store_clear (priv->group_store);
 
-  /* FIXME: We have to get the whole group list from EmpathyContactManager, as
-   * libfolks hasn't grown API to get the whole group list yet. (bgo#627398) */
-  manager = empathy_contact_manager_dup_singleton ();
-  all_groups = empathy_contact_list_get_all_groups (
-      EMPATHY_CONTACT_LIST (manager));
-  g_object_unref (manager);
+  /* FIXME: We have to get the whole group list from
+   * EmpathyConnectionAggregator, as libfolks hasn't grown API to get the whole
+   * group list yet. (bgo#627398) */
+  aggregator = empathy_connection_aggregator_dup_singleton ();
+  all_groups = empathy_connection_aggregator_get_all_groups (aggregator);
+  g_object_unref (aggregator);
 
   /* Get the list of groups that this #FolksGroupDetails is currently in */
   member_groups = folks_group_details_get_groups (priv->group_details);
