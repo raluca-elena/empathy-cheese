@@ -61,6 +61,9 @@ GType empathy_connection_aggregator_get_type (void);
 
 EmpathyConnectionAggregator * empathy_connection_aggregator_dup_singleton (void);
 
+GList * empathy_connection_aggregator_get_all_groups (
+    EmpathyConnectionAggregator *self);
+
 G_END_DECLS
 
 #endif /* #ifndef __EMPATHY_CONNECTION_AGGREGATOR_H__*/

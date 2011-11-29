@@ -188,3 +188,31 @@ empathy_connection_aggregator_dup_singleton (void)
   g_object_add_weak_pointer (G_OBJECT (aggregator), (gpointer *) &aggregator);
   return aggregator;
 }
+
+GList *
+empathy_connection_aggregator_get_all_groups (EmpathyConnectionAggregator *self)
+{
+  GList *keys, *l;
+  GHashTable *set;
+
+  set = g_hash_table_new (g_str_hash, g_str_equal);
+
+  for (l = self->priv->conns; l != NULL; l = g_list_next (l))
+    {
+      TpConnection *conn = l->data;
+      const gchar * const *groups;
+      guint i;
+
+      groups = tp_connection_get_contact_groups (conn);
+      if (groups == NULL)
+        continue;
+
+      for (i = 0; groups[i] != NULL; i++)
+        g_hash_table_insert (set, (gchar *) groups[i], GUINT_TO_POINTER (TRUE));
+    }
+
+  keys = g_hash_table_get_keys (set);
+  g_hash_table_unref (set);
+
+  return keys;
+}
