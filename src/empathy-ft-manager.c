@@ -37,7 +37,6 @@
 
 #define DEBUG_FLAG EMPATHY_DEBUG_FT
 #include <libempathy/empathy-debug.h>
-#include <libempathy/empathy-tp-file.h>
 #include <libempathy/empathy-utils.h>
 
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -518,7 +517,7 @@ do_real_transfer_done (EmpathyFTManager *manager,
 
 static void
 ft_handler_transfer_done_cb (EmpathyFTHandler *handler,
-                             EmpathyTpFile *tp_file,
+                             TpFileTransferChannel *channel,
                              EmpathyFTManager *manager)
 {
   if (empathy_ft_handler_is_incoming (handler) &&
@@ -574,7 +573,7 @@ ft_handler_transfer_progress_cb (EmpathyFTHandler *handler,
 
 static void
 ft_handler_transfer_started_cb (EmpathyFTHandler *handler,
-                                EmpathyTpFile *tp_file,
+                                TpFileTransferChannel *channel,
                                 EmpathyFTManager *manager)
 {
   guint64 transferred_bytes, total_bytes;

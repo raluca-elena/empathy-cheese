@@ -27,7 +27,8 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
-#include "empathy-tp-file.h"
+#include <telepathy-glib/file-transfer-channel.h>
+
 #include "empathy-contact.h"
 
 G_BEGIN_DECLS
@@ -56,6 +57,18 @@ typedef struct {
   GObjectClass parent_class;
 } EmpathyFTHandlerClass;
 
+#define EMPATHY_FT_ERROR_QUARK g_quark_from_static_string ("EmpathyFTError")
+
+typedef enum {
+	EMPATHY_FT_ERROR_FAILED,
+	EMPATHY_FT_ERROR_HASH_MISMATCH,
+	EMPATHY_FT_ERROR_TP_ERROR,
+	EMPATHY_FT_ERROR_SOCKET,
+	EMPATHY_FT_ERROR_NOT_SUPPORTED,
+	EMPATHY_FT_ERROR_INVALID_SOURCE_FILE,
+	EMPATHY_FT_ERROR_EMPTY_SOURCE_FILE
+} EmpathyFTErrorEnum;
+
 /**
  * EmpathyFTHandlerReadyCallback:
  * @handler: the handler which is now ready
@@ -75,7 +88,7 @@ void empathy_ft_handler_new_outgoing (EmpathyContact *contact,
     EmpathyFTHandlerReadyCallback callback,
     gpointer user_data);
 
-void empathy_ft_handler_new_incoming (EmpathyTpFile *tp_file,
+void empathy_ft_handler_new_incoming (TpFileTransferChannel *channel,
     EmpathyFTHandlerReadyCallback callback,
     gpointer user_data);
 void empathy_ft_handler_incoming_set_destination (EmpathyFTHandler *handler,

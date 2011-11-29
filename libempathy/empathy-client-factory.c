@@ -24,7 +24,6 @@
 #include "empathy-client-factory.h"
 
 #include "empathy-tp-chat.h"
-#include "empathy-tp-file.h"
 #include "empathy-utils.h"
 
 #include <telepathy-yell/telepathy-yell.h>
@@ -87,11 +86,6 @@ empathy_client_factory_create_channel (TpSimpleClientFactory *factory,
   else if (!tp_strdiff (chan_type, TPY_IFACE_CHANNEL_TYPE_CALL))
     {
       return TP_CHANNEL (call_channel_new_with_factory (
-            TP_SIMPLE_CLIENT_FACTORY (factory), conn, path, properties, error));
-    }
-  else if (!tp_strdiff (chan_type, TP_IFACE_CHANNEL_TYPE_FILE_TRANSFER))
-    {
-      return TP_CHANNEL (empathy_tp_file_new (
             TP_SIMPLE_CLIENT_FACTORY (factory), conn, path, properties, error));
     }
 

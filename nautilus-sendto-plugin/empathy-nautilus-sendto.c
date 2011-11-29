@@ -33,7 +33,6 @@
 #include <libempathy/empathy-debug.h>
 #include <libempathy/empathy-ft-factory.h>
 #include <libempathy/empathy-ft-handler.h>
-#include <libempathy/empathy-tp-file.h>
 
 #include <libempathy-gtk/empathy-contact-chooser.h>
 #include <libempathy-gtk/empathy-ui-utils.h>
@@ -166,7 +165,7 @@ quit (void)
 
 static void
 transfer_done_cb (EmpathyFTHandler *handler,
-                  EmpathyTpFile *tp_file,
+                  TpFileTransferChannel *channel,
                   NstPlugin *plugin)
 {
   quit ();
