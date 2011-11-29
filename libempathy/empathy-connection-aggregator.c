@@ -31,7 +31,7 @@
 
 #include "extensions/extensions.h"
 
-G_DEFINE_TYPE (EmpathyConnectionAggregator, empathy_connection_aggregator, 
+G_DEFINE_TYPE (EmpathyConnectionAggregator, empathy_connection_aggregator,
     G_TYPE_OBJECT);
 
 enum {
