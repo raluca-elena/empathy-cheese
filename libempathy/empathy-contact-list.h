@@ -48,7 +48,6 @@ struct _EmpathyContactListIface {
 					       const gchar        *message);
 	GList *          (*get_members)       (EmpathyContactList *list);
 	GList *          (*get_pendings)      (EmpathyContactList *list);
-	GList *          (*get_all_groups)    (EmpathyContactList *list);
 	GList *          (*get_groups)        (EmpathyContactList *list,
 					       EmpathyContact     *contact);
 	void             (*add_to_group)      (EmpathyContactList *list,
@@ -73,7 +72,6 @@ void     empathy_contact_list_remove            (EmpathyContactList *list,
 						 const gchar        *message);
 GList *  empathy_contact_list_get_members       (EmpathyContactList *list);
 GList *  empathy_contact_list_get_pendings      (EmpathyContactList *list);
-GList *  empathy_contact_list_get_all_groups    (EmpathyContactList *list);
 GList *  empathy_contact_list_get_groups        (EmpathyContactList *list,
 						 EmpathyContact     *contact);
 void     empathy_contact_list_add_to_group      (EmpathyContactList *list,

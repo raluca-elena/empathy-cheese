@@ -1069,20 +1069,6 @@ tp_contact_list_get_pendings (EmpathyContactList *list)
 }
 
 static GList *
-tp_contact_list_get_all_groups (EmpathyContactList *list)
-{
-	EmpathyTpContactListPriv *priv = GET_PRIV (list);
-	GList                    *ret, *l;
-
-	ret = g_hash_table_get_keys (priv->groups);
-	for (l = ret; l; l = l->next) {
-		l->data = g_strdup (l->data);
-	}
-
-	return ret;
-}
-
-static GList *
 tp_contact_list_get_groups (EmpathyContactList *list,
 			    EmpathyContact     *contact)
 {
@@ -1205,7 +1191,6 @@ tp_contact_list_iface_init (EmpathyContactListIface *iface)
 	iface->remove            = tp_contact_list_remove;
 	iface->get_members       = tp_contact_list_get_members;
 	iface->get_pendings      = tp_contact_list_get_pendings;
-	iface->get_all_groups    = tp_contact_list_get_all_groups;
 	iface->get_groups        = tp_contact_list_get_groups;
 	iface->add_to_group      = tp_contact_list_add_to_group;
 	iface->remove_from_group = tp_contact_list_remove_from_group;

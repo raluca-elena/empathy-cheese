@@ -415,42 +415,6 @@ contact_manager_get_pendings (EmpathyContactList *manager)
 	return contacts;
 }
 
-static void
-contact_manager_get_all_groups_foreach (TpConnection          *connection,
-					EmpathyTpContactList  *list,
-					GList                **all_groups)
-{
-	GList *groups, *l;
-
-	groups = empathy_contact_list_get_all_groups (EMPATHY_CONTACT_LIST (list));
-	for (l = groups; l; l = l->next) {
-		if (!g_list_find_custom (*all_groups,
-					 l->data,
-					 (GCompareFunc) strcmp)) {
-			*all_groups = g_list_prepend (*all_groups, l->data);
-		} else {
-			g_free (l->data);
-		}
-	}
-
-	g_list_free (groups);
-}
-
-static GList *
-contact_manager_get_all_groups (EmpathyContactList *manager)
-{
-	EmpathyContactManagerPriv *priv = GET_PRIV (manager);
-	GList                     *groups = NULL;
-
-	g_return_val_if_fail (EMPATHY_IS_CONTACT_MANAGER (manager), NULL);
-
-	g_hash_table_foreach (priv->lists,
-			      (GHFunc) contact_manager_get_all_groups_foreach,
-			      &groups);
-
-	return groups;
-}
-
 static GList *
 contact_manager_get_groups (EmpathyContactList *manager,
 			    EmpathyContact     *contact)
@@ -569,7 +533,6 @@ contact_manager_iface_init (EmpathyContactListIface *iface)
 	iface->remove            = contact_manager_remove;
 	iface->get_members       = contact_manager_get_members;
 	iface->get_pendings      = contact_manager_get_pendings;
-	iface->get_all_groups    = contact_manager_get_all_groups;
 	iface->get_groups        = contact_manager_get_groups;
 	iface->add_to_group      = contact_manager_add_to_group;
 	iface->remove_from_group = contact_manager_remove_from_group;

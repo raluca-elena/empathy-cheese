@@ -146,18 +146,6 @@ empathy_contact_list_get_pendings (EmpathyContactList *list)
 }
 
 GList *
-empathy_contact_list_get_all_groups (EmpathyContactList *list)
-{
-	g_return_val_if_fail (EMPATHY_IS_CONTACT_LIST (list), NULL);
-
-	if (EMPATHY_CONTACT_LIST_GET_IFACE (list)->get_all_groups) {
-		return EMPATHY_CONTACT_LIST_GET_IFACE (list)->get_all_groups (list);
-	}
-
-	return NULL;
-}
-
-GList *
 empathy_contact_list_get_groups (EmpathyContactList *list,
 				 EmpathyContact     *contact)
 {
