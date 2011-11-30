@@ -46,7 +46,7 @@
 #include "empathy-individual-view.h"
 #include "empathy-individual-menu.h"
 #include "empathy-individual-store.h"
-#include "empathy-contact-dialogs.h"
+#include "empathy-individual-edit-dialog.h"
 #include "empathy-individual-dialogs.h"
 #include "empathy-images.h"
 #include "empathy-linking-dialog.h"
@@ -988,7 +988,6 @@ individual_view_key_press_event_cb (EmpathyIndividualView *view,
       g_idle_add (individual_view_popup_menu_idle_cb, data);
     } else if (event->keyval == GDK_KEY_F2) {
         FolksIndividual *individual;
-        EmpathyContact *contact;
 
         g_return_val_if_fail (EMPATHY_IS_INDIVIDUAL_VIEW (view), FALSE);
 
@@ -996,15 +995,9 @@ individual_view_key_press_event_cb (EmpathyIndividualView *view,
         if (individual == NULL)
             return FALSE;
 
-        contact = empathy_contact_dup_from_folks_individual (individual);
-        if (contact == NULL) {
-            g_object_unref (individual);
-            return FALSE;
-        }
-        empathy_contact_edit_dialog_show (contact, NULL);
+        empathy_individual_edit_dialog_show (individual, NULL);
 
         g_object_unref (individual);
-        g_object_unref (contact);
     }
 
   return FALSE;
