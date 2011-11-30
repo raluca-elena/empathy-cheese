@@ -222,7 +222,10 @@ create_sink (EmpathyGstAudioSink *self)
 
   /* Set latency (buffering on the PulseAudio side) of 40ms and transfer data
    * in 10ms chunks */
-  g_object_set (sink, "buffer-time", 40000, "latency-time", 10000, NULL);
+  g_object_set (sink,
+      "buffer-time", (gint64) 40000,
+      "latency-time", (gint64) 10000,
+      NULL);
 
   return sink;
 }
