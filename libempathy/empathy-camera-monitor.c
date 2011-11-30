@@ -115,10 +115,12 @@ on_camera_added (CheeseCameraDeviceMonitor *device,
     gint api_version,
     EmpathyCameraMonitor *self)
 {
-  EmpathyCamera *camera = empathy_camera_new (id, filename, product_name);
+  EmpathyCamera *camera;
 
   if (self->priv->cameras == NULL)
     return;
+
+  camera = empathy_camera_new (id, filename, product_name);
 
   g_queue_push_tail (self->priv->cameras, camera);
 
