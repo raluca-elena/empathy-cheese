@@ -552,7 +552,8 @@ pixbuf_avatar_from_individual_closure_new (FolksIndividual    *individual,
 	closure->result = g_object_ref (result);
 	closure->width = width;
 	closure->height = height;
-	closure->cancellable = g_object_ref (cancellable);
+	if (cancellable != NULL)
+		closure->cancellable = g_object_ref (cancellable);
 
 	return closure;
 }
@@ -561,7 +562,7 @@ static void
 pixbuf_avatar_from_individual_closure_free (
 		PixbufAvatarFromIndividualClosure *closure)
 {
-	g_object_unref (closure->cancellable);
+	g_clear_object (&closure->cancellable);
 	tp_clear_object (&closure->loader);
 	g_object_unref (closure->individual);
 	g_object_unref (closure->result);
