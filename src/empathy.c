@@ -832,6 +832,9 @@ add_empathy_features (void)
       /* empathy_connection_aggregator_get_all_groups(), used by
        * EmpathyGroupsWidget relies on it */
       TP_CONNECTION_FEATURE_CONTACT_GROUPS,
+      /* empathy_connection_aggregator_dup_all_contacts(), used by
+       * EmpathyEventManager relies on it */
+      TP_CONNECTION_FEATURE_CONTACT_LIST,
       NULL);
 
   g_object_unref (factory);

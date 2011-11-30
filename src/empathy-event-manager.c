@@ -33,7 +33,7 @@
 
 #include <libempathy/empathy-presence-manager.h>
 #include <libempathy/empathy-tp-contact-factory.h>
-#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-connection-aggregator.h>
 #include <libempathy/empathy-tp-chat.h>
 #include <libempathy/empathy-tp-streamed-media.h>
 #include <libempathy/empathy-utils.h>
@@ -80,7 +80,7 @@ typedef struct {
 typedef struct {
   TpBaseClient *approver;
   TpBaseClient *auth_approver;
-  EmpathyContactManager *contact_manager;
+  EmpathyConnectionAggregator *conn_aggregator;
   GSList *events;
   /* Ongoing approvals */
   GSList *approvals;
@@ -91,6 +91,9 @@ typedef struct {
   GSettings *gsettings_ui;
 
   EmpathySoundManager *sound_mgr;
+
+  /* TpContact -> EmpathyContact */
+  GHashTable *contacts;
 } EmpathyEventManagerPriv;
 
 typedef struct _EventPriv EventPriv;
@@ -1178,15 +1181,20 @@ event_pending_subscribe_func (EventPriv *event)
 }
 
 static void
-event_manager_pendings_changed_cb (EmpathyContactList  *list,
-  EmpathyContact *contact, EmpathyContact *actor,
-  guint reason, gchar *message, gboolean is_pending,
-  EmpathyEventManager *manager)
+check_publish_state (EmpathyEventManager *self,
+    TpContact *tp_contact)
 {
-  EmpathyEventManagerPriv *priv = GET_PRIV (manager);
-  gchar                   *header, *event_msg;
+  EmpathyEventManagerPriv *priv = GET_PRIV (self);
+  gchar *header, *event_msg;
+  TpSubscriptionState state;
+  EmpathyContact *contact;
+  const gchar *message;
 
-  if (!is_pending)
+  state = tp_contact_get_publish_state (tp_contact);
+
+  contact = empathy_contact_dup_from_tp_contact (tp_contact);
+
+  if (state != TP_SUBSCRIPTION_STATE_ASK)
     {
       GSList *l;
 
@@ -1202,24 +1210,37 @@ event_manager_pendings_changed_cb (EmpathyContactList  *list,
             }
         }
 
-      return;
+      goto out;
     }
 
   header = g_strdup_printf (
       _("%s would like permission to see when you are online"),
       empathy_contact_get_alias (contact));
 
+  message = tp_contact_get_publish_request (tp_contact);
+
   if (!EMP_STR_EMPTY (message))
     event_msg = g_strdup_printf (_("\nMessage: %s"), message);
   else
     event_msg = NULL;
 
-  event_manager_add (manager, NULL, contact, EMPATHY_EVENT_TYPE_SUBSCRIPTION,
+  event_manager_add (self, NULL, contact, EMPATHY_EVENT_TYPE_SUBSCRIPTION,
       GTK_STOCK_DIALOG_QUESTION, header, event_msg, NULL,
       event_pending_subscribe_func, NULL);
 
   g_free (event_msg);
   g_free (header);
+
+out:
+  g_object_unref (contact);
+}
+
+static void
+event_manager_publish_state_changed_cb (TpContact *contact,
+    GParamSpec *spec,
+    EmpathyEventManager *self)
+{
+  check_publish_state (self, contact);
 }
 
 static void
@@ -1288,23 +1309,6 @@ out:
   g_object_unref (window);
 }
 
-static void
-event_manager_members_changed_cb (EmpathyContactList  *list,
-    EmpathyContact *contact,
-    EmpathyContact *actor,
-    guint reason,
-    gchar *message,
-    gboolean is_member,
-    EmpathyEventManager *manager)
-{
-  if (is_member)
-    g_signal_connect (contact, "presence-changed",
-        G_CALLBACK (event_manager_presence_changed_cb), manager);
-  else
-    g_signal_handlers_disconnect_by_func (contact,
-        event_manager_presence_changed_cb, manager);
-}
-
 static GObject *
 event_manager_constructor (GType type,
 			   guint n_props,
@@ -1337,12 +1341,13 @@ event_manager_finalize (GObject *object)
   g_slist_free (priv->events);
   g_slist_foreach (priv->approvals, (GFunc) event_manager_approval_free, NULL);
   g_slist_free (priv->approvals);
-  g_object_unref (priv->contact_manager);
+  g_object_unref (priv->conn_aggregator);
   g_object_unref (priv->approver);
   g_object_unref (priv->auth_approver);
   g_object_unref (priv->gsettings_notif);
   g_object_unref (priv->gsettings_ui);
   g_object_unref (priv->sound_mgr);
+  g_hash_table_unref (priv->contacts);
 }
 
 static void
@@ -1385,12 +1390,63 @@ empathy_event_manager_class_init (EmpathyEventManagerClass *klass)
 }
 
 static void
+contact_list_changed_cb (EmpathyConnectionAggregator *aggregator,
+    GPtrArray *added,
+    GPtrArray *removed,
+    EmpathyEventManager *self)
+{
+  EmpathyEventManagerPriv *priv = GET_PRIV (self);
+  guint i;
+
+  for (i = 0; i < added->len; i++)
+    {
+      TpContact *tp_contact = g_ptr_array_index (added, i);
+      EmpathyContact *contact;
+
+      if (g_hash_table_lookup (priv->contacts, tp_contact) != NULL)
+        continue;
+
+      contact = empathy_contact_dup_from_tp_contact (tp_contact);
+
+      tp_g_signal_connect_object (contact, "presence-changed",
+          G_CALLBACK (event_manager_presence_changed_cb), self, 0);
+
+      tp_g_signal_connect_object (tp_contact, "notify::publish-state",
+          G_CALLBACK (event_manager_publish_state_changed_cb), self, 0);
+
+      check_publish_state (self, tp_contact);
+
+      /* Pass ownership to the hash table */
+      g_hash_table_insert (priv->contacts, g_object_ref (tp_contact), contact);
+    }
+
+  for (i = 0; i < removed->len; i++)
+    {
+      TpContact *tp_contact = g_ptr_array_index (removed, i);
+      EmpathyContact *contact;
+
+      contact = g_hash_table_lookup (priv->contacts, tp_contact);
+      if (contact == NULL)
+        continue;
+
+      g_signal_handlers_disconnect_by_func (contact,
+          event_manager_presence_changed_cb, self);
+
+      g_signal_handlers_disconnect_by_func (tp_contact,
+          event_manager_publish_state_changed_cb, self);
+
+      g_hash_table_remove (priv->contacts, tp_contact);
+    }
+}
+
+static void
 empathy_event_manager_init (EmpathyEventManager *manager)
 {
   EmpathyEventManagerPriv *priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
     EMPATHY_TYPE_EVENT_MANAGER, EmpathyEventManagerPriv);
   GError *error = NULL;
   TpAccountManager *am;
+  GPtrArray *contacts, *empty;
 
   manager->priv = priv;
 
@@ -1399,12 +1455,23 @@ empathy_event_manager_init (EmpathyEventManager *manager)
 
   priv->sound_mgr = empathy_sound_manager_dup_singleton ();
 
-  priv->contact_manager = empathy_contact_manager_dup_singleton ();
-  g_signal_connect (priv->contact_manager, "pendings-changed",
-    G_CALLBACK (event_manager_pendings_changed_cb), manager);
+  priv->contacts = g_hash_table_new_full (NULL, NULL, g_object_unref,
+      g_object_unref);
 
-  g_signal_connect (priv->contact_manager, "members-changed",
-    G_CALLBACK (event_manager_members_changed_cb), manager);
+  priv->conn_aggregator = empathy_connection_aggregator_dup_singleton ();
+
+  tp_g_signal_connect_object (priv->conn_aggregator, "contact-list-changed",
+      G_CALLBACK (contact_list_changed_cb), manager, 0);
+
+  contacts = empathy_connection_aggregator_dup_all_contacts (
+      priv->conn_aggregator);
+
+  empty = g_ptr_array_new ();
+
+  contact_list_changed_cb (priv->conn_aggregator, contacts, empty, manager);
+
+  g_ptr_array_unref (contacts);
+  g_ptr_array_unref (empty);
 
    am = tp_account_manager_dup ();
 
