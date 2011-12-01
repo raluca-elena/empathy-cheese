@@ -33,7 +33,7 @@
 
 struct _EmpathyCameraMonitorPrivate
 {
-  CheeseCameraDeviceMonitor *cheese_monitor;
+  EmpathyCameraDeviceMonitor *empathy_monitor;
   GQueue *cameras;
   gint num_cameras;
 };
@@ -108,7 +108,7 @@ empathy_camera_monitor_free_camera_foreach (gpointer data,
 }
 
 static void
-on_camera_added (CheeseCameraDeviceMonitor *device,
+on_camera_added (EmpathyCameraDeviceMonitor *device,
     gchar *id,
     gchar *filename,
     gchar *product_name,
@@ -133,7 +133,7 @@ on_camera_added (CheeseCameraDeviceMonitor *device,
 }
 
 static void
-on_camera_removed (CheeseCameraDeviceMonitor *device,
+on_camera_removed (EmpathyCameraDeviceMonitor *device,
     gchar *id,
     EmpathyCameraMonitor *self)
 {
@@ -194,7 +194,7 @@ empathy_camera_monitor_dispose (GObject *object)
 {
   EmpathyCameraMonitor *self = EMPATHY_CAMERA_MONITOR (object);
 
-  tp_clear_object (&self->priv->cheese_monitor);
+  tp_clear_object (&self->priv->empathy_monitor);
 
   g_queue_foreach (self->priv->cameras,
       empathy_camera_monitor_free_camera_foreach, NULL);
@@ -210,7 +210,7 @@ empathy_camera_monitor_constructed (GObject *object)
 
   G_OBJECT_CLASS (empathy_camera_monitor_parent_class)->constructed (object);
 
-  cheese_camera_device_monitor_coldplug (self->priv->cheese_monitor);
+  empathy_camera_device_monitor_coldplug (self->priv->empathy_monitor);
 }
 
 static void
@@ -252,11 +252,11 @@ empathy_camera_monitor_init (EmpathyCameraMonitor *self)
 
   self->priv->cameras = g_queue_new ();
 
-  self->priv->cheese_monitor = cheese_camera_device_monitor_new ();
+  self->priv->empathy_monitor = empathy_camera_device_monitor_new ();
 
-  g_signal_connect (self->priv->cheese_monitor, "added",
+  g_signal_connect (self->priv->empathy_monitor, "added",
       G_CALLBACK (on_camera_added), self);
-  g_signal_connect (self->priv->cheese_monitor, "removed",
+  g_signal_connect (self->priv->empathy_monitor, "removed",
       G_CALLBACK (on_camera_removed), self);
 
 #ifndef HAVE_UDEV

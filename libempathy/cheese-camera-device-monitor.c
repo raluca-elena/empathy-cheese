@@ -1,3 +1,5 @@
+/* This file is a copy of cheese-camera-device-monitor.c from Empathy. We
+ * just renamespaced it to avoid conflicts when linking on libcheese. */
 /*
  * Copyright © 2007,2008 Jaap Haitsma <jaap@haitsma.org>
  * Copyright © 2007-2009 daniel g. siegel <dgsiegel@gnome.org>
@@ -49,31 +51,31 @@
  * @short_description: Simple object to enumerate v4l devices
  * @include: cheese/cheese-camera-device-monitor.h
  *
- * #CheeseCameraDeviceMonitor provides a basic interface for
+ * #EmpathyCameraDeviceMonitor provides a basic interface for
  * video4linux device enumeration and hotplugging.
  *
  * It uses either GUdev or some platform specific code to list video
  * devices.  It is also capable (right now in linux only, with the
  * udev backend) to monitor device plugging and emit a
- * CheeseCameraDeviceMonitor::added or
- * CheeseCameraDeviceMonitor::removed signal when an event happens.
+ * EmpathyCameraDeviceMonitor::added or
+ * EmpathyCameraDeviceMonitor::removed signal when an event happens.
  */
 
-G_DEFINE_TYPE (CheeseCameraDeviceMonitor, cheese_camera_device_monitor, G_TYPE_OBJECT)
+G_DEFINE_TYPE (EmpathyCameraDeviceMonitor, empathy_camera_device_monitor, G_TYPE_OBJECT)
 
-#define CHEESE_CAMERA_DEVICE_MONITOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o),                               \
-                                                                                  CHEESE_TYPE_CAMERA_DEVICE_MONITOR, \
-                                                                                  CheeseCameraDeviceMonitorPrivate))
+#define EMPATHY_CAMERA_DEVICE_MONITOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o),                               \
+                                                                                  EMPATHY_TYPE_CAMERA_DEVICE_MONITOR, \
+                                                                                  EmpathyCameraDeviceMonitorPrivate))
 
-#define CHEESE_CAMERA_DEVICE_MONITOR_ERROR cheese_camera_device_monitor_error_quark ()
+#define EMPATHY_CAMERA_DEVICE_MONITOR_ERROR empathy_camera_device_monitor_error_quark ()
 
-GST_DEBUG_CATEGORY (cheese_device_monitor_cat);
-#define GST_CAT_DEFAULT cheese_device_monitor_cat
+GST_DEBUG_CATEGORY (empathy_device_monitor_cat);
+#define GST_CAT_DEFAULT empathy_device_monitor_cat
 
-enum CheeseCameraDeviceMonitorError
+enum EmpathyCameraDeviceMonitorError
 {
-  CHEESE_CAMERA_DEVICE_MONITOR_ERROR_UNKNOWN,
-  CHEESE_CAMERA_DEVICE_MONITOR_ERROR_ELEMENT_NOT_FOUND
+  EMPATHY_CAMERA_DEVICE_MONITOR_ERROR_UNKNOWN,
+  EMPATHY_CAMERA_DEVICE_MONITOR_ERROR_ELEMENT_NOT_FOUND
 };
 
 typedef struct
@@ -83,7 +85,7 @@ typedef struct
 #else
   guint filler;
 #endif /* HAVE_UDEV */
-} CheeseCameraDeviceMonitorPrivate;
+} EmpathyCameraDeviceMonitorPrivate;
 
 enum
 {
@@ -96,15 +98,15 @@ static guint monitor_signals[LAST_SIGNAL];
 
 #if 0
 GQuark
-cheese_camera_device_monitor_error_quark (void)
+empathy_camera_device_monitor_error_quark (void)
 {
-  return g_quark_from_static_string ("cheese-camera-error-quark");
+  return g_quark_from_static_string ("empathy-camera-error-quark");
 }
 #endif
 
 #ifdef HAVE_UDEV
 static void
-cheese_camera_device_monitor_added (CheeseCameraDeviceMonitor *monitor,
+empathy_camera_device_monitor_added (EmpathyCameraDeviceMonitor *monitor,
                                     GUdevDevice               *udevice)
 {
   const char *device_file;
@@ -190,7 +192,7 @@ cheese_camera_device_monitor_added (CheeseCameraDeviceMonitor *monitor,
 }
 
 static void
-cheese_camera_device_monitor_removed (CheeseCameraDeviceMonitor *monitor,
+empathy_camera_device_monitor_removed (EmpathyCameraDeviceMonitor *monitor,
                                       GUdevDevice               *udevice)
 {
   g_signal_emit (monitor, monitor_signals[REMOVED], 0,
@@ -198,20 +200,20 @@ cheese_camera_device_monitor_removed (CheeseCameraDeviceMonitor *monitor,
 }
 
 static void
-cheese_camera_device_monitor_uevent_cb (GUdevClient               *client,
+empathy_camera_device_monitor_uevent_cb (GUdevClient               *client,
                                         const gchar               *action,
                                         GUdevDevice               *udevice,
-                                        CheeseCameraDeviceMonitor *monitor)
+                                        EmpathyCameraDeviceMonitor *monitor)
 {
   if (g_str_equal (action, "remove"))
-    cheese_camera_device_monitor_removed (monitor, udevice);
+    empathy_camera_device_monitor_removed (monitor, udevice);
   else if (g_str_equal (action, "add"))
-    cheese_camera_device_monitor_added (monitor, udevice);
+    empathy_camera_device_monitor_added (monitor, udevice);
 }
 
 /**
- * cheese_camera_device_monitor_coldplug:
- * @monitor: a #CheeseCameraDeviceMonitor object.
+ * empathy_camera_device_monitor_coldplug:
+ * @monitor: a #EmpathyCameraDeviceMonitor object.
  *
  * Will actively look for plugged in cameras and emit
  * ::added for those new cameras.
@@ -219,9 +221,9 @@ cheese_camera_device_monitor_uevent_cb (GUdevClient               *client,
  * to those signals before they are emitted.
  */
 void
-cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
+empathy_camera_device_monitor_coldplug (EmpathyCameraDeviceMonitor *monitor)
 {
-  CheeseCameraDeviceMonitorPrivate *priv = CHEESE_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
+  EmpathyCameraDeviceMonitorPrivate *priv = EMPATHY_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
   GList                            *devices, *l;
   gint                              i = 0;
 
@@ -235,7 +237,7 @@ cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
   /* Initialize camera structures */
   for (l = devices; l != NULL; l = l->next)
   {
-    cheese_camera_device_monitor_added (monitor, l->data);
+    empathy_camera_device_monitor_added (monitor, l->data);
     g_object_unref (l->data);
     i++;
   }
@@ -246,10 +248,10 @@ cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
 
 #else /* HAVE_UDEV */
 void
-cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
+empathy_camera_device_monitor_coldplug (EmpathyCameraDeviceMonitor *monitor)
 {
   #if 0
-  CheeseCameraDeviceMonitorPrivate *priv = CHEESE_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
+  EmpathyCameraDeviceMonitorPrivate *priv = EMPATHY_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
   struct v4l2_capability            v2cap;
   struct video_capability           v1cap;
   int                               fd, ok;
@@ -307,7 +309,7 @@ cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
   /* Initialize camera structures */
   for (l = devices; l != NULL; l = l->next)
   {
-    cheese_camera_device_monitor_added (monitor, l->data);
+    empathy_camera_device_monitor_added (monitor, l->data);
     g_object_unref (l->data);
   }
   g_list_free (devices);
@@ -317,11 +319,11 @@ cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor)
 #endif /* HAVE_UDEV */
 
 static void
-cheese_camera_device_monitor_finalize (GObject *object)
+empathy_camera_device_monitor_finalize (GObject *object)
 {
 #ifdef HAVE_UDEV
-  CheeseCameraDeviceMonitor *monitor = CHEESE_CAMERA_DEVICE_MONITOR (object);
-  CheeseCameraDeviceMonitorPrivate *priv = CHEESE_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
+  EmpathyCameraDeviceMonitor *monitor = EMPATHY_CAMERA_DEVICE_MONITOR (object);
+  EmpathyCameraDeviceMonitorPrivate *priv = EMPATHY_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
 
   if (priv->client != NULL)
   {
@@ -329,23 +331,23 @@ cheese_camera_device_monitor_finalize (GObject *object)
     priv->client = NULL;
   }
 #endif /* HAVE_UDEV */
-  G_OBJECT_CLASS (cheese_camera_device_monitor_parent_class)->finalize (object);
+  G_OBJECT_CLASS (empathy_camera_device_monitor_parent_class)->finalize (object);
 }
 
 static void
-cheese_camera_device_monitor_class_init (CheeseCameraDeviceMonitorClass *klass)
+empathy_camera_device_monitor_class_init (EmpathyCameraDeviceMonitorClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  if (cheese_device_monitor_cat == NULL)
-    GST_DEBUG_CATEGORY_INIT (cheese_device_monitor_cat,
-                             "cheese-device-monitor",
-                             0, "Cheese Camera Device Monitor");
+  if (empathy_device_monitor_cat == NULL)
+    GST_DEBUG_CATEGORY_INIT (empathy_device_monitor_cat,
+                             "empathy-device-monitor",
+                             0, "Empathy Camera Device Monitor");
 
-  object_class->finalize = cheese_camera_device_monitor_finalize;
+  object_class->finalize = empathy_camera_device_monitor_finalize;
 
   /**
-   * CheeseCameraDeviceMonitor::added:
+   * EmpathyCameraDeviceMonitor::added:
    * @device: A private object representing the newly added camera.
    * @id: Device unique identifier.
    * @device: Device file name  (e.g. /dev/video2).
@@ -353,17 +355,17 @@ cheese_camera_device_monitor_class_init (CheeseCameraDeviceMonitorClass *klass)
    * @api_version: Supported video4linux API: 1 for v4l, 2 for v4l2.
    *
    * The ::added signal is emitted when a camera is added, or on start-up
-   * after #cheese_camera_device_monitor_colplug is called.
+   * after #empathy_camera_device_monitor_colplug is called.
    **/
   monitor_signals[ADDED] = g_signal_new ("added", G_OBJECT_CLASS_TYPE (klass),
                                          G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-                                         G_STRUCT_OFFSET (CheeseCameraDeviceMonitorClass, added),
+                                         G_STRUCT_OFFSET (EmpathyCameraDeviceMonitorClass, added),
                                          NULL, NULL,
                                          g_cclosure_marshal_generic,
                                          G_TYPE_NONE, 4, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
 
   /**
-   * CheeseCameraDeviceMonitor::removed:
+   * EmpathyCameraDeviceMonitor::removed:
    * @device: A private object representing the newly added camera
    * @id: Device unique identifier.
    *
@@ -372,38 +374,38 @@ cheese_camera_device_monitor_class_init (CheeseCameraDeviceMonitorClass *klass)
    **/
   monitor_signals[REMOVED] = g_signal_new ("removed", G_OBJECT_CLASS_TYPE (klass),
                                            G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
-                                           G_STRUCT_OFFSET (CheeseCameraDeviceMonitorClass, removed),
+                                           G_STRUCT_OFFSET (EmpathyCameraDeviceMonitorClass, removed),
                                            NULL, NULL,
                                            g_cclosure_marshal_generic,
                                            G_TYPE_NONE, 1, G_TYPE_STRING);
 
-  g_type_class_add_private (klass, sizeof (CheeseCameraDeviceMonitorPrivate));
+  g_type_class_add_private (klass, sizeof (EmpathyCameraDeviceMonitorPrivate));
 }
 
 static void
-cheese_camera_device_monitor_init (CheeseCameraDeviceMonitor *monitor)
+empathy_camera_device_monitor_init (EmpathyCameraDeviceMonitor *monitor)
 {
 #ifdef HAVE_UDEV
-  CheeseCameraDeviceMonitorPrivate *priv         = CHEESE_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
+  EmpathyCameraDeviceMonitorPrivate *priv         = EMPATHY_CAMERA_DEVICE_MONITOR_GET_PRIVATE (monitor);
   const gchar *const                subsystems[] = {"video4linux", NULL};
 
   priv->client = g_udev_client_new (subsystems);
   g_signal_connect (G_OBJECT (priv->client), "uevent",
-                    G_CALLBACK (cheese_camera_device_monitor_uevent_cb), monitor);
+                    G_CALLBACK (empathy_camera_device_monitor_uevent_cb), monitor);
 #endif /* HAVE_UDEV */
 }
 
 /**
- * cheese_camera_device_monitor_new:
+ * empathy_camera_device_monitor_new:
  *
- * Returns a new #CheeseCameraDeviceMonitor object.
+ * Returns a new #EmpathyCameraDeviceMonitor object.
  *
- * Return value: a new #CheeseCameraDeviceMonitor object.
+ * Return value: a new #EmpathyCameraDeviceMonitor object.
  **/
-CheeseCameraDeviceMonitor *
-cheese_camera_device_monitor_new (void)
+EmpathyCameraDeviceMonitor *
+empathy_camera_device_monitor_new (void)
 {
-  return g_object_new (CHEESE_TYPE_CAMERA_DEVICE_MONITOR, NULL);
+  return g_object_new (EMPATHY_TYPE_CAMERA_DEVICE_MONITOR, NULL);
 }
 
 /*

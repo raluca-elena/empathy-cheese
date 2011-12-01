@@ -1,3 +1,5 @@
+/* This file is a copy of cheese-camera-device-monitor.h from Empathy. We
+ * just renamespaced it to avoid conflicts when linking on libcheese. */
 /*
  * Copyright © 2007,2008 Jaap Haitsma <jaap@haitsma.org>
  * Copyright © 2007-2009 daniel g. siegel <dgsiegel@gnome.org>
@@ -20,48 +22,48 @@
  */
 
 
-#ifndef __CHEESE_CAMERA_DEVICE_MONITOR_H__
-#define __CHEESE_CAMERA_DEVICE_MONITOR_H__
+#ifndef __EMPATHY_CAMERA_DEVICE_MONITOR_H__
+#define __EMPATHY_CAMERA_DEVICE_MONITOR_H__
 
 #include <glib-object.h>
 #include <gst/interfaces/xoverlay.h>
 
 G_BEGIN_DECLS
 
-#define CHEESE_TYPE_CAMERA_DEVICE_MONITOR (cheese_camera_device_monitor_get_type ())
-#define CHEESE_CAMERA_DEVICE_MONITOR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), CHEESE_TYPE_CAMERA_DEVICE_MONITOR, \
-                                                                               CheeseCameraDeviceMonitor))
-#define CHEESE_CAMERA_DEVICE_MONITOR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST ((k), CHEESE_TYPE_CAMERA_DEVICE_MONITOR, \
-                                                                            CheeseCameraDeviceMonitorClass))
-#define CHEESE_IS_CAMERA_DEVICE_MONITOR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), CHEESE_TYPE_CAMERA_DEVICE_MONITOR))
-#define CHEESE_IS_CAMERA_DEVICE_MONITOR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), CHEESE_TYPE_CAMERA_DEVICE_MONITOR))
-#define CHEESE_CAMERA_DEVICE_MONITOR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), CHEESE_TYPE_CAMERA_DEVICE_MONITOR, \
-                                                                              CheeseCameraDeviceMonitorClass))
+#define EMPATHY_TYPE_CAMERA_DEVICE_MONITOR (empathy_camera_device_monitor_get_type ())
+#define EMPATHY_CAMERA_DEVICE_MONITOR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), EMPATHY_TYPE_CAMERA_DEVICE_MONITOR, \
+                                                                               EmpathyCameraDeviceMonitor))
+#define EMPATHY_CAMERA_DEVICE_MONITOR_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST ((k), EMPATHY_TYPE_CAMERA_DEVICE_MONITOR, \
+                                                                            EmpathyCameraDeviceMonitorClass))
+#define EMPATHY_IS_CAMERA_DEVICE_MONITOR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), EMPATHY_TYPE_CAMERA_DEVICE_MONITOR))
+#define EMPATHY_IS_CAMERA_DEVICE_MONITOR_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), EMPATHY_TYPE_CAMERA_DEVICE_MONITOR))
+#define EMPATHY_CAMERA_DEVICE_MONITOR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), EMPATHY_TYPE_CAMERA_DEVICE_MONITOR, \
+                                                                              EmpathyCameraDeviceMonitorClass))
 
-typedef struct _CheeseCameraDeviceMonitorClass CheeseCameraDeviceMonitorClass;
-typedef struct _CheeseCameraDeviceMonitor CheeseCameraDeviceMonitor;
+typedef struct _EmpathyCameraDeviceMonitorClass EmpathyCameraDeviceMonitorClass;
+typedef struct _EmpathyCameraDeviceMonitor EmpathyCameraDeviceMonitor;
 
-struct _CheeseCameraDeviceMonitor
+struct _EmpathyCameraDeviceMonitor
 {
   GObject parent;
 };
 
-struct _CheeseCameraDeviceMonitorClass
+struct _EmpathyCameraDeviceMonitorClass
 {
   GObjectClass parent_class;
 
-  void (*added)(CheeseCameraDeviceMonitor *camera,
+  void (*added)(EmpathyCameraDeviceMonitor *camera,
                 const char                *id,
                 const char                *device_file,
                 const char                *product_name,
                 int                        api_version);
-  void (*removed)(CheeseCameraDeviceMonitor *camera, const char *id);
+  void (*removed)(EmpathyCameraDeviceMonitor *camera, const char *id);
 };
 
-GType                      cheese_camera_device_monitor_get_type (void) G_GNUC_CONST;
-CheeseCameraDeviceMonitor *cheese_camera_device_monitor_new (void);
-void                       cheese_camera_device_monitor_coldplug (CheeseCameraDeviceMonitor *monitor);
+GType                      empathy_camera_device_monitor_get_type (void) G_GNUC_CONST;
+EmpathyCameraDeviceMonitor *empathy_camera_device_monitor_new (void);
+void                       empathy_camera_device_monitor_coldplug (EmpathyCameraDeviceMonitor *monitor);
 
 G_END_DECLS
 
-#endif /* __CHEESE_CAMERA_DEVICE_MONITOR_H__ */
+#endif /* __EMPATHY_CAMERA_DEVICE_MONITOR_H__ */
