@@ -31,7 +31,7 @@
 #include <telepathy-glib/util.h>
 
 #include <libempathy/empathy-contact.h>
-#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-connection-aggregator.h>
 #include <libempathy/empathy-utils.h>
 #include <libempathy/empathy-location.h>
 
@@ -48,7 +48,7 @@ G_DEFINE_TYPE (EmpathyMapView, empathy_map_view, GTK_TYPE_WINDOW);
 #define GET_PRIV(self) ((EmpathyMapViewPriv *)((EmpathyMapView *) self)->priv)
 
 struct _EmpathyMapViewPriv {
-  EmpathyContactList *contact_list;
+  EmpathyConnectionAggregator *aggregator;
 
   GtkWidget *zoom_in;
   GtkWidget *zoom_out;
@@ -59,6 +59,9 @@ struct _EmpathyMapViewPriv {
   /* reffed (EmpathyContact *) => borrowed (ChamplainMarker *) */
   GHashTable *markers;
   gulong members_changed_id;
+
+  /* TpContact -> EmpathyContact */
+  GHashTable *contacts;
 };
 
 static void
@@ -303,16 +306,6 @@ create_marker (EmpathyMapView *self,
   return marker;
 }
 
-static void
-contact_added (EmpathyMapView *self,
-    EmpathyContact *contact)
-{
-  g_signal_connect (contact, "notify::location",
-      G_CALLBACK (map_view_contact_location_notify), self);
-
-  map_view_update_contact_position (self, contact);
-}
-
 static gboolean
 map_view_key_press_cb (GtkWidget *widget,
     GdkEventKey *event,
@@ -344,36 +337,55 @@ map_view_tick (EmpathyMapView *self)
 }
 
 static void
-contact_removed (EmpathyMapView *self,
-    EmpathyContact *contact)
-{
-  EmpathyMapViewPriv *priv = GET_PRIV (self);
-  ClutterActor *marker;
-
-  marker = g_hash_table_lookup (priv->markers, contact);
-  if (marker == NULL)
-    return;
-
-  clutter_actor_destroy (marker);
-  g_hash_table_remove (priv->markers, contact);
-}
-
-static void
-members_changed_cb (EmpathyContactList *list,
-    EmpathyContact *contact,
-    EmpathyContact *actor,
-    guint reason,
-    gchar *message,
-    gboolean is_member,
+contact_list_changed_cb (EmpathyConnectionAggregator *aggregator,
+    GPtrArray *added,
+    GPtrArray *removed,
     EmpathyMapView *self)
 {
-  if (is_member)
+  EmpathyMapViewPriv *priv = GET_PRIV (self);
+  guint i;
+
+  for (i = 0; i < added->len; i++)
     {
-      contact_added (self, contact);
+      TpContact *tp_contact = g_ptr_array_index (added, i);
+      EmpathyContact *contact;
+
+      if (g_hash_table_lookup (priv->contacts, tp_contact) != NULL)
+        continue;
+
+      contact = empathy_contact_dup_from_tp_contact (tp_contact);
+
+      tp_g_signal_connect_object (contact, "notify::location",
+          G_CALLBACK (map_view_contact_location_notify), self, 0);
+
+      map_view_update_contact_position (self, contact);
+
+      /* Pass ownership to the hash table */
+      g_hash_table_insert (priv->contacts, g_object_ref (tp_contact),
+          contact);
     }
-  else
+
+  for (i = 0; i < removed->len; i++)
     {
-      contact_removed (self, contact);
+      TpContact *tp_contact = g_ptr_array_index (removed, i);
+      EmpathyContact *contact;
+      ClutterActor *marker;
+
+      contact = g_hash_table_lookup (priv->contacts, tp_contact);
+      if (contact == NULL)
+        continue;
+
+      marker = g_hash_table_lookup (priv->markers, contact);
+      if (marker != NULL)
+        {
+          clutter_actor_destroy (marker);
+          g_hash_table_remove (priv->markers, contact);
+        }
+
+      g_signal_handlers_disconnect_by_func (contact,
+          map_view_contact_location_notify, self);
+
+      g_hash_table_remove (priv->contacts, tp_contact);
     }
 }
 
@@ -409,12 +421,10 @@ empathy_map_view_finalize (GObject *object)
     g_signal_handlers_disconnect_by_func (contact,
         map_view_contact_location_notify, object);
 
-  g_signal_handler_disconnect (priv->contact_list,
-      priv->members_changed_id);
-
   g_hash_table_unref (priv->markers);
-  g_object_unref (priv->contact_list);
+  g_object_unref (priv->aggregator);
   g_object_unref (priv->layer);
+  g_hash_table_unref (priv->contacts);
 
   G_OBJECT_CLASS (empathy_map_view_parent_class)->finalize (object);
 }
@@ -439,7 +449,7 @@ empathy_map_view_init (EmpathyMapView *self)
   GtkWidget *embed;
   GtkWidget *throbber_holder;
   gchar *filename;
-  GList *members, *l;
+  GPtrArray *contacts, *empty;
   GtkWidget *main_vbox;
 
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
@@ -474,12 +484,6 @@ empathy_map_view_init (EmpathyMapView *self)
 
   g_object_unref (gui);
 
-  priv->contact_list = EMPATHY_CONTACT_LIST (
-      empathy_contact_manager_dup_singleton ());
-
-  priv->members_changed_id = g_signal_connect (priv->contact_list,
-      "members-changed", G_CALLBACK (members_changed_cb), self);
-
   priv->throbber = gtk_spinner_new ();
   gtk_widget_set_size_request (priv->throbber, 16, 16);
   gtk_container_add (GTK_CONTAINER (throbber_holder), priv->throbber);
@@ -506,14 +510,20 @@ empathy_map_view_init (EmpathyMapView *self)
   priv->markers = g_hash_table_new_full (NULL, NULL,
       (GDestroyNotify) g_object_unref, NULL);
 
-  members = empathy_contact_list_get_members (
-      priv->contact_list);
-  for (l = members; l != NULL; l = g_list_next (l))
-    {
-      contact_added (self, l->data);
-      g_object_unref (l->data);
-    }
-  g_list_free (members);
+  priv->aggregator = empathy_connection_aggregator_dup_singleton ();
+  priv->contacts = g_hash_table_new_full (NULL, NULL, g_object_unref,
+      g_object_unref);
+
+  tp_g_signal_connect_object (priv->aggregator, "contact-list-changed",
+      G_CALLBACK (contact_list_changed_cb), self, 0);
+
+  contacts = empathy_connection_aggregator_dup_all_contacts (priv->aggregator);
+  empty = g_ptr_array_new ();
+
+  contact_list_changed_cb (priv->aggregator, contacts, empty, self);
+
+  g_ptr_array_unref (contacts);
+  g_ptr_array_unref (empty);
 
   /* Set up time updating loop */
   priv->timeout_id = g_timeout_add_seconds (5,
