@@ -23,26 +23,54 @@
 
 #include <gtk/gtk.h>
 
-#include <libempathy/empathy-contact-manager.h>
+#include <libempathy/empathy-client-factory.h>
 
 #include <libempathy-gtk/empathy-ui-utils.h>
 #include <libempathy-gtk/empathy-contact-blocking-dialog.h>
+
+static void
+am_prepare_cb (GObject *source,
+    GAsyncResult *result,
+    gpointer user_data)
+{
+    GMainLoop *loop = user_data;
+    GtkWidget *dialog;
+
+    dialog = empathy_contact_blocking_dialog_new (NULL);
+
+    gtk_dialog_run (GTK_DIALOG (dialog));
+
+    g_main_loop_quit (loop);
+}
 
 int
 main (int argc,
     char **argv)
   {
-    EmpathyContactManager *manager;
-    GtkWidget *dialog;
+    EmpathyClientFactory *factory;
+    TpAccountManager *am;
+    GMainLoop *loop;
 
     gtk_init (&argc, &argv);
     empathy_gtk_init ();
 
-    manager = empathy_contact_manager_dup_singleton ();
-    dialog = empathy_contact_blocking_dialog_new (NULL);
+    /* The blocking dialog needs the contact list for the contacts completion
+     * so we prepare it first. */
+    factory = empathy_client_factory_dup ();
 
-    gtk_dialog_run (GTK_DIALOG (dialog));
+    tp_simple_client_factory_add_connection_features_varargs (
+        TP_SIMPLE_CLIENT_FACTORY (factory),
+        TP_CONNECTION_FEATURE_CONTACT_LIST,
+        NULL);
 
-    g_object_unref (manager);
+    am = tp_account_manager_dup ();
+
+    loop = g_main_loop_new (NULL, FALSE);
+
+    tp_proxy_prepare_async (am, NULL, am_prepare_cb, loop);
+
+    g_main_loop_run (loop);
+
+    g_object_unref (am);
     return 0;
   }

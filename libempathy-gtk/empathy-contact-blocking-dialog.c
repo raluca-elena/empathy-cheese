@@ -27,7 +27,6 @@
 
 #include <libempathy/empathy-utils.h>
 
-#include <libempathy/empathy-contact-manager.h>
 #include <libempathy/empathy-tp-contact-list.h>
 
 #include <libempathy-gtk/empathy-account-chooser.h>
@@ -433,9 +432,8 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
   TpConnection *conn = empathy_account_chooser_get_connection (
       EMPATHY_ACCOUNT_CHOOSER (account_chooser));
   GPtrArray *blocked;
-  EmpathyContactManager *contact_manager;
-  EmpathyTpContactList *contact_list;
-  GList *members, *ptr;
+  GPtrArray *members;
+  guint i;
 
   if (self->priv->block_account_changed > 0)
     return;
@@ -472,37 +470,29 @@ contact_blocking_dialog_account_changed (GtkWidget *account_chooser,
 
   contact_blocking_dialog_add_blocked (self, blocked);
 
-  /* load the completion list */
-  g_return_if_fail (empathy_contact_manager_initialized ());
-
   DEBUG ("Loading contacts");
 
-  contact_manager = empathy_contact_manager_dup_singleton ();
-  contact_list = empathy_contact_manager_get_list (contact_manager, conn);
-  members = empathy_contact_list_get_members (
-      EMPATHY_CONTACT_LIST (contact_list));
+  members = tp_connection_dup_contact_list (conn);
 
-  for (ptr = members; ptr != NULL; ptr = ptr->next)
+  for (i = 0; i < members->len; i++)
     {
-      EmpathyContact *contact = ptr->data;
+      TpContact *contact = g_ptr_array_index (members, i);
       gchar *tmpstr;
 
       tmpstr = g_strdup_printf ("%s (%s)",
-          empathy_contact_get_alias (contact),
-          empathy_contact_get_id (contact));
+          tp_contact_get_alias (contact),
+          tp_contact_get_identifier (contact));
 
       gtk_list_store_insert_with_values (self->priv->completion_contacts,
           NULL, -1,
-          COL_COMPLETION_IDENTIFIER, empathy_contact_get_id (contact),
+          COL_COMPLETION_IDENTIFIER, tp_contact_get_identifier (contact),
           COL_COMPLETION_TEXT, tmpstr,
           -1);
 
       g_free (tmpstr);
-      g_object_unref (contact);
     }
 
-  g_list_free (members);
-  g_object_unref (contact_manager);
+  g_ptr_array_unref (members);
 }
 
 static void
