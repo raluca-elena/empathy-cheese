@@ -62,6 +62,7 @@
 #include "empathy-theme-manager.h"
 #include "empathy-ui-utils.h"
 #include "empathy-webkit-utils.h"
+#include "empathy-geometry.h"
 
 #define DEBUG_FLAG EMPATHY_DEBUG_OTHER
 #include <libempathy/empathy-debug.h>
